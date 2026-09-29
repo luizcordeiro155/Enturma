@@ -4,6 +4,9 @@ import "./advanced-games.css";
 import "./profile-customization.css";
 import "./production-polish.css";
 import "./social.css";
+import "./forum.css";
+import "./ride-activity.css";
+import { RideActivity } from "@/components/ride-activity";
 import "./study-workspace.css";
 import { Motion } from "@/components/motion";
 export const metadata: Metadata = {
@@ -24,7 +27,7 @@ export default function Layout({
       </head>
       <body>
         <Motion />
-        {children}
+        <RideActivity>{children}</RideActivity>
       </body>
     </html>
   );

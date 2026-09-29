@@ -2,48 +2,24 @@
 import { UserIdentity, type PublicProfile } from "./user-identity";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useRideUpdates } from "@/lib/use-ride-updates";
 import type { AcademicEntry } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Voice } from "./room-tools";
-import { RideMatchCelebration } from "./ride-match-celebration";
+import { RideSearchPanel } from "./ride-activity";
+import type { Ride, Match } from "@/lib/ride-types";
+import { useSearchParams } from "next/navigation";
 import { Feedback } from "./feedback";
-type Ride = {
-  id: string;
-  ownerId: string;
-  name: string;
-  campusName: string;
-  originArea: string;
-  departureAt: string;
-  seats: number;
-  type: string;
-  status: string;
-  direction: string;
-};
-type Match = {
-  id: string;
-  rideId: string;
-  userId: string;
-  ownerId: string;
-  status: string;
-  rideStatus: string;
-  meetingPoint: string | null;
-  closedAt: string | null;
-  deletedAt: string | null;
-  purgeAt: string | null;
-  originArea: string;
-  passengerName: string;
-  ownerName: string;
-  departureAt: string;
-};
 export function Rides({ create = false }: { create?: boolean }) {
+  const router = useRouter();
   const [rides, setRides] = useState<Ride[]>([]);
   const [mine, setMine] = useState<Ride[]>([]);
   const [entries, setEntries] = useState<AcademicEntry[]>([]);
   const [campuses, setCampuses] = useState<AcademicEntry[]>([]);
   const [institution, setInstitution] = useState("");
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [busy, setBusy] = useState(false);
   useEffect(() => {
     Promise.all([
@@ -58,6 +34,18 @@ export function Rides({ create = false }: { create?: boolean }) {
       })
       .catch((e) => setError(e.message));
   }, []);
+  const live = useRideUpdates(async () => {
+    try {
+      const [r, m] = await Promise.all([
+        api<Ride[]>("/rides"),
+        api<Ride[]>("/rides/mine"),
+      ]);
+      setRides(r);
+      setMine(m);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  });
   useEffect(() => {
     if (!institution) return;
     let active = true;
@@ -84,8 +72,7 @@ export function Rides({ create = false }: { create?: boolean }) {
         departureAt: new Date(String(f.get("departure"))).toISOString(),
         seats: Number(f.get("seats")),
       });
-      setSuccess("Carona publicada. Acompanhe os pedidos em Meus matches.");
-      setMine(await api<Ride[]>("/rides/mine"));
+      router.push("/caronas/matches");
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -103,13 +90,18 @@ export function Rides({ create = false }: { create?: boolean }) {
         <p className="lead">
           Conecte-se com estudantes que fazem um caminho parecido com o seu.
         </p>
+        <p className="ride-live-status" role="status">
+          {live
+            ? "Caronas atualizadas em tempo real"
+            : "Reconectando · atualização automática ativa"}
+        </p>
         <div className="actions">
           <Link href="/caronas/create" className="button">
             Publicar carona
           </Link>
           <Link href="/caronas/matches">Meus matches</Link>
         </div>
-        <Feedback error={error} success={success} />
+        <Feedback error={error} />
         {create ? (
           <form onSubmit={submit}>
             <label>
@@ -206,9 +198,7 @@ export function Rides({ create = false }: { create?: boolean }) {
                     onClick={async () => {
                       try {
                         await post(`/rides/${r.id}/interest`);
-                        setSuccess(
-                          "Interesse registrado. Aguarde o aceite em Meus matches.",
-                        );
+                        router.push("/caronas/matches");
                       } catch (e) {
                         setError((e as Error).message);
                       }
@@ -221,6 +211,7 @@ export function Rides({ create = false }: { create?: boolean }) {
             )}
           </>
         )}
+        <RideSearchPanel />
         <h2 className="section-heading">Minhas caronas</h2>
         {mine.map((r) => (
           <article key={r.id} className="room-row">
@@ -269,7 +260,8 @@ export function Rides({ create = false }: { create?: boolean }) {
 }
 export function Matches() {
   const [matches, setMatches] = useState<Match[]>([]);
-  const [seen, setSeen] = useState<string[]>([]);
+  const params = useSearchParams();
+  const requestedMatch = params.get("match");
   const [me, setMe] = useState("");
   const [selected, setSelected] = useState<Match>();
   const [messages, setMessages] = useState<
@@ -284,48 +276,55 @@ export function Matches() {
       .then(([m, p]) => {
         setMatches(m);
         setMe(p.id);
-        try {
-          const stored = JSON.parse(
-            localStorage.getItem(`enturma-ride-matches:${p.id}`) || "[]",
-          );
-          if (Array.isArray(stored))
-            setSeen(stored.filter((v) => typeof v === "string"));
-        } catch {}
       })
       .catch((e) => setError(e.message));
   }, []);
   const selectedId = selected?.id;
-  useEffect(() => {
-    let active = true;
-    const timer = setInterval(async () => {
-      if (document.hidden) return;
-      const version = selectionVersion.current;
-      try {
-        const items = await api<Match[]>("/matches");
-        if (!active || version !== selectionVersion.current) return;
-        setMatches(items);
-        if (!selectedId) return;
-        const updated = items.find(
-          (m) => m.id === selectedId && m.status === "ACCEPTED" && !m.deletedAt,
-        );
-        setSelected(updated);
-        if (!updated) {
-          setMessages([]);
-          return;
-        }
-        const chat = await api<
-          (PublicProfile & { userId: string; body: string })[]
-        >(`/matches/${updated.id}/messages`);
-        if (active && version === selectionVersion.current) setMessages(chat);
-      } catch (e) {
-        if (active) setError((e as Error).message);
+  const live = useRideUpdates(async () => {
+    const version = selectionVersion.current;
+    try {
+      const items = await api<Match[]>("/matches");
+      if (version !== selectionVersion.current) return;
+      setMatches(items);
+      if (!selectedId) return;
+      const updated = items.find(
+        (m) => m.id === selectedId && m.status === "ACCEPTED" && !m.deletedAt,
+      );
+      setSelected(updated);
+      if (!updated) {
+        setMessages([]);
+        return;
       }
-    }, 3000);
+      const chat = await api<
+        (PublicProfile & { userId: string; body: string })[]
+      >(`/matches/${updated.id}/messages`);
+      if (version === selectionVersion.current) setMessages(chat);
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  });
+  useEffect(() => {
+    if (!requestedMatch) return;
+    let active = true;
+    Promise.all([
+      api<Match[]>("/matches"),
+      api<(PublicProfile & { userId: string; body: string })[]>(
+        `/matches/${requestedMatch}/messages`,
+      ),
+    ])
+      .then(([items, chat]) => {
+        if (active) {
+          setSelected(items.find((m) => m.id === requestedMatch));
+          setMessages(chat);
+        }
+      })
+      .catch((e) => {
+        if (active) setError(e.message);
+      });
     return () => {
       active = false;
-      clearInterval(timer);
     };
-  }, [selectedId]);
+  }, [requestedMatch]);
   async function open(m: Match) {
     const version = ++selectionVersion.current;
     try {
@@ -363,7 +362,7 @@ export function Matches() {
       if (selected?.id === m.id) {
         const updated = items.find(
           (item) =>
-            item.id === m.id && item.status === "ACCEPTED" && !m.deletedAt,
+            item.id === m.id && item.status === "ACCEPTED" && !item.deletedAt,
         );
         setSelected(updated);
         if (!updated) setMessages([]);
@@ -383,23 +382,6 @@ export function Matches() {
   }
   const closed =
     !!selected && (!!selected.closedAt || selected.rideStatus !== "OPEN");
-  const celebration = me
-    ? matches.find(
-        (m) =>
-          m.status === "ACCEPTED" &&
-          m.rideStatus === "OPEN" &&
-          !m.closedAt &&
-          !m.deletedAt &&
-          !seen.includes(m.id),
-      )
-    : undefined;
-  function dismissMatch(id: string) {
-    const next = [...seen, id].slice(-100);
-    setSeen(next);
-    try {
-      localStorage.setItem(`enturma-ride-matches:${me}`, JSON.stringify(next));
-    } catch {}
-  }
   const labels: Record<string, string> = {
     PENDING: "Aguardando aceite",
     ACCEPTED: "Aceito",
@@ -410,30 +392,27 @@ export function Matches() {
     <Shell>
       <div className="narrow">
         <h1>Seus encontros pelo caminho.</h1>
+        <p className="ride-live-status" role="status">
+          {live
+            ? "Conectado · aceites aparecem em tempo real"
+            : "Conectando · atualização automática ativa"}
+        </p>
+        <div className="actions">
+          <Link href="/caronas">Encontrar caronas</Link>
+          <Link href="/caronas/create">Publicar outra carona</Link>
+        </div>
         <p className="lead">
           Após o aceite, os dois participantes podem encerrar ou excluir a
           conversa. O histórico é apagado 24 horas após o encerramento.
           Conversas abertas encerram automaticamente 24 horas após a saída.
         </p>
-        {celebration ? (
-          <RideMatchCelebration
-            key={celebration.id}
-            owner={{ id: celebration.ownerId, name: celebration.ownerName }}
-            passenger={{
-              id: celebration.userId,
-              name: celebration.passengerName,
-            }}
-            area={celebration.originArea}
-            onClose={() => dismissMatch(celebration.id)}
-            onChat={() => {
-              dismissMatch(celebration.id);
-              void open(celebration);
-            }}
-          />
-        ) : null}
+        <RideSearchPanel />
         <Feedback error={error} success={success} />
         {matches.length === 0 ? (
-          <p>Nenhum pedido de carona por aqui.</p>
+          <p>
+            Nenhum pedido de carona por aqui. Assim que alguém solicitar ou
+            aceitar, ele aparecerá automaticamente.
+          </p>
         ) : (
           matches.map((m) => (
             <article className="room-row" key={m.id}>

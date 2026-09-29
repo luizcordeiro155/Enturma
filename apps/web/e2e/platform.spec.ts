@@ -214,7 +214,12 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await expect(
     peerPage.getByRole("button", { name: "Enviar", exact: true }),
   ).toHaveCount(0);
-  await peer.close();
+  const riderContext = peer;
+  const riderPage = peerPage;
+  await riderPage.goto("/caronas");
+  await expect(
+    riderPage.getByText("Caronas atualizadas em tempo real"),
+  ).toBeVisible();
   await page.goto("/caronas/create");
   await page
     .getByRole("combobox", { name: "Universidade", exact: true })
@@ -224,7 +229,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     .selectOption(ids.CAMPUS);
   await page
     .getByLabel("Bairro ou região de origem")
-    .fill("Região de teste E2E");
+    .fill(`Região de teste ${tag}`);
   const departure = new Date(Date.now() + 86400000);
   const local = new Date(
     departure.getTime() - departure.getTimezoneOffset() * 60000,
@@ -233,26 +238,43 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     .slice(0, 16);
   await page.getByLabel("Saída", { exact: true }).fill(local);
   await page.getByRole("button", { name: "Publicar", exact: true }).click();
-  await expect(page.getByText(/Carona publicada/)).toBeVisible();
-  const mine = await request.get(`${backend}/api/v1/rides/mine`, {
-    headers: { Authorization: `Bearer ${credentials.accessToken}` },
+  await expect(page).toHaveURL(/caronas\/matches/);
+  await expect(
+    page.getByRole("region", { name: "Buscas de carona em andamento" }),
+  ).toContainText("Procurando passageiro");
+  const newRide = riderPage
+    .locator("article")
+    .filter({ hasText: `Região de teste ${tag}` })
+    .filter({
+      has: riderPage.getByRole("button", { name: "Tenho interesse" }),
+    });
+  await expect(newRide).toBeVisible({ timeout: 5000 });
+  await newRide.getByRole("button", { name: "Tenho interesse" }).click();
+  await expect(riderPage).toHaveURL(/caronas\/matches/);
+  await expect(riderPage.getByText(/Aguardando aceite/).first()).toBeVisible();
+  await riderPage.getByRole("link", { name: "Fórum", exact: true }).click();
+  await expect(
+    riderPage.getByRole("complementary", { name: "Sua busca de carona" }),
+  ).toContainText("Aguardando aceite");
+  await riderPage
+    .getByRole("button", { name: "Minimizar busca de carona" })
+    .click();
+  await expect(
+    riderPage.getByRole("button", { name: "Expandir busca de carona" }),
+  ).toBeVisible();
+  await riderPage.setViewportSize({ width: 390, height: 844 });
+  await riderPage.screenshot({
+    path: "../../.local/ride-search-mobile.png",
+    fullPage: true,
   });
-  const ride = (await mine.json())[0];
-  const interest = await request.post(
-    `${backend}/api/v1/rides/${ride.id}/interest`,
-    { headers: mh },
-  );
-  expect(interest.ok()).toBe(true);
-  const riderContext = await browser.newContext();
-  const riderPage = await riderContext.newPage();
-  await riderPage.goto("/login");
-  await riderPage.getByLabel("E-mail").fill(`mate-${tag}@example.test`);
-  await riderPage.getByLabel("Senha", { exact: true }).fill(password);
-  await riderPage.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(riderPage).toHaveURL(/home/);
-  await riderPage.goto("/caronas/matches");
-  await expect(riderPage.getByText(/Aguardando aceite/)).toBeVisible();
-  await page.goto("/caronas/matches");
+  expect(
+    await riderPage.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await expect(
+    page.getByRole("button", { name: "Aceitar", exact: true }),
+  ).toBeVisible({ timeout: 5000 });
   await page.getByRole("button", { name: "Aceitar", exact: true }).click();
   const matchDialog = page.getByRole("dialog", {
     name: "Deu match na carona!",
@@ -326,7 +348,69 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     .getByRole("button", { name: "Cancelar match", exact: true })
     .click();
   await expect(
-    page.getByText("Nenhum pedido de carona por aqui."),
+    page.getByText(/Nenhum pedido de carona por aqui/),
   ).toBeVisible();
+  await page.goto("/caronas/create");
+  await page.getByLabel("O que você precisa?").selectOption("REQUEST");
+  await page
+    .getByRole("combobox", { name: "Universidade", exact: true })
+    .selectOption(ids.INSTITUTION);
+  await page
+    .getByRole("combobox", { name: "Campus", exact: true })
+    .selectOption(ids.CAMPUS);
+  await page
+    .getByLabel("Bairro ou região de origem")
+    .fill(`Busca de teste ${tag}`);
+  await page.getByLabel("Saída", { exact: true }).fill(local);
+  await page.getByRole("button", { name: "Publicar", exact: true }).click();
+  await expect(page).toHaveURL(/caronas\/matches/);
+  const waiting = page.getByRole("region", {
+    name: "Buscas de carona em andamento",
+  });
+  await expect(waiting).toContainText("Procurando carona");
+  await page.evaluate(() => {
+    document.documentElement.dataset.reducedMotion = "true";
+    window.dispatchEvent(new Event("enturma-motion"));
+  });
+  expect(
+    await waiting.evaluate(
+      (el) =>
+        el
+          .getAnimations({ subtree: true })
+          .filter((a) => a.playState === "running").length,
+    ),
+  ).toBe(0);
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "dark";
+  });
+  await page.screenshot({
+    path: "../../.local/ride-search-panel-mobile.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.screenshot({
+    path: "../../.local/ride-search-panel-desktop.png",
+    fullPage: true,
+  });
+  await page.getByRole("link", { name: "Fórum", exact: true }).click();
+  await expect(
+    page.getByRole("complementary", { name: "Sua busca de carona" }),
+  ).toBeVisible();
+  await page.goto("/caronas");
+  const ownRequest = page
+    .locator("article")
+    .filter({ hasText: `Busca de teste ${tag}` })
+    .filter({
+      has: page.getByRole("button", { name: "Cancelar", exact: true }),
+    });
+  page.once("dialog", (dialog) => dialog.accept());
+  await ownRequest
+    .getByRole("button", { name: "Cancelar", exact: true })
+    .click();
+  await expect(
+    page
+      .locator(".ride-search-card")
+      .filter({ hasText: `Busca de teste ${tag}` }),
+  ).toHaveCount(0);
   await riderContext.close();
 });

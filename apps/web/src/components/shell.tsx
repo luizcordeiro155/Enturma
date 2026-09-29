@@ -6,6 +6,7 @@ import { Gamepad2 } from "lucide-react";
 import { ExperienceControls } from "./experience-controls";
 import { usePathname } from "next/navigation";
 import {
+  MessageCircle,
   BookOpen,
   Home,
   Search,
@@ -15,6 +16,7 @@ import {
   Users,
 } from "lucide-react";
 const links = [
+  { href: "/forum", label: "Fórum", icon: MessageCircle },
   { href: "/notebooks", label: "Cadernos IA", icon: BookOpen },
   { href: "/friends", label: "Amigos", icon: Users },
   { href: "/home", label: "Início", icon: Home },

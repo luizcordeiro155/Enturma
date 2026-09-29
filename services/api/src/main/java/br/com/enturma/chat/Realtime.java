@@ -25,14 +25,22 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
   private static class Connection {
     final WebSocketSession socket;
     final long opened = System.currentTimeMillis();
-    String token;
-    UUID room;
+    volatile String token;
+    volatile UUID room;
+    volatile UUID user;
+    volatile boolean rides;
     String previous = "";
-    Connection(WebSocketSession socket) { this.socket = socket; }
+
+    Connection(WebSocketSession socket) {
+      this.socket = socket;
+    }
   }
 
   public Realtime(
-      AuthService auth, ChatService chat, StudyService study, ObjectMapper json,
+      AuthService auth,
+      ChatService chat,
+      StudyService study,
+      ObjectMapper json,
       @Value("${enturma.origins}") String origins) {
     this.auth = auth;
     this.chat = chat;
@@ -66,11 +74,20 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
     try {
       var data = json.readTree(message.getPayload());
       String token = data.path("token").asText();
-      UUID room = UUID.fromString(data.path("roomId").asText());
       Actor actor = auth.authenticate(token).orElseThrow();
-      study.member(actor, room);
-      c.room = room;
-      c.token = token;
+      c.user = actor.id();
+      if ("rides".equals(data.path("scope").asText())) {
+        c.rides = true;
+        c.token = token;
+        synchronized (c) {
+          socket.sendMessage(new TextMessage("{\"type\":\"rides_ready\"}"));
+        }
+      } else {
+        UUID room = UUID.fromString(data.path("roomId").asText());
+        study.member(actor, room);
+        c.room = room;
+        c.token = token;
+      }
     } catch (Exception e) {
       socket.close(CloseStatus.POLICY_VIOLATION);
     }
@@ -90,9 +107,17 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
           continue;
         }
         Actor actor = auth.authenticate(c.token).orElseThrow();
+        if (c.rides) continue;
         var detail = study.detail(actor, c.room);
-        String payload = json.writeValueAsString(
-            Map.of("type", "snapshot", "room", detail, "messages", chat.messages(actor, c.room, 0)));
+        String payload =
+            json.writeValueAsString(
+                Map.of(
+                    "type",
+                    "snapshot",
+                    "room",
+                    detail,
+                    "messages",
+                    chat.messages(actor, c.room, 0)));
         if (!payload.equals(c.previous)) {
           synchronized (c) {
             c.socket.sendMessage(new TextMessage(payload));
@@ -100,7 +125,35 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
           c.previous = payload;
         }
       } catch (Exception e) {
-        try { c.socket.close(CloseStatus.POLICY_VIOLATION); } catch (Exception ignored) {}
+        try {
+          c.socket.close(CloseStatus.POLICY_VIOLATION);
+        } catch (Exception ignored) {
+        }
+        connections.remove(c.socket.getId());
+      }
+    }
+  }
+
+  @org.springframework.transaction.event.TransactionalEventListener(
+      phase = org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT)
+  public void ridesChanged(br.com.enturma.rides.RideChanged event) {
+    for (var c : connections.values()) {
+      if (!c.rides
+          || !c.socket.isOpen()
+          || (!event.publicListing() && !event.users().contains(c.user))) continue;
+      try {
+        if (auth.authenticate(c.token).isEmpty()) {
+          c.socket.close(CloseStatus.POLICY_VIOLATION);
+          continue;
+        }
+        synchronized (c) {
+          c.socket.sendMessage(new TextMessage("{\"type\":\"rides_changed\"}"));
+        }
+      } catch (Exception e) {
+        try {
+          c.socket.close();
+        } catch (Exception ignored) {
+        }
         connections.remove(c.socket.getId());
       }
     }

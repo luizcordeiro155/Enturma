@@ -543,6 +543,118 @@ class PlatformIntegrationTest {
         .isEqualTo(subject);
   }
 
+  @Autowired br.com.enturma.forum.ForumService forum;
+  @Autowired Realtime realtime;
+
+  @Test
+  void forumSearchVotesRepliesAndOwnershipAreEnforced() {
+    String title = "Algoritmos " + UUID.randomUUID();
+    UUID post =
+        (UUID)
+            ((Map<?, ?>) forum.create(host, title, "Como estudar recursão?", "PROGRAMMING"))
+                .get("id");
+    UUID similar =
+        (UUID)
+            ((Map<?, ?>)
+                    forum.create(
+                        member, "Algoritmos recursivos", "Explicação com exemplos", "PROGRAMMING"))
+                .get("id");
+    assertThat(
+            (List<?>)
+                ((Map<?, ?>) forum.list(member, title, "PROGRAMMING", "relevance", 0, false))
+                    .get("items"))
+        .hasSize(1);
+    assertThat((List<?>) forum.related(member, post))
+        .anyMatch(e -> ((Map<?, ?>) e).get("id").equals(similar));
+    forum.vote(member, post, 1);
+    forum.vote(member, post, 1);
+    var detail = (Map<?, ?>) forum.detail(member, post);
+    assertThat(((Number) detail.get("score")).intValue()).isEqualTo(1);
+    forum.vote(member, post, -1);
+    assertThat(((Number) ((Map<?, ?>) forum.detail(member, post)).get("score")).intValue())
+        .isEqualTo(-1);
+    forum.vote(member, post, 0);
+    forum.react(member, post, "👍");
+    forum.react(member, post, "💡");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM forum_reaction WHERE entry_id=?", Long.class, post))
+        .isEqualTo(1L);
+    assertThatThrownBy(() -> forum.react(member, post, "invalid")).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> forum.edit(member, post, title, "Alterado", "GENERAL"))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> forum.delete(member, post)).isInstanceOf(ApiException.class);
+    UUID comment =
+        (UUID) ((Map<?, ?>) forum.comment(member, post, null, "Use um caso base")).get("id");
+    UUID reply =
+        (UUID)
+            ((Map<?, ?>) forum.comment(host, post, comment, "Obrigado pela explicação")).get("id");
+    assertThatThrownBy(() -> forum.comment(host, similar, comment, "Resposta cruzada"))
+        .isInstanceOf(ApiException.class);
+    forum.delete(member, comment);
+    var comments = (List<?>) ((Map<?, ?>) forum.comments(host, post, 0)).get("items");
+    assertThat(comments).hasSize(2);
+    assertThat(db.one("SELECT body,deleted FROM forum_entry WHERE id=?", comment))
+        .containsEntry("body", "")
+        .containsEntry("deleted", true);
+    assertThat(db.one("SELECT body FROM forum_entry WHERE id=?", reply))
+        .containsEntry("body", "Obrigado pela explicação");
+    db.jdbc.update(
+        "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", outsider.id(), host.id());
+    assertThatThrownBy(() -> forum.detail(outsider, post)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> forum.vote(outsider, reply, 1)).isInstanceOf(ApiException.class);
+    assertThat(
+            (List<?>) ((Map<?, ?>) forum.list(outsider, title, "", "new", 0, false)).get("items"))
+        .isEmpty();
+    forum.delete(host, post);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM forum_entry WHERE id=? OR root_id=?", Long.class, post, post))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM forum_reaction WHERE entry_id=?", Long.class, post))
+        .isZero();
+  }
+
+  @Test
+  void rideChangesArePushedAfterCommitWithoutPrivatePayloads() throws Exception {
+    var socket = org.mockito.Mockito.mock(org.springframework.web.socket.WebSocketSession.class);
+    org.mockito.Mockito.when(socket.getId()).thenReturn(UUID.randomUUID().toString());
+    org.mockito.Mockito.when(socket.isOpen()).thenReturn(true);
+    realtime.afterConnectionEstablished(socket);
+    realtime.handleMessage(
+        socket,
+        new org.springframework.web.socket.TextMessage(
+            "{\"token\":\"" + hostCredentials.accessToken() + "\",\"scope\":\"rides\"}"));
+    try {
+      org.mockito.Mockito.verify(socket)
+          .sendMessage(
+              org.mockito.ArgumentMatchers.argThat(
+                  m -> m.getPayload().equals("{\"type\":\"rides_ready\"}")));
+      UUID ride =
+          (UUID)
+              ((Map<?, ?>)
+                      rides.create(
+                          host,
+                          campus,
+                          "OFFER",
+                          "Região teste",
+                          "TO_CAMPUS",
+                          Instant.now().plusSeconds(3600),
+                          1))
+                  .get("id");
+      UUID match = (UUID) ((Map<?, ?>) rides.interest(member, ride)).get("id");
+      rides.accept(host, match);
+      org.mockito.Mockito.verify(socket, org.mockito.Mockito.times(3))
+          .sendMessage(
+              org.mockito.ArgumentMatchers.argThat(
+                  m -> m.getPayload().equals("{\"type\":\"rides_changed\"}")));
+    } finally {
+      realtime.afterConnectionClosed(socket, org.springframework.web.socket.CloseStatus.NORMAL);
+    }
+  }
+
   Actor host, member, outsider, admin;
   UUID subject, period, campus;
   AuthService.Credentials hostCredentials;

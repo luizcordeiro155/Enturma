@@ -12,10 +12,25 @@ import org.springframework.transaction.annotation.Transactional;
 public class RideService {
   private final Db db;
   private final CatalogService catalog;
+  private final org.springframework.context.ApplicationEventPublisher events;
 
-  public RideService(Db db, CatalogService catalog) {
+  public RideService(
+      Db db, CatalogService catalog, org.springframework.context.ApplicationEventPublisher events) {
     this.db = db;
     this.catalog = catalog;
+    this.events = events;
+  }
+
+  private void changed(UUID ride, boolean publicListing) {
+    Set<UUID> users = new HashSet<>();
+    users.add((UUID) db.one("SELECT owner_id FROM ride WHERE id=?", ride).get("ownerId"));
+    for (var m : db.list("SELECT user_id FROM ride_match WHERE ride_id=?", ride))
+      users.add((UUID) m.get("userId"));
+    events.publishEvent(new RideChanged(Set.copyOf(users), publicListing));
+  }
+
+  private void matchChanged(UUID match) {
+    changed((UUID) db.one("SELECT ride_id FROM ride_match WHERE id=?", match).get("rideId"), false);
   }
 
   private void unblocked(UUID a, UUID b) {
@@ -76,6 +91,7 @@ public class RideService {
         direction,
         java.sql.Timestamp.from(departure),
         seats);
+    changed(id, true);
     return Map.of("id", id);
   }
 
@@ -94,6 +110,7 @@ public class RideService {
         id,
         ride,
         a.id());
+    changed(ride, false);
     return db.one("SELECT id,status FROM ride_match WHERE ride_id=? AND user_id=?", ride, a.id());
   }
 
@@ -137,6 +154,7 @@ public class RideService {
         UUID.randomUUID(),
         match.get("userId"),
         "Sua carona foi aceita. Combine o ponto de encontro no chat privado.");
+    changed((UUID) ride.get("id"), true);
   }
 
   private Map<String, Object> participant(Actor a, UUID id) {
@@ -176,6 +194,7 @@ public class RideService {
             + " hours') WHERE id=?",
         id);
     db.jdbc.update("UPDATE ride_voice SET cleaned=false,updated_at=now() WHERE match_id=?", id);
+    matchChanged(id);
   }
 
   @Transactional
@@ -199,6 +218,7 @@ public class RideService {
           UUID.randomUUID(),
           a.id().equals(m.get("ownerId")) ? m.get("userId") : m.get("ownerId"),
           "O pedido de carona foi cancelado. A conversa e a chamada foram encerradas.");
+      changed((UUID) m.get("rideId"), true);
     }
   }
 
@@ -214,6 +234,7 @@ public class RideService {
     db.jdbc.update(
         "UPDATE ride_match SET meeting_point=NULL,deleted_at=coalesce(deleted_at,now()) WHERE id=?",
         id);
+    matchChanged(id);
   }
 
   @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 60000, initialDelay = 15000)
@@ -262,6 +283,7 @@ public class RideService {
     requireOpen(m);
     db.jdbc.update(
         "INSERT INTO ride_message VALUES (?,?,?,?,now())", UUID.randomUUID(), id, a.id(), body);
+    matchChanged(id);
   }
 
   @Transactional
@@ -269,6 +291,7 @@ public class RideService {
     var m = access(a, id);
     requireOpen(m);
     db.jdbc.update("UPDATE ride_match SET meeting_point=? WHERE id=?", point, id);
+    matchChanged(id);
   }
 
   @Transactional
@@ -284,6 +307,7 @@ public class RideService {
     for (var m :
         db.list("SELECT id FROM ride_match WHERE ride_id=? AND deleted_at IS NULL FOR UPDATE", id))
       close((UUID) m.get("id"));
+    changed(id, true);
   }
 
   @Transactional
