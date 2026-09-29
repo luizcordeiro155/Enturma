@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import type { Room } from "@enturma/contracts";
@@ -10,18 +10,18 @@ export default function RoomPage() {
   const [room, setRoom] = useState<Room>();
   const [error, setError] = useState("");
 
-  async function load() {
+  const load = useCallback(async () => {
     try {
       setError("");
       setRoom(await api<Room>(`/study-rooms/${id}`));
     } catch (e) {
       setError((e as Error).message);
     }
-  }
+  }, [id]);
 
   useEffect(() => {
     void load();
-  }, [id]);
+  }, [load]);
 
   return (
     <Screen title={room?.subjectName ?? "Sua turma"}>
