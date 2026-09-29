@@ -25,8 +25,8 @@ Falhar aumenta o contador de tentativas, mas não reduz XP. A sequência é atua
 
 ## Minigames atuais
 
-- Rota do algoritmo: raciocínio procedural e planejamento de comandos.
-- Laboratório binário: representação numérica e potências de 2.
+- Rota do algoritmo: programação progressiva com movimentos, repetição, condições e laços.
+- Código Secreto: termos de programação em modos Solo, Dueto e Quarteto.
 - Detetive de código: rastreamento de variáveis, arrays e laços.
 
 Cada jogo possui quatro níveis e deve ficar progressivamente mais exigente. Novos jogos devem avaliar conteúdo de verdade, não cliques ou tempo de tela.
