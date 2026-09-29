@@ -35,13 +35,33 @@ public class AuthService {
   public Credentials register(
       String name, String username, String email, String password, String device) {
     validatePassword(password);
+    String normalizedEmail = email.strip().toLowerCase(Locale.ROOT);
+    String normalizedUsername = username.strip().toLowerCase(Locale.ROOT);
+
+    if (accounts.existsByEmail(normalizedEmail))
+      throw new ApiException(
+          409, "EMAIL_ALREADY_REGISTERED", "Já existe uma conta cadastrada com este e-mail.");
+    if (accounts.existsByUsername(normalizedUsername))
+      throw new ApiException(
+          409, "USERNAME_ALREADY_REGISTERED", "Este nome de usuário já está em uso.");
+
     Account user =
         new Account(
             name.strip(),
-            username.toLowerCase(Locale.ROOT),
-            email.strip().toLowerCase(Locale.ROOT),
+            normalizedUsername,
+            normalizedEmail,
             encoder.encode(password));
-    accounts.saveAndFlush(user);
+    try {
+      accounts.saveAndFlush(user);
+    } catch (org.springframework.dao.DataIntegrityViolationException ex) {
+      if (accounts.existsByEmail(normalizedEmail))
+        throw new ApiException(
+            409, "EMAIL_ALREADY_REGISTERED", "Já existe uma conta cadastrada com este e-mail.");
+      if (accounts.existsByUsername(normalizedUsername))
+        throw new ApiException(
+            409, "USERNAME_ALREADY_REGISTERED", "Este nome de usuário já está em uso.");
+      throw ex;
+    }
     issueAccountToken(user, "VERIFY");
     return session(user.id, device);
   }

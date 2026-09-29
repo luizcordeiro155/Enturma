@@ -123,3 +123,41 @@ O CI usa build web de produção e executa o JAR compilado para Java 21 no runti
 Ative backups do PostgreSQL, teste restauração em banco separado e acompanhe saúde, memória, conexões e falhas de provedores. A API não depende de arquivo local permanente para dados dos usuários. Certificados de conexão são configuração privada.
 
 O app Expo continua usando a mesma API por `EXPO_PUBLIC_API_URL=https://SEU-SUBDOMINIO.squareweb.app/api/v1`. Não participa do build da Vercel. A prioridade desta configuração é web; não houve publicação em lojas.
+
+
+## 5. Ativar Enturma AI
+
+Configure **somente na API/SquareCloud**, nunca no frontend:
+
+```dotenv
+AI_ENABLED=true
+OPENAI_API_KEY=...
+OPENAI_MODEL=...
+AI_WEB_SEARCH_ENABLED=true
+AI_BASE_URL=https://api.openai.com/v1
+```
+
+`AI_WEB_SEARCH_ENABLED=false` mantém o tutor restrito aos materiais da sala. Quando `true`, o modo Pesquisa usa a ferramenta Web Search da Responses API e exibe as citações retornadas pela OpenAI.
+
+Depois de alterar variáveis, reinicie/redeploy a API e confirme `GET /api/v1/capabilities`: `ai=true` e, quando habilitado, `aiWebSearch=true`.
+
+## 6. Ativar chamadas Web
+
+Crie/configure uma instância LiveKit com TLS e defina na API:
+
+```dotenv
+VOICE_ENABLED=true
+LIVEKIT_URL=wss://SEU-LIVEKIT
+LIVEKIT_API_KEY=...
+LIVEKIT_API_SECRET=...
+```
+
+As credenciais ficam somente na SquareCloud. O navegador recebe um grant temporário emitido pelo backend; ele nunca recebe o `LIVEKIT_API_SECRET`.
+
+Após o redeploy, `GET /api/v1/capabilities` deve retornar `voice=true`. Teste em dois navegadores: microfone, mute, câmera, compartilhamento de tela, saída e encerramento da sala.
+
+## 7. Migrações desta atualização
+
+`V8__collaboration_and_learning_xp.sql` adiciona XP, sequência e desafio diário. `V9__drop_persisted_chat.sql` remove as tabelas legadas de mensagens/reação para cumprir a política de chat efêmero.
+
+**Atenção:** V9 apaga o histórico antigo de chat por design. Faça backup antes do primeiro deploy se precisar preservar esse conteúdo fora da aplicação por motivo operacional/legal.

@@ -24,3 +24,23 @@ COMMIT;
 Não criar conta ou senha administrativa fixa em migrations. O usuário comum não pode enviar role no cadastro. Para promover SUPER_ADMIN, adote um procedimento operacional separado e auditado.
 
 Limites atuais: Google OAuth, reenvio de confirmação e alteração de senha com senha atual não têm interface dedicada. Recuperação de senha já existe. Confirmação de e-mail é registrada, mas ainda não é requisito para entrar em salas; decidir a política antes do lançamento.
+
+
+## Proteções contra abuso
+
+Cadastro normaliza e-mail e username para minúsculas antes da persistência. O banco mantém constraints `UNIQUE` e o serviço também verifica duplicidade antes do insert. Uma corrida concorrente ainda é protegida pela constraint e convertida para erro de domínio:
+
+- `EMAIL_ALREADY_REGISTERED` (HTTP 409);
+- `USERNAME_ALREADY_REGISTERED` (HTTP 409).
+
+Rate limits por identidade de cliente:
+
+| Rota | Limite inicial |
+|---|---|
+| `POST /auth/login` | 8 tentativas / 60 s |
+| `POST /auth/register` | 5 / 15 min |
+| `POST /auth/forgot-password` | 5 / 15 min |
+| verify/reset token | 10 / 5 min |
+| outras mutações de auth | 20 / min |
+
+Login continua retornando a mesma mensagem para e-mail inexistente e senha errada para reduzir enumeração de contas. Recuperação de senha também permanece silenciosa para endereço inexistente.

@@ -12,6 +12,9 @@ import {
   ArrowLeft,
   ArrowUp,
   ArrowDown,
+  Flame,
+  Trophy,
+  Zap,
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import {
@@ -28,6 +31,22 @@ type Progress = {
   level: number;
   completed: boolean;
   attempts: number;
+};
+type LearningSummary = {
+  totalXp: number;
+  currentStreak: number;
+  longestStreak: number;
+  level: number;
+  xpIntoLevel: number;
+  xpForNextLevel: number;
+  daily: {
+    date: string;
+    game: string;
+    level: number;
+    rewardXp: number;
+    attempts: number;
+    completed: boolean;
+  };
 };
 const games = [
   {
@@ -52,6 +71,8 @@ const games = [
 export function Learning() {
   const [access, setAccess] = useState<boolean>();
   const [progress, setProgress] = useState<Progress[]>([]);
+  const [summary, setSummary] = useState<LearningSummary>();
+  const [dailyMode, setDailyMode] = useState(false);
   const [game, setGame] = useState("robot");
   const [level, setLevel] = useState(1);
   const [commands, setCommands] = useState("");
@@ -70,7 +91,14 @@ export function Learning() {
       const a = await api<{ eligible: boolean }>("/learning/access");
       setError("");
       setAccess(a.eligible);
-      if (a.eligible) setProgress(await api<Progress[]>("/learning/progress"));
+      if (a.eligible) {
+        const [saved, overview] = await Promise.all([
+          api<Progress[]>("/learning/progress"),
+          api<LearningSummary>("/learning/summary"),
+        ]);
+        setProgress(saved);
+        setSummary(overview);
+      }
     } catch (e) {
       setError((e as Error).message);
     }
@@ -83,8 +111,14 @@ export function Learning() {
         if (!active) return;
         setAccess(a.eligible);
         if (a.eligible) {
-          const saved = await api<Progress[]>("/learning/progress");
-          if (active) setProgress(saved);
+          const [saved, overview] = await Promise.all([
+            api<Progress[]>("/learning/progress"),
+            api<LearningSummary>("/learning/summary"),
+          ]);
+          if (active) {
+            setProgress(saved);
+            setSummary(overview);
+          }
         }
       })
       .catch((e) => {
@@ -96,11 +130,12 @@ export function Learning() {
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
-  function reset(nextGame = game, nextLevel = level) {
+  function reset(nextGame = game, nextLevel = level, nextDaily = false) {
     generation.current++;
     if (timer.current) clearTimeout(timer.current);
     setGame(nextGame);
     setLevel(nextLevel);
+    setDailyMode(nextDaily);
     setCommands("");
     setPosition({ x: 0, y: 0, collision: false });
     setBits(Array(6).fill(false));
@@ -118,12 +153,17 @@ export function Learning() {
     try {
       const r = await post<{ correct: boolean; message: string }>(
         "/learning/attempts",
-        { game, level, answer: value },
+        { game, level, answer: value, daily: dailyMode },
       );
       if (token !== generation.current) return;
       setCorrect(r.correct);
       setMessage(r.message);
-      setProgress(await api<Progress[]>("/learning/progress"));
+      const [saved, overview] = await Promise.all([
+        api<Progress[]>("/learning/progress"),
+        api<LearningSummary>("/learning/summary"),
+      ]);
+      setProgress(saved);
+      setSummary(overview);
     } catch (e) {
       if (token === generation.current) setError((e as Error).message);
     } finally {
@@ -179,6 +219,29 @@ export function Learning() {
           </div>
         ) : access === true ? (
           <>
+            <div className="learning-stats">
+              <article>
+                <Zap size={22} />
+                <span>
+                  <strong>{summary?.totalXp ?? 0} XP</strong>
+                  Nível {summary?.level ?? 1}
+                </span>
+              </article>
+              <article>
+                <Flame size={22} />
+                <span>
+                  <strong>{summary?.currentStreak ?? 0} dias</strong>
+                  Sequência atual
+                </span>
+              </article>
+              <article>
+                <Trophy size={22} />
+                <span>
+                  <strong>{summary?.longestStreak ?? 0} dias</strong>
+                  Melhor sequência
+                </span>
+              </article>
+            </div>
             <div className="lab-overview">
               <span>
                 <strong>{progress.filter((p) => p.completed).length}</strong> de
@@ -189,7 +252,40 @@ export function Learning() {
                 value={progress.filter((p) => p.completed).length}
                 aria-label="Desafios concluídos"
               />
+              {summary ? (
+                <span className="level-progress">
+                  {summary.xpIntoLevel}/{summary.xpForNextLevel} XP para o próximo nível
+                </span>
+              ) : null}
             </div>
+            {summary?.daily ? (
+              <section className={summary.daily.completed ? "daily-card completed" : "daily-card"}>
+                <div>
+                  <p className="eyebrow">Desafio diário · +{summary.daily.rewardXp} XP</p>
+                  <h2>
+                    {summary.daily.completed
+                      ? "Missão de hoje concluída"
+                      : "Mantenha sua sequência viva"}
+                  </h2>
+                  <p>
+                    {summary.daily.completed
+                      ? "Volte amanhã para um novo desafio."
+                      : `Complete o desafio ${summary.daily.level} de ${games.find((g) => g.id === summary.daily.game)?.name ?? "prática"}.`}
+                  </p>
+                </div>
+                {!summary.daily.completed ? (
+                  <button
+                    onClick={() =>
+                      reset(summary.daily.game, summary.daily.level, true)
+                    }
+                  >
+                    Fazer desafio diário
+                  </button>
+                ) : (
+                  <Trophy size={32} />
+                )}
+              </section>
+            ) : null}
             <div className="game-tabs" role="tablist" aria-label="Minigames">
               {games.map((g) => (
                 <button
@@ -214,7 +310,9 @@ export function Learning() {
             >
               <div className="game-heading">
                 <div>
-                  <span className="eyebrow">Desafio {level} de 4</span>
+                  <span className="eyebrow">
+                    {dailyMode ? "Desafio diário" : `Desafio ${level} de 4`}
+                  </span>
                   <h2>{games.find((g) => g.id === game)?.name}</h2>
                 </div>
                 <div className="level-picker" aria-label="Escolher desafio">

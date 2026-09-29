@@ -36,10 +36,10 @@ Cadastre uma conta e confirme o e-mail pelo Mailpit. A confirmação também fun
 
 ## Serviços externos
 
-- Voz: `VOICE_ENABLED=true`, URL, API key e secret do LiveKit. O navegador acessa o LiveKit diretamente.
+- Chamadas Web: `VOICE_ENABLED=true` + `LIVEKIT_URL`, `LIVEKIT_API_KEY` e `LIVEKIT_API_SECRET`. Suporta microfone, câmera e compartilhamento de tela.
 - Materiais: configure `OBJECT_STORAGE_*` e crie um bucket privado. MinIO local usa a mesma interface S3. Formatos desta versão: PDF e TXT.
-- IA: `AI_ENABLED=true`, `AI_BASE_URL`, `AI_API_KEY` e `AI_MODEL` de um serviço compatível com Chat Completions. Sem credenciais, o recurso aparece como indisponível. A busca inicial usa texto completo do PostgreSQL, documentada como fallback, sem embeddings fictícios.
-- WebSocket: derivado automaticamente de `API_URL` no servidor Next.js; em produção a URL usa `wss://seu-backend/ws`.
+- IA: `AI_ENABLED=true`, `OPENAI_API_KEY` e `OPENAI_MODEL`. A integração usa OpenAI Responses API; `AI_WEB_SEARCH_ENABLED=true` habilita pesquisa externa com citações clicáveis. A busca nos materiais continua isolada por sala.
+- WebSocket: derivado automaticamente de `API_URL`; o chat Web usa relay efêmero E2EE, sem persistir texto, imagens, respostas ou reações no banco.
 
 Nenhuma chave secreta deve usar prefixo `NEXT_PUBLIC_` ou `EXPO_PUBLIC_`.
 
@@ -51,7 +51,7 @@ preservando o `.env`. O deploy não depende de GitHub Actions.
 
 A API vai para a SquareCloud em `dist/enturma-squarecloud.zip`; a interface web usa o projeto Vercel com **Root Directory `apps/web`**. O CI gera o ZIP testado no artefato `squarecloud-api`. Para gerar localmente após `mvn verify`, execute `python scripts/package-squarecloud.py` (Python 3.11+).
 
-O `.env.example` da raiz tem somente as cinco variáveis básicas da API; `apps/web/.env.example` tem as duas da Vercel. Integrações opcionais ficam em `deploy/optional.env.example`. Instruções de upload, PostgreSQL com certificados e configuração Vercel estão em [DEPLOYMENT](docs/DEPLOYMENT.md).
+O `.env.example` da raiz documenta as variáveis básicas e os blocos opcionais de IA, LiveKit e storage; `apps/web/.env.example` mantém somente as variáveis necessárias à Vercel. Uma versão enxuta das integrações opcionais também fica em `deploy/optional.env.example`. Instruções de upload, PostgreSQL com certificados e configuração Vercel estão em [DEPLOYMENT](docs/DEPLOYMENT.md).
 
 ## Estrutura
 
@@ -84,7 +84,22 @@ E2E exige API e web em execução, API apontando para um banco separado com `e2e
 
 ## Documentação
 
-[Plano](docs/IMPLEMENTATION_PLAN.md) · [Estado e limites](docs/STATUS.md) · [Arquitetura](docs/ARCHITECTURE.md) · [Banco](docs/DATABASE.md) · [API](docs/API.md) · [Autenticação](docs/AUTHENTICATION.md) · [Salas](docs/STUDY_ROOMS.md) · [Tempo real](docs/REALTIME.md) · [IA](docs/AI.md) · [Caronas](docs/CARPOOL.md) · [Segurança](docs/SECURITY.md) · [Deploy](docs/DEPLOYMENT.md)
+[Plano](docs/IMPLEMENTATION_PLAN.md) · [Estado e limites](docs/STATUS.md) · [Arquitetura](docs/ARCHITECTURE.md) · [Banco](docs/DATABASE.md) · [API](docs/API.md) · [Autenticação](docs/AUTHENTICATION.md) · [Salas](docs/STUDY_ROOMS.md) · [Tempo real](docs/REALTIME.md) · [Privacidade do chat](docs/CHAT_PRIVACY.md) · [IA](docs/AI.md) · [XP e aprendizagem](docs/LEARNING.md) · [Caronas](docs/CARPOOL.md) · [Segurança](docs/SECURITY.md) · [Deploy](docs/DEPLOYMENT.md)
 # Atualização: catálogo acadêmico e laboratório de programação
 
 Catálogo verificado com prioridade UNA Aimorés, matrizes de UNA/PUC Minas/UFMG, importações persistidas, painel `/admin/catalog`, onboarding web/mobile e 12 desafios JavaScript em `/learn`, liberados por matrícula em TI. Veja [cobertura, fontes e operação](docs/ACADEMIC_CATALOG.md). Não exige novas credenciais no `.env`.
+
+
+## Atualização: colaboração, IA e aprendizagem
+
+Esta versão adiciona ao Web:
+
+- chat efêmero com E2EE no cliente, imagens, respostas e reações por emoji;
+- nenhuma persistência de conversas no PostgreSQL;
+- chamadas LiveKit com microfone, câmera e compartilhamento de tela;
+- Enturma AI via OpenAI Responses API, materiais da sala e pesquisa web opcional com fontes;
+- XP idempotente, níveis, sequência e desafio diário;
+- rate limit específico para login/cadastro/recuperação;
+- bloqueio explícito de e-mail e username duplicados.
+
+Antes de publicar, configure OpenAI/LiveKit conforme [DEPLOYMENT](docs/DEPLOYMENT.md) e aguarde o CI completo passar.
