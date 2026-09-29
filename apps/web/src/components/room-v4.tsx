@@ -55,7 +55,7 @@ export function RoomView({ id }: { id: string }) {
   const [recap, setRecap] = useState("");
   const [recapBusy, setRecapBusy] = useState(false);
   const [summary, setSummary] = useState<Summary>();
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(() => Date.now());
   const socketRef = useRef<WebSocket | null>(null);
   const endRef = useRef<HTMLDivElement | null>(null);
   const router = useRouter();
@@ -77,9 +77,14 @@ export function RoomView({ id }: { id: string }) {
   }, [id]);
 
   useEffect(() => {
-    void reload().catch((e) => setError((e as Error).message));
+    const bootstrap = setTimeout(() => {
+      void reload().catch((e) => setError((e as Error).message));
+    }, 0);
     const clock = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(clock);
+    return () => {
+      clearTimeout(bootstrap);
+      clearInterval(clock);
+    };
   }, [reload]);
 
   useEffect(() => {
@@ -341,7 +346,7 @@ export function RoomView({ id }: { id: string }) {
                               <>
                                 {replied ? <div className="reply-preview"><strong>{replied.senderName}</strong><span>{replied.body ?? "Imagem"}</span></div> : null}
                                 {message.body ? <p>{message.body}</p> : null}
-                                {message.imageData ? <img className="chat-image" src={message.imageData} alt={message.imageName ?? "Imagem"} /> : null}
+                                {message.imageData ? {/* eslint-disable-next-line @next/next/no-img-element */}\n                                <img className="chat-image" src={message.imageData} alt={message.imageName ?? "Imagem"} /> : null}
                                 {!ended ? (
                                   <>
                                     <div className="message-actions">
@@ -372,7 +377,7 @@ export function RoomView({ id }: { id: string }) {
                         {preview && image ? (
                           <div className="attachment-preview">
                             <div className="attachment-preview-media">
-                              <img src={preview} alt={image.name} />
+                              {/* eslint-disable-next-line @next/next/no-img-element */}\n                              <img src={preview} alt={image.name} />
                               <button type="button" className="attachment-remove" onClick={() => { URL.revokeObjectURL(preview); setPreview(null); setImage(null); }}><X size={16} /></button>
                             </div>
                             <div><strong>{image.name}</strong><small>{(image.size / 1024 / 1024).toFixed(2)} MB</small></div>
