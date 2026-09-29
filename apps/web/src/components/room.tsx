@@ -47,6 +47,7 @@ export function RoomView({ id }: { id: string }) {
   const router = useRouter();
   const socketRef = useRef<WebSocket | null>(null);
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const pageRef = useRef(0);
 
   const normalize = useCallback((items: Message[]) => [...items].reverse(), []);
 
@@ -63,6 +64,7 @@ export function RoomView({ id }: { id: string }) {
     const items = await api<Message[]>(`/study-rooms/${id}/messages?page=0`);
     setMessages(normalize(items));
     setPage(0);
+    pageRef.current = 0;
     setHasOlder(items.length === 50);
   }, [id, normalize]);
 
@@ -72,9 +74,11 @@ export function RoomView({ id }: { id: string }) {
     let attempts = 0;
     const tick = setInterval(() => setNow(Date.now()), 1000);
 
-    Promise.all([reloadRoom(), loadMessages()]).catch((e) =>
-      setError((e as Error).message),
-    );
+    const bootstrap = setTimeout(() => {
+      void Promise.all([reloadRoom(), loadMessages()]).catch((e) =>
+        setError((e as Error).message),
+      );
+    }, 0);
 
     async function connect() {
       if (!alive) return;
@@ -95,7 +99,7 @@ export function RoomView({ id }: { id: string }) {
             const data = JSON.parse(event.data);
             if (data.type !== "snapshot") return;
             setRoom(data.room);
-            if (page === 0) {
+            if (pageRef.current === 0) {
               const incoming = normalize(data.messages as Message[]);
               setMessages((current) => {
                 if (current.length > 50) return current;
@@ -131,11 +135,17 @@ export function RoomView({ id }: { id: string }) {
     return () => {
       alive = false;
       clearInterval(tick);
+      clearTimeout(bootstrap);
       if (retry) clearTimeout(retry);
       socketRef.current?.close();
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
     };
   }, [id, loadMessages, normalize, reloadRoom]);
+
+  useEffect(() => {
+    return () => {
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+    };
+  }, [imagePreview]);
 
   useEffect(() => {
     if (section === "chat" && page === 0)
@@ -150,6 +160,7 @@ export function RoomView({ id }: { id: string }) {
       const older = await api<Message[]>(`/study-rooms/${id}/messages?page=${next}`);
       setMessages((current) => [...normalize(older), ...current]);
       setPage(next);
+      pageRef.current = next;
       setHasOlder(older.length === 50);
     } catch (e) {
       setError((e as Error).message);
