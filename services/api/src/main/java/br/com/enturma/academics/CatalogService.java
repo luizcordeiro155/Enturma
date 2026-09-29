@@ -54,28 +54,34 @@ public class CatalogService {
     String where =
         admin
             ? ""
-            : " AND status='VERIFIED' AND valid_from<=CURRENT_DATE AND (valid_until IS NULL OR"
-                + " valid_until>=CURRENT_DATE)";
+            : " AND e.status='VERIFIED' AND NOT EXISTS (WITH RECURSIVE ancestors AS (SELECT"
+                + " id,parent_id,status FROM academic_entry WHERE id=e.parent_id UNION ALL SELECT"
+                + " p.id,p.parent_id,p.status FROM academic_entry p JOIN ancestors a ON"
+                + " p.id=a.parent_id) SELECT 1 FROM ancestors WHERE status<>'VERIFIED')";
     return db.list(
-        "SELECT * FROM academic_entry WHERE kind=? AND (?::uuid IS NULL OR parent_id=?) AND"
-            + " lower(name) LIKE lower(?)"
+        "SELECT e.*,s.retrieved_at,s.provider source_provider,cs.workload_hours,cs.subject_id"
+            + " canonical_subject_id,o.shift,o.modality,EXISTS(SELECT 1 FROM academic_curriculum c"
+            + " WHERE c.course_offering_id=e.id AND c.verification_status='VERIFIED')"
+            + " has_curriculum FROM academic_entry e LEFT JOIN academic_source s ON"
+            + " s.id=coalesce(e.source_id,e.id) LEFT JOIN academic_curriculum_subject cs ON"
+            + " cs.id=e.id LEFT JOIN academic_course_offering o ON o.id=e.id WHERE e.kind=? AND"
+            + " (?::uuid IS NULL OR e.parent_id=?) AND e.normalized_name LIKE '%' ||"
+            + " academic_normalize(?) || '%'"
             + where
-            + " ORDER BY name,id LIMIT 30 OFFSET ?",
+            + " ORDER BY CASE WHEN e.provider='UNA' THEN 0 ELSE 1 END, CASE WHEN e.normalized_name"
+            + " LIKE '%aimores%' THEN 0 ELSE 1 END,has_curriculum DESC,e.period_number NULLS"
+            + " LAST,coalesce(cs.order_index,0),e.name,e.id LIMIT 30 OFFSET ?",
         kind,
         parent,
         parent,
-        "%" + search + "%",
+        search,
         Db.offset(page));
   }
 
   public Map<String, Object> verified(UUID id, String kind) {
     var entry =
         db.one(
-            "SELECT * FROM academic_entry WHERE id=? AND kind=? AND status='VERIFIED' AND"
-                + " valid_from<=CURRENT_DATE AND (valid_until IS NULL OR"
-                + " valid_until>=CURRENT_DATE)",
-            id,
-            kind);
+            "SELECT * FROM academic_entry WHERE id=? AND kind=? AND status='VERIFIED'", id, kind);
     if (entry.get("parentId") != null) verified((UUID) entry.get("parentId"), PARENTS.get(kind));
     return entry;
   }
@@ -88,8 +94,8 @@ public class CatalogService {
     for (Entry e : entries) {
       if (!e.kind().equals("INSTITUTION") && !PARENTS.containsKey(e.kind()))
         throw ApiException.invalid("Tipo acadêmico inválido.");
-      if (!Set.of("VERIFIED", "PENDING_VERIFICATION", "OUTDATED", "ARCHIVED").contains(e.status()))
-        throw ApiException.invalid("Status inválido.");
+      if (!Set.of("VERIFIED", "PENDING_VERIFICATION", "OUTDATED", "ARCHIVED", "REJECTED")
+          .contains(e.status())) throw ApiException.invalid("Status inválido.");
       URI uri;
       try {
         uri = URI.create(e.sourceUrl());
@@ -117,6 +123,9 @@ public class CatalogService {
       if (e.kind().equals("PERIOD") && e.periodNumber() == null)
         throw ApiException.invalid("Informe o número do período.");
       var previous = db.list("SELECT * FROM academic_entry WHERE id=? FOR UPDATE", e.id());
+      if (!previous.isEmpty() && !Objects.equals(previous.getFirst().get("provider"), "LEGACY"))
+        throw ApiException.invalid(
+            "Use a revisão de importações V2 para alterar registros de providers.");
       if (!previous.isEmpty()
           && (!previous.getFirst().get("kind").equals(e.kind())
               || !Objects.equals(previous.getFirst().get("parentId"), e.parentId())))

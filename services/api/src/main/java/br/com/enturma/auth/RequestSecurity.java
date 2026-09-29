@@ -52,7 +52,9 @@ public class RequestSecurity extends OncePerRequestFilter {
               ? clients.subject(req)
               : ((Actor) authentication.getPrincipal()).id().toString();
       boolean authRoute = req.getRequestURI().startsWith("/api/v1/auth/");
-      String bucket = (authRoute ? "auth:" : "write:") + Tokens.hash(subject);
+      boolean importRoute = req.getRequestURI().startsWith("/api/v1/admin/catalog/");
+      String bucket =
+          (authRoute ? "auth:" : importRoute ? "catalog:" : "write:") + Tokens.hash(subject);
       Integer hits =
           db.jdbc.queryForObject(
               "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,1,now()+interval '1 minute')"
@@ -62,7 +64,7 @@ public class RequestSecurity extends OncePerRequestFilter {
                   + " rate_limit.resets_at END RETURNING hits",
               Integer.class,
               bucket);
-      if (hits != null && hits > (authRoute ? 20 : 90)) {
+      if (hits != null && hits > (authRoute ? 20 : importRoute ? 20 : 90)) {
         res.setStatus(429);
         res.setHeader("Retry-After", "60");
         res.setContentType("application/json");

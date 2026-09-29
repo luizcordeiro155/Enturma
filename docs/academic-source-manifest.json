@@ -1,0 +1,233 @@
+[
+  {
+    "provider": "UNA",
+    "counts": {
+      "INSTITUTION": 1,
+      "CAMPUS": 10,
+      "COURSE": 103,
+      "CURRICULUM": 18,
+      "PERIOD": 67,
+      "SUBJECT": 400
+    },
+    "sources": [
+      {
+        "url": "https://www.una.br/unidades/aimores",
+        "name": "UNA — unidade Aimorés",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "0e1e923a77869db488fdde3a57d31df878be3cfbb6a86510a307e09566d7a20c",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/3154491e-901a-4abc-9645-93b5cabeb408.pdf",
+        "name": "UNA — matriz E2A Radial — Análise e Desenvolvimento de Sistemas",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "1358a57ba6d80b8c21a96650726c9ac2bc0c2bd660c30e49eed031a6bfd2ab09",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/60a55c35-da9f-4a7e-83d0-95a93c85a4d1.pdf",
+        "name": "UNA — matriz E2A Radial — Análise e Desenvolvimento de Sistemas",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "d530a1c9144a288b7c9fdd4fc9f6cf55d592fdd60d3df5a976ffd67b4574709c",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/ff4542d5-fe1b-467d-856c-580e3c2cc1f5.pdf",
+        "name": "UNA — matriz E2A Radial — Análise e Desenvolvimento de Sistemas",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "520037e33469c82833a85df8887ab25e82101c600ff1a4a66678f95fe9ec2701",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/7b6303e8-9423-4691-a37e-d652b3a9ce40.pdf",
+        "name": "UNA — matriz E2A Radial — Ciência da Computação",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "38758da10343901dc7c7c1b7353795084918e59d1622ee5746536ff0258bdcbe",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/6cbd7dbb-119d-4e91-9a1e-52f901e58f24.pdf",
+        "name": "UNA — matriz E2A Radial — Ciência da Computação",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "8780f875200e3ff962aa57df0d54af8d0d2838ea777a2316db9862e844adc86a",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/40b0d644-0b06-4d00-bcc7-2aeec76e974f.pdf",
+        "name": "UNA — matriz E2A Radial — Ciência da Computação",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "5cf716f626747565dd7f4c5e19e1bb135d93e1a36be397ad6e6708356aad44e3",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/46fc71dc-8481-4ea1-86cd-2a4efdc5085f.pdf",
+        "name": "UNA — matriz E2A Radial — Engenharia de Software",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "6548dc5f9022acf1e7833050435ae1f33aaa76a8c5526dda743a4006d1e6127b",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/9d479164-8dcc-4cff-90b9-86175a058dce.pdf",
+        "name": "UNA — matriz E2A Radial — Administração",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "85f6407e83d91d7cae7f50ea0bb603d58be445edab0ae0c8d56f131a8e5dbf15",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/9006ec92-08ba-42d6-b193-412cdb913234.pdf",
+        "name": "UNA — matriz E2A Radial — Administração",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "11083251bfdc33ac880e532be032557e251a69a6b142626a7219ad27dbda1eb4",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/8fe428d7-074c-4e85-bd24-fd7842b01ae0.pdf",
+        "name": "UNA — matriz E2A Radial — Administração",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "c18b1b00564a6370c7cc21755289b3d69858054b05ab8428d0e110df847916f6",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/aa2cd70d-57c7-471b-9b87-26645e01cd50.pdf",
+        "name": "UNA — matriz E2A Radial — Psicologia",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "8d62f9c894cf36701f4f750e6066e48239ceb08043423fffb0187d9e01c2ce9b",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/c7ebb136-8f93-4cdc-abbf-1e5532bab949.pdf",
+        "name": "UNA — matriz E2A Radial — Ciências Contábeis",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "6143168cefa947af0a409b61f331976cc26284317c3000b7749314283ce0056a",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/2b936165-b6ea-4e4c-84f3-71e17d8184a5.pdf",
+        "name": "UNA — matriz E2A Radial — Ciências Contábeis",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "de35e5e9ee4e8d332a7e68f2e2c69970edf67a00f6cad9609bf957a3724182bc",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/f7427d2e-1faa-40e6-a7f6-150b33be2696.pdf",
+        "name": "UNA — matriz E2A Radial — Ciências Contábeis",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "8dff4adc773d81044a378a6c6b2fcca5266f3a0e207762692ffa170f8868c113",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/6f790440-58a9-4728-bca8-54d93a3fcc6a.pdf",
+        "name": "UNA — matriz E2A Radial — Engenharia Civil",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "2745e5787f65c1dec66e030a199ae31cb9a035174258c8920230a90171e503f8",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/0fb4223b-289a-4514-847b-8693f10009af.pdf",
+        "name": "UNA — matriz E2A Radial — Engenharia Civil",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "1a8b2fa942e1297e8ee0a5a5cbe7160d2f4285a7ebf460c973a35c2814773b7b",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/444e08d6-d949-415a-a87f-5a4f00563636.pdf",
+        "name": "UNA — matriz E2A Radial — Biomedicina",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "873bffb7281cf7e6dea40c1ecf7dd612b6f5e34e57d583d4c881b3a4e6b6bb7c",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/32709409-44f6-43a0-8b53-f2379120f9d3.pdf",
+        "name": "UNA — matriz E2A Radial — Biomedicina",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "a0f247a98837d853e1d469db9cb5871ce4182027283ec8a2e238f1d3030e595b",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://estaticos.animaeducacao.com.br/medias/20260112095834/ProUni_2026.1_-_Tabela_de_Vagas_-_UNA.pdf",
+        "name": "UNA — ofertas ProUni 2026.1",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "d090eb58ca279983770fe38a308d22cd17c100647e137624a8862e2751762a6e",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      }
+    ]
+  },
+  {
+    "provider": "PUCMINAS",
+    "counts": {
+      "INSTITUTION": 1,
+      "CAMPUS": 2,
+      "COURSE": 3,
+      "CURRICULUM": 3,
+      "PERIOD": 24,
+      "SUBJECT": 192
+    },
+    "sources": [
+      {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      }
+    ]
+  },
+  {
+    "provider": "UFMG",
+    "counts": {
+      "INSTITUTION": 1,
+      "CAMPUS": 1,
+      "COURSE": 1,
+      "CURRICULUM": 1,
+      "PERIOD": 9,
+      "SUBJECT": 35
+    },
+    "sources": [
+      {
+        "url": "https://dcc.ufmg.br/painel-futuro-aluno/",
+        "name": "DCC UFMG — graduação e campus Pampulha",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "22adff3066fe63fe39f184a7318081815397a74b3c15df9b4097bf3a24cc25de",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      }
+    ]
+  }
+]

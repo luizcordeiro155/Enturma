@@ -7,9 +7,11 @@ import org.springframework.stereotype.Component;
 @Component
 public class Db {
   public final JdbcTemplate jdbc;
+  private final com.fasterxml.jackson.databind.ObjectMapper json;
 
-  public Db(JdbcTemplate jdbc) {
+  public Db(JdbcTemplate jdbc, com.fasterxml.jackson.databind.ObjectMapper json) {
     this.jdbc = jdbc;
+    this.json = json;
   }
 
   public Map<String, Object> one(String sql, Object... args) {
@@ -33,8 +35,18 @@ public class Db {
               }
             }
             Object value = rs.getObject(i);
+            if (value instanceof java.sql.Array a) value = a.getArray();
             if (value instanceof java.sql.Timestamp t) value = t.toInstant().toString();
             if (value instanceof java.sql.Date d) value = d.toLocalDate().toString();
+            if (value != null
+                && (rs.getMetaData().getColumnTypeName(i).equals("jsonb")
+                    || rs.getMetaData().getColumnTypeName(i).equals("json"))) {
+              try {
+                value = json.readTree(value.toString());
+              } catch (Exception ex) {
+                throw new java.sql.SQLException("Invalid stored JSON", ex);
+              }
+            }
             row.put(camel.toString(), value);
           }
           return row;

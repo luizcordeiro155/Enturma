@@ -73,6 +73,155 @@ class PlatformIntegrationTest {
   @Autowired RideService rides;
   @Autowired Db db;
   @Autowired MockMvc mvc;
+  @Autowired CatalogImports imports;
+  @Autowired java.util.List<br.com.enturma.academics.provider.AcademicCatalogProvider> providers;
+  @Autowired br.com.enturma.learning.LearningController learning;
+
+  @Test
+  void officialCatalogImportsAreCompleteAndIdempotent() {
+    for (int i = 0; i < 40; i++) imports.processBatch();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM academic_import_item WHERE status='FAILED' AND job_id"
+                    + " IN(SELECT id FROM academic_import_job WHERE seed_key IS NOT NULL)",
+                Integer.class))
+        .isZero();
+    var institutions = catalog.list("INSTITUTION", null, "una", 0, false);
+    assertThat(institutions).anyMatch(r -> r.get("name").equals("Centro Universitário UNA"));
+    var una =
+        providers.stream().filter(p -> p.providerCode().equals("UNA")).findFirst().orElseThrow();
+    long before =
+        db.jdbc.queryForObject(
+            "SELECT count(*) FROM academic_entry WHERE provider='UNA'", Long.class);
+    UUID job = imports.submit(admin, una.importCurriculum(), "idempotency-test");
+    for (int i = 0; i < 20; i++) imports.processBatch();
+    assertThat(db.one("SELECT status FROM academic_import_job WHERE id=?", job).get("status"))
+        .isEqualTo("COMPLETED");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM academic_entry WHERE provider='UNA'", Long.class))
+        .isEqualTo(before);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM academic_entry WHERE provider='UNA' AND kind='SUBJECT' AND"
+                    + " normalized_name LIKE '%matematica computacional aplicada%'",
+                Integer.class))
+        .isGreaterThanOrEqualTo(3);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM academic_entry WHERE provider='UNA' AND kind='CURRICULUM'",
+                Integer.class))
+        .isEqualTo(18);
+  }
+
+  @Test
+  @org.springframework.transaction.annotation.Transactional
+  void importReviewAndPausePreservePublishedRecords() {
+    var mapper =
+        com.fasterxml.jackson.databind.json.JsonMapper.builder().findAndAddModules().build();
+    String provider = "TEST" + UUID.randomUUID().toString().replace("-", "").toUpperCase();
+    var src =
+        new CatalogRecord.Source(
+            "https://example.test/catalog",
+            "Fixture exclusiva de testes",
+            "JSON_IMPORT",
+            "a".repeat(64),
+            Instant.now().minusSeconds(20),
+            Instant.now().minusSeconds(10));
+    var first =
+        new CatalogRecord(
+            "institution",
+            "INSTITUTION",
+            null,
+            "Fixture de importação",
+            null,
+            null,
+            null,
+            "VERIFIED",
+            src,
+            mapper.createObjectNode());
+    UUID job =
+        imports.submit(
+            admin, new CatalogRecord.Document(provider, List.of(first)), "test-workflow");
+    imports.control(admin, job, "pause");
+    imports.processBatch();
+    assertThat(db.one("SELECT status FROM academic_import_job WHERE id=?", job).get("status"))
+        .isEqualTo("PAUSED");
+    imports.control(admin, job, "resume");
+    for (int i = 0; i < 10; i++) imports.processBatch();
+    UUID entity = CatalogImports.identity(provider, "INSTITUTION", "institution");
+    assertThat(db.one("SELECT name FROM academic_entry WHERE id=?", entity).get("name"))
+        .isEqualTo(first.name());
+    var changed =
+        new CatalogRecord(
+            first.externalId(),
+            first.kind(),
+            null,
+            "Fixture corrigida",
+            null,
+            null,
+            null,
+            "VERIFIED",
+            src,
+            mapper.createObjectNode());
+    UUID update =
+        imports.submit(
+            admin, new CatalogRecord.Document(provider, List.of(changed)), "test-review");
+    for (int i = 0; i < 10; i++) imports.processBatch();
+    var pending = db.one("SELECT id,status FROM academic_import_item WHERE job_id=?", update);
+    assertThat(pending.get("status")).isEqualTo("PENDING_VERIFICATION");
+    assertThat(db.one("SELECT name FROM academic_entry WHERE id=?", entity).get("name"))
+        .isEqualTo(first.name());
+    imports.review(admin, (UUID) pending.get("id"), "approve", changed);
+    assertThat(db.one("SELECT name FROM academic_entry WHERE id=?", entity).get("name"))
+        .isEqualTo("Fixture corrigida");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM academic_catalog_audit WHERE entity_id=?",
+                Integer.class,
+                entity))
+        .isEqualTo(2);
+  }
+
+  @Test
+  void learningRequiresAcademicEligibilityAndSavesProgress() {
+    assertThat(learning.eligible(host)).isFalse();
+    assertThatThrownBy(
+            () ->
+                learning.attempt(
+                    host,
+                    new br.com.enturma.learning.LearningController.Attempt("binary", 1, "101")))
+        .isInstanceOf(ApiException.class);
+    db.jdbc.update(
+        "UPDATE academic_entry SET attributes=attributes||'{\"learningArea\":\"IT\"}'::jsonb WHERE"
+            + " id=?",
+        subject);
+    assertThat(learning.eligible(host)).isTrue();
+    learning.attempt(
+        host, new br.com.enturma.learning.LearningController.Attempt("binary", 1, "101"));
+    learning.attempt(
+        host, new br.com.enturma.learning.LearningController.Attempt("binary", 1, "111"));
+    var saved =
+        db.one("SELECT completed,attempts FROM learning_progress WHERE user_id=?", host.id());
+    assertThat(saved.get("completed")).isEqualTo(true);
+    assertThat(saved.get("attempts")).isEqualTo(2);
+  }
+
+  @Test
+  void publicCatalogueAndAdminBoundaries() throws Exception {
+    mvc.perform(get("/api/v1/catalog/institutions?search=UNA")).andExpect(status().isOk());
+    mvc.perform(
+            get("/api/v1/admin/catalog/imports")
+                .header("Authorization", "Bearer " + hostCredentials.accessToken()))
+        .andExpect(status().isForbidden());
+    mvc.perform(post("/api/v1/catalog/requests").contentType("application/json").content("{}"))
+        .andExpect(status().isUnauthorized());
+    assertThat(
+            db.one("SELECT subject_id FROM academic_curriculum_subject WHERE id=?", subject)
+                .get("subjectId"))
+        .isEqualTo(subject);
+  }
+
   Actor host, member, outsider, admin;
   UUID subject, period, campus;
   AuthService.Credentials hostCredentials;

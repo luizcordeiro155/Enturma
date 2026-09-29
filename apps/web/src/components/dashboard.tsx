@@ -7,6 +7,7 @@ import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
 import { useRouter } from "next/navigation";
+import { CatalogSearch } from "./catalog-search";
 export function Dashboard({ explore = false }: { explore?: boolean }) {
   const [profile, setProfile] = useState<Profile>();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -67,6 +68,7 @@ export function Dashboard({ explore = false }: { explore?: boolean }) {
             Encontre sua matéria, entre em uma turma e aprenda junto.
           </p>
           <Feedback error={error} />
+          {explore ? <CatalogSearch /> : null}
           {profile && !profile.enrollment ? (
             <section className="onboarding-banner">
               <BookOpen size={44} />
