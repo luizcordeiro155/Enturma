@@ -51,6 +51,10 @@ public class ChatService {
         a.id(), message);
   }
 
+  public Object send(Actor a, UUID room, String body, UUID reply) {
+    return send(a, room, body, reply, null);
+  }
+
   @Transactional
   public Object send(Actor a, UUID room, String body, UUID reply, UUID attachment) {
     study.activeLocked(room);
