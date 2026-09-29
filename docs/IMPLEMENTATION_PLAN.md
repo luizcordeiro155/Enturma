@@ -27,3 +27,22 @@ Repositório remoto: https://github.com/luizcordeiro155/Enturma. A main continha
 12. Produção: E2E, observabilidade, Railway/Vercel, backups e revisão operacional.
 
 Cada fase exige implementação, integração, testes e documentação. Ver docs/STATUS.md para evidências reais e limitações; este plano não declara funcionalidades concluídas.
+
+
+## Incremento v4 concluído
+
+Entregas desta etapa:
+
+- interface de sala inspirada em Discord/Teams;
+- navegação Conversa / Chamada / Materiais / Enturma AI;
+- modo claro/escuro;
+- opção de acessibilidade;
+- histórico persistente privado;
+- leitura de mensagens anteriores por quem entra depois;
+- recap de entrada tardia com IA;
+- estudo consolidado pós-sessão;
+- Rota do algoritmo com linguagem de comandos e limite de operações;
+- Código Secreto com Solo/Dueto/Quarteto;
+- documentação e migrations atualizadas.
+
+Próxima etapa operacional: validar CI, aplicar V10 na API de produção e homologar a experiência publicada na Vercel.
