@@ -16,10 +16,10 @@ import {
   Users,
 } from "lucide-react";
 const links = [
+  { href: "/home", label: "Início", icon: Home },
   { href: "/forum", label: "Fórum", icon: MessageCircle },
   { href: "/notebooks", label: "Cadernos IA", icon: BookOpen },
   { href: "/friends", label: "Amigos", icon: Users },
-  { href: "/home", label: "Início", icon: Home },
   { href: "/explore", label: "Explorar", icon: Search },
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },
   { href: "/caronas", label: "Caronas", icon: Car },
