@@ -193,7 +193,7 @@ class PlatformIntegrationTest {
             () ->
                 learning.attempt(
                     host,
-                    new br.com.enturma.learning.LearningController.Attempt("binary", 1, "101")))
+                    new br.com.enturma.learning.LearningController.Attempt("codeword", 1, "ARRAY")))
         .isInstanceOf(ApiException.class);
     db.jdbc.update(
         "UPDATE academic_entry SET attributes=attributes||'{\"learningArea\":\"IT\"}'::jsonb WHERE"
@@ -201,9 +201,9 @@ class PlatformIntegrationTest {
         subject);
     assertThat(learning.eligible(host)).isTrue();
     learning.attempt(
-        host, new br.com.enturma.learning.LearningController.Attempt("binary", 1, "101"));
+        host, new br.com.enturma.learning.LearningController.Attempt("codeword", 1, "ARRAY"));
     learning.attempt(
-        host, new br.com.enturma.learning.LearningController.Attempt("binary", 1, "111"));
+        host, new br.com.enturma.learning.LearningController.Attempt("codeword", 1, "STACK"));
     var saved =
         db.one("SELECT completed,attempts FROM learning_progress WHERE user_id=?", host.id());
     assertThat(saved.get("completed")).isEqualTo(true);
@@ -325,10 +325,8 @@ class PlatformIntegrationTest {
     study.join(member, id);
     assertThatThrownBy(() -> study.join(outsider, id)).isInstanceOf(ApiException.class);
     assertThatThrownBy(() -> chat.messages(outsider, id, 0)).isInstanceOf(ApiException.class);
-    assertThatThrownBy(() -> chat.send(member, id, "Olá", null))
-        .isInstanceOf(ApiException.class)
-        .hasMessageContaining("criptografado");
-    assertThat((List<?>) chat.messages(host, id, 0)).isEmpty();
+    chat.send(member, id, "Olá", null);
+    assertThat((List<?>) chat.messages(host, id, 0)).hasSize(1);
   }
 
   @Test
