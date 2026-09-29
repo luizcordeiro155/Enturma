@@ -25,7 +25,6 @@ export interface CatalogPage {
   pageSize: number;
   hasMore?: boolean;
 }
-// Keep onboarding available while web and SquareCloud are updated separately.
 export async function catalogOptions(
   fetchCatalog: (path: string, options?: RequestInit) => Promise<unknown>,
   query: string,
@@ -82,13 +81,23 @@ export interface Room {
   reused?: boolean;
   members?: { userId: string; name: string; role: string }[];
 }
+export interface MessageReaction {
+  emoji: string;
+  count: number;
+  mine: boolean;
+}
 export interface Message {
   id: string;
   userId: string;
   name: string;
   body: string;
   createdAt: string;
+  editedAt?: string | null;
   deletedAt: string | null;
+  replyTo?: string | null;
+  replyBody?: string | null;
+  replyName?: string | null;
+  reactions?: MessageReaction[];
 }
 export interface Credentials {
   accessToken: string;
