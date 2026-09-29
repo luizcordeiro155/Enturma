@@ -53,14 +53,14 @@ export function RoomView({ id }: { id: string }) {
   const [now, setNow] = useState(() => Date.now());
   const router = useRouter();
 
-  const socketRef = useRef<WebSocket>();
+  const socketRef = useRef<WebSocket | null>(null);
   const identityRef = useRef<{
     privateKey: CryptoKey;
     publicKey: RoomPublicKey;
-  }>();
-  const roomKeyRef = useRef<CryptoKey>();
+  } | null>(null);
+  const roomKeyRef = useRef<CryptoKey | null>(null);
   const peerNames = useRef(new Map<string, string>());
-  const myIdRef = useRef<string>();
+  const myIdRef = useRef<string | null>(null);
 
   const reloadRoom = useCallback(async () => {
     const [r, p] = await Promise.all([
@@ -149,7 +149,7 @@ export function RoomView({ id }: { id: string }) {
       try {
         const identity = await createRoomIdentity();
         identityRef.current = identity;
-        roomKeyRef.current = undefined;
+        roomKeyRef.current = null;
         setCryptoReady(false);
 
         const session = await fetch("/api/session");
@@ -295,8 +295,8 @@ export function RoomView({ id }: { id: string }) {
       if (timeout) clearTimeout(timeout);
       clearInterval(timer);
       socketRef.current?.close();
-      roomKeyRef.current = undefined;
-      identityRef.current = undefined;
+      roomKeyRef.current = null;
+      identityRef.current = null;
       peerNames.current.clear();
       setMessages([]);
     };
