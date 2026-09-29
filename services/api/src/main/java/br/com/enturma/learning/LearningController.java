@@ -84,7 +84,7 @@ public class LearningController {
     require(a);
     LocalDate today = LocalDate.now(ZoneOffset.UTC);
     int slot = Math.floorMod(Objects.hash(today.toString(), a.id().toString()), 12);
-    String[] games = {"robot", "binary", "trace"};
+    String[] games = {"robot", "words", "trace"};
     String game = games[slot / 4];
     int level = slot % 4 + 1;
     var saved =
@@ -106,18 +106,34 @@ public class LearningController {
   public record Attempt(
       @NotBlank String game,
       @Min(1) @Max(4) int level,
-      @NotNull @Size(max = 80) String answer,
+      @NotNull @Size(max = 2500) String answer,
       boolean daily) {
     public Attempt(String game, int level, String answer) {
       this(game, level, answer, false);
     }
   }
 
+  @GetMapping("/word-puzzle")
+  public Object wordPuzzle(
+      @AuthenticationPrincipal Actor a, @RequestParam @Min(1) @Max(4) int level) {
+    require(a);
+    return wordPuzzleState(a.id(), level);
+  }
+
   @PostMapping("/attempts")
   @Transactional
   public Object attempt(@AuthenticationPrincipal Actor a, @Valid @RequestBody Attempt input) {
     require(a);
-    boolean correct = check(input.game(), input.level(), input.answer());
+    Map<String, Object> wordState = null;
+    boolean correct;
+
+    if (input.game().equals("words")) {
+      wordState = submitWordGuess(a.id(), input.level(), input.answer());
+      correct = Boolean.TRUE.equals(wordState.get("completed"));
+    } else {
+      correct = check(input.game(), input.level(), input.answer());
+    }
+
     db.jdbc.update(
         "INSERT INTO learning_progress(user_id,game,level,attempts,completed,completed_at) VALUES"
             + " (?,?,?,1,?,CASE WHEN ? THEN now() END) ON CONFLICT(user_id,game,level) DO UPDATE"
@@ -154,8 +170,7 @@ public class LearningController {
             today,
             input.game(),
             input.level());
-        xpAwarded +=
-            awardXp(a.id(), "daily:" + today, 40, "DAILY_CHALLENGE");
+        xpAwarded += awardXp(a.id(), "daily:" + today, 40, "DAILY_CHALLENGE");
       }
     } else if (input.daily()) {
       var daily = daily(a);
@@ -176,19 +191,126 @@ public class LearningController {
         db.one(
             "SELECT total_xp,current_streak,longest_streak FROM learning_stats WHERE user_id=?",
             a.id());
-    return Map.of(
-        "correct",
-        correct,
-        "xpAwarded",
-        xpAwarded,
-        "totalXp",
-        stats.get("totalXp"),
-        "streak",
-        stats.get("currentStreak"),
+
+    Map<String, Object> response = new LinkedHashMap<>();
+    response.put("correct", correct);
+    response.put("xpAwarded", xpAwarded);
+    response.put("totalXp", stats.get("totalXp"));
+    response.put("streak", stats.get("currentStreak"));
+    response.put(
         "message",
         correct
             ? "Desafio concluído! Seu progresso e XP foram atualizados."
-            : "Ainda não. Execute passo a passo e tente novamente.");
+            : input.game().equals("words")
+                ? "Boa tentativa. Use as pistas de posição e presença para refinar o próximo termo."
+                : "Ainda não. Execute passo a passo e tente novamente.");
+    if (wordState != null) response.put("wordPuzzle", wordState);
+    return response;
+  }
+
+  private Map<String, Object> submitWordGuess(UUID user, int level, String rawGuess) {
+    LocalDate date = LocalDate.now(ZoneOffset.UTC);
+    String version = date.toString();
+    String guess = rawGuess.strip().toUpperCase(Locale.ROOT);
+    if (!LearningGameEngine.validProgrammingGuess(guess, level))
+      throw ApiException.invalid(
+          "Use um termo de programação válido com "
+              + LearningGameEngine.wordLength(level)
+              + " letras.");
+
+    var saved =
+        db.list(
+            "SELECT attempts,solved_mask,completed,guesses FROM learning_word_session"
+                + " WHERE user_id=? AND level=? AND puzzle_version=? FOR UPDATE",
+            user,
+            level,
+            version);
+    int attempts = saved.isEmpty() ? 0 : ((Number) saved.getFirst().get("attempts")).intValue();
+    boolean completed =
+        !saved.isEmpty() && Boolean.TRUE.equals(saved.getFirst().get("completed"));
+    if (!completed && attempts >= LearningGameEngine.maxWordGuesses(level))
+      throw new ApiException(
+          409, "WORD_PUZZLE_FINISHED", "As tentativas deste desafio terminaram. Volte amanhã.");
+
+    int mask = saved.isEmpty() ? 0 : ((Number) saved.getFirst().get("solvedMask")).intValue();
+    List<String> targets = LearningGameEngine.wordTargets(user, level, date);
+    for (int i = 0; i < targets.size(); i++)
+      if (targets.get(i).equals(guess)) mask |= (1 << i);
+    int fullMask = (1 << targets.size()) - 1;
+    completed = mask == fullMask;
+    String guesses =
+        saved.isEmpty() || String.valueOf(saved.getFirst().get("guesses")).isBlank()
+            ? guess
+            : saved.getFirst().get("guesses") + "," + guess;
+
+    db.jdbc.update(
+        "INSERT INTO learning_word_session(user_id,level,puzzle_version,attempts,solved_mask,completed,guesses)"
+            + " VALUES (?,?,?,1,?,?,?) ON CONFLICT(user_id,level,puzzle_version) DO UPDATE SET"
+            + " attempts=learning_word_session.attempts+1,solved_mask=EXCLUDED.solved_mask,"
+            + " completed=EXCLUDED.completed,guesses=EXCLUDED.guesses,updated_at=now()",
+        user,
+        level,
+        version,
+        mask,
+        completed,
+        guesses);
+    return wordPuzzleState(user, level);
+  }
+
+  private Map<String, Object> wordPuzzleState(UUID user, int level) {
+    LocalDate date = LocalDate.now(ZoneOffset.UTC);
+    String version = date.toString();
+    List<String> targets = LearningGameEngine.wordTargets(user, level, date);
+    var saved =
+        db.list(
+            "SELECT attempts,solved_mask,completed,guesses FROM learning_word_session"
+                + " WHERE user_id=? AND level=? AND puzzle_version=?",
+            user,
+            level,
+            version);
+    int attempts = saved.isEmpty() ? 0 : ((Number) saved.getFirst().get("attempts")).intValue();
+    int solvedMask = saved.isEmpty() ? 0 : ((Number) saved.getFirst().get("solvedMask")).intValue();
+    boolean completed =
+        !saved.isEmpty() && Boolean.TRUE.equals(saved.getFirst().get("completed"));
+    List<String> guesses =
+        saved.isEmpty() || saved.getFirst().get("guesses") == null
+            || String.valueOf(saved.getFirst().get("guesses")).isBlank()
+            ? List.of()
+            : Arrays.asList(String.valueOf(saved.getFirst().get("guesses")).split(","));
+
+    List<Map<String, Object>> boards = new ArrayList<>();
+    boolean reveal = attempts >= LearningGameEngine.maxWordGuesses(level);
+    for (int i = 0; i < targets.size(); i++) {
+      String target = targets.get(i);
+      boolean solved = (solvedMask & (1 << i)) != 0;
+      Map<String, Object> board = new LinkedHashMap<>();
+      board.put("index", i);
+      board.put("solved", solved);
+      List<List<Map<String, Object>>> rows = new ArrayList<>();
+      for (String guess : guesses) rows.add(LearningGameEngine.feedback(guess, target));
+      board.put("rows", rows);
+      if (solved || reveal) board.put("solution", target);
+      boards.add(board);
+    }
+
+    String mode =
+        switch (level) {
+          case 1 -> "Solo";
+          case 2 -> "Solo+";
+          case 3 -> "Dueto";
+          case 4 -> "Quarteto";
+          default -> throw ApiException.invalid("Nível inválido.");
+        };
+    Map<String, Object> result = new LinkedHashMap<>();
+    result.put("version", version);
+    result.put("mode", mode);
+    result.put("wordLength", LearningGameEngine.wordLength(level));
+    result.put("maxGuesses", LearningGameEngine.maxWordGuesses(level));
+    result.put("attempts", attempts);
+    result.put("remaining", Math.max(0, LearningGameEngine.maxWordGuesses(level) - attempts));
+    result.put("completed", completed);
+    result.put("boards", boards);
+    return result;
   }
 
   private void ensureStats(UUID user) {
@@ -242,23 +364,7 @@ public class LearningController {
       return answer.equals(Integer.toBinaryString(new int[] {5, 10, 19, 42}[level - 1]));
     if (game.equals("trace"))
       return answer.strip().equals(new String[] {"6", "12", "3", "10"}[level - 1]);
-    if (game.equals("robot")) {
-      if (!answer.matches("[RDLU]{1,24}")) return false;
-      int[][] walls = {{1, 5, 6}, {5, 6, 9}, {2, 6, 9, 11}, {1, 5, 9, 10}};
-      int x = 0, y = 0;
-      for (char c : answer.toCharArray()) {
-        switch (c) {
-          case 'R' -> x++;
-          case 'L' -> x--;
-          case 'D' -> y++;
-          case 'U' -> y--;
-          default -> throw ApiException.invalid("Comando inválido.");
-        }
-        if (x < 0 || x > 3 || y < 0 || y > 3) return false;
-        for (int wall : walls[level - 1]) if (y * 4 + x == wall) return false;
-      }
-      return x == 3 && y == 3;
-    }
+    if (game.equals("robot")) return LearningGameEngine.checkRobot(level, answer);
     throw ApiException.invalid("Jogo inválido.");
   }
 }
