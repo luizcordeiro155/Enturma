@@ -167,7 +167,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await peerPage.goto(roomUrl);
   await expect(
     peerPage.getByText("Mensagem E2E em tempo real", { exact: true }),
-  ).toHaveCount(0);
+  ).toBeVisible();
   await page
     .getByLabel("Mensagem", { exact: true })
     .fill("Atualização pelo WebSocket");
@@ -180,9 +180,10 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await expect(
     page.getByText("Sessão encerrada", { exact: false }),
   ).toBeVisible();
+  await peerPage.reload();
   await expect(
-    peerPage.getByRole("button", { name: "Enviar", exact: true }),
-  ).toBeDisabled();
+    peerPage.getByText("Esta sessão foi encerrada.", { exact: true }),
+  ).toBeVisible();
   await peer.close();
   await page.goto("/caronas/create");
   await page
