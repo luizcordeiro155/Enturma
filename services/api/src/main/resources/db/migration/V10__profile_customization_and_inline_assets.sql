@@ -8,3 +8,15 @@ ALTER TABLE app_user
 
 ALTER TABLE study_material
   ADD COLUMN IF NOT EXISTS inline_bytes bytea;
+
+
+CREATE TABLE IF NOT EXISTS learning_word_session (
+  user_id uuid NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  level int NOT NULL CHECK(level BETWEEN 1 AND 4),
+  puzzle_version varchar(30) NOT NULL,
+  attempts int NOT NULL DEFAULT 0 CHECK(attempts >= 0),
+  solved_mask int NOT NULL DEFAULT 0 CHECK(solved_mask >= 0),
+  completed boolean NOT NULL DEFAULT false,
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY(user_id, level, puzzle_version)
+);
