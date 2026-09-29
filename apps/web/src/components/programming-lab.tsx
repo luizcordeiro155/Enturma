@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Bot,
   Braces,
-  Check,
   Flame,
   Gamepad2,
   Grid2X2,
@@ -135,23 +134,34 @@ export function ProgrammingLab() {
   }
 
   useEffect(() => {
-    void loadSummary().catch((e) => setError((e as Error).message));
+    const bootstrap = setTimeout(() => {
+      void loadSummary().catch((e) => setError((e as Error).message));
+    }, 0);
     return () => {
+      clearTimeout(bootstrap);
       if (animation.current) clearTimeout(animation.current);
     };
   }, []);
 
   useEffect(() => {
-    setCode(algorithmPrompts[algorithmLevel - 1].starter);
-    setAlgorithmResult(undefined);
-    setPosition({ x: 0, y: 0 });
-    algorithmAttempts.current = 0;
-    algorithmStarted.current = Date.now();
+    const reset = setTimeout(() => {
+      setCode(algorithmPrompts[algorithmLevel - 1].starter);
+      setAlgorithmResult(undefined);
+      setPosition({ x: 0, y: 0 });
+      algorithmAttempts.current = 0;
+      algorithmStarted.current = Date.now();
+    }, 0);
+    return () => clearTimeout(reset);
   }, [algorithmLevel]);
 
   useEffect(() => {
     if (tab !== "words" || access !== true) return;
-    void loadWordChallenge(mode, difficulty, daily);
+    const bootstrap = setTimeout(() => {
+      void loadWordChallenge(mode, difficulty, daily);
+    }, 0);
+    return () => clearTimeout(bootstrap);
+    // loadWordChallenge reads only the explicit values passed above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, mode, difficulty, daily, access]);
 
   async function loadWordChallenge(
