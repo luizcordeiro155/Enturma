@@ -44,3 +44,15 @@ Rate limits por identidade de cliente:
 | outras mutações de auth | 20 / min |
 
 Login continua retornando a mesma mensagem para e-mail inexistente e senha errada para reduzir enumeração de contas. Recuperação de senha também permanece silenciosa para endereço inexistente.
+
+
+## Autorização de histórico de salas
+
+Histórico, reações, recap e estudo final exigem identidade autenticada.
+
+- para enviar mensagem/reação, o usuário precisa ser participante **ativo** da sala;
+- para consultar histórico de uma sala encerrada, basta ter participado e não ter sido removido;
+- usuários removidos não podem reentrar nem consultar o histórico privado;
+- o host continua sendo a única pessoa que pode encerrar/remover membros, salvo privilégios administrativos existentes.
+
+Tokens e cookies não são armazenados no conteúdo das mensagens.
