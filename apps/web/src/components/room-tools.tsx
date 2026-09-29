@@ -384,7 +384,7 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
     }
   }, [ended]);
 
-  async function join() {
+  async function join(startMode: "voice" | "camera" | "screen" = "voice") {
     setBusy(true);
     setError("");
     try {
@@ -468,6 +468,14 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
 
       await call.connect(credentials.url, credentials.token, { autoSubscribe: true });
       await call.localParticipant.setMicrophoneEnabled(true);
+      if (startMode === "camera") {
+        await call.localParticipant.setCameraEnabled(true);
+        setCamera(true);
+      }
+      if (startMode === "screen") {
+        await call.localParticipant.setScreenShareEnabled(true);
+        setScreen(true);
+      }
       setConnected(true);
       setMuted(false);
       refresh();
