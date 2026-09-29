@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { LiveIdentity } from "./user-identity";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -228,6 +229,9 @@ export function RoomTools({
             <div>
               <p className="eyebrow">Memória da turma</p>
               <h2>Enturma AI</h2>
+              <Link className="button secondary" href="/notebooks">
+                Abrir meus cadernos de estudo
+              </Link>
               <p className="muted">
                 A IA consulta histórico autorizado, checkpoints e materiais sem
                 carregar a sala inteira no navegador.

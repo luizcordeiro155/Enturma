@@ -68,6 +68,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     }, kind);
     expect(dimensions).toEqual([width, height]);
   }
+  await page.getByLabel("Cor do perfil", { exact: true }).fill("#b328ac");
+  await expect(page.locator(".public-profile-card")).toHaveCSS(
+    "border-top-color",
+    "rgb(179, 40, 172)",
+  );
   await page.getByLabel("Status personalizado").fill("Estudando JavaScript");
   await page
     .getByRole("combobox", { name: "Decoração do avatar" })
@@ -76,6 +81,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     page.getByRole("status").filter({ hasText: "Personalização salva" }),
   ).toBeVisible();
+  await page.reload();
+  await expect(page.locator(".public-profile-card")).toHaveCSS(
+    "border-top-color",
+    "rgb(179, 40, 172)",
+  );
   await page.screenshot({
     path: "../../.local/profile-desktop.png",
     fullPage: true,

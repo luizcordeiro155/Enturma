@@ -93,7 +93,8 @@ public class SocialController {
         (UUID)
             db.one(
                     "SELECT id FROM app_user WHERE lower(username)=lower(?) AND status='ACTIVE'",
-                    input.username().replaceFirst("^@", "").strip())
+                    br.com.enturma.auth.AuthService.normalizeUsername(
+                        input.username().replaceFirst("^@", "")))
                 .get("id");
     if (peer.equals(a.id())) throw ApiException.invalid("Escolha outra pessoa.");
     unblocked(a.id(), peer);

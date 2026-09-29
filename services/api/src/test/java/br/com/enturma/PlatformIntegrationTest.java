@@ -68,6 +68,196 @@ class PlatformIntegrationTest {
             org.mockito.ArgumentMatchers.eq(false));
   }
 
+  @Autowired br.com.enturma.ai.NotebookService notebooks;
+  @Autowired br.com.enturma.learning.DailyMissionsController missions;
+
+  @Test
+  void notebooksPersistCitationsAndIsolateOwners() {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenReturn(
+            new br.com.enturma.ai.AiProvider.Answer(
+                "## Aula\nTransações agrupam operações [1].", List.of(), "test-model", 100L, 50L));
+    UUID notebook = (UUID) ((Map<?, ?>) notebooks.create(host, "Banco de dados")).get("id");
+    UUID source =
+        (UUID)
+            ((Map<?, ?>)
+                    notebooks.add(
+                        host,
+                        notebook,
+                        "Minha aula",
+                        "TEXT",
+                        "Transações agrupam operações em uma unidade consistente e atômica.",
+                        null,
+                        null))
+                .get("id");
+    assertThatThrownBy(() -> notebooks.detail(outsider, notebook)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> notebooks.removeSource(outsider, notebook, source))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                notebooks.generate(
+                    host,
+                    notebook,
+                    UUID.randomUUID(),
+                    "Explique",
+                    "LESSON",
+                    "BEGINNER",
+                    List.of(UUID.randomUUID())))
+        .isInstanceOf(ApiException.class);
+    UUID generation = UUID.randomUUID();
+    notebooks.generate(
+        host, notebook, generation, "Explique transações", "LESSON", "BEGINNER", List.of(source));
+    notebooks.generate(
+        host, notebook, generation, "Explique transações", "LESSON", "BEGINNER", List.of(source));
+    org.awaitility.Awaitility.await()
+        .atMost(java.time.Duration.ofSeconds(15))
+        .until(
+            () ->
+                "READY"
+                    .equals(
+                        db.one("SELECT status FROM notebook_generation WHERE id=?", generation)
+                            .get("status")));
+    var saved = db.one("SELECT * FROM notebook_generation WHERE id=?", generation);
+    assertThat(saved.get("answer")).asString().contains("[1]");
+    assertThat(saved.get("model")).isEqualTo("test-model");
+    assertThat(
+            ((com.fasterxml.jackson.databind.JsonNode) saved.get("citations"))
+                .get(0)
+                .path("id")
+                .asText())
+        .isEqualTo(source.toString());
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM notebook_generation WHERE id=?", Integer.class, generation))
+        .isEqualTo(1);
+    notebooks.removeSource(host, notebook, source);
+    assertThat(
+            db.one("SELECT citations FROM notebook_generation WHERE id=?", generation)
+                .get("citations")
+                .toString())
+        .contains("Transações");
+    notebooks.delete(host, notebook);
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notebook_generation WHERE id=?)", generation))
+        .isFalse();
+  }
+
+  @Test
+  void missionsHaveFivePerGameHideAnswersAndPersistAcrossDays() {
+    db.jdbc.update(
+        "UPDATE academic_entry SET attributes=attributes||'{\"learningArea\":\"IT\"}'::jsonb WHERE"
+            + " id=?",
+        subject);
+    var day = (Map<?, ?>) missions.daily(host);
+    String date = (String) day.get("date");
+    var all = (List<Map<String, Object>>) day.get("missions");
+    assertThat(all).hasSize(20);
+    for (String game : List.of("words", "binary", "trace", "algorithm"))
+      assertThat(all.stream().filter(m -> m.get("game").equals(game))).hasSize(5);
+    for (var m : all) {
+      var d = (com.fasterxml.jackson.databind.JsonNode) m.get("definition");
+      assertThat(d.has("word")).isFalse();
+      assertThat(d.has("answer")).isFalse();
+      assertThat(d.has("seed")).isFalse();
+    }
+    assertThatThrownBy(
+            () ->
+                missions.attempt(
+                    host,
+                    new br.com.enturma.learning.DailyMissionsController.Attempt(
+                        date, "words", 2, "CACHE")))
+        .isInstanceOf(ApiException.class);
+    for (int slot = 1; slot <= 5; slot++) {
+      var d =
+          (com.fasterxml.jackson.databind.JsonNode)
+              db.one(
+                      "SELECT definition FROM learning_mission WHERE user_id=? AND game='words' AND"
+                          + " slot=? AND mission_date=?::date",
+                      host.id(),
+                      slot,
+                      date)
+                  .get("definition");
+      String word = d.path("word").asText();
+      var wrong =
+          (Map<?, ?>)
+              missions.attempt(
+                  host,
+                  new br.com.enturma.learning.DailyMissionsController.Attempt(
+                      date, "words", slot, "Z".repeat(word.length())));
+      assertThat(wrong.get("completed")).isEqualTo(false);
+      var result =
+          (Map<?, ?>)
+              missions.attempt(
+                  host,
+                  new br.com.enturma.learning.DailyMissionsController.Attempt(
+                      date, "words", slot, word.toLowerCase()));
+      assertThat(result.get("won")).isEqualTo(true);
+      assertThat(result.containsKey("answer")).isFalse();
+      assertThat(result.containsKey("answers")).isFalse();
+    }
+    assertThatThrownBy(
+            () ->
+                missions.attempt(
+                    host,
+                    new br.com.enturma.learning.DailyMissionsController.Attempt(
+                        date, "words", 1, "CACHE")))
+        .isInstanceOf(ApiException.class);
+    var yesterday = java.time.LocalDate.parse(date).minusDays(1);
+    db.jdbc.update(
+        "UPDATE learning_mission SET mission_date=? WHERE user_id=?", yesterday, host.id());
+    db.jdbc.update(
+        "UPDATE learning_mission_start SET started_on=? WHERE user_id=?", yesterday, host.id());
+    var next = (Map<?, ?>) missions.daily(host);
+    assertThat(next.get("difficulty")).isEqualTo(2);
+    assertThatThrownBy(
+            () ->
+                missions.attempt(
+                    host,
+                    new br.com.enturma.learning.DailyMissionsController.Attempt(
+                        yesterday.toString(), "words", 1, "CACHE")))
+        .isInstanceOf(ApiException.class);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM learning_mission WHERE user_id=? AND mission_date=? AND"
+                    + " completed",
+                Integer.class,
+                host.id(),
+                yesterday))
+        .isEqualTo(5);
+  }
+
+  @Test
+  void unicodeUsernamesAreAcceptedAndNormalized() {
+    String suffix = UUID.randomUUID().toString().substring(0, 8);
+    String username = "Cleita\u0303o_" + suffix;
+    var credentials =
+        auth.register(
+            "Cleitão",
+            username,
+            "unicode" + suffix + "@example.test",
+            "test-password-long",
+            "Test");
+    assertThat(
+            db.one("SELECT username FROM app_user WHERE id=?", credentials.userId())
+                .get("username"))
+        .isEqualTo("cleitão_" + suffix);
+    assertThatThrownBy(
+            () ->
+                auth.register(
+                    "Outro",
+                    "CLEITÃO_" + suffix,
+                    "other" + suffix + "@example.test",
+                    "test-password-long",
+                    "Test"))
+        .isInstanceOf(ApiException.class);
+    assertThat(AuthService.normalizeUsername("Clton_junin")).isEqualTo("clton_junin");
+  }
+
   @Autowired AuthService auth;
   @Autowired CatalogService catalog;
   @Autowired ProfileService profiles;

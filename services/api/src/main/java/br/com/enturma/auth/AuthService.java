@@ -36,7 +36,7 @@ public class AuthService {
       String name, String username, String email, String password, String device) {
     validatePassword(password);
     String normalizedEmail = email.strip().toLowerCase(Locale.ROOT);
-    String normalizedUsername = username.strip().toLowerCase(Locale.ROOT);
+    String normalizedUsername = normalizeUsername(username);
 
     if (accounts.existsByEmail(normalizedEmail))
       throw new ApiException(
@@ -46,11 +46,7 @@ public class AuthService {
           409, "USERNAME_ALREADY_REGISTERED", "Este nome de usuário já está em uso.");
 
     Account user =
-        new Account(
-            name.strip(),
-            normalizedUsername,
-            normalizedEmail,
-            encoder.encode(password));
+        new Account(name.strip(), normalizedUsername, normalizedEmail, encoder.encode(password));
     try {
       accounts.saveAndFlush(user);
     } catch (org.springframework.dao.DataIntegrityViolationException ex) {
@@ -64,6 +60,16 @@ public class AuthService {
     }
     issueAccountToken(user, "VERIFY");
     return session(user.id, device);
+  }
+
+  public static String normalizeUsername(String username) {
+    String value =
+        java.text.Normalizer.normalize(
+            username.strip().toLowerCase(Locale.ROOT), java.text.Normalizer.Form.NFC);
+    if (!value.matches("[\\p{L}\\p{M}\\p{N}_]{1,40}"))
+      throw ApiException.invalid(
+          "Use um nome com até 40 letras (acentos são aceitos), números ou _.");
+    return value;
   }
 
   @Transactional

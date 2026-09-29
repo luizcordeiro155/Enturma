@@ -17,7 +17,7 @@ public class AuthController {
 
   public record Register(
       @NotBlank @Size(max = 100) String name,
-      @Pattern(regexp = "[a-zA-Z0-9_]{3,40}") @NotNull String username,
+      @NotBlank @Size(max = 80) String username,
       @Email @NotBlank @Size(max = 254) String email,
       @NotNull @Size(min = 12, max = 72) String password,
       @NotBlank @Size(max = 150) String device) {}

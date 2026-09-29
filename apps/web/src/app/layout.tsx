@@ -4,6 +4,7 @@ import "./advanced-games.css";
 import "./profile-customization.css";
 import "./production-polish.css";
 import "./social.css";
+import "./study-workspace.css";
 import { Motion } from "@/components/motion";
 export const metadata: Metadata = {
   title: "Enturma — estude em companhia",

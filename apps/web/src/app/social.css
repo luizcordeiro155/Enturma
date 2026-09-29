@@ -525,3 +525,14 @@ html .onboarding-banner {
     top: 90px;
   }
 }
+
+.public-profile-card {
+  border: 2px solid var(--profile-accent);
+}
+.public-profile-body {
+  background: color-mix(in srgb, var(--profile-accent) 12%, var(--surface));
+  border-top: 6px solid var(--profile-accent);
+}
+.public-profile-card .profile-status {
+  border-left: 3px solid var(--profile-accent);
+}

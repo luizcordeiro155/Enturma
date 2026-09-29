@@ -38,7 +38,28 @@ export function ExperienceControls() {
         });
       }
     } catch {}
-    api<ExperiencePreference>("/users/me/experience")
+    let pending: ExperiencePreference | null = null;
+    try {
+      const raw = localStorage.getItem("enturma-experience-pending");
+      if (raw) pending = normalize(JSON.parse(raw));
+    } catch {}
+    const synchronization = pending
+      ? api<ExperiencePreference>("/users/me/experience", {
+          method: "PUT",
+          body: JSON.stringify(pending),
+          keepalive: true,
+        }).then(() => {
+          try {
+            if (
+              localStorage.getItem("enturma-experience-pending") ===
+              JSON.stringify(pending)
+            )
+              localStorage.removeItem("enturma-experience-pending");
+          } catch {}
+          return pending!;
+        })
+      : api<ExperiencePreference>("/users/me/experience");
+    synchronization
       .then((p) => {
         if (active && !changed.current) setPreference(normalize(p));
       })
@@ -77,6 +98,7 @@ export function ExperienceControls() {
     setPreference(next);
     try {
       localStorage.setItem("enturma-experience", JSON.stringify(next));
+      localStorage.setItem("enturma-experience-pending", JSON.stringify(next));
     } catch {}
     setStatus("Salvando…");
     clearTimeout(timer.current);
@@ -84,8 +106,18 @@ export function ExperienceControls() {
       void api("/users/me/experience", {
         method: "PUT",
         body: JSON.stringify(next),
+        keepalive: true,
       })
-        .then(() => setStatus("Preferências salvas no seu perfil."))
+        .then(() => {
+          try {
+            if (
+              localStorage.getItem("enturma-experience-pending") ===
+              JSON.stringify(next)
+            )
+              localStorage.removeItem("enturma-experience-pending");
+          } catch {}
+          setStatus("Preferências salvas no seu perfil.");
+        })
         .catch(() =>
           setStatus(
             "Preferências aplicadas neste navegador. Não foi possível sincronizar com seu perfil.",

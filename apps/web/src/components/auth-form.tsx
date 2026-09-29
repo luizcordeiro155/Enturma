@@ -103,9 +103,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <input
                   name="username"
                   autoComplete="username"
-                  pattern="[a-zA-Z0-9_]{3,40}"
+                  maxLength={40}
+                  autoCapitalize="none"
                   required
-                  title="De 3 a 40 letras, números ou sublinhados"
+                  placeholder="Ex.: Cleitão ou Clton_junin"
                 />
               </label>
             </>

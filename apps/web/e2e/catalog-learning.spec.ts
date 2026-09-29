@@ -56,80 +56,78 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   await expect(
     page.getByRole("heading", { name: "Termo Dev", exact: true }),
   ).toBeVisible();
-  await page
-    .getByRole("combobox", { name: "Modo", exact: true })
-    .selectOption("QUARTET");
-  await page
-    .getByRole("combobox", { name: "Dificuldade", exact: true })
-    .selectOption("5");
-  await page.getByRole("button", { name: "Iniciar nova rodada" }).click();
-  await expect(page.locator(".word-board")).toHaveCount(4);
+  const daily = await (
+    await page.request.get("/api/backend/learning/missions")
+  ).json();
+  expect(daily.missions).toHaveLength(20);
+  for (const mission of daily.missions) {
+    expect(mission.definition).not.toHaveProperty("word");
+    expect(mission.definition).not.toHaveProperty("answer");
+  }
+  await expect(page.locator(".mission-stage")).toHaveCount(1);
+  await expect(
+    page.getByText("Qual é o conceito?", { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText(/Consultar vocabulário/)).toHaveCount(0);
   const input = page.getByLabel("Palavra tentativa", { exact: true });
   const length = Number(await input.getAttribute("maxlength"));
-  const vocabulary = (await (
-    await page.request.get("/api/backend/learning/advanced/words/vocabulary")
-  ).json()) as string[];
-  const word = vocabulary.find((w) => w.length === length)!;
+  const word =
+    ({ 4: "LOOP", 5: "ARRAY", 6: "STRING" } as Record<number, string>)[
+      length
+    ] ?? "A".repeat(length);
   await input.fill(word.toLowerCase());
   await expect(input).toHaveValue(word);
-  await expect(
-    page.locator(".word-board").first().locator(".word-row").first(),
-  ).toHaveText(word);
-  const responsePromise = page.waitForResponse(
+  const sent = page.waitForResponse(
     (r) =>
-      r.url().endsWith("/words/attempt") && r.request().method() === "POST",
+      r.url().endsWith("/learning/missions") && r.request().method() === "POST",
   );
   await input.press("Enter");
-  expect((await responsePromise).ok()).toBe(true);
+  expect((await sent).ok()).toBe(true);
   await expect(input).toHaveValue("");
+  await expect(page.locator(".mission-word-row").first()).toHaveText(word);
+  await page.reload();
+  await expect(page.locator(".mission-word-row").first()).toHaveText(word);
+  await page.getByRole("button", { name: /^Laboratório Binário/ }).click();
+  await expect(page.locator(".mission-stage")).toHaveCount(1);
   await expect(
-    page
-      .locator(".word-board")
-      .first()
-      .locator(".word-row")
-      .first()
-      .locator(".correct, .present, .absent"),
-  ).toHaveCount(length);
-  await page
-    .getByRole("button", { name: "Laboratório Binário", exact: true })
-    .click();
-  await expect(
-    page.getByRole("button", { name: "Validar circuito" }),
-  ).toBeVisible();
-  const binary = await (
-    await page.request.get("/api/backend/learning/advanced/binary/challenge")
-  ).json();
-  const bits = Number(binary.operands[0].decimal)
-    .toString(2)
-    .padStart(binary.bitWidth, "0");
-  for (let i = 0; i < bits.length; i++)
-    if (bits[i] === "1")
-      await page
-        .getByRole("button", {
-          name: `Bit ${bits.length - i - 1}`,
-          exact: true,
-        })
-        .click();
-  await page.getByRole("button", { name: "Validar circuito" }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "Circuito resolvido" }),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Detetive de código", exact: true })
-    .click();
-  await page.getByLabel("Resultado de console.log").fill("6");
-  await page.getByRole("button", { name: "Testar hipótese" }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "Desafio concluído" }),
-  ).toBeVisible();
-  await page
-    .getByRole("button", { name: "Rota do Algoritmo", exact: true })
-    .click();
-  const challenge = await page.request.get(
-    "/api/backend/learning/advanced/algorithm/challenge?level=1",
+    page.getByRole("heading", { name: "Rota do Algoritmo" }),
+  ).toHaveCount(0);
+  const binary = daily.missions.find(
+    (m: { game: string; slot: number }) => m.game === "binary" && m.slot === 1,
   );
-  expect(challenge.ok()).toBe(true);
-  const { walls } = await challenge.json();
+  await page
+    .getByLabel("Resposta em binário")
+    .fill(
+      Number(binary.definition.expression.replace("decimal ", "")).toString(2),
+    );
+  await page
+    .getByRole("button", { name: "Testar resposta", exact: true })
+    .click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Missão concluída" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /^Detetive de código/ }).click();
+  await expect(page.locator(".mission-stage")).toHaveCount(1);
+  const trace = daily.missions.find(
+    (m: { game: string; slot: number }) => m.game === "trace" && m.slot === 1,
+  );
+  const initial = Number(trace.definition.code.match(/total = (\d+)/)[1]);
+  const n = Number(trace.definition.code.match(/i <= (\d+)/)[1]);
+  await page
+    .getByLabel("Resultado de console.log")
+    .fill(String(initial + (n * (n + 1)) / 2));
+  await page
+    .getByRole("button", { name: "Testar resposta", exact: true })
+    .click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Missão concluída" }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: /^Rota do Algoritmo/ }).click();
+  await expect(page.locator(".mission-stage")).toHaveCount(1);
+  const { walls } = daily.missions.find(
+    (m: { game: string; slot: number }) =>
+      m.game === "algorithm" && m.slot === 1,
+  ).definition;
   const queue: [number, string[]][] = [[0, []]];
   const seen = new Set([0]);
   let program: string[] = [];
@@ -166,7 +164,7 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
     .fill("function solve(){" + program.join("\n") + "} solve();");
   await page.getByRole("button", { name: "Executar", exact: true }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Algoritmo concluído." }),
+    page.getByRole("status").filter({ hasText: "Missão concluída" }),
   ).toBeVisible();
   await page
     .getByRole("button", { name: "Acessibilidade", exact: true })
@@ -186,8 +184,8 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.getByRole("button", { name: "Termo Dev", exact: true }).click();
-  await expect(page.locator(".word-board")).toHaveCount(4);
+  await page.getByRole("button", { name: /^Termo Dev/ }).click();
+  await expect(page.locator(".mission-word-board")).toHaveCount(1);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
