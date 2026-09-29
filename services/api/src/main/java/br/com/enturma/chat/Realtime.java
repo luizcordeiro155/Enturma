@@ -22,6 +22,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
   private final ObjectMapper json;
   private final String[] origins;
   private final Map<String, Connection> connections = new ConcurrentHashMap<>();
+  private final Map<UUID, ArrayDeque<Map<String, Object>>> roomHistory = new ConcurrentHashMap<>();
 
   private static final Set<String> RELAY_TYPES =
       Set.of("key_request", "key_offer", "encrypted_event");
@@ -108,15 +109,15 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
         socket.close(CloseStatus.TOO_BIG_TO_PROCESS);
         return;
       }
-      relay(
-          c,
-          null,
+      Map<String, Object> envelope =
           Map.of(
               "type", "encrypted_event",
               "id", id,
               "senderId", c.actor.id().toString(),
               "iv", iv,
-              "ciphertext", ciphertext));
+              "ciphertext", ciphertext);
+      remember(c.room, envelope);
+      relay(c, null, envelope);
       return;
     }
 
@@ -182,13 +183,19 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
                 "publicKey", peer.publicKey));
       }
 
+      List<Map<String, Object>> history;
+      synchronized (roomHistory) {
+        history = List.copyOf(roomHistory.getOrDefault(room, new ArrayDeque<>()));
+      }
+
       send(
           c,
           Map.of(
               "type", "ready",
               "room", detail,
               "peers", peers,
-              "privacy", "E2EE_EPHEMERAL"));
+              "history", history,
+              "privacy", "E2EE_MEMORY_HISTORY"));
 
       relay(
           c,
@@ -200,6 +207,15 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
               "publicKey", c.publicKey));
     } catch (Exception e) {
       c.socket.close(CloseStatus.POLICY_VIOLATION);
+    }
+  }
+
+  private void remember(UUID room, Map<String, Object> envelope) {
+    synchronized (roomHistory) {
+      ArrayDeque<Map<String, Object>> events =
+          roomHistory.computeIfAbsent(room, ignored -> new ArrayDeque<>());
+      events.addLast(envelope);
+      while (events.size() > 1200) events.removeFirst();
     }
   }
 
