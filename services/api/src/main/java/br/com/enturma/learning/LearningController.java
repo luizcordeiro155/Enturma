@@ -107,7 +107,11 @@ public class LearningController {
       @NotBlank String game,
       @Min(1) @Max(4) int level,
       @NotNull @Size(max = 80) String answer,
-      boolean daily) {}
+      boolean daily) {
+    public Attempt(String game, int level, String answer) {
+      this(game, level, answer, false);
+    }
+  }
 
   @PostMapping("/attempts")
   @Transactional
