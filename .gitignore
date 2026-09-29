@@ -21,3 +21,6 @@ playwright-report/
 *.pfx
 *.crt
 __pycache__/
+.squarecloud-build/
+/app.jar
+/app.jar.pending
