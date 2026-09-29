@@ -18,6 +18,8 @@ public class ChatController {
 
   public record Message(@NotBlank @Size(max = 4000) String body, UUID replyTo) {}
 
+  public record Reaction(@NotBlank @Size(max = 16) String emoji) {}
+
   @GetMapping
   public Object list(
       @AuthenticationPrincipal Actor a,
@@ -45,5 +47,23 @@ public class ChatController {
   public void delete(
       @AuthenticationPrincipal Actor a, @PathVariable UUID room, @PathVariable UUID id) {
     chat.delete(a, room, id);
+  }
+
+  @PutMapping("/{id}/reactions")
+  public void react(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID room,
+      @PathVariable UUID id,
+      @Valid @RequestBody Reaction r) {
+    chat.react(a, room, id, r.emoji());
+  }
+
+  @DeleteMapping("/{id}/reactions")
+  public void unreact(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID room,
+      @PathVariable UUID id,
+      @RequestParam @NotBlank @Size(max = 16) String emoji) {
+    chat.unreact(a, room, id, emoji);
   }
 }
