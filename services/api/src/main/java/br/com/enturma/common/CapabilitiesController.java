@@ -25,6 +25,6 @@ public class CapabilitiesController {
         "ai", ai.enabled(),
         "aiWebSearch", ai.webSearchEnabled(),
         "voice", voice.enabled(),
-        "materials", storage.enabled());
+        "materials", true);
   }
 }
