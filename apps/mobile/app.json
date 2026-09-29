@@ -1,0 +1,13 @@
+{
+  "expo": {
+    "name": "Enturma",
+    "slug": "enturma",
+    "scheme": "enturma",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "ios": { "supportsTablet": true, "bundleIdentifier": "br.com.enturma.app" },
+    "android": { "package": "br.com.enturma.app" },
+    "plugins": ["expo-router", "expo-secure-store"]
+  }
+}

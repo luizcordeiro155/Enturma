@@ -1,0 +1,88 @@
+name: Enturma CI
+on:
+  push:
+    branches: [main, 'codex/**']
+  pull_request:
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: enturma_test
+          POSTGRES_USER: enturma
+          POSTGRES_PASSWORD: ci-ephemeral-only
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U enturma -d enturma_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/enturma_test
+      TEST_DATABASE_USERNAME: enturma
+      TEST_DATABASE_PASSWORD: ci-ephemeral-only
+      DATABASE_PASSWORD: ci-ephemeral-only
+      NEXT_TELEMETRY_DISABLED: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: mvn -B -f services/api/pom.xml verify
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build
+      - run: npx expo export --platform android --output-dir ../../dist/mobile-android
+        working-directory: apps/mobile
+      - run: npx expo export --platform ios --output-dir ../../dist/mobile-ios
+        working-directory: apps/mobile
+      - run: npx playwright install --with-deps chromium
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - name: Prepare isolated E2E database and services
+        env:
+          PGPASSWORD: ci-ephemeral-only
+        run: |
+          psql -h localhost -U enturma -d enturma_test -c 'CREATE DATABASE enturma_e2e'
+          DATABASE_URL=jdbc:postgresql://localhost:5432/enturma_e2e DATABASE_USERNAME=enturma APP_URL=http://localhost:3000 java -jar services/api/target/enturma-api-0.1.0.jar --spring.profiles.active=squarecloud --server.port=8080 > /tmp/enturma-api.log 2>&1 &
+          API_URL=http://localhost:8080 APP_URL=http://localhost:3000 npm run start -w @enturma/web > /tmp/enturma-web.log 2>&1 &
+          for attempt in $(seq 1 60); do
+            if curl -fsS http://localhost:8080/actuator/health && curl -fsS http://localhost:3000/login > /dev/null; then exit 0; fi
+            sleep 2
+          done
+          exit 1
+      - run: npm run test:e2e -w @enturma/web
+        env:
+          E2E_DATABASE_URL: postgresql://enturma:ci-ephemeral-only@localhost:5432/enturma_e2e
+      - run: python -m unittest discover -s scripts -p 'test_*.py'
+      - run: python scripts/package-squarecloud.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: squarecloud-api
+          path: |
+            dist/enturma-squarecloud.zip
+            dist/enturma-squarecloud.zip.sha256
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-diagnostics
+          path: |
+            services/api/target/surefire-reports
+            apps/web/test-results
