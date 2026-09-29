@@ -1,40 +1,56 @@
-import { describe, it, expect } from "vitest";
-import { robotFrames, bitValue } from "./learning-games";
+import { describe, expect, it } from "vitest";
+import { robotFrames, wordFeedback } from "./learning-games";
+
 describe("JavaScript learning engines", () => {
-  it("traces a valid path and stops at the first collision", () => {
-    expect(robotFrames("DDDRRR", 1).won).toBe(true);
-    const collision = robotFrames("RRDDDD", 1);
-    expect(collision.won).toBe(false);
-    expect(collision.frames).toHaveLength(2);
-    expect(collision.frames[1].collision).toBe(true);
+  it("executes direct movement code on the first algorithm level", () => {
+    const code = `
+      down();
+      down();
+      down();
+      down();
+      right();
+      right();
+      right();
+      right();
+    `;
+    expect(robotFrames(code, 1).won).toBe(true);
   });
-  it("does not execute unknown instructions", () => {
+
+  it("requires repeat from level 2 onward", () => {
+    const direct = "down();down();down();down();right();right();right();right();";
+    expect(robotFrames(direct, 2).won).toBe(false);
+    expect(robotFrames(direct, 2).error).toContain("repeat");
+    const compact = 'repeat(4){down();}repeat(4){right();}';
+    expect(robotFrames(compact, 2).won).toBe(true);
+  });
+
+  it("supports decision loops without evaluating arbitrary JavaScript", () => {
+    const code =
+      'while(canMove("D")){down();}while(canMove("R")){right();}';
+    expect(robotFrames(code, 3).won).toBe(true);
     expect(robotFrames("alert(1)", 1).won).toBe(false);
   });
-  it("uses place value for bits", () => {
-    expect(bitValue([true, false, true])).toBe(5);
-    expect(bitValue([true, false, true, false, true, false])).toBe(42);
+
+  it("requires repetition and decision logic in the final level", () => {
+    const code =
+      'repeat(2){down();}while(canMove("R")){right();}repeat(3){down();}';
+    expect(robotFrames(code, 4).won).toBe(true);
   });
-  it("has a reachable goal on every map", () => {
-    for (let level = 1; level <= 4; level++) {
-      const queue = [""];
-      let solved = false;
-      const seen = new Set<string>();
-      while (queue.length && !solved) {
-        const path = queue.shift()!;
-        const r = robotFrames(path, level);
-        const last = r.frames.at(-1)!;
-        if (last.collision) continue;
-        const key = `${last.x},${last.y}`;
-        if (seen.has(key)) continue;
-        seen.add(key);
-        if (r.won) {
-          solved = true;
-          break;
-        }
-        for (const c of "RDLU") queue.push(path + c);
-      }
-      expect(solved).toBe(true);
-    }
+
+  it("scores repeated letters in programmer word guesses correctly", () => {
+    expect(wordFeedback("ARRAY", "CLASS")).toEqual([
+      { letter: "A", state: "absent" },
+      { letter: "R", state: "absent" },
+      { letter: "R", state: "absent" },
+      { letter: "A", state: "exact" },
+      { letter: "Y", state: "absent" },
+    ]);
+    expect(wordFeedback("STACK", "CACHE")).toEqual([
+      { letter: "S", state: "absent" },
+      { letter: "T", state: "absent" },
+      { letter: "A", state: "present" },
+      { letter: "C", state: "present" },
+      { letter: "K", state: "absent" },
+    ]);
   });
 });
