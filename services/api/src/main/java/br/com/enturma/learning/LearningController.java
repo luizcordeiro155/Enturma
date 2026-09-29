@@ -364,7 +364,29 @@ public class LearningController {
       return answer.equals(Integer.toBinaryString(new int[] {5, 10, 19, 42}[level - 1]));
     if (game.equals("trace"))
       return answer.strip().equals(new String[] {"6", "12", "3", "10"}[level - 1]);
-    if (game.equals("robot")) return LearningGameEngine.checkRobot(level, answer);
+    if (game.equals("robot")) {
+      if (answer.matches("[RDLU]{1,24}")) {
+        int[][] walls = {{1, 5, 6}, {5, 6, 9}, {2, 6, 9, 11}, {1, 5, 9, 10}};
+        int x = 0, y = 0;
+        for (char command : answer.toCharArray()) {
+          switch (command) {
+            case 'R' -> x++;
+            case 'L' -> x--;
+            case 'D' -> y++;
+            case 'U' -> y--;
+            default -> { return false; }
+          }
+          if (x < 0 || x > 3 || y < 0 || y > 3) return false;
+          for (int wall : walls[level - 1]) if (y * 4 + x == wall) return false;
+        }
+        return x == 3 && y == 3;
+      }
+      try {
+        return LearningGameEngine.checkRobot(level, answer);
+      } catch (ApiException ignored) {
+        return false;
+      }
+    }
     throw ApiException.invalid("Jogo inválido.");
   }
 }
