@@ -62,14 +62,14 @@ public class ProfileService {
 
   @Transactional
   public void saveAvatar(Actor a, String mime, byte[] bytes) {
-    validateImage(mime, bytes, 3 * 1024 * 1024, "avatar");
+    validateImage(mime, bytes, 2 * 1024 * 1024, "avatar");
     db.jdbc.update(
         "UPDATE app_user SET avatar_mime=?,avatar_bytes=? WHERE id=?", mime, bytes, a.id());
   }
 
   @Transactional
   public void saveBanner(Actor a, String mime, byte[] bytes) {
-    validateImage(mime, bytes, 6 * 1024 * 1024, "banner");
+    validateImage(mime, bytes, 3 * 1024 * 1024, "banner");
     db.jdbc.update(
         "UPDATE app_user SET banner_mime=?,banner_bytes=? WHERE id=?", mime, bytes, a.id());
   }
