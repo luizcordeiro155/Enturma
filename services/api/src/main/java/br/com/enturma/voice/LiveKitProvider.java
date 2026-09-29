@@ -22,7 +22,7 @@ public class LiveKitProvider implements VoiceProvider {
     this.env = env;
     this.json = json;
     this.client =
-        enabled() ? HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build() : null;
+        HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(5)).build();
   }
 
   public boolean enabled() {
@@ -41,7 +41,7 @@ public class LiveKitProvider implements VoiceProvider {
       Base64.Encoder b64 = Base64.getUrlEncoder().withoutPadding();
       String header =
           b64.encodeToString(
-              "{\"alg\":\"HS256\",\"typ\":\"JWT\"}".getBytes(StandardCharsets.UTF_8));
+              "{"alg":"HS256","typ":"JWT"}".getBytes(StandardCharsets.UTF_8));
       String payload = header + "." + b64.encodeToString(json.writeValueAsBytes(claims));
       Mac mac = Mac.getInstance("HmacSHA256");
       mac.init(
@@ -52,7 +52,7 @@ public class LiveKitProvider implements VoiceProvider {
           + "."
           + b64.encodeToString(mac.doFinal(payload.getBytes(StandardCharsets.UTF_8)));
     } catch (Exception e) {
-      throw new IllegalStateException("Falha ao assinar autorização de voz", e);
+      throw new IllegalStateException("Falha ao assinar autorização de mídia", e);
     }
   }
 
@@ -84,7 +84,7 @@ public class LiveKitProvider implements VoiceProvider {
                 "canPublishData",
                 false,
                 "canPublishSources",
-                List.of("microphone"))));
+                List.of("microphone", "camera", "screen_share", "screen_share_audio"))));
   }
 
   private com.fasterxml.jackson.databind.JsonNode call(
@@ -109,13 +109,13 @@ public class LiveKitProvider implements VoiceProvider {
               .build();
       var response = client.send(req, HttpResponse.BodyHandlers.ofString());
       if (response.statusCode() == 404) return json.createObjectNode();
-      if (response.statusCode() != 200) throw new IllegalStateException("Voz indisponível");
+      if (response.statusCode() != 200) throw new IllegalStateException("Mídia indisponível");
       return json.readTree(response.body());
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       throw new IllegalStateException(e);
     } catch (Exception e) {
-      throw new IllegalStateException("Falha na operação de voz", e);
+      throw new IllegalStateException("Falha na operação de mídia", e);
     }
   }
 
