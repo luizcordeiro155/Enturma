@@ -42,6 +42,23 @@ public class AiService {
       throw new ApiException(409, "ROOM_ENDED", "A sessão terminou. Use o material consolidado salvo pela Enturma AI.");
 
     rateLimit(a);
+    if (!ended
+        && mode.equals("QUESTION")
+        && !db.exists(
+            "SELECT EXISTS(SELECT 1 FROM room_message WHERE room_id=? AND deleted_at IS NULL)"
+                + " OR EXISTS(SELECT 1 FROM material_chunk WHERE room_id=?)"
+                + " OR EXISTS(SELECT 1 FROM room_memory_checkpoint WHERE room_id=?)",
+            room,
+            room,
+            room)) {
+      return Map.of(
+          "answer",
+          "Ainda não há conteúdo suficiente nesta turma para responder.",
+          "sources",
+          List.of(),
+          "webSources",
+          List.of());
+    }
     String context = ended
         ? artifactContext(room)
         : buildContext(room, a.id(), question, mode);
