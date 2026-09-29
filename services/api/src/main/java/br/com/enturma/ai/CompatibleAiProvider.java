@@ -62,12 +62,10 @@ public class CompatibleAiProvider implements AiProvider {
               + mode;
 
       String input =
-          (context.isBlank() ? "MATERIAIS DA SALA: nenhum trecho relevante encontrado.
-" : "MATERIAIS DA SALA:
-" + context)
-              + "
-PERGUNTA/OBJETIVO:
-"
+          (context.isBlank()
+                  ? "MATERIAIS DA SALA: nenhum trecho relevante encontrado.\n"
+                  : "MATERIAIS DA SALA:\n" + context)
+              + "\nPERGUNTA/OBJETIVO:\n"
               + question;
 
       Map<String, Object> payload = new LinkedHashMap<>();
