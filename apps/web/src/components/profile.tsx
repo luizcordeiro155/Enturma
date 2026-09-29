@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@enturma/contracts";
-import { Camera, Image as ImageIcon, Palette, Save, Upload } from "lucide-react";
+import { Camera, Image as ImageIcon, Palette, Save } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
@@ -32,11 +32,25 @@ export function ProfileView({
   }
 
   useEffect(() => {
-    void loadProfile().catch((e) => setError(e.message));
+    let active = true;
+    api<Profile>("/users/me")
+      .then((profile) => {
+        if (active) setP(profile);
+      })
+      .catch((e) => {
+        if (active) setError(e.message);
+      });
     if (settings)
       api<typeof sessions>("/auth/sessions")
-        .then(setSessions)
-        .catch((e) => setError(e.message));
+        .then((items) => {
+          if (active) setSessions(items);
+        })
+        .catch((e) => {
+          if (active) setError(e.message);
+        });
+    return () => {
+      active = false;
+    };
   }, [settings]);
 
   async function revoke(id: string) {
@@ -90,14 +104,12 @@ export function ProfileView({
   }
 
   const accent = p?.accentColor ?? "#183f36";
-  const avatarUrl = useMemo(
-    () => (p?.hasAvatar ? `/api/backend/users/${p.id}/avatar?v=${avatarVersion}` : null),
-    [p?.hasAvatar, p?.id, avatarVersion],
-  );
-  const bannerUrl = useMemo(
-    () => (p?.hasBanner ? `/api/backend/users/${p.id}/banner?v=${bannerVersion}` : null),
-    [p?.hasBanner, p?.id, bannerVersion],
-  );
+  const avatarUrl = p?.hasAvatar
+    ? `/api/backend/users/${p.id}/avatar?v=${avatarVersion}`
+    : null;
+  const bannerUrl = p?.hasBanner
+    ? `/api/backend/users/${p.id}/banner?v=${bannerVersion}`
+    : null;
 
   return (
     <Shell>
