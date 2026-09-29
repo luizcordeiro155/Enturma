@@ -172,5 +172,6 @@ public class ChatService {
     db.jdbc.update("UPDATE room_message SET reply_to=NULL WHERE room_id=?", room);
     db.jdbc.update("DELETE FROM room_message WHERE room_id=?", room);
     db.jdbc.update("DELETE FROM room_attachment WHERE room_id=?", room);
+    db.jdbc.update("DELETE FROM ai_message WHERE room_id=?", room);
   }
 }
