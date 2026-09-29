@@ -17,3 +17,24 @@ Criação/reutilização de sala serializa pelo registro da disciplina. Entrada 
 Importação é atômica: pai deve existir, tipo deve corresponder e um registro existente não muda de tipo nem pai. Alterações relevantes guardam valor anterior/novo no audit_log. Dados não verificados não são aceitos no onboarding. Não existe seed acadêmico de produção. Fixtures de testes têm rótulo TESTE e fonte `example.test`.
 
 Antes de modificar uma migration já aplicada, criar uma nova versão. Testar restauração e migração a partir de backup de staging. A manutenção/expurgo de tokens, logs, outbox e históricos precisa de política de retenção aprovada antes da operação pública.
+
+
+## Migration V10 — histórico e estudo de sessão
+
+A V10 adiciona:
+
+### room_message
+
+Histórico privado das salas com texto, imagem, resposta, autor, horários e exclusão lógica.
+
+### room_message_reaction
+
+Relação mensagem + usuário + emoji, com unicidade para impedir duplicidade da mesma reação.
+
+### room_study_summary
+
+Armazena o resultado consolidado da Enturma AI por sala. Estados: `PENDING`, `PROCESSING`, `READY`, `FAILED`.
+
+A autorização não é modelada diretamente nessas tabelas: ela continua derivada de `room_participant`.
+
+Imagens de chat v4 ficam no campo `image_data` como data URL. Para escala maior, migrar esse conteúdo para object storage preservando apenas referência + metadados no PostgreSQL.
