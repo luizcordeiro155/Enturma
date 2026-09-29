@@ -9,3 +9,16 @@ O rate limit padrão usa usuário autenticado ou IP de conexão, sem confiar em 
 Este repositório não representa certificação de segurança ou conformidade LGPD. Antes de operação pública: consentimento/termos revisados, exportação/exclusão de conta, política de retenção, controle de acessos operacionais, alertas, testes de carga, antivírus, análise de dependências, teste de restauração e revisão dos provedores externos.
 
 Bloqueios/denúncias têm API e aplicação nas interações suportadas. A interface completa de moderação e resolução de denúncias ainda está pendente. Para relatar vulnerabilidade, não publique tokens ou dados pessoais em issues públicas; combine um canal privado com o mantenedor.
+
+
+## Chat privado e conteúdo efêmero
+
+O chat Web não persiste conversas. Texto, imagens, respostas e reações são cifrados no cliente com AES-GCM; a chave da sala é distribuída entre participantes com ECDH P-256. O backend atua como relay autenticado e não recebe a chave privada dos clientes nem a chave simétrica em claro.
+
+A migration V9 remove o histórico legado armazenado no PostgreSQL. Não adicionar bodies de chat a logs, analytics, auditoria ou tracing.
+
+A criptografia de chat não torna o cliente Web imutável. Um operador capaz de alterar o JavaScript servido poderia tentar publicar uma versão maliciosa. A documentação e a interface não devem prometer segurança absoluta além do modelo implementado.
+
+## Proteções de autenticação
+
+Login, cadastro e recuperação possuem janelas específicas de rate limit. E-mail e username possuem validação de duplicidade no serviço e constraints únicas no banco. Em escala, adicionar limitação distribuída/borda, alertas de credential stuffing e observabilidade de abuso sem registrar senhas.
