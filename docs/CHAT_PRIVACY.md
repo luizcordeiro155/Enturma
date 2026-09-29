@@ -1,19 +1,34 @@
-# Chat privado das salas
+# Privacidade do chat das salas
 
-O chat de sala é efêmero e usa criptografia ponta a ponta no navegador. O servidor autentica quem pode entrar na sala e retransmite envelopes cifrados, mas não recebe a chave simétrica da conversa e não persiste mensagens, imagens, respostas ou reações.
+O chat da sala é **privado aos participantes autorizados**, mas não é mais efêmero nem E2EE de conteúdo na versão v4.
 
-## Modelo criptográfico
+## O que é armazenado
 
-Cada conexão Web gera um par ECDH P-256 usando Web Crypto. A chave privada permanece apenas em memória no cliente. A sala usa uma chave AES-GCM 256-bit aleatória. Um participante que já possui a chave da sala a entrega a novos participantes cifrando-a com uma chave de wrapping derivada por ECDH. O backend vê apenas chaves públicas, IVs e ciphertexts.
+O backend persiste:
 
-Mensagens e imagens são serializadas localmente e cifradas com AES-GCM antes de serem transmitidas. Imagens são limitadas pelo cliente a formatos de imagem permitidos e tamanho pequeno para evitar abuso de memória. O backend aplica também um limite máximo ao envelope WebSocket.
+- texto da mensagem;
+- imagem enviada e seus metadados;
+- resposta a outra mensagem;
+- horário e autor;
+- exclusão lógica;
+- reações por emoji.
 
-## Sem histórico no servidor
+Esse histórico permite leitura por participantes que entram depois e revisão após o encerramento.
 
-A migration V9 remove as tabelas legadas de mensagens e reações. O endpoint REST de mensagens permanece somente como compatibilidade e retorna lista vazia; escritas REST são rejeitadas. Se todos saírem da sala ou atualizarem o navegador, o conteúdo que existia apenas em memória é perdido por design.
+## Quem pode acessar
 
-## Limites da promessa de privacidade
+A API verifica associação à sala antes de entregar histórico. Usuários removidos não têm acesso. O conteúdo não deve ser exposto por endpoints públicos, logs de aplicação, analytics ou telemetria.
 
-Este modelo protege o conteúdo contra banco, logs, administradores e infraestrutura que apenas observe o tráfego. Em uma aplicação Web, quem controla o código servido pelo site poderia publicar uma versão futura maliciosa do JavaScript. Por isso o produto não deve anunciar a alegação absoluta de que “nem o desenvolvedor jamais poderia acessar” sem medidas adicionais de distribuição verificável do cliente, auditorias independentes e controles operacionais.
+## IA
 
-Chamadas de voz/vídeo usam LiveKit/WebRTC. Elas possuem criptografia de transporte WebRTC, mas não devem ser descritas como E2EE do conteúdo até a camada E2EE de mídia do LiveKit ser configurada explicitamente.
+Quando o usuário solicita **Entender o que perdi**, apenas mensagens anteriores ao horário de entrada daquele participante são usadas no contexto.
+
+Quando uma sessão termina, a Enturma AI pode gerar um estudo consolidado usando conversa e materiais da sala. Esse conteúdo também fica restrito a participantes autorizados.
+
+## Retenção
+
+A implementação atual mantém o histórico enquanto a sala existir no banco. Antes da abertura pública em escala, definir e documentar uma política formal de retenção/exclusão e implementar exportação/exclusão de conta conforme requisitos legais aplicáveis.
+
+## Chamadas
+
+Áudio/vídeo usam LiveKit/WebRTC e não são gravados pela aplicação Enturma nesta versão. A mídia possui criptografia de transporte, mas não deve ser descrita como E2EE do conteúdo sem a camada E2EE própria do LiveKit.
