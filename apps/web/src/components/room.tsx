@@ -219,7 +219,11 @@ export function RoomView({ id }: { id: string }) {
             }
 
             if (data.type === "key_request") {
-              if (!roomKeyRef.current || !identityRef.current) return;
+              if (!identityRef.current) return;
+              if (!roomKeyRef.current) {
+                roomKeyRef.current = await createRoomKey();
+                setCryptoReady(true);
+              }
               const wrapped = await wrapRoomKey(
                 roomKeyRef.current,
                 identityRef.current.privateKey,
