@@ -38,6 +38,17 @@ public class StudyService {
         Db.offset(page));
   }
 
+  public List<Map<String, Object>> history(Actor a, int page) {
+    return db.list(
+        "SELECT r.*,s.name subject_name,(SELECT count(*) FROM room_message m WHERE m.room_id=r.id)"
+            + " message_count,(SELECT ss.status FROM room_study_summary ss WHERE ss.room_id=r.id)"
+            + " summary_status FROM study_room r JOIN academic_entry s ON s.id=r.subject_id JOIN"
+            + " room_participant p ON p.room_id=r.id AND p.user_id=? AND NOT p.removed WHERE"
+            + " r.status='ENDED' ORDER BY coalesce(r.ended_at,r.ends_at) DESC,r.id LIMIT 30 OFFSET ?",
+        a.id(),
+        Db.offset(page));
+  }
+
   @Transactional
   public Map<String, Object> study(
       Actor a, UUID subject, UUID topic, String title, int minutes, int capacity) {
@@ -128,6 +139,13 @@ public class StudyService {
     return room;
   }
 
+  public void participant(Actor a, UUID id) {
+    if (!db.exists(
+        "SELECT EXISTS(SELECT 1 FROM room_participant WHERE room_id=? AND user_id=? AND NOT removed)",
+        id,
+        a.id())) throw ApiException.forbidden();
+  }
+
   public void member(Actor a, UUID id) {
     if (!db.exists(
         "SELECT EXISTS(SELECT 1 FROM room_participant WHERE room_id=? AND user_id=? AND left_at IS"
@@ -137,7 +155,7 @@ public class StudyService {
   }
 
   public Map<String, Object> detail(Actor a, UUID id) {
-    member(a, id);
+    participant(a, id);
     var r =
         db.one(
             "SELECT r.*,s.name subject_name FROM study_room r JOIN academic_entry s ON"
@@ -150,6 +168,29 @@ public class StudyService {
                 + " u.id=p.user_id WHERE p.room_id=? AND p.left_at IS NULL ORDER BY joined_at LIMIT"
                 + " 30",
             id));
+    var membership =
+        db.one(
+            "SELECT joined_at,left_at FROM room_participant WHERE room_id=? AND user_id=?",
+            id,
+            a.id());
+    r.put("currentMemberJoinedAt", membership.get("joinedAt"));
+    r.put("currentMemberLeftAt", membership.get("leftAt"));
+    r.put(
+        "messageCount",
+        db.jdbc.queryForObject(
+            "SELECT count(*) FROM room_message WHERE room_id=?", Long.class, id));
+    r.put(
+        "messagesBeforeJoin",
+        db.jdbc.queryForObject(
+            "SELECT count(*) FROM room_message WHERE room_id=? AND created_at<?::timestamptz",
+            Long.class,
+            id,
+            membership.get("joinedAt")));
+    var summary =
+        db.list(
+            "SELECT status,generated_at,message_count FROM room_study_summary WHERE room_id=?",
+            id);
+    if (!summary.isEmpty()) r.put("studySummary", summary.getFirst());
     return r;
   }
 
@@ -160,6 +201,11 @@ public class StudyService {
     db.jdbc.update(
         "UPDATE study_room SET status='ENDED',ended_at=now() WHERE id=? AND status IN"
             + " ('OPEN','ACTIVE')",
+        id);
+    db.jdbc.update(
+        "INSERT INTO room_study_summary(room_id,status) VALUES (?,'PENDING')"
+            + " ON CONFLICT(room_id) DO UPDATE SET status=CASE WHEN room_study_summary.status='READY'"
+            + " THEN 'READY' ELSE 'PENDING' END,updated_at=now()",
         id);
   }
 
@@ -186,5 +232,8 @@ public class StudyService {
     db.jdbc.update(
         "UPDATE study_room SET status='ENDED',ended_at=ends_at WHERE ends_at<=now() AND status IN"
             + " ('OPEN','ACTIVE')");
+    db.jdbc.update(
+        "INSERT INTO room_study_summary(room_id,status) SELECT id,'PENDING' FROM study_room"
+            + " WHERE status='ENDED' ON CONFLICT(room_id) DO NOTHING");
   }
 }
