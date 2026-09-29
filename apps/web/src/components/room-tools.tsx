@@ -6,23 +6,6 @@ import { Feedback } from "./feedback";
 import { MAX_WEB_UPLOAD_BYTES } from "@/lib/upload-limits";
 
 type Material = { id: string; fileName: string; fileSize: number };
-type Answer = {
-  answer: string;
-  sources: {
-    number: number;
-    materialId: string;
-    fileName: string;
-    page: number | null;
-    excerpt: string;
-  }[];
-  webSources?: {
-    title: string;
-    url: string;
-    startIndex: number;
-    endIndex: number;
-  }[];
-};
-
 export function RoomTools({
   roomId,
   ended,
@@ -37,7 +20,6 @@ export function RoomTools({
     aiWebSearch: boolean;
   }>();
   const [materials, setMaterials] = useState<Material[]>([]);
-  const [answer, setAnswer] = useState<Answer>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -135,7 +117,7 @@ export function RoomTools({
             </div>
           ))
         ) : (
-          <p className="muted">Envie materiais para estudar em grupo e consultar com a IA.</p>
+          <p className="muted">Envie PDFs e TXT para a turma. A Enturma AI usa esses materiais diretamente no chat.</p>
         )}
         {cap?.materials ? (
           <form onSubmit={upload}>
@@ -164,103 +146,6 @@ export function RoomTools({
         )}
       </section>
 
-      <section className="room-tool-card">
-        <p className="eyebrow">Tutor com fontes</p>
-        <h2>Enturma AI</h2>
-        <p className="muted">
-          Estude seus PDFs, peça resumos, flashcards, quizzes e explicações. No modo
-          Pesquisa, a IA também pode consultar fontes externas e mostrar os links usados.
-        </p>
-        {cap?.ai ? (
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setBusy(true);
-              setError("");
-              const f = new FormData(e.currentTarget);
-              try {
-                setAnswer(
-                  await api(`/study-rooms/${roomId}/ai`, {
-                    method: "POST",
-                    body: JSON.stringify({
-                      question: f.get("question"),
-                      mode: f.get("mode"),
-                    }),
-                    signal: AbortSignal.timeout(70000),
-                  }),
-                );
-              } catch (e) {
-                setError((e as Error).message);
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            <label>
-              Como posso ajudar?
-              <select name="mode">
-                <option value="QUESTION">Responder usando os materiais</option>
-                <option value="SUMMARY">Resumir materiais</option>
-                <option value="FLASHCARDS">Criar flashcards</option>
-                <option value="QUIZ">Criar quiz</option>
-                <option value="SIMPLIFY">Explicar de forma simples</option>
-                <option value="STUDY_PLAN">Criar roteiro de estudo</option>
-                {cap.aiWebSearch ? (
-                  <option value="RESEARCH">Pesquisar na web com fontes</option>
-                ) : null}
-              </select>
-            </label>
-            <label>
-              Sua pergunta
-              <textarea
-                name="question"
-                maxLength={2000}
-                required
-                placeholder="Ex.: explique este conceito e crie 3 questões para eu praticar"
-              />
-            </label>
-            <button disabled={busy || ended}>
-              {busy ? "Analisando…" : "Perguntar à Enturma AI"}
-            </button>
-          </form>
-        ) : (
-          <p className="muted">
-            A IA ainda não está disponível nesta instalação.
-          </p>
-        )}
-        {answer ? (
-          <article className="ai-answer">
-            <p>{renderCitedAnswer(answer.answer, answer.webSources ?? [])}</p>
-            {answer.sources.length ? <h3>Materiais usados</h3> : null}
-            {answer.sources.map((s) => (
-              <details key={`${s.materialId}-${s.number}`}>
-                <summary>
-                  [{s.number}] {s.fileName}
-                  {s.page ? ` · página ${s.page}` : ""}
-                </summary>
-                <blockquote>{s.excerpt}</blockquote>
-              </details>
-            ))}
-            {answer.webSources?.length ? (
-              <>
-                <h3>Fontes da pesquisa</h3>
-                <div className="ai-web-sources">
-                  {answer.webSources.map((s) => (
-                    <a
-                      key={`${s.url}-${s.startIndex}`}
-                      href={s.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {s.title}
-                    </a>
-                  ))}
-                </div>
-              </>
-            ) : null}
-          </article>
-        ) : null}
-      </section>
     </div>
   );
 }
@@ -697,43 +582,4 @@ function nextScreenMessage(error: unknown) {
   if (message.toLowerCase().includes("permission"))
     return "A permissão para compartilhar a tela foi recusada.";
   return message || "Não foi possível iniciar o compartilhamento de tela.";
-}
-
-
-function renderCitedAnswer(
-  text: string,
-  sources: NonNullable<Answer["webSources"]>,
-) {
-  if (!sources.length) return text;
-  const ordered = [...sources]
-    .filter(
-      (source) =>
-        source.startIndex >= 0 &&
-        source.endIndex > source.startIndex &&
-        source.endIndex <= text.length,
-    )
-    .sort((a, b) => a.startIndex - b.startIndex);
-
-  if (!ordered.length) return text;
-  const parts: React.ReactNode[] = [];
-  let cursor = 0;
-  for (const source of ordered) {
-    if (source.startIndex < cursor) continue;
-    if (source.startIndex > cursor)
-      parts.push(text.slice(cursor, source.startIndex));
-    parts.push(
-      <a
-        key={`${source.url}-${source.startIndex}`}
-        href={source.url}
-        target="_blank"
-        rel="noreferrer"
-        title={source.title}
-      >
-        {text.slice(source.startIndex, source.endIndex)}
-      </a>,
-    );
-    cursor = source.endIndex;
-  }
-  if (cursor < text.length) parts.push(text.slice(cursor));
-  return parts;
 }
