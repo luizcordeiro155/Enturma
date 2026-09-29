@@ -39,7 +39,7 @@ Cadastre uma conta e confirme o e-mail pelo Mailpit. A confirmação também fun
 - Chamadas Web: `VOICE_ENABLED=true` + `LIVEKIT_URL`, `LIVEKIT_API_KEY` e `LIVEKIT_API_SECRET`. Suporta microfone, câmera e compartilhamento de tela.
 - Materiais: configure `OBJECT_STORAGE_*` e crie um bucket privado. MinIO local usa a mesma interface S3. Formatos desta versão: PDF e TXT.
 - IA: configure somente `OPENAI_API_KEY` no backend. O modelo `gpt-5.6-sol` é definido no código; `AI_WEB_SEARCH_ENABLED=true` habilita pesquisa externa com citações clicáveis. A busca nos materiais continua isolada por sala.
-- WebSocket: derivado automaticamente de `API_URL`; o chat Web usa relay efêmero E2EE, sem persistir texto, imagens, respostas ou reações no banco.
+- WebSocket: derivado automaticamente de `API_URL`; o chat Web usa tempo real autenticado e histórico privado persistente por sala para permitir recuperação de contexto e revisão posterior.
 
 Nenhuma chave secreta deve usar prefixo `NEXT_PUBLIC_` ou `EXPO_PUBLIC_`.
 
@@ -94,8 +94,8 @@ Catálogo verificado com prioridade UNA Aimorés, matrizes de UNA/PUC Minas/UFMG
 
 Esta versão adiciona ao Web:
 
-- chat efêmero com E2EE no cliente, imagens de até 8 MB com prévia, respostas e reações por emoji;
-- nenhuma persistência de conversas no PostgreSQL;
+- chat em tempo real com histórico privado por sala, imagens de até 8 MB com prévia, respostas e reações por emoji;
+- mensagens persistidas para participantes da própria sala, inclusive para quem entrar depois e para revisão após o encerramento;
 - chamadas LiveKit com microfone, câmera, destaque de quem está falando, participantes visíveis e compartilhamento de tela com identificação do transmissor/espectadores;
 - Enturma AI via OpenAI Responses API, materiais da sala e pesquisa web opcional com fontes;
 - XP idempotente, níveis, sequência e desafio diário;
@@ -103,3 +103,14 @@ Esta versão adiciona ao Web:
 - bloqueio explícito de e-mail e username duplicados.
 
 Antes de publicar, configure OpenAI/LiveKit conforme [DEPLOYMENT](docs/DEPLOYMENT.md) e aguarde o CI completo passar.
+
+
+## Atualização v4 — salas, acessibilidade e prática de programação
+
+A experiência de sala foi reorganizada para uma navegação inspirada em Discord/Teams, com áreas separadas de **Conversa**, **Chamada**, **Materiais** e **Enturma AI**, layout responsivo para desktop e mobile web, modo claro/escuro persistente por usuário e um modo de acessibilidade com tipografia e alvos de interação maiores.
+
+O histórico da conversa agora é privado da turma e persistente. Um participante que entrar depois pode ler as mensagens anteriores e, quando houver contexto anterior, pedir à Enturma AI um resumo explicativo do que perdeu. Ao encerrar a sessão, a API agenda a geração de um estudo consolidado com conversa + materiais para revisão posterior.
+
+Nos minigames de TI, **Laboratório binário** foi substituído por **Código Secreto**, um jogo de palavras de programação com modos Solo, Dueto e Quarteto. **Rota do algoritmo** agora exige um pequeno programa textual com instruções como `UP`, `DOWN`, `LEFT`, `RIGHT` e `REPEAT N DIRECAO`, mapas maiores, obstáculos e limite de operações.
+
+A migration `V10__persistent_room_history_and_study_summary.sql` adiciona o histórico persistente de mensagens/relações e os estudos consolidados de sala.
