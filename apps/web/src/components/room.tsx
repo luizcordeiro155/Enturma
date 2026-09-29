@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Profile, Room } from "@enturma/contracts";
-import { Clock, ImagePlus, Reply, Trash2, Users, X } from "lucide-react";
+import { Bot, Clock, ImagePlus, Reply, Sparkles, Trash2, Users, X } from "lucide-react";
 import { api, post } from "@/lib/api";
 import {
   createRoomIdentity,
@@ -20,10 +20,30 @@ import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
 import { RoomTools } from "./room-tools";
 
+type AiAnswer = {
+  answer: string;
+  sources: {
+    number: number;
+    materialId: string;
+    fileName: string;
+    page: number | null;
+    excerpt: string;
+  }[];
+  webSources?: {
+    title: string;
+    url: string;
+    startIndex: number;
+    endIndex: number;
+  }[];
+};
+
 type ChatMessage = {
   id: string;
   senderId: string;
   senderName: string;
+  assistant?: boolean;
+  privateAi?: boolean;
+  aiAnswer?: AiAnswer;
   createdAt: string;
   text?: string;
   image?: {
@@ -51,6 +71,16 @@ export function RoomView({ id }: { id: string }) {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
+  const [aiMode, setAiMode] = useState(false);
+  const [aiTask, setAiTask] = useState("QUESTION");
+  const [aiBusy, setAiBusy] = useState(false);
+  const [capabilities, setCapabilities] = useState<{
+    ai: boolean;
+    aiWebSearch: boolean;
+    voice: boolean;
+    materials: boolean;
+  }>();
+  const [selectedMember, setSelectedMember] = useState<NonNullable<Room["members"]>[number] | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const router = useRouter();
 
@@ -64,12 +94,14 @@ export function RoomView({ id }: { id: string }) {
   const myIdRef = useRef<string | null>(null);
 
   const reloadRoom = useCallback(async () => {
-    const [r, p] = await Promise.all([
+    const [r, p, cap] = await Promise.all([
       api<Room>(`/study-rooms/${id}`),
       api<Profile>("/users/me"),
+      api<typeof capabilities>("/capabilities"),
     ]);
     setRoom(r);
     setMe(p);
+    setCapabilities(cap);
     myIdRef.current = p.id;
   }, [id]);
 
@@ -323,9 +355,58 @@ export function RoomView({ id }: { id: string }) {
     applyEvent(event, event.senderId);
   }
 
+  async function askAi(question: string) {
+    if (!me || !capabilities?.ai) return;
+    const promptId = crypto.randomUUID();
+    const prompt: ChatMessage = {
+      id: promptId,
+      senderId: me.id,
+      senderName: me.name,
+      privateAi: true,
+      createdAt: new Date().toISOString(),
+      text: question,
+      deleted: false,
+      reactions: {},
+    };
+    setMessages((current) => [...current, prompt]);
+    setAiBusy(true);
+    setDraft("");
+    try {
+      const answer = await api<AiAnswer>(`/study-rooms/${id}/ai`, {
+        method: "POST",
+        body: JSON.stringify({ question, mode: aiTask }),
+        signal: AbortSignal.timeout(70000),
+      });
+      setMessages((current) => [
+        ...current,
+        {
+          id: crypto.randomUUID(),
+          senderId: "enturma-ai",
+          senderName: "Enturma AI",
+          assistant: true,
+          privateAi: true,
+          aiAnswer: answer,
+          createdAt: new Date().toISOString(),
+          text: answer.answer,
+          deleted: false,
+          reactions: {},
+        },
+      ]);
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setAiBusy(false);
+    }
+  }
+
   async function send(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     if (!me) return;
+    if (aiMode) {
+      if (!draft.trim() || aiBusy) return;
+      await askAi(draft.trim());
+      return;
+    }
     if (!draft.trim() && !image) return;
     setBusy(true);
     setError("");
@@ -407,10 +488,18 @@ export function RoomView({ id }: { id: string }) {
     <Shell>
       <Feedback error={error} />
       {room ? (
-        <>
-          <h1>{room.subjectName}</h1>
-          <p className="lead">{room.title}</p>
-          <div className="actions">
+        <div className="discord-room-page">
+          <header className="room-channel-header">
+            <div>
+              <span className="room-channel-mark">#</span>
+              <div>
+                <h1>{room.subjectName}</h1>
+                <p>{room.title}</p>
+              </div>
+            </div>
+            <span className="privacy-pill">E2EE · efêmero</span>
+          </header>
+          <div className="actions room-session-meta">
             <span className="timer">
               <Clock size={16} />{" "}
               {ended
@@ -427,8 +516,10 @@ export function RoomView({ id }: { id: string }) {
             ) : null}
           </div>
 
-          <div className="room-layout">
-            <section className="chat">
+          <div className="room-layout discord-room-layout">
+            <div className="room-main-column">
+              <RoomTools roomId={id} ended={ended} />
+            <section className="chat discord-chat">
               <div className="chat-heading">
                 <div>
                   <h2>Conversa da turma</h2>
@@ -440,7 +531,6 @@ export function RoomView({ id }: { id: string }) {
                         : "Reconectando ao chat seguro"}
                   </small>
                 </div>
-                <span className="privacy-pill">E2EE · efêmero</span>
               </div>
 
               <div className="messages" aria-live="polite">
@@ -459,11 +549,26 @@ export function RoomView({ id }: { id: string }) {
                     );
                     return (
                       <article
-                        className={`message ${message.senderId === me?.id ? "mine" : ""}`}
+                        className={`message discord-message ${message.senderId === me?.id ? "mine" : ""} ${message.assistant ? "assistant-message" : ""}`}
                         key={message.id}
                       >
+                        <div className="message-avatar">
+                          {message.assistant ? (
+                            <Bot size={22} />
+                          ) : room.members?.find((m) => m.userId === message.senderId)?.hasAvatar ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                              src={`/api/backend/users/${message.senderId}/avatar`}
+                              alt=""
+                            />
+                          ) : (
+                            <span>{message.senderName.slice(0, 1).toUpperCase()}</span>
+                          )}
+                        </div>
+                        <div className="message-content">
                         <header>
                           <strong>{message.senderName}</strong>
+                          {message.privateAi ? <span className="ai-private-badge">privado</span> : null}
                           <small>
                             {new Date(message.createdAt).toLocaleTimeString(
                               "pt-BR",
@@ -504,7 +609,7 @@ export function RoomView({ id }: { id: string }) {
                               </a>
                             ) : null}
 
-                            <div className="message-actions">
+                            {!message.assistant && !message.privateAi ? <div className="message-actions">
                               <button
                                 className="text-button"
                                 onClick={() => setReplyTo(message)}
@@ -519,9 +624,9 @@ export function RoomView({ id }: { id: string }) {
                                   <Trash2 size={14} /> Remover
                                 </button>
                               ) : null}
-                            </div>
+                            </div> : null}
 
-                            <div
+                            {!message.assistant && !message.privateAi ? <div
                               className="reaction-row"
                               aria-label="Reações da mensagem"
                             >
@@ -543,9 +648,32 @@ export function RoomView({ id }: { id: string }) {
                                   </button>
                                 );
                               })}
-                            </div>
+                            </div> : null}
+                            {message.aiAnswer?.sources?.length ? (
+                              <div className="ai-inline-sources">
+                                {message.aiAnswer.sources.map((source) => (
+                                  <details key={`${message.id}-${source.materialId}-${source.number}`}>
+                                    <summary>
+                                      [{source.number}] {source.fileName}
+                                      {source.page ? ` · página ${source.page}` : ""}
+                                    </summary>
+                                    <p>{source.excerpt}</p>
+                                  </details>
+                                ))}
+                              </div>
+                            ) : null}
+                            {message.aiAnswer?.webSources?.length ? (
+                              <div className="ai-inline-links">
+                                {message.aiAnswer.webSources.map((source) => (
+                                  <a key={source.url} href={source.url} target="_blank" rel="noreferrer">
+                                    {source.title}
+                                  </a>
+                                ))}
+                              </div>
+                            ) : null}
                           </>
                         )}
+                        </div>
                       </article>
                     );
                   })
@@ -566,8 +694,44 @@ export function RoomView({ id }: { id: string }) {
                 </div>
               ) : null}
 
-              <form onSubmit={send} className="chat-composer">
-                {imagePreview && image ? (
+              <form onSubmit={send} className={`chat-composer ${aiMode ? "ai-composer" : ""}`}>
+                <div className="composer-mode-bar">
+                  <button
+                    type="button"
+                    className={aiMode ? "ai-mode-toggle active" : "ai-mode-toggle"}
+                    disabled={!capabilities?.ai || ended}
+                    onClick={() => {
+                      setAiMode((value) => !value);
+                      setImage(null);
+                      if (imagePreview) URL.revokeObjectURL(imagePreview);
+                      setImagePreview(null);
+                    }}
+                  >
+                    <Sparkles size={16} />
+                    Enturma AI
+                  </button>
+                  {aiMode ? (
+                    <>
+                      <select
+                        aria-label="Modo da Enturma AI"
+                        value={aiTask}
+                        onChange={(e) => setAiTask(e.target.value)}
+                      >
+                        <option value="QUESTION">Perguntar aos materiais</option>
+                        <option value="SUMMARY">Resumir materiais</option>
+                        <option value="FLASHCARDS">Criar flashcards</option>
+                        <option value="QUIZ">Criar quiz</option>
+                        <option value="SIMPLIFY">Explicar de forma simples</option>
+                        <option value="STUDY_PLAN">Criar roteiro de estudo</option>
+                        {capabilities?.aiWebSearch ? (
+                          <option value="RESEARCH">Pesquisar na web com fontes</option>
+                        ) : null}
+                      </select>
+                      <small>Consulta privada à IA. Não é enviada aos colegas nem salva pelo Enturma.</small>
+                    </>
+                  ) : null}
+                </div>
+                {imagePreview && image && !aiMode ? (
                   <div className="attachment-preview">
                     <div className="attachment-preview-media">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -597,19 +761,21 @@ export function RoomView({ id }: { id: string }) {
                     value={draft}
                     onChange={(e) => setDraft(e.target.value)}
                     maxLength={4000}
-                    disabled={ended || !cryptoReady}
+                    disabled={ended || (!aiMode && !cryptoReady) || aiBusy}
                     placeholder={
                       ended
                         ? "Esta sessão já terminou."
-                        : cryptoReady
-                          ? "Compartilhe uma ideia ou uma dúvida…"
-                          : "Preparando chat seguro…"
+                        : aiMode
+                          ? "Pergunte à Enturma AI sobre os materiais ou o conteúdo estudado…"
+                          : cryptoReady
+                            ? "Mensagem para a turma…"
+                            : "Preparando chat seguro…"
                     }
                   />
                 </label>
 
                 <div className="composer-tools">
-                  <div className="emoji-picker" aria-label="Emojis rápidos">
+                  {!aiMode ? <div className="emoji-picker" aria-label="Emojis rápidos">
                     {QUICK_EMOJIS.map((emoji) => (
                       <button
                         type="button"
@@ -621,9 +787,9 @@ export function RoomView({ id }: { id: string }) {
                         {emoji}
                       </button>
                     ))}
-                  </div>
+                  </div> : null}
 
-                  <label className="image-picker">
+                  {!aiMode ? <label className="image-picker">
                     <ImagePlus size={17} />
                     <span>{image ? image.name : "Imagem"}</span>
                     <input
@@ -649,36 +815,81 @@ export function RoomView({ id }: { id: string }) {
                       }}
                       disabled={ended || !cryptoReady}
                     />
-                  </label>
+                  </label> : null}
 
                   <button
                     disabled={
                       ended ||
                       busy ||
-                      !cryptoReady ||
-                      (!draft.trim() && !image)
+                      aiBusy ||
+                      (aiMode ? !draft.trim() : (!cryptoReady || (!draft.trim() && !image)))
                     }
                   >
-                    {busy ? "Criptografando…" : "Enviar"}
+                    {aiMode
+                      ? aiBusy
+                        ? "Pensando…"
+                        : "Perguntar à IA"
+                      : busy
+                        ? "Criptografando…"
+                        : "Enviar"}
                   </button>
                 </div>
                 <small>
-                  Imagens: JPG, PNG, WEBP ou GIF, até 8 MB, com prévia antes do envio.
-                  O arquivo é criptografado no navegador e nada do chat é gravado no banco.
+                  {aiMode
+                    ? "A IA recebe somente sua pergunta e os materiais necessários à resposta."
+                    : "Imagens JPG, PNG, WEBP ou GIF até 8 MB. Mensagens e anexos do chat são E2EE e efêmeros."}
                 </small>
               </form>
             </section>
+            </div>
 
-            <aside>
+            <aside className="room-members-panel">
               <h2>Participantes</h2>
+              {selectedMember ? (
+                <section
+                  className="member-profile-card"
+                  style={{ "--profile-accent": selectedMember.accentColor ?? "#183f36" } as React.CSSProperties}
+                >
+                  <button className="member-profile-close" onClick={() => setSelectedMember(null)}>×</button>
+                  <div
+                    className="member-profile-banner"
+                    style={
+                      selectedMember.hasBanner
+                        ? { backgroundImage: `url("/api/backend/users/${selectedMember.userId}/banner")` }
+                        : { background: selectedMember.accentColor ?? "#183f36" }
+                    }
+                  />
+                  <div className="member-profile-body">
+                    {selectedMember.hasAvatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={`/api/backend/users/${selectedMember.userId}/avatar`} alt="" />
+                    ) : (
+                      <span className="member-profile-fallback">{selectedMember.name.slice(0, 1).toUpperCase()}</span>
+                    )}
+                    <strong>{selectedMember.name}</strong>
+                    <small>@{selectedMember.username ?? "estudante"}</small>
+                    {selectedMember.bio ? <p>{selectedMember.bio}</p> : null}
+                  </div>
+                </section>
+              ) : null}
               {room.members?.map((member) => (
-                <div key={member.userId} className="member">
-                  <span>
-                    {member.name}
-                    <small>
-                      {member.role === "HOST" ? " · anfitrião" : ""}
-                    </small>
-                  </span>
+                <div key={member.userId} className="member discord-member">
+                  <button className="member-identity" onClick={() => setSelectedMember(member)}>
+                    <span className="member-avatar">
+                      {member.hasAvatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={`/api/backend/users/${member.userId}/avatar`} alt="" />
+                      ) : (
+                        member.name.slice(0, 1).toUpperCase()
+                      )}
+                    </span>
+                    <span>
+                      <strong>{member.name}</strong>
+                      <small>
+                        {member.role === "HOST" ? "Anfitrião" : "Estudante"}
+                      </small>
+                    </span>
+                  </button>
                   {me?.id === room.hostId &&
                   member.userId !== me.id &&
                   !ended ? (
@@ -716,9 +927,7 @@ export function RoomView({ id }: { id: string }) {
               </button>
             </aside>
           </div>
-
-          <RoomTools roomId={id} ended={ended} />
-        </>
+        </div>
       ) : !error ? (
         <Loading />
       ) : null}
