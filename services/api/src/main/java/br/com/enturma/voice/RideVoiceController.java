@@ -22,10 +22,11 @@ public class RideVoiceController {
     this.db = db;
   }
 
+  @org.springframework.transaction.annotation.Transactional
   @PostMapping("/{id}/voice")
   public Object join(@AuthenticationPrincipal Actor actor, @PathVariable UUID id) {
     var match = rides.access(actor, id);
-    if (!match.get("rideStatus").equals("OPEN")) throw ApiException.invalid("Carona encerrada.");
+    rides.requireOpen(match);
     if (!voice.enabled())
       throw new ApiException(
           503, "VOICE_UNAVAILABLE", "As chamadas precisam ser habilitadas pelo administrador.");
@@ -54,7 +55,8 @@ public class RideVoiceController {
         boolean open =
             db.exists(
                 "SELECT EXISTS(SELECT 1 FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE"
-                    + " m.id=? AND m.status='ACCEPTED' AND r.status='OPEN')",
+                    + " m.id=? AND m.status='ACCEPTED' AND r.status='OPEN' AND m.closed_at IS NULL"
+                    + " AND m.deleted_at IS NULL AND r.departure_at>now()-interval '24 hours')",
                 id);
         if (!open) {
           voice.deleteRoom(room);

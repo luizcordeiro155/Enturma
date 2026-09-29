@@ -22,6 +22,7 @@ function normalize(p: Partial<ExperiencePreference>): ExperiencePreference {
 }
 export function ExperienceControls() {
   const [preference, setPreference] = useState(defaults);
+  const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
@@ -29,15 +30,17 @@ export function ExperienceControls() {
   const changed = useRef(false);
   useEffect(() => {
     let active = true;
+    let cached = defaults;
     try {
       const raw = localStorage.getItem("enturma-experience");
-      if (raw) {
-        const cached = normalize(JSON.parse(raw));
-        queueMicrotask(() => {
-          if (active && !changed.current) setPreference(cached);
-        });
-      }
+      if (raw) cached = normalize(JSON.parse(raw));
     } catch {}
+    queueMicrotask(() => {
+      if (active && !changed.current) {
+        setPreference(cached);
+        setReady(true);
+      }
+    });
     let pending: ExperiencePreference | null = null;
     try {
       const raw = localStorage.getItem("enturma-experience-pending");
@@ -61,7 +64,13 @@ export function ExperienceControls() {
       : api<ExperiencePreference>("/users/me/experience");
     synchronization
       .then((p) => {
-        if (active && !changed.current) setPreference(normalize(p));
+        if (active && !changed.current) {
+          const next = normalize(p);
+          setPreference(next);
+          try {
+            localStorage.setItem("enturma-experience", JSON.stringify(next));
+          } catch {}
+        }
       })
       .catch(() => {});
     return () => {
@@ -69,6 +78,7 @@ export function ExperienceControls() {
     };
   }, []);
   useEffect(() => {
+    if (!ready) return;
     const system = matchMedia("(prefers-color-scheme: dark)");
     function apply() {
       const root = document.documentElement;
@@ -87,7 +97,7 @@ export function ExperienceControls() {
     apply();
     system.addEventListener("change", apply);
     return () => system.removeEventListener("change", apply);
-  }, [preference]);
+  }, [preference, ready]);
   useEffect(() => {
     if (open) dialog.current?.showModal();
     else dialog.current?.close();
@@ -153,6 +163,7 @@ export function ExperienceControls() {
       </button>
       <button
         className="accessibility-trigger"
+        aria-label="Acessibilidade"
         type="button"
         onClick={() => setOpen(true)}
       >

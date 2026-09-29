@@ -717,6 +717,97 @@ class PlatformIntegrationTest {
   }
 
   @Test
+  void rideConversationsCanCloseCancelAndPurgeWithoutLeakingAccess() {
+    UUID ride =
+        (UUID)
+            ((Map<?, ?>)
+                    rides.create(
+                        host,
+                        campus,
+                        "OFFER",
+                        "Teste de encerramento",
+                        "TO_CAMPUS",
+                        Instant.now().plusSeconds(3600),
+                        1))
+                .get("id");
+    UUID id = (UUID) ((Map<?, ?>) rides.interest(member, ride)).get("id");
+    UUID next = (UUID) ((Map<?, ?>) rides.interest(outsider, ride)).get("id");
+    rides.accept(host, id);
+    rides.message(member, id, "Mensagem a excluir");
+    rides.meeting(host, id, "Ponto privado");
+    assertThatThrownBy(() -> rides.closeConversation(outsider, id))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> rides.cancelMatch(outsider, id)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> rides.deleteConversation(outsider, id))
+        .isInstanceOf(ApiException.class);
+    rides.closeConversation(member, id);
+    var closed = rides.access(host, id);
+    assertThat(closed.get("closedAt")).isNotNull();
+    assertThat(closed.get("purgeAt")).isNotNull();
+    assertThatThrownBy(() -> rides.requireOpen(closed)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> rides.message(host, id, "Após encerramento"))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> rides.meeting(member, id, "Novo ponto"))
+        .isInstanceOf(ApiException.class);
+    assertThat((List<?>) rides.messages(host, id, 0)).hasSize(1);
+    rides.closeConversation(host, id);
+    assertThat(rides.access(host, id).get("purgeAt")).isEqualTo(closed.get("purgeAt"));
+    rides.deleteConversation(member, id);
+    rides.deleteConversation(host, id);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM ride_message WHERE match_id=?", Integer.class, id))
+        .isZero();
+    assertThat(db.one("SELECT meeting_point FROM ride_match WHERE id=?", id).get("meetingPoint"))
+        .isNull();
+    assertThatThrownBy(() -> rides.messages(host, id, 0)).isInstanceOf(ApiException.class);
+    rides.cancelMatch(member, id);
+    rides.cancelMatch(member, id);
+    rides.accept(host, next);
+    assertThat(db.one("SELECT status FROM ride_match WHERE id=?", next).get("status"))
+        .isEqualTo("ACCEPTED");
+    rides.message(outsider, next, "Outra conversa");
+    rides.finish(host, ride, true);
+    assertThat(rides.access(outsider, next).get("closedAt")).isNotNull();
+    db.jdbc.update("UPDATE ride_match SET purge_at=now()-interval '1 second' WHERE id=?", next);
+    rides.cleanupConversations();
+    assertThat(db.one("SELECT deleted_at FROM ride_match WHERE id=?", next).get("deletedAt"))
+        .isNotNull();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM ride_message WHERE match_id=?", Integer.class, next))
+        .isZero();
+    assertThat((List<?>) rides.matches(host))
+        .noneMatch(row -> ((Map<?, ?>) row).get("id").equals(next));
+  }
+
+  @Test
+  void staleRideClosesAndPendingPassengerCanWithdraw() {
+    UUID ride =
+        (UUID)
+            ((Map<?, ?>)
+                    rides.create(
+                        host,
+                        campus,
+                        "OFFER",
+                        "Teste de expiração",
+                        "TO_CAMPUS",
+                        Instant.now().plusSeconds(3600),
+                        2))
+                .get("id");
+    UUID first = (UUID) ((Map<?, ?>) rides.interest(member, ride)).get("id");
+    UUID second = (UUID) ((Map<?, ?>) rides.interest(outsider, ride)).get("id");
+    rides.cancelMatch(member, first);
+    assertThatThrownBy(() -> rides.accept(host, first)).isInstanceOf(ApiException.class);
+    rides.accept(host, second);
+    db.jdbc.update("UPDATE ride SET departure_at=now()-interval '25 hours' WHERE id=?", ride);
+    rides.cleanupConversations();
+    assertThat(rides.access(host, second).get("closedAt")).isNotNull();
+    assertThatThrownBy(() -> rides.message(outsider, second, "Muito tarde"))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
   void endpointsRejectAnonymousAndMassAssignment() throws Exception {
     mvc.perform(
             get("/api/v1/study-rooms")

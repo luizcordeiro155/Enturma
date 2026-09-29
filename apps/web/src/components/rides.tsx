@@ -1,11 +1,12 @@
 "use client";
 import { UserIdentity, type PublicProfile } from "./user-identity";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import type { AcademicEntry } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Voice } from "./room-tools";
+import { RideMatchCelebration } from "./ride-match-celebration";
 import { Feedback } from "./feedback";
 type Ride = {
   id: string;
@@ -27,6 +28,9 @@ type Match = {
   status: string;
   rideStatus: string;
   meetingPoint: string | null;
+  closedAt: string | null;
+  deletedAt: string | null;
+  purgeAt: string | null;
   originArea: string;
   passengerName: string;
   ownerName: string;
@@ -265,11 +269,14 @@ export function Rides({ create = false }: { create?: boolean }) {
 }
 export function Matches() {
   const [matches, setMatches] = useState<Match[]>([]);
+  const [seen, setSeen] = useState<string[]>([]);
   const [me, setMe] = useState("");
   const [selected, setSelected] = useState<Match>();
   const [messages, setMessages] = useState<
     (PublicProfile & { userId: string; body: string })[]
   >([]);
+  const [busy, setBusy] = useState(false);
+  const selectionVersion = useRef(0);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   useEffect(() => {
@@ -277,44 +284,153 @@ export function Matches() {
       .then(([m, p]) => {
         setMatches(m);
         setMe(p.id);
+        try {
+          const stored = JSON.parse(
+            localStorage.getItem(`enturma-ride-matches:${p.id}`) || "[]",
+          );
+          if (Array.isArray(stored))
+            setSeen(stored.filter((v) => typeof v === "string"));
+        } catch {}
       })
       .catch((e) => setError(e.message));
   }, []);
+  const selectedId = selected?.id;
   useEffect(() => {
-    if (!selected) return;
     let active = true;
-    const timer = setInterval(() => {
+    const timer = setInterval(async () => {
       if (document.hidden) return;
-      api<(PublicProfile & { userId: string; body: string })[]>(
-        `/matches/${selected.id}/messages`,
-      )
-        .then((items) => {
-          if (active) setMessages(items);
-        })
-        .catch((e) => {
-          if (active) setError(e.message);
-        });
+      const version = selectionVersion.current;
+      try {
+        const items = await api<Match[]>("/matches");
+        if (!active || version !== selectionVersion.current) return;
+        setMatches(items);
+        if (!selectedId) return;
+        const updated = items.find(
+          (m) => m.id === selectedId && m.status === "ACCEPTED" && !m.deletedAt,
+        );
+        setSelected(updated);
+        if (!updated) {
+          setMessages([]);
+          return;
+        }
+        const chat = await api<
+          (PublicProfile & { userId: string; body: string })[]
+        >(`/matches/${updated.id}/messages`);
+        if (active && version === selectionVersion.current) setMessages(chat);
+      } catch (e) {
+        if (active) setError((e as Error).message);
+      }
     }, 3000);
     return () => {
       active = false;
       clearInterval(timer);
     };
-  }, [selected]);
+  }, [selectedId]);
   async function open(m: Match) {
+    const version = ++selectionVersion.current;
     try {
-      setMessages(await api(`/matches/${m.id}/messages`));
+      const chat = await api<
+        (PublicProfile & { userId: string; body: string })[]
+      >(`/matches/${m.id}/messages`);
+      if (version !== selectionVersion.current) return;
+      setMessages(chat);
       setSelected(m);
+      setError("");
     } catch (e) {
       setError((e as Error).message);
     }
   }
+  async function change(m: Match, action: "cancel" | "close" | "delete") {
+    const prompts = {
+      cancel:
+        "Cancelar este match para os dois participantes? A vaga será liberada e mensagens e chamadas serão bloqueadas. O histórico será excluído em 24 horas.",
+      close:
+        "Encerrar esta conversa para os dois participantes? Mensagens e chamadas serão bloqueadas e o histórico será excluído em 24 horas. A carona continua combinada.",
+      delete:
+        "Excluir definitivamente esta conversa e o ponto de encontro para os dois participantes? Isso encerra a chamada e não pode ser desfeito. A exclusão não cancela a carona; use Cancelar match para liberar a vaga.",
+    };
+    if (!window.confirm(prompts[action])) return;
+    setBusy(true);
+    setError("");
+    ++selectionVersion.current;
+    try {
+      await api(
+        `/matches/${m.id}/${action === "delete" ? "conversation" : action}`,
+        { method: action === "delete" ? "DELETE" : "POST" },
+      );
+      const items = await api<Match[]>("/matches");
+      setMatches(items);
+      if (selected?.id === m.id) {
+        const updated = items.find(
+          (item) =>
+            item.id === m.id && item.status === "ACCEPTED" && !m.deletedAt,
+        );
+        setSelected(updated);
+        if (!updated) setMessages([]);
+      }
+      setSuccess(
+        action === "delete"
+          ? "Conversa excluída para os dois participantes."
+          : action === "cancel"
+            ? "Match cancelado. A vaga foi liberada."
+            : "Conversa encerrada. Exclusão automática em 24 horas.",
+      );
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+  const closed =
+    !!selected && (!!selected.closedAt || selected.rideStatus !== "OPEN");
+  const celebration = me
+    ? matches.find(
+        (m) =>
+          m.status === "ACCEPTED" &&
+          m.rideStatus === "OPEN" &&
+          !m.closedAt &&
+          !m.deletedAt &&
+          !seen.includes(m.id),
+      )
+    : undefined;
+  function dismissMatch(id: string) {
+    const next = [...seen, id].slice(-100);
+    setSeen(next);
+    try {
+      localStorage.setItem(`enturma-ride-matches:${me}`, JSON.stringify(next));
+    } catch {}
+  }
+  const labels: Record<string, string> = {
+    PENDING: "Aguardando aceite",
+    ACCEPTED: "Aceito",
+    CANCELLED: "Cancelado",
+    REJECTED: "Recusado",
+  };
   return (
     <Shell>
       <div className="narrow">
         <h1>Seus encontros pelo caminho.</h1>
         <p className="lead">
-          O ponto de encontro e a conversa ficam disponíveis após o aceite.
+          Após o aceite, os dois participantes podem encerrar ou excluir a
+          conversa. O histórico é apagado 24 horas após o encerramento.
+          Conversas abertas encerram automaticamente 24 horas após a saída.
         </p>
+        {celebration ? (
+          <RideMatchCelebration
+            key={celebration.id}
+            owner={{ id: celebration.ownerId, name: celebration.ownerName }}
+            passenger={{
+              id: celebration.userId,
+              name: celebration.passengerName,
+            }}
+            area={celebration.originArea}
+            onClose={() => dismissMatch(celebration.id)}
+            onChat={() => {
+              dismissMatch(celebration.id);
+              void open(celebration);
+            }}
+          />
+        ) : null}
         <Feedback error={error} success={success} />
         {matches.length === 0 ? (
           <p>Nenhum pedido de carona por aqui.</p>
@@ -325,26 +441,57 @@ export function Matches() {
                 <h3>{m.originArea}</h3>
                 <p>
                   {m.ownerId === me ? m.passengerName : m.ownerName} ·{" "}
-                  {m.status}
+                  {labels[m.status] ?? m.status}
                 </p>
                 <small>{new Date(m.departureAt).toLocaleString("pt-BR")}</small>
               </div>
-              {m.status === "PENDING" && m.ownerId === me ? (
-                <button
-                  onClick={async () => {
-                    try {
-                      await post(`/matches/${m.id}/accept`);
-                      setMatches(await api("/matches"));
-                      await open({ ...m, status: "ACCEPTED" });
-                    } catch (e) {
-                      setError((e as Error).message);
-                    }
-                  }}
-                >
-                  Aceitar
-                </button>
-              ) : m.status === "ACCEPTED" ? (
-                <button onClick={() => open(m)}>Conversa privada</button>
+              <div className="actions ride-match-actions">
+                {m.status === "PENDING" && m.ownerId === me ? (
+                  <button
+                    onClick={async () => {
+                      try {
+                        await post(`/matches/${m.id}/accept`);
+                        setMatches(await api("/matches"));
+                        await open({ ...m, status: "ACCEPTED" });
+                      } catch (e) {
+                        setError((e as Error).message);
+                      }
+                    }}
+                  >
+                    Aceitar
+                  </button>
+                ) : m.status === "ACCEPTED" && !m.deletedAt ? (
+                  <button onClick={() => open(m)}>
+                    {m.closedAt ? "Ver histórico" : "Conversa privada"}
+                  </button>
+                ) : null}
+                {m.rideStatus === "OPEN" &&
+                ["PENDING", "ACCEPTED"].includes(m.status) ? (
+                  <button
+                    className="secondary"
+                    disabled={busy}
+                    onClick={() => change(m, "cancel")}
+                  >
+                    Cancelar match
+                  </button>
+                ) : null}
+                {!m.deletedAt ? (
+                  <button
+                    className="secondary"
+                    disabled={busy}
+                    onClick={() => change(m, "delete")}
+                  >
+                    Excluir conversa
+                  </button>
+                ) : (
+                  <small>Conversa excluída. A carona continua combinada.</small>
+                )}
+              </div>
+              {m.purgeAt && !m.deletedAt ? (
+                <small className="ride-retention">
+                  Exclusão automática:{" "}
+                  {new Date(m.purgeAt).toLocaleString("pt-BR")}
+                </small>
               ) : null}
             </article>
           ))
@@ -354,7 +501,7 @@ export function Matches() {
             <Voice
               key={selected.id}
               roomId={selected.id}
-              ended={selected.rideStatus !== "OPEN"}
+              ended={closed}
               endpoint={`/matches/${selected.id}/voice`}
             />
             <h2>
@@ -363,31 +510,62 @@ export function Matches() {
                 ? selected.passengerName
                 : selected.ownerName}
             </h2>
+            <div className="actions">
+              {!closed ? (
+                <button
+                  className="secondary"
+                  disabled={busy}
+                  onClick={() => change(selected, "close")}
+                >
+                  Encerrar conversa
+                </button>
+              ) : null}
+              <button
+                className="text-button"
+                onClick={() => {
+                  ++selectionVersion.current;
+                  setSelected(undefined);
+                  setMessages([]);
+                }}
+              >
+                Fechar painel
+              </button>
+            </div>
+            {closed ? (
+              <p role="status">
+                Conversa encerrada.{" "}
+                {selected.purgeAt
+                  ? `O histórico será excluído em ${new Date(selected.purgeAt).toLocaleString("pt-BR")}.`
+                  : "Aguardando exclusão automática do histórico."}
+              </p>
+            ) : null}
             <p>
               Ponto de encontro:{" "}
               {selected.meetingPoint ?? "Ainda não combinado"}
             </p>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const point = new FormData(e.currentTarget).get("point");
-                try {
-                  await api(`/matches/${selected.id}/meeting-point`, {
-                    method: "PUT",
-                    body: JSON.stringify({ point }),
-                  });
-                  setSelected({ ...selected, meetingPoint: String(point) });
-                } catch (e) {
-                  setError((e as Error).message);
-                }
-              }}
-            >
-              <label>
-                Ponto privado
-                <input name="point" maxLength={500} required />
-              </label>
-              <button>Salvar ponto</button>
-            </form>
+            {!closed ? (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const point = new FormData(e.currentTarget).get("point");
+                  try {
+                    await api(`/matches/${selected.id}/meeting-point`, {
+                      method: "PUT",
+                      body: JSON.stringify({ point }),
+                    });
+                    setSelected({ ...selected, meetingPoint: String(point) });
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
+                }}
+              >
+                <label>
+                  Ponto privado
+                  <input name="point" maxLength={500} required />
+                </label>
+                <button>Salvar ponto</button>
+              </form>
+            ) : null}
             <div className="messages">
               {[...messages].reverse().map((m) => (
                 <div className="message" key={m.id}>
@@ -399,42 +577,44 @@ export function Matches() {
             <button className="text-button" onClick={() => open(selected)}>
               Atualizar conversa
             </button>
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const f = e.currentTarget;
-                try {
-                  await post(`/matches/${selected.id}/messages`, {
-                    body: new FormData(f).get("message"),
-                  });
-                  f.reset();
-                  await open(selected);
-                } catch (e) {
-                  setError((e as Error).message);
-                }
-              }}
-            >
-              <label>
-                Mensagem
-                <textarea
-                  name="message"
-                  required
-                  maxLength={2000}
-                  disabled={selected.rideStatus !== "OPEN"}
-                  onKeyDown={(e) => {
-                    if (
-                      e.key === "Enter" &&
-                      !e.shiftKey &&
-                      !e.nativeEvent.isComposing
-                    ) {
-                      e.preventDefault();
-                      e.currentTarget.form?.requestSubmit();
-                    }
-                  }}
-                />
-              </label>
-              <button>Enviar</button>
-            </form>
+            {!closed ? (
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  const f = e.currentTarget;
+                  try {
+                    await post(`/matches/${selected.id}/messages`, {
+                      body: new FormData(f).get("message"),
+                    });
+                    f.reset();
+                    await open(selected);
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
+                }}
+              >
+                <label>
+                  Mensagem
+                  <textarea
+                    name="message"
+                    required
+                    maxLength={2000}
+                    disabled={selected.rideStatus !== "OPEN"}
+                    onKeyDown={(e) => {
+                      if (
+                        e.key === "Enter" &&
+                        !e.shiftKey &&
+                        !e.nativeEvent.isComposing
+                      ) {
+                        e.preventDefault();
+                        e.currentTarget.form?.requestSubmit();
+                      }
+                    }}
+                  />
+                </label>
+                <button>Enviar</button>
+              </form>
+            ) : null}
             {selected.rideStatus === "COMPLETED" ? (
               <form
                 onSubmit={async (e) => {

@@ -128,16 +128,14 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     page.getByText("Mensagem E2E em tempo real", { exact: true }),
   ).toBeVisible();
   await expect(page.locator(".image-picker input")).toBeEnabled();
-  await page
-    .locator(".image-picker input")
-    .setInputFiles({
-      name: "teste.png",
-      mimeType: "image/png",
-      buffer: Buffer.from(
-        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA1sAAAAASUVORK5CYII=",
-        "base64",
-      ),
-    });
+  await page.locator(".image-picker input").setInputFiles({
+    name: "teste.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(
+      "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA1sAAAAASUVORK5CYII=",
+      "base64",
+    ),
+  });
   await page.getByRole("button", { name: "Enviar", exact: true }).click();
   await expect(page.locator(".chat-image")).toBeVisible();
   await expect
@@ -245,12 +243,90 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     { headers: mh },
   );
   expect(interest.ok()).toBe(true);
+  const riderContext = await browser.newContext();
+  const riderPage = await riderContext.newPage();
+  await riderPage.goto("/login");
+  await riderPage.getByLabel("E-mail").fill(`mate-${tag}@example.test`);
+  await riderPage.getByLabel("Senha", { exact: true }).fill(password);
+  await riderPage.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(riderPage).toHaveURL(/home/);
+  await riderPage.goto("/caronas/matches");
+  await expect(riderPage.getByText(/Aguardando aceite/)).toBeVisible();
   await page.goto("/caronas/matches");
   await page.getByRole("button", { name: "Aceitar", exact: true }).click();
+  const matchDialog = page.getByRole("dialog", {
+    name: "Deu match na carona!",
+  });
+  await expect(matchDialog).toBeVisible();
+  const riderDialog = riderPage.getByRole("dialog", {
+    name: "Deu match na carona!",
+  });
+  await expect(riderDialog).toBeVisible({ timeout: 10000 });
+  await riderDialog.getByRole("button", { name: "Combinar encontro" }).click();
+
+  await expect(matchDialog).toContainText("Colega E2E");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() =>
+      matchDialog.evaluate((el) =>
+        el
+          .getAnimations({ subtree: true })
+          .every((a) => a.playState !== "running"),
+      ),
+    )
+    .toBe(true);
+  const placement = await matchDialog.boundingBox();
+  expect(placement!.x).toBeGreaterThan(5);
+  expect(placement!.y).toBeGreaterThan(5);
+  const avatar = await matchDialog
+    .locator(".identity-avatar")
+    .first()
+    .boundingBox();
+  expect(Math.abs(avatar!.width - avatar!.height)).toBeLessThan(2);
+  await page.screenshot({ path: "../../.local/ride-match-mobile.png" });
+  await matchDialog.getByRole("button", { name: "Combinar encontro" }).click();
+  await expect(matchDialog).not.toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByRole("button", { name: "Conversa privada" }),
+  ).toBeVisible();
+  await expect(matchDialog).not.toBeVisible();
   await page.getByRole("button", { name: "Conversa privada" }).click();
   await page.getByLabel("Ponto privado").fill("Ponto privado E2E");
   await page.getByRole("button", { name: "Salvar ponto" }).click();
   await expect(
     page.getByText("Ponto de encontro: Ponto privado E2E"),
   ).toBeVisible();
+  await page.getByLabel("Mensagem", { exact: true }).fill("Conversa da carona");
+  await page.getByRole("button", { name: "Enviar", exact: true }).click();
+  await expect(
+    page.getByText("Conversa da carona", { exact: true }),
+  ).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page
+    .getByRole("button", { name: "Encerrar conversa", exact: true })
+    .click();
+  await expect(page.getByLabel("Mensagem", { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Ver histórico" }),
+  ).toBeVisible();
+  await expect(page.getByText(/Exclusão automática:/)).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page
+    .getByRole("button", { name: "Excluir conversa", exact: true })
+    .click();
+  await expect(
+    page.getByText("Conversa da carona", { exact: true }),
+  ).toHaveCount(0);
+  await expect(
+    page.getByText("Conversa excluída. A carona continua combinada."),
+  ).toBeVisible();
+  page.once("dialog", (dialog) => dialog.accept());
+  await page
+    .getByRole("button", { name: "Cancelar match", exact: true })
+    .click();
+  await expect(
+    page.getByText("Nenhum pedido de carona por aqui."),
+  ).toBeVisible();
+  await riderContext.close();
 });

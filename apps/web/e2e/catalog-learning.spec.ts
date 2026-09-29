@@ -197,4 +197,56 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   });
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.addInitScript(() => {
+    const state = window as unknown as { themeTransitions: string[] };
+    state.themeTransitions = [];
+    new MutationObserver((records) => {
+      for (const record of records) {
+        if (
+          record.type === "attributes" &&
+          record.attributeName === "data-theme"
+        ) {
+          if (record.oldValue) state.themeTransitions.push(record.oldValue);
+          const value = document.documentElement.dataset.theme;
+          if (value) state.themeTransitions.push(value);
+        }
+      }
+    }).observe(document, {
+      subtree: true,
+      attributes: true,
+      attributeFilter: ["data-theme"],
+      attributeOldValue: true,
+    });
+  });
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  for (const name of ["Cadernos IA", "Amigos", "Minhas matérias"]) {
+    const response = page.waitForResponse(
+      (r) =>
+        r.url().includes("/users/me/experience") &&
+        r.request().method() === "GET",
+    );
+    await page.getByRole("link", { name, exact: true }).click();
+    await response;
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  }
+  expect(
+    await page.evaluate(
+      () =>
+        (window as unknown as { themeTransitions: string[] }).themeTransitions,
+    ),
+  ).not.toContain("light");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await page
+    .getByRole("button", { name: "Acessibilidade", exact: true })
+    .click();
+  await page
+    .getByRole("dialog")
+    .getByRole("combobox", { name: "Tema", exact: true })
+    .selectOption("SYSTEM");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await page.emulateMedia({ colorScheme: "light" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });

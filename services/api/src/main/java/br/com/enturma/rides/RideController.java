@@ -75,6 +75,21 @@ public class RideController {
     rides.accept(a, id);
   }
 
+  @PostMapping("/matches/{id}/cancel")
+  public void cancelMatch(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    rides.cancelMatch(a, id);
+  }
+
+  @PostMapping("/matches/{id}/close")
+  public void closeConversation(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    rides.closeConversation(a, id);
+  }
+
+  @DeleteMapping("/matches/{id}/conversation")
+  public void deleteConversation(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    rides.deleteConversation(a, id);
+  }
+
   @GetMapping("/matches/{id}/messages")
   public Object messages(
       @AuthenticationPrincipal Actor a,

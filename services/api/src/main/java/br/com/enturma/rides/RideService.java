@@ -99,12 +99,14 @@ public class RideService {
 
   public Object matches(Actor a) {
     return db.list(
-        "SELECT m.id,m.ride_id,m.user_id,m.status,CASE WHEN m.status='ACCEPTED' THEN"
-            + " m.meeting_point ELSE NULL END"
+        "SELECT m.id,m.ride_id,m.user_id,m.status,m.closed_at,m.purge_at,m.deleted_at,CASE WHEN"
+            + " m.status='ACCEPTED' THEN m.meeting_point ELSE NULL END"
             + " meeting_point,r.owner_id,r.origin_area,r.departure_at,r.status ride_status,u.name"
             + " passenger_name,o.name owner_name FROM ride_match m JOIN ride r ON r.id=m.ride_id"
             + " JOIN app_user u ON u.id=m.user_id JOIN app_user o ON o.id=r.owner_id WHERE"
-            + " m.user_id=? OR r.owner_id=? ORDER BY m.created_at DESC LIMIT 50",
+            + " (m.user_id=? OR r.owner_id=?) AND (m.deleted_at IS NULL OR (m.status='ACCEPTED' AND"
+            + " r.status='OPEN' AND r.departure_at>now()-interval '24 hours')) ORDER BY"
+            + " m.created_at DESC LIMIT 50",
         a.id(),
         a.id());
   }
@@ -117,7 +119,8 @@ public class RideService {
     if (!ride.get("ownerId").equals(a.id())) throw ApiException.forbidden();
     unblocked(a.id(), (UUID) match.get("userId"));
     if (match.get("status").equals("ACCEPTED")) return;
-    if (!match.get("status").equals("PENDING")
+    if (match.get("deletedAt") != null
+        || !match.get("status").equals("PENDING")
         || !ride.get("status").equals("OPEN")
         || Instant.parse((String) ride.get("departureAt")).isBefore(Instant.now()))
       throw ApiException.invalid("Este pedido não pode ser aceito.");
@@ -136,18 +139,112 @@ public class RideService {
         "Sua carona foi aceita. Combine o ponto de encontro no chat privado.");
   }
 
-  public Map<String, Object> access(Actor a, UUID id) {
+  private Map<String, Object> participant(Actor a, UUID id) {
+    var initial = db.one("SELECT ride_id FROM ride_match WHERE id=?", id);
+    db.one("SELECT id FROM ride WHERE id=? FOR UPDATE", initial.get("rideId"));
     var m =
         db.one(
-            "SELECT m.*,r.owner_id,r.status ride_status FROM ride_match m JOIN ride r ON"
-                + " r.id=m.ride_id WHERE m.id=?",
+            "SELECT m.*,r.owner_id,r.status ride_status,r.departure_at FROM ride_match m JOIN ride"
+                + " r ON r.id=m.ride_id WHERE m.id=? FOR UPDATE OF m",
             id);
-    if ((!m.get("userId").equals(a.id()) && !m.get("ownerId").equals(a.id()))
-        || !m.get("status").equals("ACCEPTED")) throw ApiException.forbidden();
+    if (!m.get("userId").equals(a.id()) && !m.get("ownerId").equals(a.id()))
+      throw ApiException.forbidden();
+    return m;
+  }
+
+  @Transactional
+  public Map<String, Object> access(Actor a, UUID id) {
+    var m = participant(a, id);
+    if (!m.get("status").equals("ACCEPTED") || m.get("deletedAt") != null)
+      throw ApiException.forbidden();
     unblocked((UUID) m.get("userId"), (UUID) m.get("ownerId"));
     return m;
   }
 
+  public void requireOpen(Map<String, Object> m) {
+    if (m.get("closedAt") != null
+        || !m.get("rideStatus").equals("OPEN")
+        || Instant.parse((String) m.get("departureAt")).plusSeconds(86400).isBefore(Instant.now()))
+      throw ApiException.invalid(
+          "Conversa encerrada. Não é possível enviar mensagens ou entrar na chamada.");
+  }
+
+  private void close(UUID id) {
+    db.jdbc.update(
+        "UPDATE ride_match SET"
+            + " closed_at=coalesce(closed_at,now()),purge_at=coalesce(purge_at,now()+interval '24"
+            + " hours') WHERE id=?",
+        id);
+    db.jdbc.update("UPDATE ride_voice SET cleaned=false,updated_at=now() WHERE match_id=?", id);
+  }
+
+  @Transactional
+  public void closeConversation(Actor a, UUID id) {
+    var m = participant(a, id);
+    if (!m.get("status").equals("ACCEPTED"))
+      throw ApiException.invalid("Este pedido não tem conversa ativa.");
+    close(id);
+  }
+
+  @Transactional
+  public void cancelMatch(Actor a, UUID id) {
+    var m = participant(a, id);
+    if (!m.get("rideStatus").equals("OPEN"))
+      throw ApiException.invalid("A carona já foi encerrada.");
+    if (Set.of("PENDING", "ACCEPTED").contains(m.get("status"))) {
+      db.jdbc.update("UPDATE ride_match SET status='CANCELLED' WHERE id=?", id);
+      close(id);
+      db.jdbc.update(
+          "INSERT INTO notification(id,user_id,message) VALUES (?,?,?)",
+          UUID.randomUUID(),
+          a.id().equals(m.get("ownerId")) ? m.get("userId") : m.get("ownerId"),
+          "O pedido de carona foi cancelado. A conversa e a chamada foram encerradas.");
+    }
+  }
+
+  @Transactional
+  public void deleteConversation(Actor a, UUID id) {
+    participant(a, id);
+    close(id);
+    purge(id);
+  }
+
+  private void purge(UUID id) {
+    db.jdbc.update("DELETE FROM ride_message WHERE match_id=?", id);
+    db.jdbc.update(
+        "UPDATE ride_match SET meeting_point=NULL,deleted_at=coalesce(deleted_at,now()) WHERE id=?",
+        id);
+  }
+
+  @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 60000, initialDelay = 15000)
+  @Transactional
+  public void cleanupConversations() {
+    for (var r :
+        db.list(
+            "SELECT DISTINCT r.id FROM ride r JOIN ride_match m ON m.ride_id=r.id WHERE"
+                + " m.deleted_at IS NULL AND ((m.closed_at IS NULL AND (r.status<>'OPEN' OR"
+                + " r.departure_at<now()-interval '24 hours' OR m.status IN"
+                + " ('CANCELLED','REJECTED'))) OR m.purge_at<=now()) ORDER BY r.id LIMIT 100")) {
+      db.one("SELECT id FROM ride WHERE id=? FOR UPDATE", r.get("id"));
+      for (var m :
+          db.list(
+              "SELECT m.id,m.closed_at,m.purge_at,r.status ride_status,r.departure_at FROM"
+                  + " ride_match m JOIN ride r ON r.id=m.ride_id WHERE r.id=? AND m.deleted_at IS"
+                  + " NULL FOR UPDATE OF m",
+              r.get("id"))) {
+        if (m.get("closedAt") == null
+            && (!m.get("rideStatus").equals("OPEN")
+                || Instant.parse((String) m.get("departureAt"))
+                    .plusSeconds(86400)
+                    .isBefore(Instant.now()))) close((UUID) m.get("id"));
+        if (m.get("purgeAt") != null
+            && !Instant.parse((String) m.get("purgeAt")).isAfter(Instant.now()))
+          purge((UUID) m.get("id"));
+      }
+    }
+  }
+
+  @Transactional
   public Object messages(Actor a, UUID id, int page) {
     access(a, id);
     return db.list(
@@ -162,7 +259,7 @@ public class RideService {
   @Transactional
   public void message(Actor a, UUID id, String body) {
     var m = access(a, id);
-    if (!m.get("rideStatus").equals("OPEN")) throw ApiException.invalid("Carona encerrada.");
+    requireOpen(m);
     db.jdbc.update(
         "INSERT INTO ride_message VALUES (?,?,?,?,now())", UUID.randomUUID(), id, a.id(), body);
   }
@@ -170,7 +267,7 @@ public class RideService {
   @Transactional
   public void meeting(Actor a, UUID id, String point) {
     var m = access(a, id);
-    if (!m.get("rideStatus").equals("OPEN")) throw ApiException.invalid("Carona encerrada.");
+    requireOpen(m);
     db.jdbc.update("UPDATE ride_match SET meeting_point=? WHERE id=?", point, id);
   }
 
@@ -184,6 +281,9 @@ public class RideService {
         "UPDATE ride SET status=? WHERE id=? AND status='OPEN'",
         cancel ? "CANCELLED" : "COMPLETED",
         id);
+    for (var m :
+        db.list("SELECT id FROM ride_match WHERE ride_id=? AND deleted_at IS NULL FOR UPDATE", id))
+      close((UUID) m.get("id"));
   }
 
   @Transactional

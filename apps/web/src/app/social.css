@@ -536,3 +536,140 @@ html .onboarding-banner {
 .public-profile-card .profile-status {
   border-left: 3px solid var(--profile-accent);
 }
+
+.ride-match-actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.room-row:has(.ride-match-actions) {
+  flex-wrap: wrap;
+}
+.ride-retention {
+  flex-basis: 100%;
+  color: var(--muted);
+}
+.ride-chat .actions {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ride-match-dialog {
+  margin: auto;
+  position: fixed;
+  inset: 0;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  width: min(520px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  color: var(--ink);
+  background: var(--surface);
+}
+.ride-match-dialog::backdrop {
+  background: rgb(0 0 0 / 0.65);
+  backdrop-filter: blur(5px);
+}
+.ride-match-celebration {
+  padding: 36px 28px 24px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.ride-match-dismiss {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+}
+.ride-match-celebration > .eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0 8px;
+}
+.ride-match-profiles {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 26px;
+  margin: 28px 0;
+}
+.ride-match-person {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+}
+.ride-match-person .identity-avatar {
+  flex: none;
+  width: clamp(70px, 20vw, 112px);
+  height: clamp(70px, 20vw, 112px);
+  font-size: 2rem;
+  border: 3px solid var(--profile-accent);
+  box-shadow: 0 12px 30px rgb(0 0 0 / 0.15);
+}
+.ride-match-person strong {
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+.ride-match-person small {
+  color: var(--muted);
+}
+.ride-match-link {
+  position: absolute;
+  top: 35px;
+  left: calc(50% - 23px);
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #183f36;
+  border: 4px solid var(--surface);
+  z-index: 1;
+}
+.ride-match-burst {
+  pointer-events: none;
+  position: absolute;
+  top: 56px;
+  left: 50%;
+}
+.ride-match-particle {
+  position: absolute;
+  width: 7px;
+  height: 11px;
+  background: var(--accent);
+  opacity: 0;
+  border-radius: 2px;
+}
+.ride-match-particle:nth-child(2n) {
+  background: #ac79db;
+}
+.ride-match-particle:nth-child(3n) {
+  background: #e3a04b;
+}
+.ride-match-celebration h2 {
+  font-size: clamp(1.6rem, 5vw, 2.2rem);
+  line-height: 1.1;
+}
+.ride-match-celebration p {
+  color: var(--muted);
+  margin: 16px 0;
+}
+.ride-match-area {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+.ride-match-celebration > button:not(.ride-match-dismiss) {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+}
