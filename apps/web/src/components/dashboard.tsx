@@ -11,6 +11,7 @@ import { CatalogSearch } from "./catalog-search";
 export function Dashboard({ explore = false }: { explore?: boolean }) {
   const [profile, setProfile] = useState<Profile>();
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [history, setHistory] = useState<(Room & { messageCount?: number; summaryStatus?: string })[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState("");
@@ -22,11 +23,13 @@ export function Dashboard({ explore = false }: { explore?: boolean }) {
     Promise.all([
       api<Profile>("/users/me"),
       api<Room[]>(`/study-rooms?page=${page}`),
+      api<(Room & { messageCount?: number; summaryStatus?: string })[]>("/study-rooms/history?page=0"),
     ])
-      .then(([p, r]) => {
+      .then(([p, r, h]) => {
         if (alive) {
           setProfile(p);
           setRooms(r);
+          setHistory(h);
           setError("");
         }
       })
@@ -160,6 +163,38 @@ export function Dashboard({ explore = false }: { explore?: boolean }) {
                 ))}
             </div>
           )}
+          {!explore && history.length ? (
+            <>
+              <div className="section-heading">
+                <h2>Revisar estudos anteriores</h2>
+                <span className="muted">Histórico privado das suas turmas</span>
+              </div>
+              <div className="room-list">
+                {history.slice(0, 6).map((r) => (
+                  <article key={r.id} className="room-row history-row">
+                    <div className="subject-mark">
+                      <BookOpen />
+                    </div>
+                    <div>
+                      <h3>{r.subjectName}</h3>
+                      <p>{r.title}</p>
+                      <small>
+                        {r.messageCount ?? 0} mensagens ·{" "}
+                        {r.summaryStatus === "READY"
+                          ? "estudo da IA pronto"
+                          : r.summaryStatus === "PROCESSING" || r.summaryStatus === "PENDING"
+                            ? "estudo da IA em preparação"
+                            : "resumo disponível sob demanda"}
+                      </small>
+                    </div>
+                    <Link className="button secondary" href={`/rooms/${r.id}`}>
+                      Revisar sessão
+                    </Link>
+                  </article>
+                ))}
+              </div>
+            </>
+          ) : null}
           {explore ? (
             <div className="actions">
               <button
