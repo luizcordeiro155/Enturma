@@ -92,13 +92,6 @@ public class AiService {
 
     AiProvider.Answer result = provider.answer(context.toString(), question, mode, research);
     study.member(a, room);
-    db.jdbc.update(
-        "INSERT INTO ai_message(id,room_id,user_id,question,answer) VALUES (?,?,?,?,?)",
-        UUID.randomUUID(),
-        room,
-        a.id(),
-        question,
-        result.text());
 
     return Map.of(
         "answer",
