@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS learning_word_session (
   attempts int NOT NULL DEFAULT 0 CHECK(attempts >= 0),
   solved_mask int NOT NULL DEFAULT 0 CHECK(solved_mask >= 0),
   completed boolean NOT NULL DEFAULT false,
+  guesses text NOT NULL DEFAULT '',
   updated_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY(user_id, level, puzzle_version)
 );
