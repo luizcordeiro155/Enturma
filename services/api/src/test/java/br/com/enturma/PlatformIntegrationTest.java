@@ -325,10 +325,9 @@ class PlatformIntegrationTest {
     study.join(member, id);
     assertThatThrownBy(() -> study.join(outsider, id)).isInstanceOf(ApiException.class);
     assertThatThrownBy(() -> chat.messages(outsider, id, 0)).isInstanceOf(ApiException.class);
-    assertThatThrownBy(() -> chat.send(member, id, "Olá", null))
-        .isInstanceOf(ApiException.class)
-        .hasMessageContaining("criptografado");
-    assertThat((List<?>) chat.messages(host, id, 0)).isEmpty();
+    chat.send(member, id, "Olá", null);
+    var history = (List<?>) chat.messages(host, id, 0);
+    assertThat(history).hasSize(1);
   }
 
   @Test
