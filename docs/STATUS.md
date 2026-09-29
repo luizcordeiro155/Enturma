@@ -36,3 +36,18 @@ Este é um incremento funcional do Enturma, **não a conclusão dos 151 requisit
 9. Homologação dos serviços externos com credenciais reais; upload direto seguro para respeitar limites da Vercel; backup/restauração e operação de produção.
 
 As opções ausentes não são apresentadas como funcionalidades concluídas. As fixtures acadêmicas existem somente nos testes e não devem ser usadas como catálogo oficial. Os arquivos `.tools` e `.local` são auxiliares locais ignorados pelo Git.
+
+
+## Sala colaborativa — experiência v3
+
+Implementado no Web:
+
+- anexos de imagem E2EE de até 8 MB com pré-visualização e remoção antes do envio;
+- texto, imagens, respostas e reações continuam efêmeros e sem persistência do conteúdo no banco;
+- chamada LiveKit com lista de participantes, estado de microfone/câmera, destaque visual do participante que está falando e contagem de pessoas na call;
+- screen share com identificação explícita de quem está transmitindo e dos participantes conectados que recebem a transmissão;
+- grade de câmera/transmissão adaptada para desktop e mobile Web;
+- Permissions-Policy permite câmera, microfone e display capture somente para a própria origem;
+- Enturma AI usa OpenAI Responses API com o modelo `gpt-5.6-sol` definido no código. `OPENAI_API_KEY` é a única variável obrigatória da OpenAI; pesquisa externa continua opcional por `AI_WEB_SEARCH_ENABLED`.
+
+A mídia LiveKit continua usando a segurança de transporte do WebRTC. A documentação não declara E2EE de mídia até que a camada específica de E2EE do LiveKit seja configurada e validada.
