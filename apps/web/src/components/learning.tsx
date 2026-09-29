@@ -1,21 +1,38 @@
 "use client";
+
+import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import {
-  robotBoards,
-  robotFrames,
+  Bot,
+  Bug,
+  Check,
+  Code2,
+  Flame,
+  Play,
+  RotateCcw,
+  Trophy,
+  Zap,
+} from "lucide-react";
+import { api, post } from "@/lib/api";
+import {
   codeWordChallenges,
-  programmerDictionary,
   evaluateWordGuess,
   normalizedCodewordAnswer,
+  programmerDictionary,
+  robotBoards,
+  robotFrames,
   traceChallenges,
 } from "@/lib/learning-games";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
+
 type Progress = {
   game: string;
   level: number;
   completed: boolean;
   attempts: number;
 };
+
 type LearningSummary = {
   totalXp: number;
   currentStreak: number;
@@ -32,12 +49,13 @@ type LearningSummary = {
     completed: boolean;
   };
 };
+
 const games = [
   {
     id: "robot",
     name: "Rota do algoritmo",
     icon: Bot,
-    description: "Programe o caminho. Execute. Observe cada passo.",
+    description: "Escreva um programa e faça o robô chegar ao objetivo.",
   },
   {
     id: "codeword",
@@ -49,9 +67,10 @@ const games = [
     id: "trace",
     name: "Detetive de código",
     icon: Bug,
-    description: "Investigue variáveis, arrays e laços em JavaScript.",
+    description: "Rastreie execuções e encontre a saída correta.",
   },
 ];
+
 export function Learning() {
   const [access, setAccess] = useState<boolean>();
   const [progress, setProgress] = useState<Progress[]>([]);
@@ -59,7 +78,7 @@ export function Learning() {
   const [dailyMode, setDailyMode] = useState(false);
   const [game, setGame] = useState("robot");
   const [level, setLevel] = useState(1);
-  const [commands, setCommands] = useState("");
+  const [program, setProgram] = useState("");
   const [position, setPosition] = useState({ x: 0, y: 0, collision: false });
   const [wordGuess, setWordGuess] = useState("");
   const [wordRows, setWordRows] = useState<string[]>([]);
@@ -72,11 +91,12 @@ export function Learning() {
   const [correct, setCorrect] = useState(false);
   const generation = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   async function load() {
     try {
       const a = await api<{ eligible: boolean }>("/learning/access");
-      setError("");
       setAccess(a.eligible);
+      setError("");
       if (a.eligible) {
         const [saved, overview] = await Promise.all([
           api<Progress[]>("/learning/progress"),
@@ -89,44 +109,28 @@ export function Learning() {
       setError((e as Error).message);
     }
   }
+
   useEffect(() => {
-    const run = generation;
-    let active = true;
-    api<{ eligible: boolean }>("/learning/access")
-      .then(async (a) => {
-        if (!active) return;
-        setAccess(a.eligible);
-        if (a.eligible) {
-          const [saved, overview] = await Promise.all([
-            api<Progress[]>("/learning/progress"),
-            api<LearningSummary>("/learning/summary"),
-          ]);
-          if (active) {
-            setProgress(saved);
-            setSummary(overview);
-          }
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
+    void load();
     return () => {
-      active = false;
-      run.current++;
+      generation.current++;
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
+
   function reset(nextGame = game, nextLevel = level, nextDaily = false) {
     generation.current++;
     if (timer.current) clearTimeout(timer.current);
     setGame(nextGame);
     setLevel(nextLevel);
     setDailyMode(nextDaily);
-    setCommands("");
+    setProgram("");
     setPosition({ x: 0, y: 0, collision: false });
     setWordGuess("");
     setWordRows([]);
-    setWordSolved(Array(codeWordChallenges[nextLevel - 1]?.words.length ?? 1).fill(false));
+    setWordSolved(
+      Array(codeWordChallenges[nextLevel - 1]?.words.length ?? 1).fill(false),
+    );
     setAnswer("");
     setFrame(0);
     setRunning(false);
@@ -134,18 +138,19 @@ export function Learning() {
     setError("");
     setCorrect(false);
   }
+
   async function submit(value: string) {
     const token = generation.current;
     setRunning(true);
     setError("");
     try {
-      const r = await post<{ correct: boolean; message: string }>(
+      const result = await post<{ correct: boolean; message: string }>(
         "/learning/attempts",
         { game, level, answer: value, daily: dailyMode },
       );
       if (token !== generation.current) return;
-      setCorrect(r.correct);
-      setMessage(r.message);
+      setCorrect(result.correct);
+      setMessage(result.message);
       const [saved, overview] = await Promise.all([
         api<Progress[]>("/learning/progress"),
         api<LearningSummary>("/learning/summary"),
@@ -158,38 +163,39 @@ export function Learning() {
       if (token === generation.current) setRunning(false);
     }
   }
+
   function runRobot() {
-    setRunning(true);
-    setMessage("");
-    setCorrect(false);
-    const token = generation.current;
-    const result = robotFrames(commands, level);
+    const result = robotFrames(program, level);
     if (!result.valid) {
       setMessage("Programa inválido. Use UP, DOWN, LEFT, RIGHT ou REPEAT N DIRECAO.");
-      setRunning(false);
       return;
     }
     if (result.operations > robotBoards[level - 1].maxOps) {
       setMessage("Seu programa excede o limite de movimentos deste nível.");
-      setRunning(false);
       return;
     }
+
+    setRunning(true);
+    setMessage("");
+    setCorrect(false);
+    const token = generation.current;
     let index = 0;
-    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches
-      ? 0
-      : 420;
+    const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches ? 0 : 300;
+
     const tick = () => {
       if (token !== generation.current) return;
       setPosition(result.frames[index]);
       index++;
       if (index < result.frames.length) timer.current = setTimeout(tick, delay);
-      else void submit(commands);
+      else void submit(program);
     };
     tick();
   }
+
   function submitWordGuess() {
     const challenge = codeWordChallenges[level - 1];
     const guess = wordGuess.trim().toUpperCase();
+
     if (guess.length !== challenge.length) {
       setMessage(`Digite uma palavra de ${challenge.length} letras.`);
       return;
@@ -198,6 +204,11 @@ export function Learning() {
       setMessage("Use um termo de programação válido para este tamanho.");
       return;
     }
+    if (wordRows.length >= challenge.attempts) {
+      setMessage("Tentativas encerradas. Recomece o desafio.");
+      return;
+    }
+
     const nextSolved = challenge.words.map(
       (target, index) => wordSolved[index] || target === guess,
     );
@@ -205,36 +216,42 @@ export function Learning() {
     setWordRows(nextRows);
     setWordSolved(nextSolved);
     setWordGuess("");
-    if (nextSolved.every(Boolean)) void submit(normalizedCodewordAnswer(challenge.words));
-    else if (nextRows.length >= challenge.attempts)
-      setMessage("Limite de tentativas atingido. Recomece e use as pistas.");
+    setMessage("");
+
+    if (nextSolved.every(Boolean)) {
+      void submit(normalizedCodewordAnswer(challenge.words));
+    } else if (nextRows.length >= challenge.attempts) {
+      setMessage("Limite de tentativas atingido. Recomece e use melhor as pistas.");
+    }
   }
 
   const trace = traceChallenges[level - 1];
   const wordChallenge = codeWordChallenges[level - 1];
   const robotBoard = robotBoards[level - 1];
+
   return (
     <Shell>
       <div className="learning-page">
         <p className="eyebrow">Aprender fazendo · Laboratório de TI</p>
         <h1>
-          Seu próximo passo
+          Treine lógica como quem
           <br />
-          começa com código<span className="dot">.</span>
+          resolve um problema real<span className="dot">.</span>
         </h1>
         <p className="lead">
-          Pequenos desafios. Descobertas de verdade. Pratique no seu ritmo.
+          Os desafios aumentam de complexidade e cobram raciocínio, não clique rápido.
         </p>
+
         <Feedback error={error} />
-        {error && <button onClick={() => void load()}>Tentar novamente</button>}
+        {error ? <button onClick={() => void load()}>Tentar novamente</button> : null}
+
         {access === undefined && !error ? (
           <p role="status">Consultando suas matérias…</p>
         ) : access === false ? (
           <div className="empty">
             <h2>Este laboratório acompanha sua formação.</h2>
             <p>
-              Selecione seu curso ou suas UCs de TI no perfil acadêmico para
-              liberar os jogos.
+              Selecione seu curso ou suas UCs de TI no perfil acadêmico para liberar os jogos.
             </p>
             <Link className="button" href="/onboarding">
               Atualizar perfil acadêmico
@@ -265,10 +282,10 @@ export function Learning() {
                 </span>
               </article>
             </div>
+
             <div className="lab-overview">
               <span>
-                <strong>{progress.filter((p) => p.completed).length}</strong> de
-                12 desafios concluídos
+                <strong>{progress.filter((p) => p.completed).length}</strong> de 12 desafios concluídos
               </span>
               <progress
                 max={12}
@@ -281,6 +298,7 @@ export function Learning() {
                 </span>
               ) : null}
             </div>
+
             {summary?.daily ? (
               <section className={summary.daily.completed ? "daily-card completed" : "daily-card"}>
                 <div>
@@ -309,6 +327,7 @@ export function Learning() {
                 )}
               </section>
             ) : null}
+
             <div className="game-tabs" role="tablist" aria-label="Minigames">
               {games.map((g) => (
                 <button
@@ -325,6 +344,7 @@ export function Learning() {
                 </button>
               ))}
             </div>
+
             <section
               className="game-studio"
               id="game-panel"
@@ -357,6 +377,7 @@ export function Learning() {
                   ))}
                 </div>
               </div>
+
               {game === "robot" ? (
                 <div className="robot-layout">
                   <div>
@@ -395,22 +416,23 @@ export function Learning() {
                       </span>
                     </div>
                   </div>
+
                   <div className="program-console">
                     <h3>Seu programa</h3>
                     <p className="muted">
-                      Use UP, DOWN, LEFT, RIGHT ou REPEAT N DIRECAO. Limite expandido:
-                      {" "}{robotBoard.maxOps} movimentos.
+                      Use UP, DOWN, LEFT, RIGHT ou REPEAT N DIRECAO. Limite:
+                      {" "}{robotBoard.maxOps} movimentos depois da expansão.
                     </p>
                     <textarea
                       className="code-input robot-code"
-                      value={commands}
-                      onChange={(e) => setCommands(e.target.value)}
+                      value={program}
+                      onChange={(e) => setProgram(e.target.value)}
                       placeholder={"RIGHT\nREPEAT 3 DOWN\nLEFT"}
                       spellCheck={false}
                       disabled={running}
                     />
                     <div className="actions">
-                      <button disabled={running || !commands.trim()} onClick={runRobot}>
+                      <button disabled={running || !program.trim()} onClick={runRobot}>
                         <Play size={16} /> Executar programa
                       </button>
                       <button className="secondary" disabled={running} onClick={() => reset()}>
@@ -418,34 +440,64 @@ export function Learning() {
                       </button>
                     </div>
                     <p className="lab-hint">
-                      Nos níveis finais uma sequência longa demais falha mesmo chegando ao objetivo.
+                      Nos níveis finais, uma sequência longa demais falha mesmo que a rota pareça correta.
                     </p>
                   </div>
                 </div>
               ) : game === "codeword" ? (
                 <div className="codeword-lab">
                   <div className="codeword-mode-switch">
-                    <button className={level === 1 ? "" : "secondary"} onClick={() => reset("codeword", 1)}>Solo</button>
-                    <button className={level === 2 || level === 3 ? "" : "secondary"} onClick={() => reset("codeword", 2)}>Dueto</button>
-                    <button className={level === 4 ? "" : "secondary"} onClick={() => reset("codeword", 4)}>Quarteto</button>
+                    <button
+                      className={level === 1 ? "" : "secondary"}
+                      onClick={() => reset("codeword", 1)}
+                    >
+                      Solo
+                    </button>
+                    <button
+                      className={level === 2 || level === 3 ? "" : "secondary"}
+                      onClick={() => reset("codeword", 2)}
+                    >
+                      Dueto
+                    </button>
+                    <button
+                      className={level === 4 ? "" : "secondary"}
+                      onClick={() => reset("codeword", 4)}
+                    >
+                      Quarteto
+                    </button>
                   </div>
+
                   <p>
-                    Descubra {wordChallenge.words.length === 1 ? "a palavra" : `as ${wordChallenge.words.length} palavras`}
-                    {" "}de programação em até {wordChallenge.attempts} tentativas compartilhadas.
+                    Descubra{" "}
+                    {wordChallenge.words.length === 1
+                      ? "a palavra"
+                      : `as ${wordChallenge.words.length} palavras`}{" "}
+                    de programação em até {wordChallenge.attempts} tentativas compartilhadas.
                   </p>
+
                   <div className={`codeword-boards ${wordChallenge.mode}`}>
                     {wordChallenge.words.map((target, boardIndex) => (
-                      <div className="codeword-board" key={target}>
-                        <strong>{wordChallenge.mode === "solo" ? "Solo" : `Painel ${boardIndex + 1}`}</strong>
+                      <div className="codeword-board" key={`${target}-${boardIndex}`}>
+                        <strong>
+                          {wordChallenge.mode === "solo"
+                            ? "Solo"
+                            : `Painel ${boardIndex + 1}`}
+                        </strong>
+
                         {Array.from({ length: wordChallenge.attempts }, (_, rowIndex) => {
                           const guess = wordRows[rowIndex] ?? "";
                           const marks = guess
                             ? evaluateWordGuess(target, guess)
                             : Array(wordChallenge.length).fill("empty");
+
                           return (
                             <div className="codeword-row" key={rowIndex}>
                               {Array.from({ length: wordChallenge.length }, (_, charIndex) => (
-                                <span key={charIndex} className={marks[charIndex]}>
+                                <span
+                                  key={charIndex}
+                                  className={marks[charIndex]}
+                                  aria-label={marks[charIndex]}
+                                >
                                   {guess[charIndex] ?? ""}
                                 </span>
                               ))}
@@ -455,12 +507,16 @@ export function Learning() {
                       </div>
                     ))}
                   </div>
+
                   <div className="codeword-entry">
                     <input
                       value={wordGuess}
                       onChange={(e) =>
                         setWordGuess(
-                          e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, wordChallenge.length).toUpperCase(),
+                          e.target.value
+                            .replace(/[^a-zA-Z]/g, "")
+                            .slice(0, wordChallenge.length)
+                            .toUpperCase(),
                         )
                       }
                       onKeyDown={(e) => {
@@ -470,14 +526,20 @@ export function Learning() {
                       placeholder={`${wordChallenge.length} letras`}
                       disabled={running || correct}
                     />
-                    <button disabled={running || !wordGuess.trim() || correct} onClick={submitWordGuess}>
+                    <button
+                      disabled={running || !wordGuess.trim() || correct}
+                      onClick={submitWordGuess}
+                    >
                       Testar termo
                     </button>
                   </div>
+
                   <p className="lab-hint">
-                    Verde: posição certa. Amarelo: letra existente em outra posição. Cinza: ausente.
+                    Verde: posição certa. Amarelo: letra em outra posição. Cinza: ausente.
+                    No Dueto e Quarteto, o mesmo palpite é aplicado a todos os painéis.
                   </p>
-                </div>              ) : (
+                </div>
+              ) : (
                 <div className="trace-layout">
                   <pre className="code-window">
                     <code>{trace.code}</code>
@@ -489,8 +551,7 @@ export function Learning() {
                       <input
                         value={answer}
                         onChange={(e) => setAnswer(e.target.value)}
-                        inputMode="numeric"
-                        maxLength={20}
+                        maxLength={30}
                         disabled={running}
                       />
                     </label>
@@ -503,11 +564,7 @@ export function Learning() {
                     <details>
                       <summary>Preciso de uma pista</summary>
                       <p>{trace.hint}</p>
-                      <div
-                        className="trace-frame"
-                        aria-live="polite"
-                        key={frame}
-                      >
+                      <div className="trace-frame" aria-live="polite" key={frame}>
                         {trace.frames[frame]}
                       </div>
                       <button
@@ -522,30 +579,25 @@ export function Learning() {
                   </div>
                 </div>
               )}
-              <div
-                className={`game-result ${correct ? "won" : ""}`}
-                role="status"
-              >
+
+              <div className={`game-result ${correct ? "won" : ""}`} role="status">
                 {message}
               </div>
+
               <div className="actions">
-                <button
-                  className="text-button"
-                  disabled={running}
-                  onClick={() => reset()}
-                >
+                <button className="text-button" disabled={running} onClick={() => reset()}>
                   <RotateCcw size={16} /> Recomeçar
                 </button>
-                {correct && level < 4 && (
+                {correct && level < 4 ? (
                   <button onClick={() => reset(game, level + 1)}>
-                    Próximo desafio <ArrowRight size={16} />
+                    Próximo desafio
                   </button>
-                )}
+                ) : null}
               </div>
             </section>
+
             <p className="muted">
-              Exercícios de prática do Enturma. Não substituem atividades ou
-              avaliações da sua universidade.
+              Exercícios de prática do Enturma. Não substituem atividades ou avaliações da universidade.
             </p>
           </>
         ) : null}
