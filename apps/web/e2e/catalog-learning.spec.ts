@@ -56,28 +56,21 @@ test("UNA Aimorés ADS: seleção de UCs reais e três minigames com progresso",
   await expect(
     page.getByRole("heading", { name: "Rota do algoritmo" }),
   ).toBeVisible();
-  for (const direction of [
-    "Baixo",
-    "Baixo",
-    "Baixo",
-    "Direita",
-    "Direita",
-    "Direita",
-  ])
-    await page.getByRole("button", { name: direction, exact: true }).click();
-  await page.getByRole("button", { name: "Executar", exact: true }).click();
+  await page.locator("textarea.robot-code").fill(
+    "DOWN\nDOWN\nDOWN\nDOWN\nRIGHT\nRIGHT\nRIGHT\nRIGHT",
+  );
+  await page.getByRole("button", { name: "Executar programa", exact: true }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Desafio concluído" }),
   ).toBeVisible();
-  await page.getByRole("tab", { name: /Laboratório binário/ }).click();
-  await page.getByRole("button", { name: "Bit 4", exact: true }).click();
-  await page.getByRole("button", { name: "Bit 1", exact: true }).click();
-  await page.getByRole("button", { name: "Conferir combinação" }).click();
+  await page.getByRole("tab", { name: /Código Secreto/ }).click();
+  await page.getByPlaceholder("5 letras").fill("ARRAY");
+  await page.getByRole("button", { name: "Testar termo", exact: true }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Desafio concluído" }),
   ).toBeVisible();
   await page.getByRole("tab", { name: /Detetive de código/ }).click();
-  await page.getByLabel("Resultado de console.log").fill("6");
+  await page.getByLabel("Resultado de console.log").fill("20");
   await page.getByRole("button", { name: "Testar hipótese" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Desafio concluído" }),
@@ -90,7 +83,7 @@ test("UNA Aimorés ADS: seleção de UCs reais e três minigames com progresso",
   });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.getByRole("tab", { name: /Laboratório binário/ }).click();
+  await page.getByRole("tab", { name: /Código Secreto/ }).click();
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
