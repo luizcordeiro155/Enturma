@@ -1,4 +1,4 @@
-import { RoomView } from "@/components/room";
+import { RoomView } from "@/components/room-v4";
 export default async function Page({
   params,
 }: {
