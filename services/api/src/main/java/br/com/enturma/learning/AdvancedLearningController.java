@@ -64,6 +64,7 @@ public class AdvancedLearningController {
       @NotBlank String mode,
       @Min(1) @Max(5) int difficulty,
       @NotBlank @Size(max = 32) String guess,
+      @Size(max = 20) List<String> guesses,
       @Min(1) @Max(20) int attempt,
       boolean daily,
       @Min(0) int durationMs) {}
@@ -83,10 +84,15 @@ public class AdvancedLearningController {
     if (guess.length() != targets.getFirst().length())
       throw ApiException.invalid("A palavra precisa ter " + targets.getFirst().length() + " letras.");
 
+    Set<String> played = new HashSet<>();
+    if (r.guesses() != null)
+      for (String previous : r.guesses()) played.add(normalizeWord(previous));
+    played.add(guess);
+
     List<Map<String,Object>> boards = new ArrayList<>();
     boolean completed = true;
     for (String target : targets) {
-      boolean solved = target.equals(guess);
+      boolean solved = played.contains(target);
       completed &= solved;
       boards.add(Map.of("marks", marks(target, guess), "solved", solved));
     }
@@ -108,7 +114,10 @@ public class AdvancedLearningController {
                 + " completed_at=coalesce(daily_word_progress.completed_at,EXCLUDED.completed_at)",
             a.id(), LocalDate.now(ZoneOffset.UTC), mode, d, r.attempt(), completed, completed);
       }
-      if (completed) awardXp(a.id(), "word:" + expectedKey, 25 + d * 10 + (mode.equals("QUARTET") ? 30 : mode.equals("DUET") ? 15 : 0));
+      if (completed) {
+        awardXp(a.id(), "word:" + expectedKey, 25 + d * 10 + (mode.equals("QUARTET") ? 30 : mode.equals("DUET") ? 15 : 0));
+        touchStreak(a.id());
+      }
     }
 
     return Map.of(
@@ -123,11 +132,10 @@ public class AdvancedLearningController {
   @GetMapping("/words/stats")
   public Object wordStats(@AuthenticationPrincipal Actor a) {
     require(a);
-    var stats = db.one(
+    return db.one(
         "SELECT count(*) games,count(*) FILTER(WHERE won) wins,coalesce(avg(attempts) FILTER(WHERE won),0) average_attempts,"
             + " coalesce(max(difficulty) FILTER(WHERE won),0) max_difficulty FROM word_game_result WHERE user_id=?",
         a.id());
-    return stats;
   }
 
   public record AlgorithmAttempt(
@@ -149,9 +157,210 @@ public class AdvancedLearningController {
               + " VALUES (?,?,?,?,?,?,?)",
           UUID.randomUUID(), a.id(), r.level(), result.commands(), r.attempts(), r.durationMs(), stars);
       awardXp(a.id(), "algorithm:" + r.level(), 35 + r.level() * 8);
+      touchStreak(a.id());
       return Map.of("won", true, "stars", stars, "commands", result.commands(), "frames", result.frames(), "message", "Algoritmo concluído.");
     }
     return Map.of("won", false, "stars", 0, "commands", result.commands(), "frames", result.frames(), "message", result.message());
+  }
+
+  @GetMapping("/binary/challenge")
+  public Object binaryChallenge(@AuthenticationPrincipal Actor a) {
+    require(a);
+    var challenge = binaryFor(a.id());
+    var result = new LinkedHashMap<String, Object>();
+    result.put("challengeKey", challenge.key());
+    result.put("dayLevel", challenge.dayLevel());
+    result.put("bitWidth", challenge.bitWidth());
+    result.put("operation", challenge.operation());
+    result.put("prompt", challenge.prompt());
+    result.put("hint", challenge.hint());
+    result.put("expression", challenge.expression());
+    result.put("operands", challenge.operands());
+    result.put("completedToday", challenge.completedToday());
+    result.put("completedDays", challenge.completedDays());
+    result.put("rewardXp", 40 + Math.min(challenge.dayLevel(), 30) * 3);
+    return result;
+  }
+
+  public record BinaryAttempt(
+      @NotBlank String challengeKey,
+      @NotBlank @Pattern(regexp = "[01]{1,16}") String answer,
+      @Min(0) int durationMs) {}
+
+  @PostMapping("/binary/attempt")
+  @Transactional
+  public Object binaryAttempt(@AuthenticationPrincipal Actor a, @Valid @RequestBody BinaryAttempt r) {
+    require(a);
+    var challenge = binaryFor(a.id());
+    if (!challenge.key().equals(r.challengeKey()))
+      throw ApiException.invalid("O desafio binário mudou. Atualize o laboratório.");
+
+    String normalized = r.answer().replaceFirst("^0+(?!$)", "");
+    String expected = Integer.toBinaryString(challenge.expected());
+    boolean correct = normalized.equals(expected);
+
+    int xp = 0;
+    if (correct && !challenge.completedToday()) {
+      int reward = 40 + Math.min(challenge.dayLevel(), 30) * 3;
+      xp = awardXp(
+          a.id(),
+          "binary-daily:" + LocalDate.now(ZoneOffset.UTC),
+          reward);
+      touchStreak(a.id());
+    }
+
+    var response = new LinkedHashMap<String, Object>();
+    response.put("correct", correct);
+    response.put("xpAwarded", xp);
+    response.put("expectedBits", correct ? toBits(challenge.expected(), challenge.bitWidth()) : "");
+    response.put(
+        "message",
+        correct
+            ? challenge.completedToday()
+                ? "Desafio de hoje já estava concluído. Volte amanhã para uma versão mais difícil."
+                : "Circuito resolvido! Amanhã o laboratório aumenta a complexidade."
+            : "Ainda não. Confira os bits e refaça a operação.");
+    response.put("nextDayLevel", correct ? challenge.dayLevel() + 1 : challenge.dayLevel());
+    return response;
+  }
+
+  private record BinaryChallenge(
+      String key,
+      int dayLevel,
+      int bitWidth,
+      String operation,
+      String prompt,
+      String hint,
+      String expression,
+      List<Map<String, Object>> operands,
+      int expected,
+      boolean completedToday,
+      int completedDays) {}
+
+  private BinaryChallenge binaryFor(UUID user) {
+    LocalDate today = LocalDate.now(ZoneOffset.UTC);
+    String eventKey = "binary-daily:" + today;
+    boolean completedToday = db.exists(
+        "SELECT EXISTS(SELECT 1 FROM learning_xp_event WHERE user_id=? AND event_key=?)",
+        user,
+        eventKey);
+    Integer count = db.jdbc.queryForObject(
+        "SELECT count(*) FROM learning_xp_event WHERE user_id=? AND event_key LIKE 'binary-daily:%'",
+        Integer.class,
+        user);
+    int completedDays = count == null ? 0 : count;
+    int dayLevel = completedToday ? Math.max(1, completedDays) : completedDays + 1;
+    int bitWidth = Math.min(12, 3 + dayLevel);
+    int mask = (1 << bitWidth) - 1;
+    Random random = new Random(Objects.hash(today.toString(), user.toString(), dayLevel, "enturma-binary"));
+
+    String operation;
+    String prompt;
+    String hint;
+    String expression;
+    List<Map<String, Object>> operands = new ArrayList<>();
+    int expected;
+
+    if (dayLevel == 1) {
+      int a = 1 + random.nextInt(mask);
+      operation = "DECIMAL";
+      prompt = "Monte em bits o número decimal " + a + ".";
+      hint = "Cada chave representa uma potência de 2.";
+      expression = Integer.toString(a);
+      operands.add(binaryOperand("A", a, bitWidth));
+      expected = a;
+    } else if (dayLevel == 2) {
+      int a = random.nextInt(Math.max(2, mask / 2));
+      int b = 1 + random.nextInt(Math.max(2, mask / 2));
+      operation = "ADD";
+      prompt = "Some A + B e monte o resultado em binário.";
+      hint = "Faça a soma decimal ou binária e respeite a largura do circuito.";
+      expression = "A + B";
+      operands.add(binaryOperand("A", a, bitWidth));
+      operands.add(binaryOperand("B", b, bitWidth));
+      expected = (a + b) & mask;
+    } else if (dayLevel == 3) {
+      int a = random.nextInt(mask + 1);
+      int b = random.nextInt(mask + 1);
+      operation = "XOR";
+      prompt = "Resolva A XOR B e ligue os bits do resultado.";
+      hint = "No XOR, o bit vale 1 quando os dois bits são diferentes.";
+      expression = "A XOR B";
+      operands.add(binaryOperand("A", a, bitWidth));
+      operands.add(binaryOperand("B", b, bitWidth));
+      expected = (a ^ b) & mask;
+    } else if (dayLevel == 4) {
+      int a = random.nextInt(mask + 1);
+      int b = random.nextInt(mask + 1);
+      int c = random.nextInt(mask + 1);
+      operation = "LOGIC";
+      prompt = "Resolva (A AND B) OR C.";
+      hint = "Faça o AND primeiro e depois aplique OR ao resultado.";
+      expression = "(A AND B) OR C";
+      operands.add(binaryOperand("A", a, bitWidth));
+      operands.add(binaryOperand("B", b, bitWidth));
+      operands.add(binaryOperand("C", c, bitWidth));
+      expected = ((a & b) | c) & mask;
+    } else if (dayLevel == 5) {
+      int a = random.nextInt(mask + 1);
+      int shift = 1 + random.nextInt(Math.min(3, bitWidth - 1));
+      int b = random.nextInt(mask + 1);
+      operation = "SHIFT";
+      prompt = "Desloque A para a esquerda e depois aplique XOR com B.";
+      hint = "O deslocamento << move todos os bits e preenche com zero à direita.";
+      expression = "(A << " + shift + ") XOR B";
+      operands.add(binaryOperand("A", a, bitWidth));
+      operands.add(binaryOperand("B", b, bitWidth));
+      expected = ((a << shift) ^ b) & mask;
+    } else {
+      int operandCount = Math.min(5, 3 + Math.max(0, dayLevel - 6) / 3);
+      int value = random.nextInt(mask + 1);
+      operands.add(binaryOperand("A", value, bitWidth));
+      StringBuilder expr = new StringBuilder("A");
+      for (int i = 1; i < operandCount; i++) {
+        int operand = random.nextInt(mask + 1);
+        String label = String.valueOf((char) ('A' + i));
+        operands.add(binaryOperand(label, operand, bitWidth));
+        if (i % 2 == 1) {
+          value = (value ^ operand) & mask;
+          expr.insert(0, "(").append(" XOR ").append(label).append(")");
+        } else {
+          value = (value + operand) & mask;
+          expr.insert(0, "(").append(" + ").append(label).append(")");
+        }
+      }
+      operation = "PIPELINE";
+      prompt = "Resolva a expressão em etapas e monte o resultado final.";
+      hint = "Trabalhe da esquerda para a direita respeitando os parênteses. O circuito mantém apenas "
+          + bitWidth + " bits.";
+      expression = expr.toString();
+      expected = value;
+    }
+
+    return new BinaryChallenge(
+        today + ":" + dayLevel + ":" + operation,
+        dayLevel,
+        bitWidth,
+        operation,
+        prompt,
+        hint,
+        expression,
+        operands,
+        expected,
+        completedToday,
+        completedDays);
+  }
+
+  private Map<String, Object> binaryOperand(String label, int value, int bits) {
+    return Map.of(
+        "label", label,
+        "decimal", value,
+        "binary", toBits(value, bits));
+  }
+
+  private String toBits(int value, int bits) {
+    String raw = Integer.toBinaryString(value);
+    return "0".repeat(Math.max(0, bits - raw.length())) + raw;
   }
 
   private record Simulation(boolean won, int commands, List<Map<String,Integer>> frames, String message) {}
@@ -164,13 +373,17 @@ public class AdvancedLearningController {
       return new Simulation(false, 0, List.of(), "Este nível exige criar ou reutilizar uma função.");
 
     List<String> commands = new ArrayList<>();
-    java.util.regex.Pattern repeat = java.util.regex.Pattern.compile("repeat\\s*\\(\\s*(\\d{1,2})\\s*,\\s*(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\)", java.util.regex.Pattern.CASE_INSENSITIVE);
+    java.util.regex.Pattern repeat = java.util.regex.Pattern.compile(
+        "repeat\\s*\\(\\s*(\\d{1,2})\\s*,\\s*(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\)",
+        java.util.regex.Pattern.CASE_INSENSITIVE);
     Matcher rm = repeat.matcher(code);
     while (rm.find()) {
       int n = Math.min(20, Integer.parseInt(rm.group(1)));
       for (int i=0;i<n;i++) commands.add(rm.group(2).toLowerCase(Locale.ROOT));
     }
-    Matcher direct = java.util.regex.Pattern.compile("(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\(\\s*\\)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(code);
+    Matcher direct = java.util.regex.Pattern.compile(
+        "(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\(\\s*\\)",
+        java.util.regex.Pattern.CASE_INSENSITIVE).matcher(code);
     while (direct.find()) commands.add(direct.group(1).toLowerCase(Locale.ROOT));
     if (commands.isEmpty()) return new Simulation(false, 0, List.of(), "Nenhum comando de movimento foi encontrado.");
     if (commands.size() > commandLimit(level))
@@ -188,7 +401,10 @@ public class AdvancedLearningController {
         case "moveleft" -> x--;
         case "moveup" -> y--;
         case "movedown" -> y++;
-        case "moveforward" -> { x += new int[]{0,1,0,-1}[dir]; y += new int[]{-1,0,1,0}[dir]; }
+        case "moveforward" -> {
+          x += new int[]{0,1,0,-1}[dir];
+          y += new int[]{-1,0,1,0}[dir];
+        }
         default -> {}
       }
       if (x<0 || x>5 || y<0 || y>5 || walls.contains(y*6+x)) {
@@ -203,6 +419,7 @@ public class AdvancedLearningController {
 
   private int commandLimit(int level) { return new int[]{18,18,16,14,12,10}[level-1]; }
   private int optimal(int level) { return new int[]{10,10,10,10,10,10}[level-1]; }
+
   private Set<Integer> walls(int level) {
     return switch(level) {
       case 1 -> Set.of(8,14,20);
@@ -227,12 +444,17 @@ public class AdvancedLearningController {
   private List<String> targets(String seed, String mode, int difficulty) {
     List<String> pool = WORDS.get(difficulty);
     int count = mode.equals("QUARTET") ? 4 : mode.equals("DUET") ? 2 : 1;
-    int length = pool.get(Math.floorMod(seed.hashCode(), pool.size())).length();
-    List<String> compatible = pool.stream().filter(w -> w.length() == length).toList();
-    if (compatible.size() < count) compatible = pool;
-    List<String> result = new ArrayList<>();
-    for (int i=0;i<count;i++) result.add(compatible.get(Math.floorMod(Objects.hash(seed,i), compatible.size())));
-    return result;
+    Map<Integer, List<String>> byLength = new LinkedHashMap<>();
+    for (String word : pool)
+      byLength.computeIfAbsent(word.length(), ignored -> new ArrayList<>()).add(word);
+    List<List<String>> eligible =
+        byLength.values().stream().filter(group -> group.size() >= count).toList();
+    if (eligible.isEmpty()) throw new IllegalStateException("Banco de palavras insuficiente.");
+    List<String> compatible =
+        eligible.get(Math.floorMod(seed.hashCode(), eligible.size()));
+    List<String> ordered = new ArrayList<>(compatible);
+    Collections.rotate(ordered, Math.floorMod(Objects.hash(seed, difficulty), ordered.size()));
+    return new ArrayList<>(ordered.subList(0, count));
   }
 
   private String marks(String target, String guess) {
@@ -246,18 +468,45 @@ public class AdvancedLearningController {
     for (int i=0;i<target.length();i++) {
       if (out[i]=='C') continue;
       int index=guess.charAt(i)-'A';
-      if (index>=0 && index<26 && remaining[index]>0) { out[i]='P'; remaining[index]--; }
+      if (index>=0 && index<26 && remaining[index]>0) {
+        out[i]='P';
+        remaining[index]--;
+      }
     }
     return new String(out);
   }
 
-  private void awardXp(UUID user, String key, int amount) {
+  private int awardXp(UUID user, String key, int amount) {
     db.jdbc.update("INSERT INTO learning_stats(user_id) VALUES (?) ON CONFLICT DO NOTHING", user);
     int inserted = db.jdbc.update(
         "INSERT INTO learning_xp_event(id,user_id,event_key,amount,reason) VALUES (?,?,?,?,?)"
             + " ON CONFLICT(user_id,event_key) DO NOTHING",
         UUID.randomUUID(), user, key, amount, "ADVANCED_GAME");
     if (inserted == 1)
-      db.jdbc.update("UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?", amount, user);
+      db.jdbc.update(
+          "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
+          amount,
+          user);
+    return inserted == 1 ? amount : 0;
+  }
+
+  private void touchStreak(UUID user) {
+    db.jdbc.update("INSERT INTO learning_stats(user_id) VALUES (?) ON CONFLICT DO NOTHING", user);
+    LocalDate today = LocalDate.now(ZoneOffset.UTC);
+    var stats = db.one(
+        "SELECT current_streak,last_active_date FROM learning_stats WHERE user_id=? FOR UPDATE",
+        user);
+    Object rawLast = stats.get("lastActiveDate");
+    LocalDate last = rawLast == null ? null : LocalDate.parse(rawLast.toString());
+    if (today.equals(last)) return;
+    int current = ((Number) stats.get("currentStreak")).intValue();
+    int next = last != null && last.equals(today.minusDays(1)) ? current + 1 : 1;
+    db.jdbc.update(
+        "UPDATE learning_stats SET current_streak=?,longest_streak=greatest(longest_streak,?),"
+            + " last_active_date=?,updated_at=now() WHERE user_id=?",
+        next,
+        next,
+        today,
+        user);
   }
 }

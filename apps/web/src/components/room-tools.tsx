@@ -605,8 +605,8 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
                       <span>
                         <Eye size={14} />
                         {viewers.length
-                          ? `Assistindo: ${viewers.map((member) => member.name).join(", ")}`
-                          : "Aguardando espectadores"}
+                          ? `${viewers.length} ${viewers.length === 1 ? "participante disponível" : "participantes disponíveis"} na chamada`
+                          : "Aguardando participantes"}
                       </span>
                     </div>
                   </article>

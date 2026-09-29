@@ -3,8 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
+  Binary,
   Bot,
   Braces,
+  CircuitBoard,
   Flame,
   Gamepad2,
   Grid2X2,
@@ -56,6 +58,34 @@ type AlgorithmResult = {
   message: string;
 };
 
+type BinaryOperand = {
+  label: string;
+  decimal: number;
+  binary: string;
+};
+
+type BinaryChallenge = {
+  challengeKey: string;
+  dayLevel: number;
+  bitWidth: number;
+  operation: string;
+  prompt: string;
+  hint: string;
+  expression: string;
+  operands: BinaryOperand[];
+  completedToday: boolean;
+  completedDays: number;
+  rewardXp: number;
+};
+
+type BinaryResult = {
+  correct: boolean;
+  xpAwarded: number;
+  expectedBits: string;
+  message: string;
+  nextDayLevel: number;
+};
+
 const algorithmPrompts = [
   {
     title: "Sequência precisa",
@@ -103,7 +133,7 @@ const keyboardRows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
 export function ProgrammingLab() {
   const [access, setAccess] = useState<boolean>();
   const [summary, setSummary] = useState<Summary>();
-  const [tab, setTab] = useState<"algorithm" | "words">("algorithm");
+  const [tab, setTab] = useState<"algorithm" | "words" | "binary">("algorithm");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -123,6 +153,11 @@ export function ProgrammingLab() {
   const [guesses, setGuesses] = useState<{ word: string; boards: WordBoard[] }[]>([]);
   const [wordResult, setWordResult] = useState<WordAttemptResult>();
   const wordStarted = useRef(Date.now());
+
+  const [binary, setBinary] = useState<BinaryChallenge>();
+  const [bits, setBits] = useState<boolean[]>([]);
+  const [binaryResult, setBinaryResult] = useState<BinaryResult>();
+  const binaryStarted = useRef(Date.now());
 
   async function loadSummary() {
     const [a, s] = await Promise.all([
@@ -160,9 +195,17 @@ export function ProgrammingLab() {
       void loadWordChallenge(mode, difficulty, daily);
     }, 0);
     return () => clearTimeout(bootstrap);
-    // loadWordChallenge reads only the explicit values passed above.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [tab, mode, difficulty, daily, access]);
+
+  useEffect(() => {
+    if (tab !== "binary" || access !== true) return;
+    const bootstrap = setTimeout(() => {
+      void loadBinary();
+    }, 0);
+    return () => clearTimeout(bootstrap);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab, access]);
 
   async function loadWordChallenge(
     nextMode = mode,
@@ -180,6 +223,22 @@ export function ProgrammingLab() {
       setGuesses([]);
       setWordResult(undefined);
       wordStarted.current = Date.now();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function loadBinary() {
+    setBusy(true);
+    setError("");
+    try {
+      const data = await api<BinaryChallenge>("/learning/advanced/binary/challenge");
+      setBinary(data);
+      setBits(Array.from({ length: data.bitWidth }, () => false));
+      setBinaryResult(undefined);
+      binaryStarted.current = Date.now();
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -231,6 +290,7 @@ export function ProgrammingLab() {
         mode: challenge.mode,
         difficulty: challenge.difficulty,
         guess,
+        guesses: [...guesses.map((item) => item.word), guess],
         attempt: guesses.length + 1,
         daily: challenge.daily,
         durationMs: Date.now() - wordStarted.current,
@@ -250,9 +310,30 @@ export function ProgrammingLab() {
     }
   }
 
-  const completedCount = useMemo(
-    () => guesses.length,
-    [guesses],
+  async function submitBinary() {
+    if (!binary) return;
+    setBusy(true);
+    setError("");
+    try {
+      const answer = bits.map((bit) => (bit ? "1" : "0")).join("");
+      const result = await post<BinaryResult>("/learning/advanced/binary/attempt", {
+        challengeKey: binary.challengeKey,
+        answer,
+        durationMs: Date.now() - binaryStarted.current,
+      });
+      setBinaryResult(result);
+      if (result.correct) await loadSummary();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  const completedCount = useMemo(() => guesses.length, [guesses]);
+  const binaryValue = useMemo(
+    () => parseInt(bits.map((bit) => (bit ? "1" : "0")).join("") || "0", 2),
+    [bits],
   );
 
   return (
@@ -263,8 +344,7 @@ export function ProgrammingLab() {
             <p className="eyebrow">Praticar programação</p>
             <h1>Treino que fica mais difícil conforme você evolui.</h1>
             <p className="lead">
-              Resolva lógica escrevendo instruções e domine palavras técnicas em Solo,
-              Dueto e Quarteto.
+              Resolva lógica, domine termos técnicos e exercite raciocínio binário.
             </p>
           </div>
           <Gamepad2 size={54} />
@@ -296,20 +376,18 @@ export function ProgrammingLab() {
               </article>
             </div>
 
-            <div className="advanced-game-tabs" role="tablist">
-              <button
-                className={tab === "algorithm" ? "active" : ""}
-                onClick={() => setTab("algorithm")}
-              >
+            <div className="advanced-game-tabs three" role="tablist">
+              <button className={tab === "algorithm" ? "active" : ""} onClick={() => setTab("algorithm")}>
                 <Bot size={20} />
                 <span><strong>Rota do algoritmo</strong><small>Programe de verdade para avançar</small></span>
               </button>
-              <button
-                className={tab === "words" ? "active" : ""}
-                onClick={() => setTab("words")}
-              >
+              <button className={tab === "words" ? "active" : ""} onClick={() => setTab("words")}>
                 <Braces size={20} />
                 <span><strong>Termo Dev</strong><small>Solo, Dueto e Quarteto técnico</small></span>
+              </button>
+              <button className={tab === "binary" ? "active" : ""} onClick={() => setTab("binary")}>
+                <Binary size={20} />
+                <span><strong>Laboratório Binário</strong><small>Desafio diário que evolui com você</small></span>
               </button>
             </div>
 
@@ -323,11 +401,7 @@ export function ProgrammingLab() {
                   </div>
                   <div className="level-picker">
                     {[1,2,3,4,5,6].map((level) => (
-                      <button
-                        key={level}
-                        aria-pressed={algorithmLevel === level}
-                        onClick={() => setAlgorithmLevel(level)}
-                      >
+                      <button key={level} aria-pressed={algorithmLevel === level} onClick={() => setAlgorithmLevel(level)}>
                         {level}
                       </button>
                     ))}
@@ -340,34 +414,19 @@ export function ProgrammingLab() {
                       {Array.from({ length: 36 }, (_, index) => (
                         <div
                           key={index}
-                          className={
-                            wallSets[algorithmLevel - 1].includes(index)
-                              ? "wall"
-                              : index === 35
-                                ? "goal"
-                                : "tile"
-                          }
+                          className={wallSets[algorithmLevel - 1].includes(index) ? "wall" : index === 35 ? "goal" : "tile"}
                         >
                           {index === 0 ? "INÍCIO" : index === 35 ? "⚑" : ""}
                         </div>
                       ))}
-                      <span
-                        className="robot-piece six"
-                        style={{
-                          transform: `translate(${position.x * 100}%, ${position.y * 100}%)`,
-                        }}
-                      >
+                      <span className="robot-piece six" style={{ transform: `translate(${position.x * 100}%, ${position.y * 100}%)` }}>
                         <Bot size={30} />
                       </span>
                     </div>
                     <div className="algorithm-api-help">
                       <strong>Comandos disponíveis</strong>
-                      <code>moveRight()</code>
-                      <code>moveLeft()</code>
-                      <code>moveUp()</code>
-                      <code>moveDown()</code>
-                      <code>moveForward()</code>
-                      <code>repeat(n, moveRight)</code>
+                      <code>moveRight()</code><code>moveLeft()</code><code>moveUp()</code>
+                      <code>moveDown()</code><code>moveForward()</code><code>repeat(n, moveRight)</code>
                     </div>
                   </div>
 
@@ -376,130 +435,77 @@ export function ProgrammingLab() {
                       <span><Braces size={16} /> seu-algoritmo.js</span>
                       <small>Execução segura · sem eval</small>
                     </div>
-                    <textarea
-                      spellCheck={false}
-                      value={code}
-                      onChange={(e) => setCode(e.target.value)}
-                      aria-label="Código do algoritmo"
-                    />
+                    <textarea spellCheck={false} value={code} onChange={(e) => setCode(e.target.value)} aria-label="Código do algoritmo" />
                     <div className="actions">
                       <button disabled={busy || !code.trim()} onClick={() => void runAlgorithm()}>
                         <Play size={16} /> Executar algoritmo
                       </button>
-                      <button
-                        className="secondary"
-                        onClick={() => {
-                          setCode(algorithmPrompts[algorithmLevel - 1].starter);
-                          setAlgorithmResult(undefined);
-                          setPosition({ x: 0, y: 0 });
-                        }}
-                      >
+                      <button className="secondary" onClick={() => {
+                        setCode(algorithmPrompts[algorithmLevel - 1].starter);
+                        setAlgorithmResult(undefined);
+                        setPosition({ x: 0, y: 0 });
+                      }}>
                         <RotateCcw size={16} /> Reiniciar
                       </button>
                     </div>
                     {algorithmResult ? (
                       <div className={algorithmResult.won ? "game-result won" : "game-result"}>
                         <strong>{algorithmResult.message}</strong>
-                        {algorithmResult.won ? (
-                          <span>
-                            {"★".repeat(algorithmResult.stars)}{"☆".repeat(3 - algorithmResult.stars)}
-                            {" · "}{algorithmResult.commands} comandos
-                          </span>
-                        ) : null}
+                        {algorithmResult.won ? <span>{"★".repeat(algorithmResult.stars)}{"☆".repeat(3 - algorithmResult.stars)} · {algorithmResult.commands} comandos</span> : null}
                       </div>
                     ) : null}
                     {algorithmResult?.won && algorithmLevel < 6 ? (
-                      <button onClick={() => setAlgorithmLevel((value) => value + 1)}>
-                        Próximo nível <ArrowRight size={16} />
-                      </button>
+                      <button onClick={() => setAlgorithmLevel((value) => value + 1)}>Próximo nível <ArrowRight size={16} /></button>
                     ) : null}
                   </div>
                 </div>
               </section>
-            ) : (
-              <section className="advanced-game-card word-game">
+            ) : null}
+
+            {tab === "words" ? (
+              <section className="advanced-game-card word-game compact-word-game">
                 <div className="game-heading">
                   <div>
                     <p className="eyebrow">Termo Dev · {challenge?.category ?? "Programação"}</p>
                     <h2>Encontre {mode === "SOLO" ? "a palavra" : mode === "DUET" ? "as duas palavras" : "as quatro palavras"}.</h2>
-                    <p>
-                      Cada tentativa é aplicada em todos os tabuleiros. A dificuldade aumenta
-                      o tamanho e a complexidade dos termos.
-                    </p>
+                    <p>Cada tentativa vale para todos os tabuleiros.</p>
                   </div>
                 </div>
 
                 <div className="word-config">
                   <div>
                     {(["SOLO","DUET","QUARTET"] as const).map((value) => (
-                      <button
-                        key={value}
-                        className={mode === value ? "active" : "secondary"}
-                        onClick={() => setMode(value)}
-                      >
+                      <button key={value} className={mode === value ? "active" : "secondary"} onClick={() => setMode(value)}>
                         {value === "SOLO" ? "Solo" : value === "DUET" ? "Dueto" : "Quarteto"}
                       </button>
                     ))}
                   </div>
                   <div className="difficulty-picker">
                     {[1,2,3,4,5].map((value) => (
-                      <button
-                        key={value}
-                        aria-pressed={difficulty === value}
-                        onClick={() => setDifficulty(value)}
-                      >
-                        {value}
-                      </button>
+                      <button key={value} aria-pressed={difficulty === value} onClick={() => setDifficulty(value)}>{value}</button>
                     ))}
                   </div>
                   <label className="daily-toggle">
-                    <input
-                      type="checkbox"
-                      checked={daily}
-                      onChange={(e) => setDaily(e.target.checked)}
-                    />
+                    <input type="checkbox" checked={daily} onChange={(e) => setDaily(e.target.checked)} />
                     Desafio diário
                   </label>
                 </div>
 
                 {challenge ? (
                   <>
-                    <div
-                      className="word-boards"
-                      style={{ gridTemplateColumns: `repeat(${challenge.boards > 2 ? 2 : challenge.boards}, minmax(0, 1fr))` }}
-                    >
+                    <div className={`word-boards boards-${challenge.boards}`}>
                       {Array.from({ length: challenge.boards }, (_, boardIndex) => (
                         <div className="word-board" key={boardIndex}>
-                          <header>
-                            <Grid2X2 size={16} />
-                            <strong>
-                              {challenge.boards === 1 ? "Palavra" : `Palavra ${boardIndex + 1}`}
-                            </strong>
-                          </header>
+                          <header><Grid2X2 size={16} /><strong>{challenge.boards === 1 ? "Palavra" : `Palavra ${boardIndex + 1}`}</strong></header>
                           {Array.from({ length: challenge.maxAttempts }, (_, row) => {
                             const played = guesses[row];
                             return (
-                              <div
-                                className="word-row"
-                                key={row}
-                                style={{ gridTemplateColumns: `repeat(${challenge.wordLength}, 1fr)` }}
-                              >
+                              <div className="word-row" key={row} style={{ gridTemplateColumns: `repeat(${challenge.wordLength}, minmax(0, 1fr))` }}>
                                 {Array.from({ length: challenge.wordLength }, (_, column) => {
                                   const letter = played?.word[column] ?? "";
                                   const mark = played?.boards[boardIndex]?.marks[column];
                                   return (
-                                    <span
-                                      key={column}
-                                      className={
-                                        mark === "C"
-                                          ? "correct"
-                                          : mark === "P"
-                                            ? "present"
-                                            : mark === "A"
-                                              ? "absent"
-                                              : ""
-                                      }
-                                    >
+                                    <span key={column} className={mark === "C" ? "correct" : mark === "P" ? "present" : mark === "A" ? "absent" : ""}>
                                       {letter}
                                     </span>
                                   );
@@ -514,69 +520,129 @@ export function ProgrammingLab() {
                     <div className="word-entry">
                       <input
                         value={guess}
-                        onChange={(e) =>
-                          setGuess(
-                            e.target.value
-                              .toUpperCase()
-                              .replace(/[^A-Z]/g, "")
-                              .slice(0, challenge.wordLength),
-                          )
-                        }
+                        onChange={(e) => setGuess(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, challenge.wordLength))}
                         maxLength={challenge.wordLength}
                         disabled={busy || wordResult?.finished}
                         placeholder={`${challenge.wordLength} letras`}
                         aria-label="Palavra tentativa"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") void submitWord();
-                        }}
+                        onKeyDown={(e) => { if (e.key === "Enter") void submitWord(); }}
                       />
-                      <button
-                        disabled={
-                          busy ||
-                          wordResult?.finished ||
-                          guess.length !== challenge.wordLength
-                        }
-                        onClick={() => void submitWord()}
-                      >
+                      <button disabled={busy || wordResult?.finished || guess.length !== challenge.wordLength} onClick={() => void submitWord()}>
                         Testar palavra
                       </button>
                     </div>
 
                     <div className="virtual-keyboard" aria-hidden="true">
-                      {keyboardRows.map((row) => (
-                        <div key={row}>
-                          {row.split("").map((letter) => <span key={letter}>{letter}</span>)}
-                        </div>
-                      ))}
+                      {keyboardRows.map((row) => <div key={row}>{row.split("").map((letter) => <span key={letter}>{letter}</span>)}</div>)}
                     </div>
 
                     <div className={wordResult?.completed ? "game-result won" : "game-result"}>
-                      {wordResult ? (
-                        <>
-                          <strong>{wordResult.message}</strong>
-                          <span>{completedCount}/{challenge.maxAttempts} tentativas</span>
-                        </>
-                      ) : (
-                        <span>
-                          Verde: posição certa · amarelo: letra presente · cinza: ausente
-                        </span>
-                      )}
+                      {wordResult ? <><strong>{wordResult.message}</strong><span>{completedCount}/{challenge.maxAttempts} tentativas</span></> : <span>Verde: posição certa · amarelo: presente · cinza: ausente</span>}
                     </div>
 
                     {wordResult?.finished ? (
-                      <button
-                        className="secondary"
-                        onClick={() => void loadWordChallenge()}
-                      >
+                      <button className="secondary" onClick={() => void loadWordChallenge()}>
                         <Sparkles size={16} /> Jogar novamente
                       </button>
                     ) : null}
                   </>
-                ) : (
-                  <p role="status">Preparando desafio…</p>
-                )}
+                ) : <p role="status">Preparando desafio…</p>}
               </section>
-            )}
+            ) : null}
+
+            {tab === "binary" ? (
+              <section className="advanced-game-card binary-lab">
+                {binary ? (
+                  <>
+                    <div className="binary-lab-header">
+                      <div>
+                        <p className="eyebrow">Laboratório Binário · dia {binary.dayLevel}</p>
+                        <h2>{binary.prompt}</h2>
+                        <p>{binary.hint}</p>
+                      </div>
+                      <div className="binary-progress-badge">
+                        <CircuitBoard size={22} />
+                        <span><strong>{binary.completedDays}</strong> dias concluídos</span>
+                      </div>
+                    </div>
+
+                    <div className="binary-expression">
+                      <small>Expressão do circuito</small>
+                      <strong>{binary.expression}</strong>
+                    </div>
+
+                    <div className="binary-operands">
+                      {binary.operands.map((operand) => (
+                        <article key={operand.label}>
+                          <strong>{operand.label}</strong>
+                          <code>{operand.binary}</code>
+                          <small>decimal {operand.decimal}</small>
+                        </article>
+                      ))}
+                    </div>
+
+                    <div className="binary-switch-board">
+                      {bits.map((enabled, index) => {
+                        const power = bits.length - index - 1;
+                        return (
+                          <button
+                            type="button"
+                            key={index}
+                            className={enabled ? "bit-on" : ""}
+                            aria-pressed={enabled}
+                            disabled={binary.completedToday || Boolean(binaryResult?.correct)}
+                            onClick={() =>
+                              setBits((current) =>
+                                current.map((value, i) => (i === index ? !value : value)),
+                              )
+                            }
+                          >
+                            <span>{enabled ? "1" : "0"}</span>
+                            <small>2^{power}</small>
+                          </button>
+                        );
+                      })}
+                    </div>
+
+                    <div className="binary-current-value">
+                      <span>Resultado montado</span>
+                      <strong>{bits.map((bit) => (bit ? "1" : "0")).join("")}</strong>
+                      <small>decimal {binaryValue}</small>
+                    </div>
+
+                    <div className="binary-actions">
+                      <button disabled={busy || binary.completedToday || Boolean(binaryResult?.correct)} onClick={() => void submitBinary()}>
+                        <Zap size={17} /> Validar circuito
+                      </button>
+                      <button className="secondary" disabled={binary.completedToday} onClick={() => setBits(Array.from({ length: binary.bitWidth }, () => false))}>
+                        <RotateCcw size={16} /> Limpar
+                      </button>
+                    </div>
+
+                    {binary.completedToday ? (
+                      <div className="game-result won">
+                        <strong>Desafio diário concluído.</strong>
+                        <span>Amanhã o laboratório sobe de nível e adiciona novas operações.</span>
+                      </div>
+                    ) : binaryResult ? (
+                      <div className={binaryResult.correct ? "game-result won" : "game-result"}>
+                        <strong>{binaryResult.message}</strong>
+                        {binaryResult.correct ? <span>+{binaryResult.xpAwarded} XP · próximo nível diário {binaryResult.nextDayLevel}</span> : null}
+                      </div>
+                    ) : null}
+
+                    <div className="binary-difficulty-roadmap">
+                      <span>Dia 1 · decimal → binário</span>
+                      <span>Dia 2 · soma</span>
+                      <span>Dia 3 · XOR</span>
+                      <span>Dia 4 · AND/OR</span>
+                      <span>Dia 5 · shift + XOR</span>
+                      <span>Dia 6+ · pipelines progressivos</span>
+                    </div>
+                  </>
+                ) : <p role="status">Montando circuito diário…</p>}
+              </section>
+            ) : null}
           </>
         )}
       </div>
