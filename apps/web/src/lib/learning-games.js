@@ -25,7 +25,7 @@ export const robotLevels = [
   {
     size: 6,
     goal: [5, 5],
-    walls: [1, 7, 13, 18, 19, 24, 25, 26, 27, 28],
+    walls: [1, 7, 18, 19, 24, 25, 26, 27, 28],
     requirement:
       "Combine repeat(n) com if/while. O nível final exige abstração e decisão.",
     starter:
