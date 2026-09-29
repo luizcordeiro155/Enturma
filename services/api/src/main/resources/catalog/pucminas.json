@@ -1,0 +1,4627 @@
+{
+  "provider": "PUCMINAS",
+  "entries": [
+    {
+      "externalId": "pucminas",
+      "kind": "INSTITUTION",
+      "parentExternalId": null,
+      "name": "Pontifícia Universidade Católica de Minas Gerais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "shortName": "PUC Minas",
+        "state": "MG",
+        "websiteUrl": "https://www.pucminas.br"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-campus",
+      "kind": "CAMPUS",
+      "parentExternalId": "pucminas",
+      "name": "Barreiro",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "state": "MG"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening",
+      "kind": "COURSE",
+      "parentExternalId": "puc-barreiro-si-campus",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "shift": "EVENING",
+        "durationPeriods": 8,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "kind": "CURRICULUM",
+      "parentExternalId": "puc-barreiro-si-evening",
+      "name": "Matriz publicada · consulta 29/09/2026",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 8,
+        "note": "Versão identificada pela captura da página oficial; o ano de ingresso não é informado pela página."
+      },
+      "curriculumVersion": "captura-baa0ec59da23"
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1",
+      "name": "ALGORITMOS E TÉCNICAS DE PROGRAMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 144,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1",
+      "name": "DESENVOLVIMENTO WEB FRONT- END",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1",
+      "name": "FUNDAMENTOS DE SISTEMAS DE INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1",
+      "name": "INTRODUÇÃO À COMPUTAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1",
+      "name": "MENTORIA DE CARREIRA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1",
+      "name": "METODOLOGIAS DE EXTENSÃO UNIVERSITÁRIA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p1",
+      "name": "TRABALHO INTERDISCIPLINAR: APLICAÇÕES WEB FRONT-END",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "Requisito(s)"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2",
+      "name": "ALGORITMOS E ESTRUTURA DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 144,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2",
+      "name": "BANCO DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2",
+      "name": "DESENVOLVIMENTO WEB BACK-END",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2",
+      "name": "MODELAGEM DE PROCESSOS DE NEGÓCIO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p2",
+      "name": "TRABALHO INTERDISCIPLINAR: APLICAÇÕES PARA PROCESSOS DE NEGÓCIO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 170,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3",
+      "name": "BANCO DE DADOS NoSQL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3",
+      "name": "FUNDAMENTOS DE CÁLCULO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3",
+      "name": "INTERAÇÃO HUMANO-COMPUTADOR",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3",
+      "name": "PROGRAMAÇÃO ORIENTADA POR OBJETOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3",
+      "name": "REQUISITOS DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p3",
+      "name": "TRABALHO INTERDISCIPLINAR: APLICAÇÕES INTERATIVAS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 170,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4",
+      "name": "DESENVOLVIMENTO DE APLICAÇÕES DISTRIBUÍDAS E MÓVEIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4",
+      "name": "ESTATÍSTICA E PROBABILIDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 108,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4",
+      "name": "OPTATIVA I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4",
+      "name": "PROJETO DE REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4",
+      "name": "PROJETO E ARQUITETURA DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p4",
+      "name": "TRABALHO INTERDISCIPLINAR: APLICAÇÕES DISTRIBUÍDAS PARA SUSTENTABILIDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 42,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5",
+      "name": "ALGORITMOS EM GRAFOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5",
+      "name": "CULTURA E PRÁTICAS DEVOPS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5",
+      "name": "CULTURA RELIGIOSA: SABERES E TRADIÇÕES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5",
+      "name": "FUNDAMENTOS DE INTELIGÊNCIA ARTIFICIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5",
+      "name": "GERÊNCIA DE PROJETOS DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5",
+      "name": "TESTE E QUALIDADE DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p5",
+      "name": "TRABALHO INTERDISCIPLINAR: PROJETO DE IMPLANTAÇÃO DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 42,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "ARQUITETURA DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 42,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "BUSINESS INTELIGENCE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 42,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "CÁLCULO E ALGEBRA MATRICIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 108,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "CULTURA RELIGIOSA: HUMANISMO, SOCIEDADE E ECOLOGIA INTEGRAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "INTRODUÇÃO À INOVAÇÃO TECNOLÓGICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "INTRODUÇÃO À PESQUISA EM INFORMÁTICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "OPTATIVA II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "RECUPERAÇÃO DE INFORMAÇÃO NA WEB E REDES SOCIAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p6",
+      "name": "TRABALHO INTERDISCIPLINAR: PESQUISA E INOVAÇÃO EM INFORMÁTICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 42,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "name": "ANÁLISE DE ALGORITMOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "name": "ARQUITETURA DE REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "name": "CIBERSEGURANÇA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "name": "FILOSOFIA: LÓGICA E PENSAMENTO CRÍTICO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "name": "FUNDAMENTOS DE SISTEMAS OPERACIONAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "name": "OPTATIVA III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "name": "OTIMIZAÇÃO DE SISTEMAS COMPUTACIONAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p7",
+      "name": "TRABALHO INTERDISCIPLINAR: INFRAESTRUTURA PARA SISTEMAS DE INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "name": "CIDADANIA E RESPONSABILIDADE SOCIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "name": "CIÊNCIA DE DADOS E INTELIGÊNCIA ARTIFICIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "name": "FILOSOFIA: ANTROPOLOGIA E ÉTICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "name": "GOVERNANÇA DE TECNOLOGIA DA INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "name": "OPTATIVA IV",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "name": "SISTEMAS INTEGRADOS DE GESTÃO EMPRESARIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 42,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "name": "TECNOLOGIAS DA INFORMAÇÃO E DO CONHECIMENTO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-barreiro-si-evening-snapshot-baa0ec59da23-p8",
+      "name": "TRABALHO DE CONCLUSÃO DE CURSO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2",
+        "name": "PUC Minas — Sistemas de Informação — Barreiro",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "baa0ec59da2370a0ad3c0c9f5de9a06cd3c083d7cc71d94929447ac3985779a7",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 256,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-campus",
+      "kind": "CAMPUS",
+      "parentExternalId": "pucminas",
+      "name": "Poços de Caldas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "state": "MG"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning",
+      "kind": "COURSE",
+      "parentExternalId": "puc-pocos-cc-campus",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "shift": "MORNING",
+        "durationPeriods": 8,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "kind": "CURRICULUM",
+      "parentExternalId": "puc-pocos-cc-morning",
+      "name": "Matriz publicada · consulta 29/09/2026",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 8,
+        "note": "Versão identificada pela captura da página oficial; o ano de ingresso não é informado pela página."
+      },
+      "curriculumVersion": "captura-c4a41b309767"
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "name": "ALGORITMOS E ESTRUTURAS DE DADOS I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "name": "INTERAÇÃO HUMANO COMPUTADOR",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "name": "INTRODUÇÃO À CIÊNCIA DA COMPUTAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "name": "LABORATÓRIO DE ALGORITMOS E ESTRUTURAS DE DADOS I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "name": "LABORATÓRIO DE PROJETO HARDWARE E SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "name": "MENTORING - PLANEJAMENTO ACADÊMICO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "name": "MODELAGEM MATEMÁTICA I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p1",
+      "name": "SEMINÁRIOS I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2",
+      "name": "ALGORITMOS E ESTRUTURAS DE DADOS II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2",
+      "name": "ARQUITETURA E ORGANIZAÇÃO DE COMPUTADORES I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2",
+      "name": "LABORATÓRIO DE ALGORITMOS E ESTRUTURAS DE DADOS II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2",
+      "name": "MENTORING - SOCIEDADE DIGITAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2",
+      "name": "MODELAGEM E CONSTRUÇÃO DE APLICAÇÕES 3D",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2",
+      "name": "PROJETO E DESENVOLVIMENTO DE APLICAÇÕES WEB I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p2",
+      "name": "SEMINÁRIOS II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3",
+      "name": "ARQUITETURA E ORGANIZAÇÃO DE COMPUTADORES II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3",
+      "name": "BANCO DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 108,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3",
+      "name": "INTELIGÊNCIA ARTIFICIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3",
+      "name": "LABORATÓRIO DE ARQUITETURA E ORGANIZAÇÃO DE COMPUTADORES II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3",
+      "name": "PROJETO E DESENVOLVIMENTO DE APLICAÇÕES WEB II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p3",
+      "name": "TEORIA DA COMPUTAÇÃO E LINGUAGENS FORMAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "COMPILADORES E INTERPRETADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "COMPUTAÇÃO EM NUVEM",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "DATA SCIENCE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "ENGENHARIA DE APLICAÇÕES MÓVEIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "FILOSOFIA: LÓGICA E PENSAMENTO CRÍTICO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "PROJETO E DESENVOLVIMENTO DE APLICAÇÕES WEB III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO I - DIAGNÓSTICO COMUNITÁRIO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO I - DIAGNÓSTICO COMUNITÁRIO: CAMPO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p4",
+      "name": "SEGURANÇA E CRIPTOGRAFIA DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "CIDADANIA E RESPONSABILIDADE SOCIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "FILOSOFIA: ANTROPOLOGIA E ÉTICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "OPTATIVA I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "PARADIGMAS DE PROGRAMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO II - PLANEJAMENTO DE INTERVENÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO II - PLANEJAMENTO DE INTERVENÇÃO: CAMPO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "ROBÔS, SENSORES E APLICAÇÕES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "SEMINÁRIOS III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5-s9",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p5",
+      "name": "SISTEMAS OPERACIONAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 9,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "COMPLEXIDADE E ALGORITMOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "CULTURA RELIGIOSA: SABERES E TRADIÇÕES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "ENGENHARIA DE SOFTWARE I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "GERÊNCIA DE REDES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "LABORATÓRIO DE REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "NOVOS NEGÓCIOS E STARTUPS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "OPTATIVA II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO III - EXECUÇÃO DA INTERVENÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO III - EXECUÇÃO DA INTERVENÇÃO: CAMPO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6-s9",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p6",
+      "name": "TÓPICOS ESPECIAIS EM COMPUTAÇÃO I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 9,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "CULTURA RELIGIOSA: HUMANISMO, SOCIEDADE E ECOLOGIA INTEGRAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "ENGENHARIA DE SOFTWARE II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "ESTÁGIO OBRIGATÓRIO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 116,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "INTERNET DAS COISAS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "OPTATIVA III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO IV - AVALIAÇÃO E SUSTENTABILIDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO IV - AVALIAÇÃO E SUSTENTABILIDADE: CAMPO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "SEMINÁRIOS IV",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "TÓPICOS ESPECIAIS EM COMPUTAÇÃO II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7-s9",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p7",
+      "name": "VISÃO COMPUTACIONAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 9,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "name": "CIDADES INTELIGENTES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "name": "COMPUTAÇÃO DE ALTO DESEMPENHO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "name": "COMPUTAÇÃO GRÁFICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "name": "OPTATIVA IV",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "name": "SEGURANÇA DE SISTEMAS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "name": "SISTEMAS DISTRIBUIDOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "name": "TÓPICOS ESPECIAIS EM COMPUTAÇÃO III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-morning-snapshot-c4a41b309767-p8",
+      "name": "TRABALHO DE DIPLOMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 116,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening",
+      "kind": "COURSE",
+      "parentExternalId": "puc-pocos-cc-campus",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "shift": "EVENING",
+        "durationPeriods": 8,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "kind": "CURRICULUM",
+      "parentExternalId": "puc-pocos-cc-evening",
+      "name": "Matriz publicada · consulta 29/09/2026",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 8,
+        "note": "Versão identificada pela captura da página oficial; o ano de ingresso não é informado pela página."
+      },
+      "curriculumVersion": "captura-c4a41b309767"
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "name": "ALGORITMOS E ESTRUTURAS DE DADOS I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "name": "INTERAÇÃO HUMANO COMPUTADOR",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "name": "INTRODUÇÃO À CIÊNCIA DA COMPUTAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "name": "LABORATÓRIO DE ALGORITMOS E ESTRUTURAS DE DADOS I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "name": "LABORATÓRIO DE PROJETO HARDWARE E SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "name": "MENTORING - PLANEJAMENTO ACADÊMICO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "name": "MODELAGEM MATEMÁTICA I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p1",
+      "name": "SEMINÁRIOS I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2",
+      "name": "ALGORITMOS E ESTRUTURAS DE DADOS II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2",
+      "name": "ARQUITETURA E ORGANIZAÇÃO DE COMPUTADORES I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2",
+      "name": "LABORATÓRIO DE ALGORITMOS E ESTRUTURAS DE DADOS II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2",
+      "name": "MENTORING - SOCIEDADE DIGITAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2",
+      "name": "MODELAGEM E CONSTRUÇÃO DE APLICAÇÕES 3D",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2",
+      "name": "PROJETO E DESENVOLVIMENTO DE APLICAÇÕES WEB I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p2",
+      "name": "SEMINÁRIOS II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3",
+      "name": "ARQUITETURA E ORGANIZAÇÃO DE COMPUTADORES II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3",
+      "name": "BANCO DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 108,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3",
+      "name": "INTELIGÊNCIA ARTIFICIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3",
+      "name": "LABORATÓRIO DE ARQUITETURA E ORGANIZAÇÃO DE COMPUTADORES II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3",
+      "name": "PROJETO E DESENVOLVIMENTO DE APLICAÇÕES WEB II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p3",
+      "name": "TEORIA DA COMPUTAÇÃO E LINGUAGENS FORMAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "COMPILADORES E INTERPRETADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "COMPUTAÇÃO EM NUVEM",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "DATA SCIENCE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "ENGENHARIA DE APLICAÇÕES MÓVEIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "FILOSOFIA: LÓGICA E PENSAMENTO CRÍTICO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "PROJETO E DESENVOLVIMENTO DE APLICAÇÕES WEB III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO I - DIAGNÓSTICO COMUNITÁRIO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO I - DIAGNÓSTICO COMUNITÁRIO: CAMPO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p4",
+      "name": "SEGURANÇA E CRIPTOGRAFIA DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "CIDADANIA E RESPONSABILIDADE SOCIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "FILOSOFIA: ANTROPOLOGIA E ÉTICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "OPTATIVA I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "PARADIGMAS DE PROGRAMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO II - PLANEJAMENTO DE INTERVENÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO II - PLANEJAMENTO DE INTERVENÇÃO: CAMPO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "ROBÔS, SENSORES E APLICAÇÕES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "SEMINÁRIOS III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5-s9",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p5",
+      "name": "SISTEMAS OPERACIONAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 9,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "COMPLEXIDADE E ALGORITMOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "CULTURA RELIGIOSA: SABERES E TRADIÇÕES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "ENGENHARIA DE SOFTWARE I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "GERÊNCIA DE REDES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 48,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "LABORATÓRIO DE REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "NOVOS NEGÓCIOS E STARTUPS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "OPTATIVA II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO III - EXECUÇÃO DA INTERVENÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO III - EXECUÇÃO DA INTERVENÇÃO: CAMPO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6-s9",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p6",
+      "name": "TÓPICOS ESPECIAIS EM COMPUTAÇÃO I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 9,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "CULTURA RELIGIOSA: HUMANISMO, SOCIEDADE E ECOLOGIA INTEGRAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "ENGENHARIA DE SOFTWARE II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "ESTÁGIO OBRIGATÓRIO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 116,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "INTERNET DAS COISAS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "OPTATIVA III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO IV - AVALIAÇÃO E SUSTENTABILIDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "PROJETO INTEGRADO PESQUISA E EXTENSÃO IV - AVALIAÇÃO E SUSTENTABILIDADE: CAMPO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "SEMINÁRIOS IV",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "TÓPICOS ESPECIAIS EM COMPUTAÇÃO II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7-s9",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p7",
+      "name": "VISÃO COMPUTACIONAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 84,
+        "orderIndex": 9,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8-s0",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "name": "CIDADES INTELIGENTES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 54,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "name": "COMPUTAÇÃO DE ALTO DESEMPENHO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "name": "COMPUTAÇÃO GRÁFICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "name": "OPTATIVA IV",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "name": "SEGURANÇA DE SISTEMAS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "name": "SISTEMAS DISTRIBUIDOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "name": "TÓPICOS ESPECIAIS EM COMPUTAÇÃO III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    },
+    {
+      "externalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-pocos-cc-evening-snapshot-c4a41b309767-p8",
+      "name": "TRABALHO DE DIPLOMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx",
+        "name": "PUC Minas — Ciência da Computação — Poços de Caldas",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "c4a41b3097678747515e98a48b8213c734daf982a37767a0c4839fb91d653488",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 116,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "--"
+      }
+    }
+  ]
+}

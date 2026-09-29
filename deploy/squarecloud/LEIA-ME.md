@@ -15,4 +15,8 @@ O banco escolhido para esta instalação é o PostgreSQL existente no Railway. C
 
 Cadastro, login, perfil, catálogo, salas, chat e caronas precisam somente do PostgreSQL. Confirmação de e-mail e recuperação de senha exigem SMTP. Materiais, IA e voz dependem de seus provedores; os blocos opcionais estão em `deploy/optional.env.example` no repositório.
 
-O catálogo começa vazio. Cadastre sua conta, promova o administrador pelo procedimento em `docs/AUTHENTICATION.md` e importe dados verificados em `/admin`. Nenhum administrador ou dado acadêmico falso é criado automaticamente.
+O catálogo inclui matrizes verificadas de UNA (com prioridade Aimorés), PUC Minas e UFMG. No primeiro início desta atualização, jobs em lotes carregam os registros; aguarde a conclusão em `/admin/catalog/imports`. Matrículas, salas e dados antigos são preservados pelas migrations V6/V7. Faça backup do PostgreSQL antes de atualizar. Nenhum administrador ou dado acadêmico falso é criado automaticamente.
+
+Após o início, selecione UNA → Campus Sede Aimorés → Análise e Desenvolvimento de Sistemas (modalidade correta) → E2A Radial → Fundamental (semestres 1–2). Marque as UCs atuais, por exemplo Exploração digital e fundamentos tecnológicos e Matemática computacional aplicada. A matriz pública é organizada por níveis; confira a versão com sua matrícula no Ulife.
+
+O laboratório de programação tem 12 desafios e aparece para matrículas em TI ou UCs de programação. O progresso é salvo no mesmo PostgreSQL. Catálogo e jogos não precisam de novas variáveis no `.env`. O frontend atualizado na Vercel requer este novo backend.

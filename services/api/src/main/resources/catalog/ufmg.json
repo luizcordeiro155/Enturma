@@ -1,0 +1,1076 @@
+{
+  "provider": "UFMG",
+  "entries": [
+    {
+      "externalId": "ufmg",
+      "kind": "INSTITUTION",
+      "parentExternalId": null,
+      "name": "Universidade Federal de Minas Gerais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/painel-futuro-aluno/",
+        "name": "DCC UFMG — graduação e campus Pampulha",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "22adff3066fe63fe39f184a7318081815397a74b3c15df9b4097bf3a24cc25de",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "shortName": "UFMG",
+        "state": "MG",
+        "websiteUrl": "https://ufmg.br"
+      }
+    },
+    {
+      "externalId": "pampulha",
+      "kind": "CAMPUS",
+      "parentExternalId": "ufmg",
+      "name": "Campus Pampulha",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/painel-futuro-aluno/",
+        "name": "DCC UFMG — graduação e campus Pampulha",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": "22adff3066fe63fe39f184a7318081815397a74b3c15df9b4097bf3a24cc25de",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "city": "Belo Horizonte",
+        "state": "MG"
+      }
+    },
+    {
+      "externalId": "si-noturno",
+      "kind": "COURSE",
+      "parentExternalId": "pampulha",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "shift": "EVENING",
+        "durationPeriods": 9,
+        "learningArea": "IT",
+        "aliases": "SI"
+      }
+    },
+    {
+      "externalId": "si-n2019-9",
+      "kind": "CURRICULUM",
+      "parentExternalId": "si-noturno",
+      "name": "N-2019/9 · Bacharelado / Formação Livre",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "totalWorkloadHours": 3000,
+        "minimumPeriods": 8
+      },
+      "curriculumVersion": "N-2019/9"
+    },
+    {
+      "externalId": "si-n2019-9-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "si-n2019-9-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "si-n2019-9-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "si-n2019-9-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "si-n2019-9-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "si-n2019-9-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "si-n2019-9-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "si-n2019-9-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "si-n2019-9-p9",
+      "kind": "PERIOD",
+      "parentExternalId": "si-n2019-9",
+      "name": "9º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 9
+    },
+    {
+      "externalId": "si-n2019-9-p1-CAD103",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p1",
+      "name": "ADMINISTRACAO TGA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "CAD103"
+    },
+    {
+      "externalId": "si-n2019-9-p1-DCC044",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p1",
+      "name": "FUNDAMENTOS DE SISTEMAS DE INFORMACAO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 30,
+        "orderIndex": 1,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC044"
+    },
+    {
+      "externalId": "si-n2019-9-p1-DCC203",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p1",
+      "name": "PROGRAMAÇÃO E DESENVOLVIMENTO DE SOFTWARE I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 2,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC203"
+    },
+    {
+      "externalId": "si-n2019-9-p1-DCC638",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p1",
+      "name": "INTRODUÇÃO À LÓGICA COMPUTACIONAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 3,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC638"
+    },
+    {
+      "externalId": "si-n2019-9-p1-MAT038",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p1",
+      "name": "GEOMETRIA ANALITICA E ALGEBRA LINEAR",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 4,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "MAT038"
+    },
+    {
+      "externalId": "si-n2019-9-p2-DCC204",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p2",
+      "name": "PROGRAMAÇÃO E DESENVOLVIMENTO DE SOFTWARE II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 5,
+        "learningArea": "IT",
+        "prerequisiteText": "DCC203",
+        "prerequisites": [
+          "si-n2019-9-p1-DCC203"
+        ]
+      },
+      "code": "DCC204"
+    },
+    {
+      "externalId": "si-n2019-9-p2-DCC216",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p2",
+      "name": "MATEMÁTICA DISCRETA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 6,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC216"
+    },
+    {
+      "externalId": "si-n2019-9-p2-DCC639",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p2",
+      "name": "ÁLGEBRA LINEAR COMPUTACIONAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 7,
+        "learningArea": "IT",
+        "prerequisiteText": "MAT038",
+        "prerequisites": [
+          "si-n2019-9-p1-MAT038"
+        ]
+      },
+      "code": "DCC639"
+    },
+    {
+      "externalId": "si-n2019-9-p2-ECN101",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p2",
+      "name": "ECONOMIA A I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 8,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "ECN101"
+    },
+    {
+      "externalId": "si-n2019-9-p2-MAT001",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p2",
+      "name": "CALCULO DIFERENCIAL E INTEGRAL I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 9,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "MAT001"
+    },
+    {
+      "externalId": "si-n2019-9-p3-DCC011",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p3",
+      "name": "INTRODUÇÃO A BANCO DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 10,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC011"
+    },
+    {
+      "externalId": "si-n2019-9-p3-DCC114",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p3",
+      "name": "INTRODUÇÃO AOS SISTEMAS LÓGICOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 11,
+        "learningArea": "IT",
+        "prerequisiteText": "DCC216",
+        "prerequisites": [
+          "si-n2019-9-p2-DCC216"
+        ]
+      },
+      "code": "DCC114"
+    },
+    {
+      "externalId": "si-n2019-9-p3-DCC205",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p3",
+      "name": "ESTRUTURAS DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 12,
+        "learningArea": "IT",
+        "prerequisiteText": "DCC204",
+        "prerequisites": [
+          "si-n2019-9-p2-DCC204"
+        ]
+      },
+      "code": "DCC205"
+    },
+    {
+      "externalId": "si-n2019-9-p3-EST031",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p3",
+      "name": "ESTATISTICA E PROBABILIDADES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 13,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "EST031"
+    },
+    {
+      "externalId": "si-n2019-9-p3-MAT039",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p3",
+      "name": "CÁLCULO DIFERENCIAL E INTEGRAL II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 14,
+        "learningArea": "IT",
+        "prerequisiteText": "MAT001",
+        "prerequisites": [
+          "si-n2019-9-p2-MAT001"
+        ]
+      },
+      "code": "MAT039"
+    },
+    {
+      "externalId": "si-n2019-9-p4-CAD163",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p4",
+      "name": "ADMINISTRAÇÃO DE RECURSOS HUMANOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 15,
+        "learningArea": "IT",
+        "prerequisiteText": "CAD103",
+        "prerequisites": [
+          "si-n2019-9-p1-CAD103"
+        ]
+      },
+      "code": "CAD163"
+    },
+    {
+      "externalId": "si-n2019-9-p4-DCC006",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p4",
+      "name": "ORGANIZAÇÃO DE COMPUTADORES I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 16,
+        "learningArea": "IT",
+        "prerequisiteText": "DCC114",
+        "prerequisites": [
+          "si-n2019-9-p3-DCC114"
+        ]
+      },
+      "code": "DCC006"
+    },
+    {
+      "externalId": "si-n2019-9-p4-DCC206",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p4",
+      "name": "ALGORITMOS I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 17,
+        "learningArea": "IT",
+        "prerequisiteText": "DCC216, DCC205",
+        "prerequisites": [
+          "si-n2019-9-p2-DCC216",
+          "si-n2019-9-p3-DCC205"
+        ]
+      },
+      "code": "DCC206"
+    },
+    {
+      "externalId": "si-n2019-9-p4-TGI004",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p4",
+      "name": "USUÁRIOS DA INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 18,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "TGI004"
+    },
+    {
+      "externalId": "si-n2019-9-p5-CAD004",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p5",
+      "name": "ADMINISTRAÇÃO DA PRODUÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 19,
+        "learningArea": "IT",
+        "prerequisiteText": "CAD103",
+        "prerequisites": [
+          "si-n2019-9-p1-CAD103"
+        ]
+      },
+      "code": "CAD004"
+    },
+    {
+      "externalId": "si-n2019-9-p5-CIC010",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p5",
+      "name": "INTRODUÇÃO À CONTABILIDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 20,
+        "learningArea": "IT",
+        "prerequisiteText": "CAD103",
+        "prerequisites": [
+          "si-n2019-9-p1-CAD103"
+        ]
+      },
+      "code": "CIC010"
+    },
+    {
+      "externalId": "si-n2019-9-p5-DCC024",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p5",
+      "name": "LINGUAGENS DE PROGRAMACAO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 21,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC024"
+    },
+    {
+      "externalId": "si-n2019-9-p5-DCC194",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p5",
+      "name": "INTERAÇÃO HUMANO-COMPUTADOR",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 22,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC194"
+    },
+    {
+      "externalId": "si-n2019-9-p5-OTI071",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p5",
+      "name": "ORGANIZAÇÃO E TRATAMENTO DA INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 23,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "OTI071"
+    },
+    {
+      "externalId": "si-n2019-9-p6-CAD153",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p6",
+      "name": "ADMINISTRAÇÃO DE CUSTOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 24,
+        "learningArea": "IT",
+        "prerequisiteText": "CIC010",
+        "prerequisites": [
+          "si-n2019-9-p5-CIC010"
+        ]
+      },
+      "code": "CAD153"
+    },
+    {
+      "externalId": "si-n2019-9-p6-DCC603",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p6",
+      "name": "ENGENHARIA DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 25,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC603"
+    },
+    {
+      "externalId": "si-n2019-9-p6-DCC605",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p6",
+      "name": "SISTEMAS OPERACIONAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 26,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC605"
+    },
+    {
+      "externalId": "si-n2019-9-p7-CAD167",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p7",
+      "name": "ADMINISTRAÇÃO FINANCEIRA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 27,
+        "learningArea": "IT",
+        "prerequisiteText": "CAD153",
+        "prerequisites": [
+          "si-n2019-9-p6-CAD153"
+        ]
+      },
+      "code": "CAD167"
+    },
+    {
+      "externalId": "si-n2019-9-p7-DCC023",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p7",
+      "name": "REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 28,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC023"
+    },
+    {
+      "externalId": "si-n2019-9-p7-DCC072",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p7",
+      "name": "ENGENHARIA DE SOFTWARE II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 29,
+        "learningArea": "IT",
+        "prerequisiteText": "DCC603",
+        "prerequisites": [
+          "si-n2019-9-p6-DCC603"
+        ]
+      },
+      "code": "DCC072"
+    },
+    {
+      "externalId": "si-n2019-9-p7-DCC636",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p7",
+      "name": "ÉTICA NA COMPUTAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 30,
+        "orderIndex": 30,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC636"
+    },
+    {
+      "externalId": "si-n2019-9-p8-CAD164",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p8",
+      "name": "ADMINISTRAÇÃO MERCADOLÓGICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 31,
+        "learningArea": "IT",
+        "prerequisiteText": "CAD103",
+        "prerequisites": [
+          "si-n2019-9-p1-CAD103"
+        ]
+      },
+      "code": "CAD164"
+    },
+    {
+      "externalId": "si-n2019-9-p8-DCC046",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p8",
+      "name": "MONOGRAFIA EM SISTEMAS DE INFORMAÇÃO I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 32,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC046"
+    },
+    {
+      "externalId": "si-n2019-9-p8-DCC637",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p8",
+      "name": "COMPUTAÇÃO E SOCIEDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 30,
+        "orderIndex": 33,
+        "learningArea": "IT",
+        "prerequisiteText": "-",
+        "prerequisites": []
+      },
+      "code": "DCC637"
+    },
+    {
+      "externalId": "si-n2019-9-p9-DCC073",
+      "kind": "SUBJECT",
+      "parentExternalId": "si-n2019-9-p9",
+      "name": "MONOGRAFIA EM SISTEMAS DE INFORMAÇÃO II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://dcc.ufmg.br/wp-content/uploads/versao_curricular_bsi_20250102.pdf",
+        "name": "UFMG — Sistemas de Informação — percurso N-2019/9, relatório de 02/01/2025",
+        "type": "OFFICIAL_PDF",
+        "contentHash": "bba1818cc83ecaa3c35d9cf4085d7d3e00f01c1cefd703ac88e0647f95431e63",
+        "retrievedAt": "2026-09-29T03:30:00Z",
+        "verifiedAt": "2026-09-29T03:30:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 34,
+        "learningArea": "IT",
+        "prerequisiteText": "DCC046",
+        "prerequisites": [
+          "si-n2019-9-p8-DCC046"
+        ]
+      },
+      "code": "DCC073"
+    }
+  ]
+}

@@ -1,5 +1,8 @@
 "use client";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { api } from "@/lib/api";
+import { Gamepad2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
@@ -18,6 +21,18 @@ const links = [
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const [learning, setLearning] = useState(false);
+  useEffect(() => {
+    let active = true;
+    api<{ eligible: boolean }>("/learning/access")
+      .then((r) => {
+        if (active) setLearning(r.eligible);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [path]);
   return (
     <div className="app-shell">
       <a className="skip" href="#content">
@@ -31,6 +46,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
           </span>
         </Link>
         <nav aria-label="Principal">
+          {learning ? (
+            <Link
+              href="/learn"
+              aria-current={path === "/learn" ? "page" : undefined}
+            >
+              <Gamepad2 size={21} />
+              Praticar programação
+            </Link>
+          ) : null}
           {links.map(({ href, label, icon: Icon }) => (
             <Link
               key={href}

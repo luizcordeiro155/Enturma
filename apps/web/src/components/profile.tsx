@@ -74,7 +74,9 @@ export function ProfileView({
               p.subjects.map((s) => (
                 <article className="room-row" key={s.id}>
                   <div>
-                    <h3>{s.name}</h3>
+                    <h3>
+                      <Link href={`/subjects/${s.id}`}>{s.name}</Link>
+                    </h3>
                     <a href={s.sourceUrl} target="_blank" rel="noreferrer">
                       Consultar fonte: {s.sourceName}
                     </a>

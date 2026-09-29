@@ -1,6 +1,30 @@
 # API v1
 
-Base `/api/v1`. Todos os endpoints, exceto autenticação inicial e health, exigem `Authorization: Bearer <access>`. Erros: `timestamp`, `status`, `code`, `message`, `path`, `requestId`.
+Base `/api/v1`. Todos os endpoints, exceto autenticação inicial, health e leitura GET `/catalog/**`, exigem `Authorization: Bearer <access>`. Erros: `timestamp`, `status`, `code`, `message`, `path`, `requestId`.
+
+## Catálogo V2 e aprendizagem
+
+| Método/rota | Função |
+|---|---|
+| GET /catalog/institutions, campuses, courses, curricula, periods, subjects, topics | parentId, search, page; `{items,page,pageSize,hasMore}` |
+| GET /catalog/onboarding/options | kind, parentId, search, page; `{items,page,pageSize}` |
+| GET /catalog/subjects/{id} | Fonte, contexto de grade, tópicos e pré-requisitos |
+| GET /catalog/coverage/summary | Cobertura por ofertas conhecidas |
+| POST /catalog/requests | `{courseOfferingId}`; usuário autenticado |
+| GET /admin/catalog/summary, providers, sources, events, audit, requests, migration-report | Gestão e inspeção; ADMIN/SUPER_ADMIN |
+| GET/POST /admin/catalog/imports | Jobs paginados / documento `{provider,entries}` |
+| POST /admin/catalog/imports/csv | CSV, query provider |
+| GET /admin/catalog/imports/{id} | Contadores e página de itens |
+| POST /admin/catalog/imports/{id}/pause,resume,cancel,retry | Controle persistido |
+| GET /admin/catalog/review; POST /admin/catalog/review/{id} | Comparação e `{action,correction}` |
+| POST /admin/catalog/providers/{code}/imports | Reimportar snapshot |
+| POST /admin/catalog/documents/inspect; /documents/pdf | URL / multipart para extração pendente |
+| POST /admin/catalog/sources/{id}/check | Conferir hash sem sobrescrever matriz |
+| GET /learning/access | `{eligible}` baseado na matrícula |
+| GET /learning/progress | Progresso do usuário elegível |
+| POST /learning/attempts | `{game:robot|binary|trace,level:1..4,answer}`; validação no servidor |
+
+Detalhes e schemas em [ACADEMIC_IMPORTS](ACADEMIC_IMPORTS.md). `/academics` e `/admin/academics/import` permanecem como compatibilidade legada; use V2 para novos providers.
 
 | Método/rota | Função |
 |---|---|

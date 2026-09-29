@@ -81,3 +81,6 @@ E2E exige API e web em execução, API apontando para um banco separado com `e2e
 ## Documentação
 
 [Plano](docs/IMPLEMENTATION_PLAN.md) · [Estado e limites](docs/STATUS.md) · [Arquitetura](docs/ARCHITECTURE.md) · [Banco](docs/DATABASE.md) · [API](docs/API.md) · [Autenticação](docs/AUTHENTICATION.md) · [Salas](docs/STUDY_ROOMS.md) · [Tempo real](docs/REALTIME.md) · [IA](docs/AI.md) · [Caronas](docs/CARPOOL.md) · [Segurança](docs/SECURITY.md) · [Deploy](docs/DEPLOYMENT.md)
+# Atualização: catálogo acadêmico e laboratório de programação
+
+Catálogo verificado com prioridade UNA Aimorés, matrizes de UNA/PUC Minas/UFMG, importações persistidas, painel `/admin/catalog`, onboarding web/mobile e 12 desafios JavaScript em `/learn`, liberados por matrícula em TI. Veja [cobertura, fontes e operação](docs/ACADEMIC_CATALOG.md). Não exige novas credenciais no `.env`.
