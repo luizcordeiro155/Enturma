@@ -1,27 +1,11 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
-import Link from "next/link";
 import {
-  Bot,
-  Binary,
-  Bug,
-  Check,
-  Play,
-  RotateCcw,
-  ArrowRight,
-  ArrowLeft,
-  ArrowUp,
-  ArrowDown,
-  Flame,
-  Trophy,
-  Zap,
-} from "lucide-react";
-import { api, post } from "@/lib/api";
-import {
+  robotBoards,
   robotFrames,
-  robotWalls,
-  binaryTargets,
-  bitValue,
+  codeWordChallenges,
+  programmerDictionary,
+  evaluateWordGuess,
+  normalizedCodewordAnswer,
   traceChallenges,
 } from "@/lib/learning-games";
 import { Shell } from "./shell";
@@ -56,10 +40,10 @@ const games = [
     description: "Programe o caminho. Execute. Observe cada passo.",
   },
   {
-    id: "binary",
-    name: "Laboratório binário",
-    icon: Binary,
-    description: "Transforme números em bits e veja a matemática acontecer.",
+    id: "codeword",
+    name: "Código Secreto",
+    icon: Code2,
+    description: "Termo para programadores com Solo, Dueto e Quarteto.",
   },
   {
     id: "trace",
@@ -77,7 +61,9 @@ export function Learning() {
   const [level, setLevel] = useState(1);
   const [commands, setCommands] = useState("");
   const [position, setPosition] = useState({ x: 0, y: 0, collision: false });
-  const [bits, setBits] = useState<boolean[]>(Array(6).fill(false));
+  const [wordGuess, setWordGuess] = useState("");
+  const [wordRows, setWordRows] = useState<string[]>([]);
+  const [wordSolved, setWordSolved] = useState<boolean[]>([false]);
   const [answer, setAnswer] = useState("");
   const [frame, setFrame] = useState(0);
   const [running, setRunning] = useState(false);
@@ -138,7 +124,9 @@ export function Learning() {
     setDailyMode(nextDaily);
     setCommands("");
     setPosition({ x: 0, y: 0, collision: false });
-    setBits(Array(6).fill(false));
+    setWordGuess("");
+    setWordRows([]);
+    setWordSolved(Array(codeWordChallenges[nextLevel - 1]?.words.length ?? 1).fill(false));
     setAnswer("");
     setFrame(0);
     setRunning(false);
@@ -176,6 +164,16 @@ export function Learning() {
     setCorrect(false);
     const token = generation.current;
     const result = robotFrames(commands, level);
+    if (!result.valid) {
+      setMessage("Programa inválido. Use UP, DOWN, LEFT, RIGHT ou REPEAT N DIRECAO.");
+      setRunning(false);
+      return;
+    }
+    if (result.operations > robotBoards[level - 1].maxOps) {
+      setMessage("Seu programa excede o limite de movimentos deste nível.");
+      setRunning(false);
+      return;
+    }
     let index = 0;
     const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ? 0
@@ -189,7 +187,32 @@ export function Learning() {
     };
     tick();
   }
+  function submitWordGuess() {
+    const challenge = codeWordChallenges[level - 1];
+    const guess = wordGuess.trim().toUpperCase();
+    if (guess.length !== challenge.length) {
+      setMessage(`Digite uma palavra de ${challenge.length} letras.`);
+      return;
+    }
+    if (!programmerDictionary.includes(guess) && !challenge.words.includes(guess)) {
+      setMessage("Use um termo de programação válido para este tamanho.");
+      return;
+    }
+    const nextSolved = challenge.words.map(
+      (target, index) => wordSolved[index] || target === guess,
+    );
+    const nextRows = [...wordRows, guess];
+    setWordRows(nextRows);
+    setWordSolved(nextSolved);
+    setWordGuess("");
+    if (nextSolved.every(Boolean)) void submit(normalizedCodewordAnswer(challenge.words));
+    else if (nextRows.length >= challenge.attempts)
+      setMessage("Limite de tentativas atingido. Recomece e use as pistas.");
+  }
+
   const trace = traceChallenges[level - 1];
+  const wordChallenge = codeWordChallenges[level - 1];
+  const robotBoard = robotBoards[level - 1];
   return (
     <Shell>
       <div className="learning-page">
@@ -338,31 +361,34 @@ export function Learning() {
                 <div className="robot-layout">
                   <div>
                     <p>
-                      Leve o robô do início até a bandeira. Evite os blocos.
-                      Cada seta é uma instrução.
+                      Programe o robô até a bandeira. Obstáculos encerram a execução e os níveis
+                      finais exigem soluções compactas com repetição.
                     </p>
                     <div
-                      className="robot-grid"
-                      aria-label={`Robô na coluna ${position.x + 1}, linha ${position.y + 1}${position.collision ? ", colisão" : ""}`}
+                      className="robot-grid hard"
+                      style={{ gridTemplateColumns: `repeat(${robotBoard.size}, 1fr)` }}
+                      aria-label={`Robô na coluna ${position.x + 1}, linha ${position.y + 1}`}
                     >
-                      {Array.from({ length: 16 }, (_, i) => (
+                      {Array.from({ length: robotBoard.size * robotBoard.size }, (_, i) => (
                         <div
                           key={i}
                           className={
-                            robotWalls[level - 1].includes(i)
+                            robotBoard.walls.includes(i)
                               ? "wall"
-                              : i === 15
+                              : i === robotBoard.goal
                                 ? "goal"
                                 : "tile"
                           }
                         >
-                          {i === 15 ? "⚑" : i === 0 ? "INÍCIO" : ""}
+                          {i === robotBoard.goal ? "⚑" : i === 0 ? "INÍCIO" : ""}
                         </div>
                       ))}
                       <span
                         className={`robot-piece ${position.collision ? "collision" : ""}`}
                         style={{
-                          transform: `translate(${Math.max(0, Math.min(3, position.x)) * 100}%, ${Math.max(0, Math.min(3, position.y)) * 100}%)`,
+                          width: `${100 / robotBoard.size}%`,
+                          height: `${100 / robotBoard.size}%`,
+                          transform: `translate(${Math.max(0, Math.min(robotBoard.size - 1, position.x)) * 100}%, ${Math.max(0, Math.min(robotBoard.size - 1, position.y)) * 100}%)`,
                         }}
                       >
                         <Bot size={32} />
@@ -372,108 +398,86 @@ export function Learning() {
                   <div className="program-console">
                     <h3>Seu programa</h3>
                     <p className="muted">
-                      Até 24 comandos · {commands.length} usados
+                      Use UP, DOWN, LEFT, RIGHT ou REPEAT N DIRECAO. Limite expandido:
+                      {" "}{robotBoard.maxOps} movimentos.
                     </p>
-                    <div className="command-track" aria-live="polite">
-                      {commands ? (
-                        commands
-                          .split("")
-                          .map((c, i) => (
-                            <span key={i}>
-                              {{ R: "→", L: "←", U: "↑", D: "↓" }[c]}
-                            </span>
-                          ))
-                      ) : (
-                        <span className="muted">
-                          Adicione instruções abaixo
-                        </span>
-                      )}
-                    </div>
-                    <div className="command-buttons">
-                      {[
-                        ["U", ArrowUp, "Cima"],
-                        ["L", ArrowLeft, "Esquerda"],
-                        ["D", ArrowDown, "Baixo"],
-                        ["R", ArrowRight, "Direita"],
-                      ].map(([c, Icon, label]) => {
-                        const Direction = Icon as typeof ArrowUp;
-                        return (
-                          <button
-                            key={String(c)}
-                            aria-label={String(label)}
-                            disabled={running || commands.length >= 24}
-                            onClick={() => setCommands((s) => s + String(c))}
-                          >
-                            <Direction size={23} />
-                          </button>
-                        );
-                      })}
-                    </div>
+                    <textarea
+                      className="code-input robot-code"
+                      value={commands}
+                      onChange={(e) => setCommands(e.target.value)}
+                      placeholder={"RIGHT\nREPEAT 3 DOWN\nLEFT"}
+                      spellCheck={false}
+                      disabled={running}
+                    />
                     <div className="actions">
-                      <button
-                        disabled={running || !commands}
-                        onClick={runRobot}
-                      >
-                        <Play size={16} /> Executar
+                      <button disabled={running || !commands.trim()} onClick={runRobot}>
+                        <Play size={16} /> Executar programa
                       </button>
-                      <button
-                        className="secondary"
-                        disabled={running || !commands}
-                        onClick={() => setCommands((s) => s.slice(0, -1))}
-                      >
-                        Desfazer
+                      <button className="secondary" disabled={running} onClick={() => reset()}>
+                        <RotateCcw size={16} /> Limpar
                       </button>
                     </div>
                     <p className="lab-hint">
-                      Pense antes de executar: qual instrução muda a linha? Qual
-                      muda a coluna?
+                      Nos níveis finais uma sequência longa demais falha mesmo chegando ao objetivo.
                     </p>
                   </div>
                 </div>
-              ) : game === "binary" ? (
-                <div className="binary-lab">
+              ) : game === "codeword" ? (
+                <div className="codeword-lab">
+                  <div className="codeword-mode-switch">
+                    <button className={level === 1 ? "" : "secondary"} onClick={() => reset("codeword", 1)}>Solo</button>
+                    <button className={level === 2 || level === 3 ? "" : "secondary"} onClick={() => reset("codeword", 2)}>Dueto</button>
+                    <button className={level === 4 ? "" : "secondary"} onClick={() => reset("codeword", 4)}>Quarteto</button>
+                  </div>
                   <p>
-                    Acenda os bits para representar o número{" "}
-                    <strong className="target-number">
-                      {binaryTargets[level - 1]}
-                    </strong>
-                    .
+                    Descubra {wordChallenge.words.length === 1 ? "a palavra" : `as ${wordChallenge.words.length} palavras`}
+                    {" "}de programação em até {wordChallenge.attempts} tentativas compartilhadas.
                   </p>
-                  <div className="bit-switches">
-                    {bits.map((bit, i) => (
-                      <button
-                        key={i}
-                        aria-label={`Bit ${2 ** (5 - i)}`}
-                        aria-pressed={bit}
-                        disabled={running}
-                        onClick={() =>
-                          setBits((values) =>
-                            values.map((v, n) => (n === i ? !v : v)),
-                          )
-                        }
-                      >
-                        <small>{2 ** (5 - i)}</small>
-                        <strong>{bit ? 1 : 0}</strong>
-                        <span>{bit ? "Ligado" : "Desligado"}</span>
-                      </button>
+                  <div className={`codeword-boards ${wordChallenge.mode}`}>
+                    {wordChallenge.words.map((target, boardIndex) => (
+                      <div className="codeword-board" key={target}>
+                        <strong>{wordChallenge.mode === "solo" ? "Solo" : `Painel ${boardIndex + 1}`}</strong>
+                        {Array.from({ length: wordChallenge.attempts }, (_, rowIndex) => {
+                          const guess = wordRows[rowIndex] ?? "";
+                          const marks = guess
+                            ? evaluateWordGuess(target, guess)
+                            : Array(wordChallenge.length).fill("empty");
+                          return (
+                            <div className="codeword-row" key={rowIndex}>
+                              {Array.from({ length: wordChallenge.length }, (_, charIndex) => (
+                                <span key={charIndex} className={marks[charIndex]}>
+                                  {guess[charIndex] ?? ""}
+                                </span>
+                              ))}
+                            </div>
+                          );
+                        })}
+                      </div>
                     ))}
                   </div>
-                  <div className="binary-equation" aria-live="polite">
-                    {bits.map((b, i) => (b ? 2 ** (5 - i) : 0)).join(" + ")} ={" "}
-                    <strong>{bitValue(bits)}</strong>
+                  <div className="codeword-entry">
+                    <input
+                      value={wordGuess}
+                      onChange={(e) =>
+                        setWordGuess(
+                          e.target.value.replace(/[^a-zA-Z]/g, "").slice(0, wordChallenge.length).toUpperCase(),
+                        )
+                      }
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") submitWordGuess();
+                      }}
+                      maxLength={wordChallenge.length}
+                      placeholder={`${wordChallenge.length} letras`}
+                      disabled={running || correct}
+                    />
+                    <button disabled={running || !wordGuess.trim() || correct} onClick={submitWordGuess}>
+                      Testar termo
+                    </button>
                   </div>
-                  <button
-                    disabled={running}
-                    onClick={() => void submit(bitValue(bits).toString(2))}
-                  >
-                    Conferir combinação
-                  </button>
                   <p className="lab-hint">
-                    Cada posição vale uma potência de 2. Somente os bits ligados
-                    entram na soma.
+                    Verde: posição certa. Amarelo: letra existente em outra posição. Cinza: ausente.
                   </p>
-                </div>
-              ) : (
+                </div>              ) : (
                 <div className="trace-layout">
                   <pre className="code-window">
                     <code>{trace.code}</code>
