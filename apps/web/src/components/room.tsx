@@ -141,8 +141,10 @@ export function RoomView({ id }: { id: string }) {
     let timeout: ReturnType<typeof setTimeout> | undefined;
     let attempts = 0;
     const timer = setInterval(() => setNow(Date.now()), 1000);
-
-    void reloadRoom().catch((e) => setError((e as Error).message));
+    const peerMap = peerNames.current;
+    const bootstrap = setTimeout(() => {
+      void reloadRoom().catch((e) => setError((e as Error).message));
+    }, 0);
 
     async function connect() {
       if (!alive) return;
@@ -295,12 +297,12 @@ export function RoomView({ id }: { id: string }) {
     return () => {
       alive = false;
       if (timeout) clearTimeout(timeout);
+      clearTimeout(bootstrap);
       clearInterval(timer);
       socketRef.current?.close();
       roomKeyRef.current = null;
       identityRef.current = null;
-      peerNames.current.clear();
-      setMessages([]);
+      peerMap.clear();
     };
   }, [id, reloadRoom, applyEvent]);
 
