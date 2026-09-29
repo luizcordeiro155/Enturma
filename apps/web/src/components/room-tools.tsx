@@ -653,16 +653,39 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
           </small>
         </>
       ) : (
-        <div className="call-entry">
+        <div className="call-entry discord-call-entry">
           <div>
-            <strong>Entre na chamada da turma</strong>
-            <span>
-              Veja quem está conectado, quem está falando e quem está compartilhando a tela.
-            </span>
+            <strong>Conectar à sala</strong>
+            <span>Escolha como entrar. Depois você pode trocar microfone, câmera e tela.</span>
           </div>
-          <button disabled={ended || busy} onClick={join}>
-            {busy ? "Conectando…" : "Entrar na chamada"}
-          </button>
+          <div className="call-entry-actions">
+            <button
+              type="button"
+              disabled={ended || busy}
+              onClick={() => void join("voice")}
+            >
+              <Mic size={18} />
+              {busy ? "Conectando…" : "Iniciar chamada"}
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              disabled={ended || busy}
+              onClick={() => void join("camera")}
+            >
+              <Video size={18} />
+              Câmera
+            </button>
+            <button
+              type="button"
+              className="secondary"
+              disabled={ended || busy}
+              onClick={() => void join("screen")}
+            >
+              <MonitorUp size={18} />
+              Transmitir tela
+            </button>
+          </div>
         </div>
       )}
     </div>
