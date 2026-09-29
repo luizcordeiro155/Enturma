@@ -34,9 +34,6 @@ public class MaterialService {
   public Object upload(Actor a, UUID room, String fileName, byte[] bytes) {
     study.activeLocked(room);
     study.member(a, room);
-    if (!storage.enabled())
-      throw new ApiException(
-          503, "STORAGE_UNAVAILABLE", "O envio de materiais ainda não está disponível.");
     if (db.jdbc.queryForObject(
             "SELECT count(*) FROM study_material WHERE room_id=? AND status='READY'",
             Long.class,
@@ -46,31 +43,37 @@ public class MaterialService {
     if (name.length() > 200) name = name.substring(name.length() - 200);
     var parsed = parser.parse(bytes, name);
     UUID id = UUID.randomUUID();
-    String key = "rooms/" + room + "/" + id;
-    storage.put(key, bytes, parsed.mime());
-    org.springframework.transaction.support.TransactionSynchronizationManager
-        .registerSynchronization(
-            new org.springframework.transaction.support.TransactionSynchronization() {
-              @Override
-              public void afterCompletion(int status) {
-                if (status != STATUS_COMMITTED)
-                  try {
-                    storage.delete(key);
-                  } catch (Exception ignored) {
-                  }
-              }
-            });
+    String key = storage.enabled() ? "rooms/" + room + "/" + id : "db:" + id;
+    byte[] inline = null;
+    if (storage.enabled()) {
+      storage.put(key, bytes, parsed.mime());
+      org.springframework.transaction.support.TransactionSynchronizationManager
+          .registerSynchronization(
+              new org.springframework.transaction.support.TransactionSynchronization() {
+                @Override
+                public void afterCompletion(int status) {
+                  if (status != STATUS_COMMITTED)
+                    try {
+                      storage.delete(key);
+                    } catch (Exception ignored) {
+                    }
+                }
+              });
+    } else {
+      inline = bytes;
+    }
     db.jdbc.update(
         "INSERT INTO"
-            + " study_material(id,room_id,uploaded_by,file_name,storage_key,mime_type,file_size)"
-            + " VALUES (?,?,?,?,?,?,?)",
+            + " study_material(id,room_id,uploaded_by,file_name,storage_key,mime_type,file_size,inline_bytes)"
+            + " VALUES (?,?,?,?,?,?,?,?)",
         id,
         room,
         a.id(),
         name,
         key,
         parsed.mime(),
-        bytes.length);
+        bytes.length,
+        inline);
     for (var c : parsed.chunks())
       db.jdbc.update(
           "INSERT INTO material_chunk(id,material_id,room_id,ordinal,page,body) VALUES"
@@ -91,8 +94,11 @@ public class MaterialService {
     var m =
         db.one(
             "SELECT * FROM study_material WHERE id=? AND room_id=? AND status='READY'", id, room);
+    byte[] inline = (byte[]) m.get("inlineBytes");
+    byte[] body =
+        inline != null ? inline : storage.get((String) m.get("storageKey"));
     return new Download(
-        storage.get((String) m.get("storageKey")),
+        body,
         (String) m.get("fileName"),
         (String) m.get("mimeType"));
   }
