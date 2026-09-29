@@ -8,7 +8,7 @@ A primeira pessoa conectada gera uma chave AES-GCM 256-bit da sala. Quando outra
 
 Texto, imagens, respostas, exclusões e reações são cifrados no navegador antes do envio. O backend não recebe a chave AES da sala e não persiste o conteúdo. A migration V9 remove as tabelas legadas de mensagens e reações. Ao atualizar a página ou quando todos os participantes saem, o histórico em memória é perdido por design.
 
-Imagens aceitas no chat Web: JPG, PNG, WEBP e GIF, com limite de 650 KB. Elas viajam dentro do envelope cifrado e não são enviadas ao Object Storage.
+Imagens aceitas no chat Web: JPG, PNG, WEBP e GIF, com limite de 8 MB. Antes do envio o usuário vê uma prévia e pode remover o anexo. A imagem é cifrada no navegador, viaja somente dentro do envelope E2EE e não é enviada ao Object Storage.
 
 O servidor valida associação à sala antes de aceitar o socket, limita payloads e injeta o `senderId` autenticado no envelope externo. O cliente rejeita eventos cujo remetente interno não corresponda ao remetente autenticado.
 
@@ -21,8 +21,9 @@ Chamadas usam LiveKit/WebRTC. O backend emite grants curtos somente para partici
 - microfone e mute;
 - câmera;
 - participantes remotos;
-- indicador de quem está falando;
-- compartilhamento de tela;
+- indicador visual de quem está falando em tempo real;
+- lista completa de participantes da chamada;
+- compartilhamento de tela com destaque do transmissor e lista de participantes que estão recebendo a transmissão;
 - áudio de screen share quando suportado pelo navegador;
 - reconexão do LiveKit;
 - encerramento quando a sala termina.

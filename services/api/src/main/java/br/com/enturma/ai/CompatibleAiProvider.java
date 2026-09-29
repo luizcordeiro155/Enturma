@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CompatibleAiProvider implements AiProvider {
+  private static final String OPENAI_MODEL = "gpt-5.6-sol";
   private final Environment env;
   private final ObjectMapper json;
   private final HttpClient client;
@@ -28,14 +29,11 @@ public class CompatibleAiProvider implements AiProvider {
   }
 
   private String model() {
-    String value = env.getProperty("OPENAI_MODEL", "");
-    return value.isBlank() ? env.getProperty("AI_MODEL", "") : value;
+    return OPENAI_MODEL;
   }
 
   public boolean enabled() {
-    return env.getProperty("AI_ENABLED", Boolean.class, false)
-        && !apiKey().isBlank()
-        && !model().isBlank();
+    return !apiKey().isBlank();
   }
 
   public boolean webSearchEnabled() {

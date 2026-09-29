@@ -156,8 +156,8 @@ export async function decryptEvent(
 export async function fileToEncryptedDataUrl(file: File) {
   if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type))
     throw new Error("Use uma imagem JPG, PNG, WEBP ou GIF.");
-  if (file.size > 650 * 1024)
-    throw new Error("A imagem do chat pode ter no máximo 650 KB.");
+  if (file.size > 8 * 1024 * 1024)
+    throw new Error("A imagem do chat pode ter no máximo 8 MB.");
 
   const result = await new Promise<string>((resolve, reject) => {
     const reader = new FileReader();

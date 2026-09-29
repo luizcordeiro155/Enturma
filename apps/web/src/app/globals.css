@@ -1391,3 +1391,299 @@ label small {
     flex: 1;
   }
 }
+
+
+/* Discord-inspired study room experience */
+.attachment-preview {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #f7f9f6;
+}
+.attachment-preview-media {
+  position: relative;
+  width: 132px;
+  min-width: 132px;
+  aspect-ratio: 16 / 10;
+  overflow: hidden;
+  border-radius: 10px;
+  background: #10241f;
+}
+.attachment-preview-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.attachment-preview > div:last-child {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+.attachment-preview strong,
+.attachment-preview small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.attachment-remove {
+  position: absolute;
+  top: 7px;
+  right: 7px;
+  width: 30px;
+  height: 30px;
+  padding: 0 !important;
+  display: grid;
+  place-items: center;
+  border-radius: 999px !important;
+  background: rgba(16, 36, 31, 0.9) !important;
+  color: white !important;
+  border: 0 !important;
+}
+.discord-call {
+  overflow: hidden;
+  border-radius: 14px;
+  background: #17201e;
+  color: #f5f7f6;
+  padding: 0;
+}
+.discord-call .error {
+  margin: 14px;
+}
+.call-topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 15px 18px;
+  border-bottom: 1px solid rgba(255,255,255,.08);
+  background: #111816;
+}
+.call-topbar > div:first-child {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+.call-topbar small {
+  color: #aeb9b5;
+}
+.call-live-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #51d17a;
+  box-shadow: 0 0 0 4px rgba(81,209,122,.12);
+}
+.call-speaking-summary {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: #b9c7c1;
+  font-size: .83rem;
+}
+.screen-share-status {
+  display: grid;
+  gap: 8px;
+  padding: 12px 16px 0;
+}
+.screen-share-status article {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid rgba(97,211,132,.22);
+  background: rgba(52,116,72,.18);
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+.screen-share-status article > div {
+  display: grid;
+  gap: 3px;
+}
+.screen-share-status span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #b9c7c1;
+  font-size: .78rem;
+}
+.discord-call .call-video-grid {
+  padding: 14px 16px 0;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+}
+.call-media-tile {
+  position: relative;
+  overflow: hidden;
+  min-height: 190px;
+  border-radius: 12px;
+  background: #0d1211;
+  border: 2px solid transparent;
+  transition: border-color .16s ease, box-shadow .16s ease;
+}
+.call-media-tile.screen-share {
+  grid-column: 1 / -1;
+  min-height: 340px;
+}
+.call-media-tile.speaking {
+  border-color: #51d17a;
+  box-shadow: 0 0 0 3px rgba(81,209,122,.12);
+}
+.call-media-tile video {
+  width: 100%;
+  height: 100%;
+  min-height: inherit;
+  object-fit: contain;
+  background: #090d0c;
+}
+.call-media-label {
+  position: absolute;
+  left: 9px;
+  bottom: 9px;
+  padding: 5px 8px;
+  border-radius: 6px;
+  background: rgba(0,0,0,.72);
+  color: white;
+  font-size: .76rem;
+  font-weight: 700;
+}
+.call-members {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 8px;
+  padding: 14px 16px;
+}
+.call-member {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: #202a27;
+  border: 1px solid transparent;
+}
+.call-member.speaking {
+  border-color: #51d17a;
+  background: #21372b;
+}
+.call-avatar {
+  width: 38px;
+  height: 38px;
+  min-width: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #33423e;
+  font-weight: 800;
+}
+.call-member.speaking .call-avatar {
+  box-shadow: 0 0 0 3px #51d17a;
+}
+.call-member-info {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  flex: 1;
+}
+.call-member-info strong,
+.call-member-info small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.call-member-info small {
+  color: #aeb9b5;
+}
+.call-member-icons {
+  display: flex;
+  gap: 7px;
+  color: #aeb9b5;
+}
+.discord-controls {
+  justify-content: center;
+  padding: 12px 16px;
+  border-top: 1px solid rgba(255,255,255,.08);
+  background: #111816;
+}
+.call-control {
+  min-width: 92px;
+  display: inline-flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 9px 13px !important;
+  background: #2b3633 !important;
+  color: white !important;
+  border: 1px solid rgba(255,255,255,.08) !important;
+}
+.call-control span {
+  font-size: .7rem;
+}
+.call-control:hover,
+.call-control.active {
+  background: #3e4f49 !important;
+}
+.call-control.active {
+  color: #8ce9a5 !important;
+}
+.call-control.danger,
+.call-control.hangup {
+  background: #9d3438 !important;
+}
+.call-control.hangup:hover,
+.call-control.danger:hover {
+  background: #b33d42 !important;
+}
+.call-privacy-note {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 0 16px 14px;
+  color: #9eaaa6;
+}
+.call-entry {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 18px;
+  padding: 18px;
+  background: #17201e;
+  color: white;
+}
+.call-entry > div {
+  display: grid;
+  gap: 4px;
+}
+.call-entry span {
+  color: #aeb9b5;
+  font-size: .85rem;
+}
+@media (max-width: 760px) {
+  .attachment-preview {
+    align-items: stretch;
+  }
+  .attachment-preview-media {
+    width: 96px;
+    min-width: 96px;
+  }
+  .call-topbar,
+  .call-entry {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .call-speaking-summary {
+    align-self: flex-start;
+  }
+  .call-media-tile.screen-share {
+    min-height: 220px;
+  }
+  .discord-controls {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .call-control {
+    width: 100%;
+  }
+}
