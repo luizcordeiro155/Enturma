@@ -149,8 +149,43 @@ public class SocialController {
   public record PublicKey(
       @NotBlank String kty,
       @NotBlank String crv,
-      @Pattern(regexp = "[A-Za-z0-9_-]{43}") String x,
-      @Pattern(regexp = "[A-Za-z0-9_-]{43}") String y) {}
+      @NotNull @Pattern(regexp = "[A-Za-z0-9_-]{43}") String x,
+      @NotNull @Pattern(regexp = "[A-Za-z0-9_-]{43}") String y) {}
+
+  public record KeyVault(
+      @Min(2) @Max(2) int version,
+      @NotNull @Valid PublicKey publicKey,
+      @NotBlank @Pattern(regexp = "[A-Za-z0-9+/]{43}=") String salt,
+      @NotBlank @Pattern(regexp = "[A-Za-z0-9+/]{16}") String iv,
+      @NotBlank @Size(min = 64, max = 12000) @Pattern(regexp = "[A-Za-z0-9+/]+={0,2}")
+          String data) {}
+
+  @GetMapping("/private-vault")
+  public Object vault(@AuthenticationPrincipal Actor a) {
+    return db.list("SELECT envelope,created_at FROM private_key_vault WHERE user_id=?", a.id());
+  }
+
+  @PutMapping("/private-vault")
+  public void vault(@AuthenticationPrincipal Actor a, @Valid @RequestBody KeyVault value)
+      throws Exception {
+    if (!db.exists(
+        "SELECT EXISTS(SELECT 1 FROM private_identity WHERE user_id=? AND public_key=?::jsonb)",
+        a.id(),
+        json.writeValueAsString(value.publicKey())))
+      throw ApiException.invalid("Sincronize a chave original desta conta.");
+    // A second device must unlock the existing vault, never replace its identity.
+    if (db.jdbc.update(
+            "INSERT INTO private_key_vault(user_id,envelope) VALUES (?,?::jsonb) ON CONFLICT DO"
+                + " NOTHING",
+            a.id(),
+            json.writeValueAsString(value))
+        == 0)
+      throw new ApiException(
+          409,
+          "VAULT_EXISTS",
+          "As conversas já estão sincronizadas. Use a senha das conversas para desbloquear este"
+              + " dispositivo.");
+  }
 
   @PutMapping("/private-identity")
   public void identity(@AuthenticationPrincipal Actor a, @Valid @RequestBody PublicKey key)

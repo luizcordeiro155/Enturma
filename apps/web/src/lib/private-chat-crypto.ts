@@ -1,6 +1,6 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
-type Identity = { publicKey: JsonWebKey; privateKey: JsonWebKey };
+export type Identity = { publicKey: JsonWebKey; privateKey: JsonWebKey };
 export function base64(bytes: ArrayBuffer | Uint8Array) {
   return btoa(String.fromCharCode(...new Uint8Array(bytes)));
 }
@@ -244,4 +244,106 @@ export async function importBackup(
   if (exported.x !== value.publicKey.x || exported.y !== value.publicKey.y)
     throw Error("Chaves do backup não correspondem.");
   return value;
+}
+
+// Version 2 binds a password-protected identity to its account and public key.
+// The passphrase and clear private key never leave this device.
+export type IdentityVault = {
+  version: 2;
+  publicKey: ReturnType<typeof publicFields>;
+  salt: string;
+  iv: string;
+  data: string;
+};
+async function vaultKey(password: string, salt: Uint8Array<ArrayBuffer>) {
+  const material = await crypto.subtle.importKey(
+    "raw",
+    enc.encode(password),
+    "PBKDF2",
+    false,
+    ["deriveKey"],
+  );
+  return crypto.subtle.deriveKey(
+    { name: "PBKDF2", hash: "SHA-256", salt, iterations: 600000 },
+    material,
+    { name: "AES-GCM", length: 256 },
+    false,
+    ["encrypt", "decrypt"],
+  );
+}
+function vaultContext(user: string, key: JsonWebKey) {
+  return enc.encode(
+    JSON.stringify(["enturma-private-vault-v2", user, publicFields(key)]),
+  );
+}
+export async function encryptIdentityVault(
+  identity: Identity,
+  password: string,
+  user: string,
+): Promise<IdentityVault> {
+  if (password.length < 12 || password.length > 256)
+    throw Error("Use uma senha das conversas com 12 a 256 caracteres.");
+  const salt = crypto.getRandomValues(new Uint8Array(32));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = await crypto.subtle.encrypt(
+    {
+      name: "AES-GCM",
+      iv,
+      additionalData: vaultContext(user, identity.publicKey),
+    },
+    await vaultKey(password, salt),
+    enc.encode(JSON.stringify(identity)),
+  );
+  return {
+    version: 2,
+    publicKey: publicFields(identity.publicKey),
+    salt: base64(salt),
+    iv: base64(iv),
+    data: base64(data),
+  };
+}
+export async function decryptIdentityVault(
+  vault: IdentityVault,
+  password: string,
+  user: string,
+): Promise<Identity> {
+  if (
+    vault.version !== 2 ||
+    password.length > 256 ||
+    !/^[A-Za-z0-9+/]{43}=$/.test(vault.salt) ||
+    !/^[A-Za-z0-9+/]{16}$/.test(vault.iv) ||
+    vault.data.length > 12000 ||
+    vault.data.length < 64
+  )
+    throw Error("Cofre de conversas inválido.");
+  const clear = await crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: bytes(vault.iv),
+      additionalData: vaultContext(user, vault.publicKey),
+    },
+    await vaultKey(password, bytes(vault.salt)),
+    bytes(vault.data),
+  );
+  const identity: Identity = JSON.parse(dec.decode(clear));
+  if (
+    JSON.stringify(publicFields(identity.publicKey)) !==
+      JSON.stringify(publicFields(vault.publicKey)) ||
+    JSON.stringify(publicFields(identity.privateKey)) !==
+      JSON.stringify(publicFields(vault.publicKey))
+  )
+    throw Error("Chaves do cofre não correspondem.");
+  // Import validates the curve/private scalar. A round trip verifies the pair.
+  const probe = await createIdentity();
+  const own = await conversationKey(identity, probe.publicKey, user);
+  const peer = await conversationKey(probe, identity.publicKey, user);
+  const message = await encryptMessage(
+    own,
+    "verify-vault",
+    user,
+    user,
+    "vault",
+  );
+  await decryptMessage(peer, { ...message, senderId: user }, user);
+  return identity;
 }

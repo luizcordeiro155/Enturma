@@ -399,6 +399,36 @@ class PlatformIntegrationTest {
   }
 
   @Test
+  void privateVaultIsAccountBoundAndCannotReplaceExistingKeys() throws Exception {
+    var key = new SocialController.PublicKey("EC", "P-256", "a".repeat(43), "b".repeat(43));
+    social.identity(host, key);
+    var vault =
+        new SocialController.KeyVault(
+            2, key, "a".repeat(43) + "=", "b".repeat(16), "c".repeat(128));
+    assertThat((List<?>) social.vault(host)).isEmpty();
+    assertThatThrownBy(() -> social.vault(outsider, vault)).isInstanceOf(ApiException.class);
+    social.vault(host, vault);
+    assertThat((List<?>) social.vault(host)).hasSize(1);
+    assertThat((List<?>) social.vault(member)).isEmpty();
+    assertThatThrownBy(() -> social.vault(host, vault)).isInstanceOf(ApiException.class);
+    var wrongKey = new SocialController.PublicKey("EC", "P-256", "d".repeat(43), "e".repeat(43));
+    assertThatThrownBy(
+            () ->
+                social.vault(
+                    host,
+                    new SocialController.KeyVault(
+                        2, wrongKey, vault.salt(), vault.iv(), vault.data())))
+        .isInstanceOf(ApiException.class);
+    mvc.perform(get("/api/v1/private-vault")).andExpect(status().isUnauthorized());
+    mvc.perform(
+            put("/api/v1/private-vault")
+                .header("Authorization", "Bearer " + hostCredentials.accessToken())
+                .contentType("application/json")
+                .content("{\"version\":2,\"data\":\"invalid\"}"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
   void officialCatalogImportsAreCompleteAndIdempotent() {
     for (int i = 0; i < 40; i++) imports.processBatch();
     assertThat(

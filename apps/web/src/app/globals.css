@@ -2346,3 +2346,10 @@ html[data-theme="dark"] .ai-web-sources a {
     transition-duration: .001ms !important;
   }
 }
+
+.private-key-sync { margin-block: 1rem; }
+.private-key-sync h2 { font-size: 1.1rem; margin-bottom: .5rem; }
+.private-sync-form { display: grid; gap: .85rem; max-width: 36rem; }
+.private-sync-form label { display: grid; gap: .4rem; }
+.private-sync-form input { width: 100%; min-width: 0; }
+.private-key-sync > .text-button { margin-top: .75rem; }

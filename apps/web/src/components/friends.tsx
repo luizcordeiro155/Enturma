@@ -21,6 +21,7 @@ import {
   readIdentity,
   storeIdentity,
 } from "@/lib/private-chat-crypto";
+import { PrivateKeySync } from "./private-key-sync";
 import { Shell } from "./shell";
 import { UserIdentity, type PublicProfile } from "./user-identity";
 type Friend = Omit<PublicProfile, "id"> & {
@@ -87,7 +88,7 @@ export function Friends() {
           if (!local) {
             if (stored.length)
               throw Error(
-                "Este navegador não tem sua chave. Restaure o backup cifrado em Chaves e backup das conversas ou abra o Enturma no dispositivo original.",
+                "Desbloqueie as conversas na seção Conversas em todos os dispositivos. Se ainda não ativou a sincronização, ative pelo dispositivo original ou restaure seu backup cifrado.",
               );
             local = await createIdentity();
             await storeIdentity(user.id, local);
@@ -128,6 +129,17 @@ export function Friends() {
       clearInterval(timer);
     };
   }, [refresh, identityAttempt]);
+  const unlock = useCallback(
+    (restored: Awaited<ReturnType<typeof createIdentity>>) => {
+      identity.current = restored;
+      setReady(true);
+      setIdentityError("");
+      setConnectionAttempt((n) => n + 1);
+      setError("");
+      setNotice("Conversas desbloqueadas neste dispositivo.");
+    },
+    [],
+  );
   const load = useCallback(
     async (
       friend: Friend,
@@ -354,13 +366,16 @@ export function Friends() {
           </label>
           <button>Enviar convite</button>
         </form>
+        {me && (
+          <PrivateKeySync userId={me.id} ready={ready} onUnlock={unlock} />
+        )}
         <details className="private-backup" id="private-backup">
           <summary>Chaves e backup das conversas</summary>
           <p>
-            Sua chave privada fica neste navegador. Guarde um backup cifrado
-            para abrir o histórico em outro dispositivo. Sem a chave ou o
-            backup, não é possível recuperar as mensagens. Compare o código de
-            segurança com seu amigo por outro canal.
+            Além da sincronização, você pode guardar um backup cifrado para
+            recuperar sua chave em outro dispositivo. Sem a chave ou o backup,
+            não é possível recuperar as mensagens. Compare o código de segurança
+            com seu amigo por outro canal.
           </p>
           <label>
             Senha do backup
@@ -548,17 +563,15 @@ export function Friends() {
                           <button
                             className="text-button"
                             onClick={() => {
-                              const backup = document.getElementById(
-                                "private-backup",
-                              ) as HTMLDetailsElement | null;
+                              const backup =
+                                document.getElementById("private-sync");
                               if (backup) {
-                                backup.open = true;
                                 backup.scrollIntoView({ block: "center" });
-                                backup.querySelector("summary")?.focus();
+                                backup.querySelector("input")?.focus();
                               }
                             }}
                           >
-                            Abrir chaves e backup
+                            Desbloquear neste dispositivo
                           </button>
                         ) : null}
                       </div>

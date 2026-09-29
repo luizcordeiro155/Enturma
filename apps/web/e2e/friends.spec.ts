@@ -235,6 +235,19 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     page.getByText("Resposta protegida", { exact: true }),
   ).toBeVisible();
+  const sync = page.locator("#private-sync");
+  await sync
+    .getByLabel("Senha das conversas", { exact: true })
+    .fill("conversation-sync-secret-123");
+  await sync
+    .getByLabel("Confirmar senha das conversas")
+    .fill("conversation-sync-secret-123");
+  await sync.getByRole("button", { name: "Ativar sincronização" }).click();
+  await expect(sync).toContainText("Sincronização ativa neste dispositivo");
+  const vaultResponse = await page.request.get("/api/backend/private-vault");
+  expect(await vaultResponse.text()).not.toContain(
+    "conversation-sync-secret-123",
+  );
   const clean = await browser.newContext();
   const fresh = await clean.newPage();
   await fresh.goto("/login");
@@ -250,8 +263,48 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     fresh.getByText("Sua chave precisa de atenção", { exact: true }),
   ).toBeVisible();
   await expect(fresh.getByLabel("Mensagem privada")).toBeDisabled();
-  await fresh.getByRole("button", { name: "Abrir chaves e backup" }).click();
-  await expect(fresh.locator("#private-backup")).toHaveAttribute("open", "");
+  await fresh
+    .getByRole("button", { name: "Desbloquear neste dispositivo" })
+    .click();
+  const unlock = fresh.locator("#private-sync");
+  await unlock
+    .getByLabel("Senha das conversas", { exact: true })
+    .fill("wrong-conversation-password");
+  await unlock
+    .getByRole("button", { name: "Desbloquear conversas", exact: true })
+    .click();
+  await expect(unlock.getByRole("alert")).toContainText(
+    "Confira a senha das conversas",
+  );
+  await expect(fresh.getByLabel("Mensagem privada")).toBeDisabled();
+  await unlock
+    .getByLabel("Senha das conversas", { exact: true })
+    .fill("conversation-sync-secret-123");
+  await unlock
+    .getByRole("button", { name: "Desbloquear conversas", exact: true })
+    .click();
+  await expect(fresh.getByLabel("Mensagem privada")).toBeEnabled();
+  await expect(
+    fresh.getByText("Resposta protegida", { exact: true }),
+  ).toBeVisible();
+  await fresh.getByText("Código de segurança", { exact: true }).click();
+  expect(await fresh.locator(".safety-code").textContent()).toEqual(
+    await other.locator(".safety-code").textContent(),
+  );
+  await fresh
+    .getByLabel("Mensagem privada")
+    .fill("Enviado pelo novo dispositivo");
+  await fresh.getByLabel("Mensagem privada").press("Enter");
+  await other.bringToFront();
+  await expect(
+    other.getByText("Enviado pelo novo dispositivo", { exact: true }),
+  ).toBeVisible({ timeout: 10000 });
+  await fresh.reload();
+  await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
+  await expect(fresh.getByLabel("Mensagem privada")).toBeEnabled();
+  await expect(
+    fresh.getByText("Resposta protegida", { exact: true }),
+  ).toBeVisible();
   await clean.close();
   await peer.close();
 });
