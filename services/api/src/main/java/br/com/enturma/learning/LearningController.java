@@ -55,7 +55,7 @@ public class LearningController {
     require(a);
     return db.list(
         "SELECT game,level,attempts,completed,completed_at FROM learning_progress WHERE user_id=?"
-            + " ORDER BY game,level",
+            + " AND game IN ('robot','codeword','trace') ORDER BY game,level",
         a.id());
   }
 
