@@ -43,18 +43,21 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }, [path]);
 
   useEffect(() => {
-    const storedTheme = localStorage.getItem("enturma-theme");
-    const nextTheme =
-      storedTheme === "dark" || storedTheme === "light"
-        ? storedTheme
-        : window.matchMedia("(prefers-color-scheme: dark)").matches
-          ? "dark"
-          : "light";
-    const storedAccess = localStorage.getItem("enturma-accessibility") === "true";
-    setTheme(nextTheme);
-    setAccessible(storedAccess);
-    document.documentElement.dataset.theme = nextTheme;
-    document.documentElement.dataset.accessibility = storedAccess ? "on" : "off";
+    const bootstrap = setTimeout(() => {
+      const storedTheme = localStorage.getItem("enturma-theme");
+      const nextTheme =
+        storedTheme === "dark" || storedTheme === "light"
+          ? storedTheme
+          : window.matchMedia("(prefers-color-scheme: dark)").matches
+            ? "dark"
+            : "light";
+      const storedAccess = localStorage.getItem("enturma-accessibility") === "true";
+      setTheme(nextTheme);
+      setAccessible(storedAccess);
+      document.documentElement.dataset.theme = nextTheme;
+      document.documentElement.dataset.accessibility = storedAccess ? "on" : "off";
+    }, 0);
+    return () => clearTimeout(bootstrap);
   }, []);
 
   function toggleTheme() {
