@@ -155,9 +155,14 @@ public class StudyService {
         id, a.id());
     r.put("joinedAt", mine.get("joinedAt"));
     r.put("leftAt", mine.get("leftAt"));
-    r.put("hasEarlierHistory",
-        db.exists("SELECT EXISTS(SELECT 1 FROM room_message WHERE room_id=? AND created_at<?)",
-            id, mine.get("joinedAt")));
+    r.put(
+        "hasEarlierHistory",
+        db.exists(
+            "SELECT EXISTS(SELECT 1 FROM room_message m JOIN room_participant p"
+                + " ON p.room_id=m.room_id WHERE m.room_id=? AND p.user_id=?"
+                + " AND m.created_at<p.joined_at)",
+            id,
+            a.id()));
     return r;
   }
 
