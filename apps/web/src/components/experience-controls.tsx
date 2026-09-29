@@ -31,8 +31,8 @@ export function ExperienceControls() {
     if (cached) {
       try {
         const parsed = { ...defaults, ...JSON.parse(cached) } as ExperiencePreference;
-        setPreference(parsed);
         applyPreference(parsed);
+        queueMicrotask(() => setPreference(parsed));
       } catch {}
     }
     api<ExperiencePreference>("/users/me/experience")
