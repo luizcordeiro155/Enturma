@@ -6,6 +6,7 @@ import "./production-polish.css";
 import "./social.css";
 import "./forum.css";
 import "./notifications.css";
+import "./study-journey.css";
 import "./ride-activity.css";
 import { RideActivity } from "@/components/ride-activity";
 import "./study-workspace.css";

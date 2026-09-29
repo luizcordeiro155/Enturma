@@ -1,8 +1,16 @@
 "use client";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { Bell, CheckCheck, MessageCircle, X, AtSign } from "lucide-react";
+import {
+  Bell,
+  CheckCheck,
+  MessageCircle,
+  X,
+  AtSign,
+  Trash2,
+} from "lucide-react";
 import { api, post } from "@/lib/api";
+import { playMotion } from "@/lib/motion";
 import { useAppConnection, useLiveRefresh } from "@/lib/live-updates";
 
 type Notice = {
@@ -21,6 +29,7 @@ type State = Inbox & {
   error: string;
   refresh: () => Promise<void>;
   read: (ids?: string[], all?: boolean) => Promise<void>;
+  clear: () => Promise<boolean>;
   inline: Notice[];
 };
 const Context = createContext<State | undefined>(undefined);
@@ -39,14 +48,17 @@ export function NotificationsProvider({
   const [inbox, setInbox] = useState<Inbox>({ items: [], unreadCount: 0 });
   const [inline, setInline] = useState<Notice[]>([]);
   const [error, setError] = useState("");
+  const revision = useRef(0);
   const pending = useRef(false),
     seen = useRef(new Set<string>());
   useAppConnection();
   async function refresh() {
     if (pending.current) return;
     pending.current = true;
+    const requested = revision.current;
     try {
       const data = await api<Inbox>("/notifications/inbox");
+      if (requested !== revision.current) return;
       const contexts = activeContexts();
       const viewed = data.items.filter(
         (n) =>
@@ -72,6 +84,7 @@ export function NotificationsProvider({
         );
         data.unreadCount = Math.max(0, data.unreadCount - viewed.length);
       }
+      if (requested !== revision.current) return;
       seen.current = new Set(data.items.map((n) => n.id));
       setInbox(data);
       setError("");
@@ -109,8 +122,22 @@ export function NotificationsProvider({
       setError("Não foi possível marcar como lida. Tente novamente.");
     }
   }
+  async function clear() {
+    try {
+      await post("/notifications/clear");
+      revision.current++;
+      setInbox({ items: [], unreadCount: 0 });
+      setInline([]);
+      setError("");
+      await refresh();
+      return true;
+    } catch {
+      setError("Não foi possível limpar as notificações. Tente novamente.");
+      return false;
+    }
+  }
   return (
-    <Context.Provider value={{ ...inbox, error, refresh, read, inline }}>
+    <Context.Provider value={{ ...inbox, error, refresh, read, clear, inline }}>
       {children}
     </Context.Provider>
   );
@@ -121,6 +148,8 @@ export function NotificationBell() {
     router = useRouter(),
     path = usePathname();
   const [open, setOpen] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [cleared, setCleared] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null),
     button = useRef<HTMLButtonElement>(null),
     last = useRef(0);
@@ -149,6 +178,18 @@ export function NotificationBell() {
       ]);
     last.current = data?.unreadCount ?? 0;
   }, [data?.unreadCount]);
+  useEffect(() => {
+    if (cleared && dialog.current) {
+      const status = dialog.current.querySelector('[role="status"]');
+      const animation = status
+        ? playMotion(status, [
+            { opacity: 0.3, transform: "translateY(5px)" },
+            { opacity: 1, transform: "none" },
+          ])
+        : undefined;
+      return () => animation?.cancel();
+    }
+  }, [cleared]);
   if (!data) return null;
   async function visit(n: Notice) {
     await data!.read([n.id]);
@@ -209,6 +250,23 @@ export function NotificationBell() {
           >
             <CheckCheck size={17} /> Marcar todas como lidas
           </button>
+          <button
+            className="text-button"
+            disabled={clearing || !data.items.length}
+            onClick={async () => {
+              setClearing(true);
+              setCleared(await data.clear());
+              setClearing(false);
+            }}
+          >
+            <Trash2 size={17} />{" "}
+            {clearing ? "Limpando…" : "Limpar notificações"}
+          </button>
+          {cleared ? (
+            <p role="status">
+              Caixa de entrada limpa. Novos avisos continuarão chegando.
+            </p>
+          ) : null}
           {data.error ? (
             <p role="alert">
               {data.error}
@@ -340,5 +398,5 @@ function reduced() {
   );
 }
 function animate(el: Element, frames: Keyframe[]) {
-  if (!reduced()) el.animate(frames, { duration: 420, easing: "ease-out" });
+  playMotion(el, frames, { duration: 420, easing: "ease-out" });
 }

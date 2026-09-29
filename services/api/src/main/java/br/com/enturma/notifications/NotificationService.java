@@ -99,8 +99,9 @@ public class NotificationService {
   }
 
   private String visible() {
-    return " n.user_id=? AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=n.user_id AND"
-               + " b.blocked_id=n.actor_id) OR (b.blocked_id=n.user_id AND b.user_id=n.actor_id))";
+    return " n.user_id=? AND n.dismissed_at IS NULL AND NOT EXISTS(SELECT 1 FROM user_block b WHERE"
+               + " (b.user_id=n.user_id AND b.blocked_id=n.actor_id) OR (b.blocked_id=n.user_id AND"
+               + " b.user_id=n.actor_id))";
   }
 
   public Object inbox(Actor a) {
@@ -117,6 +118,15 @@ public class NotificationService {
             Long.class,
             a.id());
     return Map.of("items", rows, "unreadCount", unread);
+  }
+
+  @Transactional
+  public void clear(Actor a) {
+    db.jdbc.update(
+        "UPDATE notification SET dismissed_at=now(),read_at=coalesce(read_at,now()) WHERE user_id=?"
+            + " AND dismissed_at IS NULL",
+        a.id());
+    changed(a.id());
   }
 
   @Transactional

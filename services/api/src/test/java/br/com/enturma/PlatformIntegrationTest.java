@@ -548,6 +548,85 @@ class PlatformIntegrationTest {
 
   @Autowired br.com.enturma.notifications.NotificationService notices;
 
+  @Autowired br.com.enturma.learning.StudyJourneyController journey;
+
+  @Test
+  void journeyRewardsRealActionsOnceAndKeepsTutorialPreference() throws Exception {
+    var first = (Map<String, Object>) journey.sync(host);
+    assertThat(first)
+        .containsEntry("completed", 1)
+        .containsEntry("xpAwarded", 20)
+        .containsEntry("tutorialSeen", false);
+    assertThat((Map<String, Object>) journey.sync(host)).containsEntry("xpAwarded", 0);
+    UUID room = room(8);
+    assertThat((Map<String, Object>) journey.sync(host))
+        .containsEntry("completed", 2)
+        .containsEntry("xpAwarded", 30);
+    chat.send(host, room, "Minha primeira dúvida", null);
+    try (var pool = Executors.newVirtualThreadPerTaskExecutor()) {
+      var results =
+          pool.invokeAll(
+              List.<Callable<Object>>of(() -> journey.sync(host), () -> journey.sync(host)));
+      int awarded = 0;
+      for (var result : results)
+        awarded += ((Number) ((Map<String, Object>) result.get()).get("xpAwarded")).intValue();
+      assertThat(awarded).isEqualTo(50);
+    }
+    assertThat((Map<String, Object>) journey.sync(host))
+        .containsEntry("completed", 3)
+        .containsEntry("totalXp", 100)
+        .containsEntry("xpAwarded", 0);
+    journey.seen(host);
+    assertThat((Map<String, Object>) journey.sync(host)).containsEntry("tutorialSeen", true);
+    assertThat((Map<String, Object>) journey.sync(member))
+        .containsEntry("completed", 1)
+        .containsEntry("totalXp", 20)
+        .containsEntry("tutorialSeen", false);
+  }
+
+  @Test
+  void clearingInboxIsIsolatedAndDoesNotRestoreDeduplicatedNotices() {
+    UUID target = UUID.randomUUID();
+    notices.send(
+        member.id(),
+        host.id(),
+        "FORUM_LIKE",
+        "forum:" + target,
+        target,
+        "/forum/" + target,
+        "Curtida");
+    notices.send(
+        host.id(),
+        member.id(),
+        "FORUM_LIKE",
+        "forum:" + target,
+        target,
+        "/forum/" + target,
+        "Curtida");
+    notices.clear(host);
+    assertThat((List<?>) ((Map<String, Object>) notices.inbox(host)).get("items")).isEmpty();
+    assertThat((Map<String, Object>) notices.inbox(host)).containsEntry("unreadCount", 0L);
+    assertThat((List<?>) ((Map<String, Object>) notices.inbox(member)).get("items")).hasSize(1);
+    notices.send(
+        member.id(),
+        host.id(),
+        "FORUM_LIKE",
+        "forum:" + target,
+        target,
+        "/forum/" + target,
+        "Curtida");
+    assertThat((List<?>) ((Map<String, Object>) notices.inbox(host)).get("items")).isEmpty();
+    notices.send(
+        member.id(),
+        host.id(),
+        "FORUM_REPLY",
+        "forum:" + target,
+        UUID.randomUUID(),
+        "/forum/" + target,
+        "Resposta nova");
+    assertThat((List<?>) ((Map<String, Object>) notices.inbox(host)).get("items")).hasSize(1);
+  }
+
   @Test
   void notificationsArePrivateDeduplicatedAndSupportMentionsAndReadState() {
     UUID post =

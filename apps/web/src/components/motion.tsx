@@ -1,15 +1,11 @@
 "use client";
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { cancelMotion } from "@/lib/motion";
 export function Motion() {
   const path = usePathname();
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (
-      reduced.matches ||
-      document.documentElement.dataset.reducedMotion === "true"
-    )
-      return;
     const animations = new Set<Animation>();
     const seen = new WeakSet<Element>();
     const observer = new IntersectionObserver(
@@ -38,7 +34,7 @@ export function Motion() {
     function scan() {
       document
         .querySelectorAll(
-          "main h1, main article, .game-studio, .option-list > button, .hero h1",
+          "main h1, main article, .game-studio, .option-list > button, .hero h1, .onboarding-banner, .study-journey, .guide-welcome",
         )
         .forEach((el) => {
           if (!seen.has(el)) {
@@ -50,7 +46,7 @@ export function Motion() {
     scan();
     const mutations = new MutationObserver(scan);
     mutations.observe(document.body, { subtree: true, childList: true });
-    function tap(e: PointerEvent) {
+    function tap(e: MouseEvent) {
       if (
         reduced.matches ||
         document.documentElement.dataset.reducedMotion === "true"
@@ -69,19 +65,22 @@ export function Motion() {
       if (
         reduced.matches ||
         document.documentElement.dataset.reducedMotion === "true"
-      )
+      ) {
         animations.forEach((a) => a.cancel());
+        cancelMotion();
+      }
     }
-    document.addEventListener("pointerup", tap);
+    document.addEventListener("click", tap);
     reduced.addEventListener("change", preference);
     window.addEventListener("enturma-motion", preference);
     return () => {
       observer.disconnect();
       mutations.disconnect();
-      document.removeEventListener("pointerup", tap);
+      document.removeEventListener("click", tap);
       reduced.removeEventListener("change", preference);
       window.removeEventListener("enturma-motion", preference);
       animations.forEach((a) => a.cancel());
+      cancelMotion();
     };
   }, [path]);
   return null;

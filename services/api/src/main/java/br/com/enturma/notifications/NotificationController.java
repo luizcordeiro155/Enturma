@@ -21,6 +21,11 @@ public class NotificationController {
     return service.inbox(a);
   }
 
+  @PostMapping("/clear")
+  public void clear(@AuthenticationPrincipal Actor a) {
+    service.clear(a);
+  }
+
   public record Read(
       @Size(max = 100) List<UUID> ids, @Size(max = 100) String context, boolean all) {}
 
