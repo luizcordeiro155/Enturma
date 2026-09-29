@@ -220,7 +220,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       ArrayDeque<Map<String, Object>> events =
           roomHistory.computeIfAbsent(room, ignored -> new ArrayDeque<>());
       events.addLast(envelope);
-      while (events.size() > 1200) events.removeFirst();
+      while (events.size() > 64) events.removeFirst();
     }
   }
 
