@@ -38,7 +38,7 @@ Cadastre uma conta e confirme o e-mail pelo Mailpit. A confirmação também fun
 
 - Chamadas Web: `VOICE_ENABLED=true` + `LIVEKIT_URL`, `LIVEKIT_API_KEY` e `LIVEKIT_API_SECRET`. Suporta microfone, câmera e compartilhamento de tela.
 - Materiais: configure `OBJECT_STORAGE_*` e crie um bucket privado. MinIO local usa a mesma interface S3. Formatos desta versão: PDF e TXT.
-- IA: `AI_ENABLED=true`, `OPENAI_API_KEY` e `OPENAI_MODEL`. A integração usa OpenAI Responses API; `AI_WEB_SEARCH_ENABLED=true` habilita pesquisa externa com citações clicáveis. A busca nos materiais continua isolada por sala.
+- IA: configure somente `OPENAI_API_KEY` no backend. O modelo `gpt-5.6-sol` é definido no código; `AI_WEB_SEARCH_ENABLED=true` habilita pesquisa externa com citações clicáveis. A busca nos materiais continua isolada por sala.
 - WebSocket: derivado automaticamente de `API_URL`; o chat Web usa relay efêmero E2EE, sem persistir texto, imagens, respostas ou reações no banco.
 
 Nenhuma chave secreta deve usar prefixo `NEXT_PUBLIC_` ou `EXPO_PUBLIC_`.
@@ -94,9 +94,9 @@ Catálogo verificado com prioridade UNA Aimorés, matrizes de UNA/PUC Minas/UFMG
 
 Esta versão adiciona ao Web:
 
-- chat efêmero com E2EE no cliente, imagens, respostas e reações por emoji;
+- chat efêmero com E2EE no cliente, imagens de até 8 MB com prévia, respostas e reações por emoji;
 - nenhuma persistência de conversas no PostgreSQL;
-- chamadas LiveKit com microfone, câmera e compartilhamento de tela;
+- chamadas LiveKit com microfone, câmera, destaque de quem está falando, participantes visíveis e compartilhamento de tela com identificação do transmissor/espectadores;
 - Enturma AI via OpenAI Responses API, materiais da sala e pesquisa web opcional com fontes;
 - XP idempotente, níveis, sequência e desafio diário;
 - rate limit específico para login/cadastro/recuperação;
