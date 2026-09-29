@@ -1,37 +1,53 @@
 "use client";
+
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import {
   Bot,
-  Binary,
   Bug,
   Check,
+  Code2,
+  Flame,
   Play,
   RotateCcw,
   ArrowRight,
-  ArrowLeft,
-  ArrowUp,
-  ArrowDown,
-  Flame,
   Trophy,
   Zap,
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import {
   robotFrames,
-  robotWalls,
-  binaryTargets,
-  bitValue,
+  robotLevels,
   traceChallenges,
+  wordGameLevels,
 } from "@/lib/learning-games";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
+
 type Progress = {
   game: string;
   level: number;
   completed: boolean;
   attempts: number;
 };
+
+type WordCell = { letter: string; state: "exact" | "present" | "absent" };
+type WordPuzzle = {
+  version: string;
+  mode: string;
+  wordLength: number;
+  maxGuesses: number;
+  attempts: number;
+  remaining: number;
+  completed: boolean;
+  boards: {
+    index: number;
+    solved: boolean;
+    solution?: string;
+    rows: WordCell[][];
+  }[];
+};
+
 type LearningSummary = {
   totalXp: number;
   currentStreak: number;
@@ -48,18 +64,21 @@ type LearningSummary = {
     completed: boolean;
   };
 };
+
 const games = [
   {
     id: "robot",
     name: "Rota do algoritmo",
     icon: Bot,
-    description: "Programe o caminho. Execute. Observe cada passo.",
+    description:
+      "Escreva código de verdade em uma DSL segura: funções, repetição, condição e loops.",
   },
   {
-    id: "binary",
-    name: "Laboratório binário",
-    icon: Binary,
-    description: "Transforme números em bits e veja a matemática acontecer.",
+    id: "words",
+    name: "Código Secreto",
+    icon: Code2,
+    description:
+      "Descubra termos de programação em Solo, Dueto e Quarteto com dificuldade progressiva.",
   },
   {
     id: "trace",
@@ -68,6 +87,7 @@ const games = [
     description: "Investigue variáveis, arrays e laços em JavaScript.",
   },
 ];
+
 export function Learning() {
   const [access, setAccess] = useState<boolean>();
   const [progress, setProgress] = useState<Progress[]>([]);
@@ -75,9 +95,10 @@ export function Learning() {
   const [dailyMode, setDailyMode] = useState(false);
   const [game, setGame] = useState("robot");
   const [level, setLevel] = useState(1);
-  const [commands, setCommands] = useState("");
+  const [commands, setCommands] = useState(robotLevels[0].starter);
   const [position, setPosition] = useState({ x: 0, y: 0, collision: false });
-  const [bits, setBits] = useState<boolean[]>(Array(6).fill(false));
+  const [wordPuzzle, setWordPuzzle] = useState<WordPuzzle>();
+  const [wordGuess, setWordGuess] = useState("");
   const [answer, setAnswer] = useState("");
   const [frame, setFrame] = useState(0);
   const [running, setRunning] = useState(false);
@@ -86,6 +107,7 @@ export function Learning() {
   const [correct, setCorrect] = useState(false);
   const generation = useRef(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   async function load() {
     try {
       const a = await api<{ eligible: boolean }>("/learning/access");
@@ -103,6 +125,17 @@ export function Learning() {
       setError((e as Error).message);
     }
   }
+
+  async function loadWordPuzzle(targetLevel = level) {
+    try {
+      setWordPuzzle(
+        await api<WordPuzzle>(`/learning/word-puzzle?level=${targetLevel}`),
+      );
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   useEffect(() => {
     const run = generation;
     let active = true;
@@ -130,15 +163,23 @@ export function Learning() {
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (access === true && game === "words") void loadWordPuzzle(level);
+  }, [access, game, level]);
+
   function reset(nextGame = game, nextLevel = level, nextDaily = false) {
     generation.current++;
     if (timer.current) clearTimeout(timer.current);
     setGame(nextGame);
     setLevel(nextLevel);
     setDailyMode(nextDaily);
-    setCommands("");
+    setCommands(
+      nextGame === "robot" ? robotLevels[nextLevel - 1].starter : "",
+    );
     setPosition({ x: 0, y: 0, collision: false });
-    setBits(Array(6).fill(false));
+    setWordGuess("");
+    setWordPuzzle(undefined);
     setAnswer("");
     setFrame(0);
     setRunning(false);
@@ -146,18 +187,29 @@ export function Learning() {
     setError("");
     setCorrect(false);
   }
+
   async function submit(value: string) {
     const token = generation.current;
     setRunning(true);
     setError("");
     try {
-      const r = await post<{ correct: boolean; message: string }>(
-        "/learning/attempts",
-        { game, level, answer: value, daily: dailyMode },
-      );
+      const r = await post<{
+        correct: boolean;
+        message: string;
+        wordPuzzle?: WordPuzzle;
+      }>("/learning/attempts", {
+        game,
+        level,
+        answer: value,
+        daily: dailyMode,
+      });
       if (token !== generation.current) return;
       setCorrect(r.correct);
       setMessage(r.message);
+      if (r.wordPuzzle) {
+        setWordPuzzle(r.wordPuzzle);
+        setWordGuess("");
+      }
       const [saved, overview] = await Promise.all([
         api<Progress[]>("/learning/progress"),
         api<LearningSummary>("/learning/summary"),
@@ -170,16 +222,23 @@ export function Learning() {
       if (token === generation.current) setRunning(false);
     }
   }
+
   function runRobot() {
     setRunning(true);
     setMessage("");
     setCorrect(false);
+    setError("");
     const token = generation.current;
     const result = robotFrames(commands, level);
+    if (result.error) {
+      setRunning(false);
+      setError(result.error);
+      return;
+    }
     let index = 0;
     const delay = window.matchMedia("(prefers-reduced-motion: reduce)").matches
       ? 0
-      : 420;
+      : 260;
     const tick = () => {
       if (token !== generation.current) return;
       setPosition(result.frames[index]);
@@ -189,21 +248,26 @@ export function Learning() {
     };
     tick();
   }
+
   const trace = traceChallenges[level - 1];
+  const robot = robotLevels[level - 1];
+  const wordLevel = wordGameLevels[level - 1];
+
   return (
     <Shell>
       <div className="learning-page">
-        <p className="eyebrow">Aprender fazendo · Laboratório de TI</p>
         <h1>
           Seu próximo passo
           <br />
           começa com código<span className="dot">.</span>
         </h1>
         <p className="lead">
-          Pequenos desafios. Descobertas de verdade. Pratique no seu ritmo.
+          Desafios curtos que começam acessíveis e evoluem para lógica, código e
+          vocabulário técnico de verdade.
         </p>
         <Feedback error={error} />
         {error && <button onClick={() => void load()}>Tentar novamente</button>}
+
         {access === undefined && !error ? (
           <p role="status">Consultando suas matérias…</p>
         ) : access === false ? (
@@ -242,6 +306,7 @@ export function Learning() {
                 </span>
               </article>
             </div>
+
             <div className="lab-overview">
               <span>
                 <strong>{progress.filter((p) => p.completed).length}</strong> de
@@ -254,14 +319,19 @@ export function Learning() {
               />
               {summary ? (
                 <span className="level-progress">
-                  {summary.xpIntoLevel}/{summary.xpForNextLevel} XP para o próximo nível
+                  {summary.xpIntoLevel}/{summary.xpForNextLevel} XP para o próximo
+                  nível
                 </span>
               ) : null}
             </div>
+
             {summary?.daily ? (
-              <section className={summary.daily.completed ? "daily-card completed" : "daily-card"}>
+              <section
+                className={
+                  summary.daily.completed ? "daily-card completed" : "daily-card"
+                }
+              >
                 <div>
-                  <p className="eyebrow">Desafio diário · +{summary.daily.rewardXp} XP</p>
                   <h2>
                     {summary.daily.completed
                       ? "Missão de hoje concluída"
@@ -270,7 +340,7 @@ export function Learning() {
                   <p>
                     {summary.daily.completed
                       ? "Volte amanhã para um novo desafio."
-                      : `Complete o desafio ${summary.daily.level} de ${games.find((g) => g.id === summary.daily.game)?.name ?? "prática"}.`}
+                      : `Complete o desafio ${summary.daily.level} de ${games.find((g) => g.id === summary.daily.game)?.name ?? "prática"} e ganhe +${summary.daily.rewardXp} XP.`}
                   </p>
                 </div>
                 {!summary.daily.completed ? (
@@ -286,6 +356,7 @@ export function Learning() {
                 )}
               </section>
             ) : null}
+
             <div className="game-tabs" role="tablist" aria-label="Minigames">
               {games.map((g) => (
                 <button
@@ -302,6 +373,7 @@ export function Learning() {
                 </button>
               ))}
             </div>
+
             <section
               className="game-studio"
               id="game-panel"
@@ -310,10 +382,10 @@ export function Learning() {
             >
               <div className="game-heading">
                 <div>
-                  <span className="eyebrow">
-                    {dailyMode ? "Desafio diário" : `Desafio ${level} de 4`}
-                  </span>
                   <h2>{games.find((g) => g.id === game)?.name}</h2>
+                  <p className="muted">
+                    {dailyMode ? "Desafio diário" : `Desafio ${level} de 4`}
+                  </p>
                 </div>
                 <div className="level-picker" aria-label="Escolher desafio">
                   {[1, 2, 3, 4].map((n) => (
@@ -324,7 +396,8 @@ export function Learning() {
                       onClick={() => reset(game, n)}
                     >
                       {progress.some(
-                        (p) => p.game === game && p.level === n && p.completed,
+                        (p) =>
+                          p.game === game && p.level === n && p.completed,
                       ) ? (
                         <Check size={16} />
                       ) : (
@@ -334,143 +407,224 @@ export function Learning() {
                   ))}
                 </div>
               </div>
+
               {game === "robot" ? (
-                <div className="robot-layout">
+                <div className="robot-layout advanced">
                   <div>
-                    <p>
-                      Leve o robô do início até a bandeira. Evite os blocos.
-                      Cada seta é uma instrução.
-                    </p>
+                    <h3>Mapa de execução</h3>
+                    <p className="muted">{robot.requirement}</p>
                     <div
                       className="robot-grid"
+                      style={{
+                        gridTemplateColumns: `repeat(${robot.size}, 1fr)`,
+                      }}
                       aria-label={`Robô na coluna ${position.x + 1}, linha ${position.y + 1}${position.collision ? ", colisão" : ""}`}
                     >
-                      {Array.from({ length: 16 }, (_, i) => (
-                        <div
-                          key={i}
-                          className={
-                            robotWalls[level - 1].includes(i)
-                              ? "wall"
-                              : i === 15
-                                ? "goal"
-                                : "tile"
-                          }
-                        >
-                          {i === 15 ? "⚑" : i === 0 ? "INÍCIO" : ""}
-                        </div>
-                      ))}
+                      {Array.from(
+                        { length: robot.size * robot.size },
+                        (_, i) => {
+                          const goal =
+                            i ===
+                            robot.goal[1] * robot.size + robot.goal[0];
+                          return (
+                            <div
+                              key={i}
+                              className={
+                                robot.walls.includes(i)
+                                  ? "wall"
+                                  : goal
+                                    ? "goal"
+                                    : "tile"
+                              }
+                            >
+                              {goal ? "⚑" : i === 0 ? "INÍCIO" : ""}
+                            </div>
+                          );
+                        },
+                      )}
                       <span
                         className={`robot-piece ${position.collision ? "collision" : ""}`}
                         style={{
-                          transform: `translate(${Math.max(0, Math.min(3, position.x)) * 100}%, ${Math.max(0, Math.min(3, position.y)) * 100}%)`,
+                          width: `${100 / robot.size}%`,
+                          height: `${100 / robot.size}%`,
+                          transform: `translate(${Math.max(0, Math.min(robot.size - 1, position.x)) * 100}%, ${Math.max(0, Math.min(robot.size - 1, position.y)) * 100}%)`,
                         }}
                       >
-                        <Bot size={32} />
+                        <Bot size={30} />
                       </span>
                     </div>
                   </div>
-                  <div className="program-console">
-                    <h3>Seu programa</h3>
+
+                  <div className="program-console code-challenge">
+                    <h3>Editor do algoritmo</h3>
                     <p className="muted">
-                      Até 24 comandos · {commands.length} usados
+                      Não há botões de direção. Escreva o programa e execute.
                     </p>
-                    <div className="command-track" aria-live="polite">
-                      {commands ? (
-                        commands
-                          .split("")
-                          .map((c, i) => (
-                            <span key={i}>
-                              {{ R: "→", L: "←", U: "↑", D: "↓" }[c]}
-                            </span>
-                          ))
-                      ) : (
-                        <span className="muted">
-                          Adicione instruções abaixo
-                        </span>
-                      )}
-                    </div>
-                    <div className="command-buttons">
-                      {[
-                        ["U", ArrowUp, "Cima"],
-                        ["L", ArrowLeft, "Esquerda"],
-                        ["D", ArrowDown, "Baixo"],
-                        ["R", ArrowRight, "Direita"],
-                      ].map(([c, Icon, label]) => {
-                        const Direction = Icon as typeof ArrowUp;
-                        return (
-                          <button
-                            key={String(c)}
-                            aria-label={String(label)}
-                            disabled={running || commands.length >= 24}
-                            onClick={() => setCommands((s) => s + String(c))}
-                          >
-                            <Direction size={23} />
-                          </button>
-                        );
-                      })}
+                    <textarea
+                      className="algorithm-editor"
+                      spellCheck={false}
+                      value={commands}
+                      maxLength={2500}
+                      disabled={running}
+                      onChange={(e) => setCommands(e.target.value)}
+                      aria-label="Código do robô"
+                    />
+                    <div className="dsl-reference">
+                      <code>right(); left(); up(); down();</code>
+                      <code>repeat(3) &#123; ... &#125;</code>
+                      <code>if (canMove(&quot;R&quot;)) &#123; ... &#125; else &#123; ... &#125;</code>
+                      <code>while (canMove(&quot;D&quot;)) &#123; ... &#125;</code>
                     </div>
                     <div className="actions">
                       <button
-                        disabled={running || !commands}
+                        disabled={running || !commands.trim()}
                         onClick={runRobot}
                       >
-                        <Play size={16} /> Executar
+                        <Play size={16} /> Compilar e executar
                       </button>
                       <button
                         className="secondary"
-                        disabled={running || !commands}
-                        onClick={() => setCommands((s) => s.slice(0, -1))}
+                        disabled={running}
+                        onClick={() => setCommands(robot.starter)}
                       >
-                        Desfazer
+                        Restaurar código inicial
                       </button>
                     </div>
                     <p className="lab-hint">
-                      Pense antes de executar: qual instrução muda a linha? Qual
-                      muda a coluna?
+                      A linguagem é interpretada pelo Enturma, sem eval. Nos
+                      níveis avançados, repetir movimentos manualmente não é
+                      suficiente: o validador exige estruturas de controle.
                     </p>
                   </div>
                 </div>
-              ) : game === "binary" ? (
-                <div className="binary-lab">
-                  <p>
-                    Acenda os bits para representar o número{" "}
-                    <strong className="target-number">
-                      {binaryTargets[level - 1]}
-                    </strong>
-                    .
-                  </p>
-                  <div className="bit-switches">
-                    {bits.map((bit, i) => (
-                      <button
-                        key={i}
-                        aria-label={`Bit ${2 ** (5 - i)}`}
-                        aria-pressed={bit}
-                        disabled={running}
-                        onClick={() =>
-                          setBits((values) =>
-                            values.map((v, n) => (n === i ? !v : v)),
-                          )
-                        }
+              ) : game === "words" ? (
+                <div className="word-game">
+                  <div className="word-game-head">
+                    <div>
+                      <h3>
+                        {wordPuzzle?.mode ?? wordLevel.mode} ·{" "}
+                        {wordPuzzle?.wordLength ?? wordLevel.length} letras
+                      </h3>
+                      <p>
+                        Uma tentativa é aplicada a todos os quadros. Verde =
+                        posição correta; amarelo = existe em outra posição.
+                      </p>
+                    </div>
+                    <span className="word-attempt-counter">
+                      {wordPuzzle?.remaining ?? wordLevel.maxGuesses} tentativas
+                      restantes
+                    </span>
+                  </div>
+
+                  <div
+                    className={`word-boards boards-${wordPuzzle?.boards.length ?? wordLevel.boards}`}
+                  >
+                    {(wordPuzzle?.boards ??
+                      Array.from({ length: wordLevel.boards }, (_, index) => ({
+                        index,
+                        solved: false,
+                        rows: [],
+                      }))).map((board) => (
+                      <section
+                        className={board.solved ? "word-board solved" : "word-board"}
+                        key={board.index}
                       >
-                        <small>{2 ** (5 - i)}</small>
-                        <strong>{bit ? 1 : 0}</strong>
-                        <span>{bit ? "Ligado" : "Desligado"}</span>
-                      </button>
+                        <header>
+                          <strong>
+                            {wordLevel.boards === 1
+                              ? "Termo"
+                              : `Quadro ${board.index + 1}`}
+                          </strong>
+                          {board.solved ? <Check size={17} /> : null}
+                        </header>
+                        <div className="word-grid">
+                          {Array.from(
+                            { length: wordPuzzle?.maxGuesses ?? wordLevel.maxGuesses },
+                            (_, rowIndex) => {
+                              const row = board.rows[rowIndex];
+                              return (
+                                <div className="word-row" key={rowIndex}>
+                                  {Array.from(
+                                    {
+                                      length:
+                                        wordPuzzle?.wordLength ?? wordLevel.length,
+                                    },
+                                    (_, colIndex) => {
+                                      const cell = row?.[colIndex];
+                                      return (
+                                        <span
+                                          key={colIndex}
+                                          className={
+                                            cell
+                                              ? `word-cell ${cell.state}`
+                                              : "word-cell"
+                                          }
+                                        >
+                                          {cell?.letter ?? ""}
+                                        </span>
+                                      );
+                                    },
+                                  )}
+                                </div>
+                              );
+                            },
+                          )}
+                        </div>
+                        {board.solution ? (
+                          <small>
+                            Solução: <strong>{board.solution}</strong>
+                          </small>
+                        ) : null}
+                      </section>
                     ))}
                   </div>
-                  <div className="binary-equation" aria-live="polite">
-                    {bits.map((b, i) => (b ? 2 ** (5 - i) : 0)).join(" + ")} ={" "}
-                    <strong>{bitValue(bits)}</strong>
-                  </div>
-                  <button
-                    disabled={running}
-                    onClick={() => void submit(bitValue(bits).toString(2))}
+
+                  <form
+                    className="word-guess-form"
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      if (wordGuess.length === (wordPuzzle?.wordLength ?? wordLevel.length))
+                        void submit(wordGuess);
+                    }}
                   >
-                    Conferir combinação
-                  </button>
+                    <label>
+                      Seu termo de programação
+                      <input
+                        value={wordGuess}
+                        autoComplete="off"
+                        spellCheck={false}
+                        maxLength={wordPuzzle?.wordLength ?? wordLevel.length}
+                        placeholder={`Digite ${wordPuzzle?.wordLength ?? wordLevel.length} letras`}
+                        disabled={
+                          running ||
+                          wordPuzzle?.completed ||
+                          wordPuzzle?.remaining === 0
+                        }
+                        onChange={(e) =>
+                          setWordGuess(
+                            e.target.value
+                              .toUpperCase()
+                              .replace(/[^A-Z]/g, ""),
+                          )
+                        }
+                      />
+                    </label>
+                    <button
+                      disabled={
+                        running ||
+                        wordGuess.length !==
+                          (wordPuzzle?.wordLength ?? wordLevel.length) ||
+                        wordPuzzle?.completed ||
+                        wordPuzzle?.remaining === 0
+                      }
+                    >
+                      Confirmar termo
+                    </button>
+                  </form>
                   <p className="lab-hint">
-                    Cada posição vale uma potência de 2. Somente os bits ligados
-                    entram na soma.
+                    O vocabulário é restrito a programação, desenvolvimento,
+                    redes e computação. No Dueto e Quarteto, a mesma palavra
+                    precisa gerar pistas úteis em vários quadros ao mesmo tempo.
                   </p>
                 </div>
               ) : (
@@ -518,6 +672,7 @@ export function Learning() {
                   </div>
                 </div>
               )}
+
               <div
                 className={`game-result ${correct ? "won" : ""}`}
                 role="status"
@@ -530,7 +685,7 @@ export function Learning() {
                   disabled={running}
                   onClick={() => reset()}
                 >
-                  <RotateCcw size={16} /> Recomeçar
+                  <RotateCcw size={16} /> Recomeçar interface
                 </button>
                 {correct && level < 4 && (
                   <button onClick={() => reset(game, level + 1)}>
@@ -539,6 +694,7 @@ export function Learning() {
                 )}
               </div>
             </section>
+
             <p className="muted">
               Exercícios de prática do Enturma. Não substituem atividades ou
               avaliações da sua universidade.
