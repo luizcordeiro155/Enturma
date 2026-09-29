@@ -18,6 +18,18 @@ describe("JavaScript learning engines", () => {
     expect(tooLong.operations).toBeGreaterThan(12);
   });
 
+  it("keeps every robot level solvable within its operation budget", () => {
+    const solutions = [
+      "DOWN;DOWN;DOWN;RIGHT;RIGHT;DOWN;RIGHT;RIGHT",
+      "RIGHT;RIGHT;RIGHT;RIGHT;DOWN;DOWN;DOWN;DOWN",
+      "DOWN;DOWN;RIGHT;DOWN;DOWN;DOWN;RIGHT;RIGHT;RIGHT;RIGHT",
+      "DOWN;DOWN;DOWN;DOWN;DOWN;RIGHT;RIGHT;RIGHT;RIGHT;RIGHT",
+    ];
+    solutions.forEach((program, index) => {
+      expect(robotFrames(program, index + 1).won).toBe(true);
+    });
+  });
+
   it("evaluates repeated letters like a Termo-style game", () => {
     expect(evaluateWordGuess("ARRAY", "ARRAY")).toEqual([
       "correct",
