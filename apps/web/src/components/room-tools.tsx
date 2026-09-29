@@ -229,7 +229,7 @@ export function RoomTools({
         )}
         {answer ? (
           <article className="ai-answer">
-            <p>{answer.answer}</p>
+            <p>{renderCitedAnswer(answer.answer, answer.webSources ?? [])}</p>
             {answer.sources.length ? <h3>Materiais usados</h3> : null}
             {answer.sources.map((s) => (
               <details key={`${s.materialId}-${s.number}`}>
@@ -424,4 +424,43 @@ function nextScreenMessage(error: unknown) {
   if (message.toLowerCase().includes("permission"))
     return "A permissão para compartilhar a tela foi recusada.";
   return message || "Não foi possível iniciar o compartilhamento de tela.";
+}
+
+
+function renderCitedAnswer(
+  text: string,
+  sources: NonNullable<Answer["webSources"]>,
+) {
+  if (!sources.length) return text;
+  const ordered = [...sources]
+    .filter(
+      (source) =>
+        source.startIndex >= 0 &&
+        source.endIndex > source.startIndex &&
+        source.endIndex <= text.length,
+    )
+    .sort((a, b) => a.startIndex - b.startIndex);
+
+  if (!ordered.length) return text;
+  const parts: React.ReactNode[] = [];
+  let cursor = 0;
+  for (const source of ordered) {
+    if (source.startIndex < cursor) continue;
+    if (source.startIndex > cursor)
+      parts.push(text.slice(cursor, source.startIndex));
+    parts.push(
+      <a
+        key={`${source.url}-${source.startIndex}`}
+        href={source.url}
+        target="_blank"
+        rel="noreferrer"
+        title={source.title}
+      >
+        {text.slice(source.startIndex, source.endIndex)}
+      </a>,
+    );
+    cursor = source.endIndex;
+  }
+  if (cursor < text.length) parts.push(text.slice(cursor));
+  return parts;
 }
