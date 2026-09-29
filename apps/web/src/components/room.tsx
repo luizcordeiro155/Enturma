@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Profile, Room } from "@enturma/contracts";
-import { Clock, ImagePlus, Reply, Trash2, Users } from "lucide-react";
+import { Clock, ImagePlus, Reply, Trash2, Users, X } from "lucide-react";
 import { api, post } from "@/lib/api";
 import {
   createRoomIdentity,
@@ -49,6 +49,7 @@ export function RoomView({ id }: { id: string }) {
   const [cryptoReady, setCryptoReady] = useState(false);
   const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
   const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [draft, setDraft] = useState("");
   const [now, setNow] = useState(() => Date.now());
   const router = useRouter();
@@ -342,7 +343,9 @@ export function RoomView({ id }: { id: string }) {
       };
       await emit(event);
       setDraft("");
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
       setImage(null);
+      setImagePreview(null);
       setReplyTo(null);
     } catch (e) {
       setError((e as Error).message);
@@ -564,6 +567,30 @@ export function RoomView({ id }: { id: string }) {
               ) : null}
 
               <form onSubmit={send} className="chat-composer">
+                {imagePreview && image ? (
+                  <div className="attachment-preview">
+                    <div className="attachment-preview-media">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={imagePreview} alt={image.name} />
+                      <button
+                        type="button"
+                        className="attachment-remove"
+                        aria-label="Remover imagem selecionada"
+                        onClick={() => {
+                          URL.revokeObjectURL(imagePreview);
+                          setImage(null);
+                          setImagePreview(null);
+                        }}
+                      >
+                        <X size={16} />
+                      </button>
+                    </div>
+                    <div>
+                      <strong>{image.name}</strong>
+                      <small>{(image.size / (1024 * 1024)).toFixed(2)} MB · será criptografada antes do envio</small>
+                    </div>
+                  </div>
+                ) : null}
                 <label>
                   Mensagem
                   <textarea
@@ -602,7 +629,24 @@ export function RoomView({ id }: { id: string }) {
                     <input
                       type="file"
                       accept="image/jpeg,image/png,image/webp,image/gif"
-                      onChange={(e) => setImage(e.target.files?.[0] ?? null)}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0] ?? null;
+                        if (!file) return;
+                        if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+                          setError("Use uma imagem JPG, PNG, WEBP ou GIF.");
+                          e.currentTarget.value = "";
+                          return;
+                        }
+                        if (file.size > 8 * 1024 * 1024) {
+                          setError("A imagem do chat pode ter no máximo 8 MB.");
+                          e.currentTarget.value = "";
+                          return;
+                        }
+                        if (imagePreview) URL.revokeObjectURL(imagePreview);
+                        setError("");
+                        setImage(file);
+                        setImagePreview(URL.createObjectURL(file));
+                      }}
                       disabled={ended || !cryptoReady}
                     />
                   </label>
@@ -619,8 +663,8 @@ export function RoomView({ id }: { id: string }) {
                   </button>
                 </div>
                 <small>
-                  Imagens: JPG, PNG, WEBP ou GIF, até 650 KB. Nada do chat é
-                  gravado no banco.
+                  Imagens: JPG, PNG, WEBP ou GIF, até 8 MB, com prévia antes do envio.
+                  O arquivo é criptografado no navegador e nada do chat é gravado no banco.
                 </small>
               </form>
             </section>
