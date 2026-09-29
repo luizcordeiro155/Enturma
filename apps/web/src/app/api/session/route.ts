@@ -1,10 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Credentials } from "@enturma/contracts";
+import {
+  allowedOrigin,
+  backendUrl,
+  websocketUrl,
+  upstreamHeaders,
+} from "@/lib/server-config";
+export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
-  if (req.headers.get("origin") !== (process.env.APP_URL ?? req.nextUrl.origin))
-    return new NextResponse(null, { status: 403 });
-  const base = process.env.API_URL ?? "http://localhost:8080";
+  if (!allowedOrigin(req)) return new NextResponse(null, { status: 403 });
   try {
+    const base = backendUrl();
     const access = req.cookies.get("enturma_access")?.value;
     if (access) {
       const check = await fetch(`${base}/api/v1/users/me`, {
@@ -16,9 +22,11 @@ export async function POST(req: NextRequest) {
     }
     const refresh = req.cookies.get("enturma_refresh")?.value;
     if (!refresh) return new NextResponse(null, { status: 401 });
+    const headers = upstreamHeaders(req);
+    headers.set("Content-Type", "application/json");
     const result = await fetch(`${base}/api/v1/auth/refresh`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers,
       body: JSON.stringify({ token: refresh }),
       cache: "no-store",
       signal: AbortSignal.timeout(10000),
@@ -43,7 +51,7 @@ export async function POST(req: NextRequest) {
         ...options,
         maxAge: 2592000,
       });
-    } else {
+    } else if (result.status === 401) {
       res.cookies.delete("enturma_access");
       res.cookies.delete("enturma_refresh");
     }
@@ -57,13 +65,23 @@ export async function POST(req: NextRequest) {
 }
 export async function GET(req: NextRequest) {
   const access = req.cookies.get("enturma_access")?.value;
-  return NextResponse.json(
-    access
-      ? {
-          token: access,
-          url: process.env.WEBSOCKET_URL ?? "ws://localhost:8080/ws",
-        }
-      : { message: "Sessão expirada." },
-    { status: access ? 200 : 401, headers: { "Cache-Control": "no-store" } },
-  );
+  if (!access)
+    return NextResponse.json(
+      { message: "Sessão expirada." },
+      { status: 401, headers: { "Cache-Control": "no-store" } },
+    );
+  try {
+    return NextResponse.json(
+      {
+        token: access,
+        url: websocketUrl(),
+      },
+      { headers: { "Cache-Control": "no-store" } },
+    );
+  } catch {
+    return NextResponse.json(
+      { message: "A conexão com o servidor ainda não está configurada." },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
 }

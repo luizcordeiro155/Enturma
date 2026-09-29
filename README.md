@@ -9,9 +9,9 @@ Plataforma de estudo universitário com catálogo acadêmico controlado, salas t
 Requisitos: Java 21 JDK, Maven 3.9+, Node 22.14+ (24 recomendado), npm 11 e Docker Compose. No Windows, use `npm.cmd` se a política do PowerShell bloquear scripts.
 
 1. Clone este repositório e entre na pasta.
-2. Copie `.env.example` para `.env`. Defina senhas locais distintas para PostgreSQL e MinIO. `DATABASE_PASSWORD` deve corresponder a `POSTGRES_PASSWORD`.
+2. Copie `deploy/local.env.example` para `.env`. Defina senhas locais distintas para PostgreSQL e MinIO. `DATABASE_PASSWORD` deve corresponder a `POSTGRES_PASSWORD`. O `.env.example` da raiz é o modelo de produção da SquareCloud.
 3. Execute `docker compose up -d` para PostgreSQL, Redis, MinIO e Mailpit.
-4. Exporte as variáveis do `.env` para o processo Java; Maven não carrega esse arquivo automaticamente. No PowerShell: `./scripts/load-env.ps1` com dot-sourcing, conforme abaixo.
+4. Exporte as variáveis do `.env` para os processos de desenvolvimento. No PowerShell: `./scripts/load-env.ps1` com dot-sourcing, conforme abaixo. O JAR de produção também lê `.env` diretamente da sua pasta.
 5. Instale os pacotes e execute API, web e mobile em terminais separados.
 
 ```powershell
@@ -39,9 +39,15 @@ Cadastre uma conta e confirme o e-mail pelo Mailpit. A confirmação também fun
 - Voz: `VOICE_ENABLED=true`, URL, API key e secret do LiveKit. O navegador acessa o LiveKit diretamente.
 - Materiais: configure `OBJECT_STORAGE_*` e crie um bucket privado. MinIO local usa a mesma interface S3. Formatos desta versão: PDF e TXT.
 - IA: `AI_ENABLED=true`, `AI_BASE_URL`, `AI_API_KEY` e `AI_MODEL` de um serviço compatível com Chat Completions. Sem credenciais, o recurso aparece como indisponível. A busca inicial usa texto completo do PostgreSQL, documentada como fallback, sem embeddings fictícios.
-- WebSocket: configure `WEBSOCKET_URL` no servidor Next.js; em produção use `wss://seu-backend/ws`.
+- WebSocket: derivado automaticamente de `API_URL` no servidor Next.js; em produção a URL usa `wss://seu-backend/ws`.
 
 Nenhuma chave secreta deve usar prefixo `NEXT_PUBLIC_` ou `EXPO_PUBLIC_`.
+
+## Publicar na SquareCloud e Vercel
+
+A API vai para a SquareCloud em `dist/enturma-squarecloud.zip`; a interface web usa o projeto Vercel com **Root Directory `apps/web`**. O CI gera o ZIP testado no artefato `squarecloud-api`. Para gerar localmente após `mvn verify`, execute `python scripts/package-squarecloud.py` (Python 3.11+).
+
+O `.env.example` da raiz tem somente as cinco variáveis básicas da API; `apps/web/.env.example` tem as duas da Vercel. Integrações opcionais ficam em `deploy/optional.env.example`. Instruções de upload, PostgreSQL com certificados e configuração Vercel estão em [DEPLOYMENT](docs/DEPLOYMENT.md).
 
 ## Estrutura
 

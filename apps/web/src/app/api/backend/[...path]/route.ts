@@ -1,6 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { Credentials } from "@enturma/contracts";
-const backend = process.env.API_URL ?? "http://localhost:8080";
+import {
+  allowedOrigin,
+  backendUrl,
+  upstreamHeaders,
+} from "@/lib/server-config";
+import { MAX_WEB_REQUEST_BYTES } from "@/lib/upload-limits";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 const secure = process.env.NODE_ENV === "production";
 const cookieOptions = {
   httpOnly: true,
@@ -15,34 +22,36 @@ async function proxy(
   const { path } = await context.params;
   if (path.some((p) => p === ".." || p.includes("/") || p.includes("\\")))
     return NextResponse.json({ message: "Rota inválida." }, { status: 400 });
-  if (
-    !["GET", "HEAD"].includes(req.method) &&
-    req.headers.get("origin") !== (process.env.APP_URL ?? req.nextUrl.origin)
-  )
+  if (!["GET", "HEAD"].includes(req.method) && !allowedOrigin(req))
     return NextResponse.json(
       { message: "Origem não permitida." },
       { status: 403 },
     );
   const route = path.join("/");
-  const headers = new Headers();
+  const headers = upstreamHeaders(req);
   headers.set(
     "Content-Type",
     req.headers.get("content-type") ?? "application/json",
   );
   const access = req.cookies.get("enturma_access")?.value;
   if (access) headers.set("Authorization", `Bearer ${access}`);
+  if (Number(req.headers.get("content-length")) > MAX_WEB_REQUEST_BYTES)
+    return NextResponse.json(
+      { message: "O limite de envio web é 4 MB." },
+      { status: 413 },
+    );
   const body = ["GET", "HEAD"].includes(req.method)
     ? undefined
     : await req.arrayBuffer();
-  if (body && body.byteLength > 16 * 1024 * 1024)
+  if (body && body.byteLength > MAX_WEB_REQUEST_BYTES)
     return NextResponse.json(
-      { message: "Arquivo muito grande." },
+      { message: "O limite de envio web é 4 MB." },
       { status: 413 },
     );
   let credentials: Credentials | undefined;
   try {
     const upstream = await fetch(
-      `${backend}/api/v1/${route}${req.nextUrl.search}`,
+      `${backendUrl()}/api/v1/${route}${req.nextUrl.search}`,
       {
         method: req.method,
         headers,
@@ -51,12 +60,10 @@ async function proxy(
         signal: AbortSignal.timeout(route.endsWith("/ai") ? 55000 : 20000),
       },
     );
-    let payload: ArrayBuffer | string | null =
-      upstream.status === 204 ? null : await upstream.arrayBuffer();
+    let payload: ReadableStream<Uint8Array> | string | null =
+      upstream.status === 204 ? null : upstream.body;
     if (upstream.ok && ["auth/login", "auth/register"].includes(route)) {
-      credentials = JSON.parse(
-        new TextDecoder().decode(payload as ArrayBuffer),
-      );
+      credentials = await upstream.json();
       payload = JSON.stringify({ userId: credentials!.userId });
     }
     const res = new NextResponse(payload, {
@@ -65,6 +72,9 @@ async function proxy(
         "Content-Type":
           upstream.headers.get("Content-Type") ?? "application/json",
         "Cache-Control": "no-store",
+        ...(upstream.headers.has("Retry-After")
+          ? { "Retry-After": upstream.headers.get("Retry-After")! }
+          : {}),
         ...(upstream.headers.has("Content-Disposition")
           ? {
               "Content-Disposition": upstream.headers.get(

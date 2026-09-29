@@ -15,11 +15,13 @@ public class RequestSecurity extends OncePerRequestFilter {
   private final AuthService auth;
   private final Db db;
   private final ObjectMapper json;
+  private final ClientIdentity clients;
 
-  public RequestSecurity(AuthService auth, Db db, ObjectMapper json) {
+  public RequestSecurity(AuthService auth, Db db, ObjectMapper json, ClientIdentity clients) {
     this.auth = auth;
     this.db = db;
     this.json = json;
+    this.clients = clients;
   }
 
   @Override
@@ -47,7 +49,7 @@ public class RequestSecurity extends OncePerRequestFilter {
       var authentication = SecurityContextHolder.getContext().getAuthentication();
       String subject =
           authentication == null
-              ? req.getRemoteAddr()
+              ? clients.subject(req)
               : ((Actor) authentication.getPrincipal()).id().toString();
       boolean authRoute = req.getRequestURI().startsWith("/api/v1/auth/");
       String bucket = (authRoute ? "auth:" : "write:") + Tokens.hash(subject);

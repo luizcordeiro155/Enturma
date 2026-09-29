@@ -14,3 +14,10 @@ playwright-report/
 *.log
 *.tsbuildinfo
 .DS_Store
+.vercel/
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+__pycache__/

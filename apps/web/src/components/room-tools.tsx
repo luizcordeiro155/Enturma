@@ -2,6 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
+import { MAX_WEB_UPLOAD_BYTES } from "@/lib/upload-limits";
 type Material = { id: string; fileName: string; fileSize: number };
 type Answer = {
   answer: string;
@@ -46,6 +47,9 @@ export function RoomTools({
     setBusy(true);
     setError("");
     try {
+      const file = form.get("file");
+      if (!(file instanceof File) || file.size > MAX_WEB_UPLOAD_BYTES)
+        throw Error("Selecione um PDF ou TXT de até 4 MB.");
       await api("/users/me");
       const res = await fetch(`/api/backend/study-rooms/${roomId}/materials`, {
         method: "POST",
@@ -115,7 +119,7 @@ export function RoomTools({
               disabled={ended || busy}
             />
             <small>
-              Até 15 MB e 150 páginas. Compartilhe apenas materiais que você tem
+              Até 4 MB e 150 páginas. Compartilhe apenas materiais que você tem
               autorização para usar.
             </small>
           </label>

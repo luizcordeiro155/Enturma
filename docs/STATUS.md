@@ -1,10 +1,11 @@
 # Estado da implementação
 
-Este é um incremento funcional do Enturma, **não a conclusão dos 151 requisitos do documento mestre**. Não está homologado para produção. Não foi feito deploy em Railway/Vercel nem publicação em lojas.
+Este é um incremento funcional do Enturma, **não a conclusão dos 151 requisitos do documento mestre**. Não está homologado para produção. A configuração de hospedagem prioriza web na Vercel, API na SquareCloud e PostgreSQL existente no Railway; veja `docs/DEPLOYMENT.md`. Não houve publicação em lojas.
 
 ## Implementado e integrado
 
 - Monorepo, Java/Spring, Next.js, Expo, contratos e tokens visuais, migrations, Dockerfile, Compose e workflow GitHub Actions.
+- Deploy web: configuração Vercel do monorepo, healthcheck de ponta a ponta, origens exatas, WebSocket derivado da API, upload web de 4 MB, download em streaming e limites por cliente assinados pelo BFF. ZIP SquareCloud reproduzível com perfil de porta/memória, leitura de `.env` e template mínimo; integrações opcionais separadas.
 - Web: cadastro/login, recuperação/confirmação, sessões, catálogo administrativo JSON, onboarding em seis etapas, matérias/perfil, salas, chat, caronas e matches.
 - Backend: tokens com hash/rotação/revogação, autorização, hierarquia acadêmica com fontes/vigência/auditoria, locking de salas/vagas, expiração, chat persistente e WebSocket autenticado, ofertas/pedidos/aceite, conversa privada e avaliações de carona.
 - App nativo: cadastro/login, armazenamento seguro, onboarding, listagem/criação/reutilização de salas e chat. Usa a mesma API.
@@ -13,6 +14,7 @@ Este é um incremento funcional do Enturma, **não a conclusão dos 151 requisit
 
 ## Evidências locais
 
+- Preparação SquareCloud/Vercel: 17 testes Java, 7 testes web, 2 testes do empacotador, lint/tipos/build web e fluxo E2E com WebSocket aprovados localmente. O CI também executa o JAR em Java 25 e a interface com `next start`, além de gerar o ZIP sem credenciais.
 - Verificação em 28/09/2026: `mvn verify` passou com 14 testes (10 de integração e 4 de parsing); `npm test` passou com 6 testes; lint, TypeScript, build Next.js e exportações Expo Android/iOS passaram. `expo install --check` confirmou compatibilidade. As integrações de IA/storage usam doubles somente no teste de isolamento; não houve chamada a fornecedores reais.
 - Testes de integração em PostgreSQL real: sessão, replay de refresh, corrida de criação de sala, capacidade, associação, expiração, expulsão, catálogo, privacidade de caronas e validação HTTP.
 - Testes de componentes web e armazenamento seguro mobile.

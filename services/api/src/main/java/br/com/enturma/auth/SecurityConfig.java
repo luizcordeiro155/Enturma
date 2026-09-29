@@ -28,6 +28,7 @@ public class SecurityConfig {
       AuthService auth,
       Db db,
       ObjectMapper json,
+      ClientIdentity clients,
       @Value("${enturma.origins}") String origins)
       throws Exception {
     var cors = new CorsConfiguration();
@@ -66,7 +67,8 @@ public class SecurityConfig {
                           Errors.body(401, "UNAUTHORIZED", "Entre para continuar.", req));
                     }))
         .addFilterBefore(
-            new RequestSecurity(auth, db, json), UsernamePasswordAuthenticationFilter.class)
+            new RequestSecurity(auth, db, json, clients),
+            UsernamePasswordAuthenticationFilter.class)
         .build();
   }
 }
