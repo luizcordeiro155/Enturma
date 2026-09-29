@@ -38,12 +38,12 @@ describe("JavaScript learning engines", () => {
   });
 
   it("scores repeated letters in programmer word guesses correctly", () => {
-    expect(wordFeedback("ARRAY", "CLASS")).toEqual([
-      { letter: "A", state: "absent" },
-      { letter: "R", state: "absent" },
-      { letter: "R", state: "absent" },
-      { letter: "A", state: "exact" },
-      { letter: "Y", state: "absent" },
+    expect(wordFeedback("QUEUE", "QUERY")).toEqual([
+      { letter: "Q", state: "exact" },
+      { letter: "U", state: "exact" },
+      { letter: "E", state: "exact" },
+      { letter: "U", state: "absent" },
+      { letter: "E", state: "absent" },
     ]);
     expect(wordFeedback("STACK", "CACHE")).toEqual([
       { letter: "S", state: "absent" },
