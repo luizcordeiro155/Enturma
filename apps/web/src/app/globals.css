@@ -1687,3 +1687,435 @@ label small {
     width: 100%;
   }
 }
+
+
+/* Enturma collaborative room v4 */
+:root[data-theme="dark"] {
+  --bg: #111718;
+  --ink: #edf5f0;
+  --muted: #a8b8b2;
+  --accent: #cfe96c;
+  --border: #344343;
+  --soft: #1b2425;
+  color-scheme: dark;
+}
+:root[data-theme="dark"] body,
+:root[data-theme="dark"] .workspace,
+:root[data-theme="dark"] .sidebar,
+:root[data-theme="dark"] .topbar,
+:root[data-theme="dark"] .game-studio,
+:root[data-theme="dark"] .room-tool-card {
+  background: var(--bg);
+  color: var(--ink);
+}
+:root[data-theme="dark"] .secondary,
+:root[data-theme="dark"] .reaction,
+:root[data-theme="dark"] .reply-preview,
+:root[data-theme="dark"] .composer-reply,
+:root[data-theme="dark"] .ai-web-sources a {
+  background: #1d2829 !important;
+  color: var(--ink) !important;
+}
+:root[data-theme="dark"] .learning-stats article,
+:root[data-theme="dark"] .program-console,
+:root[data-theme="dark"] .game-tabs button,
+:root[data-theme="dark"] .chat-empty {
+  background: #182122;
+}
+:root[data-accessibility="on"] body {
+  font-size: 18px;
+  line-height: 1.7;
+}
+:root[data-accessibility="on"] button,
+:root[data-accessibility="on"] a {
+  min-height: 44px;
+}
+:root[data-accessibility="on"] *:focus-visible {
+  outline-width: 4px;
+  outline-offset: 5px;
+}
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.icon-control {
+  min-width: 46px;
+  padding: 10px 13px !important;
+}
+.icon-control.active {
+  box-shadow: inset 0 0 0 2px var(--ink);
+}
+.room-experience {
+  width: min(1500px, 100%);
+  margin: 0 auto;
+}
+.room-titlebar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding-bottom: 24px;
+}
+.room-titlebar h1 {
+  font-size: clamp(32px, 4vw, 48px);
+  margin-top: 6px;
+}
+.room-titlebar p {
+  color: var(--muted);
+}
+.room-session-actions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 12px;
+}
+.room-session-actions > span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: .86rem;
+}
+.room-discord-layout {
+  min-height: 720px;
+  display: grid;
+  grid-template-columns: 220px minmax(0,1fr) 260px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.room-channel-list,
+.room-participants {
+  background: color-mix(in srgb, var(--soft) 80%, var(--bg));
+  padding: 18px 12px;
+}
+.room-channel-list {
+  border-right: 1px solid var(--border);
+}
+.room-participants {
+  border-left: 1px solid var(--border);
+}
+.room-channel-caption {
+  display: grid;
+  gap: 3px;
+  padding: 5px 10px 16px;
+}
+.room-channel {
+  width: 100%;
+  justify-content: flex-start !important;
+  background: transparent !important;
+  color: var(--muted) !important;
+  border-color: transparent !important;
+  padding: 10px 12px !important;
+  margin-bottom: 4px;
+}
+.room-channel:hover,
+.room-channel.active {
+  background: color-mix(in srgb, var(--soft) 70%, var(--border)) !important;
+  color: var(--ink) !important;
+}
+.room-channel-note {
+  display: block;
+  padding: 26px 10px 0;
+  line-height: 1.55;
+}
+.room-main-panel {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0 !important;
+}
+.room-main-panel .chat-heading {
+  min-height: 76px;
+  padding: 18px 24px;
+  border-bottom: 1px solid var(--border);
+}
+.discord-messages {
+  flex: 1;
+  min-height: 500px;
+  max-height: 650px;
+  margin: 0;
+  padding: 22px 24px;
+  gap: 2px;
+}
+.discord-messages .message {
+  display: grid;
+  grid-template-columns: 42px minmax(0,1fr);
+  gap: 12px;
+  background: transparent;
+  border-radius: 7px;
+  padding: 9px 8px;
+  border-left: 0;
+}
+.discord-messages .message:hover {
+  background: color-mix(in srgb, var(--soft) 75%, transparent);
+}
+.message-avatar,
+.participant-avatar {
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--soft);
+  border: 1px solid var(--border);
+  font-weight: 800;
+}
+.message-avatar {
+  width: 40px;
+  height: 40px;
+}
+.message-body {
+  min-width: 0;
+}
+.message-body header {
+  justify-content: flex-start;
+  align-items: baseline;
+}
+.message-body header small {
+  margin-left: 8px;
+}
+.discord-composer {
+  margin: 0 18px 18px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--soft) 70%, var(--bg));
+}
+.discord-composer textarea {
+  min-height: 76px;
+  resize: vertical;
+  background: transparent;
+  border: 0;
+  padding: 6px;
+}
+.room-participants h2 {
+  font-size: 1rem;
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.room-participants .member {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 9px;
+}
+.room-participants .member > span:not(.participant-avatar) {
+  display: grid;
+  min-width: 0;
+}
+.participant-avatar {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+}
+.late-join-banner,
+.ai-recap,
+.session-study-card {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  margin-bottom: 18px;
+}
+.late-join-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 18px;
+  background: color-mix(in srgb, var(--accent) 22%, var(--bg));
+}
+.late-join-banner > div {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+}
+.ai-recap {
+  padding: 18px;
+  display: grid;
+  gap: 12px;
+}
+.ai-recap > div {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ai-recap p,
+.session-study-content {
+  white-space: pre-wrap;
+}
+.room-ended-note {
+  display: grid;
+  gap: 4px;
+  padding: 18px 24px;
+  border-top: 1px solid var(--border);
+}
+.session-study-card {
+  margin-top: 20px;
+  padding: 24px;
+  display: grid;
+  gap: 18px;
+}
+.session-study-content {
+  padding: 18px;
+  border-radius: 10px;
+  background: var(--soft);
+  line-height: 1.7;
+}
+
+/* Codeword game */
+.codeword-lab {
+  display: grid;
+  gap: 22px;
+}
+.codeword-mode-switch,
+.codeword-entry {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.codeword-boards {
+  display: grid;
+  gap: 18px;
+}
+.codeword-boards.dueto {
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+.codeword-boards.quarteto {
+  grid-template-columns: repeat(2, minmax(0,1fr));
+}
+.codeword-board {
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.codeword-row {
+  display: flex;
+  gap: 5px;
+}
+.codeword-row span {
+  width: 42px;
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--border);
+  border-radius: 6px;
+  font-weight: 800;
+  font-size: 1.05rem;
+}
+.codeword-row span.correct {
+  background: #42855b;
+  color: white;
+  border-color: #42855b;
+}
+.codeword-row span.present {
+  background: #b38c38;
+  color: white;
+  border-color: #b38c38;
+}
+.codeword-row span.absent {
+  background: #5f6967;
+  color: white;
+  border-color: #5f6967;
+}
+.codeword-entry input {
+  flex: 1;
+  min-width: 180px;
+  text-transform: uppercase;
+  letter-spacing: .2em;
+  font-weight: 800;
+}
+.robot-code {
+  min-height: 220px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+@media (max-width: 1050px) {
+  .room-discord-layout {
+    grid-template-columns: 190px minmax(0,1fr);
+  }
+  .room-participants {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .topbar {
+    height: auto;
+    min-height: 62px;
+    gap: 10px;
+    padding-block: 8px;
+  }
+  .topbar-actions {
+    gap: 6px;
+  }
+  .icon-control span {
+    display: none;
+  }
+  .room-titlebar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .room-session-actions {
+    justify-content: flex-start;
+  }
+  .room-discord-layout {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    border-radius: 12px;
+  }
+  .room-channel-list {
+    order: 0;
+    display: flex;
+    overflow-x: auto;
+    gap: 6px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+    padding: 8px;
+  }
+  .room-channel-caption,
+  .room-channel-note {
+    display: none;
+  }
+  .room-channel {
+    width: auto;
+    white-space: nowrap;
+    margin: 0;
+  }
+  .room-main-panel {
+    order: 1;
+  }
+  .discord-messages {
+    min-height: 420px;
+    max-height: 58vh;
+    padding: 14px 10px;
+  }
+  .discord-messages .message {
+    grid-template-columns: 34px minmax(0,1fr);
+  }
+  .message-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  .discord-composer {
+    margin: 0 8px 8px;
+  }
+  .late-join-banner {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .late-join-banner button {
+    width: 100%;
+  }
+  .codeword-boards.dueto,
+  .codeword-boards.quarteto {
+    grid-template-columns: 1fr;
+  }
+  .codeword-row span {
+    width: min(10vw, 40px);
+  }
+}
