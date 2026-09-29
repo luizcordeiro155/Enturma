@@ -139,6 +139,10 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       socket.close(CloseStatus.BAD_DATA);
       return;
     }
+    List<Map<String, Object>> history;
+    synchronized (roomHistory) {
+      history = List.copyOf(roomHistory.getOrDefault(c.room, new ArrayDeque<>()));
+    }
     relay(
         c,
         targetId,
@@ -147,7 +151,8 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
             "senderId", c.actor.id().toString(),
             "senderPublicKey", c.publicKey,
             "iv", iv,
-            "ciphertext", ciphertext));
+            "ciphertext", ciphertext,
+            "history", history));
   }
 
   private void authenticate(Connection c, JsonNode data) throws Exception {
