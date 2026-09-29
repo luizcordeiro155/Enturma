@@ -97,7 +97,7 @@ final class LearningGameEngine {
       {1, 2, 6, 7, 11, 12, 17},
       {1, 2, 3, 6, 8, 11, 13, 16, 18},
       {1, 7, 13, 19, 20, 21, 22, 23, 28, 29},
-      {1, 7, 13, 18, 19, 24, 25, 26, 27, 28}
+      {1, 7, 18, 19, 24, 25, 26, 27, 28}
     };
     State state = new State(size, walls[level - 1]);
     execute(program, state);
