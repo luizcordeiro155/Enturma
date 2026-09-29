@@ -80,7 +80,7 @@ public class LearningController {
   }
 
   @GetMapping("/daily")
-  public Object daily(@AuthenticationPrincipal Actor a) {
+  public Map<String, Object> daily(@AuthenticationPrincipal Actor a) {
     require(a);
     LocalDate today = LocalDate.now(ZoneOffset.UTC);
     int slot = Math.floorMod(Objects.hash(today.toString(), a.id().toString()), 12);
