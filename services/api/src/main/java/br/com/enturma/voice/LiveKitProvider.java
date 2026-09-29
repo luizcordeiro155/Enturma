@@ -41,7 +41,7 @@ public class LiveKitProvider implements VoiceProvider {
       Base64.Encoder b64 = Base64.getUrlEncoder().withoutPadding();
       String header =
           b64.encodeToString(
-              "{"alg":"HS256","typ":"JWT"}".getBytes(StandardCharsets.UTF_8));
+              "{\\\"alg\\\":\\\"HS256\\\",\\\"typ\\\":\\\"JWT\\\"}".getBytes(StandardCharsets.UTF_8));
       String payload = header + "." + b64.encodeToString(json.writeValueAsBytes(claims));
       Mac mac = Mac.getInstance("HmacSHA256");
       mac.init(
