@@ -111,8 +111,30 @@ export function Learning() {
   }
 
   useEffect(() => {
-    void load();
+    let active = true;
+    const bootstrap = setTimeout(() => {
+      api<{ eligible: boolean }>("/learning/access")
+        .then(async (a) => {
+          if (!active) return;
+          setAccess(a.eligible);
+          if (a.eligible) {
+            const [saved, overview] = await Promise.all([
+              api<Progress[]>("/learning/progress"),
+              api<LearningSummary>("/learning/summary"),
+            ]);
+            if (active) {
+              setProgress(saved);
+              setSummary(overview);
+            }
+          }
+        })
+        .catch((e) => {
+          if (active) setError(e.message);
+        });
+    }, 0);
     return () => {
+      active = false;
+      clearTimeout(bootstrap);
       generation.current++;
       if (timer.current) clearTimeout(timer.current);
     };
