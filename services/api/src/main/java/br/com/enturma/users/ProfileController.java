@@ -54,24 +54,6 @@ public class ProfileController {
     profiles.saveBanner(a, file.getContentType(), file.getBytes());
   }
 
-  @GetMapping("/{userId}/avatar")
-  public ResponseEntity<byte[]> avatar(@PathVariable UUID userId) {
-    var image = profiles.avatar(userId);
-    return ResponseEntity.ok()
-        .contentType(MediaType.parseMediaType(image.mime()))
-        .header("Cache-Control", "private, max-age=300")
-        .body(image.bytes());
-  }
-
-  @GetMapping("/{userId}/banner")
-  public ResponseEntity<byte[]> banner(@PathVariable UUID userId) {
-    var image = profiles.banner(userId);
-    return ResponseEntity.ok()
-        .contentType(MediaType.parseMediaType(image.mime()))
-        .header("Cache-Control", "private, max-age=300")
-        .body(image.bytes());
-  }
-
   @PutMapping("/enrollment")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void enroll(@AuthenticationPrincipal Actor a, @Valid @RequestBody Enrollment r) {
