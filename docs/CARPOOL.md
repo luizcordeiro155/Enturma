@@ -7,3 +7,8 @@ Interesse gera pedido PENDING único por usuário/carona. Somente dono aceita, c
 Somente dono conclui/cancela. Conclusão exige ter chegado o horário da saída. Avaliação 1–5 só após conclusão, uma por avaliador/match. Há testes para privacidade e lotação. O sistema não faz verificação de motorista nem oferece garantia de segurança.
 
 Ainda pendentes: ranking por proximidade/horário, filtros geográficos, recusa/cancelamento de pedido pelo passageiro, telas equivalentes no app nativo, notificações completas de ciclo de vida, perfis de veículo e reputação agregada. Não há porcentagem de compatibilidade inventada.
+
+
+## Relação com a atualização v4
+
+O módulo de caronas não teve mudança de modelo nesta atualização. Ele continua isolado das mensagens das salas de estudo: conversas e dados de carona não entram no histórico da turma nem nos resumos gerados pela Enturma AI.
