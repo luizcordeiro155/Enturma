@@ -8,6 +8,7 @@ import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
 import { useRouter } from "next/navigation";
 import { CatalogSearch } from "./catalog-search";
+import { ForumHighlights } from "./forum-highlights";
 export function Dashboard({ explore = false }: { explore?: boolean }) {
   const [profile, setProfile] = useState<Profile>();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -183,6 +184,7 @@ export function Dashboard({ explore = false }: { explore?: boolean }) {
               </button>
             </div>
           ) : null}
+          {!explore ? <ForumHighlights /> : null}
         </div>
         <aside className="study-guide">
           <h2>Seu espaço de estudo</h2>

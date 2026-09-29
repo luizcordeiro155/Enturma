@@ -2,6 +2,8 @@
 
 O fórum fica em `/forum`, com publicações por assunto, pesquisa textual em português, ordenação por data/votos/relevância, posts semelhantes, comentários encadeados (até quatro níveis), votos e reações. O autor pode editar ou excluir; moderadores podem excluir e recebem denúncias pelo fluxo existente. Excluir um comentário preserva suas respostas; excluir um post remove a discussão e as reações. Bloqueios entre usuários também se aplicam ao fórum. Código é exibido como texto, sem executar HTML.
 
+O início exibe quatro destaques abaixo das salas abertas. `/api/v1/forum/highlights` seleciona posts dos últimos 30 dias pela soma de votos positivos e reações, desempata pela data mais recente e respeita os mesmos bloqueios e status dos autores. Os cartões mostram autor, resumo, curtidas, reações e comentários; a prévia atualiza a cada minuto enquanto a página está visível e ao retornar à aba. Não há conteúdo fictício quando o fórum está vazio.
+
 Criar uma oferta, publicar uma busca ou demonstrar interesse redireciona para `/caronas/matches`. A conexão autenticada `/ws`, com escopo `rides`, envia apenas invalidações após a confirmação da transação. A interface busca novamente os dados autorizados. Publicações novas atualizam a lista e aceites abrem a celebração para ambos, inclusive durante a navegação por outras páginas.
 
 Ofertas com vagas e solicitações pendentes aparecem no painel de busca. Na página de caronas há uma animação de radar; nas demais páginas privadas há um indicador inferior que pode ser minimizado. Ele não representa localização GPS nem promete um motorista: o aceite continua sendo feito pelos participantes. Buscas saem do painel ao cancelar, completar, preencher as vagas ou passar o horário de saída.

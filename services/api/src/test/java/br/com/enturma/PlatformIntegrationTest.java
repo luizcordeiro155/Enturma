@@ -547,6 +547,39 @@ class PlatformIntegrationTest {
   @Autowired Realtime realtime;
 
   @Test
+  void forumHighlightsRankRecentPostsByLikesAndReactionsAndRespectBlocks() {
+    UUID popular =
+        (UUID)
+            ((Map<?, ?>) forum.create(host, "Destaque popular", "Explicação", "GENERAL")).get("id");
+    UUID fresh =
+        (UUID)
+            ((Map<?, ?>) forum.create(host, "Conversa recente", "Uma dúvida", "GENERAL")).get("id");
+    UUID old =
+        (UUID) ((Map<?, ?>) forum.create(host, "Conversa antiga", "Arquivo", "GENERAL")).get("id");
+    for (Actor a : List.of(host, member, outsider)) {
+      forum.vote(a, popular, 1);
+      forum.react(a, popular, "💡");
+      forum.vote(a, old, 1);
+      forum.react(a, old, "💡");
+    }
+    forum.comment(member, popular, null, "Uma resposta útil");
+    db.jdbc.update("UPDATE forum_entry SET created_at=now()-interval '31 days' WHERE id=?", old);
+    var highlights = (List<?>) forum.highlights(member);
+    assertThat(highlights.size()).isLessThanOrEqualTo(4);
+    var first = (Map<?, ?>) highlights.getFirst();
+    assertThat(first.get("id")).isEqualTo(popular);
+    assertThat(((Number) first.get("likes")).intValue()).isEqualTo(3);
+    assertThat(((Number) first.get("reactionCount")).intValue()).isEqualTo(3);
+    assertThat(((Number) first.get("commentsCount")).intValue()).isEqualTo(1);
+    assertThat(highlights).noneMatch(e -> ((Map<?, ?>) e).get("id").equals(old));
+    db.jdbc.update(
+        "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", member.id(), host.id());
+    assertThat((List<?>) forum.highlights(member))
+        .noneMatch(e -> ((Map<?, ?>) e).get("authorId").equals(host.id()));
+    for (UUID id : List.of(popular, fresh, old)) forum.delete(host, id);
+  }
+
+  @Test
   void forumSearchVotesRepliesAndOwnershipAreEnforced() {
     String title = "Algoritmos " + UUID.randomUUID();
     UUID post =

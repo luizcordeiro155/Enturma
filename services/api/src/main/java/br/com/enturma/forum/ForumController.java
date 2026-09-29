@@ -27,6 +27,11 @@ public class ForumController {
 
   public record Reaction(@Size(max = 20) String emoji) {}
 
+  @GetMapping("/highlights")
+  public Object highlights(@AuthenticationPrincipal Actor a) {
+    return forum.highlights(a);
+  }
+
   @GetMapping
   public Object list(
       @AuthenticationPrincipal Actor a,

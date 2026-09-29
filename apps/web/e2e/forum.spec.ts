@@ -78,7 +78,34 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await expect(
     post.getByRole("button", { name: "Editar publicação ou comentário" }),
   ).toHaveCount(0);
-  await page.reload();
+  await page.goto("/home");
+  const highlights = page.getByRole("region", { name: "Em destaque no fórum" });
+  const featured = highlights.locator("article").filter({ hasText: title });
+  await expect(featured).toBeVisible();
+  await expect(featured).toContainText("1 curtida");
+  await expect(featured).toContainText("1 reação");
+  await expect(featured).toContainText("1 comentário");
+  const roomsHeading = await page
+    .getByRole("heading", { name: "Salas acontecendo agora" })
+    .boundingBox();
+  expect((await highlights.boundingBox())!.y).toBeGreaterThan(roomsHeading!.y);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "dark";
+  });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await highlights.screenshot({ path: "../../.local/home-forum-mobile.png" });
+  await page.setViewportSize({ width: 1440, height: 1000 });
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "light";
+  });
+  await highlights.screenshot({ path: "../../.local/home-forum-desktop.png" });
+  await featured.getByRole("heading", { name: title, exact: true }).click();
+  await expect(page).toHaveURL(url);
   await page
     .locator(".forum-comment")
     .getByRole("button", { name: "Responder", exact: true })

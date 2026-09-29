@@ -17,20 +17,36 @@ public class ForumService {
     this.db = db;
   }
 
+  public Object highlights(Actor a) {
+    return db.list(
+        "SELECT * FROM (SELECT e.id,e.author_id,e.title,left(e.body,240) excerpt,e.category,"
+            + " e.created_at,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS"
+            + " NOT NULL has_avatar,(SELECT count(*) FROM forum_vote v WHERE v.entry_id=e.id AND"
+            + " v.value=1) likes,(SELECT count(*) FROM forum_reaction r WHERE r.entry_id=e.id)"
+            + " reaction_count,(SELECT count(*) FROM forum_entry c WHERE c.root_id=e.id AND NOT"
+            + " c.deleted) comments_count FROM forum_entry e JOIN app_user u ON u.id=e.author_id"
+            + " WHERE e.root_id IS NULL AND NOT e.deleted AND e.created_at >= now()-interval '30"
+            + " days' AND "
+            + visible()
+            + ") h ORDER BY (likes+reaction_count) DESC,created_at DESC,id LIMIT 4",
+        a.id(),
+        a.id());
+  }
+
   private String visible() {
     return " u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
-               + " b.blocked_id=e.author_id) OR (b.blocked_id=? AND b.user_id=e.author_id)) ";
+        + " b.blocked_id=e.author_id) OR (b.blocked_id=? AND b.user_id=e.author_id)) ";
   }
 
   private String projection() {
     return "SELECT e.*,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS NOT"
-               + " NULL has_avatar,coalesce((SELECT sum(v.value) FROM forum_vote v WHERE"
-               + " v.entry_id=e.id),0) score,coalesce((SELECT v.value FROM forum_vote v WHERE"
-               + " v.entry_id=e.id AND v.user_id=?),0) my_vote,(SELECT count(*) FROM forum_entry c"
-               + " WHERE c.root_id=e.id AND NOT c.deleted) comments_count,coalesce((SELECT"
-               + " jsonb_agg(r) FROM (SELECT emoji,count(*) count,bool_or(user_id=?) mine FROM"
-               + " forum_reaction WHERE entry_id=e.id GROUP BY emoji ORDER BY emoji)r),'[]'::jsonb)"
-               + " reactions FROM forum_entry e JOIN app_user u ON u.id=e.author_id ";
+        + " NULL has_avatar,coalesce((SELECT sum(v.value) FROM forum_vote v WHERE"
+        + " v.entry_id=e.id),0) score,coalesce((SELECT v.value FROM forum_vote v WHERE"
+        + " v.entry_id=e.id AND v.user_id=?),0) my_vote,(SELECT count(*) FROM forum_entry c"
+        + " WHERE c.root_id=e.id AND NOT c.deleted) comments_count,coalesce((SELECT"
+        + " jsonb_agg(r) FROM (SELECT emoji,count(*) count,bool_or(user_id=?) mine FROM"
+        + " forum_reaction WHERE entry_id=e.id GROUP BY emoji ORDER BY emoji)r),'[]'::jsonb)"
+        + " reactions FROM forum_entry e JOIN app_user u ON u.id=e.author_id ";
   }
 
   public Object list(Actor a, String query, String category, String sort, int page, boolean mine) {
@@ -43,7 +59,7 @@ public class ForumService {
             ? "score DESC,e.created_at DESC,e.id"
             : sort.equals("relevance") && !query.isBlank()
                 ? "ts_rank(e.search_vector,websearch_to_tsquery('portuguese',?)) DESC,e.created_at"
-                      + " DESC,e.id"
+                    + " DESC,e.id"
                 : "e.created_at DESC,e.id";
     var args =
         new ArrayList<Object>(
