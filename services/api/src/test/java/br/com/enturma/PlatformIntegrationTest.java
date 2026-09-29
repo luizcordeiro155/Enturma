@@ -546,6 +546,73 @@ class PlatformIntegrationTest {
   @Autowired br.com.enturma.forum.ForumService forum;
   @Autowired Realtime realtime;
 
+  @Autowired br.com.enturma.notifications.NotificationService notices;
+
+  @Test
+  void notificationsArePrivateDeduplicatedAndSupportMentionsAndReadState() {
+    UUID post =
+        (UUID)
+            ((Map<?, ?>) forum.create(host, "Notificações de teste", "Conversa", "GENERAL"))
+                .get("id");
+    forum.vote(host, post, 1);
+    assertThat(((Number) ((Map<?, ?>) notices.inbox(host)).get("unreadCount")).intValue()).isZero();
+    forum.vote(member, post, 1);
+    forum.vote(member, post, 0);
+    forum.vote(member, post, 1);
+    forum.react(member, post, "👍");
+    forum.react(member, post, "💡");
+    assertThat(((Number) ((Map<?, ?>) notices.inbox(host)).get("unreadCount")).intValue())
+        .isEqualTo(2);
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", host.id()).get("username");
+    UUID comment =
+        (UUID) ((Map<?, ?>) forum.comment(member, post, null, "Confira @" + username)).get("id");
+    var mention =
+        db.one("SELECT * FROM notification WHERE user_id=? AND target_id=?", host.id(), comment);
+    assertThat(mention.get("kind")).isEqualTo("MENTION");
+    assertThat(mention.get("href")).isEqualTo("/forum/" + post + "#entry-" + comment);
+    UUID notice = (UUID) mention.get("id");
+    notices.read(outsider, List.of(notice), null, false);
+    assertThat(db.one("SELECT read_at FROM notification WHERE id=?", notice).get("readAt"))
+        .isNull();
+    notices.read(host, List.of(notice), null, false);
+    assertThat(((Number) ((Map<?, ?>) notices.inbox(host)).get("unreadCount")).intValue())
+        .isEqualTo(2);
+    notices.read(host, null, null, true);
+    assertThat(((Number) ((Map<?, ?>) notices.inbox(host)).get("unreadCount")).intValue()).isZero();
+    db.jdbc.update(
+        "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", host.id(), outsider.id());
+    notices.send(
+        outsider.id(),
+        host.id(),
+        "ROOM_MESSAGE",
+        "room:" + UUID.randomUUID(),
+        UUID.randomUUID(),
+        "/home",
+        "Não mostrar");
+    assertThat(((Number) ((Map<?, ?>) notices.inbox(host)).get("unreadCount")).intValue()).isZero();
+    UUID room = room(8);
+    study.join(member, room);
+    UUID message = (UUID) ((Map<?, ?>) chat.send(member, room, "Olá @" + username, null)).get("id");
+    assertThat(
+            db.one(
+                "SELECT kind FROM notification WHERE user_id=? AND target_id=?",
+                host.id(),
+                message))
+        .containsEntry("kind", "MENTION");
+    assertThat((List<?>) chat.target(host, room, message)).hasSize(1);
+    assertThatThrownBy(() -> chat.target(outsider, room, message)).isInstanceOf(ApiException.class);
+    notices.read(host, null, "room:" + room, false);
+    assertThat(
+            db.one(
+                    "SELECT read_at FROM notification WHERE user_id=? AND target_id=?",
+                    host.id(),
+                    message)
+                .get("readAt"))
+        .isNotNull();
+    forum.delete(host, post);
+  }
+
   @Test
   void forumHighlightsRankRecentPostsByLikesAndReactionsAndRespectBlocks() {
     UUID popular =

@@ -11,10 +11,16 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ChatService {
   private final Db db;
+  private final br.com.enturma.notifications.NotificationService notices;
   private final StudyService study;
   private final ObjectStorageService storage;
 
-  public ChatService(Db db, StudyService study, ObjectStorageService storage) {
+  public ChatService(
+      Db db,
+      StudyService study,
+      ObjectStorageService storage,
+      br.com.enturma.notifications.NotificationService notices) {
+    this.notices = notices;
     this.db = db;
     this.study = study;
     this.storage = storage;
@@ -28,6 +34,14 @@ public class ChatService {
   }
 
   public Object messages(Actor a, UUID room, int page) {
+    return messageRows(a, room, page, null);
+  }
+
+  public Object target(Actor a, UUID room, UUID target) {
+    return messageRows(a, room, 0, target);
+  }
+
+  private Object messageRows(Actor a, UUID room, int page, UUID target) {
     study.member(a, room);
     return db.list(
         "SELECT"
@@ -35,10 +49,12 @@ public class ChatService {
             + " IS NOT NULL has_avatar, a.id attachment_id,a.file_name attachment_name,a.mime_type"
             + " attachment_mime, a.file_size attachment_size FROM room_message m JOIN app_user u ON"
             + " u.id=m.user_id LEFT JOIN room_attachment a ON a.id=m.attachment_id WHERE"
-            + " m.room_id=? AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
-            + " b.blocked_id=m.user_id) OR (b.blocked_id=? AND b.user_id=m.user_id)) ORDER BY"
-            + " m.created_at DESC,m.id DESC LIMIT 50 OFFSET ?",
+            + " m.room_id=? AND (?::uuid IS NULL OR m.id=?) AND NOT EXISTS(SELECT 1 FROM user_block"
+            + " b WHERE (b.user_id=? AND b.blocked_id=m.user_id) OR (b.blocked_id=? AND"
+            + " b.user_id=m.user_id)) ORDER BY m.created_at DESC,m.id DESC LIMIT 50 OFFSET ?",
         room,
+        target,
+        target,
         a.id(),
         a.id(),
         Math.clamp(page, 0, 10000) * 50);
@@ -56,6 +72,7 @@ public class ChatService {
         message);
   }
 
+  @Transactional
   public Object send(Actor a, UUID room, String body, UUID reply) {
     return send(a, room, body, reply, null);
   }
@@ -90,6 +107,24 @@ public class ChatService {
         text.isBlank() ? null : text,
         reply,
         attachment);
+    var mentions = notices.mentions(text);
+    for (var member :
+        db.list(
+            "SELECT user_id FROM room_participant WHERE room_id=? AND NOT removed AND left_at IS"
+                + " NULL",
+            room)) {
+      UUID user = (UUID) member.get("userId");
+      notices.send(
+          a.id(),
+          user,
+          mentions.contains(user) ? "MENTION" : "ROOM_MESSAGE",
+          "room:" + room,
+          id,
+          "/rooms/" + room + "#message-" + id,
+          mentions.contains(user)
+              ? "Você foi mencionado na sala de estudo."
+              : "Nova mensagem na sua sala de estudo.");
+    }
     return Map.of("id", id);
   }
 

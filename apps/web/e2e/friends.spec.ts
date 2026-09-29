@@ -115,6 +115,34 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     other.getByText("Conversa privada ponta a ponta 🔒", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
+  await expect(
+    other.getByRole("button", { name: "Nova mensagem · ir para ela" }),
+  ).toBeVisible();
+  await expect(other.locator(".notification-count")).toHaveCount(0);
+  await other
+    .getByRole("button", { name: "Nova mensagem · ir para ela" })
+    .click();
+  await expect(other.locator(".notification-target")).toContainText(
+    "Conversa privada ponta a ponta",
+  );
+  await other.goto("/home");
+  await page
+    .getByLabel("Mensagem privada")
+    .fill(`Olá @${b}, confira a revisão`);
+  await page.getByLabel("Mensagem privada").press("Enter");
+  await other.getByRole("button", { name: /Notificações,.*não lidas/ }).click();
+  const inbox = other.getByRole("dialog", { name: "Sua caixa de entrada" });
+  await expect(inbox).toContainText(
+    "Você foi mencionado em uma conversa privada.",
+  );
+  await inbox
+    .getByRole("button")
+    .filter({ hasText: "Você foi mencionado em uma conversa privada." })
+    .click();
+  await expect(other).toHaveURL(/friends\?chat=/);
+  await expect(
+    other.getByText(`Olá @${b}, confira a revisão`, { exact: true }),
+  ).toBeVisible();
   await other.getByLabel("Mensagem privada").fill("Resposta protegida");
   await other.getByRole("button", { name: "Enviar mensagem" }).click();
   await expect(

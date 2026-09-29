@@ -78,6 +78,12 @@ public class ForumController {
     return forum.comment(a, id, c.parentId(), c.body());
   }
 
+  @GetMapping("/{id}/target/{target}")
+  public Object target(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @PathVariable UUID target) {
+    return forum.target(a, id, target);
+  }
+
   @GetMapping("/{id}/related")
   public Object related(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
     return forum.related(a, id);

@@ -9,17 +9,19 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ForumService {
   private final Db db;
+  private final br.com.enturma.notifications.NotificationService notices;
   private static final Set<String> CATEGORIES =
       Set.of("GENERAL", "PROGRAMMING", "ACADEMIC", "CAREER", "CAMPUS");
   private static final Set<String> REACTIONS = Set.of("👍", "❤️", "💡", "🎉", "🤔");
 
-  public ForumService(Db db) {
+  public ForumService(Db db, br.com.enturma.notifications.NotificationService notices) {
+    this.notices = notices;
     this.db = db;
   }
 
   public Object highlights(Actor a) {
     return db.list(
-        "SELECT * FROM (SELECT e.id,e.author_id,e.title,left(e.body,240) excerpt,e.category,"
+        "SELECT * FROM (SELECT e.id,e.author_id,e.title,e.body excerpt,e.category,"
             + " e.created_at,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS"
             + " NOT NULL has_avatar,(SELECT count(*) FROM forum_vote v WHERE v.entry_id=e.id AND"
             + " v.value=1) likes,(SELECT count(*) FROM forum_reaction r WHERE r.entry_id=e.id)"
@@ -138,6 +140,13 @@ public class ForumService {
     return Map.of("items", rows.subList(0, Math.min(30, rows.size())), "hasMore", rows.size() > 30);
   }
 
+  public Object target(Actor a, UUID root, UUID target) {
+    detail(a, root);
+    var e = entry(a, target, false);
+    if (!target.equals(root) && !root.equals(e.get("rootId"))) throw ApiException.missing();
+    return db.one(projection() + " WHERE e.id=?", a.id(), a.id(), target);
+  }
+
   public Object related(Actor a, UUID id) {
     var e = entry(a, id, false);
     String title = Objects.toString(e.get("title"), "");
@@ -189,6 +198,8 @@ public class ForumService {
         title.strip(),
         body.strip(),
         category);
+    notices.forumMentions(a.id(), id, id, title + " " + body);
+    notices.forumChanged();
     return Map.of("id", id);
   }
 
@@ -209,6 +220,8 @@ public class ForumService {
         throw ApiException.invalid("Escreva até 4.000 caracteres.");
       db.jdbc.update("UPDATE forum_entry SET body=?,updated_at=now() WHERE id=?", body.strip(), id);
     }
+    notices.forumMentions(a.id(), e.get("rootId") == null ? id : (UUID) e.get("rootId"), id, body);
+    notices.forumChanged();
   }
 
   @Transactional
@@ -239,6 +252,18 @@ public class ForumService {
         body.strip(),
         post.get("category"),
         depth);
+    notices.forumMentions(a.id(), root, id, body);
+    UUID recipient = (UUID) (target.equals(root) ? post : entry(a, target, false)).get("authorId");
+    if (!notices.mentions(body).contains(recipient))
+      notices.send(
+          a.id(),
+          recipient,
+          "FORUM_REPLY",
+          "forum:" + root,
+          id,
+          "/forum/" + root + "#entry-" + id,
+          "Alguém respondeu à sua conversa no fórum.");
+    notices.forumChanged();
     return Map.of("id", id);
   }
 
@@ -246,17 +271,20 @@ public class ForumService {
   public void delete(Actor a, UUID id) {
     var e = entry(a, id, true);
     if (!e.get("authorId").equals(a.id()) && !a.admin()) throw ApiException.forbidden();
-    if (e.get("rootId") == null) db.jdbc.update("DELETE FROM forum_entry WHERE id=?", id);
-    else {
+    if (e.get("rootId") == null) {
+      db.jdbc.update("DELETE FROM notification WHERE context_key=?", "forum:" + id);
+      db.jdbc.update("DELETE FROM forum_entry WHERE id=?", id);
+    } else {
       db.jdbc.update("UPDATE forum_entry SET body='',deleted=true,updated_at=now() WHERE id=?", id);
       db.jdbc.update("DELETE FROM forum_vote WHERE entry_id=?", id);
       db.jdbc.update("DELETE FROM forum_reaction WHERE entry_id=?", id);
     }
+    notices.forumChanged();
   }
 
   @Transactional
   public void vote(Actor a, UUID id, int value) {
-    entry(a, id, true);
+    var e = entry(a, id, true);
     if (value < -1 || value > 1) throw ApiException.invalid("Voto inválido.");
     if (value == 0)
       db.jdbc.update("DELETE FROM forum_vote WHERE entry_id=? AND user_id=?", id, a.id());
@@ -267,13 +295,16 @@ public class ForumService {
           id,
           a.id(),
           value);
+    if (value == 1) activity(a, e, id, "FORUM_LIKE", "Sua publicação recebeu uma curtida.");
+    notices.forumChanged();
   }
 
   @Transactional
   public void react(Actor a, UUID id, String emoji) {
-    entry(a, id, true);
+    var e = entry(a, id, true);
     if (emoji == null || emoji.isEmpty()) {
       db.jdbc.update("DELETE FROM forum_reaction WHERE entry_id=? AND user_id=?", id, a.id());
+      notices.forumChanged();
       return;
     }
     if (!REACTIONS.contains(emoji)) throw ApiException.invalid("Reação inválida.");
@@ -283,5 +314,19 @@ public class ForumService {
         id,
         a.id(),
         emoji);
+    activity(a, e, id, "FORUM_REACTION", "Sua publicação recebeu uma reação.");
+    notices.forumChanged();
+  }
+
+  private void activity(Actor a, Map<String, Object> entry, UUID id, String kind, String message) {
+    UUID root = entry.get("rootId") == null ? id : (UUID) entry.get("rootId");
+    notices.send(
+        a.id(),
+        (UUID) entry.get("authorId"),
+        kind,
+        "forum:" + root,
+        id,
+        "/forum/" + root + "#entry-" + id,
+        message);
   }
 }

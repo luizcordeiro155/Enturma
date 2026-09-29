@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef } from "react";
 import type { Message, Profile } from "@enturma/contracts";
 import { Hash, ImagePlus, Loader2, Reply, Trash2, X } from "lucide-react";
 import { UserIdentity } from "./user-identity";
+import { ConversationNotice, useNotificationTarget } from "./notifications";
 import { api } from "@/lib/api";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
@@ -55,6 +56,7 @@ export function RoomChat(props: Props) {
     setError,
   } = props;
 
+  useNotificationTarget();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const nearBottom = useRef(true);
@@ -90,6 +92,7 @@ export function RoomChat(props: Props) {
 
   return (
     <section
+      data-notification-context={`room:${roomId}`}
       className={compact ? "persistent-chat call-chat-pane" : "persistent-chat"}
     >
       <div className="chat-heading persistent-heading">
@@ -108,6 +111,7 @@ export function RoomChat(props: Props) {
         ) : null}
       </div>
 
+      <ConversationNotice context={`room:${roomId}`} />
       <div
         ref={scrollRef}
         className="messages persistent-messages"

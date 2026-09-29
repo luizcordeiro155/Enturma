@@ -29,6 +29,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
     volatile UUID room;
     volatile UUID user;
     volatile boolean rides;
+    volatile boolean activity;
     String previous = "";
 
     Connection(WebSocketSession socket) {
@@ -76,7 +77,13 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       String token = data.path("token").asText();
       Actor actor = auth.authenticate(token).orElseThrow();
       c.user = actor.id();
-      if ("rides".equals(data.path("scope").asText())) {
+      if ("activity".equals(data.path("scope").asText())) {
+        c.activity = true;
+        c.token = token;
+        synchronized (c) {
+          socket.sendMessage(new TextMessage("{\"type\":\"app_ready\"}"));
+        }
+      } else if ("rides".equals(data.path("scope").asText())) {
         c.rides = true;
         c.token = token;
         synchronized (c) {
@@ -107,7 +114,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
           continue;
         }
         Actor actor = auth.authenticate(c.token).orElseThrow();
-        if (c.rides) continue;
+        if (c.rides || c.activity) continue;
         var detail = study.detail(actor, c.room);
         String payload =
             json.writeValueAsString(
@@ -148,6 +155,32 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
         }
         synchronized (c) {
           c.socket.sendMessage(new TextMessage("{\"type\":\"rides_changed\"}"));
+        }
+      } catch (Exception e) {
+        try {
+          c.socket.close();
+        } catch (Exception ignored) {
+        }
+        connections.remove(c.socket.getId());
+      }
+    }
+  }
+
+  @org.springframework.transaction.event.TransactionalEventListener(
+      phase = org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT)
+  public void appChanged(br.com.enturma.notifications.AppChanged event) {
+    for (var c : connections.values()) {
+      if (!c.activity
+          || !c.socket.isOpen()
+          || (!event.users().isEmpty() && !event.users().contains(c.user))) continue;
+      try {
+        if (auth.authenticate(c.token).isEmpty()) {
+          c.socket.close(CloseStatus.POLICY_VIOLATION);
+          continue;
+        }
+        synchronized (c) {
+          c.socket.sendMessage(
+              new TextMessage(json.writeValueAsString(Map.of("type", event.type()))));
         }
       } catch (Exception e) {
         try {

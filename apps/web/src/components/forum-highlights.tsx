@@ -1,4 +1,6 @@
 "use client";
+import { ForumLinks } from "./forum-links";
+import { useLiveRefresh } from "@/lib/live-updates";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { ArrowRight, MessageCircle, ThumbsUp, Sparkles } from "lucide-react";
@@ -51,6 +53,15 @@ export function ForumHighlights() {
       document.removeEventListener("visibilitychange", visible);
     };
   }, [attempt]);
+  useLiveRefresh("forum_changed", async () => {
+    try {
+      setItems(await api<Highlight[]>("/forum/highlights"));
+      setFailed(false);
+    } catch {
+      setFailed(true);
+    }
+  });
+
   return (
     <section className="home-forum" aria-labelledby="home-forum-title">
       <div className="section-heading">
@@ -106,8 +117,12 @@ export function ForumHighlights() {
             </header>
             <Link href={`/forum/${item.id}`} className="home-forum-post">
               <h3>{item.title}</h3>
-              <p>{item.excerpt.replace(/```[^\n]*\n?|```/g, " ").trim()}</p>
             </Link>
+            <p className="home-forum-excerpt">
+              <ForumLinks
+                text={item.excerpt.replace(/```[^\n]*\n?|```/g, " ").trim()}
+              />
+            </p>
             <div className="home-forum-stats">
               <span>
                 <ThumbsUp size={15} />

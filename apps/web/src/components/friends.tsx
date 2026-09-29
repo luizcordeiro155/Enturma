@@ -1,5 +1,13 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import {
+  ConversationNotice,
+  useNotificationTarget,
+  focusMessage,
+} from "./notifications";
+import { useLiveRefresh } from "@/lib/live-updates";
+import { mentionsUser } from "@/lib/mentions";
 import { api, post } from "@/lib/api";
 import {
   conversationKey,
@@ -31,6 +39,9 @@ type Envelope = {
   createdAt: string;
 };
 export function Friends() {
+  const params = useSearchParams();
+  const requestedChat = params.get("chat");
+  useNotificationTarget();
   const [me, setMe] = useState<PublicProfile>();
   const [friends, setFriends] = useState<Friend[]>([]);
   const [selected, setSelected] = useState<Friend>();
@@ -99,9 +110,12 @@ export function Friends() {
       cryptoKey: CryptoKey,
       index: number,
       version: number,
+      target?: string,
     ) => {
       const rows = await api<Envelope[]>(
-        `/friends/${friend.id}/messages?page=${index}`,
+        target
+          ? `/friends/${friend.id}/messages/target/${target}`
+          : `/friends/${friend.id}/messages?page=${index}`,
       );
       const decoded = await Promise.all(
         rows.map(async (m) => ({
@@ -118,7 +132,7 @@ export function Friends() {
             a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id),
         ),
       );
-      setOlder(rows.length === 50);
+      if (!target) setOlder(rows.length === 50);
     },
     [],
   );
@@ -147,6 +161,11 @@ export function Friends() {
         key.current = k;
         setFinger(code);
         await load(friend, k, 0, current);
+        const target = location.hash.match(/^#message-([a-f0-9-]+)$/)?.[1];
+        if (target) {
+          await load(friend, k, 0, current, target);
+          focusMessage(`message-${target}`);
+        }
         timer = setInterval(() => {
           if (document.visibilityState === "visible")
             void load(friend, k, 0, current).catch((e) => setError(e.message));
@@ -167,6 +186,21 @@ export function Friends() {
       clearInterval(timer);
     };
   }, [selected, ready, load]);
+  useEffect(() => {
+    const jump = () => {
+      const target = location.hash.match(/^#message-([a-f0-9-]+)$/)?.[1];
+      if (target && selected && key.current)
+        void load(selected, key.current, 0, generation.current, target).then(
+          () => focusMessage(`message-${target}`),
+        );
+    };
+    window.addEventListener("hashchange", jump);
+    window.addEventListener("enturma-notification-open", jump);
+    return () => {
+      window.removeEventListener("hashchange", jump);
+      window.removeEventListener("enturma-notification-open", jump);
+    };
+  }, [selected, load]);
   function choose(friend: Friend) {
     setError("");
     setMessages([]);
@@ -176,6 +210,21 @@ export function Friends() {
     key.current = null;
     setSelected(friend);
   }
+  useEffect(() => {
+    if (!requestedChat || selected?.id === requestedChat) return;
+    const target = friends.find(
+      (f) => f.id === requestedChat && f.status === "ACCEPTED",
+    );
+    if (target) {
+      const timer = setTimeout(() => choose(target), 0);
+      return () => clearTimeout(timer);
+    }
+  }, [requestedChat, friends, selected?.id]);
+  useLiveRefresh("notifications_changed", async () => {
+    await refresh();
+    if (selected && key.current)
+      await load(selected, key.current, 0, generation.current);
+  });
   async function send(e: React.FormEvent) {
     e.preventDefault();
     if (!selected || !me || !key.current || busy || !draft.trim()) return;
@@ -190,7 +239,11 @@ export function Friends() {
         me.id,
         crypto.randomUUID(),
       );
-      await post(`/friends/${friend.id}/messages`, payload);
+      await post(`/friends/${friend.id}/messages`, {
+        ...payload,
+        mentioned:
+          !!friend.username && mentionsUser(draft, friend.username),
+      });
       setDraft("");
       await load(friend, key.current, 0, generation.current);
     } catch (e) {
@@ -371,7 +424,13 @@ export function Friends() {
               ))
             )}
           </aside>
-          <section className="private-chat" aria-label="Conversa privada">
+          <section
+            className="private-chat"
+            aria-label="Conversa privada"
+            data-notification-context={
+              selected ? `friend:${selected.id}` : undefined
+            }
+          >
             {selected ? (
               <>
                 <header>
@@ -389,6 +448,7 @@ export function Friends() {
                 ) : (
                   <p>Preparando conversa…</p>
                 )}
+                <ConversationNotice context={`friend:${selected.id}`} />
                 <div className="private-messages" role="log">
                   {older ? (
                     <button
@@ -413,6 +473,7 @@ export function Friends() {
                   {messages.map((m) => (
                     <article
                       key={m.id}
+                      id={`message-${m.id}`}
                       className={m.senderId === me?.id ? "mine" : ""}
                     >
                       <UserIdentity

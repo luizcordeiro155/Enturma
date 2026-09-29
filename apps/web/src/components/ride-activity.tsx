@@ -6,6 +6,7 @@ import { Car, Users, MapPin, Minus, ChevronUp, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { useRideUpdates } from "@/lib/use-ride-updates";
 import type { Ride, Match } from "@/lib/ride-types";
+import { NotificationsProvider } from "./notifications";
 import { RideMatchCelebration } from "./ride-match-celebration";
 
 type Search = {
@@ -134,7 +135,7 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
   const primary = searches.find((s) => s.incoming) ?? searches[0];
   return (
     <SearchContext.Provider value={{ searches, live }}>
-      {children}
+      <NotificationsProvider>{children}</NotificationsProvider>
       {primary && !path.startsWith("/caronas") ? (
         <aside
           className={`ride-search-dock ${minimized ? "is-minimized" : ""}`}

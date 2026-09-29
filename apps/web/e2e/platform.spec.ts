@@ -206,6 +206,16 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await expect(
     peerPage.getByText("Atualização pelo WebSocket", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
+  await expect(
+    peerPage.getByRole("button", { name: "Nova mensagem · ir para ela" }),
+  ).toBeVisible();
+  await expect(peerPage.locator(".notification-count")).toHaveCount(0);
+  await peerPage
+    .getByRole("button", { name: "Nova mensagem · ir para ela" })
+    .click();
+  await expect(peerPage.locator(".notification-target")).toContainText(
+    "Atualização pelo WebSocket",
+  );
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Encerrar sessão" }).click();
   await expect(

@@ -23,9 +23,16 @@ public class ChatController {
 
   @GetMapping
   public Object list(
-      @AuthenticationPrincipal Actor a, @PathVariable UUID room,
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID room,
       @RequestParam(defaultValue = "0") int page) {
     return chat.messages(a, room, page);
+  }
+
+  @GetMapping("/target/{id}")
+  public Object target(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID room, @PathVariable UUID id) {
+    return chat.target(a, room, id);
   }
 
   @PostMapping
@@ -36,7 +43,9 @@ public class ChatController {
 
   @PutMapping("/{id}")
   public void edit(
-      @AuthenticationPrincipal Actor a, @PathVariable UUID room, @PathVariable UUID id,
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID room,
+      @PathVariable UUID id,
       @Valid @RequestBody Message r) {
     chat.edit(a, room, id, r.body());
   }
@@ -78,14 +87,18 @@ public class ChatController {
 
   @PostMapping("/{id}/reactions")
   public void react(
-      @AuthenticationPrincipal Actor a, @PathVariable UUID room, @PathVariable UUID id,
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID room,
+      @PathVariable UUID id,
       @RequestParam String emoji) {
     chat.react(a, room, id, emoji);
   }
 
   @DeleteMapping("/{id}/reactions")
   public void unreact(
-      @AuthenticationPrincipal Actor a, @PathVariable UUID room, @PathVariable UUID id,
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID room,
+      @PathVariable UUID id,
       @RequestParam String emoji) {
     chat.unreact(a, room, id, emoji);
   }

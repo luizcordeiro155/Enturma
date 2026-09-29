@@ -38,7 +38,7 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await editor
     .getByLabel("Conteúdo da publicação")
     .fill(
-      "Como funciona o caso base?\n```js\nif (n === 0) return 1;\n```\n<script>alert('não executar')</script>",
+      "Fonte: https://example.org/estudo?tema=recursao\nComo funciona o caso base?\n```js\nif (n === 0) return 1;\n```\n<script>alert('não executar')</script>",
     );
   await editor.getByRole("button", { name: "Publicar", exact: true }).click();
   await expect(page).toHaveURL(/forum\/[0-9a-f-]+/);
@@ -48,10 +48,66 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   ).toBeVisible();
   await expect(page.locator(".forum-body code")).toContainText("return 1");
   await expect(page.locator(".forum-body")).toContainText("<script>");
+  await page
+    .getByRole("link", {
+      name: "https://example.org/estudo?tema=recursao",
+      exact: true,
+    })
+    .click();
+  const warning = page.getByRole("dialog", {
+    name: "Você está saindo do Enturma",
+  });
+  await expect(warning).toBeVisible();
+  await expect
+    .poll(() =>
+      warning.evaluate((el) =>
+        el.getAnimations().every((a) => a.playState !== "running"),
+      ),
+    )
+    .toBe(true);
+  await warning.screenshot({
+    path: "../../.local/external-link-confirmation.png",
+  });
+  await expect(
+    warning.getByRole("button", { name: "Abrir link" }),
+  ).toBeDisabled();
+  await warning
+    .getByLabel("Entendo que vou acessar um site externo e aceito continuar.")
+    .check();
+  await page.context().route("https://example.org/**", (route) =>
+    route.fulfill({
+      body: "Página externa de teste",
+      contentType: "text/html",
+    }),
+  );
+  const popupPromise = page.context().waitForEvent("page");
+  await warning.getByRole("button", { name: "Abrir link" }).click();
+  const popup = await popupPromise;
+  await popup.waitForLoadState();
+  expect(popup.url()).toBe("https://example.org/estudo?tema=recursao");
+  await popup.close();
   await page.getByRole("link", { name: "Voltar ao fórum" }).click();
   await page.getByLabel("Buscar publicações").fill(tag);
   await page.getByRole("button", { name: "Buscar no fórum" }).click();
   await expect(page.locator(".forum-card")).toHaveCount(1);
+  const newPost = await request.post(`${backend}/api/v1/forum`, {
+    headers: { Authorization: `Bearer ${users[1].accessToken}` },
+    data: {
+      title: `Nova conversa ${tag}`,
+      body: "Atualização sem reload",
+      category: "GENERAL",
+    },
+  });
+  expect(newPost.ok()).toBe(true);
+  const newId = (await newPost.json()).id;
+  await expect(
+    page.getByRole("link", { name: `Nova conversa ${tag}`, exact: true }),
+  ).toBeVisible({ timeout: 5000 });
+  await request.delete(`${backend}/api/v1/forum/${newId}`, {
+    headers: { Authorization: `Bearer ${users[1].accessToken}` },
+  });
+  await expect(page.locator(".forum-card")).toHaveCount(1);
+
   await page.getByRole("link", { name: title, exact: true }).click();
   const peer = await browser.newContext();
   const peerPage = await peer.newPage();
@@ -63,7 +119,7 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await peerPage.goto(url);
   await peerPage
     .getByLabel("Seu comentário")
-    .fill("O caso base interrompe as chamadas recursivas.");
+    .fill(`O caso base interrompe as chamadas recursivas. @Autor_${tag}`);
   await peerPage.getByRole("button", { name: "Comentar", exact: true }).click();
   await expect(peerPage.locator(".forum-comment")).toContainText("interrompe");
   const post = peerPage.locator(".forum-card").first();
@@ -78,6 +134,37 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await expect(
     post.getByRole("button", { name: "Editar publicação ou comentário" }),
   ).toHaveCount(0);
+  await expect(page.locator(".forum-comment")).toContainText("interrompe", {
+    timeout: 5000,
+  });
+  await page.getByRole("button", { name: /Notificações,.*não lidas/ }).click();
+  const inbox = page.getByRole("dialog", { name: "Sua caixa de entrada" });
+  await expect(inbox).toContainText("Sua publicação recebeu uma curtida.");
+  await expect(inbox).toContainText(
+    "Você foi mencionado em uma conversa do fórum.",
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect
+    .poll(() =>
+      inbox.evaluate((el) =>
+        el
+          .getAnimations({ subtree: true })
+          .every((a) => a.playState !== "running"),
+      ),
+    )
+    .toBe(true);
+  await page.screenshot({ path: "../../.local/notification-inbox-mobile.png" });
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "dark";
+  });
+  await page.screenshot({ path: "../../.local/notification-inbox-dark.png" });
+  await page.evaluate(() => {
+    document.documentElement.dataset.theme = "light";
+  });
+  await inbox.getByRole("button", { name: "Marcar todas como lidas" }).click();
+  await expect(inbox.getByText("0 não lidas", { exact: true })).toBeVisible();
+  await inbox.getByRole("button", { name: "Fechar notificações" }).click();
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/home");
   const highlights = page.getByRole("region", { name: "Em destaque no fórum" });
   const featured = highlights.locator("article").filter({ hasText: title });

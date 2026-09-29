@@ -1,0 +1,205 @@
+.notification-bell {
+  position: relative;
+  flex: none;
+}
+.notification-count {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ad2338;
+  color: white;
+  border: 2px solid var(--surface);
+  border-radius: 12px;
+  min-width: 19px;
+  padding: 1px 4px;
+  font-size: 0.65rem;
+  line-height: 1.3;
+}
+.notification-inbox,
+.external-link-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 24px;
+  width: min(500px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+  box-shadow: 0 20px 70px #0005;
+}
+.notification-inbox::backdrop,
+.external-link-dialog::backdrop {
+  background: #0008;
+}
+.notification-inbox > header,
+.external-link-dialog > header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  justify-content: space-between;
+}
+.notification-inbox h2,
+.external-link-dialog h2 {
+  font-size: 1.25rem;
+  margin: 0;
+}
+.notification-inbox header small {
+  color: var(--muted);
+}
+.notification-items {
+  display: grid;
+  gap: 8px;
+}
+.notification-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--ink);
+  border-radius: 12px;
+}
+.notification-item > span {
+  flex: 1;
+  min-width: 0;
+}
+.notification-item span span,
+.notification-item strong,
+.notification-item time {
+  display: block;
+  overflow-wrap: anywhere;
+}
+.notification-item time {
+  color: var(--muted);
+  font-size: 0.75rem;
+  margin-top: 6px;
+}
+.notification-item.unread {
+  border-left: 4px solid var(--accent);
+}
+.notification-item > svg {
+  flex: none;
+}
+.notification-item > i {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--ink);
+  margin-top: 5px;
+}
+.notification-empty {
+  padding: 24px 0;
+  color: var(--muted);
+}
+.external-destination {
+  padding: 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow-wrap: anywhere;
+}
+.external-destination strong,
+.external-destination span {
+  display: block;
+}
+.external-destination span {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 6px;
+}
+.external-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 20px 0;
+}
+.external-consent input {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin: 2px 0;
+}
+.external-link-dialog .actions {
+  flex-wrap: wrap;
+}
+.forum-body a,
+.home-forum-excerpt a {
+  overflow-wrap: anywhere;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.conversation-notice {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: center;
+  margin: 8px auto;
+  padding: 10px 14px;
+  font-size: 0.85rem;
+  background: var(--accent);
+  color: #173f36;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+}
+.notification-target {
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 6px;
+  scroll-margin: 120px;
+}
+.home-forum-excerpt {
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+  margin: 6px 0 12px;
+}
+@media (max-width: 600px) {
+  .notification-inbox,
+  .external-link-dialog {
+    padding: 18px;
+  }
+  .topbar-actions {
+    gap: 8px !important;
+  }
+  .topbar > span {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .external-link-dialog > header {
+    align-items: flex-start;
+  }
+}
+
+.home-forum-excerpt {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.notification-inbox .notification-item {
+  background: var(--surface-raised) !important;
+  color: var(--ink) !important;
+  justify-content: flex-start;
+}
+.notification-inbox .notification-item:hover {
+  background: var(--surface-hover) !important;
+}
+.notification-inbox .notification-item.unread {
+  background: color-mix(in srgb, var(--accent) 10%, var(--surface)) !important;
+}
+.conversation-notice {
+  background: var(--accent) !important;
+  color: #173f36 !important;
+}

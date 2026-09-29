@@ -1,4 +1,7 @@
 "use client";
+import { ForumLinks } from "./forum-links";
+import { useLiveRefresh } from "@/lib/live-updates";
+import { useNotificationTarget, focusMessage } from "./notifications";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -52,6 +55,7 @@ export function Forum({
   initialCategory?: string;
 }) {
   const router = useRouter();
+  useNotificationTarget();
   const [me, setMe] = useState<Me>();
   const [items, setItems] = useState<Entry[]>([]);
   const [current, setCurrent] = useState<Entry>();
@@ -75,21 +79,56 @@ export function Forum({
   const [report, setReport] = useState<Entry>();
   const commentInput = useRef<HTMLTextAreaElement>(null);
   const sequence = useRef(0);
+  useEffect(() => {
+    if (!id) return;
+    let active = true;
+    const jump = async () => {
+      const target = location.hash.match(/^#entry-([a-f0-9-]+)$/)?.[1];
+      if (!target || target === id) return;
+      try {
+        const e = await api<Entry>(`/forum/${id}/target/${target}`);
+        if (active) {
+          setComments((old) =>
+            old.some((c) => c.id === e.id) ? old : [...old, e],
+          );
+          focusMessage(`entry-${target}`);
+        }
+      } catch {}
+    };
+    const timer = setTimeout(() => void jump(), 500);
+    window.addEventListener("hashchange", jump);
+    window.addEventListener("enturma-notification-open", jump);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      window.removeEventListener("hashchange", jump);
+      window.removeEventListener("enturma-notification-open", jump);
+    };
+  }, [id]);
   const load = useCallback(
-    async (pageNumber = 0) => {
+    async (pageNumber = 0, refresh = false) => {
       const version = ++sequence.current;
       try {
         if (id) {
           const [p, c, r] = await Promise.all([
             api<Entry>(`/forum/${id}`),
-            api<PageData>(`/forum/${id}/comments?page=${pageNumber}`),
+            Promise.all(
+              Array.from({ length: refresh ? pageNumber + 1 : 1 }, (_, i) =>
+                api<PageData>(
+                  `/forum/${id}/comments?page=${refresh ? i : pageNumber}`,
+                ),
+              ),
+            ).then((pages) => ({
+              items: pages.flatMap((p) => p.items),
+              hasMore: pages.at(-1)!.hasMore,
+            })),
             api<Entry[]>(`/forum/${id}/related`),
           ]);
           if (version !== sequence.current) return;
           setCurrent(p);
           setRelated(r);
           setComments((old) =>
-            pageNumber
+            pageNumber && !refresh
               ? [
                   ...old,
                   ...c.items.filter(
@@ -100,12 +139,20 @@ export function Forum({
           );
           setMore(c.hasMore);
         } else {
-          const data = await api<PageData>(
-            `/forum?${new URLSearchParams({ q: search, category, sort, mine: String(mine), page: String(pageNumber) })}`,
+          const pages = await Promise.all(
+            Array.from({ length: refresh ? pageNumber + 1 : 1 }, (_, i) =>
+              api<PageData>(
+                `/forum?${new URLSearchParams({ q: search, category, sort, mine: String(mine), page: String(refresh ? i : pageNumber) })}`,
+              ),
+            ),
           );
+          const data = {
+            items: pages.flatMap((p) => p.items),
+            hasMore: pages.at(-1)!.hasMore,
+          };
           if (version !== sequence.current) return;
           setItems((old) =>
-            pageNumber ? [...old, ...data.items] : data.items,
+            pageNumber && !refresh ? [...old, ...data.items] : data.items,
           );
           setMore(data.hasMore);
         }
@@ -119,6 +166,7 @@ export function Forum({
     },
     [id, search, category, sort, mine],
   );
+  useLiveRefresh("forum_changed", () => load(page, true));
   useEffect(() => {
     const counter = sequence;
     const timer = setTimeout(() => void load(), 0);
@@ -496,7 +544,7 @@ export function Forum({
                         maxLength={4000}
                         value={body}
                         onChange={(e) => setBody(e.target.value)}
-                        placeholder="Compartilhe uma explicação, uma experiência ou uma nova pergunta…"
+                        placeholder="Compartilhe uma explicação ou mencione @usuario…"
                       />
                     </label>
                     <button disabled={busy || !body.trim()}>
@@ -633,7 +681,9 @@ function ForumBody({ text }: { text: string }) {
             <code>{part.slice(3, -3).replace(/^\w*\n/, "")}</code>
           </pre>
         ) : (
-          <p key={i}>{part}</p>
+          <p key={i}>
+            <ForumLinks text={part} />
+          </p>
         ),
       )}
     </div>
@@ -779,7 +829,7 @@ function ForumEditor({
             required
             maxLength={entry?.rootId ? 4000 : 12000}
             rows={8}
-            placeholder="Dê contexto. Para compartilhar código, use três crases antes e depois do trecho."
+            placeholder="Dê contexto. Use @usuario para mencionar alguém e três crases para compartilhar código."
           />
         </label>
         <div className="actions">

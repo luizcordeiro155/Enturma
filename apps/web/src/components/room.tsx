@@ -20,6 +20,7 @@ import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
 import { RoomTools } from "./room-tools";
 import { UserIdentity } from "./user-identity";
+import { focusMessage } from "./notifications";
 import { RoomChat } from "./room-chat";
 
 type Section = "chat" | "call" | "materials" | "ai";
@@ -50,6 +51,36 @@ export function RoomView({ id }: { id: string }) {
   const pageRef = useRef(0);
   const connectedRef = useRef(false);
 
+  useEffect(() => {
+    let active = true;
+    const jump = async () => {
+      const target = location.hash.match(/^#message-([a-f0-9-]+)$/)?.[1];
+      if (!target) return;
+      setSection("chat");
+      try {
+        const rows = await api<Message[]>(
+          `/study-rooms/${id}/messages/target/${target}`,
+        );
+        if (active) {
+          setMessages((old) =>
+            [...new Map([...old, ...rows].map((m) => [m.id, m])).values()].sort(
+              (a, b) => a.createdAt.localeCompare(b.createdAt),
+            ),
+          );
+          focusMessage(`message-${target}`);
+        }
+      } catch {}
+    };
+    const timer = setTimeout(() => void jump(), 300);
+    window.addEventListener("hashchange", jump);
+    window.addEventListener("enturma-notification-open", jump);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+      window.removeEventListener("hashchange", jump);
+      window.removeEventListener("enturma-notification-open", jump);
+    };
+  }, [id]);
   const normalize = useCallback((items: Message[]) => [...items].reverse(), []);
 
   const reloadRoom = useCallback(async () => {

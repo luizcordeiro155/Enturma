@@ -14,9 +14,12 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1")
 public class SocialController {
   private final Db db;
+  private final br.com.enturma.notifications.NotificationService notices;
   private final ObjectMapper json;
 
-  public SocialController(Db db, ObjectMapper json) {
+  public SocialController(
+      Db db, ObjectMapper json, br.com.enturma.notifications.NotificationService notices) {
+    this.notices = notices;
     this.db = db;
     this.json = json;
   }
@@ -188,26 +191,61 @@ public class SocialController {
         Math.clamp(page, 0, 10000) * 50);
   }
 
+  @GetMapping("/friends/{id}/messages/target/{target}")
+  public Object messageTarget(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @PathVariable UUID target) {
+    access(a, id, true);
+    return db.list(
+        "SELECT id,sender_id,ciphertext,iv,client_id,created_at FROM private_message WHERE"
+            + " friendship_id=? AND id=?",
+        id,
+        target);
+  }
+
   public record Envelope(
       @NotNull UUID clientId,
       @NotBlank @Size(max = 24000) @Pattern(regexp = "[A-Za-z0-9+/=]+") String ciphertext,
-      @NotBlank @Pattern(regexp = "[A-Za-z0-9+/]{16}") String iv) {}
+      @NotBlank @Pattern(regexp = "[A-Za-z0-9+/]{16}") String iv,
+      Boolean mentioned) {
+    public Envelope(UUID clientId, String ciphertext, String iv) {
+      this(clientId, ciphertext, iv, false);
+    }
+  }
 
   @PostMapping("/friends/{id}/messages")
   @Transactional
   public void send(
       @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Envelope body) {
-    access(a, id, true);
+    var friendship = access(a, id, true);
     if (!db.exists("SELECT EXISTS(SELECT 1 FROM private_identity WHERE user_id=?)", a.id()))
       throw ApiException.invalid("Configure a chave privada primeiro.");
-    db.jdbc.update(
-        "INSERT INTO private_message(id,friendship_id,sender_id,ciphertext,iv,client_id) VALUES"
-            + " (?,?,?,?,?,?) ON CONFLICT(sender_id,client_id) DO NOTHING",
-        UUID.randomUUID(),
-        id,
-        a.id(),
-        body.ciphertext(),
-        body.iv(),
-        body.clientId());
+    UUID message = UUID.randomUUID();
+    int inserted =
+        db.jdbc.update(
+            "INSERT INTO private_message(id,friendship_id,sender_id,ciphertext,iv,client_id) VALUES"
+                + " (?,?,?,?,?,?) ON CONFLICT(sender_id,client_id) DO NOTHING",
+            message,
+            id,
+            a.id(),
+            body.ciphertext(),
+            body.iv(),
+            body.clientId());
+    if (inserted > 0) {
+      UUID peer =
+          (UUID)
+              (a.id().equals(friendship.get("requester"))
+                  ? friendship.get("recipient")
+                  : friendship.get("requester"));
+      notices.send(
+          a.id(),
+          peer,
+          Boolean.TRUE.equals(body.mentioned()) ? "MENTION" : "PRIVATE_MESSAGE",
+          "friend:" + id,
+          message,
+          "/friends?chat=" + id + "#message-" + message,
+          Boolean.TRUE.equals(body.mentioned())
+              ? "Você foi mencionado em uma conversa privada."
+              : "Você recebeu uma mensagem privada.");
+    }
   }
 }
