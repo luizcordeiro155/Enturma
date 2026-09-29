@@ -45,6 +45,10 @@ Nenhuma chave secreta deve usar prefixo `NEXT_PUBLIC_` ou `EXPO_PUBLIC_`.
 
 ## Publicar na SquareCloud e Vercel
 
+Para sincronização direta com o GitHub, veja [SquareCloud pelo Git](docs/SQUARECLOUD_GIT.md).
+O inicializador compila a API na hospedagem após cada atualização dos fontes,
+preservando o `.env`. O deploy não depende de GitHub Actions.
+
 A API vai para a SquareCloud em `dist/enturma-squarecloud.zip`; a interface web usa o projeto Vercel com **Root Directory `apps/web`**. O CI gera o ZIP testado no artefato `squarecloud-api`. Para gerar localmente após `mvn verify`, execute `python scripts/package-squarecloud.py` (Python 3.11+).
 
 O `.env.example` da raiz tem somente as cinco variáveis básicas da API; `apps/web/.env.example` tem as duas da Vercel. Integrações opcionais ficam em `deploy/optional.env.example`. Instruções de upload, PostgreSQL com certificados e configuração Vercel estão em [DEPLOYMENT](docs/DEPLOYMENT.md).

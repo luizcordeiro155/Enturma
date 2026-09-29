@@ -1,6 +1,9 @@
 .git
 .local
 .tools
+.squarecloud-build
+app.jar
+app.jar.pending
 dist
 services
 database
