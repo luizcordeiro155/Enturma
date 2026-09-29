@@ -69,3 +69,21 @@ Swagger/OpenAPI usa springdoc, desabilitado por padrão (`OPENAPI_ENABLED=false`
 Body `{ "entries": [...] }`, até 500 entradas por transação, com pais primeiro. Cada entrada: `id` (UUID), `kind` (INSTITUTION, CAMPUS, COURSE, CURRICULUM, PERIOD, SUBJECT, TOPIC), `parentId`, `name`, `code` opcional, `curriculumVersion` obrigatória para CURRICULUM, `periodNumber` para PERIOD, `sourceUrl` HTTPS, `sourceName`, `verifiedAt`, `validFrom`, `validUntil` opcional, `status` (VERIFIED, PENDING_VERIFICATION, OUTDATED, ARCHIVED). VERIFIED exige data de verificação não futura. Verificação humana da autenticidade da fonte continua necessária.
 
 Os exemplos de testes não representam nenhuma universidade real. Não use as fixtures como catálogo inicial.
+
+
+## Atualização v4 — colaboração e aprendizagem
+
+Novos/alterados endpoints relevantes:
+
+- `GET /api/v1/study-rooms/history`: lista sessões encerradas das quais o usuário participou.
+- `GET /api/v1/study-rooms/{room}/messages?page=0`: histórico privado da sala.
+- `POST /api/v1/study-rooms/{room}/messages`: cria mensagem com texto, resposta e imagem opcional.
+- `DELETE /api/v1/study-rooms/{room}/messages/{id}`: exclusão lógica da mensagem.
+- `POST /api/v1/study-rooms/{room}/messages/{id}/reactions`: ativa/remove reação.
+- `GET /api/v1/study-rooms/{room}/study-summary`: consulta estudo final.
+- `POST /api/v1/study-rooms/{room}/study-summary`: agenda/reagenda geração do estudo final.
+- `POST /api/v1/study-rooms/{room}/study-summary/recap`: gera recuperação de contexto anterior à entrada do usuário.
+
+O WebSocket `/ws` aceita `chat_message`, `chat_delete`, `chat_reaction` e `typing`.
+
+O módulo `/api/v1/learning` usa agora os jogos `robot`, `codeword` e `trace`.
