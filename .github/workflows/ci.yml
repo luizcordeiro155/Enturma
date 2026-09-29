@@ -20,7 +20,9 @@ jobs:
           POSTGRES_USER: enturma
           POSTGRES_PASSWORD: ci-ephemeral-only
         ports: ['5432:5432']
-        options: --health-cmd 'pg_isready -U enturma' --health-interval 5s --health-timeout 5s --health-retries 10
+        options: >-
+          --health-cmd "pg_isready -U enturma -d enturma_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
     env:
       TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/enturma_test
       TEST_DATABASE_USERNAME: enturma
