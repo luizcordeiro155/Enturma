@@ -4,8 +4,11 @@ import br.com.enturma.auth.Actor;
 import br.com.enturma.common.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -56,10 +59,58 @@ public class LearningController {
         a.id());
   }
 
+  @GetMapping("/summary")
+  public Object summary(@AuthenticationPrincipal Actor a) {
+    require(a);
+    ensureStats(a.id());
+    var stats =
+        db.one(
+            "SELECT total_xp,current_streak,longest_streak,last_active_date FROM learning_stats"
+                + " WHERE user_id=?",
+            a.id());
+    int xp = ((Number) stats.get("totalXp")).intValue();
+    int level = xp / 250 + 1;
+    int intoLevel = xp % 250;
+    var result = new LinkedHashMap<String, Object>(stats);
+    result.put("level", level);
+    result.put("xpIntoLevel", intoLevel);
+    result.put("xpForNextLevel", 250);
+    result.put("daily", daily(a));
+    return result;
+  }
+
+  @GetMapping("/daily")
+  public Object daily(@AuthenticationPrincipal Actor a) {
+    require(a);
+    LocalDate today = LocalDate.now(ZoneOffset.UTC);
+    int slot = Math.floorMod(Objects.hash(today.toString(), a.id().toString()), 12);
+    String[] games = {"robot", "binary", "trace"};
+    String game = games[slot / 4];
+    int level = slot % 4 + 1;
+    var saved =
+        db.list(
+            "SELECT attempts,completed,completed_at FROM daily_learning_progress WHERE user_id=?"
+                + " AND challenge_date=?",
+            a.id(),
+            today);
+    Map<String, Object> result = new LinkedHashMap<>();
+    result.put("date", today.toString());
+    result.put("game", game);
+    result.put("level", level);
+    result.put("rewardXp", 40);
+    result.put("attempts", saved.isEmpty() ? 0 : saved.getFirst().get("attempts"));
+    result.put("completed", !saved.isEmpty() && Boolean.TRUE.equals(saved.getFirst().get("completed")));
+    return result;
+  }
+
   public record Attempt(
-      @NotBlank String game, @Min(1) @Max(4) int level, @NotNull @Size(max = 80) String answer) {}
+      @NotBlank String game,
+      @Min(1) @Max(4) int level,
+      @NotNull @Size(max = 80) String answer,
+      boolean daily) {}
 
   @PostMapping("/attempts")
+  @Transactional
   public Object attempt(@AuthenticationPrincipal Actor a, @Valid @RequestBody Attempt input) {
     require(a);
     boolean correct = check(input.game(), input.level(), input.answer());
@@ -73,13 +124,112 @@ public class LearningController {
         input.level(),
         correct,
         correct);
+
+    int xpAwarded = 0;
+    if (correct) {
+      xpAwarded +=
+          awardXp(
+              a.id(),
+              "level:" + input.game() + ":" + input.level(),
+              20 + input.level() * 5,
+              "LEVEL_COMPLETED");
+      touchStreak(a.id());
+
+      if (input.daily()) {
+        var daily = daily(a);
+        if (!daily.get("game").equals(input.game())
+            || ((Number) daily.get("level")).intValue() != input.level())
+          throw ApiException.invalid("Este não é o desafio diário de hoje.");
+        LocalDate today = LocalDate.now(ZoneOffset.UTC);
+        db.jdbc.update(
+            "INSERT INTO daily_learning_progress(user_id,challenge_date,game,level,attempts,completed,completed_at)"
+                + " VALUES (?,?,?,?,1,true,now()) ON CONFLICT(user_id,challenge_date) DO UPDATE SET"
+                + " attempts=daily_learning_progress.attempts+1,completed=true,"
+                + " completed_at=coalesce(daily_learning_progress.completed_at,now())",
+            a.id(),
+            today,
+            input.game(),
+            input.level());
+        xpAwarded +=
+            awardXp(a.id(), "daily:" + today, 40, "DAILY_CHALLENGE");
+      }
+    } else if (input.daily()) {
+      var daily = daily(a);
+      if (daily.get("game").equals(input.game())
+          && ((Number) daily.get("level")).intValue() == input.level())
+        db.jdbc.update(
+            "INSERT INTO daily_learning_progress(user_id,challenge_date,game,level,attempts,completed)"
+                + " VALUES (?,?,?,?,1,false) ON CONFLICT(user_id,challenge_date) DO UPDATE SET"
+                + " attempts=daily_learning_progress.attempts+1",
+            a.id(),
+            LocalDate.now(ZoneOffset.UTC),
+            input.game(),
+            input.level());
+    }
+
+    ensureStats(a.id());
+    var stats =
+        db.one(
+            "SELECT total_xp,current_streak,longest_streak FROM learning_stats WHERE user_id=?",
+            a.id());
     return Map.of(
         "correct",
         correct,
+        "xpAwarded",
+        xpAwarded,
+        "totalXp",
+        stats.get("totalXp"),
+        "streak",
+        stats.get("currentStreak"),
         "message",
         correct
-            ? "Desafio concluído! Seu progresso foi salvo."
+            ? "Desafio concluído! Seu progresso e XP foram atualizados."
             : "Ainda não. Execute passo a passo e tente novamente.");
+  }
+
+  private void ensureStats(UUID user) {
+    db.jdbc.update(
+        "INSERT INTO learning_stats(user_id) VALUES (?) ON CONFLICT(user_id) DO NOTHING", user);
+  }
+
+  private int awardXp(UUID user, String key, int amount, String reason) {
+    ensureStats(user);
+    int inserted =
+        db.jdbc.update(
+            "INSERT INTO learning_xp_event(id,user_id,event_key,amount,reason) VALUES (?,?,?,?,?)"
+                + " ON CONFLICT(user_id,event_key) DO NOTHING",
+            UUID.randomUUID(),
+            user,
+            key,
+            amount,
+            reason);
+    if (inserted == 1)
+      db.jdbc.update(
+          "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
+          amount,
+          user);
+    return inserted == 1 ? amount : 0;
+  }
+
+  private void touchStreak(UUID user) {
+    ensureStats(user);
+    LocalDate today = LocalDate.now(ZoneOffset.UTC);
+    var stats =
+        db.one(
+            "SELECT current_streak,last_active_date FROM learning_stats WHERE user_id=? FOR UPDATE",
+            user);
+    String last = (String) stats.get("lastActiveDate");
+    if (last != null && last.equals(today.toString())) return;
+    int current = ((Number) stats.get("currentStreak")).intValue();
+    int next =
+        last != null && LocalDate.parse(last).equals(today.minusDays(1)) ? current + 1 : 1;
+    db.jdbc.update(
+        "UPDATE learning_stats SET current_streak=?,longest_streak=greatest(longest_streak,?),"
+            + " last_active_date=?,updated_at=now() WHERE user_id=?",
+        next,
+        next,
+        today,
+        user);
   }
 
   public static boolean check(String game, int level, String answer) {
