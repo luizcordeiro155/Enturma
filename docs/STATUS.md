@@ -13,7 +13,7 @@ Este é um incremento funcional do Enturma, **não a conclusão dos 151 requisit
 
 ## Evidências locais
 
-- Verificação em 28/09/2026: `mvn verify` passou com 14 testes (10 de integração e 4 de parsing); `npm test` passou com 4 testes; lint, TypeScript, build Next.js e exportações Expo Android/iOS passaram. `expo install --check` confirmou compatibilidade. As integrações de IA/storage usam doubles somente no teste de isolamento; não houve chamada a fornecedores reais.
+- Verificação em 28/09/2026: `mvn verify` passou com 14 testes (10 de integração e 4 de parsing); `npm test` passou com 6 testes; lint, TypeScript, build Next.js e exportações Expo Android/iOS passaram. `expo install --check` confirmou compatibilidade. As integrações de IA/storage usam doubles somente no teste de isolamento; não houve chamada a fornecedores reais.
 - Testes de integração em PostgreSQL real: sessão, replay de refresh, corrida de criação de sala, capacidade, associação, expiração, expulsão, catálogo, privacidade de caronas e validação HTTP.
 - Testes de componentes web e armazenamento seguro mobile.
 - Playwright Chromium: cadastro → catálogo de teste → onboarding → sala → reutilização por outro estudante → mensagens em dois navegadores via WebSocket → encerramento → publicação de carona → interesse → aceite → ponto privado.

@@ -11,8 +11,11 @@ export async function session(): Promise<Credentials | null> {
   return value ? JSON.parse(value) : null;
 }
 export async function logout() {
-  await api("/auth/logout", { method: "POST" });
-  await SecureStore.deleteItemAsync("enturma_session");
+  try {
+    await api("/auth/logout", { method: "POST" });
+  } finally {
+    await SecureStore.deleteItemAsync("enturma_session");
+  }
 }
 export async function api<T>(
   path: string,
@@ -34,21 +37,24 @@ export async function api<T>(
       !(e instanceof ApiError) ||
       e.status !== 401 ||
       !c ||
-      path.startsWith("/auth/")
+      (path.startsWith("/auth/") && path !== "/auth/logout")
     )
       throw e;
     if (!rotating)
-      rotating = request<Credentials>(base, "/auth/refresh", {
-        method: "POST",
-        body: JSON.stringify({ token: c.refreshToken }),
-      })
-        .then(async (next) => {
-          await save(next);
-          return next;
-        })
-        .finally(() => {
-          rotating = null;
+      rotating = (async () => {
+        const latest = await session();
+        if (!latest) throw e;
+        // A delayed 401 may arrive after another request already rotated the token.
+        if (latest.refreshToken !== c.refreshToken) return latest;
+        const next = await request<Credentials>(base, "/auth/refresh", {
+          method: "POST",
+          body: JSON.stringify({ token: latest.refreshToken }),
         });
+        await save(next);
+        return next;
+      })().finally(() => {
+        rotating = null;
+      });
     const next = await rotating;
     return run(next.accessToken);
   }
