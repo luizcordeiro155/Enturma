@@ -1,39 +1,47 @@
 # Chat, chamadas e tempo real
 
-## Chat Web: efêmero e E2EE
+## Chat Web
 
-O chat Web de cada sala funciona em `/ws`. O cliente primeiro gera um par ECDH P-256 com Web Crypto e autentica o socket enviando o access token de curta duração, o `roomId` e somente a chave pública. A chave privada nunca é enviada ao backend.
+O chat Web de cada sala funciona em `/ws`. O cliente autentica o socket com access token e `roomId`. O backend valida associação ativa antes de aceitar eventos em tempo real.
 
-A primeira pessoa conectada gera uma chave AES-GCM 256-bit da sala. Quando outra pessoa entra, a chave da sala é entregue entre os clientes usando uma chave de wrapping derivada por ECDH. O servidor atua apenas como relay autenticado de chaves públicas, IVs e ciphertexts.
+Eventos suportados:
 
-Texto, imagens, respostas, exclusões e reações são cifrados no navegador antes do envio. O backend não recebe a chave AES da sala e não persiste o conteúdo. A migration V9 remove as tabelas legadas de mensagens e reações. Ao atualizar a página ou quando todos os participantes saem, o histórico em memória é perdido por design.
+- `chat_message`;
+- `chat_delete`;
+- `chat_reaction`;
+- `typing`.
 
-Imagens aceitas no chat Web: JPG, PNG, WEBP e GIF, com limite de 8 MB. Antes do envio o usuário vê uma prévia e pode remover o anexo. A imagem é cifrada no navegador, viaja somente dentro do envelope E2EE e não é enviada ao Object Storage.
+Mensagens também possuem API REST de fallback em `/api/v1/study-rooms/{room}/messages`.
 
-O servidor valida associação à sala antes de aceitar o socket, limita payloads e injeta o `senderId` autenticado no envelope externo. O cliente rejeita eventos cujo remetente interno não corresponda ao remetente autenticado.
+## Persistência
 
-> Limite importante: numa aplicação Web, quem controla o código entregue pelo site poderia publicar uma versão futura maliciosa do cliente. Portanto, a implementação protege o conteúdo contra banco, logs, admins e infraestrutura que apenas observe o tráfego, mas não deve ser anunciada como garantia absoluta de que um mantenedor jamais poderia alterar o cliente. Consulte [CHAT_PRIVACY](CHAT_PRIVACY.md).
+A versão v4 substitui o chat efêmero anterior por histórico privado persistente. Texto, metadados de imagem, respostas, exclusões e reações são armazenados em tabelas dedicadas da sala.
+
+Isso é necessário para:
+
+- permitir que alguém que entre depois leia o que já aconteceu;
+- permitir recuperação de contexto pela Enturma AI;
+- permitir revisão da sessão depois do encerramento;
+- gerar o estudo final da sessão.
+
+A migration responsável é `V10__persistent_room_history_and_study_summary.sql`.
+
+Imagens do chat aceitam JPG, PNG, WEBP e GIF com até 8 MB. Nesta versão elas são serializadas como data URL e persistidas junto da mensagem. Para escala maior, o próximo passo recomendado é upload direto para object storage com URL assinada, mantendo autorização por sala.
 
 ## Chamadas Web
 
-Chamadas usam LiveKit/WebRTC. O backend emite grants curtos somente para participantes ativos da sala. O cliente Web suporta:
+Chamadas usam LiveKit/WebRTC. O backend emite grants curtos somente para participantes ativos. O cliente suporta:
 
 - microfone e mute;
 - câmera;
-- participantes remotos;
-- indicador visual de quem está falando em tempo real;
-- lista completa de participantes da chamada;
-- compartilhamento de tela com destaque do transmissor e lista de participantes que estão recebendo a transmissão;
-- áudio de screen share quando suportado pelo navegador;
-- reconexão do LiveKit;
-- encerramento quando a sala termina.
+- lista de participantes;
+- destaque visual de quem está falando;
+- compartilhamento de tela;
+- identificação de quem está transmitindo;
+- reconexão e encerramento da sessão.
 
-O token permite as fontes `microphone`, `camera`, `screen_share` e `screen_share_audio`. O navegador sempre pede consentimento do usuário para microfone, câmera e tela.
-
-O reconciliador da API remove identidades que não pertencem mais à sala e apaga a sala LiveKit quando a sessão do Enturma termina.
-
-WebRTC fornece criptografia de transporte. Não documentar a mídia como E2EE de conteúdo até que a camada E2EE de mídia do LiveKit seja habilitada e testada explicitamente.
+WebRTC fornece criptografia de transporte. A documentação não descreve a mídia como E2EE de conteúdo até a camada específica de E2EE do LiveKit ser configurada e validada.
 
 ## Escala
 
-O relay atual é em memória por instância. Antes de executar várias réplicas da API, introduzir um barramento/pub-sub compatível com envelopes cifrados sem descriptografá-los. O conteúdo deve continuar opaco ao broker.
+O WebSocket atual é por instância. Antes de múltiplas réplicas da API, adicionar pub/sub para eventos de sala e presença. O histórico persistente já fica no PostgreSQL e não depende da memória da instância.
