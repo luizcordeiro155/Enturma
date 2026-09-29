@@ -1,67 +1,54 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import type { Profile, Room } from "@enturma/contracts";
-import { Clock, ImagePlus, Reply, Trash2, Users, X } from "lucide-react";
-import { api, post } from "@/lib/api";
+import type { Message, Profile, Room } from "@enturma/contracts";
 import {
-  createRoomIdentity,
-  createRoomKey,
-  decryptEvent,
-  encryptEvent,
-  fileToEncryptedDataUrl,
-  type EphemeralChatEvent,
-  type RoomPublicKey,
-  unwrapRoomKey,
-  wrapRoomKey,
-} from "@/lib/e2ee-room";
+  Bot,
+  Clock,
+  FileText,
+  Hash,
+  ImagePlus,
+  Loader2,
+  MessageCircle,
+  MoreHorizontal,
+  Phone,
+  Reply,
+  Sparkles,
+  Trash2,
+  Users,
+  X,
+} from "lucide-react";
+import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
 import { RoomTools } from "./room-tools";
 
-type ChatMessage = {
-  id: string;
-  senderId: string;
-  senderName: string;
-  createdAt: string;
-  text?: string;
-  image?: {
-    name: string;
-    mime: string;
-    size: number;
-    dataUrl: string;
-  };
-  replyTo?: string | null;
-  deleted: boolean;
-  reactions: Record<string, string[]>;
-};
+type Section = "chat" | "call" | "materials" | "ai";
+type Upload = { id: string; fileName: string; mimeType: string; fileSize: number };
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
 
 export function RoomView({ id }: { id: string }) {
   const [room, setRoom] = useState<Room>();
   const [me, setMe] = useState<Profile>();
-  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [section, setSection] = useState<Section>("chat");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [connected, setConnected] = useState(false);
-  const [cryptoReady, setCryptoReady] = useState(false);
-  const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
+  const [page, setPage] = useState(0);
+  const [hasOlder, setHasOlder] = useState(false);
+  const [replyTo, setReplyTo] = useState<Message | null>(null);
+  const [draft, setDraft] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
-  const [draft, setDraft] = useState("");
   const [now, setNow] = useState(() => Date.now());
   const router = useRouter();
-
   const socketRef = useRef<WebSocket | null>(null);
-  const identityRef = useRef<{
-    privateKey: CryptoKey;
-    publicKey: RoomPublicKey;
-  } | null>(null);
-  const roomKeyRef = useRef<CryptoKey | null>(null);
-  const peerNames = useRef(new Map<string, string>());
-  const myIdRef = useRef<string | null>(null);
+  const bottomRef = useRef<HTMLDivElement | null>(null);
+
+  const normalize = useCallback((items: Message[]) => [...items].reverse(), []);
 
   const reloadRoom = useCallback(async () => {
     const [r, p] = await Promise.all([
@@ -70,214 +57,60 @@ export function RoomView({ id }: { id: string }) {
     ]);
     setRoom(r);
     setMe(p);
-    myIdRef.current = p.id;
   }, [id]);
 
-  const applyEvent = useCallback(
-    (event: EphemeralChatEvent, verifiedSenderId: string) => {
-      if (event.type === "message") {
-        const senderName =
-          verifiedSenderId === myIdRef.current
-            ? me?.name ?? event.senderName
-            : peerNames.current.get(verifiedSenderId) ?? event.senderName;
-        setMessages((current) => {
-          if (current.some((m) => m.id === event.id)) return current;
-          return [
-            ...current,
-            {
-              id: event.id,
-              senderId: verifiedSenderId,
-              senderName,
-              createdAt: event.createdAt,
-              text: event.text,
-              image: event.image,
-              replyTo: event.replyTo,
-              deleted: false,
-              reactions: {},
-            },
-          ];
-        });
-        return;
-      }
-
-      if (event.type === "delete") {
-        setMessages((current) =>
-          current.map((message) =>
-            message.id === event.messageId &&
-            message.senderId === verifiedSenderId
-              ? {
-                  ...message,
-                  deleted: true,
-                  text: undefined,
-                  image: undefined,
-                  reactions: {},
-                }
-              : message,
-          ),
-        );
-        return;
-      }
-
-      if (event.type === "reaction") {
-        setMessages((current) =>
-          current.map((message) => {
-            if (message.id !== event.messageId || message.deleted) return message;
-            const existing = message.reactions[event.emoji] ?? [];
-            const users = event.active
-              ? Array.from(new Set([...existing, verifiedSenderId]))
-              : existing.filter((userId) => userId !== verifiedSenderId);
-            const reactions = { ...message.reactions };
-            if (users.length) reactions[event.emoji] = users;
-            else delete reactions[event.emoji];
-            return { ...message, reactions };
-          }),
-        );
-      }
-    },
-    [me?.name],
-  );
+  const loadMessages = useCallback(async () => {
+    const items = await api<Message[]>(`/study-rooms/${id}/messages?page=0`);
+    setMessages(normalize(items));
+    setPage(0);
+    setHasOlder(items.length === 50);
+  }, [id, normalize]);
 
   useEffect(() => {
     let alive = true;
-    let timeout: ReturnType<typeof setTimeout> | undefined;
+    let retry: ReturnType<typeof setTimeout> | undefined;
     let attempts = 0;
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    const peerMap = peerNames.current;
-    const bootstrap = setTimeout(() => {
-      void reloadRoom().catch((e) => setError((e as Error).message));
-    }, 0);
+    const tick = setInterval(() => setNow(Date.now()), 1000);
+
+    Promise.all([reloadRoom(), loadMessages()]).catch((e) =>
+      setError((e as Error).message),
+    );
 
     async function connect() {
       if (!alive) return;
       try {
-        const identity = await createRoomIdentity();
-        identityRef.current = identity;
-        roomKeyRef.current = null;
-        setCryptoReady(false);
-
         const session = await fetch("/api/session");
         if (!session.ok) throw Error("Sua sessão expirou. Entre novamente.");
         const { token, url } = await session.json();
-
         const socket = new WebSocket(url);
         socketRef.current = socket;
 
         socket.onopen = () => {
-          socket.send(
-            JSON.stringify({
-              type: "auth",
-              token,
-              roomId: id,
-              publicKey: identity.publicKey,
-            }),
-          );
+          socket.send(JSON.stringify({ token, roomId: id }));
+          setConnected(true);
           attempts = 0;
         };
-
-        socket.onmessage = async (message) => {
+        socket.onmessage = (event) => {
           try {
-            const data = JSON.parse(message.data);
-
-            if (data.type === "ready") {
-              setConnected(true);
-              setRoom(data.room);
-              for (const peer of data.peers ?? [])
-                peerNames.current.set(peer.userId, peer.name ?? "Estudante");
-
-              if (!(data.peers?.length > 0)) {
-                roomKeyRef.current = await createRoomKey();
-                setCryptoReady(true);
-              } else {
-                socket.send(
-                  JSON.stringify({
-                    type: "key_request",
-                  }),
-                );
-              }
-              return;
-            }
-
-            if (data.type === "peer_joined") {
-              peerNames.current.set(data.userId, data.name ?? "Estudante");
-              if (roomKeyRef.current && identityRef.current) {
-                const wrapped = await wrapRoomKey(
-                  roomKeyRef.current,
-                  identityRef.current.privateKey,
-                  data.publicKey,
-                );
-                socket.send(
-                  JSON.stringify({
-                    type: "key_offer",
-                    targetId: data.userId,
-                    ...wrapped,
-                  }),
-                );
-              }
-              return;
-            }
-
-            if (data.type === "peer_left") {
-              peerNames.current.delete(data.userId);
-              return;
-            }
-
-            if (data.type === "key_request") {
-              if (!identityRef.current) return;
-              if (!roomKeyRef.current) {
-                const ownId = myIdRef.current;
-                if (!ownId || ownId.localeCompare(data.senderId) > 0) return;
-                roomKeyRef.current = await createRoomKey();
-                setCryptoReady(true);
-              }
-              const wrapped = await wrapRoomKey(
-                roomKeyRef.current,
-                identityRef.current.privateKey,
-                data.publicKey,
-              );
-              socket.send(
-                JSON.stringify({
-                  type: "key_offer",
-                  targetId: data.senderId,
-                  ...wrapped,
-                }),
-              );
-              return;
-            }
-
-            if (data.type === "key_offer") {
-              if (roomKeyRef.current || !identityRef.current) return;
-              roomKeyRef.current = await unwrapRoomKey(
-                identityRef.current.privateKey,
-                data.senderPublicKey,
-                data.iv,
-                data.ciphertext,
-              );
-              setCryptoReady(true);
-              return;
-            }
-
-            if (data.type === "encrypted_event") {
-              if (!roomKeyRef.current) return;
-              const event = await decryptEvent(
-                roomKeyRef.current,
-                data.iv,
-                data.ciphertext,
-              );
-              if (event.senderId !== data.senderId) return;
-              applyEvent(event, data.senderId);
+            const data = JSON.parse(event.data);
+            if (data.type !== "snapshot") return;
+            setRoom(data.room);
+            if (page === 0) {
+              const incoming = normalize(data.messages as Message[]);
+              setMessages((current) => {
+                if (current.length > 50) return current;
+                return incoming;
+              });
+              setHasOlder((data.messages as Message[]).length === 50);
             }
           } catch {
-            setError(
-              "Uma atualização criptografada da sala não pôde ser processada.",
-            );
+            setError("Não foi possível sincronizar a conversa em tempo real.");
           }
         };
-
         socket.onclose = () => {
           setConnected(false);
-          setCryptoReady(false);
           if (alive && attempts < 6) {
-            timeout = setTimeout(
+            retry = setTimeout(
               connect,
               Math.min(30000, 1000 * 2 ** attempts++),
             );
@@ -287,7 +120,7 @@ export function RoomView({ id }: { id: string }) {
         if (!alive) return;
         setError((e as Error).message);
         if (attempts < 6)
-          timeout = setTimeout(
+          retry = setTimeout(
             connect,
             Math.min(30000, 1000 * 2 ** attempts++),
           );
@@ -297,56 +130,27 @@ export function RoomView({ id }: { id: string }) {
     void connect();
     return () => {
       alive = false;
-      if (timeout) clearTimeout(timeout);
-      clearTimeout(bootstrap);
-      clearInterval(timer);
+      clearInterval(tick);
+      if (retry) clearTimeout(retry);
       socketRef.current?.close();
-      roomKeyRef.current = null;
-      identityRef.current = null;
-      peerMap.clear();
-    };
-  }, [id, reloadRoom, applyEvent]);
-
-  async function emit(event: EphemeralChatEvent) {
-    const socket = socketRef.current;
-    const roomKey = roomKeyRef.current;
-    if (!socket || socket.readyState !== WebSocket.OPEN || !roomKey)
-      throw Error("A criptografia da sala ainda está sendo preparada.");
-    const encrypted = await encryptEvent(roomKey, event);
-    socket.send(
-      JSON.stringify({
-        type: "encrypted_event",
-        id: event.id,
-        ...encrypted,
-      }),
-    );
-    applyEvent(event, event.senderId);
-  }
-
-  async function send(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!me) return;
-    if (!draft.trim() && !image) return;
-    setBusy(true);
-    setError("");
-    try {
-      const encryptedImage = image ? await fileToEncryptedDataUrl(image) : undefined;
-      const event: EphemeralChatEvent = {
-        type: "message",
-        id: crypto.randomUUID(),
-        senderId: me.id,
-        senderName: me.name,
-        createdAt: new Date().toISOString(),
-        text: draft.trim() || undefined,
-        image: encryptedImage,
-        replyTo: replyTo?.id ?? null,
-      };
-      await emit(event);
-      setDraft("");
       if (imagePreview) URL.revokeObjectURL(imagePreview);
-      setImage(null);
-      setImagePreview(null);
-      setReplyTo(null);
+    };
+  }, [id, loadMessages, normalize, reloadRoom]);
+
+  useEffect(() => {
+    if (section === "chat" && page === 0)
+      bottomRef.current?.scrollIntoView({ block: "end" });
+  }, [messages.length, section, page]);
+
+  async function loadOlder() {
+    if (!hasOlder || busy) return;
+    setBusy(true);
+    try {
+      const next = page + 1;
+      const older = await api<Message[]>(`/study-rooms/${id}/messages?page=${next}`);
+      setMessages((current) => [...normalize(older), ...current]);
+      setPage(next);
+      setHasOlder(older.length === 50);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -354,36 +158,43 @@ export function RoomView({ id }: { id: string }) {
     }
   }
 
-  async function react(message: ChatMessage, emoji: string) {
-    if (!me) return;
-    const active = !(message.reactions[emoji] ?? []).includes(me.id);
-    try {
-      await emit({
-        type: "reaction",
-        id: crypto.randomUUID(),
-        senderId: me.id,
-        messageId: message.id,
-        emoji,
-        active,
-        createdAt: new Date().toISOString(),
-      });
-    } catch (e) {
-      setError((e as Error).message);
+  async function uploadImage() {
+    if (!image) return null;
+    const form = new FormData();
+    form.set("file", image);
+    const response = await fetch(
+      `/api/backend/study-rooms/${id}/messages/attachments`,
+      { method: "POST", body: form, signal: AbortSignal.timeout(45000) },
+    );
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw Error(body.message ?? "Não foi possível enviar a imagem.");
     }
+    return (await response.json()) as Upload;
   }
 
-  async function removeMessage(message: ChatMessage) {
-    if (!me || message.senderId !== me.id) return;
+  async function send(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!draft.trim() && !image) return;
+    setBusy(true);
+    setError("");
     try {
-      await emit({
-        type: "delete",
-        id: crypto.randomUUID(),
-        senderId: me.id,
-        messageId: message.id,
-        createdAt: new Date().toISOString(),
+      const attachment = await uploadImage();
+      await post(`/study-rooms/${id}/messages`, {
+        body: draft.trim() || null,
+        replyTo: replyTo?.id ?? null,
+        attachmentId: attachment?.id ?? null,
       });
+      setDraft("");
+      setReplyTo(null);
+      setImage(null);
+      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      setImagePreview(null);
+      await loadMessages();
     } catch (e) {
       setError((e as Error).message);
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -403,325 +214,390 @@ export function RoomView({ id }: { id: string }) {
     : 0;
   const ended = room?.status === "ENDED" || seconds === 0;
 
+  const messageMap = useMemo(
+    () => new Map(messages.map((message) => [message.id, message])),
+    [messages],
+  );
+
+  if (!room && !error)
+    return (
+      <Shell>
+        <Loading />
+      </Shell>
+    );
+
   return (
     <Shell>
-      <Feedback error={error} />
-      {room ? (
-        <>
-          <h1>{room.subjectName}</h1>
-          <p className="lead">{room.title}</p>
-          <div className="actions">
-            <span className="timer">
-              <Clock size={16} />{" "}
-              {ended
-                ? "Sessão encerrada"
-                : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")} restantes`}
-            </span>
-            <span>
-              <Users size={16} /> {room.members?.length} estudantes
-            </span>
-            {room.hostId === me?.id && !ended ? (
-              <button className="secondary" onClick={end}>
-                Encerrar sessão
-              </button>
-            ) : null}
-          </div>
+      <div className="study-room-page">
+        <Feedback error={error} />
+        {room ? (
+          <>
+            <header className="study-room-header">
+              <div>
+                <button className="text-button room-back" onClick={() => router.push("/rooms")}>
+                  ← Minhas turmas
+                </button>
+                <h1>{room.title}</h1>
+                <p>{room.subjectName}</p>
+              </div>
+              <div className="study-room-status">
+                <span className="timer">
+                  <Clock size={16} />
+                  {ended
+                    ? "Sessão encerrada"
+                    : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")} restantes`}
+                </span>
+                <span>
+                  <Users size={16} />
+                  {room.members?.filter((m) => !m.leftAt).length ?? 0} participantes
+                </span>
+                {room.hostId === me?.id && !ended ? (
+                  <button className="secondary" onClick={end}>Encerrar sessão</button>
+                ) : null}
+              </div>
+            </header>
 
-          <div className="room-layout">
-            <section className="chat">
-              <div className="chat-heading">
+            {room.hasEarlierHistory && section === "chat" ? (
+              <div className="late-join-banner">
+                <Sparkles size={20} />
                 <div>
-                  <h2>Conversa da turma</h2>
-                  <small role="status">
-                    {connected && cryptoReady
-                      ? "Criptografia ponta a ponta ativa · sem histórico no servidor"
-                      : connected
-                        ? "Conectado · preparando chave criptográfica"
-                        : "Reconectando ao chat seguro"}
-                  </small>
+                  <strong>Você entrou depois que esta turma começou.</strong>
+                  <span>A conversa anterior continua disponível e a IA pode explicar o contexto completo.</span>
                 </div>
-                <span className="privacy-pill">E2EE · efêmero</span>
+                <button onClick={() => setSection("ai")}>Me atualizar com IA</button>
               </div>
+            ) : null}
 
-              <div className="messages" aria-live="polite">
-                {messages.length === 0 ? (
-                  <div className="chat-empty">
-                    <p>A conversa começa aqui.</p>
-                    <small>
-                      Mensagens e imagens existem somente na memória dos participantes
-                      conectados e desaparecem ao sair ou atualizar.
-                    </small>
-                  </div>
-                ) : (
-                  messages.map((message) => {
-                    const replied = messages.find(
-                      (candidate) => candidate.id === message.replyTo,
-                    );
-                    return (
-                      <article
-                        className={`message ${message.senderId === me?.id ? "mine" : ""}`}
-                        key={message.id}
-                      >
-                        <header>
-                          <strong>{message.senderName}</strong>
-                          <small>
-                            {new Date(message.createdAt).toLocaleTimeString(
-                              "pt-BR",
-                              { hour: "2-digit", minute: "2-digit" },
-                            )}
-                          </small>
-                        </header>
+            <div className="study-room-shell">
+              <nav className="room-channel-nav" aria-label="Áreas da turma">
+                <div className="room-channel-title">
+                  <strong>Sua turma</strong>
+                  <small>Conhecimento que continua depois da sessão.</small>
+                </div>
+                <ChannelButton active={section === "chat"} onClick={() => setSection("chat")} icon={<Hash size={19} />} label="Conversa" />
+                <ChannelButton active={section === "call"} onClick={() => setSection("call")} icon={<Phone size={19} />} label="Chamada" />
+                <ChannelButton active={section === "materials"} onClick={() => setSection("materials")} icon={<FileText size={19} />} label="Materiais" />
+                <ChannelButton active={section === "ai"} onClick={() => setSection("ai")} icon={<Bot size={19} />} label="Enturma AI" />
+                <div className="room-channel-note">
+                  <MessageCircle size={17} />
+                  <span>Durante a sessão, participantes autorizados veem o histórico. Ao encerrar, o chat bruto é eliminado.</span>
+                </div>
+              </nav>
 
-                        {message.deleted ? (
-                          <p className="muted">Mensagem removida pelo autor.</p>
-                        ) : (
-                          <>
-                            {replied ? (
-                              <div className="reply-preview">
-                                <strong>{replied.senderName}</strong>
-                                <span>
-                                  {replied.deleted
-                                    ? "Mensagem removida"
-                                    : replied.text ??
-                                      (replied.image ? "Imagem" : "Mensagem")}
-                                </span>
-                              </div>
-                            ) : null}
-                            {message.text ? <p>{message.text}</p> : null}
-                            {message.image ? (
-                              <a
-                                className="chat-image-link"
-                                href={message.image.dataUrl}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img
-                                  className="chat-image"
-                                  src={message.image.dataUrl}
-                                  alt={message.image.name}
-                                />
-                              </a>
-                            ) : null}
+              <main className="room-main-panel">
+                {section === "chat" ? (
+                  <section className="persistent-chat">
+                    <div className="chat-heading persistent-heading">
+                      <div>
+                        <h2>Conversa da turma</h2>
+                        <small role="status">
+                          {connected
+                            ? "Sincronizado em tempo real · histórico persistente"
+                            : "Reconectando · o histórico continua salvo"}
+                        </small>
+                      </div>
+                      <span className="privacy-pill">Histórico da turma</span>
+                    </div>
 
-                            <div className="message-actions">
-                              <button
-                                className="text-button"
-                                onClick={() => setReplyTo(message)}
-                              >
-                                <Reply size={14} /> Responder
-                              </button>
-                              {message.senderId === me?.id ? (
-                                <button
-                                  className="text-button"
-                                  onClick={() => void removeMessage(message)}
-                                >
-                                  <Trash2 size={14} /> Remover
-                                </button>
-                              ) : null}
-                            </div>
+                    <div className="messages persistent-messages" aria-live="polite">
+                      {hasOlder ? (
+                        <button className="load-older" disabled={busy} onClick={() => void loadOlder()}>
+                          {busy ? <Loader2 className="spin" size={16} /> : null}
+                          Carregar mensagens anteriores
+                        </button>
+                      ) : null}
 
-                            <div
-                              className="reaction-row"
-                              aria-label="Reações da mensagem"
+                      {messages.length === 0 ? (
+                        <div className="chat-empty modern-empty">
+                          <Hash size={44} />
+                          <h3>Boas ideias começam com uma conversa.</h3>
+                          <p>Compartilhe sua primeira dúvida com a turma.</p>
+                        </div>
+                      ) : (
+                        messages.map((message) => {
+                          const replied = message.replyTo ? messageMap.get(message.replyTo) : undefined;
+                          return (
+                            <article
+                              className={`message persistent-message ${message.userId === me?.id ? "mine" : ""}`}
+                              key={message.id}
                             >
-                              {QUICK_EMOJIS.map((emoji) => {
-                                const users = message.reactions[emoji] ?? [];
-                                return (
-                                  <button
-                                    key={emoji}
-                                    className={
-                                      users.includes(me?.id ?? "")
-                                        ? "reaction active"
-                                        : "reaction"
-                                    }
-                                    aria-label={`Reagir com ${emoji}`}
-                                    onClick={() => void react(message, emoji)}
-                                  >
-                                    {emoji}
-                                    {users.length ? <span>{users.length}</span> : null}
+                              <div className="message-avatar" aria-hidden="true">
+                                {message.name.slice(0, 2).toUpperCase()}
+                              </div>
+                              <div className="message-content">
+                                <header>
+                                  <strong>{message.name}</strong>
+                                  <small>
+                                    {new Date(message.createdAt).toLocaleString("pt-BR", {
+                                      day: "2-digit",
+                                      month: "2-digit",
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    })}
+                                  </small>
+                                </header>
+                                {replied ? (
+                                  <button className="reply-preview" onClick={() => document.getElementById(`message-${replied.id}`)?.scrollIntoView({ behavior: "smooth" })}>
+                                    <Reply size={13} />
+                                    <strong>{replied.name}</strong>
+                                    <span>{replied.deletedAt ? "Mensagem removida" : replied.body ?? "Imagem"}</span>
                                   </button>
-                                );
-                              })}
+                                ) : null}
+                                <div id={`message-${message.id}`}>
+                                  {message.deletedAt ? (
+                                    <p className="muted">Mensagem removida.</p>
+                                  ) : (
+                                    <>
+                                      {message.body ? <p>{message.body}</p> : null}
+                                      {message.attachmentId ? (
+                                        <a
+                                          className="chat-image-link"
+                                          href={`/api/backend/study-rooms/${id}/messages/attachments/${message.attachmentId}`}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                        >
+                                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                                          <img
+                                            className="chat-image"
+                                            src={`/api/backend/study-rooms/${id}/messages/attachments/${message.attachmentId}`}
+                                            alt={message.attachmentName ?? "Imagem compartilhada"}
+                                            loading="lazy"
+                                          />
+                                        </a>
+                                      ) : null}
+                                    </>
+                                  )}
+                                </div>
+                                {!message.deletedAt ? (
+                                  <div className="message-actions">
+                                    <button className="text-button" onClick={() => setReplyTo(message)}>
+                                      <Reply size={14} /> Responder
+                                    </button>
+                                    <div className="quick-reactions">
+                                      {QUICK_EMOJIS.slice(0, 4).map((emoji) => (
+                                        <button
+                                          type="button"
+                                          key={emoji}
+                                          title={`Reagir com ${emoji}`}
+                                          aria-label={`Reagir com ${emoji}`}
+                                          onClick={() =>
+                                            api(`/study-rooms/${id}/messages/${message.id}/reactions?emoji=${encodeURIComponent(emoji)}`, { method: "POST" })
+                                              .catch((e) => setError((e as Error).message))
+                                          }
+                                        >
+                                          {emoji}
+                                        </button>
+                                      ))}
+                                    </div>
+                                    {message.userId === me?.id ? (
+                                      <button
+                                        className="text-button"
+                                        onClick={async () => {
+                                          try {
+                                            await api(`/study-rooms/${id}/messages/${message.id}`, { method: "DELETE" });
+                                            await loadMessages();
+                                          } catch (e) {
+                                            setError((e as Error).message);
+                                          }
+                                        }}
+                                      >
+                                        <Trash2 size={14} /> Remover
+                                      </button>
+                                    ) : null}
+                                  </div>
+                                ) : null}
+                              </div>
+                            </article>
+                          );
+                        })
+                      )}
+                      <div ref={bottomRef} />
+                    </div>
+
+                    {!ended ? (
+                      <form onSubmit={send} className="chat-composer persistent-composer">
+                        {replyTo ? (
+                          <div className="composer-reply">
+                            <span>Respondendo a <strong>{replyTo.name}</strong></span>
+                            <button type="button" className="text-button" onClick={() => setReplyTo(null)}>
+                              <X size={15} /> Cancelar
+                            </button>
+                          </div>
+                        ) : null}
+
+                        {imagePreview && image ? (
+                          <div className="attachment-preview">
+                            <div className="attachment-preview-media">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={imagePreview} alt={image.name} />
+                              <button
+                                type="button"
+                                className="attachment-remove"
+                                aria-label="Remover imagem selecionada"
+                                onClick={() => {
+                                  URL.revokeObjectURL(imagePreview);
+                                  setImage(null);
+                                  setImagePreview(null);
+                                }}
+                              >
+                                <X size={16} />
+                              </button>
                             </div>
-                          </>
-                        )}
-                      </article>
-                    );
-                  })
+                            <div>
+                              <strong>{image.name}</strong>
+                              <small>{(image.size / (1024 * 1024)).toFixed(2)} MB</small>
+                            </div>
+                          </div>
+                        ) : null}
+
+                        <label>
+                          <span className="sr-only">Mensagem</span>
+                          <textarea
+                            value={draft}
+                            onChange={(e) => setDraft(e.target.value)}
+                            maxLength={4000}
+                            placeholder="Compartilhe uma ideia ou uma dúvida…"
+                          />
+                        </label>
+
+                        <div className="composer-tools">
+                          <div className="emoji-picker" aria-label="Emojis rápidos">
+                            {QUICK_EMOJIS.map((emoji) => (
+                              <button
+                                type="button"
+                                key={emoji}
+                                className="secondary"
+                                onClick={() => setDraft((value) => value + emoji)}
+                                aria-label={`Adicionar ${emoji}`}
+                              >
+                                {emoji}
+                              </button>
+                            ))}
+                          </div>
+                          <label className="image-picker">
+                            <ImagePlus size={17} />
+                            <span>Imagem</span>
+                            <input
+                              type="file"
+                              accept="image/jpeg,image/png,image/webp,image/gif"
+                              onChange={(e) => {
+                                const file = e.target.files?.[0] ?? null;
+                                if (!file) return;
+                                if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+                                  setError("Use JPG, PNG, WEBP ou GIF.");
+                                  return;
+                                }
+                                if (file.size > 8 * 1024 * 1024) {
+                                  setError("A imagem pode ter no máximo 8 MB.");
+                                  return;
+                                }
+                                if (imagePreview) URL.revokeObjectURL(imagePreview);
+                                setImage(file);
+                                setImagePreview(URL.createObjectURL(file));
+                              }}
+                            />
+                          </label>
+                          <button disabled={busy || (!draft.trim() && !image)}>
+                            {busy ? "Enviando…" : "Enviar"}
+                          </button>
+                        </div>
+                        <small>Imagens até 8 MB. O histórico fica disponível apenas para participantes autorizados da turma.</small>
+                      </form>
+                    ) : (
+                      <div className="ended-chat-note">
+                        A sessão terminou. O chat bruto e as imagens deixam de ficar disponíveis; use o relatório consolidado na Enturma AI.
+                      </div>
+                    )}
+                  </section>
+                ) : (
+                  <RoomTools roomId={id} ended={ended} view={section} />
                 )}
-              </div>
+              </main>
 
-              {replyTo ? (
-                <div className="composer-reply">
-                  <span>
-                    Respondendo a <strong>{replyTo.senderName}</strong>
-                  </span>
-                  <button
-                    className="text-button"
-                    onClick={() => setReplyTo(null)}
-                  >
-                    Cancelar
-                  </button>
+              <aside className="room-members-panel">
+                <div className="participants-heading">
+                  <h2>Participantes</h2>
+                  <span>{room.members?.length ?? 0}</span>
                 </div>
-              ) : null}
-
-              <form onSubmit={send} className="chat-composer">
-                {imagePreview && image ? (
-                  <div className="attachment-preview">
-                    <div className="attachment-preview-media">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={imagePreview} alt={image.name} />
+                {room.members?.map((member) => (
+                  <div key={member.userId} className={`participant-row ${member.leftAt ? "offline" : ""}`}>
+                    <div className="participant-avatar">{member.name.slice(0, 2).toUpperCase()}</div>
+                    <span>
+                      <strong>{member.name}</strong>
+                      <small>
+                        {member.role === "HOST" ? "Anfitrião" : member.leftAt ? "Saiu da sessão" : "Estudante"}
+                      </small>
+                    </span>
+                    {me?.id === room.hostId && member.userId !== me.id && !ended && !member.leftAt ? (
                       <button
-                        type="button"
-                        className="attachment-remove"
-                        aria-label="Remover imagem selecionada"
-                        onClick={() => {
-                          URL.revokeObjectURL(imagePreview);
-                          setImage(null);
-                          setImagePreview(null);
+                        className="icon-control"
+                        aria-label={`Opções de ${member.name}`}
+                        title="Remover participante"
+                        onClick={async () => {
+                          try {
+                            await api(`/study-rooms/${id}/participants/${member.userId}`, { method: "DELETE" });
+                            await reloadRoom();
+                          } catch (e) {
+                            setError((e as Error).message);
+                          }
                         }}
                       >
-                        <X size={16} />
+                        <MoreHorizontal size={17} />
                       </button>
-                    </div>
-                    <div>
-                      <strong>{image.name}</strong>
-                      <small>{(image.size / (1024 * 1024)).toFixed(2)} MB · será criptografada antes do envio</small>
-                    </div>
+                    ) : null}
                   </div>
-                ) : null}
-                <label>
-                  Mensagem
-                  <textarea
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    maxLength={4000}
-                    disabled={ended || !cryptoReady}
-                    placeholder={
-                      ended
-                        ? "Esta sessão já terminou."
-                        : cryptoReady
-                          ? "Compartilhe uma ideia ou uma dúvida…"
-                          : "Preparando chat seguro…"
-                    }
-                  />
-                </label>
-
-                <div className="composer-tools">
-                  <div className="emoji-picker" aria-label="Emojis rápidos">
-                    {QUICK_EMOJIS.map((emoji) => (
-                      <button
-                        type="button"
-                        key={emoji}
-                        className="secondary"
-                        onClick={() => setDraft((value) => value + emoji)}
-                        disabled={ended || !cryptoReady}
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-
-                  <label className="image-picker">
-                    <ImagePlus size={17} />
-                    <span>{image ? image.name : "Imagem"}</span>
-                    <input
-                      type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0] ?? null;
-                        if (!file) return;
-                        if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
-                          setError("Use uma imagem JPG, PNG, WEBP ou GIF.");
-                          e.currentTarget.value = "";
-                          return;
-                        }
-                        if (file.size > 8 * 1024 * 1024) {
-                          setError("A imagem do chat pode ter no máximo 8 MB.");
-                          e.currentTarget.value = "";
-                          return;
-                        }
-                        if (imagePreview) URL.revokeObjectURL(imagePreview);
-                        setError("");
-                        setImage(file);
-                        setImagePreview(URL.createObjectURL(file));
-                      }}
-                      disabled={ended || !cryptoReady}
-                    />
-                  </label>
-
+                ))}
+                {!ended ? (
                   <button
-                    disabled={
-                      ended ||
-                      busy ||
-                      !cryptoReady ||
-                      (!draft.trim() && !image)
-                    }
+                    className="text-button leave-room"
+                    onClick={async () => {
+                      try {
+                        await post(`/study-rooms/${id}/leave`);
+                        router.push("/home");
+                      } catch (e) {
+                        setError((e as Error).message);
+                      }
+                    }}
                   >
-                    {busy ? "Criptografando…" : "Enviar"}
+                    Sair da turma
                   </button>
-                </div>
-                <small>
-                  Imagens: JPG, PNG, WEBP ou GIF, até 8 MB, com prévia antes do envio.
-                  O arquivo é criptografado no navegador e nada do chat é gravado no banco.
-                </small>
-              </form>
-            </section>
+                ) : null}
+              </aside>
+            </div>
 
-            <aside>
-              <h2>Participantes</h2>
-              {room.members?.map((member) => (
-                <div key={member.userId} className="member">
-                  <span>
-                    {member.name}
-                    <small>
-                      {member.role === "HOST" ? " · anfitrião" : ""}
-                    </small>
-                  </span>
-                  {me?.id === room.hostId &&
-                  member.userId !== me.id &&
-                  !ended ? (
-                    <button
-                      className="text-button"
-                      onClick={async () => {
-                        try {
-                          await api(
-                            `/study-rooms/${id}/participants/${member.userId}`,
-                            { method: "DELETE" },
-                          );
-                          await reloadRoom();
-                        } catch (e) {
-                          setError((e as Error).message);
-                        }
-                      }}
-                    >
-                      Remover
-                    </button>
-                  ) : null}
-                </div>
-              ))}
-              <button
-                className="text-button"
-                onClick={async () => {
-                  try {
-                    await post(`/study-rooms/${id}/leave`);
-                    router.push("/home");
-                  } catch (e) {
-                    setError((e as Error).message);
-                  }
-                }}
-              >
-                Sair da turma
-              </button>
-            </aside>
-          </div>
-
-          <RoomTools roomId={id} ended={ended} />
-        </>
-      ) : !error ? (
-        <Loading />
-      ) : null}
+            <nav className="room-mobile-nav" aria-label="Navegação da turma">
+              <ChannelButton active={section === "chat"} onClick={() => setSection("chat")} icon={<Hash size={20} />} label="Chat" />
+              <ChannelButton active={section === "call"} onClick={() => setSection("call")} icon={<Phone size={20} />} label="Chamada" />
+              <ChannelButton active={section === "materials"} onClick={() => setSection("materials")} icon={<FileText size={20} />} label="Materiais" />
+              <ChannelButton active={section === "ai"} onClick={() => setSection("ai")} icon={<Sparkles size={20} />} label="IA" />
+            </nav>
+          </>
+        ) : null}
+      </div>
     </Shell>
+  );
+}
+
+function ChannelButton({
+  active,
+  onClick,
+  icon,
+  label,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+}) {
+  return (
+    <button
+      type="button"
+      className={active ? "room-channel active" : "room-channel"}
+      aria-pressed={active}
+      onClick={onClick}
+    >
+      {icon}
+      <span>{label}</span>
+    </button>
   );
 }

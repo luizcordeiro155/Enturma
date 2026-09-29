@@ -79,7 +79,16 @@ export interface Room {
   maxParticipants: number;
   participants: number;
   reused?: boolean;
-  members?: { userId: string; name: string; role: string }[];
+  joinedAt?: string;
+  leftAt?: string | null;
+  hasEarlierHistory?: boolean;
+  members?: {
+    userId: string;
+    name: string;
+    role: string;
+    joinedAt?: string;
+    leftAt?: string | null;
+  }[];
 }
 export interface MessageReaction {
   emoji: string;
@@ -90,14 +99,29 @@ export interface Message {
   id: string;
   userId: string;
   name: string;
-  body: string;
+  body: string | null;
   createdAt: string;
   editedAt?: string | null;
   deletedAt: string | null;
   replyTo?: string | null;
-  replyBody?: string | null;
-  replyName?: string | null;
-  reactions?: MessageReaction[];
+  attachmentId?: string | null;
+  attachmentName?: string | null;
+  attachmentMime?: string | null;
+  attachmentSize?: number | null;
+}
+export interface RoomArtifact {
+  id: string;
+  kind: string;
+  title: string;
+  content?: string;
+  createdAt: string;
+}
+export interface ExperiencePreference {
+  theme: "LIGHT" | "DARK" | "SYSTEM";
+  fontScale: number;
+  highContrast: boolean;
+  reducedMotion: boolean;
+  enhancedFocus: boolean;
 }
 export interface Credentials {
   accessToken: string;

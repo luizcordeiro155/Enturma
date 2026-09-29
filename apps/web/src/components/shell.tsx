@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
 import { Gamepad2 } from "lucide-react";
+import { ExperienceControls } from "./experience-controls";
 import { usePathname } from "next/navigation";
 import {
   BookOpen,
@@ -72,9 +73,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span>
             {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
           </span>
-          <Link className="button" href="/profile">
-            Meu perfil
-          </Link>
+          <div className="topbar-actions">
+            <ExperienceControls />
+            <Link className="button" href="/profile">
+              Meu perfil
+            </Link>
+          </div>
         </header>
         <main id="content">{children}</main>
         <footer>

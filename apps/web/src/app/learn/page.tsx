@@ -1,4 +1,4 @@
-import { Learning } from "@/components/learning";
+import { ProgrammingLab } from "@/components/programming-lab";
 export default function Page() {
-  return <Learning />;
+  return <ProgrammingLab />;
 }

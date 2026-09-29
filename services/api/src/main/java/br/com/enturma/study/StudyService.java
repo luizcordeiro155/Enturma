@@ -130,8 +130,9 @@ public class StudyService {
 
   public void member(Actor a, UUID id) {
     if (!db.exists(
-        "SELECT EXISTS(SELECT 1 FROM room_participant WHERE room_id=? AND user_id=? AND left_at IS"
-            + " NULL AND NOT removed)",
+        "SELECT EXISTS(SELECT 1 FROM room_participant p JOIN study_room r ON r.id=p.room_id"
+            + " WHERE p.room_id=? AND p.user_id=? AND NOT p.removed"
+            + " AND (p.left_at IS NULL OR r.status='ENDED'))",
         id,
         a.id())) throw ApiException.forbidden();
   }
@@ -146,10 +147,17 @@ public class StudyService {
     r.put(
         "members",
         db.list(
-            "SELECT p.user_id,u.name,p.role FROM room_participant p JOIN app_user u ON"
-                + " u.id=p.user_id WHERE p.room_id=? AND p.left_at IS NULL ORDER BY joined_at LIMIT"
-                + " 30",
+            "SELECT p.user_id,u.name,p.role,p.joined_at,p.left_at FROM room_participant p JOIN app_user u ON"
+                + " u.id=p.user_id WHERE p.room_id=? AND NOT p.removed ORDER BY p.joined_at LIMIT 30",
             id));
+    var mine = db.one(
+        "SELECT joined_at,left_at FROM room_participant WHERE room_id=? AND user_id=? AND NOT removed",
+        id, a.id());
+    r.put("joinedAt", mine.get("joinedAt"));
+    r.put("leftAt", mine.get("leftAt"));
+    r.put("hasEarlierHistory",
+        db.exists("SELECT EXISTS(SELECT 1 FROM room_message WHERE room_id=? AND created_at<?)",
+            id, mine.get("joinedAt")));
     return r;
   }
 

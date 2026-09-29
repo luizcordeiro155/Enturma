@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Eye, Mic, MicOff, MonitorUp, PhoneOff, Radio, Users, Video, VideoOff } from "lucide-react";
+import { Eye, Mic, MicOff, MonitorUp, PhoneOff, Radio, Users, Video, VideoOff, Sparkles, FileText, Brain } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
 import { MAX_WEB_UPLOAD_BYTES } from "@/lib/upload-limits";
 
 type Material = { id: string; fileName: string; fileSize: number };
+type Artifact = { id: string; kind: string; title: string; content?: string; createdAt: string };
 type Answer = {
   answer: string;
   sources: {
@@ -26,9 +27,11 @@ type Answer = {
 export function RoomTools({
   roomId,
   ended,
+  view,
 }: {
   roomId: string;
   ended: boolean;
+  view: "call" | "materials" | "ai";
 }) {
   const [cap, setCap] = useState<{
     voice: boolean;
@@ -37,6 +40,7 @@ export function RoomTools({
     aiWebSearch: boolean;
   }>();
   const [materials, setMaterials] = useState<Material[]>([]);
+  const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [answer, setAnswer] = useState<Answer>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -45,10 +49,12 @@ export function RoomTools({
     Promise.all([
       api<typeof cap>("/capabilities"),
       api<Material[]>(`/study-rooms/${roomId}/materials`),
+      api<Artifact[]>(`/study-rooms/${roomId}/ai/artifacts`).catch(() => []),
     ])
-      .then(([c, m]) => {
+      .then(([c, m, a]) => {
         setCap(c);
         setMaterials(m);
+        setArtifacts(a);
       })
       .catch((e) => setError(e.message));
   }, [roomId]);
@@ -62,7 +68,6 @@ export function RoomTools({
       const file = form.get("file");
       if (!(file instanceof File) || file.size > MAX_WEB_UPLOAD_BYTES)
         throw Error("Selecione um PDF ou TXT de até 4 MB.");
-      await api("/users/me");
       const res = await fetch(`/api/backend/study-rooms/${roomId}/materials`, {
         method: "POST",
         body: form,
@@ -83,10 +88,7 @@ export function RoomTools({
 
   async function download(m: Material) {
     try {
-      await api("/users/me");
-      const res = await fetch(
-        `/api/backend/study-rooms/${roomId}/materials/${m.id}`,
-      );
+      const res = await fetch(`/api/backend/study-rooms/${roomId}/materials/${m.id}`);
       if (!res.ok) throw Error("Não foi possível baixar o material.");
       const url = URL.createObjectURL(await res.blob());
       const a = document.createElement("a");
@@ -99,168 +101,214 @@ export function RoomTools({
     }
   }
 
+  async function runAi(path: string) {
+    setBusy(true);
+    setError("");
+    try {
+      const result = await api<Answer>(`/study-rooms/${roomId}/ai/${path}`, {
+        method: "POST",
+        signal: AbortSignal.timeout(90000),
+      });
+      setAnswer(result);
+      setArtifacts(await api<Artifact[]>(`/study-rooms/${roomId}/ai/artifacts`));
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function openArtifact(id: string) {
+    try {
+      const item = await api<Artifact>(`/study-rooms/${roomId}/ai/artifacts/${id}`);
+      setAnswer({ answer: item.content ?? "", sources: [], webSources: [] });
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   return (
-    <div className="room-tools">
+    <div className="room-tools room-channel-content">
       <Feedback error={error} />
 
-      <section className="room-tool-card">
-        <div>
-          <p className="eyebrow">Sala ao vivo</p>
-          <h2>Chamada da turma</h2>
-          <p className="muted">
-            Converse por voz, abra a câmera e compartilhe sua tela sem sair do Enturma.
-          </p>
-        </div>
-        {cap?.voice ? (
-          <Voice roomId={roomId} ended={ended} />
-        ) : (
-          <p className="muted">
-            As chamadas ainda não estão disponíveis nesta instalação.
-          </p>
-        )}
-      </section>
+      {view === "call" ? (
+        <section className="room-tool-card channel-card">
+          <div>
+            <p className="eyebrow">Sala ao vivo</p>
+            <h2>Chamada da turma</h2>
+            <p className="muted">
+              Voz, câmera e compartilhamento de tela com participantes e indicador de fala.
+            </p>
+          </div>
+          {cap?.voice ? (
+            <Voice roomId={roomId} ended={ended} />
+          ) : (
+            <p className="muted">As chamadas ainda não estão disponíveis nesta instalação.</p>
+          )}
+        </section>
+      ) : null}
 
-      <section className="room-tool-card">
-        <h2>Materiais da turma</h2>
-        {materials.length ? (
-          materials.map((m) => (
-            <div className="room-row" key={m.id}>
-              <span>
-                {m.fileName}
-                <small>{Math.ceil(m.fileSize / 1024)} KB</small>
-              </span>
-              <button className="secondary" onClick={() => download(m)}>
-                Baixar
-              </button>
+      {view === "materials" ? (
+        <section className="room-tool-card channel-card">
+          <div>
+            <p className="eyebrow">Biblioteca compartilhada</p>
+            <h2>Materiais da turma</h2>
+          </div>
+          {materials.length ? (
+            materials.map((m) => (
+              <div className="room-row" key={m.id}>
+                <span>
+                  {m.fileName}
+                  <small>{Math.ceil(m.fileSize / 1024)} KB</small>
+                </span>
+                <button className="secondary" onClick={() => void download(m)}>Baixar</button>
+              </div>
+            ))
+          ) : (
+            <div className="empty compact">
+              <FileText size={28} />
+              <p>Nenhum material compartilhado ainda.</p>
             </div>
-          ))
-        ) : (
-          <p className="muted">Envie materiais para estudar em grupo e consultar com a IA.</p>
-        )}
-        {cap?.materials ? (
-          <form onSubmit={upload}>
-            <label>
-              Adicionar PDF ou TXT
-              <input
-                type="file"
-                name="file"
-                required
-                accept="application/pdf,text/plain,.pdf,.txt"
-                disabled={ended || busy}
-              />
-              <small>
-                Até 4 MB e 150 páginas. Compartilhe apenas materiais que você tem
-                autorização para usar.
-              </small>
-            </label>
-            <button disabled={ended || busy}>
-              {busy ? "Enviando…" : "Enviar material"}
-            </button>
-          </form>
-        ) : (
-          <p className="muted">
-            O envio de materiais ainda não está disponível nesta instalação.
-          </p>
-        )}
-      </section>
+          )}
+          {cap?.materials && !ended ? (
+            <form onSubmit={upload}>
+              <label>
+                Adicionar PDF ou TXT
+                <input
+                  type="file"
+                  name="file"
+                  required
+                  accept="application/pdf,text/plain,.pdf,.txt"
+                  disabled={busy}
+                />
+                <small>Até 4 MB e 150 páginas.</small>
+              </label>
+              <button disabled={busy}>{busy ? "Enviando…" : "Enviar material"}</button>
+            </form>
+          ) : null}
+        </section>
+      ) : null}
 
-      <section className="room-tool-card">
-        <p className="eyebrow">Tutor com fontes</p>
-        <h2>Enturma AI</h2>
-        <p className="muted">
-          Estude seus PDFs, peça resumos, flashcards, quizzes e explicações. No modo
-          Pesquisa, a IA também pode consultar fontes externas e mostrar os links usados.
-        </p>
-        {cap?.ai ? (
-          <form
-            onSubmit={async (e) => {
-              e.preventDefault();
-              setBusy(true);
-              setError("");
-              const f = new FormData(e.currentTarget);
-              try {
-                setAnswer(
-                  await api(`/study-rooms/${roomId}/ai`, {
-                    method: "POST",
-                    body: JSON.stringify({
-                      question: f.get("question"),
-                      mode: f.get("mode"),
-                    }),
-                    signal: AbortSignal.timeout(70000),
-                  }),
-                );
-              } catch (e) {
-                setError((e as Error).message);
-              } finally {
-                setBusy(false);
-              }
-            }}
-          >
-            <label>
-              Como posso ajudar?
-              <select name="mode">
-                <option value="QUESTION">Responder usando os materiais</option>
-                <option value="SUMMARY">Resumir materiais</option>
-                <option value="FLASHCARDS">Criar flashcards</option>
-                <option value="QUIZ">Criar quiz</option>
-                <option value="SIMPLIFY">Explicar de forma simples</option>
-                <option value="STUDY_PLAN">Criar roteiro de estudo</option>
-                {cap.aiWebSearch ? (
-                  <option value="RESEARCH">Pesquisar na web com fontes</option>
-                ) : null}
-              </select>
-            </label>
-            <label>
-              Sua pergunta
-              <textarea
-                name="question"
-                maxLength={2000}
-                required
-                placeholder="Ex.: explique este conceito e crie 3 questões para eu praticar"
-              />
-            </label>
-            <button disabled={busy || ended}>
-              {busy ? "Analisando…" : "Perguntar à Enturma AI"}
-            </button>
-          </form>
-        ) : (
-          <p className="muted">
-            A IA ainda não está disponível nesta instalação.
-          </p>
-        )}
-        {answer ? (
-          <article className="ai-answer">
-            <p>{renderCitedAnswer(answer.answer, answer.webSources ?? [])}</p>
-            {answer.sources.length ? <h3>Materiais usados</h3> : null}
-            {answer.sources.map((s) => (
-              <details key={`${s.materialId}-${s.number}`}>
-                <summary>
-                  [{s.number}] {s.fileName}
-                  {s.page ? ` · página ${s.page}` : ""}
-                </summary>
-                <blockquote>{s.excerpt}</blockquote>
-              </details>
-            ))}
-            {answer.webSources?.length ? (
-              <>
-                <h3>Fontes da pesquisa</h3>
-                <div className="ai-web-sources">
-                  {answer.webSources.map((s) => (
-                    <a
-                      key={`${s.url}-${s.startIndex}`}
-                      href={s.url}
-                      target="_blank"
-                      rel="noreferrer"
-                    >
-                      {s.title}
-                    </a>
-                  ))}
-                </div>
-              </>
-            ) : null}
-          </article>
-        ) : null}
-      </section>
+      {view === "ai" ? (
+        <section className="room-tool-card channel-card ai-channel">
+          <div className="ai-channel-heading">
+            <div>
+              <p className="eyebrow">Memória da turma</p>
+              <h2>Enturma AI</h2>
+              <p className="muted">
+                A IA consulta histórico autorizado, checkpoints e materiais sem carregar a sala inteira no navegador.
+              </p>
+            </div>
+            <Brain size={30} />
+          </div>
+
+          {cap?.ai ? (
+            <>
+              <div className="ai-quick-actions">
+                <button disabled={busy} onClick={() => void runAi("catch-up")}>
+                  <Sparkles size={17} /> Me atualizar com IA
+                </button>
+                <button className="secondary" disabled={busy} onClick={() => void runAi("session-report")}>
+                  Gerar relatório da sessão
+                </button>
+                <button className="secondary" disabled={busy} onClick={() => void runAi("study-material")}>
+                  Gerar material de estudo
+                </button>
+              </div>
+
+              <form
+                onSubmit={async (e) => {
+                  e.preventDefault();
+                  setBusy(true);
+                  setError("");
+                  const form = new FormData(e.currentTarget);
+                  try {
+                    setAnswer(
+                      await api(`/study-rooms/${roomId}/ai`, {
+                        method: "POST",
+                        body: JSON.stringify({
+                          question: form.get("question"),
+                          mode: form.get("mode"),
+                        }),
+                        signal: AbortSignal.timeout(90000),
+                      }),
+                    );
+                  } catch (e) {
+                    setError((e as Error).message);
+                  } finally {
+                    setBusy(false);
+                  }
+                }}
+              >
+                <label>
+                  Tipo de ajuda
+                  <select name="mode">
+                    <option value="QUESTION">Perguntar sobre a turma</option>
+                    <option value="SUMMARY">Resumir o que foi estudado</option>
+                    <option value="FLASHCARDS">Criar flashcards</option>
+                    <option value="QUIZ">Criar quiz</option>
+                    <option value="SIMPLIFY">Explicar de forma simples</option>
+                    <option value="STUDY_PLAN">Criar roteiro de estudo</option>
+                    {cap.aiWebSearch ? <option value="RESEARCH">Pesquisar na web com fontes</option> : null}
+                  </select>
+                </label>
+                <label>
+                  Pergunta
+                  <textarea
+                    name="question"
+                    maxLength={2000}
+                    required
+                    placeholder="Ex.: o que estudamos sobre recursividade?"
+                  />
+                </label>
+                <button disabled={busy}>{busy ? "Analisando contexto…" : "Perguntar à Enturma AI"}</button>
+              </form>
+            </>
+          ) : (
+            <p className="muted">A IA ainda não está disponível nesta instalação.</p>
+          )}
+
+          {answer ? (
+            <article className="ai-answer" aria-live="polite">
+              <p>{renderCitedAnswer(answer.answer, answer.webSources ?? [])}</p>
+              {answer.sources.length ? <h3>Materiais usados</h3> : null}
+              {answer.sources.map((s) => (
+                <details key={`${s.materialId}-${s.number}`}>
+                  <summary>[{s.number}] {s.fileName}{s.page ? ` · página ${s.page}` : ""}</summary>
+                  <blockquote>{s.excerpt}</blockquote>
+                </details>
+              ))}
+              {answer.webSources?.length ? (
+                <>
+                  <h3>Fontes da pesquisa</h3>
+                  <div className="ai-web-sources">
+                    {answer.webSources.map((s) => (
+                      <a key={`${s.url}-${s.startIndex}`} href={s.url} target="_blank" rel="noreferrer">
+                        {s.title}
+                      </a>
+                    ))}
+                  </div>
+                </>
+              ) : null}
+            </article>
+          ) : null}
+
+          {artifacts.length ? (
+            <div className="session-artifacts">
+              <h3>Conhecimento salvo desta sessão</h3>
+              {artifacts.map((artifact) => (
+                <button className="artifact-row" key={artifact.id} onClick={() => void openArtifact(artifact.id)}>
+                  <FileText size={17} />
+                  <span>
+                    <strong>{artifact.title}</strong>
+                    <small>{new Date(artifact.createdAt).toLocaleString("pt-BR")}</small>
+                  </span>
+                </button>
+              ))}
+            </div>
+          ) : null}
+        </section>
+      ) : null}
     </div>
   );
 }

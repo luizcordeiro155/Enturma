@@ -70,7 +70,7 @@ public class CompatibleAiProvider implements AiProvider {
       payload.put("model", model());
       payload.put("instructions", instructions);
       payload.put("input", input);
-      payload.put("max_output_tokens", 1600);
+      payload.put("max_output_tokens", Set.of("CATCH_UP","SESSION_REPORT","STUDY_MATERIAL").contains(mode) ? 5200 : 2200);
       if (webSearch)
         payload.put(
             "tools",
