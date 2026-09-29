@@ -26,9 +26,11 @@ type Answer = {
 export function RoomTools({
   roomId,
   ended,
+  section,
 }: {
   roomId: string;
   ended: boolean;
+  section?: "call" | "materials" | "ai";
 }) {
   const [cap, setCap] = useState<{
     voice: boolean;
@@ -103,7 +105,7 @@ export function RoomTools({
     <div className="room-tools">
       <Feedback error={error} />
 
-      <section className="room-tool-card">
+      {(!section || section === "call") ? <section className="room-tool-card">
         <div>
           <p className="eyebrow">Sala ao vivo</p>
           <h2>Chamada da turma</h2>
@@ -118,9 +120,9 @@ export function RoomTools({
             As chamadas ainda não estão disponíveis nesta instalação.
           </p>
         )}
-      </section>
+      </section> : null}
 
-      <section className="room-tool-card">
+      {(!section || section === "materials") ? <section className="room-tool-card">
         <h2>Materiais da turma</h2>
         {materials.length ? (
           materials.map((m) => (
@@ -162,9 +164,9 @@ export function RoomTools({
             O envio de materiais ainda não está disponível nesta instalação.
           </p>
         )}
-      </section>
+      </section> : null}
 
-      <section className="room-tool-card">
+      {(!section || section === "ai") ? <section className="room-tool-card">
         <p className="eyebrow">Tutor com fontes</p>
         <h2>Enturma AI</h2>
         <p className="muted">
@@ -260,7 +262,7 @@ export function RoomTools({
             ) : null}
           </article>
         ) : null}
-      </section>
+      </section> : null}
     </div>
   );
 }
