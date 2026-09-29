@@ -40,8 +40,10 @@ class PlatformIntegrationTest {
             aiProvider.answer(
                 org.mockito.ArgumentMatchers.anyString(),
                 org.mockito.ArgumentMatchers.anyString(),
-                org.mockito.ArgumentMatchers.anyString()))
-        .thenReturn("Resposta de teste [1]");
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenReturn(
+            new br.com.enturma.ai.AiProvider.Answer("Resposta de teste [1]", java.util.List.of()));
     UUID id = room(8);
     materials.upload(
         host,
@@ -62,7 +64,8 @@ class PlatformIntegrationTest {
         .answer(
             org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.anyString(),
-            org.mockito.ArgumentMatchers.anyString());
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.eq(false));
   }
 
   @Autowired AuthService auth;
@@ -322,8 +325,10 @@ class PlatformIntegrationTest {
     study.join(member, id);
     assertThatThrownBy(() -> study.join(outsider, id)).isInstanceOf(ApiException.class);
     assertThatThrownBy(() -> chat.messages(outsider, id, 0)).isInstanceOf(ApiException.class);
-    chat.send(member, id, "Olá", null);
-    assertThat((List<?>) chat.messages(host, id, 0)).hasSize(1);
+    assertThatThrownBy(() -> chat.send(member, id, "Olá", null))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("criptografado");
+    assertThat((List<?>) chat.messages(host, id, 0)).isEmpty();
   }
 
   @Test
