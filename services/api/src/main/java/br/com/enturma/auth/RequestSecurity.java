@@ -51,22 +51,54 @@ public class RequestSecurity extends OncePerRequestFilter {
           authentication == null
               ? clients.subject(req)
               : ((Actor) authentication.getPrincipal()).id().toString();
-      boolean authRoute = req.getRequestURI().startsWith("/api/v1/auth/");
-      boolean importRoute = req.getRequestURI().startsWith("/api/v1/admin/catalog/");
-      String bucket =
-          (authRoute ? "auth:" : importRoute ? "catalog:" : "write:") + Tokens.hash(subject);
+      String uri = req.getRequestURI();
+      boolean importRoute = uri.startsWith("/api/v1/admin/catalog/");
+      String prefix = "write:";
+      int limit = 90;
+      int windowSeconds = 60;
+
+      if (uri.equals("/api/v1/auth/login")) {
+        prefix = "auth-login:";
+        limit = 8;
+        windowSeconds = 60;
+      } else if (uri.equals("/api/v1/auth/register")) {
+        prefix = "auth-register:";
+        limit = 5;
+        windowSeconds = 900;
+      } else if (uri.equals("/api/v1/auth/forgot-password")) {
+        prefix = "auth-forgot:";
+        limit = 5;
+        windowSeconds = 900;
+      } else if (uri.equals("/api/v1/auth/reset-password")
+          || uri.equals("/api/v1/auth/verify-email")) {
+        prefix = "auth-token:";
+        limit = 10;
+        windowSeconds = 300;
+      } else if (uri.startsWith("/api/v1/auth/")) {
+        prefix = "auth:";
+        limit = 20;
+        windowSeconds = 60;
+      } else if (importRoute) {
+        prefix = "catalog:";
+        limit = 20;
+        windowSeconds = 60;
+      }
+
+      String bucket = prefix + Tokens.hash(subject);
       Integer hits =
           db.jdbc.queryForObject(
-              "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,1,now()+interval '1 minute')"
+              "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,1,now()+(? * interval '1 second'))"
                   + " ON CONFLICT(bucket) DO UPDATE SET hits=CASE WHEN rate_limit.resets_at<now()"
                   + " THEN 1 ELSE rate_limit.hits+1 END,resets_at=CASE WHEN"
-                  + " rate_limit.resets_at<now() THEN now()+interval '1 minute' ELSE"
+                  + " rate_limit.resets_at<now() THEN now()+(? * interval '1 second') ELSE"
                   + " rate_limit.resets_at END RETURNING hits",
               Integer.class,
-              bucket);
-      if (hits != null && hits > (authRoute ? 20 : importRoute ? 20 : 90)) {
+              bucket,
+              windowSeconds,
+              windowSeconds);
+      if (hits != null && hits > limit) {
         res.setStatus(429);
-        res.setHeader("Retry-After", "60");
+        res.setHeader("Retry-After", Integer.toString(windowSeconds));
         res.setContentType("application/json");
         json.writeValue(
             res.getOutputStream(),
