@@ -67,8 +67,8 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       socket.close(CloseStatus.SERVICE_OVERLOAD);
       return;
     }
-    // 1 MiB image + base64/encryption overhead, with a hard cap to avoid memory abuse.
-    socket.setTextMessageSizeLimit(1_700_000);
+    // Up to 8 MiB images plus base64/AES-GCM/JSON overhead. Chat remains ephemeral in memory.
+    socket.setTextMessageSizeLimit(12_000_000);
     connections.put(socket.getId(), new Connection(socket));
   }
 
@@ -104,7 +104,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       String iv = data.path("iv").asText("");
       String ciphertext = data.path("ciphertext").asText("");
       String id = data.path("id").asText("");
-      if (iv.length() > 64 || ciphertext.isBlank() || ciphertext.length() > 1_500_000 || id.length() > 80) {
+      if (iv.length() > 64 || ciphertext.isBlank() || ciphertext.length() > 11_500_000 || id.length() > 80) {
         socket.close(CloseStatus.TOO_BIG_TO_PROCESS);
         return;
       }
