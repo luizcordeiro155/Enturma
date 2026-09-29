@@ -33,8 +33,7 @@ public class CompatibleAiProvider implements AiProvider {
   }
 
   public boolean enabled() {
-    return env.getProperty("AI_ENABLED", Boolean.class, true)
-        && !apiKey().isBlank();
+    return !apiKey().isBlank();
   }
 
   public boolean webSearchEnabled() {
