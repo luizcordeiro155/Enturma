@@ -25,18 +25,16 @@ A integração usa `POST /v1/responses`. A pesquisa externa usa a ferramenta `we
 Variáveis da API:
 
 ```dotenv
-AI_ENABLED=true
 OPENAI_API_KEY=
-OPENAI_MODEL=
 AI_WEB_SEARCH_ENABLED=false
 AI_BASE_URL=https://api.openai.com/v1
 ```
 
-`OPENAI_API_KEY` nunca deve ser enviada ao browser, Vercel client bundle ou aplicativo mobile. Ela fica somente no backend da SquareCloud.
+`OPENAI_API_KEY` nunca deve ser enviada ao browser, Vercel client bundle ou aplicativo mobile. Ela fica somente no backend da SquareCloud. O modelo é definido no código como `gpt-5.6-sol`, evitando dependência de `OPENAI_MODEL` no ambiente.
 
 `AI_WEB_SEARCH_ENABLED=true` libera o modo **Pesquisar na web com fontes**. A pesquisa Web da OpenAI tem custo separado de uso de modelo, portanto mantenha limites e orçamento configurados no projeto da API.
 
-O adaptador ainda aceita `AI_API_KEY` e `AI_MODEL` como fallback de compatibilidade, mas novas instalações devem usar os nomes `OPENAI_*`.
+O adaptador ainda aceita `AI_API_KEY` como fallback de compatibilidade para a chave, mas o modelo não vem mais do ambiente. A Enturma AI fica ativa automaticamente quando uma chave OpenAI válida está configurada.
 
 ## Segurança e qualidade
 
