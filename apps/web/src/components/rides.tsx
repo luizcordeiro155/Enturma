@@ -1,9 +1,11 @@
 "use client";
+import { UserIdentity, type PublicProfile } from "./user-identity";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import type { AcademicEntry } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
+import { Voice } from "./room-tools";
 import { Feedback } from "./feedback";
 type Ride = {
   id: string;
@@ -266,7 +268,7 @@ export function Matches() {
   const [me, setMe] = useState("");
   const [selected, setSelected] = useState<Match>();
   const [messages, setMessages] = useState<
-    { id: string; name: string; body: string }[]
+    (PublicProfile & { userId: string; body: string })[]
   >([]);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -278,6 +280,26 @@ export function Matches() {
       })
       .catch((e) => setError(e.message));
   }, []);
+  useEffect(() => {
+    if (!selected) return;
+    let active = true;
+    const timer = setInterval(() => {
+      if (document.hidden) return;
+      api<(PublicProfile & { userId: string; body: string })[]>(
+        `/matches/${selected.id}/messages`,
+      )
+        .then((items) => {
+          if (active) setMessages(items);
+        })
+        .catch((e) => {
+          if (active) setError(e.message);
+        });
+    }, 3000);
+    return () => {
+      active = false;
+      clearInterval(timer);
+    };
+  }, [selected]);
   async function open(m: Match) {
     try {
       setMessages(await api(`/matches/${m.id}/messages`));
@@ -313,6 +335,7 @@ export function Matches() {
                     try {
                       await post(`/matches/${m.id}/accept`);
                       setMatches(await api("/matches"));
+                      await open({ ...m, status: "ACCEPTED" });
                     } catch (e) {
                       setError((e as Error).message);
                     }
@@ -327,7 +350,13 @@ export function Matches() {
           ))
         )}
         {selected ? (
-          <section className="chat">
+          <section className="chat ride-chat">
+            <Voice
+              key={selected.id}
+              roomId={selected.id}
+              ended={selected.rideStatus !== "OPEN"}
+              endpoint={`/matches/${selected.id}/voice`}
+            />
             <h2>
               Conversa com{" "}
               {selected.ownerId === me
@@ -362,7 +391,7 @@ export function Matches() {
             <div className="messages">
               {[...messages].reverse().map((m) => (
                 <div className="message" key={m.id}>
-                  <strong>{m.name}</strong>
+                  <UserIdentity user={{ ...m, id: m.userId }} />
                   <p>{m.body}</p>
                 </div>
               ))}
@@ -387,7 +416,22 @@ export function Matches() {
             >
               <label>
                 Mensagem
-                <textarea name="message" required maxLength={2000} />
+                <textarea
+                  name="message"
+                  required
+                  maxLength={2000}
+                  disabled={selected.rideStatus !== "OPEN"}
+                  onKeyDown={(e) => {
+                    if (
+                      e.key === "Enter" &&
+                      !e.shiftKey &&
+                      !e.nativeEvent.isComposing
+                    ) {
+                      e.preventDefault();
+                      e.currentTarget.form?.requestSubmit();
+                    }
+                  }}
+                />
               </label>
               <button>Enviar</button>
             </form>

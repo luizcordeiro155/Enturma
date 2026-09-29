@@ -12,8 +12,10 @@ import {
   Car,
   Settings,
   ShieldCheck,
+  Users,
 } from "lucide-react";
 const links = [
+  {href:"/friends",label:"Amigos",icon:Users},
   { href: "/home", label: "Início", icon: Home },
   { href: "/explore", label: "Explorar", icon: Search },
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },

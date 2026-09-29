@@ -1,648 +1,562 @@
 "use client";
-
-import { useEffect, useMemo, useRef, useState } from "react";
-import {
-  ArrowRight,
-  Binary,
-  Bot,
-  Braces,
-  CircuitBoard,
-  Flame,
-  Gamepad2,
-  Grid2X2,
-  Play,
-  RotateCcw,
-  Sparkles,
-  Trophy,
-  Zap,
-} from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Bot, Braces, Play, Pause, SkipForward, RotateCcw } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
 
-type Summary = {
-  totalXp: number;
-  currentStreak: number;
-  longestStreak: number;
-  level: number;
-  xpIntoLevel: number;
-  xpForNextLevel: number;
-};
-
-type WordChallenge = {
+type Board = { marks: string; solved: boolean };
+type Played = { word: string; boards: Board[] };
+type Challenge = {
   challengeKey: string;
-  mode: "SOLO" | "DUET" | "QUARTET";
+  mode: string;
   difficulty: number;
+  daily: boolean;
   boards: number;
   wordLength: number;
   maxAttempts: number;
-  daily: boolean;
-  category: string;
-};
-
-type WordBoard = { marks: string; solved: boolean };
-type WordAttemptResult = {
-  boards: WordBoard[];
-  completed: boolean;
+  history: Played[];
   finished: boolean;
-  attempt: number;
-  maxAttempts: number;
-  message: string;
 };
-
-type AlgorithmResult = {
+type WordResult = {
+  boards: Board[];
+  finished: boolean;
+  completed: boolean;
+  message: string;
+  answers?: string[];
+};
+type Frame = { x: number; y: number; step: number };
+type Run = {
   won: boolean;
   stars: number;
   commands: number;
-  frames: { x: number; y: number }[];
+  frames: Frame[];
   message: string;
 };
-
-type BinaryOperand = {
-  label: string;
-  decimal: number;
-  binary: string;
-};
-
-type BinaryChallenge = {
-  challengeKey: string;
-  dayLevel: number;
-  bitWidth: number;
-  operation: string;
-  prompt: string;
-  hint: string;
-  expression: string;
-  operands: BinaryOperand[];
-  completedToday: boolean;
-  completedDays: number;
-  rewardXp: number;
-};
-
-type BinaryResult = {
-  correct: boolean;
-  xpAwarded: number;
-  expectedBits: string;
-  message: string;
-  nextDayLevel: number;
-};
-
-const algorithmPrompts = [
-  {
-    title: "Sequência precisa",
-    help: "Use os comandos de movimento para chegar ao objetivo sem tocar nos blocos.",
-    starter: "moveRight();\nmoveRight();\nmoveDown();",
-  },
-  {
-    title: "Controle de fluxo",
-    help: "Este nível exige if, switch, for, while ou repeat(...).",
-    starter: "repeat(3, moveRight);\nif (true) {\n  moveDown();\n}",
-  },
-  {
-    title: "Menos comandos",
-    help: "Resolva com estrutura de controle e respeite o limite de instruções.",
-    starter: "for (let i = 0; i < 4; i++) {\n  moveRight();\n}\nmoveDown();",
-  },
-  {
-    title: "Reutilização",
-    help: "A partir daqui você precisa definir ou reutilizar uma função.",
-    starter: "function avance() {\n  moveRight();\n}\nrepeat(4, moveRight);",
-  },
-  {
-    title: "Otimização",
-    help: "O caminho é mais restrito e o limite de comandos é menor.",
-    starter: "const linha = () => {\n  moveRight();\n};\nrepeat(5, moveRight);",
-  },
-  {
-    title: "Desafio avançado",
-    help: "Combine abstração, controle de fluxo e raciocínio espacial.",
-    starter: "const passo = () => moveRight();\nrepeat(5, moveRight);\nrepeat(5, moveDown);",
-  },
-];
-
-const wallSets = [
-  [8, 14, 20],
-  [7, 8, 14, 20, 26],
-  [7, 13, 14, 15, 21, 27],
-  [2, 8, 14, 20, 26, 27],
-  [6, 7, 13, 19, 25, 31],
-  [1, 7, 8, 14, 20, 21, 27, 33],
-];
-
-const keyboardRows = ["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"];
-
+const difficultyNames = ["Fácil", "Médio", "Difícil", "Especialista", "Insano"];
+const starter =
+  "// Programe o caminho até a bandeira.\n// Use x, y, blocked() e atGoal() como sensores.\nrepeat(2, moveRight);\nmoveDown();";
 export function ProgrammingLab() {
-  const [access, setAccess] = useState<boolean>();
-  const [summary, setSummary] = useState<Summary>();
-  const [tab, setTab] = useState<"algorithm" | "words" | "binary">("algorithm");
+  const [eligible, setEligible] = useState<boolean>();
+  const [tab, setTab] = useState("words");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
-
-  const [algorithmLevel, setAlgorithmLevel] = useState(1);
-  const [code, setCode] = useState(algorithmPrompts[0].starter);
-  const [algorithmResult, setAlgorithmResult] = useState<AlgorithmResult>();
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const algorithmAttempts = useRef(0);
-  const algorithmStarted = useRef(Date.now());
-  const animation = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const [mode, setMode] = useState<"SOLO" | "DUET" | "QUARTET">("SOLO");
+  const [summary, setSummary] = useState<{
+    totalXp: number;
+    level: number;
+    currentStreak: number;
+  }>();
+  const [mode, setMode] = useState("SOLO");
   const [difficulty, setDifficulty] = useState(1);
   const [daily, setDaily] = useState(false);
-  const [challenge, setChallenge] = useState<WordChallenge>();
+  const [challenge, setChallenge] = useState<Challenge>();
+  const [played, setPlayed] = useState<Played[]>([]);
   const [guess, setGuess] = useState("");
-  const [guesses, setGuesses] = useState<{ word: string; boards: WordBoard[] }[]>([]);
-  const [wordResult, setWordResult] = useState<WordAttemptResult>();
-  const wordStarted = useRef(Date.now());
-
-  const [binary, setBinary] = useState<BinaryChallenge>();
-  const [bits, setBits] = useState<boolean[]>([]);
-  const [binaryResult, setBinaryResult] = useState<BinaryResult>();
-  const binaryStarted = useRef(Date.now());
-
-  async function loadSummary() {
-    const [a, s] = await Promise.all([
-      api<{ eligible: boolean }>("/learning/access"),
-      api<Summary>("/learning/summary").catch(() => undefined),
-    ]);
-    setAccess(a.eligible);
-    if (s) setSummary(s);
-  }
-
+  const [result, setResult] = useState<WordResult>();
+  const [level, setLevel] = useState(1);
+  const [walls, setWalls] = useState<number[]>([]);
+  const [loadedLevel, setLoadedLevel] = useState(0);
+  const [code, setCode] = useState(starter);
+  const [run, setRun] = useState<Run>();
+  const [frame, setFrame] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const started = useRef(0);
+  const attempts = useRef(0);
+  const refresh = useCallback(
+    () =>
+      api<{ totalXp: number; level: number; currentStreak: number }>(
+        "/learning/summary",
+      ).then(setSummary),
+    [],
+  );
   useEffect(() => {
-    const bootstrap = setTimeout(() => {
-      void loadSummary().catch((e) => setError((e as Error).message));
-    }, 0);
-    return () => {
-      clearTimeout(bootstrap);
-      if (animation.current) clearTimeout(animation.current);
-    };
-  }, []);
-
+    started.current = Date.now();
+    api<{ eligible: boolean }>("/learning/access")
+      .then((r) => setEligible(r.eligible))
+      .catch((e) => setError(e.message));
+    void refresh().catch(() => {});
+  }, [refresh]);
   useEffect(() => {
-    const reset = setTimeout(() => {
-      setCode(algorithmPrompts[algorithmLevel - 1].starter);
-      setAlgorithmResult(undefined);
-      setPosition({ x: 0, y: 0 });
-      algorithmAttempts.current = 0;
-      algorithmStarted.current = Date.now();
-    }, 0);
-    return () => clearTimeout(reset);
-  }, [algorithmLevel]);
-
-  useEffect(() => {
-    if (tab !== "words" || access !== true) return;
-    const bootstrap = setTimeout(() => {
-      void loadWordChallenge(mode, difficulty, daily);
-    }, 0);
-    return () => clearTimeout(bootstrap);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, mode, difficulty, daily, access]);
-
-  useEffect(() => {
-    if (tab !== "binary" || access !== true) return;
-    const bootstrap = setTimeout(() => {
-      void loadBinary();
-    }, 0);
-    return () => clearTimeout(bootstrap);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tab, access]);
-
-  async function loadWordChallenge(
-    nextMode = mode,
-    nextDifficulty = difficulty,
-    nextDaily = daily,
-  ) {
-    setBusy(true);
-    setError("");
-    try {
-      const data = await api<WordChallenge>(
-        `/learning/advanced/words/challenge?mode=${nextMode}&difficulty=${nextDifficulty}&daily=${nextDaily}`,
-      );
-      setChallenge(data);
-      setGuess("");
-      setGuesses([]);
-      setWordResult(undefined);
-      wordStarted.current = Date.now();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function loadBinary() {
-    setBusy(true);
-    setError("");
-    try {
-      const data = await api<BinaryChallenge>("/learning/advanced/binary/challenge");
-      setBinary(data);
-      setBits(Array.from({ length: data.bitWidth }, () => false));
-      setBinaryResult(undefined);
-      binaryStarted.current = Date.now();
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function runAlgorithm() {
-    setBusy(true);
-    setError("");
-    algorithmAttempts.current += 1;
-    try {
-      const result = await post<AlgorithmResult>("/learning/advanced/algorithm/evaluate", {
-        level: algorithmLevel,
-        code,
-        attempts: algorithmAttempts.current,
-        durationMs: Date.now() - algorithmStarted.current,
+    if (!eligible) return;
+    let active = true;
+    api<{ walls: number[] }>(
+      `/learning/advanced/algorithm/challenge?level=${level}`,
+    )
+      .then((r) => {
+        if (active) {
+          setWalls(r.walls);
+          setLoadedLevel(level);
+        }
+      })
+      .catch((e) => {
+        if (active) setError(e.message);
       });
-      setAlgorithmResult(result);
-      animateFrames(result.frames);
-      if (result.won) await loadSummary();
+    return () => {
+      active = false;
+    };
+  }, [level, eligible]);
+  useEffect(() => {
+    if (!playing || !run) return;
+    const timer = setTimeout(() => {
+      if (frame >= run.frames.length - 1) setPlaying(false);
+      else setFrame(frame + 1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [playing, frame, run]);
+  async function newWord() {
+    setBusy(true);
+    setError("");
+    try {
+      const c = await api<Challenge>(
+        `/learning/advanced/words/challenge?mode=${mode}&difficulty=${difficulty}&daily=${daily}`,
+      );
+      setChallenge(c);
+      setPlayed(c.history ?? []);
+      setGuess("");
+      setResult(
+        c.finished
+          ? {
+              finished: true,
+              completed: false,
+              message:
+                "Desafio diário já concluído. Volte amanhã ou escolha treino livre.",
+              boards: [],
+            }
+          : undefined,
+      );
+      started.current = Date.now();
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
   }
-
-  function animateFrames(frames: { x: number; y: number }[]) {
-    if (animation.current) clearTimeout(animation.current);
-    let i = 0;
-    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const next = () => {
-      setPosition(frames[i] ?? { x: 0, y: 0 });
-      i += 1;
-      if (i < frames.length)
-        animation.current = setTimeout(next, reduced ? 0 : 220);
-    };
-    next();
-  }
-
   async function submitWord() {
-    if (!challenge || guess.length !== challenge.wordLength) return;
+    if (
+      !challenge ||
+      busy ||
+      result?.finished ||
+      guess.length !== challenge.wordLength
+    )
+      return;
     setBusy(true);
     setError("");
     try {
-      const result = await post<WordAttemptResult>("/learning/advanced/words/attempt", {
+      const r = await post<WordResult>("/learning/advanced/words/attempt", {
         challengeKey: challenge.challengeKey,
         mode: challenge.mode,
         difficulty: challenge.difficulty,
-        guess,
-        guesses: [...guesses.map((item) => item.word), guess],
-        attempt: guesses.length + 1,
         daily: challenge.daily,
-        durationMs: Date.now() - wordStarted.current,
+        guess,
+        guesses: [],
+        attempt: played.length + 1,
+        durationMs: Date.now() - started.current,
       });
-      setGuesses((current) => [...current, { word: guess, boards: result.boards }]);
-      setWordResult(result);
+      setPlayed((v) => [...v, { word: guess, boards: r.boards }]);
+      setResult(r);
       setGuess("");
-      if (result.completed) {
-        await loadSummary();
-        if (!daily && difficulty < 5)
-          setTimeout(() => setDifficulty((value) => Math.min(5, value + 1)), 800);
-      }
+      if (r.completed) void refresh();
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
   }
-
-  async function submitBinary() {
-    if (!binary) return;
+  async function execute() {
+    if (busy || loadedLevel !== level) return;
     setBusy(true);
     setError("");
+    setPlaying(false);
     try {
-      const answer = bits.map((bit) => (bit ? "1" : "0")).join("");
-      const result = await post<BinaryResult>("/learning/advanced/binary/attempt", {
-        challengeKey: binary.challengeKey,
-        answer,
-        durationMs: Date.now() - binaryStarted.current,
+      const r = await post<Run>("/learning/advanced/algorithm/evaluate", {
+        level,
+        code,
+        attempts: Math.min(++attempts.current, 100),
+        durationMs: Date.now() - started.current,
       });
-      setBinaryResult(result);
-      if (result.correct) await loadSummary();
+      setRun(r);
+      setFrame(0);
+      const reduced =
+        matchMedia("(prefers-reduced-motion: reduce)").matches ||
+        document.documentElement.dataset.reducedMotion === "true";
+      if (reduced) setFrame(r.frames.length - 1);
+      else setPlaying(true);
+      if (r.won) void refresh();
     } catch (e) {
       setError((e as Error).message);
     } finally {
       setBusy(false);
     }
   }
-
-  const completedCount = useMemo(() => guesses.length, [guesses]);
-  const binaryValue = useMemo(
-    () => parseInt(bits.map((bit) => (bit ? "1" : "0")).join("") || "0", 2),
-    [bits],
-  );
-
+  function changeLevel(next: number) {
+    setLevel(next);
+    setRun(undefined);
+    setFrame(0);
+    setPlaying(false);
+    attempts.current = 0;
+    started.current = Date.now();
+  }
+  const position = run?.frames[frame] ?? { x: 0, y: 0, step: 0 };
   return (
     <Shell>
-      <div className="programming-lab-page">
-        <div className="practice-hero">
-          <div>
-            <p className="eyebrow">Praticar programação</p>
-            <h1>Treino que fica mais difícil conforme você evolui.</h1>
-            <p className="lead">
-              Resolva lógica, domine termos técnicos e exercite raciocínio binário.
-            </p>
-          </div>
-          <Gamepad2 size={54} />
-        </div>
-
+      <div className="programming-lab">
+        <header className="lab-heading">
+          <h1>Aprenda jogando. Evolua programando.</h1>
+          <p>Desafios de programação com progresso salvo no seu perfil.</p>
+        </header>
         <Feedback error={error} />
-
-        {access === false ? (
-          <div className="empty">
-            <h2>Disponível para estudantes de TI.</h2>
-            <p>Selecione seu curso ou suas matérias de programação no perfil acadêmico.</p>
-          </div>
-        ) : access === undefined ? (
+        {eligible === false ? (
+          <p>
+            Estes desafios são liberados para estudantes de cursos ou matérias
+            de TI.
+          </p>
+        ) : eligible === undefined ? (
           <p role="status">Carregando laboratório…</p>
         ) : (
           <>
             <div className="learning-stats">
-              <article>
-                <Zap size={22} />
-                <span><strong>{summary?.totalXp ?? 0} XP</strong>Nível {summary?.level ?? 1}</span>
-              </article>
-              <article>
-                <Flame size={22} />
-                <span><strong>{summary?.currentStreak ?? 0} dias</strong>Sequência atual</span>
-              </article>
-              <article>
-                <Trophy size={22} />
-                <span><strong>{summary?.longestStreak ?? 0} dias</strong>Melhor sequência</span>
-              </article>
+              <span>
+                <strong>{summary?.totalXp ?? 0}</strong> XP
+              </span>
+              <span>Nível {summary?.level ?? 1}</span>
+              <span>{summary?.currentStreak ?? 0} dias de sequência</span>
             </div>
-
-            <div className="advanced-game-tabs three" role="tablist">
-              <button className={tab === "algorithm" ? "active" : ""} onClick={() => setTab("algorithm")}>
-                <Bot size={20} />
-                <span><strong>Rota do algoritmo</strong><small>Programe de verdade para avançar</small></span>
+            <nav className="advanced-game-tabs" aria-label="Minigames">
+              <button
+                aria-pressed={tab === "words"}
+                onClick={() => setTab("words")}
+              >
+                <Braces size={20} /> Termo Dev
               </button>
-              <button className={tab === "words" ? "active" : ""} onClick={() => setTab("words")}>
-                <Braces size={20} />
-                <span><strong>Termo Dev</strong><small>Solo, Dueto e Quarteto técnico</small></span>
+              <button
+                aria-pressed={tab === "algorithm"}
+                onClick={() => setTab("algorithm")}
+              >
+                <Bot size={20} /> Rota do Algoritmo
               </button>
-              <button className={tab === "binary" ? "active" : ""} onClick={() => setTab("binary")}>
-                <Binary size={20} />
-                <span><strong>Laboratório Binário</strong><small>Desafio diário que evolui com você</small></span>
-              </button>
-            </div>
-
-            {tab === "algorithm" ? (
+            </nav>
+            {tab === "words" ? (
+              <section className="advanced-game-card">
+                <h2>Termo Dev</h2>
+                <p>
+                  Investigue palavras técnicas. Cada treino sorteia uma nova
+                  combinação; o desafio diário é igual para todos.
+                </p>
+                <div className="word-settings">
+                  <label>
+                    Modo
+                    <select
+                      value={mode}
+                      disabled={busy}
+                      onChange={(e) => setMode(e.target.value)}
+                    >
+                      <option value="SOLO">Solo</option>
+                      <option value="DUET">Dueto</option>
+                      <option value="QUARTET">Quarteto</option>
+                    </select>
+                  </label>
+                  <label>
+                    Dificuldade
+                    <select
+                      value={difficulty}
+                      disabled={busy}
+                      onChange={(e) => setDifficulty(Number(e.target.value))}
+                    >
+                      {difficultyNames.map((n, i) => (
+                        <option key={n} value={i + 1}>
+                          {n}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label className="toggle-row">
+                    <input
+                      type="checkbox"
+                      checked={daily}
+                      disabled={busy}
+                      onChange={(e) => setDaily(e.target.checked)}
+                    />
+                    Desafio diário
+                  </label>
+                  <button disabled={busy} onClick={() => void newWord()}>
+                    {busy ? "Preparando…" : "Iniciar nova rodada"}
+                  </button>
+                </div>
+                {challenge ? (
+                  <>
+                    <p>
+                      {difficultyNames[challenge.difficulty - 1]} ·{" "}
+                      {challenge.wordLength} letras · {played.length}/
+                      {challenge.maxAttempts} tentativas ·{" "}
+                      {challenge.daily ? "Diário" : "Treino livre"}
+                    </p>
+                    <div className={`word-boards boards-${challenge.boards}`}>
+                      {Array.from({ length: challenge.boards }, (_, b) => (
+                        <div className="word-board" key={b}>
+                          <h3>Palavra {b + 1}</h3>
+                          {Array.from(
+                            { length: challenge.maxAttempts },
+                            (_, r) => (
+                              <div
+                                className="word-row"
+                                key={r}
+                                style={{
+                                  gridTemplateColumns: `repeat(${challenge.wordLength},minmax(28px,1fr))`,
+                                }}
+                              >
+                                {Array.from(
+                                  { length: challenge.wordLength },
+                                  (_, c) => {
+                                    const mark = played[r]?.boards[b]?.marks[c];
+                                    const letter = played[r]?.word[c] ?? "";
+                                    return (
+                                      <span
+                                        key={c}
+                                        className={
+                                          mark === "C"
+                                            ? "correct"
+                                            : mark === "P"
+                                              ? "present"
+                                              : mark === "A"
+                                                ? "absent"
+                                                : ""
+                                        }
+                                        aria-label={`${letter || "vazio"}: ${mark === "C" ? "posição correta" : mark === "P" ? "outra posição" : mark === "A" ? "ausente" : "não preenchido"}`}
+                                      >
+                                        {letter}
+                                      </span>
+                                    );
+                                  },
+                                )}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    <form
+                      className="word-entry"
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        void submitWord();
+                      }}
+                    >
+                      <label>
+                        Palavra tentativa
+                        <input
+                          value={guess}
+                          autoComplete="off"
+                          autoCapitalize="characters"
+                          maxLength={challenge.wordLength}
+                          disabled={busy || result?.finished}
+                          onChange={(e) =>
+                            setGuess(
+                              e.target.value
+                                .toUpperCase()
+                                .replace(/[^A-Z]/g, ""),
+                            )
+                          }
+                        />
+                      </label>
+                      <button
+                        disabled={
+                          busy ||
+                          result?.finished ||
+                          guess.length !== challenge.wordLength
+                        }
+                      >
+                        Testar palavra
+                      </button>
+                    </form>
+                    <div
+                      className="virtual-keyboard"
+                      aria-label="Teclado de letras"
+                    >
+                      {["QWERTYUIOP", "ASDFGHJKL", "ZXCVBNM"].map((row) => (
+                        <div key={row}>
+                          {row.split("").map((letter) => (
+                            <button
+                              key={letter}
+                              type="button"
+                              aria-label={`Letra ${letter}`}
+                              disabled={busy || result?.finished}
+                              onClick={() =>
+                                setGuess((v) =>
+                                  (v + letter).slice(0, challenge.wordLength),
+                                )
+                              }
+                            >
+                              {letter}
+                            </button>
+                          ))}
+                        </div>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => setGuess((v) => v.slice(0, -1))}
+                        disabled={busy || result?.finished}
+                      >
+                        Apagar letra
+                      </button>
+                    </div>
+                    <p role="status" className="game-result">
+                      {result?.message ??
+                        "Verde: posição correta. Amarelo: outra posição. Cinza: ausente."}
+                      {result?.answers
+                        ? ` Palavras: ${result.answers.join(", ")}.`
+                        : ""}
+                    </p>
+                  </>
+                ) : (
+                  <div className="empty">
+                    <p>Escolha Solo, Dueto ou Quarteto e inicie uma rodada.</p>
+                  </div>
+                )}
+              </section>
+            ) : (
               <section className="advanced-game-card">
                 <div className="game-heading">
                   <div>
-                    <p className="eyebrow">Rota do algoritmo · nível {algorithmLevel}/6</p>
-                    <h2>{algorithmPrompts[algorithmLevel - 1].title}</h2>
-                    <p>{algorithmPrompts[algorithmLevel - 1].help}</p>
+                    <h2>Rota do Algoritmo · nível {level}</h2>
+                    <p>
+                      Execute um programa real na linguagem limitada do jogo.
+                      Cada nível gera um mapa com solução.
+                    </p>
                   </div>
-                  <div className="level-picker">
-                    {[1,2,3,4,5,6].map((level) => (
-                      <button key={level} aria-pressed={algorithmLevel === level} onClick={() => setAlgorithmLevel(level)}>
-                        {level}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="algorithm-workspace">
-                  <div className="algorithm-board">
-                    <div className="robot-grid six">
-                      {Array.from({ length: 36 }, (_, index) => (
-                        <div
-                          key={index}
-                          className={wallSets[algorithmLevel - 1].includes(index) ? "wall" : index === 35 ? "goal" : "tile"}
-                        >
-                          {index === 0 ? "INÍCIO" : index === 35 ? "⚑" : ""}
-                        </div>
-                      ))}
-                      <span className="robot-piece six" style={{ transform: `translate(${position.x * 100}%, ${position.y * 100}%)` }}>
-                        <Bot size={30} />
-                      </span>
-                    </div>
-                    <div className="algorithm-api-help">
-                      <strong>Comandos disponíveis</strong>
-                      <code>moveRight()</code><code>moveLeft()</code><code>moveUp()</code>
-                      <code>moveDown()</code><code>moveForward()</code><code>repeat(n, moveRight)</code>
-                    </div>
-                  </div>
-
-                  <div className="algorithm-editor">
-                    <div className="code-editor-heading">
-                      <span><Braces size={16} /> seu-algoritmo.js</span>
-                      <small>Execução segura · sem eval</small>
-                    </div>
-                    <textarea spellCheck={false} value={code} onChange={(e) => setCode(e.target.value)} aria-label="Código do algoritmo" />
-                    <div className="actions">
-                      <button disabled={busy || !code.trim()} onClick={() => void runAlgorithm()}>
-                        <Play size={16} /> Executar algoritmo
-                      </button>
-                      <button className="secondary" onClick={() => {
-                        setCode(algorithmPrompts[algorithmLevel - 1].starter);
-                        setAlgorithmResult(undefined);
-                        setPosition({ x: 0, y: 0 });
-                      }}>
-                        <RotateCcw size={16} /> Reiniciar
-                      </button>
-                    </div>
-                    {algorithmResult ? (
-                      <div className={algorithmResult.won ? "game-result won" : "game-result"}>
-                        <strong>{algorithmResult.message}</strong>
-                        {algorithmResult.won ? <span>{"★".repeat(algorithmResult.stars)}{"☆".repeat(3 - algorithmResult.stars)} · {algorithmResult.commands} comandos</span> : null}
-                      </div>
-                    ) : null}
-                    {algorithmResult?.won && algorithmLevel < 6 ? (
-                      <button onClick={() => setAlgorithmLevel((value) => value + 1)}>Próximo nível <ArrowRight size={16} /></button>
-                    ) : null}
-                  </div>
-                </div>
-              </section>
-            ) : null}
-
-            {tab === "words" ? (
-              <section className="advanced-game-card word-game compact-word-game">
-                <div className="game-heading">
-                  <div>
-                    <p className="eyebrow">Termo Dev · {challenge?.category ?? "Programação"}</p>
-                    <h2>Encontre {mode === "SOLO" ? "a palavra" : mode === "DUET" ? "as duas palavras" : "as quatro palavras"}.</h2>
-                    <p>Cada tentativa vale para todos os tabuleiros.</p>
-                  </div>
-                </div>
-
-                <div className="word-config">
-                  <div>
-                    {(["SOLO","DUET","QUARTET"] as const).map((value) => (
-                      <button key={value} className={mode === value ? "active" : "secondary"} onClick={() => setMode(value)}>
-                        {value === "SOLO" ? "Solo" : value === "DUET" ? "Dueto" : "Quarteto"}
-                      </button>
-                    ))}
-                  </div>
-                  <div className="difficulty-picker">
-                    {[1,2,3,4,5].map((value) => (
-                      <button key={value} aria-pressed={difficulty === value} onClick={() => setDifficulty(value)}>{value}</button>
-                    ))}
-                  </div>
-                  <label className="daily-toggle">
-                    <input type="checkbox" checked={daily} onChange={(e) => setDaily(e.target.checked)} />
-                    Desafio diário
+                  <label>
+                    Nível
+                    <input
+                      type="number"
+                      min={1}
+                      max={100000}
+                      value={level}
+                      onChange={(e) =>
+                        changeLevel(
+                          Math.max(
+                            1,
+                            Math.min(100000, Number(e.target.value) || 1),
+                          ),
+                        )
+                      }
+                    />
                   </label>
                 </div>
-
-                {challenge ? (
-                  <>
-                    <div className={`word-boards boards-${challenge.boards}`}>
-                      {Array.from({ length: challenge.boards }, (_, boardIndex) => (
-                        <div className="word-board" key={boardIndex}>
-                          <header><Grid2X2 size={16} /><strong>{challenge.boards === 1 ? "Palavra" : `Palavra ${boardIndex + 1}`}</strong></header>
-                          {Array.from({ length: challenge.maxAttempts }, (_, row) => {
-                            const played = guesses[row];
-                            return (
-                              <div className="word-row" key={row} style={{ gridTemplateColumns: `repeat(${challenge.wordLength}, minmax(0, 1fr))` }}>
-                                {Array.from({ length: challenge.wordLength }, (_, column) => {
-                                  const letter = played?.word[column] ?? "";
-                                  const mark = played?.boards[boardIndex]?.marks[column];
-                                  return (
-                                    <span key={column} className={mark === "C" ? "correct" : mark === "P" ? "present" : mark === "A" ? "absent" : ""}>
-                                      {letter}
-                                    </span>
-                                  );
-                                })}
-                              </div>
-                            );
-                          })}
+                <div className="algorithm-workspace">
+                  <div className="algorithm-board">
+                    <div
+                      className="robot-grid six"
+                      aria-label={`Robô na coluna ${position.x + 1}, linha ${position.y + 1}`}
+                    >
+                      {Array.from({ length: 36 }, (_, i) => (
+                        <div
+                          key={i}
+                          className={
+                            walls.includes(i)
+                              ? "wall"
+                              : i === 35
+                                ? "goal"
+                                : "tile"
+                          }
+                        >
+                          {i === 0 ? "INÍCIO" : i === 35 ? "FIM" : ""}
                         </div>
                       ))}
+                      <span
+                        className="robot-piece six"
+                        style={{
+                          transform: `translate(${position.x * 100}%,${position.y * 100}%)`,
+                        }}
+                      >
+                        <Bot size={28} />
+                      </span>
                     </div>
-
-                    <div className="word-entry">
-                      <input
-                        value={guess}
-                        onChange={(e) => setGuess(e.target.value.toUpperCase().replace(/[^A-Z]/g, "").slice(0, challenge.wordLength))}
-                        maxLength={challenge.wordLength}
-                        disabled={busy || wordResult?.finished}
-                        placeholder={`${challenge.wordLength} letras`}
-                        aria-label="Palavra tentativa"
-                        onKeyDown={(e) => { if (e.key === "Enter") void submitWord(); }}
-                      />
-                      <button disabled={busy || wordResult?.finished || guess.length !== challenge.wordLength} onClick={() => void submitWord()}>
-                        Testar palavra
+                    <p role="status">
+                      Passo {position.step} · Coluna {position.x + 1}, linha{" "}
+                      {position.y + 1}
+                    </p>
+                  </div>
+                  <div className="algorithm-editor">
+                    <label htmlFor="algorithm-code">Seu programa</label>
+                    <textarea
+                      id="algorithm-code"
+                      spellCheck={false}
+                      value={code}
+                      onChange={(e) => setCode(e.target.value)}
+                      maxLength={6000}
+                    />
+                    <div className="actions">
+                      <button
+                        disabled={busy || !code.trim()}
+                        onClick={() => void execute()}
+                      >
+                        <Play size={16} />
+                        Executar
+                      </button>
+                      <button
+                        className="secondary"
+                        disabled={!run}
+                        onClick={() => setPlaying(!playing)}
+                      >
+                        {playing ? <Pause size={16} /> : <Play size={16} />}{" "}
+                        {playing ? "Pausar" : "Reproduzir"}
+                      </button>
+                      <button
+                        className="secondary"
+                        disabled={!run || frame >= run.frames.length - 1}
+                        onClick={() => {
+                          setPlaying(false);
+                          setFrame((v) => v + 1);
+                        }}
+                      >
+                        <SkipForward size={16} />
+                        Passo
+                      </button>
+                      <button
+                        className="secondary"
+                        onClick={() => {
+                          setPlaying(false);
+                          setFrame(0);
+                        }}
+                      >
+                        <RotateCcw size={16} />
+                        Resetar execução
                       </button>
                     </div>
-
-                    <div className="virtual-keyboard" aria-hidden="true">
-                      {keyboardRows.map((row) => <div key={row}>{row.split("").map((letter) => <span key={letter}>{letter}</span>)}</div>)}
-                    </div>
-
-                    <div className={wordResult?.completed ? "game-result won" : "game-result"}>
-                      {wordResult ? <><strong>{wordResult.message}</strong><span>{completedCount}/{challenge.maxAttempts} tentativas</span></> : <span>Verde: posição certa · amarelo: presente · cinza: ausente</span>}
-                    </div>
-
-                    {wordResult?.finished ? (
-                      <button className="secondary" onClick={() => void loadWordChallenge()}>
-                        <Sparkles size={16} /> Jogar novamente
+                    <details>
+                      <summary>Comandos, sensores e exemplos</summary>
+                      <p>
+                        moveRight(), moveLeft(), moveUp(), moveDown(),
+                        moveForward(), turnRight(), turnLeft(). Use blocked(),
+                        atGoal(), x e y. Limite: 100 movimentos e 1000
+                        operações.
+                      </p>
+                      <pre>
+                        {
+                          "let passos = 0;\nfunction avancar() {\n  if (!blocked()) { moveForward(); }\n  else { turnRight(); }\n}\nwhile (!atGoal() && passos < 30) {\n  avancar();\n  passos = passos + 1;\n}\n// Também: repeat(3, moveDown);\n// ou repeat(3) { moveDown(); }"
+                        }
+                      </pre>
+                      <p>
+                        Não há acesso à internet, DOM ou arquivos. Sintaxe não
+                        suportada é rejeitada, nunca ignorada.
+                      </p>
+                    </details>
+                    {run ? (
+                      <p role="status" className="game-result">
+                        {run.message}{" "}
+                        {run.won
+                          ? `${run.stars} estrelas · ${run.commands} movimentos`
+                          : ""}
+                      </p>
+                    ) : null}
+                    {run?.won && level < 100000 ? (
+                      <button onClick={() => changeLevel(level + 1)}>
+                        Próximo desafio
                       </button>
                     ) : null}
-                  </>
-                ) : <p role="status">Preparando desafio…</p>}
+                  </div>
+                </div>
               </section>
-            ) : null}
-
-            {tab === "binary" ? (
-              <section className="advanced-game-card binary-lab">
-                {binary ? (
-                  <>
-                    <div className="binary-lab-header">
-                      <div>
-                        <p className="eyebrow">Laboratório Binário · dia {binary.dayLevel}</p>
-                        <h2>{binary.prompt}</h2>
-                        <p>{binary.hint}</p>
-                      </div>
-                      <div className="binary-progress-badge">
-                        <CircuitBoard size={22} />
-                        <span><strong>{binary.completedDays}</strong> dias concluídos</span>
-                      </div>
-                    </div>
-
-                    <div className="binary-expression">
-                      <small>Expressão do circuito</small>
-                      <strong>{binary.expression}</strong>
-                    </div>
-
-                    <div className="binary-operands">
-                      {binary.operands.map((operand) => (
-                        <article key={operand.label}>
-                          <strong>{operand.label}</strong>
-                          <code>{operand.binary}</code>
-                          <small>decimal {operand.decimal}</small>
-                        </article>
-                      ))}
-                    </div>
-
-                    <div className="binary-switch-board">
-                      {bits.map((enabled, index) => {
-                        const power = bits.length - index - 1;
-                        return (
-                          <button
-                            type="button"
-                            key={index}
-                            className={enabled ? "bit-on" : ""}
-                            aria-pressed={enabled}
-                            disabled={binary.completedToday || Boolean(binaryResult?.correct)}
-                            onClick={() =>
-                              setBits((current) =>
-                                current.map((value, i) => (i === index ? !value : value)),
-                              )
-                            }
-                          >
-                            <span>{enabled ? "1" : "0"}</span>
-                            <small>2^{power}</small>
-                          </button>
-                        );
-                      })}
-                    </div>
-
-                    <div className="binary-current-value">
-                      <span>Resultado montado</span>
-                      <strong>{bits.map((bit) => (bit ? "1" : "0")).join("")}</strong>
-                      <small>decimal {binaryValue}</small>
-                    </div>
-
-                    <div className="binary-actions">
-                      <button disabled={busy || binary.completedToday || Boolean(binaryResult?.correct)} onClick={() => void submitBinary()}>
-                        <Zap size={17} /> Validar circuito
-                      </button>
-                      <button className="secondary" disabled={binary.completedToday} onClick={() => setBits(Array.from({ length: binary.bitWidth }, () => false))}>
-                        <RotateCcw size={16} /> Limpar
-                      </button>
-                    </div>
-
-                    {binary.completedToday ? (
-                      <div className="game-result won">
-                        <strong>Desafio diário concluído.</strong>
-                        <span>Amanhã o laboratório sobe de nível e adiciona novas operações.</span>
-                      </div>
-                    ) : binaryResult ? (
-                      <div className={binaryResult.correct ? "game-result won" : "game-result"}>
-                        <strong>{binaryResult.message}</strong>
-                        {binaryResult.correct ? <span>+{binaryResult.xpAwarded} XP · próximo nível diário {binaryResult.nextDayLevel}</span> : null}
-                      </div>
-                    ) : null}
-
-                    <div className="binary-difficulty-roadmap">
-                      <span>Dia 1 · decimal → binário</span>
-                      <span>Dia 2 · soma</span>
-                      <span>Dia 3 · XOR</span>
-                      <span>Dia 4 · AND/OR</span>
-                      <span>Dia 5 · shift + XOR</span>
-                      <span>Dia 6+ · pipelines progressivos</span>
-                    </div>
-                  </>
-                ) : <p role="status">Montando circuito diário…</p>}
-              </section>
-            ) : null}
+            )}
           </>
         )}
       </div>

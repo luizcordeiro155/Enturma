@@ -1,6 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
-test("UNA Aimorés ADS: seleção de UCs reais e três minigames com progresso", async ({
+test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   page,
   request,
 }) => {
@@ -47,57 +47,98 @@ test("UNA Aimorés ADS: seleção de UCs reais e três minigames com progresso",
     .check();
   await page.getByLabel(/Matemática computacional aplicada/).check();
   await page.screenshot({
-    path: "../../docs/design/una-onboarding.png",
+    path: "../../.local/una-onboarding.png",
     fullPage: true,
   });
   await page.getByRole("button", { name: "Concluir perfil" }).click();
   await expect(page).toHaveURL(/home/);
   await page.getByRole("link", { name: "Praticar programação" }).click();
   await expect(
-    page.getByRole("heading", { name: "Rota do algoritmo" }),
+    page.getByRole("heading", { name: "Termo Dev", exact: true }),
   ).toBeVisible();
-  for (const direction of [
-    "Baixo",
-    "Baixo",
-    "Baixo",
-    "Direita",
-    "Direita",
-    "Direita",
-  ])
-    await page.getByRole("button", { name: direction, exact: true }).click();
+  await page
+    .getByRole("combobox", { name: "Modo", exact: true })
+    .selectOption("QUARTET");
+  await page
+    .getByRole("combobox", { name: "Dificuldade", exact: true })
+    .selectOption("5");
+  await page.getByRole("button", { name: "Iniciar nova rodada" }).click();
+  await expect(page.locator(".word-board")).toHaveCount(4);
+  await page
+    .getByRole("button", { name: "Rota do Algoritmo", exact: true })
+    .click();
+  const challenge = await page.request.get(
+    "/api/backend/learning/advanced/algorithm/challenge?level=1",
+  );
+  expect(challenge.ok()).toBe(true);
+  const { walls } = await challenge.json();
+  const queue: [number, string[]][] = [[0, []]];
+  const seen = new Set([0]);
+  let program: string[] = [];
+  while (queue.length) {
+    const [at, steps] = queue.shift()!;
+    if (at === 35) {
+      program = steps;
+      break;
+    }
+    for (const [dx, dy, move] of [
+      [1, 0, "moveRight"],
+      [-1, 0, "moveLeft"],
+      [0, 1, "moveDown"],
+      [0, -1, "moveUp"],
+    ] as const) {
+      const x = (at % 6) + dx,
+        y = Math.floor(at / 6) + dy,
+        n = y * 6 + x;
+      if (
+        x >= 0 &&
+        x < 6 &&
+        y >= 0 &&
+        y < 6 &&
+        !walls.includes(n) &&
+        !seen.has(n)
+      ) {
+        seen.add(n);
+        queue.push([n, [...steps, move + "();"]]);
+      }
+    }
+  }
+  await page
+    .getByLabel("Seu programa")
+    .fill("function solve(){" + program.join("\n") + "} solve();");
   await page.getByRole("button", { name: "Executar", exact: true }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Desafio concluído" }),
+    page.getByRole("status").filter({ hasText: "Algoritmo concluído." }),
   ).toBeVisible();
-  await page.getByRole("tab", { name: /Laboratório binário/ }).click();
-  await page.getByRole("button", { name: "Bit 4", exact: true }).click();
-  await page.getByRole("button", { name: "Bit 1", exact: true }).click();
-  await page.getByRole("button", { name: "Conferir combinação" }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "Desafio concluído" }),
-  ).toBeVisible();
-  await page.getByRole("tab", { name: /Detetive de código/ }).click();
-  await page.getByLabel("Resultado de console.log").fill("6");
-  await page.getByRole("button", { name: "Testar hipótese" }).click();
-  await expect(
-    page.getByRole("status").filter({ hasText: "Desafio concluído" }),
-  ).toBeVisible();
-  await page.reload();
-  await expect(page.getByText("de 12 desafios concluídos")).toContainText("3");
+  await page
+    .getByRole("button", { name: "Acessibilidade", exact: true })
+    .click();
+  const dialog = page.getByRole("dialog");
+  await dialog
+    .getByRole("combobox", { name: "Tema", exact: true })
+    .selectOption("DARK");
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await dialog.getByLabel("Alto contraste").check();
+  await dialog.getByLabel("Tamanho do texto").fill("1.35");
+  await dialog.getByLabel("Reduzir animações").check();
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
   await page.screenshot({
-    path: "../../docs/design/learning-desktop.png",
+    path: "../../.local/learning-desktop.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await page.getByRole("tab", { name: /Laboratório binário/ }).click();
+  await page.getByRole("button", { name: "Termo Dev", exact: true }).click();
+  await expect(page.locator(".word-board")).toHaveCount(4);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
   await page.screenshot({
-    path: "../../docs/design/learning-mobile.png",
+    path: "../../.local/learning-mobile.png",
     fullPage: true,
   });
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 });

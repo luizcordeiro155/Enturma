@@ -80,6 +80,134 @@ class PlatformIntegrationTest {
   @Autowired java.util.List<br.com.enturma.academics.provider.AcademicCatalogProvider> providers;
   @Autowired br.com.enturma.learning.LearningController learning;
 
+  @Autowired br.com.enturma.learning.AdvancedLearningController advanced;
+
+  @Test
+  void wordModesHavePlayablePoolsAndAttemptsAreAuthoritative() {
+    db.jdbc.update(
+        "UPDATE academic_entry SET attributes=attributes||'{\"learningArea\":\"IT\"}'::jsonb WHERE"
+            + " id=?",
+        subject);
+    for (int difficulty = 1; difficulty <= 5; difficulty++)
+      for (String mode : List.of("SOLO", "DUET", "QUARTET")) {
+        var c = (Map<?, ?>) advanced.wordChallenge(host, mode, difficulty, false);
+        assertThat((Number) c.get("wordLength")).isNotNull();
+        String key = (String) c.get("challengeKey");
+        assertThatThrownBy(
+                () ->
+                    advanced.wordAttempt(
+                        outsider,
+                        new br.com.enturma.learning.AdvancedLearningController.WordAttempt(
+                            key, mode, 1, "CACHE", List.of(), 1, false, 0)))
+            .isInstanceOf(ApiException.class);
+      }
+    var c = (Map<?, ?>) advanced.wordChallenge(host, "SOLO", 1, true);
+    var again = (Map<?, ?>) advanced.wordChallenge(host, "SOLO", 1, true);
+    assertThat(c.get("challengeKey")).isEqualTo(again.get("challengeKey"));
+    var words = List.of("JAVA", "CACHE", "PYTHON");
+    String guess =
+        words.stream()
+            .filter(w -> w.length() == ((Number) c.get("wordLength")).intValue())
+            .findFirst()
+            .orElse("RETURN");
+    var r =
+        (Map<?, ?>)
+            advanced.wordAttempt(
+                host,
+                new br.com.enturma.learning.AdvancedLearningController.WordAttempt(
+                    (String) c.get("challengeKey"),
+                    "SOLO",
+                    1,
+                    guess,
+                    List.of("CACHE", "JAVA", "PYTHON"),
+                    19,
+                    true,
+                    0));
+    assertThat(r.get("attempt")).isEqualTo(1);
+    assertThatThrownBy(
+            () ->
+                advanced.wordAttempt(
+                    host,
+                    new br.com.enturma.learning.AdvancedLearningController.WordAttempt(
+                        (String) c.get("challengeKey"), "SOLO", 1, guess, List.of(), 1, true, 0)))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void incrementalMemoryKeepsHistoryOnProviderFailureAndGeneratesAfterRecovery() {
+    UUID id = room(8);
+    chat.send(host, id, "Conceito importante para preservar", null);
+    study.end(host, id);
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenThrow(new IllegalStateException("offline"));
+    ai.finalizeEndedSessions();
+    assertThat((List<?>) chat.messages(host, id, 0)).hasSize(1);
+    org.mockito.Mockito.reset(aiProvider);
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenReturn(new br.com.enturma.ai.AiProvider.Answer("Resumo preservado", List.of()));
+    for (int i = 0; i < 4; i++) ai.finalizeEndedSessions();
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM room_memory_checkpoint WHERE room_id=? AND"
+                    + " through_message_id IS NOT NULL)",
+                id))
+        .isTrue();
+    assertThat((List<?>) chat.messages(host, id, 0)).hasSize(1);
+  }
+
+  @Autowired br.com.enturma.users.SocialController social;
+
+  @Test
+  void friendshipsRequireAcceptanceAndPrivateMessagesStayCiphertext() throws Exception {
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", member.id()).get("username");
+    var invitation =
+        (Map<?, ?>) social.invite(host, new br.com.enturma.users.SocialController.Invite(username));
+    UUID id = (UUID) invitation.get("id");
+    assertThatThrownBy(() -> social.messages(host, id, 0)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> social.accept(host, id)).isInstanceOf(ApiException.class);
+    social.accept(member, id);
+    var key =
+        new br.com.enturma.users.SocialController.PublicKey(
+            "EC", "P-256", "a".repeat(43), "b".repeat(43));
+    social.identity(host, key);
+    var envelope =
+        new br.com.enturma.users.SocialController.Envelope(
+            UUID.randomUUID(), "Y2lwaGVydGV4dA==", "abcdefghijklmnop");
+    social.send(host, id, envelope);
+    social.send(host, id, envelope);
+    assertThat((List<?>) social.messages(member, id, 0)).hasSize(1);
+    assertThat(
+            db.one("SELECT ciphertext FROM private_message WHERE friendship_id=?", id)
+                .get("ciphertext"))
+        .isEqualTo(envelope.ciphertext());
+    assertThatThrownBy(() -> social.messages(outsider, id, 0)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                social.identity(
+                    host,
+                    new br.com.enturma.users.SocialController.PublicKey(
+                        "EC", "P-256", "c".repeat(43), "b".repeat(43))))
+        .isInstanceOf(ApiException.class);
+    assertThat(((Map<?, ?>) social.profile(member, host.id())).containsKey("email")).isFalse();
+    db.jdbc.update(
+        "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", member.id(), host.id());
+    assertThatThrownBy(() -> social.messages(host, id, 0)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> social.profile(host, member.id())).isInstanceOf(ApiException.class);
+  }
+
   @Test
   void officialCatalogImportsAreCompleteAndIdempotent() {
     for (int i = 0; i < 40; i++) imports.processBatch();
@@ -328,6 +456,18 @@ class PlatformIntegrationTest {
     chat.send(member, id, "Olá", null);
     var history = (List<?>) chat.messages(host, id, 0);
     assertThat(history).hasSize(1);
+  }
+
+  @Test
+  void historySurvivesEndingAndDeletionKeepsValidTombstone() {
+    UUID id = room(8);
+    study.join(member, id);
+    var sent = (Map<?, ?>) chat.send(host, id, "Conteúdo para revisar depois", null);
+    chat.delete(host, id, (UUID) sent.get("id"));
+    chat.send(member, id, "Mensagem preservada", null);
+    study.end(host, id);
+    assertThat((List<?>) chat.messages(member, id, 0)).hasSize(2);
+    assertThatThrownBy(() -> chat.messages(outsider, id, 0)).isInstanceOf(ApiException.class);
   }
 
   @Test

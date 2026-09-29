@@ -58,7 +58,19 @@ export const academicLabels: Record<string, string> = {
   FULL_TIME: "Integral",
   VARIABLE: "Variável",
 };
-export interface Profile {
+export interface IdentityStyle {
+  hasAvatar?: boolean;
+  accentColor?: string;
+  profileDetails?: {
+    pronouns?: string;
+    statusText?: string;
+    decoration?: string;
+    nameFont?: string;
+    website?: string;
+    interests?: string;
+  };
+}
+export interface Profile extends IdentityStyle {
   id: string;
   name: string;
   username: string;
@@ -86,20 +98,20 @@ export interface Room {
   joinedAt?: string;
   leftAt?: string | null;
   hasEarlierHistory?: boolean;
-  members?: {
+  members?: (IdentityStyle & {
     userId: string;
     name: string;
     role: string;
     joinedAt?: string;
     leftAt?: string | null;
-  }[];
+  })[];
 }
 export interface MessageReaction {
   emoji: string;
   count: number;
   mine: boolean;
 }
-export interface Message {
+export interface Message extends IdentityStyle {
   id: string;
   userId: string;
   name: string;

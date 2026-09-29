@@ -147,12 +147,17 @@ public class StudyService {
     r.put(
         "members",
         db.list(
-            "SELECT p.user_id,u.name,p.role,p.joined_at,p.left_at FROM room_participant p JOIN app_user u ON"
-                + " u.id=p.user_id WHERE p.room_id=? AND NOT p.removed ORDER BY p.joined_at LIMIT 30",
+            "SELECT p.user_id,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS"
+                + " NOT NULL has_avatar,p.role,p.joined_at,p.left_at FROM room_participant p JOIN"
+                + " app_user u ON u.id=p.user_id WHERE p.room_id=? AND NOT p.removed ORDER BY"
+                + " p.joined_at LIMIT 30",
             id));
-    var mine = db.one(
-        "SELECT joined_at,left_at FROM room_participant WHERE room_id=? AND user_id=? AND NOT removed",
-        id, a.id());
+    var mine =
+        db.one(
+            "SELECT joined_at,left_at FROM room_participant WHERE room_id=? AND user_id=? AND NOT"
+                + " removed",
+            id,
+            a.id());
     r.put("joinedAt", mine.get("joinedAt"));
     r.put("leftAt", mine.get("leftAt"));
     r.put(

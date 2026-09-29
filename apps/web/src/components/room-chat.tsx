@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import type { Message, Profile } from "@enturma/contracts";
 import { Hash, ImagePlus, Loader2, Reply, Trash2, X } from "lucide-react";
+import { UserIdentity } from "./user-identity";
 import { api } from "@/lib/api";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
@@ -55,18 +56,25 @@ export function RoomChat(props: Props) {
   } = props;
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const nearBottom = useRef(true);
   const messageMap = useMemo(
     () => new Map(messages.map((message) => [message.id, message])),
     [messages],
   );
 
   useEffect(() => {
-    if (!compact) bottomRef.current?.scrollIntoView({ block: "end" });
+    if (nearBottom.current && scrollRef.current)
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages.length, compact]);
 
   function selectImage(file: File | null) {
     if (!file) return;
-    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+    if (
+      !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+        file.type,
+      )
+    ) {
       setError("Use JPG, PNG, WEBP ou GIF.");
       return;
     }
@@ -81,7 +89,9 @@ export function RoomChat(props: Props) {
   }
 
   return (
-    <section className={compact ? "persistent-chat call-chat-pane" : "persistent-chat"}>
+    <section
+      className={compact ? "persistent-chat call-chat-pane" : "persistent-chat"}
+    >
       <div className="chat-heading persistent-heading">
         <div>
           <h2>{compact ? "Chat da turma" : "Conversa da turma"}</h2>
@@ -89,16 +99,40 @@ export function RoomChat(props: Props) {
             {ended
               ? "Sessão encerrada"
               : connected
-                ? "Tempo real · histórico temporário da sessão"
-                : "Reconectando · o histórico continua na sala ativa"}
+                ? "Tempo real · histórico disponível aos participantes"
+                : "Reconectando · seu histórico está preservado"}
           </small>
         </div>
-        {!compact ? <span className="privacy-pill">Apagado ao encerrar</span> : null}
+        {!compact ? (
+          <span className="privacy-pill">Histórico da turma</span>
+        ) : null}
       </div>
 
-      <div className="messages persistent-messages" aria-live="polite">
+      <div
+        ref={scrollRef}
+        className="messages persistent-messages"
+        aria-live="polite"
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          nearBottom.current =
+            el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+        }}
+      >
         {hasOlder ? (
-          <button className="load-older" disabled={busy} onClick={() => void onLoadOlder()} type="button">
+          <button
+            className="load-older"
+            disabled={busy}
+            onClick={async () => {
+              nearBottom.current = false;
+              const el = scrollRef.current;
+              const height = el?.scrollHeight ?? 0;
+              await onLoadOlder();
+              requestAnimationFrame(() => {
+                if (el) el.scrollTop += el.scrollHeight - height;
+              });
+            }}
+            type="button"
+          >
             {busy ? <Loader2 className="spin" size={16} /> : null}
             Carregar mensagens anteriores
           </button>
@@ -112,14 +146,19 @@ export function RoomChat(props: Props) {
           </div>
         ) : (
           messages.map((message) => {
-            const replied = message.replyTo ? messageMap.get(message.replyTo) : undefined;
+            const replied = message.replyTo
+              ? messageMap.get(message.replyTo)
+              : undefined;
             return (
               <article
                 className={`message persistent-message ${message.userId === me?.id ? "mine" : ""}`}
                 key={message.id}
               >
-                <div className="message-avatar" aria-hidden="true">
-                  {message.name.slice(0, 2).toUpperCase()}
+                <div className="message-avatar">
+                  <UserIdentity
+                    compact
+                    user={{ ...message, id: message.userId }}
+                  />
                 </div>
                 <div className="message-content">
                   <header>
@@ -139,15 +178,27 @@ export function RoomChat(props: Props) {
                       className="reply-preview"
                       type="button"
                       onClick={() =>
-                        document.getElementById(`message-${replied.id}`)?.scrollIntoView({
-                          behavior: "smooth",
-                          block: "center",
-                        })
+                        document
+                          .getElementById(`message-${replied.id}`)
+                          ?.scrollIntoView({
+                            behavior:
+                              document.documentElement.dataset.reducedMotion ===
+                                "true" ||
+                              matchMedia("(prefers-reduced-motion: reduce)")
+                                .matches
+                                ? "instant"
+                                : "smooth",
+                            block: "center",
+                          })
                       }
                     >
                       <Reply size={13} />
                       <strong>{replied.name}</strong>
-                      <span>{replied.deletedAt ? "Mensagem removida" : replied.body ?? "Imagem"}</span>
+                      <span>
+                        {replied.deletedAt
+                          ? "Mensagem removida"
+                          : (replied.body ?? "Imagem")}
+                      </span>
                     </button>
                   ) : null}
 
@@ -168,7 +219,9 @@ export function RoomChat(props: Props) {
                             <img
                               className="chat-image"
                               src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
-                              alt={message.attachmentName ?? "Imagem compartilhada"}
+                              alt={
+                                message.attachmentName ?? "Imagem compartilhada"
+                              }
                               loading="lazy"
                             />
                           </a>
@@ -179,7 +232,11 @@ export function RoomChat(props: Props) {
 
                   {!message.deletedAt ? (
                     <div className="message-actions">
-                      <button className="text-button" type="button" onClick={() => setReplyTo(message)}>
+                      <button
+                        className="text-button"
+                        type="button"
+                        onClick={() => setReplyTo(message)}
+                      >
                         <Reply size={14} /> Responder
                       </button>
 
@@ -208,9 +265,12 @@ export function RoomChat(props: Props) {
                           type="button"
                           onClick={async () => {
                             try {
-                              await api(`/study-rooms/${roomId}/messages/${message.id}`, {
-                                method: "DELETE",
-                              });
+                              await api(
+                                `/study-rooms/${roomId}/messages/${message.id}`,
+                                {
+                                  method: "DELETE",
+                                },
+                              );
                               await onReloadMessages();
                             } catch (e) {
                               setError((e as Error).message);
@@ -234,8 +294,14 @@ export function RoomChat(props: Props) {
         <form onSubmit={onSubmit} className="chat-composer persistent-composer">
           {replyTo ? (
             <div className="composer-reply">
-              <span>Respondendo a <strong>{replyTo.name}</strong></span>
-              <button type="button" className="text-button" onClick={() => setReplyTo(null)}>
+              <span>
+                Respondendo a <strong>{replyTo.name}</strong>
+              </span>
+              <button
+                type="button"
+                className="text-button"
+                onClick={() => setReplyTo(null)}
+              >
                 <X size={15} /> Cancelar
               </button>
             </div>
@@ -269,17 +335,26 @@ export function RoomChat(props: Props) {
           <label>
             <span className="sr-only">Mensagem</span>
             <textarea
+              disabled={busy}
               value={draft}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+                if (
+                  e.key === "Enter" &&
+                  !e.shiftKey &&
+                  !e.nativeEvent.isComposing
+                ) {
                   e.preventDefault();
                   e.currentTarget.form?.requestSubmit();
                 }
               }}
               maxLength={4000}
               rows={compact ? 2 : 3}
-              placeholder={compact ? "Conversar enquanto assiste…" : "Compartilhe uma ideia ou uma dúvida…"}
+              placeholder={
+                compact
+                  ? "Conversar enquanto assiste…"
+                  : "Compartilhe uma ideia ou uma dúvida…"
+              }
             />
           </label>
 
@@ -291,6 +366,7 @@ export function RoomChat(props: Props) {
                     type="button"
                     key={emoji}
                     className="secondary"
+                    disabled={busy}
                     onClick={() => setDraft(draft + emoji)}
                     aria-label={`Adicionar ${emoji}`}
                   >
@@ -305,6 +381,7 @@ export function RoomChat(props: Props) {
               <span>{compact ? "Imagem" : "Adicionar imagem"}</span>
               <input
                 type="file"
+                disabled={busy}
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 onChange={(e) => selectImage(e.target.files?.[0] ?? null)}
               />
@@ -316,12 +393,14 @@ export function RoomChat(props: Props) {
           </div>
 
           <small className="composer-hint">
-            Enter envia · Shift+Enter cria uma nova linha{!compact ? " · imagens até 8 MB" : ""}
+            Enter envia · Shift+Enter cria uma nova linha
+            {!compact ? " · imagens até 8 MB, otimizadas antes do envio" : ""}
           </small>
         </form>
       ) : (
         <div className="ended-chat-note">
-          A sessão terminou. O chat bruto e as imagens foram removidos; consulte o relatório consolidado na Enturma AI.
+          A sessão terminou. O histórico e as imagens foram preservados;
+          consulte o relatório consolidado na Enturma AI.
         </div>
       )}
     </section>

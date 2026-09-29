@@ -1,12 +1,32 @@
 "use client";
+import { LiveIdentity } from "./user-identity";
 import { useEffect, useRef, useState } from "react";
-import { Eye, Mic, MicOff, MonitorUp, PhoneOff, Radio, Users, Video, VideoOff, Sparkles, FileText, Brain } from "lucide-react";
+import {
+  Eye,
+  Mic,
+  MicOff,
+  MonitorUp,
+  PhoneOff,
+  Radio,
+  Users,
+  Video,
+  VideoOff,
+  Sparkles,
+  FileText,
+  Brain,
+} from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
 import { MAX_WEB_UPLOAD_BYTES } from "@/lib/upload-limits";
 
 type Material = { id: string; fileName: string; fileSize: number };
-type Artifact = { id: string; kind: string; title: string; content?: string; createdAt: string };
+type Artifact = {
+  id: string;
+  kind: string;
+  title: string;
+  content?: string;
+  createdAt: string;
+};
 type Answer = {
   answer: string;
   sources: {
@@ -88,7 +108,9 @@ export function RoomTools({
 
   async function download(m: Material) {
     try {
-      const res = await fetch(`/api/backend/study-rooms/${roomId}/materials/${m.id}`);
+      const res = await fetch(
+        `/api/backend/study-rooms/${roomId}/materials/${m.id}`,
+      );
       if (!res.ok) throw Error("Não foi possível baixar o material.");
       const url = URL.createObjectURL(await res.blob());
       const a = document.createElement("a");
@@ -110,7 +132,9 @@ export function RoomTools({
         signal: AbortSignal.timeout(90000),
       });
       setAnswer(result);
-      setArtifacts(await api<Artifact[]>(`/study-rooms/${roomId}/ai/artifacts`));
+      setArtifacts(
+        await api<Artifact[]>(`/study-rooms/${roomId}/ai/artifacts`),
+      );
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -120,7 +144,9 @@ export function RoomTools({
 
   async function openArtifact(id: string) {
     try {
-      const item = await api<Artifact>(`/study-rooms/${roomId}/ai/artifacts/${id}`);
+      const item = await api<Artifact>(
+        `/study-rooms/${roomId}/ai/artifacts/${id}`,
+      );
       setAnswer({ answer: item.content ?? "", sources: [], webSources: [] });
     } catch (e) {
       setError((e as Error).message);
@@ -137,13 +163,16 @@ export function RoomTools({
             <p className="eyebrow">Sala ao vivo</p>
             <h2>Chamada da turma</h2>
             <p className="muted">
-              Voz, câmera e compartilhamento de tela com participantes e indicador de fala.
+              Voz, câmera e compartilhamento de tela com participantes e
+              indicador de fala.
             </p>
           </div>
           {cap?.voice ? (
             <Voice roomId={roomId} ended={ended} />
           ) : (
-            <p className="muted">As chamadas ainda não estão disponíveis nesta instalação.</p>
+            <p className="muted">
+              As chamadas ainda não estão disponíveis nesta instalação.
+            </p>
           )}
         </section>
       ) : null}
@@ -161,7 +190,9 @@ export function RoomTools({
                   {m.fileName}
                   <small>{Math.ceil(m.fileSize / 1024)} KB</small>
                 </span>
-                <button className="secondary" onClick={() => void download(m)}>Baixar</button>
+                <button className="secondary" onClick={() => void download(m)}>
+                  Baixar
+                </button>
               </div>
             ))
           ) : (
@@ -183,7 +214,9 @@ export function RoomTools({
                 />
                 <small>Até 4 MB e 150 páginas.</small>
               </label>
-              <button disabled={busy}>{busy ? "Enviando…" : "Enviar material"}</button>
+              <button disabled={busy}>
+                {busy ? "Enviando…" : "Enviar material"}
+              </button>
             </form>
           ) : null}
         </section>
@@ -196,7 +229,8 @@ export function RoomTools({
               <p className="eyebrow">Memória da turma</p>
               <h2>Enturma AI</h2>
               <p className="muted">
-                A IA consulta histórico autorizado, checkpoints e materiais sem carregar a sala inteira no navegador.
+                A IA consulta histórico autorizado, checkpoints e materiais sem
+                carregar a sala inteira no navegador.
               </p>
             </div>
             <Brain size={30} />
@@ -208,10 +242,18 @@ export function RoomTools({
                 <button disabled={busy} onClick={() => void runAi("catch-up")}>
                   <Sparkles size={17} /> Me atualizar com IA
                 </button>
-                <button className="secondary" disabled={busy} onClick={() => void runAi("session-report")}>
+                <button
+                  className="secondary"
+                  disabled={busy}
+                  onClick={() => void runAi("session-report")}
+                >
                   Gerar relatório da sessão
                 </button>
-                <button className="secondary" disabled={busy} onClick={() => void runAi("study-material")}>
+                <button
+                  className="secondary"
+                  disabled={busy}
+                  onClick={() => void runAi("study-material")}
+                >
                   Gerar material de estudo
                 </button>
               </div>
@@ -249,7 +291,11 @@ export function RoomTools({
                     <option value="QUIZ">Criar quiz</option>
                     <option value="SIMPLIFY">Explicar de forma simples</option>
                     <option value="STUDY_PLAN">Criar roteiro de estudo</option>
-                    {cap.aiWebSearch ? <option value="RESEARCH">Pesquisar na web com fontes</option> : null}
+                    {cap.aiWebSearch ? (
+                      <option value="RESEARCH">
+                        Pesquisar na web com fontes
+                      </option>
+                    ) : null}
                   </select>
                 </label>
                 <label>
@@ -261,11 +307,15 @@ export function RoomTools({
                     placeholder="Ex.: o que estudamos sobre recursividade?"
                   />
                 </label>
-                <button disabled={busy}>{busy ? "Analisando contexto…" : "Perguntar à Enturma AI"}</button>
+                <button disabled={busy}>
+                  {busy ? "Analisando contexto…" : "Perguntar à Enturma AI"}
+                </button>
               </form>
             </>
           ) : (
-            <p className="muted">A IA ainda não está disponível nesta instalação.</p>
+            <p className="muted">
+              A IA ainda não está disponível nesta instalação.
+            </p>
           )}
 
           {answer ? (
@@ -274,7 +324,10 @@ export function RoomTools({
               {answer.sources.length ? <h3>Materiais usados</h3> : null}
               {answer.sources.map((s) => (
                 <details key={`${s.materialId}-${s.number}`}>
-                  <summary>[{s.number}] {s.fileName}{s.page ? ` · página ${s.page}` : ""}</summary>
+                  <summary>
+                    [{s.number}] {s.fileName}
+                    {s.page ? ` · página ${s.page}` : ""}
+                  </summary>
                   <blockquote>{s.excerpt}</blockquote>
                 </details>
               ))}
@@ -283,7 +336,12 @@ export function RoomTools({
                   <h3>Fontes da pesquisa</h3>
                   <div className="ai-web-sources">
                     {answer.webSources.map((s) => (
-                      <a key={`${s.url}-${s.startIndex}`} href={s.url} target="_blank" rel="noreferrer">
+                      <a
+                        key={`${s.url}-${s.startIndex}`}
+                        href={s.url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
                         {s.title}
                       </a>
                     ))}
@@ -297,11 +355,17 @@ export function RoomTools({
             <div className="session-artifacts">
               <h3>Conhecimento salvo desta sessão</h3>
               {artifacts.map((artifact) => (
-                <button className="artifact-row" key={artifact.id} onClick={() => void openArtifact(artifact.id)}>
+                <button
+                  className="artifact-row"
+                  key={artifact.id}
+                  onClick={() => void openArtifact(artifact.id)}
+                >
                   <FileText size={17} />
                   <span>
                     <strong>{artifact.title}</strong>
-                    <small>{new Date(artifact.createdAt).toLocaleString("pt-BR")}</small>
+                    <small>
+                      {new Date(artifact.createdAt).toLocaleString("pt-BR")}
+                    </small>
                   </span>
                 </button>
               ))}
@@ -323,7 +387,15 @@ type CallMember = {
   screen: boolean;
 };
 
-function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
+export function Voice({
+  roomId,
+  ended,
+  endpoint,
+}: {
+  roomId: string;
+  ended: boolean;
+  endpoint?: string;
+}) {
   const [connected, setConnected] = useState(false);
   const [muted, setMuted] = useState(false);
   const [camera, setCamera] = useState(false);
@@ -347,7 +419,9 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
     ];
     const next = participants.map((participant) => {
       const publications = Array.from(
-        participant.trackPublications.values() as Iterable<import("livekit-client").TrackPublication>,
+        participant.trackPublications.values() as Iterable<
+          import("livekit-client").TrackPublication
+        >,
       );
       const active = (source: string) =>
         publications.some(
@@ -365,9 +439,16 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
       };
     });
     setMembers(next);
+    const local = next.find((member) => member.local);
+    if (local) {
+      setScreen(local.screen);
+      setCamera(local.camera);
+      setMuted(!local.microphone);
+    }
 
     for (const tile of Array.from(
-      videos.current?.querySelectorAll<HTMLElement>("[data-call-identity]") ?? [],
+      videos.current?.querySelectorAll<HTMLElement>("[data-call-identity]") ??
+        [],
     )) {
       const member = next.find(
         (candidate) => candidate.identity === tile.dataset.callIdentity,
@@ -399,13 +480,30 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
     media.autoplay = true;
     if (media instanceof HTMLVideoElement) media.playsInline = true;
     tile.appendChild(media);
+    if (source === "screen_share") {
+      const expand = document.createElement("button");
+      expand.type = "button";
+      expand.className = "call-media-fullscreen";
+      expand.textContent = "Tela cheia";
+      expand.onclick = () => {
+        if (!tile.requestFullscreen) {
+          setError("Use o controle de tela cheia do vídeo neste navegador.");
+          return;
+        }
+        void (
+          document.fullscreenElement
+            ? document.exitFullscreen()
+            : tile.requestFullscreen()
+        ).catch(() => setError("Tela cheia indisponível neste navegador."));
+      };
+      tile.appendChild(expand);
+      if (media instanceof HTMLVideoElement) media.controls = true;
+    }
 
     const label = document.createElement("div");
     label.className = "call-media-label";
     label.textContent =
-      source === "screen_share"
-        ? `${name} está compartilhando a tela`
-        : name;
+      source === "screen_share" ? `${name} está compartilhando a tela` : name;
     tile.appendChild(label);
     stage.appendChild(tile);
   }
@@ -438,7 +536,7 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
     try {
       const { Room, RoomEvent, Track } = await import("livekit-client");
       const credentials = await post<{ token: string; url: string }>(
-        `/study-rooms/${roomId}/voice`,
+        endpoint ?? `/study-rooms/${roomId}/voice`,
       );
       const call = new Room({
         adaptiveStream: true,
@@ -464,11 +562,14 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
         refresh();
       });
 
-      call.on(RoomEvent.TrackUnsubscribed, (track, publication, participant) => {
-        track.detach().forEach((element) => element.remove());
-        removeTrack(participant.identity, String(publication.source));
-        refresh();
-      });
+      call.on(
+        RoomEvent.TrackUnsubscribed,
+        (track, publication, participant) => {
+          track.detach().forEach((element) => element.remove());
+          removeTrack(participant.identity, String(publication.source));
+          refresh();
+        },
+      );
 
       call.on(RoomEvent.TrackPublished, refresh);
       call.on(RoomEvent.TrackUnpublished, refresh);
@@ -498,10 +599,7 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
 
       call.on(RoomEvent.LocalTrackUnpublished, (publication) => {
         publication.track?.detach().forEach((element) => element.remove());
-        removeTrack(
-          call.localParticipant.identity,
-          String(publication.source),
-        );
+        removeTrack(call.localParticipant.identity, String(publication.source));
         refresh();
       });
 
@@ -514,7 +612,9 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
         clearMedia();
       });
 
-      await call.connect(credentials.url, credentials.token, { autoSubscribe: true });
+      await call.connect(credentials.url, credentials.token, {
+        autoSubscribe: true,
+      });
       await call.localParticipant.setMicrophoneEnabled(true);
       setConnected(true);
       setMuted(false);
@@ -580,7 +680,8 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
               <span className="call-live-dot" />
               <strong>Voz conectada</strong>
               <small>
-                {members.length} {members.length === 1 ? "pessoa" : "pessoas"} na chamada
+                {members.length} {members.length === 1 ? "pessoa" : "pessoas"}{" "}
+                na chamada
               </small>
             </div>
             <div className="call-speaking-summary">
@@ -620,12 +721,12 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
           <div className="call-members">
             {members.map((member) => (
               <article
-                className={member.speaking ? "call-member speaking" : "call-member"}
+                className={
+                  member.speaking ? "call-member speaking" : "call-member"
+                }
                 key={member.identity}
               >
-                <div className="call-avatar">
-                  {member.name.slice(0, 1).toUpperCase()}
-                </div>
+                <LiveIdentity id={member.identity} name={member.name} />
                 <div className="call-member-info">
                   <strong>
                     {member.name}
@@ -689,7 +790,8 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
 
           <small className="call-privacy-note">
             <Users size={14} />
-            Todos na chamada aparecem acima. Quem estiver falando recebe destaque em tempo real.
+            Todos na chamada aparecem acima. Quem estiver falando recebe
+            destaque em tempo real.
           </small>
         </>
       ) : (
@@ -697,7 +799,8 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
           <div>
             <strong>Entre na chamada da turma</strong>
             <span>
-              Veja quem está conectado, quem está falando e quem está compartilhando a tela.
+              Veja quem está conectado, quem está falando e quem está
+              compartilhando a tela.
             </span>
           </div>
           <button disabled={ended || busy} onClick={join}>
@@ -715,7 +818,6 @@ function nextScreenMessage(error: unknown) {
     return "A permissão para compartilhar a tela foi recusada.";
   return message || "Não foi possível iniciar o compartilhamento de tela.";
 }
-
 
 function renderCitedAnswer(
   text: string,

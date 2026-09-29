@@ -24,3 +24,5 @@ __pycache__/
 .squarecloud-build/
 /app.jar
 /app.jar.pending
+
+test-results-platform/

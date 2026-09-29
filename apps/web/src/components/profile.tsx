@@ -7,6 +7,7 @@ import type { Profile } from "@enturma/contracts";
 import { Camera, Image as ImageIcon, Palette, Save } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
+import { ProfileDetailsEditor } from "./profile-details-editor";
 import { Feedback } from "./feedback";
 
 export function ProfileView({
@@ -62,13 +63,14 @@ export function ProfileView({
     }
   }
 
-  async function uploadAsset(
-    type: "avatar" | "banner",
-    file: File | null,
-  ) {
+  async function uploadAsset(type: "avatar" | "banner", file: File | null) {
     if (!file) return;
     const max = type === "avatar" ? 2 * 1024 * 1024 : 3 * 1024 * 1024;
-    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+    if (
+      !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+        file.type,
+      )
+    ) {
       setError("Use JPG, PNG, WEBP ou GIF.");
       return;
     }
@@ -82,6 +84,7 @@ export function ProfileView({
     setError("");
     setSuccess("");
     try {
+      await api("/users/me");
       const form = new FormData();
       form.set("file", file);
       const res = await fetch(`/api/backend/users/me/${type}`, {
@@ -95,7 +98,9 @@ export function ProfileView({
       await loadProfile();
       if (type === "avatar") setAvatarVersion(Date.now());
       else setBannerVersion(Date.now());
-      setSuccess(type === "avatar" ? "Avatar atualizado." : "Banner atualizado.");
+      setSuccess(
+        type === "avatar" ? "Avatar atualizado." : "Banner atualizado.",
+      );
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -126,21 +131,33 @@ export function ProfileView({
         {p ? (
           <>
             {!subjectsOnly && !settings ? (
+              <ProfileDetailsEditor key={p.id} profile={p} />
+            ) : null}
+            {!subjectsOnly && !settings ? (
               <div className="profile-customizer">
-                <section className="profile-preview-card" style={{ "--profile-accent": accent } as React.CSSProperties}>
+                <section
+                  className="profile-preview-card"
+                  style={{ "--profile-accent": accent } as React.CSSProperties}
+                >
                   <div
                     className="profile-banner"
                     style={
                       bannerUrl
                         ? { backgroundImage: `url("${bannerUrl}")` }
-                        : { background: `linear-gradient(135deg, ${accent}, #101816)` }
+                        : {
+                            background: `linear-gradient(135deg, ${accent}, #101816)`,
+                          }
                     }
                   />
                   <div className="profile-card-body">
                     <div className="profile-avatar-wrap">
                       {avatarUrl ? (
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={avatarUrl} alt="" className="profile-avatar" />
+                        <img
+                          src={avatarUrl}
+                          alt=""
+                          className="profile-avatar"
+                        />
                       ) : (
                         <div className="profile-avatar profile-avatar-fallback">
                           {p.name.slice(0, 1).toUpperCase()}
@@ -150,9 +167,18 @@ export function ProfileView({
                     </div>
                     <h2>{p.name}</h2>
                     <p className="profile-handle">@{p.username}</p>
-                    {p.bio ? <p className="profile-bio">{p.bio}</p> : <p className="profile-bio muted">Adicione uma bio para se apresentar à turma.</p>}
+                    {p.bio ? (
+                      <p className="profile-bio">{p.bio}</p>
+                    ) : (
+                      <p className="profile-bio muted">
+                        Adicione uma bio para se apresentar à turma.
+                      </p>
+                    )}
                     <div className="profile-meta">
-                      <span>{p.enrollment?.periodName ?? "Curso/período não informado"}</span>
+                      <span>
+                        {p.enrollment?.periodName ??
+                          "Curso/período não informado"}
+                      </span>
                       <span>{p.subjects.length} matérias</span>
                     </div>
                   </div>
@@ -162,7 +188,10 @@ export function ProfileView({
                   <div className="profile-editor-title">
                     <div>
                       <h2>Personalizar perfil</h2>
-                      <p>Foto, banner, cor, nome de exibição e bio aparecem nas salas.</p>
+                      <p>
+                        Foto, banner, cor, nome de exibição e bio aparecem nas
+                        salas.
+                      </p>
                     </div>
                     <Palette size={22} />
                   </div>
@@ -178,7 +207,12 @@ export function ProfileView({
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/gif"
                         disabled={busy}
-                        onChange={(e) => void uploadAsset("avatar", e.target.files?.[0] ?? null)}
+                        onChange={(e) =>
+                          void uploadAsset(
+                            "avatar",
+                            e.target.files?.[0] ?? null,
+                          )
+                        }
                       />
                     </label>
                     <label className="profile-upload">
@@ -191,7 +225,12 @@ export function ProfileView({
                         type="file"
                         accept="image/jpeg,image/png,image/webp,image/gif"
                         disabled={busy}
-                        onChange={(e) => void uploadAsset("banner", e.target.files?.[0] ?? null)}
+                        onChange={(e) =>
+                          void uploadAsset(
+                            "banner",
+                            e.target.files?.[0] ?? null,
+                          )
+                        }
                       />
                     </label>
                   </div>
@@ -223,7 +262,13 @@ export function ProfileView({
                   >
                     <label>
                       Nome de exibição
-                      <input name="name" defaultValue={p.name} minLength={2} maxLength={100} required />
+                      <input
+                        name="name"
+                        defaultValue={p.name}
+                        minLength={2}
+                        maxLength={100}
+                        required
+                      />
                     </label>
                     <label>
                       Bio
@@ -237,7 +282,11 @@ export function ProfileView({
                     <label>
                       Cor do perfil
                       <div className="profile-color-control">
-                        <input name="accentColor" type="color" defaultValue={accent} />
+                        <input
+                          name="accentColor"
+                          type="color"
+                          defaultValue={accent}
+                        />
                         <span>{accent}</span>
                       </div>
                     </label>
@@ -256,10 +305,14 @@ export function ProfileView({
                 <dd>@{p.username}</dd>
                 <dt>E-mail</dt>
                 <dd>
-                  {p.email} · {p.emailVerified ? "Confirmado" : "Confirmação pendente"}
+                  {p.email} ·{" "}
+                  {p.emailVerified ? "Confirmado" : "Confirmação pendente"}
                 </dd>
                 <dt>Período</dt>
-                <dd>{p.enrollment?.periodName ?? "Perfil acadêmico ainda não preenchido"}</dd>
+                <dd>
+                  {p.enrollment?.periodName ??
+                    "Perfil acadêmico ainda não preenchido"}
+                </dd>
               </dl>
             ) : null}
 
@@ -295,7 +348,9 @@ export function ProfileView({
                   <div className="room-row" key={s.id}>
                     <span>
                       {s.device}
-                      <small>{new Date(s.createdAt).toLocaleString("pt-BR")}</small>
+                      <small>
+                        {new Date(s.createdAt).toLocaleString("pt-BR")}
+                      </small>
                     </span>
                     <button onClick={() => revoke(s.id)}>Revogar</button>
                   </div>

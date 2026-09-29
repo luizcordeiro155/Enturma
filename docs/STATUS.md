@@ -1,3 +1,5 @@
+> Atualização: o chat atual é persistente, autorizado por sala e não usa E2EE. As descrições históricas abaixo foram substituídas pelo fluxo documentado em CHAT_PRIVACY.md.
+
 # Estado da implementação
 
 Este é um incremento funcional do Enturma, **não a conclusão dos 151 requisitos do documento mestre**. Não está homologado para produção. A configuração de hospedagem prioriza web na Vercel, API na SquareCloud e PostgreSQL existente no Railway; veja `docs/DEPLOYMENT.md`. Não houve publicação em lojas.

@@ -14,14 +14,21 @@ import {
   Sparkles,
   Users,
 } from "lucide-react";
+import { prepareChatImage } from "@/lib/chat-image";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
 import { RoomTools } from "./room-tools";
+import { UserIdentity } from "./user-identity";
 import { RoomChat } from "./room-chat";
 
 type Section = "chat" | "call" | "materials" | "ai";
-type Upload = { id: string; fileName: string; mimeType: string; fileSize: number };
+type Upload = {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  fileSize: number;
+};
 
 export function RoomView({ id }: { id: string }) {
   const [room, setRoom] = useState<Room>();
@@ -41,6 +48,7 @@ export function RoomView({ id }: { id: string }) {
   const router = useRouter();
   const socketRef = useRef<WebSocket | null>(null);
   const pageRef = useRef(0);
+  const connectedRef = useRef(false);
 
   const normalize = useCallback((items: Message[]) => [...items].reverse(), []);
 
@@ -76,15 +84,17 @@ export function RoomView({ id }: { id: string }) {
     async function connect() {
       if (!alive) return;
       try {
+        await api("/users/me");
+        if (!alive) return;
         const session = await fetch("/api/session");
         if (!session.ok) throw Error("Sua sessão expirou. Entre novamente.");
         const { token, url } = await session.json();
+        if (!alive) return;
         const socket = new WebSocket(url);
         socketRef.current = socket;
 
         socket.onopen = () => {
           socket.send(JSON.stringify({ token, roomId: id }));
-          setConnected(true);
           attempts = 0;
         };
 
@@ -92,12 +102,21 @@ export function RoomView({ id }: { id: string }) {
           try {
             const data = JSON.parse(event.data);
             if (data.type !== "snapshot") return;
+            setConnected(true);
+            connectedRef.current = true;
+            setError("");
             setRoom(data.room);
-            if (pageRef.current === 0) {
-              const incoming = normalize(data.messages as Message[]);
-              setMessages((current) => (current.length > 50 ? current : incoming));
-              setHasOlder((data.messages as Message[]).length === 50);
-            }
+            const incoming = normalize(data.messages as Message[]);
+            setMessages((current) => {
+              const combined = new Map(current.map((m) => [m.id, m]));
+              incoming.forEach((m) => combined.set(m.id, m));
+              return [...combined.values()].sort(
+                (a, b) =>
+                  a.createdAt.localeCompare(b.createdAt) ||
+                  a.id.localeCompare(b.id),
+              );
+            });
+            if (pageRef.current === 0) setHasOlder(data.messages.length === 50);
           } catch {
             setError("Não foi possível sincronizar a conversa em tempo real.");
           }
@@ -105,8 +124,12 @@ export function RoomView({ id }: { id: string }) {
 
         socket.onclose = () => {
           setConnected(false);
+          connectedRef.current = false;
           if (alive && attempts < 6) {
-            retry = setTimeout(connect, Math.min(30000, 1000 * 2 ** attempts++));
+            retry = setTimeout(
+              connect,
+              Math.min(30000, 1000 * 2 ** attempts++),
+            );
           }
         };
       } catch (e) {
@@ -117,10 +140,38 @@ export function RoomView({ id }: { id: string }) {
       }
     }
 
+    const poll = setInterval(() => {
+      if (
+        !alive ||
+        connectedRef.current ||
+        document.visibilityState !== "visible"
+      )
+        return;
+      void Promise.all([
+        reloadRoom(),
+        api<Message[]>(`/study-rooms/${id}/messages?page=0`).then(
+          (incoming) => {
+            if (!alive) return;
+            setMessages((current) =>
+              [
+                ...new Map(
+                  [...current, ...incoming].map((m) => [m.id, m]),
+                ).values(),
+              ].sort(
+                (a, b) =>
+                  a.createdAt.localeCompare(b.createdAt) ||
+                  a.id.localeCompare(b.id),
+              ),
+            );
+          },
+        ),
+      ]).catch(() => {});
+    }, 5000);
     void connect();
     return () => {
       alive = false;
       clearInterval(tick);
+      clearInterval(poll);
       clearTimeout(bootstrap);
       if (retry) clearTimeout(retry);
       socketRef.current?.close();
@@ -141,7 +192,11 @@ export function RoomView({ id }: { id: string }) {
       const older = await api<Message[]>(
         `/study-rooms/${id}/messages?page=${next}`,
       );
-      setMessages((current) => [...normalize(older), ...current]);
+      setMessages((current) => [
+        ...new Map(
+          [...normalize(older), ...current].map((m) => [m.id, m]),
+        ).values(),
+      ]);
       setPage(next);
       pageRef.current = next;
       setHasOlder(older.length === 50);
@@ -154,8 +209,9 @@ export function RoomView({ id }: { id: string }) {
 
   async function uploadImage() {
     if (!image) return null;
+    await api("/users/me");
     const form = new FormData();
-    form.set("file", image);
+    form.set("file", await prepareChatImage(image));
     const response = await fetch(
       `/api/backend/study-rooms/${id}/messages/attachments`,
       { method: "POST", body: form, signal: AbortSignal.timeout(45000) },
@@ -169,7 +225,7 @@ export function RoomView({ id }: { id: string }) {
 
   async function send(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!draft.trim() && !image) return;
+    if (busy || (!draft.trim() && !image)) return;
     setBusy(true);
     setError("");
     try {
@@ -198,7 +254,7 @@ export function RoomView({ id }: { id: string }) {
     try {
       await post(`/study-rooms/${id}/end`);
       await reloadRoom();
-      setMessages([]);
+      await loadMessages();
     } catch (e) {
       setError((e as Error).message);
     }
@@ -265,7 +321,8 @@ export function RoomView({ id }: { id: string }) {
                 </span>
                 <span>
                   <Users size={16} />
-                  {room.members?.filter((m) => !m.leftAt).length ?? 0} participantes
+                  {room.members?.filter((m) => !m.leftAt).length ?? 0}{" "}
+                  participantes
                 </span>
                 {room.hostId === me?.id && !ended ? (
                   <button className="secondary" onClick={end}>
@@ -281,8 +338,8 @@ export function RoomView({ id }: { id: string }) {
                 <div>
                   <strong>Você entrou depois que esta turma começou.</strong>
                   <span>
-                    O histórico temporário da sessão está disponível e a IA pode
-                    explicar o contexto anterior.
+                    O histórico da sessão está disponível e a IA pode explicar o
+                    contexto anterior.
                   </span>
                 </div>
                 <button onClick={() => setSection("ai")}>
@@ -291,7 +348,13 @@ export function RoomView({ id }: { id: string }) {
               </div>
             ) : null}
 
-            <div className={section === "call" ? "study-room-shell call-active" : "study-room-shell"}>
+            <div
+              className={
+                section === "call"
+                  ? "study-room-shell call-active"
+                  : "study-room-shell"
+              }
+            >
               <nav className="room-channel-nav" aria-label="Áreas da turma">
                 <div className="room-channel-title">
                   <strong>Sua turma</strong>
@@ -328,13 +391,19 @@ export function RoomView({ id }: { id: string }) {
                 <div className="room-channel-note">
                   <MessageCircle size={17} />
                   <span>
-                    O chat existe durante a sessão. Ao encerrar, mensagens,
-                    reações e imagens brutas são eliminadas.
+                    Mensagens, reações e imagens ficam disponíveis aos
+                    participantes, inclusive após encerrar a sessão.
                   </span>
                 </div>
               </nav>
 
-              <main className={section === "call" ? "room-main-panel call-mode" : "room-main-panel"}>
+              <main
+                className={
+                  section === "call"
+                    ? "room-main-panel call-mode"
+                    : "room-main-panel"
+                }
+              >
                 {section === "chat" ? <RoomChat {...chatProps} /> : null}
 
                 {section === "call" ? (
@@ -351,73 +420,76 @@ export function RoomView({ id }: { id: string }) {
                 ) : null}
               </main>
 
-              {section !== "call" ? <aside className="room-members-panel">
-                <div className="participants-heading">
-                  <h2>Participantes</h2>
-                  <span>{room.members?.length ?? 0}</span>
-                </div>
-
-                {room.members?.map((member) => (
-                  <div
-                    key={member.userId}
-                    className={`participant-row ${member.leftAt ? "offline" : ""}`}
-                  >
-                    <div className="participant-avatar">
-                      {member.name.slice(0, 2).toUpperCase()}
-                    </div>
-                    <span>
-                      <strong>{member.name}</strong>
-                      <small>
-                        {member.role === "HOST"
-                          ? "Anfitrião"
-                          : member.leftAt
-                            ? "Saiu da sessão"
-                            : "Estudante"}
-                      </small>
-                    </span>
-
-                    {me?.id === room.hostId &&
-                    member.userId !== me.id &&
-                    !ended &&
-                    !member.leftAt ? (
-                      <button
-                        className="icon-control"
-                        aria-label={`Opções de ${member.name}`}
-                        title="Remover participante"
-                        onClick={async () => {
-                          try {
-                            await api(
-                              `/study-rooms/${id}/participants/${member.userId}`,
-                              { method: "DELETE" },
-                            );
-                            await reloadRoom();
-                          } catch (e) {
-                            setError((e as Error).message);
-                          }
-                        }}
-                      >
-                        <MoreHorizontal size={17} />
-                      </button>
-                    ) : null}
+              {section !== "call" ? (
+                <aside className="room-members-panel">
+                  <div className="participants-heading">
+                    <h2>Participantes</h2>
+                    <span>{room.members?.length ?? 0}</span>
                   </div>
-                ))}
 
-                {!ended ? (
-                  <button
-                    className="text-button leave-room"
-                    onClick={async () => {
-                      try {
-                        await post(`/study-rooms/${id}/leave`);
-                        router.push("/home");
-                      } catch (e) {
-                        setError((e as Error).message);
-                      }
-                    }}
-                  >
-                    Sair da turma
-                  </button>
-                ) : null}
-              </aside> : null}
+                  {room.members?.map((member) => (
+                    <div
+                      key={member.userId}
+                      className={`participant-row ${member.leftAt ? "offline" : ""}`}
+                    >
+                      <UserIdentity
+                        compact
+                        user={{ ...member, id: member.userId }}
+                      />
+                      <span>
+                        <strong>{member.name}</strong>
+                        <small>
+                          {member.role === "HOST"
+                            ? "Anfitrião"
+                            : member.leftAt
+                              ? "Saiu da sessão"
+                              : "Estudante"}
+                        </small>
+                      </span>
+
+                      {me?.id === room.hostId &&
+                      member.userId !== me.id &&
+                      !ended &&
+                      !member.leftAt ? (
+                        <button
+                          className="icon-control"
+                          aria-label={`Opções de ${member.name}`}
+                          title="Remover participante"
+                          onClick={async () => {
+                            try {
+                              await api(
+                                `/study-rooms/${id}/participants/${member.userId}`,
+                                { method: "DELETE" },
+                              );
+                              await reloadRoom();
+                            } catch (e) {
+                              setError((e as Error).message);
+                            }
+                          }}
+                        >
+                          <MoreHorizontal size={17} />
+                        </button>
+                      ) : null}
+                    </div>
+                  ))}
+
+                  {!ended ? (
+                    <button
+                      className="text-button leave-room"
+                      onClick={async () => {
+                        try {
+                          await post(`/study-rooms/${id}/leave`);
+                          router.push("/home");
+                        } catch (e) {
+                          setError((e as Error).message);
+                        }
+                      }}
+                    >
+                      Sair da turma
+                    </button>
+                  ) : null}
+                </aside>
+              ) : null}
             </div>
 
             <nav className="room-mobile-nav" aria-label="Navegação da turma">

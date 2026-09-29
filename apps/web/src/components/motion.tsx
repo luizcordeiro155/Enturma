@@ -5,7 +5,11 @@ export function Motion() {
   const path = usePathname();
   useEffect(() => {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (reduced.matches) return;
+    if (
+      reduced.matches ||
+      document.documentElement.dataset.reducedMotion === "true"
+    )
+      return;
     const animations = new Set<Animation>();
     const seen = new WeakSet<Element>();
     const observer = new IntersectionObserver(
@@ -13,7 +17,11 @@ export function Motion() {
         entries.forEach(({ target, isIntersecting }) => {
           if (!isIntersecting) return;
           observer.unobserve(target);
-          if (reduced.matches) return;
+          if (
+            reduced.matches ||
+            document.documentElement.dataset.reducedMotion === "true"
+          )
+            return;
           const a = target.animate(
             [
               { opacity: 0.35, transform: "translateY(12px)" },
@@ -43,7 +51,11 @@ export function Motion() {
     const mutations = new MutationObserver(scan);
     mutations.observe(document.body, { subtree: true, childList: true });
     function tap(e: PointerEvent) {
-      if (reduced.matches) return;
+      if (
+        reduced.matches ||
+        document.documentElement.dataset.reducedMotion === "true"
+      )
+        return;
       const button = (e.target as Element).closest("button,.button");
       if (!button || button.matches(":disabled")) return;
       const a = button.animate(
@@ -54,15 +66,21 @@ export function Motion() {
       a.onfinish = () => animations.delete(a);
     }
     function preference() {
-      if (reduced.matches) animations.forEach((a) => a.cancel());
+      if (
+        reduced.matches ||
+        document.documentElement.dataset.reducedMotion === "true"
+      )
+        animations.forEach((a) => a.cancel());
     }
     document.addEventListener("pointerup", tap);
     reduced.addEventListener("change", preference);
+    window.addEventListener("enturma-motion", preference);
     return () => {
       observer.disconnect();
       mutations.disconnect();
       document.removeEventListener("pointerup", tap);
       reduced.removeEventListener("change", preference);
+      window.removeEventListener("enturma-motion", preference);
       animations.forEach((a) => a.cancel());
     };
   }, [path]);

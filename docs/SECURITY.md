@@ -11,13 +11,9 @@ Este repositório não representa certificação de segurança ou conformidade L
 Bloqueios/denúncias têm API e aplicação nas interações suportadas. A interface completa de moderação e resolução de denúncias ainda está pendente. Para relatar vulnerabilidade, não publique tokens ou dados pessoais em issues públicas; combine um canal privado com o mantenedor.
 
 
-## Chat privado e conteúdo efêmero
+## Chat e retenção
 
-O chat Web não persiste conversas. Texto, imagens, respostas e reações são cifrados no cliente com AES-GCM; a chave da sala é distribuída entre participantes com ECDH P-256. O backend atua como relay autenticado e não recebe a chave privada dos clientes nem a chave simétrica em claro.
-
-A migration V9 remove o histórico legado armazenado no PostgreSQL. Não adicionar bodies de chat a logs, analytics, auditoria ou tracing.
-
-A criptografia de chat não torna o cliente Web imutável. Um operador capaz de alterar o JavaScript servido poderia tentar publicar uma versão maliciosa. A documentação e a interface não devem prometer segurança absoluta além do modelo implementado.
+O fluxo atual persiste conversas e anexos com autorização por sala. HTTPS/WSS protege o transporte; não é E2EE. Não registrar conteúdo em logs ou analytics. Consultar [CHAT_PRIVACY](CHAT_PRIVACY.md) para armazenamento e acesso pela IA.
 
 ## Proteções de autenticação
 

@@ -7,7 +7,6 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.regex.Matcher;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -18,12 +17,28 @@ public class AdvancedLearningController {
   private final Db db;
   private final LearningController access;
 
-  private static final Map<Integer, List<String>> WORDS = Map.of(
-      1, List.of("CACHE","ARRAY","CLOUD","STACK","TOKEN","CLASS","REACT","LINUX"),
-      2, List.of("REDIS","NGINX","REGEX","BYTES","ASYNC","PROXY","QUEUE","MUTEX"),
-      3, List.of("KAFKA","SOCKET","MALLOC","SCHEMA","KERNEL","BRANCH","BINARY","THREAD"),
-      4, List.of("LAMBDA","SHARDING","WEBHOOK","SERIALIZE","DEADLOCK","RECURSION","INDEXING","PIPELINE"),
-      5, List.of("IDEMPOTENT","BACKPRESSURE","CONSISTENCY","MEMOIZATION","POLYMORPHISM","OBSERVABILITY","ORCHESTRATOR","SERIALIZABLE"));
+  private static final Map<Integer, List<String>> WORDS =
+      Map.of(
+          1,
+              List.of(
+                  "CACHE ARRAY CLOUD STACK TOKEN CLASS REACT LINUX HTML JAVA JSON LOOP NODE HEAP HASH BYTE PORT LINK CODE DATA BOOL CHAR FLOAT INPUT PRINT WHILE BREAK CONST EVENT INDEX QUERY TABLE FIELD VALUE ROUTE MODEL VIEWS STYLE CLICK DEBUG PATCH MERGE CLONE FETCH PUSH PULL SORT TREE LIST FILE PATH SHELL SCRIPT STRING RETURN SWITCH OBJECT METHOD PYTHON DOCKER SERVER CLIENT"
+                      .split(" ")),
+          2,
+              List.of(
+                  "REDIS NGINX REGEX BYTES ASYNC PROXY QUEUE MUTEX UNION JOINS WHERE LIMIT GROUP ORDER COUNT CROSS INNER OUTER DISTINCT SELECT INSERT UPDATE DELETE COMMIT REBASE BRANCH REMOTE ORIGIN STREAM SOCKET SCHEMA KERNEL THREAD BUFFER PROMISE CLOSURE MODULE EXPORT IMPORT BUNDLE CHUNKS WEBPACK COMPILER RUNTIME ADAPTER BUILDER FACTORY OBSERVER HANDLER PAYLOAD REQUEST RESPONSE SESSION COOKIE HEADER STATUS"
+                      .split(" ")),
+          3,
+              List.of(
+                  "KAFKA MONGO SPARK FLINK INDEX LOCKS SHARD LEASE CRON GRANT REVOKE UPSERT MERGED CURSOR TRIGGER SCALAR VECTOR TENSOR MATRIX EMBED LATENT NEURON EPOCH BATCH GRADIENT ENTROPY SIGMOID SOFTMAX DROPOUT PRUNING LAMBDA FUTURE ACTOR FIBER YIELD SPAWN ATOMIC CASCADE GARBAGE SERIAL PARSER LEXER ASTAR DIJKSTRA BELLMAN KRUSKAL PRIM QUICK SORTING BINARY SEARCH TRAVERSAL"
+                      .split(" ")),
+          4,
+              List.of(
+                  "SHARDING WEBHOOK DEADLOCK PIPELINE INDEXING DISPATCH SNAPSHOT ROLLBACK SAVEPOINT ISOLATION RECURSION MONAD FUNCTOR APPLICATIVE TRAMPOLINE CURRYING CLOSURES TYPECLASS COVARIANT INVARIANT CONSTRAINT INFERENCE GENERICS OVERLOAD OVERRIDE SERIALIZE DESERIALIZE CHECKSUM MERKLE BLOOM HYPERLOGLOG CONSENSUS QUORUM PAXOS RAFT GOSSIP VECTORCLOCK TOMBSTONE COMPACTION PARTITION REPLICATION FAILOVER SEMAPHORE SPINLOCK LOCKFREE WAITFREE"
+                      .split(" ")),
+          5,
+              List.of(
+                  "IDEMPOTENT BACKPRESSURE CONSISTENCY MEMOIZATION POLYMORPHISM OBSERVABILITY ORCHESTRATOR SERIALIZABLE LINEARIZABLE COMMUTATIVITY ASSOCIATIVITY DISTRIBUTIVITY HOMOMORPHISM ISOMORPHISM CONTINUATION COROUTINE COINDUCTION BISECTION BISIMULATION INVARIANCE CONTRAVARIANT METAPROGRAMMING INTROSPECTION REFLECTION REIFICATION DEFUNCTOR FUNCTIONAL REFERENTIAL TRANSPARENCY DETERMINISM NONDETERMINISM SYNCHRONIZATION LAMPORT BYZANTINE CONVERGENCE COMMUTATIVE IDEMPOTENCE CRYPTOGRAPHY AUTHENTICATION AUTHORIZATION CAPABILITY SANDBOXING HYPERVISOR VIRTUALIZATION SPECULATION PREFETCHING VECTORIZATION PARALLELISM DISTRIBUTED TRANSACTIONAL"
+                      .split(" ")));
 
   public AdvancedLearningController(Db db, LearningController access) {
     this.db = db;
@@ -32,9 +47,11 @@ public class AdvancedLearningController {
 
   private void require(Actor a) {
     if (!access.eligible(a))
-      throw new ApiException(403, "LEARNING_NOT_AVAILABLE", "Os jogos são liberados para estudantes de TI.");
+      throw new ApiException(
+          403, "LEARNING_NOT_AVAILABLE", "Os jogos são liberados para estudantes de TI.");
   }
 
+  @Transactional
   @GetMapping("/words/challenge")
   public Object wordChallenge(
       @AuthenticationPrincipal Actor a,
@@ -44,19 +61,60 @@ public class AdvancedLearningController {
     require(a);
     String normalizedMode = normalizeMode(mode);
     int d = Math.clamp(difficulty, 1, 5);
-    String seed = (daily ? LocalDate.now(ZoneOffset.UTC).toString() : "practice")
-        + ":" + normalizedMode + ":" + d;
+    String seed =
+        (daily ? LocalDate.now(ZoneOffset.UTC).toString() : "practice-" + UUID.randomUUID())
+            + ":"
+            + normalizedMode
+            + ":"
+            + d;
+    db.jdbc.update(
+        "INSERT INTO word_game_session(user_id,challenge_key,mode,difficulty,daily) VALUES"
+            + " (?,?,?,?,?) ON CONFLICT DO NOTHING",
+        a.id(),
+        seed,
+        normalizedMode,
+        d,
+        daily);
     var targets = targets(seed, normalizedMode, d);
     int maxAttempts = normalizedMode.equals("QUARTET") ? 11 : normalizedMode.equals("DUET") ? 8 : 6;
-    return Map.of(
-        "challengeKey", seed,
-        "mode", normalizedMode,
-        "difficulty", d,
-        "boards", targets.size(),
-        "wordLength", targets.getFirst().length(),
-        "maxAttempts", maxAttempts,
-        "daily", daily,
-        "category", "Programação e tecnologia");
+    var response =
+        new LinkedHashMap<String, Object>(
+            Map.of(
+                "challengeKey", seed,
+                "mode", normalizedMode,
+                "difficulty", d,
+                "boards", targets.size(),
+                "wordLength", targets.getFirst().length(),
+                "maxAttempts", maxAttempts,
+                "daily", daily,
+                "category", "Programação e tecnologia"));
+    var previous =
+        db.jdbc.queryForList(
+            "SELECT unnest(guesses) FROM word_game_session WHERE user_id=? AND challenge_key=?",
+            String.class,
+            a.id(),
+            seed);
+    response.put(
+        "history",
+        previous.stream()
+            .map(
+                g ->
+                    Map.of(
+                        "word",
+                        g,
+                        "boards",
+                        targets.stream()
+                            .map(t -> Map.of("marks", marks(t, g), "solved", previous.contains(t)))
+                            .toList()))
+            .toList());
+    response.put(
+        "finished",
+        db.one(
+                "SELECT finished FROM word_game_session WHERE user_id=? AND challenge_key=?",
+                a.id(),
+                seed)
+            .get("finished"));
+    return response;
   }
 
   public record WordAttempt(
@@ -75,21 +133,45 @@ public class AdvancedLearningController {
     require(a);
     String mode = normalizeMode(r.mode());
     int d = Math.clamp(r.difficulty(), 1, 5);
-    String expectedPrefix = r.daily() ? LocalDate.now(ZoneOffset.UTC).toString() : "practice";
-    String expectedKey = expectedPrefix + ":" + mode + ":" + d;
-    if (!expectedKey.equals(r.challengeKey())) throw ApiException.invalid("Desafio expirado. Atualize a página.");
-
+    var session =
+        db.one(
+            "SELECT * FROM word_game_session WHERE user_id=? AND challenge_key=? FOR UPDATE",
+            a.id(),
+            r.challengeKey());
+    if (!mode.equals(session.get("mode"))
+        || d != ((Number) session.get("difficulty")).intValue()
+        || r.daily() != (Boolean) session.get("daily"))
+      throw ApiException.invalid("Desafio inválido.");
+    if (Boolean.TRUE.equals(session.get("finished")))
+      throw ApiException.invalid("Esta rodada já terminou. Inicie outra rodada.");
+    String expectedKey = r.challengeKey();
+    if (r.daily() && !expectedKey.startsWith(LocalDate.now(ZoneOffset.UTC).toString()))
+      throw ApiException.invalid("Desafio diário expirado.");
     var targets = targets(expectedKey, mode, d);
     String guess = normalizeWord(r.guess());
     if (guess.length() != targets.getFirst().length())
-      throw ApiException.invalid("A palavra precisa ter " + targets.getFirst().length() + " letras.");
-
-    Set<String> played = new HashSet<>();
-    if (r.guesses() != null)
-      for (String previous : r.guesses()) played.add(normalizeWord(previous));
+      throw ApiException.invalid(
+          "A palavra precisa ter " + targets.getFirst().length() + " letras.");
+    if (WORDS.values().stream().flatMap(List::stream).noneMatch(guess::equals))
+      throw ApiException.invalid("Use um termo do vocabulário de programação.");
+    List<String> previous =
+        db.jdbc.queryForList(
+            "SELECT unnest(guesses) FROM word_game_session WHERE user_id=? AND challenge_key=?",
+            String.class,
+            a.id(),
+            expectedKey);
+    if (previous.contains(guess)) throw ApiException.invalid("Você já tentou esta palavra.");
+    Set<String> played = new HashSet<>(previous);
     played.add(guess);
+    int attempt = previous.size() + 1;
+    db.jdbc.update(
+        "UPDATE word_game_session SET guesses=array_append(guesses,?) WHERE user_id=? AND"
+            + " challenge_key=?",
+        guess,
+        a.id(),
+        expectedKey);
 
-    List<Map<String,Object>> boards = new ArrayList<>();
+    List<Map<String, Object>> boards = new ArrayList<>();
     boolean completed = true;
     for (String target : targets) {
       boolean solved = played.contains(target);
@@ -97,70 +179,136 @@ public class AdvancedLearningController {
       boards.add(Map.of("marks", marks(target, guess), "solved", solved));
     }
     int maxAttempts = mode.equals("QUARTET") ? 11 : mode.equals("DUET") ? 8 : 6;
-    boolean finished = completed || r.attempt() >= maxAttempts;
+    boolean finished = completed || attempt >= maxAttempts;
 
     if (finished) {
       db.jdbc.update(
-          "INSERT INTO word_game_result(id,user_id,challenge_key,mode,difficulty,attempts,won,daily,duration_ms)"
+          "UPDATE word_game_session SET finished=true WHERE user_id=? AND challenge_key=?",
+          a.id(),
+          expectedKey);
+      db.jdbc.update(
+          "INSERT INTO"
+              + " word_game_result(id,user_id,challenge_key,mode,difficulty,attempts,won,daily,duration_ms)"
               + " VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(user_id,challenge_key) DO UPDATE SET"
-              + " attempts=LEAST(word_game_result.attempts,EXCLUDED.attempts),won=word_game_result.won OR EXCLUDED.won,"
-              + " duration_ms=CASE WHEN EXCLUDED.won THEN EXCLUDED.duration_ms ELSE word_game_result.duration_ms END",
-          UUID.randomUUID(), a.id(), expectedKey, mode, d, r.attempt(), completed, r.daily(), r.durationMs());
+              + " attempts=LEAST(word_game_result.attempts,EXCLUDED.attempts),won=word_game_result.won"
+              + " OR EXCLUDED.won, duration_ms=CASE WHEN EXCLUDED.won THEN EXCLUDED.duration_ms"
+              + " ELSE word_game_result.duration_ms END",
+          UUID.randomUUID(),
+          a.id(),
+          expectedKey,
+          mode,
+          d,
+          attempt,
+          completed,
+          r.daily(),
+          r.durationMs());
       if (r.daily()) {
         db.jdbc.update(
-            "INSERT INTO daily_word_progress(user_id,challenge_date,mode,difficulty,attempts,completed,completed_at)"
-                + " VALUES (?,?,?,?,?,?,CASE WHEN ? THEN now() END) ON CONFLICT(user_id,challenge_date,mode)"
-                + " DO UPDATE SET attempts=EXCLUDED.attempts,completed=daily_word_progress.completed OR EXCLUDED.completed,"
+            "INSERT INTO"
+                + " daily_word_progress(user_id,challenge_date,mode,difficulty,attempts,completed,completed_at)"
+                + " VALUES (?,?,?,?,?,?,CASE WHEN ? THEN now() END) ON"
+                + " CONFLICT(user_id,challenge_date,mode) DO UPDATE SET"
+                + " attempts=EXCLUDED.attempts,completed=daily_word_progress.completed OR"
+                + " EXCLUDED.completed,"
                 + " completed_at=coalesce(daily_word_progress.completed_at,EXCLUDED.completed_at)",
-            a.id(), LocalDate.now(ZoneOffset.UTC), mode, d, r.attempt(), completed, completed);
+            a.id(),
+            LocalDate.now(ZoneOffset.UTC),
+            mode,
+            d,
+            attempt,
+            completed,
+            completed);
       }
       if (completed) {
-        awardXp(a.id(), "word:" + expectedKey, 25 + d * 10 + (mode.equals("QUARTET") ? 30 : mode.equals("DUET") ? 15 : 0));
+        awardXp(
+            a.id(),
+            "word:" + expectedKey,
+            25 + d * 10 + (mode.equals("QUARTET") ? 30 : mode.equals("DUET") ? 15 : 0));
         touchStreak(a.id());
       }
     }
 
-    return Map.of(
-        "boards", boards,
-        "completed", completed,
-        "finished", finished,
-        "attempt", r.attempt(),
-        "maxAttempts", maxAttempts,
-        "message", completed ? "Desafio concluído!" : finished ? "Fim da rodada. Tente um novo desafio." : "Continue investigando.");
+    var response =
+        new LinkedHashMap<String, Object>(
+            Map.of(
+                "boards", boards,
+                "completed", completed,
+                "finished", finished,
+                "attempt", attempt,
+                "maxAttempts", maxAttempts,
+                "message",
+                    completed
+                        ? "Desafio concluído!"
+                        : finished
+                            ? "Fim da rodada. Tente um novo desafio."
+                            : "Continue investigando."));
+    if (finished) response.put("answers", targets);
+    return response;
   }
 
   @GetMapping("/words/stats")
   public Object wordStats(@AuthenticationPrincipal Actor a) {
     require(a);
     return db.one(
-        "SELECT count(*) games,count(*) FILTER(WHERE won) wins,coalesce(avg(attempts) FILTER(WHERE won),0) average_attempts,"
-            + " coalesce(max(difficulty) FILTER(WHERE won),0) max_difficulty FROM word_game_result WHERE user_id=?",
+        "SELECT count(*) games,count(*) FILTER(WHERE won) wins,coalesce(avg(attempts) FILTER(WHERE"
+            + " won),0) average_attempts, coalesce(max(difficulty) FILTER(WHERE won),0)"
+            + " max_difficulty FROM word_game_result WHERE user_id=?",
         a.id());
   }
 
   public record AlgorithmAttempt(
-      @Min(1) @Max(6) int level,
+      @Min(1) @Max(100000) int level,
       @NotBlank @Size(max = 6000) String code,
       @Min(1) @Max(100) int attempts,
       @Min(0) int durationMs) {}
 
   @PostMapping("/algorithm/evaluate")
   @Transactional
-  public Object algorithm(@AuthenticationPrincipal Actor a, @Valid @RequestBody AlgorithmAttempt r) {
+  public Object algorithm(
+      @AuthenticationPrincipal Actor a, @Valid @RequestBody AlgorithmAttempt r) {
     require(a);
-    var result = simulate(r.code(), r.level());
+    var result = AlgorithmEngine.evaluate(r.code(), r.level());
     if (result.won()) {
-      int stars = result.commands() <= optimal(r.level()) ? 3
-          : result.commands() <= optimal(r.level()) + 5 ? 2 : 1;
+      int stars =
+          result.commands() <= optimal(r.level())
+              ? 3
+              : result.commands() <= optimal(r.level()) + 5 ? 2 : 1;
       db.jdbc.update(
-          "INSERT INTO algorithm_game_result(id,user_id,level,command_count,attempts,duration_ms,stars)"
+          "INSERT INTO"
+              + " algorithm_game_result(id,user_id,level,command_count,attempts,duration_ms,stars)"
               + " VALUES (?,?,?,?,?,?,?)",
-          UUID.randomUUID(), a.id(), r.level(), result.commands(), r.attempts(), r.durationMs(), stars);
-      awardXp(a.id(), "algorithm:" + r.level(), 35 + r.level() * 8);
+          UUID.randomUUID(),
+          a.id(),
+          r.level(),
+          result.commands(),
+          r.attempts(),
+          r.durationMs(),
+          stars);
+      awardXp(a.id(), "algorithm:" + r.level(), 35 + Math.min(r.level(), 20) * 8);
       touchStreak(a.id());
-      return Map.of("won", true, "stars", stars, "commands", result.commands(), "frames", result.frames(), "message", "Algoritmo concluído.");
+      return Map.of(
+          "won",
+          true,
+          "stars",
+          stars,
+          "commands",
+          result.commands(),
+          "frames",
+          result.frames(),
+          "message",
+          "Algoritmo concluído.");
     }
-    return Map.of("won", false, "stars", 0, "commands", result.commands(), "frames", result.frames(), "message", result.message());
+    return Map.of(
+        "won",
+        false,
+        "stars",
+        0,
+        "commands",
+        result.commands(),
+        "frames",
+        result.frames(),
+        "message",
+        result.message());
   }
 
   @GetMapping("/binary/challenge")
@@ -189,7 +337,8 @@ public class AdvancedLearningController {
 
   @PostMapping("/binary/attempt")
   @Transactional
-  public Object binaryAttempt(@AuthenticationPrincipal Actor a, @Valid @RequestBody BinaryAttempt r) {
+  public Object binaryAttempt(
+      @AuthenticationPrincipal Actor a, @Valid @RequestBody BinaryAttempt r) {
     require(a);
     var challenge = binaryFor(a.id());
     if (!challenge.key().equals(r.challengeKey()))
@@ -202,10 +351,7 @@ public class AdvancedLearningController {
     int xp = 0;
     if (correct && !challenge.completedToday()) {
       int reward = 40 + Math.min(challenge.dayLevel(), 30) * 3;
-      xp = awardXp(
-          a.id(),
-          "binary-daily:" + LocalDate.now(ZoneOffset.UTC),
-          reward);
+      xp = awardXp(a.id(), "binary-daily:" + LocalDate.now(ZoneOffset.UTC), reward);
       touchStreak(a.id());
     }
 
@@ -240,19 +386,22 @@ public class AdvancedLearningController {
   private BinaryChallenge binaryFor(UUID user) {
     LocalDate today = LocalDate.now(ZoneOffset.UTC);
     String eventKey = "binary-daily:" + today;
-    boolean completedToday = db.exists(
-        "SELECT EXISTS(SELECT 1 FROM learning_xp_event WHERE user_id=? AND event_key=?)",
-        user,
-        eventKey);
-    Integer count = db.jdbc.queryForObject(
-        "SELECT count(*) FROM learning_xp_event WHERE user_id=? AND event_key LIKE 'binary-daily:%'",
-        Integer.class,
-        user);
+    boolean completedToday =
+        db.exists(
+            "SELECT EXISTS(SELECT 1 FROM learning_xp_event WHERE user_id=? AND event_key=?)",
+            user,
+            eventKey);
+    Integer count =
+        db.jdbc.queryForObject(
+            "SELECT count(*) FROM learning_xp_event WHERE user_id=? AND event_key LIKE"
+                + " 'binary-daily:%'",
+            Integer.class, user);
     int completedDays = count == null ? 0 : count;
     int dayLevel = completedToday ? Math.max(1, completedDays) : completedDays + 1;
     int bitWidth = Math.min(12, 3 + dayLevel);
     int mask = (1 << bitWidth) - 1;
-    Random random = new Random(Objects.hash(today.toString(), user.toString(), dayLevel, "enturma-binary"));
+    Random random =
+        new Random(Objects.hash(today.toString(), user.toString(), dayLevel, "enturma-binary"));
 
     String operation;
     String prompt;
@@ -331,8 +480,10 @@ public class AdvancedLearningController {
       }
       operation = "PIPELINE";
       prompt = "Resolva a expressão em etapas e monte o resultado final.";
-      hint = "Trabalhe da esquerda para a direita respeitando os parênteses. O circuito mantém apenas "
-          + bitWidth + " bits.";
+      hint =
+          "Trabalhe da esquerda para a direita respeitando os parênteses. O circuito mantém apenas "
+              + bitWidth
+              + " bits.";
       expression = expr.toString();
       expected = value;
     }
@@ -363,77 +514,32 @@ public class AdvancedLearningController {
     return "0".repeat(Math.max(0, bits - raw.length())) + raw;
   }
 
-  private record Simulation(boolean won, int commands, List<Map<String,Integer>> frames, String message) {}
-
-  private Simulation simulate(String raw, int level) {
-    String code = raw.replaceAll("//.*", "").trim();
-    if (level >= 2 && !code.matches("(?s).*(if|switch|for|while|repeat\\s*\\().*"))
-      return new Simulation(false, 0, List.of(), "Este nível exige uma estrutura de controle.");
-    if (level >= 4 && !code.matches("(?s).*(function|const\\s+\\w+\\s*=\\s*\\(|=>).*"))
-      return new Simulation(false, 0, List.of(), "Este nível exige criar ou reutilizar uma função.");
-
-    List<String> commands = new ArrayList<>();
-    java.util.regex.Pattern repeat = java.util.regex.Pattern.compile(
-        "repeat\\s*\\(\\s*(\\d{1,2})\\s*,\\s*(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\)",
-        java.util.regex.Pattern.CASE_INSENSITIVE);
-    Matcher rm = repeat.matcher(code);
-    while (rm.find()) {
-      int n = Math.min(20, Integer.parseInt(rm.group(1)));
-      for (int i=0;i<n;i++) commands.add(rm.group(2).toLowerCase(Locale.ROOT));
-    }
-    Matcher direct = java.util.regex.Pattern.compile(
-        "(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\(\\s*\\)",
-        java.util.regex.Pattern.CASE_INSENSITIVE).matcher(code);
-    while (direct.find()) commands.add(direct.group(1).toLowerCase(Locale.ROOT));
-    if (commands.isEmpty()) return new Simulation(false, 0, List.of(), "Nenhum comando de movimento foi encontrado.");
-    if (commands.size() > commandLimit(level))
-      return new Simulation(false, commands.size(), List.of(), "Você usou comandos acima do limite deste nível.");
-
-    int x=0,y=0,dir=1;
-    List<Map<String,Integer>> frames = new ArrayList<>();
-    frames.add(Map.of("x",x,"y",y));
-    Set<Integer> walls = walls(level);
-    int steps=0;
-    for (String cmd : commands) {
-      if (++steps > 120) return new Simulation(false, steps, frames, "Seu algoritmo entrou em loop ou excedeu o limite de execução.");
-      switch (cmd) {
-        case "moveright" -> x++;
-        case "moveleft" -> x--;
-        case "moveup" -> y--;
-        case "movedown" -> y++;
-        case "moveforward" -> {
-          x += new int[]{0,1,0,-1}[dir];
-          y += new int[]{-1,0,1,0}[dir];
-        }
-        default -> {}
-      }
-      if (x<0 || x>5 || y<0 || y>5 || walls.contains(y*6+x)) {
-        frames.add(Map.of("x",Math.clamp(x,0,5),"y",Math.clamp(y,0,5)));
-        return new Simulation(false, commands.size(), frames, "O caminho colidiu com um obstáculo.");
-      }
-      frames.add(Map.of("x",x,"y",y));
-    }
-    boolean won = x==5 && y==5;
-    return new Simulation(won, commands.size(), frames, won ? "" : "Esse caminho não alcança o objetivo.");
+  private int optimal(int level) {
+    return 10;
   }
 
-  private int commandLimit(int level) { return new int[]{18,18,16,14,12,10}[level-1]; }
-  private int optimal(int level) { return new int[]{10,10,10,10,10,10}[level-1]; }
-
-  private Set<Integer> walls(int level) {
-    return switch(level) {
-      case 1 -> Set.of(8,14,20);
-      case 2 -> Set.of(7,8,14,20,26);
-      case 3 -> Set.of(7,13,14,15,21,27);
-      case 4 -> Set.of(2,8,14,20,26,27);
-      case 5 -> Set.of(6,7,13,19,25,31);
-      default -> Set.of(1,7,8,14,20,21,27,33);
-    };
+  @GetMapping("/algorithm/challenge")
+  public Object algorithmChallenge(
+      @AuthenticationPrincipal Actor a, @RequestParam(defaultValue = "1") int level) {
+    require(a);
+    if (level < 1 || level > 100000) throw ApiException.invalid("Nível inválido.");
+    return Map.of(
+        "level",
+        level,
+        "walls",
+        AlgorithmEngine.walls(level),
+        "size",
+        6,
+        "goal",
+        35,
+        "maxMoves",
+        100);
   }
 
   private String normalizeMode(String mode) {
     String value = mode == null ? "SOLO" : mode.toUpperCase(Locale.ROOT);
-    if (!Set.of("SOLO","DUET","QUARTET").contains(value)) throw ApiException.invalid("Modo inválido.");
+    if (!Set.of("SOLO", "DUET", "QUARTET").contains(value))
+      throw ApiException.invalid("Modo inválido.");
     return value;
   }
 
@@ -450,10 +556,9 @@ public class AdvancedLearningController {
     List<List<String>> eligible =
         byLength.values().stream().filter(group -> group.size() >= count).toList();
     if (eligible.isEmpty()) throw new IllegalStateException("Banco de palavras insuficiente.");
-    List<String> compatible =
-        eligible.get(Math.floorMod(seed.hashCode(), eligible.size()));
+    List<String> compatible = eligible.get(Math.floorMod(seed.hashCode(), eligible.size()));
     List<String> ordered = new ArrayList<>(compatible);
-    Collections.rotate(ordered, Math.floorMod(Objects.hash(seed, difficulty), ordered.size()));
+    Collections.shuffle(ordered, new Random(Objects.hash(seed, difficulty)));
     return new ArrayList<>(ordered.subList(0, count));
   }
 
@@ -461,15 +566,15 @@ public class AdvancedLearningController {
     char[] out = new char[target.length()];
     int[] remaining = new int[26];
     Arrays.fill(out, 'A');
-    for (int i=0;i<target.length();i++) {
-      if (guess.charAt(i)==target.charAt(i)) out[i]='C';
-      else remaining[target.charAt(i)-'A']++;
+    for (int i = 0; i < target.length(); i++) {
+      if (guess.charAt(i) == target.charAt(i)) out[i] = 'C';
+      else remaining[target.charAt(i) - 'A']++;
     }
-    for (int i=0;i<target.length();i++) {
-      if (out[i]=='C') continue;
-      int index=guess.charAt(i)-'A';
-      if (index>=0 && index<26 && remaining[index]>0) {
-        out[i]='P';
+    for (int i = 0; i < target.length(); i++) {
+      if (out[i] == 'C') continue;
+      int index = guess.charAt(i) - 'A';
+      if (index >= 0 && index < 26 && remaining[index] > 0) {
+        out[i] = 'P';
         remaining[index]--;
       }
     }
@@ -478,10 +583,15 @@ public class AdvancedLearningController {
 
   private int awardXp(UUID user, String key, int amount) {
     db.jdbc.update("INSERT INTO learning_stats(user_id) VALUES (?) ON CONFLICT DO NOTHING", user);
-    int inserted = db.jdbc.update(
-        "INSERT INTO learning_xp_event(id,user_id,event_key,amount,reason) VALUES (?,?,?,?,?)"
-            + " ON CONFLICT(user_id,event_key) DO NOTHING",
-        UUID.randomUUID(), user, key, amount, "ADVANCED_GAME");
+    int inserted =
+        db.jdbc.update(
+            "INSERT INTO learning_xp_event(id,user_id,event_key,amount,reason) VALUES (?,?,?,?,?)"
+                + " ON CONFLICT(user_id,event_key) DO NOTHING",
+            UUID.randomUUID(),
+            user,
+            key,
+            amount,
+            "ADVANCED_GAME");
     if (inserted == 1)
       db.jdbc.update(
           "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
@@ -493,9 +603,10 @@ public class AdvancedLearningController {
   private void touchStreak(UUID user) {
     db.jdbc.update("INSERT INTO learning_stats(user_id) VALUES (?) ON CONFLICT DO NOTHING", user);
     LocalDate today = LocalDate.now(ZoneOffset.UTC);
-    var stats = db.one(
-        "SELECT current_streak,last_active_date FROM learning_stats WHERE user_id=? FOR UPDATE",
-        user);
+    var stats =
+        db.one(
+            "SELECT current_streak,last_active_date FROM learning_stats WHERE user_id=? FOR UPDATE",
+            user);
     Object rawLast = stats.get("lastActiveDate");
     LocalDate last = rawLast == null ? null : LocalDate.parse(rawLast.toString());
     if (today.equals(last)) return;

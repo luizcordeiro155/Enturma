@@ -57,7 +57,7 @@ async function proxy(
         headers,
         body,
         cache: "no-store",
-        signal: AbortSignal.timeout(route.endsWith("/ai") ? 55000 : 20000),
+        signal: AbortSignal.timeout(route.includes("/ai") ? 90000 : 45000),
       },
     );
     let payload: ReadableStream<Uint8Array> | string | null =

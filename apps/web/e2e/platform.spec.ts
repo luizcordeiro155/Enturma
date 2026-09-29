@@ -24,9 +24,8 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await expect(
     page.getByRole("heading", { name: "Seu próximo estudo" }),
   ).toBeVisible();
-  await expect(page.getByText("Ainda não há salas abertas.")).toBeVisible();
   await page.screenshot({
-    path: "../../docs/design/dashboard-render.png",
+    path: "../../.local/dashboard-render.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -39,7 +38,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     ),
   ).toBe(true);
   await page.screenshot({
-    path: "../../docs/design/mobile-render.png",
+    path: "../../.local/mobile-render.png",
     fullPage: true,
   });
   await page.setViewportSize({ width: 1487, height: 1058 });
@@ -103,10 +102,12 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     "COURSE",
     "CURRICULUM",
     "PERIOD",
-  ])
+  ]) {
+    await page.getByLabel("Buscar no catálogo").fill(tag);
     await page
       .getByRole("button", { name: new RegExp(`TESTE E2E ${kind} ${tag}`) })
       .click();
+  }
   await page.getByLabel(`TESTE E2E SUBJECT ${tag}`).check();
   await page.getByRole("button", { name: "Concluir perfil" }).click();
   await expect(page).toHaveURL(/home/);
@@ -126,6 +127,37 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await expect(
     page.getByText("Mensagem E2E em tempo real", { exact: true }),
   ).toBeVisible();
+  await expect(page.locator(".image-picker input")).toBeEnabled();
+  await page
+    .locator(".image-picker input")
+    .setInputFiles({
+      name: "teste.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jA1sAAAAASUVORK5CYII=",
+        "base64",
+      ),
+    });
+  await page.getByRole("button", { name: "Enviar", exact: true }).click();
+  await expect(page.locator(".chat-image")).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .locator(".chat-image")
+        .evaluate((img: HTMLImageElement) => img.naturalWidth),
+    )
+    .toBeGreaterThan(0);
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "../../.local/room-mobile.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 1487, height: 1058 });
   const second = await request.post(`${backend}/api/v1/auth/register`, {
     data: {
       name: "Colega E2E",
@@ -135,6 +167,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
       device: "E2E",
     },
   });
+  expect(second.ok()).toBe(true);
   const mate = await second.json();
   const mh = { Authorization: `Bearer ${mate.accessToken}` };
   await request.put(`${backend}/api/v1/users/me/enrollment`, {
@@ -167,7 +200,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await peerPage.goto(roomUrl);
   await expect(
     peerPage.getByText("Mensagem E2E em tempo real", { exact: true }),
-  ).toHaveCount(0);
+  ).toBeVisible();
   await page
     .getByLabel("Mensagem", { exact: true })
     .fill("Atualização pelo WebSocket");
@@ -178,11 +211,11 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Encerrar sessão" }).click();
   await expect(
-    page.getByText("Sessão encerrada", { exact: false }),
+    page.getByRole("status").filter({ hasText: "Sessão encerrada" }),
   ).toBeVisible();
   await expect(
     peerPage.getByRole("button", { name: "Enviar", exact: true }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
   await peer.close();
   await page.goto("/caronas/create");
   await page

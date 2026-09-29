@@ -136,7 +136,7 @@ public class RideService {
         "Sua carona foi aceita. Combine o ponto de encontro no chat privado.");
   }
 
-  private Map<String, Object> access(Actor a, UUID id) {
+  public Map<String, Object> access(Actor a, UUID id) {
     var m =
         db.one(
             "SELECT m.*,r.owner_id,r.status ride_status FROM ride_match m JOIN ride r ON"
@@ -151,8 +151,10 @@ public class RideService {
   public Object messages(Actor a, UUID id, int page) {
     access(a, id);
     return db.list(
-        "SELECT m.id,m.body,m.created_at,u.name FROM ride_message m JOIN app_user u ON"
-            + " u.id=m.sender_id WHERE match_id=? ORDER BY created_at DESC,m.id LIMIT 30 OFFSET ?",
+        "SELECT m.id,m.body,m.created_at,m.sender_id"
+            + " user_id,u.name,u.accent_color,u.profile_details,u.avatar_bytes IS NOT NULL"
+            + " has_avatar FROM ride_message m JOIN app_user u ON u.id=m.sender_id WHERE match_id=?"
+            + " ORDER BY created_at DESC,m.id LIMIT 30 OFFSET ?",
         id,
         Db.offset(page));
   }

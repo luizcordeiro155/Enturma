@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class CompatibleAiProvider implements AiProvider {
-  private static final String OPENAI_MODEL = "gpt-5.6-sol";
+  private static final String OPENAI_MODEL = "gpt-4.1-mini";
   private final Environment env;
   private final ObjectMapper json;
   private final HttpClient client;
@@ -29,7 +29,7 @@ public class CompatibleAiProvider implements AiProvider {
   }
 
   private String model() {
-    return OPENAI_MODEL;
+    return env.getProperty("AI_MODEL", OPENAI_MODEL);
   }
 
   public boolean enabled() {
@@ -70,7 +70,9 @@ public class CompatibleAiProvider implements AiProvider {
       payload.put("model", model());
       payload.put("instructions", instructions);
       payload.put("input", input);
-      payload.put("max_output_tokens", Set.of("CATCH_UP","SESSION_REPORT","STUDY_MATERIAL").contains(mode) ? 5200 : 2200);
+      payload.put(
+          "max_output_tokens",
+          Set.of("CATCH_UP", "SESSION_REPORT", "STUDY_MATERIAL").contains(mode) ? 5200 : 2200);
       if (webSearch)
         payload.put(
             "tools",
@@ -79,7 +81,8 @@ public class CompatibleAiProvider implements AiProvider {
                     "type", "web_search",
                     "search_context_size", "medium")));
 
-      String base = env.getProperty("AI_BASE_URL", "https://api.openai.com/v1").replaceAll("/+$", "");
+      String base =
+          env.getProperty("AI_BASE_URL", "https://api.openai.com/v1").replaceAll("/+$", "");
       var request =
           HttpRequest.newBuilder(URI.create(base + "/responses"))
               .timeout(Duration.ofSeconds(webSearch ? 60 : 45))
@@ -89,6 +92,16 @@ public class CompatibleAiProvider implements AiProvider {
               .build();
 
       var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+      if (response.statusCode() == 429)
+        throw new ApiException(
+            429,
+            "AI_PROVIDER_LIMIT",
+            "O serviço de IA atingiu seu limite. Tente novamente mais tarde.");
+      if (response.statusCode() == 401 || response.statusCode() == 403)
+        throw new ApiException(
+            503,
+            "AI_CONFIGURATION",
+            "A credencial da IA precisa ser verificada pelo administrador.");
       if (response.statusCode() < 200 || response.statusCode() >= 300)
         throw new IllegalStateException("OpenAI HTTP " + response.statusCode());
 
@@ -114,8 +127,7 @@ public class CompatibleAiProvider implements AiProvider {
             String key = url + ":" + start + ":" + end;
             if (seen.add(key))
               sources.add(
-                  new ExternalSource(
-                      annotation.path("title").asText(url), url, start, end));
+                  new ExternalSource(annotation.path("title").asText(url), url, start, end));
           }
         }
       }

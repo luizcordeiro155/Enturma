@@ -20,7 +20,7 @@ public class ProfileService {
   public Object me(Actor a) {
     var user =
         db.one(
-            "SELECT id,name,username,email,email_verified,role,bio,accent_color,"
+            "SELECT id,name,username,email,email_verified,role,bio,accent_color,profile_details,"
                 + " avatar_bytes IS NOT NULL has_avatar,banner_bytes IS NOT NULL has_banner"
                 + " FROM app_user WHERE id=?",
             a.id());
@@ -46,7 +46,8 @@ public class ProfileService {
   @Transactional
   public void updateAppearance(Actor a, String name, String bio, String accentColor) {
     String color = accentColor == null ? "#183f36" : accentColor.strip();
-    if (!color.matches("^#[0-9A-Fa-f]{6}$")) throw ApiException.invalid("Cor de destaque inválida.");
+    if (!color.matches("^#[0-9A-Fa-f]{6}$"))
+      throw ApiException.invalid("Cor de destaque inválida.");
     String safeName = name == null ? "" : name.strip();
     if (safeName.length() < 2 || safeName.length() > 100)
       throw ApiException.invalid("Nome deve ter entre 2 e 100 caracteres.");

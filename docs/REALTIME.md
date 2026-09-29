@@ -1,18 +1,10 @@
 # Chat, chamadas e tempo real
 
-## Chat Web: efêmero e E2EE
+## Chat Web persistente
 
-O chat Web de cada sala funciona em `/ws`. O cliente primeiro gera um par ECDH P-256 com Web Crypto e autentica o socket enviando o access token de curta duração, o `roomId` e somente a chave pública. A chave privada nunca é enviada ao backend.
+Mensagens são enviadas via REST autenticado. O WebSocket envia snapshots autorizados para sincronizar participantes; reconexão recupera o histórico no banco. Texto, respostas, imagens e reações não usam E2EE neste fluxo. Ver [privacidade do chat](CHAT_PRIVACY.md).
 
-A primeira pessoa conectada gera uma chave AES-GCM 256-bit da sala. Quando outra pessoa entra, a chave da sala é entregue entre os clientes usando uma chave de wrapping derivada por ECDH. O servidor atua apenas como relay autenticado de chaves públicas, IVs e ciphertexts.
-
-Texto, imagens, respostas, exclusões e reações são cifrados no navegador antes do envio. O backend não recebe a chave AES da sala e não persiste o conteúdo. A migration V9 remove as tabelas legadas de mensagens e reações. Ao atualizar a página ou quando todos os participantes saem, o histórico em memória é perdido por design.
-
-Imagens aceitas no chat Web: JPG, PNG, WEBP e GIF, com limite de 8 MB. Antes do envio o usuário vê uma prévia e pode remover o anexo. A imagem é cifrada no navegador, viaja somente dentro do envelope E2EE e não é enviada ao Object Storage.
-
-O servidor valida associação à sala antes de aceitar o socket, limita payloads e injeta o `senderId` autenticado no envelope externo. O cliente rejeita eventos cujo remetente interno não corresponda ao remetente autenticado.
-
-> Limite importante: numa aplicação Web, quem controla o código entregue pelo site poderia publicar uma versão futura maliciosa do cliente. Portanto, a implementação protege o conteúdo contra banco, logs, admins e infraestrutura que apenas observe o tráfego, mas não deve ser anunciada como garantia absoluta de que um mantenedor jamais poderia alterar o cliente. Consulte [CHAT_PRIVACY](CHAT_PRIVACY.md).
+Encerrar a sala bloqueia envios e preserva as mensagens para participantes. O conteúdo não é apagado quando a IA está indisponível.
 
 ## Chamadas Web
 

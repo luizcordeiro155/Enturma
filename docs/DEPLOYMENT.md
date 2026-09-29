@@ -135,7 +135,7 @@ AI_WEB_SEARCH_ENABLED=true
 AI_BASE_URL=https://api.openai.com/v1
 ```
 
-O modelo `gpt-5.6-sol` é definido diretamente no backend e não exige `OPENAI_MODEL`. `AI_WEB_SEARCH_ENABLED=false` mantém o tutor restrito aos materiais da sala. Quando `true`, o modo Pesquisa usa a ferramenta Web Search da Responses API e exibe as citações retornadas pela OpenAI.
+O modelo padrão é `gpt-4.1-mini`; `AI_MODEL` permite configurá-lo opcionalmente. `AI_WEB_SEARCH_ENABLED=false` mantém o tutor restrito aos materiais da sala. Quando `true`, o modo Pesquisa usa a ferramenta Web Search da Responses API e exibe as citações retornadas pela OpenAI.
 
 Depois de alterar variáveis, reinicie/redeploy a API e confirme `GET /api/v1/capabilities`: `ai=true` e, quando habilitado, `aiWebSearch=true`.
 
@@ -156,6 +156,6 @@ Após o redeploy, `GET /api/v1/capabilities` deve retornar `voice=true`. Teste e
 
 ## 7. Migrações desta atualização
 
-`V8__collaboration_and_learning_xp.sql` adiciona XP, sequência e desafio diário. `V9__drop_persisted_chat.sql` remove as tabelas legadas de mensagens/reação para cumprir a política de chat efêmero.
+`V8__collaboration_and_learning_xp.sql` adiciona XP, sequência e desafio diário. V9 foi uma migração histórica do chat. V10 reintroduziu o histórico persistente; V12/V13 preservam anexos e memória incremental. Não reexecutar migrações antigas manualmente.
 
 **Atenção:** V9 apaga o histórico antigo de chat por design. Faça backup antes do primeiro deploy se precisar preservar esse conteúdo fora da aplicação por motivo operacional/legal.

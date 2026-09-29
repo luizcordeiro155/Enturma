@@ -10,11 +10,11 @@ Quando a sessão expira, o scheduler atualiza o estado de forma idempotente. O b
 
 A sala Web reúne três áreas principais:
 
-1. chat efêmero com criptografia ponta a ponta;
+1. chat persistente autorizado por participante;
 2. chamada LiveKit com voz, câmera e compartilhamento de tela;
 3. materiais + Enturma AI com respostas baseadas em fontes.
 
-O chat não possui histórico persistente. Mensagens e imagens existem apenas na memória dos clientes conectados. Consulte [CHAT_PRIVACY](CHAT_PRIVACY.md).
+O chat possui histórico persistente. Mensagens e imagens ficam disponíveis aos participantes, inclusive após o encerramento. Consulte [CHAT_PRIVACY](CHAT_PRIVACY.md).
 
 Materiais enviados explicitamente para estudo são diferentes do chat: eles são persistidos em storage privado para que a IA possa indexá-los e consultá-los. Essa diferença deve ficar clara na interface.
 
@@ -25,5 +25,5 @@ Ao encerrar uma sala:
 - novas operações de estudo são bloqueadas;
 - grants de mídia deixam de ser emitidos;
 - a sala LiveKit é removida pelo reconciliador;
-- o chat efêmero deixa de aceitar novos eventos;
-- materiais seguem a política de retenção do produto, não a política efêmera do chat.
+- o chat deixa de aceitar novos envios e mantém seu histórico;
+- materiais e histórico seguem a política de retenção do produto.
