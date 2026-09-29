@@ -1,0 +1,43 @@
+package br.com.enturma.auth;
+
+import br.com.enturma.common.Db;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+@Component
+public class EmailWorker {
+  private final Db db;
+  private final JavaMailSender sender;
+  private final String from;
+
+  public EmailWorker(Db db, JavaMailSender sender, @Value("${enturma.mail-from}") String from) {
+    this.db = db;
+    this.sender = sender;
+    this.from = from;
+  }
+
+  @Scheduled(fixedDelay = 30000)
+  @Transactional
+  public void deliver() {
+    for (var row :
+        db.list(
+            "SELECT * FROM email_outbox WHERE sent_at IS NULL AND attempts<10 ORDER BY created_at"
+                + " LIMIT 10 FOR UPDATE SKIP LOCKED")) {
+      try {
+        var mail = new SimpleMailMessage();
+        mail.setFrom(from);
+        mail.setTo((String) row.get("recipient"));
+        mail.setSubject((String) row.get("subject"));
+        mail.setText((String) row.get("body"));
+        sender.send(mail);
+        db.jdbc.update("UPDATE email_outbox SET sent_at=now(),body='' WHERE id=?", row.get("id"));
+      } catch (org.springframework.mail.MailException e) {
+        db.jdbc.update("UPDATE email_outbox SET attempts=attempts+1 WHERE id=?", row.get("id"));
+      }
+    }
+  }
+}
