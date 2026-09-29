@@ -64,6 +64,64 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
     .selectOption("5");
   await page.getByRole("button", { name: "Iniciar nova rodada" }).click();
   await expect(page.locator(".word-board")).toHaveCount(4);
+  const input = page.getByLabel("Palavra tentativa", { exact: true });
+  const length = Number(await input.getAttribute("maxlength"));
+  const vocabulary = (await (
+    await page.request.get("/api/backend/learning/advanced/words/vocabulary")
+  ).json()) as string[];
+  const word = vocabulary.find((w) => w.length === length)!;
+  await input.fill(word.toLowerCase());
+  await expect(input).toHaveValue(word);
+  await expect(
+    page.locator(".word-board").first().locator(".word-row").first(),
+  ).toHaveText(word);
+  const responsePromise = page.waitForResponse(
+    (r) =>
+      r.url().endsWith("/words/attempt") && r.request().method() === "POST",
+  );
+  await input.press("Enter");
+  expect((await responsePromise).ok()).toBe(true);
+  await expect(input).toHaveValue("");
+  await expect(
+    page
+      .locator(".word-board")
+      .first()
+      .locator(".word-row")
+      .first()
+      .locator(".correct, .present, .absent"),
+  ).toHaveCount(length);
+  await page
+    .getByRole("button", { name: "Laboratório Binário", exact: true })
+    .click();
+  await expect(
+    page.getByRole("button", { name: "Validar circuito" }),
+  ).toBeVisible();
+  const binary = await (
+    await page.request.get("/api/backend/learning/advanced/binary/challenge")
+  ).json();
+  const bits = Number(binary.operands[0].decimal)
+    .toString(2)
+    .padStart(binary.bitWidth, "0");
+  for (let i = 0; i < bits.length; i++)
+    if (bits[i] === "1")
+      await page
+        .getByRole("button", {
+          name: `Bit ${bits.length - i - 1}`,
+          exact: true,
+        })
+        .click();
+  await page.getByRole("button", { name: "Validar circuito" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Circuito resolvido" }),
+  ).toBeVisible();
+  await page
+    .getByRole("button", { name: "Detetive de código", exact: true })
+    .click();
+  await page.getByLabel("Resultado de console.log").fill("6");
+  await page.getByRole("button", { name: "Testar hipótese" }).click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Desafio concluído" }),
+  ).toBeVisible();
   await page
     .getByRole("button", { name: "Rota do Algoritmo", exact: true })
     .click();

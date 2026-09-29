@@ -1,12 +1,66 @@
 "use client";
 import { useState } from "react";
+import { ProfileImageEditor } from "./profile-image-editor";
 import { api } from "@/lib/api";
 import {
   ProfileCard,
   type PublicProfile,
   type ProfileDetails,
 } from "./user-identity";
-export function ProfileDetailsEditor({ profile }: { profile: PublicProfile }) {
+export function ProfileDetailsEditor({
+  profile,
+  onSaved,
+}: {
+  profile: PublicProfile;
+  onSaved: () => Promise<void>;
+}) {
+  const [appearance, setAppearance] = useState({
+    name: profile.name,
+    bio: profile.bio ?? "",
+    accentColor: profile.accentColor ?? "#183f36",
+  });
+  const [mediaVersion, setMediaVersion] = useState(0);
+  const [crop, setCrop] = useState<{ file: File; kind: "avatar" | "banner" }>();
+  function choose(kind: "avatar" | "banner", file?: File) {
+    if (!file) return;
+    if (
+      !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+        file.type,
+      )
+    ) {
+      setStatus("Use JPG, PNG, WEBP ou GIF.");
+      return;
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setStatus("Escolha uma imagem de até 20 MB para recortar.");
+      return;
+    }
+    setCrop({ kind, file });
+  }
+  async function upload(file: File) {
+    if (!crop) return;
+    if (file.size > (crop.kind === "avatar" ? 2 : 3) * 1024 * 1024)
+      throw Error(
+        "A imagem excede o limite. Use o recorte ou escolha um arquivo menor.",
+      );
+    await api("/users/me");
+    const form = new FormData();
+    form.set("file", file);
+    const response = await fetch(`/api/backend/users/me/${crop.kind}`, {
+      method: "POST",
+      body: form,
+    });
+    if (!response.ok)
+      throw Error(
+        (await response.json().catch(() => ({}))).message ??
+          "Não foi possível salvar a imagem.",
+      );
+    await onSaved();
+    // Upload completion needs a fresh URL to invalidate the browser image cache.
+    // eslint-disable-next-line react-hooks/purity
+    setMediaVersion(Date.now());
+    setStatus("Imagem atualizada.");
+  }
   const [details, setDetails] = useState<ProfileDetails>({
     decoration: "NONE",
     nameFont: "SYSTEM",
@@ -25,16 +79,28 @@ export function ProfileDetailsEditor({ profile }: { profile: PublicProfile }) {
         decoram o perfil sem reduzir o contraste do texto.
       </p>
       <div className="profile-details-layout">
-        <ProfileCard user={{ ...profile, profileDetails: details }} />
+        <ProfileCard
+          user={{
+            ...profile,
+            ...appearance,
+            mediaVersion,
+            profileDetails: details,
+          }}
+        />
         <form
           onSubmit={async (e) => {
             e.preventDefault();
             setBusy(true);
             try {
+              await api("/users/me/appearance", {
+                method: "PUT",
+                body: JSON.stringify(appearance),
+              });
               await api("/users/me/profile-details", {
                 method: "PUT",
                 body: JSON.stringify(details),
               });
+              await onSaved();
               setStatus("Personalização salva para todas as suas conversas.");
             } catch (e) {
               setStatus((e as Error).message);
@@ -43,6 +109,64 @@ export function ProfileDetailsEditor({ profile }: { profile: PublicProfile }) {
             }
           }}
         >
+          <div className="profile-media-grid">
+            <label className="profile-upload">
+              Foto de perfil
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                disabled={busy}
+                onChange={(e) => {
+                  choose("avatar", e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+            <label className="profile-upload">
+              Banner
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp,image/gif"
+                disabled={busy}
+                onChange={(e) => {
+                  choose("banner", e.target.files?.[0]);
+                  e.target.value = "";
+                }}
+              />
+            </label>
+          </div>
+          <label>
+            Nome de exibição
+            <input
+              value={appearance.name}
+              required
+              minLength={2}
+              maxLength={100}
+              onChange={(e) =>
+                setAppearance((p) => ({ ...p, name: e.target.value }))
+              }
+            />
+          </label>
+          <label>
+            Bio
+            <textarea
+              value={appearance.bio}
+              maxLength={280}
+              onChange={(e) =>
+                setAppearance((p) => ({ ...p, bio: e.target.value }))
+              }
+            />
+          </label>
+          <label>
+            Cor do perfil
+            <input
+              type="color"
+              value={appearance.accentColor}
+              onChange={(e) =>
+                setAppearance((p) => ({ ...p, accentColor: e.target.value }))
+              }
+            />
+          </label>
           <label>
             Pronomes
             <input
@@ -104,11 +228,19 @@ export function ProfileDetailsEditor({ profile }: { profile: PublicProfile }) {
             </select>
           </label>
           <button disabled={busy}>
-            {busy ? "Salvando…" : "Salvar identidade"}
+            {busy ? "Salvando…" : "Salvar perfil"}
           </button>
           <p role="status">{status}</p>
         </form>
       </div>
+      {crop ? (
+        <ProfileImageEditor
+          file={crop.file}
+          kind={crop.kind}
+          onApply={upload}
+          onCancel={() => setCrop(undefined)}
+        />
+      ) : null}
     </section>
   );
 }

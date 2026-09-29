@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- authenticated avatars use the same-origin API */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useId } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { api, post } from "@/lib/api";
 export type ProfileDetails = {
@@ -20,6 +21,7 @@ export type PublicProfile = {
   hasAvatar?: boolean;
   hasBanner?: boolean;
   profileDetails?: ProfileDetails;
+  mediaVersion?: number;
 };
 export function LiveIdentity({ id, name }: { id: string; name: string }) {
   const [user, setUser] = useState<PublicProfile>({ id, name });
@@ -48,7 +50,10 @@ export function Avatar({ user }: { user: PublicProfile }) {
       }
     >
       {user.hasAvatar ? (
-        <img src={`/api/backend/users/${user.id}/avatar`} alt="" />
+        <img
+          src={`/api/backend/users/${user.id}/avatar?v=${user.mediaVersion ?? 0}`}
+          alt=""
+        />
       ) : (
         user.name.slice(0, 2).toUpperCase()
       )}
@@ -69,7 +74,7 @@ export function ProfileCard({ user }: { user: PublicProfile }) {
       <div className="public-profile-banner">
         {user.hasBanner ? (
           <img
-            src={`/api/backend/users/${user.id}/banner`}
+            src={`/api/backend/users/${user.id}/banner?v=${user.mediaVersion ?? 0}`}
             alt="Banner do perfil"
           />
         ) : null}
@@ -101,17 +106,66 @@ export function ProfileCard({ user }: { user: PublicProfile }) {
 export function UserIdentity({
   user,
   compact = false,
+  nameOnly = false,
+  subtitle,
 }: {
   user: PublicProfile;
   compact?: boolean;
+  nameOnly?: boolean;
+  subtitle?: string;
 }) {
   const [profile, setProfile] = useState<PublicProfile>();
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const dialog = useRef<HTMLDialogElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const card = useRef<HTMLDivElement>(null);
+  const id = useId();
   useEffect(() => {
-    if (open) dialog.current?.showModal();
-    else dialog.current?.close();
+    if (!open) return;
+    const anchor = trigger.current;
+    const panel = card.current;
+    if (!anchor || !panel) return;
+    function position() {
+      if (!anchor || !panel) return;
+      const rect = anchor.getBoundingClientRect();
+      const width = panel.offsetWidth;
+      const height = panel.offsetHeight;
+      const right = rect.right + 10;
+      const left =
+        right + width <= innerWidth - 12 ? right : rect.left - width - 10;
+      panel.style.left = `${Math.max(12, Math.min(left, innerWidth - width - 12))}px`;
+      panel.style.top = `${Math.max(12, Math.min(rect.top, innerHeight - height - 12))}px`;
+    }
+    function outside(e: PointerEvent) {
+      if (
+        !panel?.contains(e.target as Node) &&
+        !anchor?.contains(e.target as Node)
+      )
+        setOpen(false);
+    }
+    function key(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        setOpen(false);
+        anchor?.focus();
+      }
+    }
+    position();
+    panel
+      .querySelector<HTMLButtonElement>("button")
+      ?.focus({ preventScroll: true });
+    const observer = new ResizeObserver(position);
+    observer.observe(panel);
+    window.addEventListener("resize", position);
+    window.addEventListener("scroll", position, true);
+    document.addEventListener("pointerdown", outside);
+    document.addEventListener("keydown", key);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", position);
+      window.removeEventListener("scroll", position, true);
+      document.removeEventListener("pointerdown", outside);
+      document.removeEventListener("keydown", key);
+    };
   }, [open]);
   async function show() {
     setMessage("");
@@ -126,11 +180,15 @@ export function UserIdentity({
     <>
       <button
         type="button"
+        ref={trigger}
+        aria-expanded={open}
+        aria-controls={open ? id : undefined}
+        aria-haspopup="dialog"
         className="identity-trigger"
         aria-label={`Ver perfil de ${user.name}`}
-        onClick={() => void show()}
+        onClick={() => (open ? setOpen(false) : void show())}
       >
-        <Avatar user={user} />
+        {!nameOnly ? <Avatar user={user} /> : null}
         {!compact ? (
           <span>
             <strong
@@ -138,54 +196,65 @@ export function UserIdentity({
             >
               {user.name}
             </strong>
-            {user.profileDetails?.statusText ? (
+            {subtitle ? <small>{subtitle}</small> : null}
+            {!subtitle && user.profileDetails?.statusText ? (
               <small>{user.profileDetails.statusText}</small>
             ) : null}
           </span>
         ) : null}
       </button>
-      <dialog
-        className="user-profile-dialog"
-        ref={dialog}
-        aria-label={`Perfil de ${user.name}`}
-        onCancel={() => setOpen(false)}
-        onClose={() => setOpen(false)}
-      >
-        <button
-          className="profile-close"
-          aria-label="Fechar perfil"
-          onClick={() => setOpen(false)}
-        >
-          ×
-        </button>
-        {profile ? (
-          <>
-            <ProfileCard user={profile} />
-            <div className="profile-dialog-actions">
+      {open
+        ? createPortal(
+            <div
+              id={id}
+              role="dialog"
+              className="user-profile-dialog user-profile-popover"
+              ref={card}
+              aria-label={`Perfil de ${user.name}`}
+            >
               <button
-                onClick={async () => {
-                  try {
-                    await post("/friends", { username: profile.username });
-                    setMessage(
-                      "Solicitação enviada. Gerencie o convite em Amigos.",
-                    );
-                  } catch (e) {
-                    setMessage((e as Error).message);
-                  }
+                className="profile-close"
+                aria-label="Fechar perfil"
+                onClick={() => {
+                  setOpen(false);
+                  trigger.current?.focus();
                 }}
               >
-                Adicionar amizade
+                ×
               </button>
-              <Link className="button secondary" href="/friends">
-                Conversas privadas
-              </Link>
-            </div>
-          </>
-        ) : (
-          <p>Carregando perfil…</p>
-        )}
-        <p role="status">{message}</p>
-      </dialog>
+              {profile ? (
+                <>
+                  <ProfileCard user={profile} />
+                  <div className="profile-dialog-actions">
+                    <button
+                      onClick={async () => {
+                        try {
+                          await post("/friends", {
+                            username: profile.username,
+                          });
+                          setMessage(
+                            "Solicitação enviada. Gerencie o convite em Amigos.",
+                          );
+                        } catch (e) {
+                          setMessage((e as Error).message);
+                        }
+                      }}
+                    >
+                      Adicionar amizade
+                    </button>
+                    <Link className="button secondary" href="/friends">
+                      Conversas privadas
+                    </Link>
+                  </div>
+                </>
+              ) : (
+                <p>Carregando perfil…</p>
+              )}
+              <p role="status">{message}</p>
+            </div>,
+            document.body,
+          )
+        : null}
     </>
   );
 }

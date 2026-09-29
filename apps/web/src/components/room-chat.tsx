@@ -162,7 +162,10 @@ export function RoomChat(props: Props) {
                 </div>
                 <div className="message-content">
                   <header>
-                    <strong>{message.name}</strong>
+                    <UserIdentity
+                      nameOnly
+                      user={{ ...message, id: message.userId }}
+                    />
                     <small>
                       {new Date(message.createdAt).toLocaleString("pt-BR", {
                         day: "2-digit",

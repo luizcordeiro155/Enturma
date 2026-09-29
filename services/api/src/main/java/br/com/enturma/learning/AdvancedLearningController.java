@@ -51,6 +51,12 @@ public class AdvancedLearningController {
           403, "LEARNING_NOT_AVAILABLE", "Os jogos são liberados para estudantes de TI.");
   }
 
+  @GetMapping("/words/vocabulary")
+  public List<String> wordVocabulary(@AuthenticationPrincipal Actor a) {
+    require(a);
+    return WORDS.values().stream().flatMap(List::stream).distinct().sorted().toList();
+  }
+
   @Transactional
   @GetMapping("/words/challenge")
   public Object wordChallenge(
@@ -153,7 +159,9 @@ public class AdvancedLearningController {
       throw ApiException.invalid(
           "A palavra precisa ter " + targets.getFirst().length() + " letras.");
     if (WORDS.values().stream().flatMap(List::stream).noneMatch(guess::equals))
-      throw ApiException.invalid("Use um termo do vocabulário de programação.");
+      throw ApiException.invalid(
+          "Termo não encontrado. Consulte o vocabulário da rodada para escolher uma palavra"
+              + " aceita.");
     List<String> previous =
         db.jdbc.queryForList(
             "SELECT unnest(guesses) FROM word_game_session WHERE user_id=? AND challenge_key=?",

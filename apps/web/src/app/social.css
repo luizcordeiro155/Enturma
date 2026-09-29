@@ -382,3 +382,146 @@ html .virtual-keyboard button:disabled {
 .profile-customizer {
   margin-top: 24px;
 }
+
+/* Profile popovers stay next to their trigger without obscuring the room. */
+.user-profile-popover {
+  position: fixed;
+  z-index: 1200;
+  margin: 0;
+  width: min(360px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  box-shadow: 0 16px 48px #0005;
+}
+.image-crop-dialog {
+  margin: auto;
+  position: fixed;
+  inset: 0;
+  width: min(520px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  overflow: auto;
+  padding: 24px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.image-crop-dialog::backdrop {
+  background: #0009;
+}
+.image-crop-preview {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  background: var(--soft);
+  touch-action: none;
+  cursor: grab;
+  margin: 16px 0;
+}
+.image-crop-preview img {
+  position: absolute;
+  max-width: none;
+  max-height: none;
+  pointer-events: none;
+}
+.crop-guide {
+  position: absolute;
+  inset: 0;
+  border: 2px solid #fff;
+  pointer-events: none;
+  box-shadow: 0 0 0 200px #0005;
+}
+.crop-avatar .crop-guide {
+  border-radius: 50%;
+}
+.image-crop-dialog input[type="range"] {
+  width: 100%;
+  padding: 0;
+}
+.crop-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+.image-crop-dialog label {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+}
+html .onboarding-banner,
+html .onboarding-banner h2,
+html .onboarding-banner p,
+html .onboarding-banner > svg {
+  color: #183f36 !important;
+}
+html .onboarding-banner {
+  background: #ddf280 !important;
+}
+.screen-share-status {
+  padding: 8px 12px !important;
+}
+.screen-share-status > article {
+  min-height: 0 !important;
+  height: auto !important;
+  padding: 10px 12px !important;
+  gap: 10px;
+}
+.screen-share-status > article > div {
+  min-width: 0;
+}
+.screen-share-status strong {
+  font-size: 0.875rem;
+  overflow-wrap: anywhere;
+}
+.screen-share-status span {
+  font-size: 0.75rem;
+}
+
+.word-vocabulary > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 180px;
+  overflow: auto;
+  margin-block: 8px;
+}
+.word-vocabulary button {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+.screen-share-status {
+  align-self: start;
+  align-content: start;
+  flex: 0 0 auto;
+}
+.screen-share-status > article {
+  aspect-ratio: auto !important;
+  align-self: start;
+}
+
+/* Optional audio/status nodes must not occupy the video grid's tall row. */
+.discord-call {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.discord-call .call-audio,
+.discord-call .call-video-grid:empty {
+  display: none;
+}
+.discord-call .screen-share-status {
+  width: 100%;
+}
+
+.profile-details-editor input[type="color"] {
+  width: 72px;
+  height: 44px;
+  padding: 4px;
+  cursor: pointer;
+}
+@media (min-width: 761px) {
+  .profile-details-layout > .public-profile-card {
+    position: sticky;
+    top: 90px;
+  }
+}

@@ -2,6 +2,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Bot, Braces, Play, Pause, SkipForward, RotateCcw } from "lucide-react";
 import { api, post } from "@/lib/api";
+import { BinaryLab } from "./binary-lab";
+import { TraceLab } from "./trace-lab";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
 
@@ -51,6 +53,8 @@ export function ProgrammingLab() {
   const [daily, setDaily] = useState(false);
   const [challenge, setChallenge] = useState<Challenge>();
   const [played, setPlayed] = useState<Played[]>([]);
+  const wordInput = useRef<HTMLInputElement>(null);
+  const [vocabulary, setVocabulary] = useState<string[]>([]);
   const [guess, setGuess] = useState("");
   const [result, setResult] = useState<WordResult>();
   const [level, setLevel] = useState(1);
@@ -79,6 +83,31 @@ export function ProgrammingLab() {
   useEffect(() => {
     if (!eligible) return;
     let active = true;
+    api<string[]>("/learning/advanced/words/vocabulary")
+      .then((words) => {
+        if (active) setVocabulary(words);
+      })
+      .catch(() => {});
+    api<Challenge>(
+      "/learning/advanced/words/challenge?mode=SOLO&difficulty=1&daily=false",
+    )
+      .then((c) => {
+        if (active) {
+          setChallenge(c);
+          setPlayed(c.history ?? []);
+          started.current = Date.now();
+        }
+      })
+      .catch((e) => {
+        if (active) setError(e.message);
+      });
+    return () => {
+      active = false;
+    };
+  }, [eligible]);
+  useEffect(() => {
+    if (!eligible) return;
+    let active = true;
     api<{ walls: number[] }>(
       `/learning/advanced/algorithm/challenge?level=${level}`,
     )
@@ -103,6 +132,9 @@ export function ProgrammingLab() {
     }, 300);
     return () => clearTimeout(timer);
   }, [playing, frame, run]);
+  useEffect(() => {
+    wordInput.current?.focus({ preventScroll: true });
+  }, [challenge]);
   async function newWord() {
     setBusy(true);
     setError("");
@@ -234,7 +266,21 @@ export function ProgrammingLab() {
               >
                 <Bot size={20} /> Rota do Algoritmo
               </button>
+              <button
+                aria-pressed={tab === "binary"}
+                onClick={() => setTab("binary")}
+              >
+                Laboratório Binário
+              </button>
+              <button
+                aria-pressed={tab === "trace"}
+                onClick={() => setTab("trace")}
+              >
+                Detetive de código
+              </button>
             </nav>
+            {tab === "binary" ? <BinaryLab onProgress={refresh} /> : null}
+            {tab === "trace" ? <TraceLab onProgress={refresh} /> : null}
             {tab === "words" ? (
               <section className="advanced-game-card">
                 <h2>Termo Dev</h2>
@@ -290,50 +336,37 @@ export function ProgrammingLab() {
                       {challenge.maxAttempts} tentativas ·{" "}
                       {challenge.daily ? "Diário" : "Treino livre"}
                     </p>
-                    <div className={`word-boards boards-${challenge.boards}`}>
-                      {Array.from({ length: challenge.boards }, (_, b) => (
-                        <div className="word-board" key={b}>
-                          <h3>Palavra {b + 1}</h3>
-                          {Array.from(
-                            { length: challenge.maxAttempts },
-                            (_, r) => (
-                              <div
-                                className="word-row"
-                                key={r}
-                                style={{
-                                  gridTemplateColumns: `repeat(${challenge.wordLength},minmax(28px,1fr))`,
-                                }}
-                              >
-                                {Array.from(
-                                  { length: challenge.wordLength },
-                                  (_, c) => {
-                                    const mark = played[r]?.boards[b]?.marks[c];
-                                    const letter = played[r]?.word[c] ?? "";
-                                    return (
-                                      <span
-                                        key={c}
-                                        className={
-                                          mark === "C"
-                                            ? "correct"
-                                            : mark === "P"
-                                              ? "present"
-                                              : mark === "A"
-                                                ? "absent"
-                                                : ""
-                                        }
-                                        aria-label={`${letter || "vazio"}: ${mark === "C" ? "posição correta" : mark === "P" ? "outra posição" : mark === "A" ? "ausente" : "não preenchido"}`}
-                                      >
-                                        {letter}
-                                      </span>
-                                    );
-                                  },
-                                )}
-                              </div>
-                            ),
-                          )}
-                        </div>
-                      ))}
-                    </div>
+                    <details className="word-vocabulary">
+                      <summary>
+                        Consultar vocabulário de {challenge.wordLength} letras
+                      </summary>
+                      <p>
+                        Termos técnicos aceitos. Selecione um para preencher e
+                        depois teste sua palavra.
+                      </p>
+                      <div>
+                        {vocabulary
+                          .filter((w) => w.length === challenge.wordLength)
+                          .map((w) => (
+                            <button
+                              key={w}
+                              type="button"
+                              className="secondary"
+                              disabled={
+                                busy ||
+                                result?.finished ||
+                                played.some((p) => p.word === w)
+                              }
+                              onClick={() => {
+                                setGuess(w);
+                                wordInput.current?.focus();
+                              }}
+                            >
+                              {w}
+                            </button>
+                          ))}
+                      </div>
+                    </details>
                     <form
                       className="word-entry"
                       onSubmit={(e) => {
@@ -344,6 +377,9 @@ export function ProgrammingLab() {
                       <label>
                         Palavra tentativa
                         <input
+                          ref={wordInput}
+                          placeholder={`${challenge.wordLength} letras`}
+                          spellCheck={false}
                           value={guess}
                           autoComplete="off"
                           autoCapitalize="characters"
@@ -352,6 +388,8 @@ export function ProgrammingLab() {
                           onChange={(e) =>
                             setGuess(
                               e.target.value
+                                .normalize("NFD")
+                                .replace(/[\u0300-\u036f]/g, "")
                                 .toUpperCase()
                                 .replace(/[^A-Z]/g, ""),
                             )
@@ -398,6 +436,58 @@ export function ProgrammingLab() {
                       >
                         Apagar letra
                       </button>
+                    </div>
+                    <div className={`word-boards boards-${challenge.boards}`}>
+                      {Array.from({ length: challenge.boards }, (_, b) => (
+                        <div
+                          className="word-board"
+                          key={b}
+                          onClick={() => wordInput.current?.focus()}
+                        >
+                          <h3>Palavra {b + 1}</h3>
+                          {Array.from(
+                            { length: challenge.maxAttempts },
+                            (_, r) => (
+                              <div
+                                className="word-row"
+                                key={r}
+                                style={{
+                                  gridTemplateColumns: `repeat(${challenge.wordLength},minmax(28px,1fr))`,
+                                }}
+                              >
+                                {Array.from(
+                                  { length: challenge.wordLength },
+                                  (_, c) => {
+                                    const mark = played[r]?.boards[b]?.marks[c];
+                                    const letter =
+                                      played[r]?.word[c] ??
+                                      (r === played.length
+                                        ? (guess[c] ?? "")
+                                        : "");
+                                    return (
+                                      <span
+                                        key={c}
+                                        className={
+                                          mark === "C"
+                                            ? "correct"
+                                            : mark === "P"
+                                              ? "present"
+                                              : mark === "A"
+                                                ? "absent"
+                                                : ""
+                                        }
+                                        aria-label={`${letter || "vazio"}: ${mark === "C" ? "posição correta" : mark === "P" ? "outra posição" : mark === "A" ? "ausente" : "não preenchido"}`}
+                                      >
+                                        {letter}
+                                      </span>
+                                    );
+                                  },
+                                )}
+                              </div>
+                            ),
+                          )}
+                        </div>
+                      ))}
                     </div>
                     <p role="status" className="game-result">
                       {result?.message ??

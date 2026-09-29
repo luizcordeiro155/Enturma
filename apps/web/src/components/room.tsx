@@ -433,19 +433,15 @@ export function RoomView({ id }: { id: string }) {
                       className={`participant-row ${member.leftAt ? "offline" : ""}`}
                     >
                       <UserIdentity
-                        compact
                         user={{ ...member, id: member.userId }}
-                      />
-                      <span>
-                        <strong>{member.name}</strong>
-                        <small>
-                          {member.role === "HOST"
+                        subtitle={
+                          member.role === "HOST"
                             ? "Anfitrião"
                             : member.leftAt
                               ? "Saiu da sessão"
-                              : "Estudante"}
-                        </small>
-                      </span>
+                              : "Estudante"
+                        }
+                      />
 
                       {me?.id === room.hostId &&
                       member.userId !== me.id &&
