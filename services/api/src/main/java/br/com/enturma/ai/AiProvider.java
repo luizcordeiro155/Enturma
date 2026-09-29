@@ -9,8 +9,8 @@ public interface AiProvider {
 
   Answer answer(String context, String question, String mode, boolean webSearch);
 
-  default Answer answer(String context, String question, String mode) {
-    return answer(context, question, mode, false);
+  default String answer(String context, String question, String mode) {
+    return answer(context, question, mode, false).text();
   }
 
   boolean enabled();
