@@ -65,6 +65,10 @@ export interface Profile {
   email: string;
   emailVerified: boolean;
   role: string;
+  bio?: string | null;
+  accentColor?: string;
+  hasAvatar?: boolean;
+  hasBanner?: boolean;
   enrollment: { periodId: string; periodName: string; shift: string } | null;
   subjects: AcademicEntry[];
 }
@@ -79,7 +83,16 @@ export interface Room {
   maxParticipants: number;
   participants: number;
   reused?: boolean;
-  members?: { userId: string; name: string; role: string }[];
+  members?: {
+    userId: string;
+    name: string;
+    username?: string;
+    role: string;
+    bio?: string | null;
+    accentColor?: string;
+    hasAvatar?: boolean;
+    hasBanner?: boolean;
+  }[];
 }
 export interface MessageReaction {
   emoji: string;
