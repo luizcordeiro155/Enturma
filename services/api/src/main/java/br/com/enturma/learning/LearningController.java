@@ -84,7 +84,7 @@ public class LearningController {
     require(a);
     LocalDate today = LocalDate.now(ZoneOffset.UTC);
     int slot = Math.floorMod(Objects.hash(today.toString(), a.id().toString()), 12);
-    String[] games = {"robot", "binary", "trace"};
+    String[] games = {"robot", "codeword", "trace"};
     String game = games[slot / 4];
     int level = slot % 4 + 1;
     var saved =
@@ -106,7 +106,7 @@ public class LearningController {
   public record Attempt(
       @NotBlank String game,
       @Min(1) @Max(4) int level,
-      @NotNull @Size(max = 80) String answer,
+      @NotNull @Size(max = 600) String answer,
       boolean daily) {
     public Attempt(String game, int level, String answer) {
       this(game, level, answer, false);
@@ -238,27 +238,60 @@ public class LearningController {
 
   public static boolean check(String game, int level, String answer) {
     if (level < 1 || level > 4) throw ApiException.invalid("Nível inválido.");
-    if (game.equals("binary"))
-      return answer.equals(Integer.toBinaryString(new int[] {5, 10, 19, 42}[level - 1]));
-    if (game.equals("trace"))
-      return answer.strip().equals(new String[] {"6", "12", "3", "10"}[level - 1]);
-    if (game.equals("robot")) {
-      if (!answer.matches("[RDLU]{1,24}")) return false;
-      int[][] walls = {{1, 5, 6}, {5, 6, 9}, {2, 6, 9, 11}, {1, 5, 9, 10}};
-      int x = 0, y = 0;
-      for (char c : answer.toCharArray()) {
-        switch (c) {
-          case 'R' -> x++;
-          case 'L' -> x--;
-          case 'D' -> y++;
-          case 'U' -> y--;
-          default -> throw ApiException.invalid("Comando inválido.");
-        }
-        if (x < 0 || x > 3 || y < 0 || y > 3) return false;
-        for (int wall : walls[level - 1]) if (y * 4 + x == wall) return false;
-      }
-      return x == 3 && y == 3;
+    if (game.equals("codeword")) {
+      String[] expected = {
+        "ARRAY",
+        "CACHE,STACK",
+        "THREAD,KERNEL",
+        "BOOLEAN,COMPILE,RUNTIME,POINTER"
+      };
+      return answer.strip().toUpperCase(Locale.ROOT).equals(expected[level - 1]);
     }
+    if (game.equals("trace"))
+      return answer.strip().equals(new String[] {"20", "10", "16", "12"}[level - 1]);
+    if (game.equals("robot")) return checkRobot(level, answer);
     throw ApiException.invalid("Jogo inválido.");
+  }
+
+  private static boolean checkRobot(int level, String program) {
+    int[] sizes = {5, 5, 6, 6};
+    int[][] walls = {
+      {1, 6, 11, 13, 18},
+      {5, 6, 8, 11, 13, 16, 18},
+      {1, 7, 8, 10, 14, 16, 20, 22, 26, 28},
+      {1, 7, 8, 10, 14, 16, 19, 20, 22, 25, 28, 31}
+    };
+    int[] maxOps = {12, 10, 12, 10};
+    List<String> ops = new ArrayList<>();
+    for (String raw : program.toUpperCase(Locale.ROOT).split("[\\n;]+")) {
+      String line = raw.strip();
+      if (line.isBlank()) continue;
+      var repeat =
+          java.util.regex.Pattern.compile("^REPEAT\\s+([1-9])\\s+(UP|DOWN|LEFT|RIGHT)$")
+              .matcher(line);
+      if (repeat.matches()) {
+        int count = Integer.parseInt(repeat.group(1));
+        for (int i = 0; i < count; i++) ops.add(repeat.group(2));
+      } else if (Set.of("UP", "DOWN", "LEFT", "RIGHT").contains(line)) {
+        ops.add(line);
+      } else return false;
+    }
+    if (ops.isEmpty() || ops.size() > maxOps[level - 1]) return false;
+    int size = sizes[level - 1];
+    int x = 0, y = 0;
+    for (String op : ops) {
+      switch (op) {
+        case "RIGHT" -> x++;
+        case "LEFT" -> x--;
+        case "DOWN" -> y++;
+        case "UP" -> y--;
+        default -> {
+          return false;
+        }
+      }
+      if (x < 0 || x >= size || y < 0 || y >= size) return false;
+      for (int wall : walls[level - 1]) if (y * size + x == wall) return false;
+    }
+    return x == size - 1 && y == size - 1;
   }
 }
