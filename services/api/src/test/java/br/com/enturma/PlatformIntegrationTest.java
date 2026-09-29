@@ -93,6 +93,8 @@ class PlatformIntegrationTest {
     assertThat(institutions).anyMatch(r -> r.get("name").equals("Centro Universitário UNA"));
     var una =
         providers.stream().filter(p -> p.providerCode().equals("UNA")).findFirst().orElseThrow();
+    // Drain any startup/scheduled catalog import before measuring idempotency.
+    for (int i = 0; i < 30; i++) imports.processBatch();
     long before =
         db.jdbc.queryForObject(
             "SELECT count(*) FROM academic_entry WHERE provider='UNA'", Long.class);
