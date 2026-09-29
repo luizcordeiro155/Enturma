@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
+import type { Profile } from "@enturma/contracts";
 import { Gamepad2 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import {
@@ -22,13 +23,17 @@ const links = [
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const [learning, setLearning] = useState(false);
+  const [me, setMe] = useState<Profile>();
   useEffect(() => {
     let active = true;
-    api<{ eligible: boolean }>("/learning/access")
-      .then((r) => {
-        if (active) setLearning(r.eligible);
-      })
-      .catch(() => {});
+    Promise.all([
+      api<{ eligible: boolean }>("/learning/access").catch(() => ({ eligible: false })),
+      api<Profile>("/users/me").catch(() => undefined),
+    ]).then(([learningAccess, profile]) => {
+      if (!active) return;
+      setLearning(learningAccess.eligible);
+      if (profile) setMe(profile);
+    });
     return () => {
       active = false;
     };
@@ -72,8 +77,16 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <span>
             {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
           </span>
-          <Link className="button" href="/profile">
-            Meu perfil
+          <Link className="topbar-profile" href="/profile" aria-label="Abrir meu perfil">
+            <span className="topbar-profile-avatar">
+              {me?.hasAvatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={`/api/backend/users/${me.id}/avatar`} alt="" />
+              ) : (
+                (me?.name ?? "U").slice(0, 1).toUpperCase()
+              )}
+            </span>
+            <span>{me?.name ?? "Meu perfil"}</span>
           </Link>
         </header>
         <main id="content">{children}</main>
