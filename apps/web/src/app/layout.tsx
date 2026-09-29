@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import "./advanced-games.css";
+import "./profile-customization.css";
 import { Motion } from "@/components/motion";
 export const metadata: Metadata = {
   title: "Enturma — estude em companhia",

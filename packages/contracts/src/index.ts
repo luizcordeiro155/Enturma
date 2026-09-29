@@ -65,6 +65,10 @@ export interface Profile {
   email: string;
   emailVerified: boolean;
   role: string;
+  bio?: string | null;
+  accentColor?: string;
+  hasAvatar?: boolean;
+  hasBanner?: boolean;
   enrollment: { periodId: string; periodName: string; shift: string } | null;
   subjects: AcademicEntry[];
 }
