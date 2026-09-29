@@ -1,38 +1,51 @@
 # XP, sequência e prática diária
 
-O módulo de aprendizagem complementa as salas de estudo com prática curta e progressiva.
+O módulo de aprendizagem complementa as salas de estudo com prática progressiva para estudantes de TI.
 
 ## Progressão
 
-Cada usuário elegível possui:
+Cada usuário elegível possui XP total, nível, sequência diária, maior sequência e progresso por jogo/dificuldade. A primeira conclusão de cada nível concede XP uma única vez. Repetições servem para prática sem gerar XP infinito.
 
-- XP total;
-- nível;
-- XP restante para o próximo nível;
-- sequência diária atual;
-- maior sequência alcançada;
-- progresso por jogo e dificuldade.
-
-A primeira conclusão de cada nível concede XP uma única vez. Repetir um nível já concluído pode ser usado para prática, mas não gera XP infinito.
-
-A fórmula inicial usa 250 XP por nível. Isso é um parâmetro de produto e pode evoluir sem alterar o histórico de eventos de XP.
+A fórmula atual usa 250 XP por nível.
 
 ## Desafio diário
 
-A API gera um desafio diário determinístico por usuário e data UTC, selecionando um dos jogos e uma dificuldade. Concluir a missão diária concede um bônus de XP uma única vez e atualiza a sequência.
+A API escolhe deterministicamente um jogo + nível por usuário/data UTC. A missão diária concede bônus de XP uma única vez.
 
-Falhar aumenta o contador de tentativas, mas não reduz XP. A sequência é atualizada apenas em atividade concluída.
+Os jogos atuais são:
 
-## Minigames atuais
+- `robot` — Rota do algoritmo;
+- `codeword` — Código Secreto;
+- `trace` — Detetive de código.
 
-- Rota do algoritmo: raciocínio procedural e planejamento de comandos.
-- Laboratório binário: representação numérica e potências de 2.
-- Detetive de código: rastreamento de variáveis, arrays e laços.
+## Rota do algoritmo
 
-Cada jogo possui quatro níveis e deve ficar progressivamente mais exigente. Novos jogos devem avaliar conteúdo de verdade, não cliques ou tempo de tela.
+O usuário precisa escrever um pequeno programa textual para mover o robô. Instruções permitidas:
+
+- `UP`
+- `DOWN`
+- `LEFT`
+- `RIGHT`
+- `REPEAT N DIRECAO`
+
+Os mapas crescem para 5x5 e 6x6, adicionam mais obstáculos e reduzem o limite de operações nos níveis avançados. O backend valida a mesma gramática e o mesmo mapa do cliente; não há `eval` nem execução de código arbitrário.
+
+## Código Secreto
+
+Substitui o antigo Laboratório binário e usa palavras relacionadas a programação.
+
+Modos:
+
+- **Solo** — uma palavra;
+- **Dueto** — duas palavras usando o mesmo palpite;
+- **Quarteto** — quatro palavras usando o mesmo palpite.
+
+As pistas seguem três estados: posição correta, letra existente em outra posição e letra ausente. O nível 4 usa palavras de sete letras e dez tentativas compartilhadas.
+
+## Detetive de código
+
+Mantém a leitura de JavaScript, mas os quatro desafios foram elevados para combinações de laços, arrays, map/filter/reduce e índices.
 
 ## Anti-farm
 
-`learning_xp_event` possui chave única por usuário + evento. Isso impede que refresh, retry ou chamadas repetidas premiem o mesmo feito mais de uma vez.
-
-A progressão deve continuar priorizando aprendizagem. Não adicionar mecânicas que recompensem spam, presença passiva ou comportamento compulsivo.
+`learning_xp_event` possui chave única por usuário + evento. Refresh, retry ou chamadas repetidas não premiam o mesmo feito mais de uma vez.
