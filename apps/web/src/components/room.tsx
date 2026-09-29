@@ -221,6 +221,8 @@ export function RoomView({ id }: { id: string }) {
             if (data.type === "key_request") {
               if (!identityRef.current) return;
               if (!roomKeyRef.current) {
+                const ownId = myIdRef.current;
+                if (!ownId || ownId.localeCompare(data.senderId) > 0) return;
                 roomKeyRef.current = await createRoomKey();
                 setCryptoReady(true);
               }
