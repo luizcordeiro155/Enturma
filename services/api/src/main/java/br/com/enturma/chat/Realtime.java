@@ -2,6 +2,7 @@ package br.com.enturma.chat;
 
 import br.com.enturma.auth.*;
 import br.com.enturma.study.StudyService;
+import br.com.enturma.common.Db;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
@@ -17,6 +18,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 public class Realtime extends TextWebSocketHandler implements WebSocketConfigurer {
   private final AuthService auth;
   private final StudyService study;
+  private final Db db;
   private final ObjectMapper json;
   private final String[] origins;
   private final Map<String, Connection> connections = new ConcurrentHashMap<>();
@@ -44,10 +46,12 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
   public Realtime(
       AuthService auth,
       StudyService study,
+      Db db,
       ObjectMapper json,
       @Value("${enturma.origins}") String origins) {
     this.auth = auth;
     this.study = study;
+    this.db = db;
     this.json = json;
     this.origins = origins.split(",");
   }
@@ -161,17 +165,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       study.member(actor, room);
       var detail = study.detail(actor, room);
       String name =
-          detail instanceof Map<?, ?> map
-              ? String.valueOf(
-                  ((List<?>) map.getOrDefault("members", List.of())).stream()
-                      .filter(
-                          raw ->
-                              raw instanceof Map<?, ?> member
-                                  && actor.id().toString().equals(String.valueOf(member.get("userId"))))
-                      .findFirst()
-                      .map(raw -> ((Map<?, ?>) raw).get("name"))
-                      .orElse("Estudante"))
-              : "Estudante";
+          String.valueOf(db.one("SELECT name FROM app_user WHERE id=?", actor.id()).get("name"));
 
       c.actor = actor;
       c.room = room;
