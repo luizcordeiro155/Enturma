@@ -165,7 +165,18 @@ export function Learning() {
   }, []);
 
   useEffect(() => {
-    if (access === true && game === "words") void loadWordPuzzle(level);
+    if (access !== true || game !== "words") return;
+    let active = true;
+    api<WordPuzzle>(`/learning/word-puzzle?level=${level}`)
+      .then((puzzle) => {
+        if (active) setWordPuzzle(puzzle);
+      })
+      .catch((e) => {
+        if (active) setError(e.message);
+      });
+    return () => {
+      active = false;
+    };
   }, [access, game, level]);
 
   function reset(nextGame = game, nextLevel = level, nextDaily = false) {
