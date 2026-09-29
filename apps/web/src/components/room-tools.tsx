@@ -298,7 +298,9 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
       ...Array.from(call.remoteParticipants.values()),
     ];
     const next = participants.map((participant) => {
-      const publications = Array.from(participant.trackPublications.values());
+      const publications = Array.from(
+        participant.trackPublications.values() as Iterable<import("livekit-client").TrackPublication>,
+      );
       const active = (source: string) =>
         publications.some(
           (publication) =>
@@ -347,7 +349,7 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
 
     const media = track.attach();
     media.autoplay = true;
-    media.playsInline = true;
+    if (media instanceof HTMLVideoElement) media.playsInline = true;
     tile.appendChild(media);
 
     const label = document.createElement("div");
@@ -393,7 +395,6 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
       const call = new Room({
         adaptiveStream: true,
         dynacast: true,
-        autoSubscribe: true,
       });
       room.current = call;
 
@@ -465,7 +466,7 @@ function Voice({ roomId, ended }: { roomId: string; ended: boolean }) {
         clearMedia();
       });
 
-      await call.connect(credentials.url, credentials.token);
+      await call.connect(credentials.url, credentials.token, { autoSubscribe: true });
       await call.localParticipant.setMicrophoneEnabled(true);
       setConnected(true);
       setMuted(false);
