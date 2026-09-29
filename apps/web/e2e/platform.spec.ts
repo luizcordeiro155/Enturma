@@ -167,7 +167,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await peerPage.goto(roomUrl);
   await expect(
     peerPage.getByText("Mensagem E2E em tempo real", { exact: true }),
-  ).toBeVisible();
+  ).toHaveCount(0);
   await page
     .getByLabel("Mensagem", { exact: true })
     .fill("Atualização pelo WebSocket");
