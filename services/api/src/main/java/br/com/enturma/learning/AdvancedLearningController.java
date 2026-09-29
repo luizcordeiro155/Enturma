@@ -7,7 +7,7 @@ import jakarta.validation.constraints.*;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.*;
-import java.util.regex.*;
+import java.util.regex.Matcher;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -164,13 +164,13 @@ public class AdvancedLearningController {
       return new Simulation(false, 0, List.of(), "Este nível exige criar ou reutilizar uma função.");
 
     List<String> commands = new ArrayList<>();
-    Pattern repeat = Pattern.compile("repeat\\s*\\(\\s*(\\d{1,2})\\s*,\\s*(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\)", Pattern.CASE_INSENSITIVE);
+    java.util.regex.Pattern repeat = java.util.regex.Pattern.compile("repeat\\s*\\(\\s*(\\d{1,2})\\s*,\\s*(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\)", java.util.regex.Pattern.CASE_INSENSITIVE);
     Matcher rm = repeat.matcher(code);
     while (rm.find()) {
       int n = Math.min(20, Integer.parseInt(rm.group(1)));
       for (int i=0;i<n;i++) commands.add(rm.group(2).toLowerCase(Locale.ROOT));
     }
-    Matcher direct = Pattern.compile("(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\(\\s*\\)", Pattern.CASE_INSENSITIVE).matcher(code);
+    Matcher direct = java.util.regex.Pattern.compile("(moveForward|moveRight|moveLeft|moveUp|moveDown)\\s*\\(\\s*\\)", java.util.regex.Pattern.CASE_INSENSITIVE).matcher(code);
     while (direct.find()) commands.add(direct.group(1).toLowerCase(Locale.ROOT));
     if (commands.isEmpty()) return new Simulation(false, 0, List.of(), "Nenhum comando de movimento foi encontrado.");
     if (commands.size() > commandLimit(level))
