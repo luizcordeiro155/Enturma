@@ -21,6 +21,10 @@ public class CapabilitiesController {
 
   @GetMapping
   public Object get() {
-    return Map.of("ai", ai.enabled(), "voice", voice.enabled(), "materials", storage.enabled());
+    return Map.of(
+        "ai", ai.enabled(),
+        "aiWebSearch", ai.webSearchEnabled(),
+        "voice", voice.enabled(),
+        "materials", storage.enabled());
   }
 }
