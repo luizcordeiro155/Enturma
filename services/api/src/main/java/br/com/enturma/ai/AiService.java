@@ -49,10 +49,6 @@ public class AiService {
     AiProvider.Answer result = provider.answer(context, objective, mode, research);
     study.member(a, room);
 
-    db.jdbc.update(
-        "INSERT INTO ai_message(id,room_id,user_id,question,answer) VALUES (?,?,?,?,?)",
-        UUID.randomUUID(), room, a.id(), question, result.text());
-
     if (!ended && Set.of("CATCH_UP", "SUMMARY").contains(mode)) saveCheckpoint(room, result.text());
     if (!ended && Set.of("SESSION_REPORT", "STUDY_MATERIAL").contains(mode))
       saveArtifact(room, a.id(), mode, titleFor(mode), result.text());
