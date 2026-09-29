@@ -22,3 +22,21 @@ A criptografia de chat não torna o cliente Web imutável. Um operador capaz de 
 ## Proteções de autenticação
 
 Login, cadastro e recuperação possuem janelas específicas de rate limit. E-mail e username possuem validação de duplicidade no serviço e constraints únicas no banco. Em escala, adicionar limitação distribuída/borda, alertas de credential stuffing e observabilidade de abuso sem registrar senhas.
+
+
+## Segurança da colaboração v4
+
+A versão v4 troca o modelo de chat efêmero pelo requisito explícito de histórico privado persistente. Por isso:
+
+- autorização é validada em toda leitura/escrita por associação à sala;
+- envio só é permitido enquanto a sessão está ativa;
+- leitura posterior é permitida apenas a participantes não removidos;
+- imagens são limitadas a 8 MB e a MIME types permitidos;
+- IDs de resposta precisam pertencer à mesma sala;
+- exclusão é lógica e limpa o conteúdo da mensagem;
+- resumo de entrada tardia usa somente mensagens anteriores ao `joined_at` daquele usuário;
+- estudos finais continuam sujeitos à autorização da sala.
+
+Não descrever o chat v4 como E2EE: o backend precisa acessar o conteúdo para persistência e para os recursos de recuperação de contexto solicitados.
+
+Para produção em escala, priorizar upload direto de imagens para object storage, política formal de retenção, auditoria de acesso e pub/sub autenticado para múltiplas instâncias de WebSocket.
