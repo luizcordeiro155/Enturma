@@ -17,15 +17,15 @@ Os testes Maven exigem PostgreSQL separado, conforme README. O script empacota s
 
 A configuração define Java `recommended`, 1024 MB, reinício automático, heap limitado a 65% e perfil `squarecloud`. O serviço escuta em `0.0.0.0:80` e aplica migrations Flyway automaticamente. A SquareCloud recebe o JAR pronto, sem Maven no servidor. Confira a memória disponível no seu plano antes do upload. [Runtime Java](https://squarecloud.app/en/runtimes/java) · [Spring Boot e porta 80](https://help.squarecloud.app/en-us/article/how-to-host-a-spring-boot-application-java-vhja1m/)
 
-## 2. API: somente cinco variáveis básicas
+## 2. API: variáveis básicas
 
 Preencha `.env` dentro do ZIP, ou use as variáveis do painel da SquareCloud (têm precedência). A aplicação lê `.env` na pasta do JAR como propriedades UTF-8, com valores sem aspas. Para valores com barras invertidas, prefira o painel ou escape cada barra como `\\`.
 
 | Variável | Valor |
 |---|---|
-| `DATABASE_URL` | URL JDBC do PostgreSQL, sem senha: `jdbc:postgresql://HOST:PORT/BANCO?...` |
-| `DATABASE_USERNAME` | Usuário do banco |
-| `DATABASE_PASSWORD` | Senha do banco |
+| `DATABASE_URL` | URI pública `postgresql://USUARIO:SENHA@HOST:PORT/BANCO?...` ou URL JDBC `jdbc:postgresql://HOST:PORT/BANCO?...` |
+| `DATABASE_USERNAME` | Usuário do banco; opcional quando incluído na URI |
+| `DATABASE_PASSWORD` | Senha do banco; opcional quando incluída na URI |
 | `APP_URL` | URL HTTPS web; modelo: `https://enturma-flax.vercel.app` |
 | `BFF_PROXY_SECRET` | Chave aleatória de 32+ caracteres, igual à configurada na Vercel |
 
@@ -37,13 +37,13 @@ Gere a chave localmente com `node -e "console.log(require('crypto').randomBytes(
 
 No serviço PostgreSQL do Railway, use os dados de **Connect → Public Network** / `DATABASE_PUBLIC_URL`. O endereço privado `*.railway.internal` não funciona fora do Railway. Se o acesso público ainda estiver desligado, habilite o TCP Proxy nas configurações de rede do serviço. Não crie outro banco só para hospedar a API na SquareCloud. [Conexão externa no Railway](https://docs.railway.com/databases/postgresql)
 
-Separe os dados da URI pública:
+Você pode colar a URI pública diretamente em `DATABASE_URL`. Nesse formato, são necessárias somente três variáveis: `DATABASE_URL`, `APP_URL` e `BFF_PROXY_SECRET`. A API extrai e decodifica as credenciais (inclusive `%xx` e `+` literal), converte a URL para JDBC antes de iniciar o pool e preserva os parâmetros de conexão. As credenciais da URI prevalecem sobre `DATABASE_USERNAME`/`DATABASE_PASSWORD`:
 
 ```text
-postgresql://USUARIO:SENHA@HOST-PUBLICO:PORTA/BANCO
+DATABASE_URL=postgresql://USUARIO:SENHA@HOST-PUBLICO:PORTA/BANCO?sslmode=require
 ```
 
-No `.env`:
+Ou mantenha o formato JDBC com campos separados no `.env`:
 
 ```dotenv
 DATABASE_URL=jdbc:postgresql://HOST-PUBLICO:PORTA/BANCO?sslmode=require
@@ -55,7 +55,7 @@ Use a porta pública exibida, que pode ser diferente de 5432. Se a senha na URI 
 
 ### Alternativa: PostgreSQL da SquareCloud e certificados
 
-O serviço PostgreSQL da SquareCloud exige certificados. Baixe os arquivos privados pelo painel e guarde fora do Git. A conexão JDBC deve usar o formato aceito pelo driver Java; não cole uma URI `postgresql://usuario:senha@...` diretamente. [Guia SquareCloud](https://help.squarecloud.app/pt-br/article/como-criar-um-banco-postgresql-e-conectar-ma6gn5/)
+O serviço PostgreSQL da SquareCloud exige certificados. Baixe os arquivos privados pelo painel e guarde fora do Git. A conexão deve incluir os parâmetros de certificado aceitos pelo driver Java, mesmo quando a URL for convertida de uma URI `postgresql://usuario:senha@...`. [Guia SquareCloud](https://help.squarecloud.app/pt-br/article/como-criar-um-banco-postgresql-e-conectar-ma6gn5/)
 
 Para compatibilidade entre versões do driver, crie um PKCS12 com alias `user` usando o certificado e a chave disponibilizados pelo provedor:
 
