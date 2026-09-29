@@ -146,9 +146,10 @@ public class StudyService {
     r.put(
         "members",
         db.list(
-            "SELECT p.user_id,u.name,p.role FROM room_participant p JOIN app_user u ON"
-                + " u.id=p.user_id WHERE p.room_id=? AND p.left_at IS NULL ORDER BY joined_at LIMIT"
-                + " 30",
+            "SELECT p.user_id,u.name,u.username,u.bio,u.accent_color,"
+                + " u.avatar_bytes IS NOT NULL has_avatar,u.banner_bytes IS NOT NULL has_banner,"
+                + " p.role FROM room_participant p JOIN app_user u ON u.id=p.user_id"
+                + " WHERE p.room_id=? AND p.left_at IS NULL ORDER BY joined_at LIMIT 30",
             id));
     return r;
   }
