@@ -1,28 +1,8 @@
 # Materiais e Enturma AI
 
-A Enturma AI é um tutor acadêmico orientado por fontes. Ela combina materiais privados da sala com a OpenAI Responses API e, opcionalmente, pesquisa na web.
+A Enturma AI usa OpenAI Responses API com o modelo `gpt-5.6-sol` definido no backend.
 
-## Materiais da sala
-
-Uploads são autorizados por sala e guardados em bucket S3/R2 privado. PDF e TXT passam por validação antes do parsing. Chunks ficam associados ao `roomId`; material de outra sala não entra na consulta.
-
-A recuperação atual usa busca textual PostgreSQL em português. O backend inclui nome do arquivo, página quando disponível e trecho recuperado. A resposta retorna essas fontes separadamente para a interface.
-
-Modos disponíveis:
-
-- pergunta sobre materiais;
-- resumo;
-- flashcards;
-- quiz;
-- explicação simplificada;
-- plano de estudo;
-- pesquisa externa com fontes, quando habilitada.
-
-## OpenAI
-
-A integração usa `POST /v1/responses`. A pesquisa externa usa a ferramenta `web_search`. Citações `url_citation` retornadas pela API são preservadas e renderizadas como links clicáveis na interface.
-
-Variáveis da API:
+## Variáveis
 
 ```dotenv
 OPENAI_API_KEY=
@@ -30,16 +10,39 @@ AI_WEB_SEARCH_ENABLED=false
 AI_BASE_URL=https://api.openai.com/v1
 ```
 
-`OPENAI_API_KEY` nunca deve ser enviada ao browser, Vercel client bundle ou aplicativo mobile. Ela fica somente no backend da SquareCloud. O modelo é definido no código como `gpt-5.6-sol`, evitando dependência de `OPENAI_MODEL` no ambiente.
+A chave nunca vai para o browser.
 
-`AI_WEB_SEARCH_ENABLED=true` libera o modo **Pesquisar na web com fontes**. A pesquisa Web da OpenAI tem custo separado de uso de modelo, portanto mantenha limites e orçamento configurados no projeto da API.
+## Modos da sala
 
-O adaptador ainda aceita `AI_API_KEY` como fallback de compatibilidade para a chave, mas o modelo não vem mais do ambiente. A Enturma AI fica ativa automaticamente quando uma chave OpenAI válida está configurada.
+O tutor suporta pergunta, resumo, flashcards, quiz, explicação simples, plano de estudo e pesquisa externa com fontes quando habilitada.
 
-## Segurança e qualidade
+Materiais PDF/TXT são armazenados em storage privado e seus chunks ficam associados ao `roomId`.
 
-Materiais são tratados como dados não confiáveis. O prompt manda ignorar instruções encontradas dentro dos documentos. Autorização é determinada por código, nunca pelo LLM.
+## Recuperação de contexto
 
-A API aplica limite diário por usuário e não deve registrar API key, documentos completos ou prompts privados em logs. Pesquisa externa é separada dos materiais e a UI identifica as fontes.
+A versão v4 adiciona um fluxo separado em `POST /study-rooms/{room}/study-summary/recap`.
 
-Próximas melhorias recomendadas: embeddings/pgvector, processamento assíncrono de documentos grandes, antivírus/quarentena, avaliações de qualidade, cache de respostas não sensíveis e métricas de custo por usuário.
+Ele é oferecido quando `messagesBeforeJoin > 0` e usa apenas a conversa anterior ao horário de entrada daquele estudante. A resposta organiza conceitos, exemplos, dúvidas resolvidas, decisões, pontos em aberto e próximos passos.
+
+## Estudo final da sessão
+
+Quando uma sala termina, `room_study_summary` recebe estado `PENDING`. Um job agendado tenta gerar um guia completo com:
+
+- visão geral;
+- conceitos estudados;
+- explicações passo a passo;
+- exemplos;
+- dúvidas e respostas;
+- pontos de atenção;
+- checklist de revisão;
+- exercícios;
+- autoavaliação;
+- plano de revisão.
+
+Estados possíveis: `PENDING`, `PROCESSING`, `READY` e `FAILED`.
+
+A geração pode ser solicitada novamente por `POST /study-rooms/{room}/study-summary`.
+
+## Segurança
+
+Materiais e histórico são tratados como dados não confiáveis para o modelo. Autorização é determinada pelo backend. Não registrar API keys, documentos completos ou conversas privadas em logs.
