@@ -59,6 +59,10 @@ public class ChatService {
         .orElse(0L);
   }
 
+  public Map<String, Object> send(Actor actor, UUID room, String body, UUID replyTo) {
+    return send(actor, room, null, body, replyTo, null);
+  }
+
   @Transactional
   public Map<String, Object> send(
       Actor actor, UUID room, UUID requestedId, String rawBody, UUID replyTo, ImagePayload image) {
