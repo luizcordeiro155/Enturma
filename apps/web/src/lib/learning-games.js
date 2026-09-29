@@ -3,7 +3,7 @@ export const robotBoards = [
   { size: 5, walls: [1, 6, 11, 13, 18], goal: 24, maxOps: 12 },
   { size: 5, walls: [5, 6, 8, 11, 13, 16, 18], goal: 24, maxOps: 10 },
   { size: 6, walls: [1, 7, 8, 10, 14, 16, 20, 22, 26, 28], goal: 35, maxOps: 12 },
-  { size: 6, walls: [1, 7, 8, 10, 14, 16, 19, 20, 22, 25, 28, 31], goal: 35, maxOps: 10 },
+  { size: 6, walls: [1, 7, 8, 10, 13, 14, 16, 19, 20, 22, 25, 26, 28], goal: 35, maxOps: 10 },
 ];
 
 export const codeWordChallenges = [
