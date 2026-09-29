@@ -346,7 +346,12 @@ export function RoomView({ id }: { id: string }) {
                               <>
                                 {replied ? <div className="reply-preview"><strong>{replied.senderName}</strong><span>{replied.body ?? "Imagem"}</span></div> : null}
                                 {message.body ? <p>{message.body}</p> : null}
-                                {message.imageData ? {/* eslint-disable-next-line @next/next/no-img-element */}\n                                <img className="chat-image" src={message.imageData} alt={message.imageName ?? "Imagem"} /> : null}
+                                {message.imageData ? (
+                                  <>
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                                    <img className="chat-image" src={message.imageData} alt={message.imageName ?? "Imagem"} />
+                                  </>
+                                ) : null}
                                 {!ended ? (
                                   <>
                                     <div className="message-actions">
@@ -377,7 +382,8 @@ export function RoomView({ id }: { id: string }) {
                         {preview && image ? (
                           <div className="attachment-preview">
                             <div className="attachment-preview-media">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}\n                              <img src={preview} alt={image.name} />
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={preview} alt={image.name} />
                               <button type="button" className="attachment-remove" onClick={() => { URL.revokeObjectURL(preview); setPreview(null); setImage(null); }}><X size={16} /></button>
                             </div>
                             <div><strong>{image.name}</strong><small>{(image.size / 1024 / 1024).toFixed(2)} MB</small></div>
