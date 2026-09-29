@@ -31,6 +31,13 @@ public class StudyController {
     return study.list(a, subjectId, page);
   }
 
+  @GetMapping("/history")
+  public Object history(
+      @AuthenticationPrincipal Actor a,
+      @RequestParam(defaultValue = "0") int page) {
+    return study.history(a, page);
+  }
+
   @PostMapping
   public Object create(@AuthenticationPrincipal Actor a, @Valid @RequestBody Create r) {
     return study.study(a, r.subjectId(), r.topicId(), r.title(), r.minutes(), r.maxParticipants());
