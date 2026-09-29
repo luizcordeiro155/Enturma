@@ -4,6 +4,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   page,
   browser,
 }) => {
+  test.setTimeout(90000);
   const tag = randomUUID().slice(0, 8),
     a = `alice_${tag}`,
     b = `bob_${tag}`;
@@ -101,13 +102,40 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     other.getByRole("button", { name: "Aceitar convite" }),
   ).toBeVisible({ timeout: 10000 });
   await other.getByRole("button", { name: "Aceitar convite" }).click();
+  await page.bringToFront();
   await expect(
     page.getByRole("button", { name: "Conversar", exact: true }),
   ).toBeVisible({ timeout: 10000 });
+  let peerNotReady = true;
+  await page.route("**/api/backend/friends/*/identity", (route) =>
+    peerNotReady
+      ? route.fulfill({
+          status: 404,
+          contentType: "application/json",
+          body: JSON.stringify({
+            message: "Chave ainda não ativada",
+            code: "NOT_FOUND",
+          }),
+        })
+      : route.continue(),
+  );
   await page.getByRole("button", { name: "Conversar", exact: true }).click();
+  await expect(
+    page.getByText("Aguardando seu amigo", { exact: true }),
+  ).toBeVisible();
+  peerNotReady = false;
+
   await other.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
+  // Re-selecting the active friend must preserve the established key and draft.
+  await page.getByLabel("Mensagem privada").fill("Rascunho preservado");
+  await page.getByRole("button", { name: "Conversar", exact: true }).dblclick();
+  await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
+  await expect(page.getByLabel("Mensagem privada")).toHaveValue(
+    "Rascunho preservado",
+  );
+
   await page
     .getByLabel("Mensagem privada")
     .fill("Conversa privada ponta a ponta 🔒");
@@ -207,5 +235,23 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     page.getByText("Resposta protegida", { exact: true }),
   ).toBeVisible();
+  const clean = await browser.newContext();
+  const fresh = await clean.newPage();
+  await fresh.goto("/login");
+  await fresh.getByLabel("E-mail").fill(`${a}@example.test`);
+  await fresh
+    .getByLabel("Senha", { exact: true })
+    .fill("E2E-password-long-123");
+  await fresh.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(fresh).toHaveURL(/home/);
+  await fresh.goto("/friends");
+  await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
+  await expect(
+    fresh.getByText("Sua chave precisa de atenção", { exact: true }),
+  ).toBeVisible();
+  await expect(fresh.getByLabel("Mensagem privada")).toBeDisabled();
+  await fresh.getByRole("button", { name: "Abrir chaves e backup" }).click();
+  await expect(fresh.locator("#private-backup")).toHaveAttribute("open", "");
+  await clean.close();
   await peer.close();
 });

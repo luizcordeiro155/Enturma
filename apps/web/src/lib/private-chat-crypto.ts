@@ -10,34 +10,71 @@ function bytes(value: string) {
 async function database() {
   return new Promise<IDBDatabase>((resolve, reject) => {
     const r = indexedDB.open("enturma-private-keys", 1);
-    r.onupgradeneeded = () => r.result.createObjectStore("identities");
-    r.onsuccess = () => resolve(r.result);
-    r.onerror = () => reject(r.error);
+    let expired = false;
+    const timer = setTimeout(() => {
+      expired = true;
+      reject(
+        Error(
+          "Não foi possível abrir o armazenamento de chaves. Feche outras abas do Enturma e tente novamente.",
+        ),
+      );
+    }, 8000);
+    r.onupgradeneeded = () => {
+      if (!r.result.objectStoreNames.contains("identities"))
+        r.result.createObjectStore("identities");
+    };
+    r.onsuccess = () => {
+      clearTimeout(timer);
+      if (expired) r.result.close();
+      else resolve(r.result);
+    };
+    r.onerror = () => {
+      clearTimeout(timer);
+      reject(
+        Error(
+          "O navegador bloqueou o armazenamento das chaves. Permita os dados deste site e tente novamente.",
+        ),
+      );
+    };
   });
 }
-export async function readIdentity(
-  user: string,
-): Promise<Identity | undefined> {
+async function identityTransaction<T>(
+  mode: IDBTransactionMode,
+  operation: (store: IDBObjectStore) => IDBRequest<T>,
+): Promise<T> {
   const db = await database();
   return new Promise((resolve, reject) => {
-    const tx = db.transaction("identities");
-    const r = tx.objectStore("identities").get(user);
-    r.onsuccess = () => resolve(r.result);
-    r.onerror = () => reject(r.error);
-    tx.oncomplete = () => db.close();
+    const tx = db.transaction("identities", mode);
+    const request = operation(tx.objectStore("identities"));
+    const timer = setTimeout(() => {
+      tx.abort();
+      reject(
+        Error("O armazenamento de chaves demorou demais. Tente novamente."),
+      );
+    }, 8000);
+    const close = () => {
+      clearTimeout(timer);
+      db.close();
+    };
+    tx.oncomplete = () => {
+      close();
+      resolve(request.result);
+    };
+    tx.onabort = tx.onerror = () => {
+      close();
+      reject(
+        Error(
+          "Não foi possível acessar sua chave neste navegador. Confira as permissões de armazenamento.",
+        ),
+      );
+    };
   });
 }
+export function readIdentity(user: string): Promise<Identity | undefined> {
+  return identityTransaction("readonly", (store) => store.get(user));
+}
 export async function storeIdentity(user: string, value: Identity) {
-  const db = await database();
-  await new Promise<void>((resolve, reject) => {
-    const tx = db.transaction("identities", "readwrite");
-    tx.objectStore("identities").put(value, user);
-    tx.oncomplete = () => {
-      db.close();
-      resolve();
-    };
-    tx.onerror = () => reject(tx.error);
-  });
+  await identityTransaction("readwrite", (store) => store.put(value, user));
 }
 export async function createIdentity(): Promise<Identity> {
   const pair = await crypto.subtle.generateKey(

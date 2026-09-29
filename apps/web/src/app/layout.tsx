@@ -10,6 +10,7 @@ import "./study-journey.css";
 import "./ride-activity.css";
 import { RideActivity } from "@/components/ride-activity";
 import "./study-workspace.css";
+import "./responsive-shell.css";
 import { Motion } from "@/components/motion";
 export const metadata: Metadata = {
   title: "Enturma — estude em companhia",

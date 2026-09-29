@@ -51,6 +51,13 @@ export function Friends() {
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
+  const [identityError, setIdentityError] = useState("");
+  const [identityAttempt, setIdentityAttempt] = useState(0);
+  const [connectionAttempt, setConnectionAttempt] = useState(0);
+  const [connectionState, setConnectionState] = useState<
+    "preparing" | "waiting" | "error" | "ready"
+  >("preparing");
+  const [connectionError, setConnectionError] = useState("");
   const [finger, setFinger] = useState("");
   const [password, setPassword] = useState("");
   const [messages, setMessages] = useState<(Envelope & { text: string })[]>([]);
@@ -67,32 +74,49 @@ export function Friends() {
   );
   useEffect(() => {
     let alive = true;
-    api<PublicProfile>("/users/me")
+    api<PublicProfile>("/users/me", { signal: AbortSignal.timeout(12000) })
       .then(async (user) => {
         if (!alive) return;
         setMe(user);
-        let local = await readIdentity(user.id);
-        const stored =
-          await api<{ publicKey: JsonWebKey }[]>("/private-identity");
-        if (!local) {
-          if (stored.length)
-            throw Error(
-              "Este navegador não tem sua chave. Restaure o backup ou use o dispositivo original.",
-            );
-          local = await createIdentity();
-          await storeIdentity(user.id, local);
-        }
-        await api("/private-identity", {
-          method: "PUT",
-          body: JSON.stringify(publicFields(local.publicKey)),
-        });
-        if (alive) {
-          identity.current = local;
-          setReady(true);
-        }
+        const prepare = async () => {
+          let local = await readIdentity(user.id);
+          const stored = await api<{ publicKey: JsonWebKey }[]>(
+            "/private-identity",
+            { signal: AbortSignal.timeout(12000) },
+          );
+          if (!local) {
+            if (stored.length)
+              throw Error(
+                "Este navegador não tem sua chave. Restaure o backup cifrado em Chaves e backup das conversas ou abra o Enturma no dispositivo original.",
+              );
+            local = await createIdentity();
+            await storeIdentity(user.id, local);
+          }
+          await api("/private-identity", {
+            method: "PUT",
+            body: JSON.stringify(publicFields(local.publicKey)),
+            signal: AbortSignal.timeout(12000),
+          });
+          if (alive) {
+            identity.current = local;
+            setReady(true);
+            setIdentityError("");
+          }
+        };
+        if (navigator.locks)
+          await navigator.locks.request(
+            `enturma-private-identity:${user.id}`,
+            prepare,
+          );
+        else await prepare();
       })
       .catch((e) => {
-        if (alive) setError(e.message);
+        if (alive)
+          setIdentityError(
+            e.name === "TimeoutError"
+              ? "A ativação da conversa demorou demais. Confira sua conexão e tente novamente."
+              : e.message,
+          );
       });
     void refresh().catch((e) => setError(e.message));
     const timer = setInterval(() => {
@@ -103,7 +127,7 @@ export function Friends() {
       alive = false;
       clearInterval(timer);
     };
-  }, [refresh]);
+  }, [refresh, identityAttempt]);
   const load = useCallback(
     async (
       friend: Friend,
@@ -116,6 +140,7 @@ export function Friends() {
         target
           ? `/friends/${friend.id}/messages/target/${target}`
           : `/friends/${friend.id}/messages?page=${index}`,
+        { signal: AbortSignal.timeout(12000) },
       );
       const decoded = await Promise.all(
         rows.map(async (m) => ({
@@ -141,11 +166,22 @@ export function Friends() {
     const friend = selected;
     const current = ++generation.current;
     let active = true;
-    let timer: ReturnType<typeof setInterval>;
+    let timer: ReturnType<typeof setTimeout>;
+    async function poll(k: CryptoKey) {
+      if (!active) return;
+      try {
+        if (document.visibilityState === "visible")
+          await load(friend, k, 0, current);
+      } catch (e) {
+        if (active) setError((e as Error).message);
+      }
+      if (active) timer = setTimeout(() => void poll(k), 3000);
+    }
     async function connect() {
       try {
         const peer = await api<{ publicKey: JsonWebKey }>(
           `/friends/${friend.id}/identity`,
+          { signal: AbortSignal.timeout(12000) },
         );
         if (!active) return;
         const k = await conversationKey(
@@ -158,34 +194,47 @@ export function Friends() {
           peer.publicKey,
         );
         if (!active) return;
+        await load(friend, k, 0, current);
+        if (!active) return;
         key.current = k;
         setFinger(code);
-        await load(friend, k, 0, current);
+        setConnectionState("ready");
+        setConnectionError("");
         const target = location.hash.match(/^#message-([a-f0-9-]+)$/)?.[1];
         if (target) {
           await load(friend, k, 0, current, target);
-          focusMessage(`message-${target}`);
+          if (active) focusMessage(`message-${target}`);
         }
-        timer = setInterval(() => {
-          if (document.visibilityState === "visible")
-            void load(friend, k, 0, current).catch((e) => setError(e.message));
-        }, 3000);
+        if (active) timer = setTimeout(() => void poll(k), 3000);
       } catch (e) {
-        if (active)
-          setError(
-            "A conversa ainda não está pronta. A outra pessoa precisa abrir Amigos para ativar sua chave. " +
-              (e as Error).message,
-          );
+        if (!active) return;
+        const failure = e as Error & { status?: number };
+        key.current = null;
+        setFinger("");
+        const waiting = failure.status === 404;
+        setConnectionState(waiting ? "waiting" : "error");
+        setConnectionError(
+          waiting
+            ? "Aguardando a outra pessoa ativar a conversa. Assim que ela abrir Amigos no dispositivo dela, conectaremos automaticamente."
+            : "Não foi possível preparar a conversa. Verifique a conexão e tente novamente.",
+        );
+        if (waiting || !failure.status || failure.status >= 500)
+          timer = setTimeout(() => void connect(), 4000);
       }
     }
-    void connect();
+    const start = setTimeout(() => {
+      setConnectionState("preparing");
+      setConnectionError("");
+      void connect();
+    }, 0);
     return () => {
       active = false;
       generation.current = current + 1;
       key.current = null;
-      clearInterval(timer);
+      clearTimeout(timer);
+      clearTimeout(start);
     };
-  }, [selected, ready, load]);
+  }, [selected, ready, load, connectionAttempt]);
   useEffect(() => {
     const jump = () => {
       const target = location.hash.match(/^#message-([a-f0-9-]+)$/)?.[1];
@@ -201,15 +250,24 @@ export function Friends() {
       window.removeEventListener("enturma-notification-open", jump);
     };
   }, [selected, load]);
-  function choose(friend: Friend) {
-    setError("");
-    setMessages([]);
-    setDraft("");
-    setPage(0);
-    setFinger("");
-    key.current = null;
-    setSelected(friend);
-  }
+  const choose = useCallback(
+    (friend: Friend) => {
+      if (selected?.id === friend.id) {
+        if (!key.current) setConnectionAttempt((n) => n + 1);
+        return;
+      }
+      setConnectionState("preparing");
+      setConnectionError("");
+      setError("");
+      setMessages([]);
+      setDraft("");
+      setPage(0);
+      setFinger("");
+      key.current = null;
+      setSelected(friend);
+    },
+    [selected?.id],
+  );
   useEffect(() => {
     if (!requestedChat || selected?.id === requestedChat) return;
     const target = friends.find(
@@ -219,7 +277,7 @@ export function Friends() {
       const timer = setTimeout(() => choose(target), 0);
       return () => clearTimeout(timer);
     }
-  }, [requestedChat, friends, selected?.id]);
+  }, [requestedChat, friends, selected?.id, choose]);
   useLiveRefresh("notifications_changed", async () => {
     await refresh();
     if (selected && key.current)
@@ -241,8 +299,7 @@ export function Friends() {
       );
       await post(`/friends/${friend.id}/messages`, {
         ...payload,
-        mentioned:
-          !!friend.username && mentionsUser(draft, friend.username),
+        mentioned: !!friend.username && mentionsUser(draft, friend.username),
       });
       setDraft("");
       await load(friend, key.current, 0, generation.current);
@@ -263,6 +320,11 @@ export function Friends() {
         {error ? (
           <p role="alert" className="error">
             {error}
+          </p>
+        ) : null}
+        {!selected && identityError ? (
+          <p className="error" role="alert">
+            {identityError}
           </p>
         ) : null}
         <p role="status">{notice}</p>
@@ -292,7 +354,7 @@ export function Friends() {
           </label>
           <button>Enviar convite</button>
         </form>
-        <details className="private-backup">
+        <details className="private-backup" id="private-backup">
           <summary>Chaves e backup das conversas</summary>
           <p>
             Sua chave privada fica neste navegador. Guarde um backup cifrado
@@ -354,6 +416,8 @@ export function Friends() {
                     await storeIdentity(me.id, restored);
                     identity.current = restored;
                     setReady(true);
+                    setIdentityError("");
+                    setConnectionAttempt((n) => n + 1);
                     setError("");
                     setNotice("Chave restaurada.");
                   } catch {
@@ -446,7 +510,60 @@ export function Friends() {
                     <p>Os dois dispositivos devem mostrar o mesmo código.</p>
                   </details>
                 ) : (
-                  <p>Preparando conversa…</p>
+                  <div className="private-connection-status" role="status">
+                    <strong>
+                      {identityError
+                        ? "Sua chave precisa de atenção"
+                        : connectionState === "waiting"
+                          ? "Aguardando seu amigo"
+                          : connectionState === "error"
+                            ? "Conversa indisponível no momento"
+                            : "Preparando conversa segura…"}
+                    </strong>
+                    <p>
+                      {identityError ||
+                        connectionError ||
+                        "Ativando a criptografia neste dispositivo. Isso deve levar poucos segundos."}
+                    </p>
+                    {identityError ||
+                    connectionState === "error" ||
+                    connectionState === "waiting" ? (
+                      <div className="actions">
+                        <button
+                          className="secondary"
+                          onClick={() => {
+                            if (!ready) {
+                              setIdentityError("");
+                              setIdentityAttempt((n) => n + 1);
+                            } else {
+                              setConnectionState("preparing");
+                              setConnectionError("");
+                              setConnectionAttempt((n) => n + 1);
+                            }
+                          }}
+                        >
+                          Tentar conectar novamente
+                        </button>
+                        {identityError ? (
+                          <button
+                            className="text-button"
+                            onClick={() => {
+                              const backup = document.getElementById(
+                                "private-backup",
+                              ) as HTMLDetailsElement | null;
+                              if (backup) {
+                                backup.open = true;
+                                backup.scrollIntoView({ block: "center" });
+                                backup.querySelector("summary")?.focus();
+                              }
+                            }}
+                          >
+                            Abrir chaves e backup
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
+                  </div>
                 )}
                 <ConversationNotice context={`friend:${selected.id}`} />
                 <div className="private-messages" role="log">

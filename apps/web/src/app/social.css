@@ -673,3 +673,26 @@ html .onboarding-banner {
   width: 100%;
   margin-top: 12px;
 }
+
+/* The lime authentication panel keeps its own readable foreground in every theme. */
+html .auth-story {
+  background: #ddf280;
+  color: #183f36;
+}
+html .auth-story :is(h1, p, span, a, svg) {
+  color: #183f36;
+}
+.private-connection-status {
+  background: var(--soft);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+}
+.private-connection-status p {
+  margin: 8px 0;
+  line-height: 1.6;
+}
+.private-connection-status .actions {
+  flex-wrap: wrap;
+}
