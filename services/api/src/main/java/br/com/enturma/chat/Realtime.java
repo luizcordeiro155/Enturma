@@ -151,8 +151,14 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
             "senderId", c.actor.id().toString(),
             "senderPublicKey", c.publicKey,
             "iv", iv,
-            "ciphertext", ciphertext,
-            "history", history));
+            "ciphertext", ciphertext));
+
+    java.util.concurrent.CompletableFuture.delayedExecutor(
+            700, java.util.concurrent.TimeUnit.MILLISECONDS)
+        .execute(
+            () -> {
+              for (Map<String, Object> envelope : history) relay(c, targetId, envelope);
+            });
   }
 
   private void authenticate(Connection c, JsonNode data) throws Exception {
