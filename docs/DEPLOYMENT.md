@@ -130,14 +130,12 @@ O app Expo continua usando a mesma API por `EXPO_PUBLIC_API_URL=https://SEU-SUBD
 Configure **somente na API/SquareCloud**, nunca no frontend:
 
 ```dotenv
-AI_ENABLED=true
 OPENAI_API_KEY=...
-OPENAI_MODEL=...
 AI_WEB_SEARCH_ENABLED=true
 AI_BASE_URL=https://api.openai.com/v1
 ```
 
-`AI_WEB_SEARCH_ENABLED=false` mantém o tutor restrito aos materiais da sala. Quando `true`, o modo Pesquisa usa a ferramenta Web Search da Responses API e exibe as citações retornadas pela OpenAI.
+O modelo `gpt-5.6-sol` é definido diretamente no backend e não exige `OPENAI_MODEL`. `AI_WEB_SEARCH_ENABLED=false` mantém o tutor restrito aos materiais da sala. Quando `true`, o modo Pesquisa usa a ferramenta Web Search da Responses API e exibe as citações retornadas pela OpenAI.
 
 Depois de alterar variáveis, reinicie/redeploy a API e confirme `GET /api/v1/capabilities`: `ai=true` e, quando habilitado, `aiWebSearch=true`.
 
