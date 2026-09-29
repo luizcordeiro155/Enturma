@@ -65,12 +65,17 @@ class CatalogRulesTest {
 
   @Test
   void gameAnswersAreValidatedServerSide() {
-    assertThat(LearningController.check("binary", 1, "101")).isTrue();
-    assertThat(LearningController.check("binary", 1, "111")).isFalse();
-    assertThat(LearningController.check("trace", 4, "10")).isTrue();
+    assertThat(LearningController.check("codeword", 1, "ARRAY")).isTrue();
+    assertThat(LearningController.check("codeword", 1, "STACK")).isFalse();
+    assertThat(LearningController.check("trace", 4, "12")).isTrue();
     assertThat(LearningController.check("trace", 4, "999")).isFalse();
-    assertThat(LearningController.check("robot", 1, "DDDRRR")).isTrue();
-    assertThat(LearningController.check("robot", 1, "RDDRRD")).isFalse();
+    assertThat(
+            LearningController.check(
+                "robot",
+                1,
+                "DOWN;DOWN;DOWN;RIGHT;RIGHT;DOWN;RIGHT;RIGHT"))
+        .isTrue();
+    assertThat(LearningController.check("robot", 1, "RIGHT")).isFalse();
     assertThat(LearningController.check("robot", 1, "eval()")).isFalse();
     assertThatThrownBy(() -> LearningController.check("fake", 1, "10"))
         .isInstanceOf(ApiException.class);
