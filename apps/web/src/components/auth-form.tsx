@@ -32,7 +32,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   useEffect(() => {
     if (!completed) return;
-    setRedirectSeconds(completed === "reset" ? 30 : 5);
     const channel =
       typeof BroadcastChannel !== "undefined"
         ? new BroadcastChannel("enturma-account-status")
@@ -112,6 +111,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         sessionStorage.setItem("enturma-password-reset-complete", "1");
         window.history.replaceState(null, "", "/reset-password");
         setSuccess("Senha atualizada com sucesso.");
+        setRedirectSeconds(30);
         setCompleted("reset");
       } else {
         setSuccess(
