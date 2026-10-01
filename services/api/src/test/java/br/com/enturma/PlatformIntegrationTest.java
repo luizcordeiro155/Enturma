@@ -1150,7 +1150,8 @@ class PlatformIntegrationTest {
     assertThatThrownBy(() -> auth.consume(verifyToken, "VERIFY", null))
         .isInstanceOf(ApiException.class);
 
-    auth.recover(email);
+    var recovery = auth.recover(email);
+    assertThat(auth.recoveryStatus(recovery.trackingToken()).status()).isEqualTo("PENDING");
     var resetMail =
         db.one(
             "SELECT body FROM email_outbox WHERE recipient=? AND subject LIKE '%senha%'"
@@ -1160,6 +1161,7 @@ class PlatformIntegrationTest {
     String resetToken = resetBody.substring(resetBody.indexOf("#token=") + 7);
     auth.consume(resetToken, "RESET", "new-test-password-long");
 
+    assertThat(auth.recoveryStatus(recovery.trackingToken()).status()).isEqualTo("COMPLETED");
     assertThat(
             db.one("SELECT revoked_at FROM user_session WHERE id=?", host.sessionId())
                 .get("revokedAt"))
