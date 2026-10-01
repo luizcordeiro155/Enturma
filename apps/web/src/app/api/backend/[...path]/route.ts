@@ -94,7 +94,10 @@ async function proxy(
         maxAge: 30 * 86400,
       });
     }
-    if (route === "auth/logout" && upstream.ok) {
+    if (
+      upstream.ok &&
+      (route === "auth/logout" || route === "auth/reset-password")
+    ) {
       res.cookies.delete("enturma_access");
       res.cookies.delete("enturma_refresh");
     }

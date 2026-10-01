@@ -52,3 +52,12 @@ Rate limits por identidade de cliente:
 | outras mutações de auth | 20 / min |
 
 Login continua retornando a mesma mensagem para e-mail inexistente e senha errada para reduzir enumeração de contas. Recuperação de senha também permanece silenciosa para endereço inexistente.
+
+
+## Experiência de confirmação e recuperação
+
+- Ao reenviar a confirmação pelo perfil, o Web mostra uma tela animada com contagem regressiva de 30 minutos, opção para cancelar a espera e verificação automática do status da conta.
+- Quando o link de confirmação é consumido, a página exibe uma animação de sucesso e sinaliza outras abas abertas para atualizarem o perfil automaticamente.
+- A recuperação de senha mostra uma tela animada informando que o link foi enviado e o tempo restante de 30 minutos.
+- Após definir uma nova senha, todas as sessões existentes são revogadas no backend e os cookies da sessão atual também são apagados pelo BFF Web.
+- A tela de sucesso da redefinição mantém o usuário informado por 30 segundos e então o envia ao login. Recarregar a página não restaura a sessão anterior.

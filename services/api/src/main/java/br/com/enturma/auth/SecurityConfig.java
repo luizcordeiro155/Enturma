@@ -29,7 +29,8 @@ public class SecurityConfig {
       Db db,
       ObjectMapper json,
       ClientIdentity clients,
-      @Value("${enturma.origins}") String origins)
+      @Value("${enturma.origins}") String origins,
+      @Value("${enturma.auth-register-limit:5}") int registerLimit)
       throws Exception {
     var cors = new CorsConfiguration();
     cors.setAllowedOrigins(Arrays.asList(origins.split(",")));
@@ -69,7 +70,7 @@ public class SecurityConfig {
                           Errors.body(401, "UNAUTHORIZED", "Entre para continuar.", req));
                     }))
         .addFilterBefore(
-            new RequestSecurity(auth, db, json, clients),
+            new RequestSecurity(auth, db, json, clients, registerLimit),
             UsernamePasswordAuthenticationFilter.class)
         .build();
   }

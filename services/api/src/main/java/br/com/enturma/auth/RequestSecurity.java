@@ -16,12 +16,19 @@ public class RequestSecurity extends OncePerRequestFilter {
   private final Db db;
   private final ObjectMapper json;
   private final ClientIdentity clients;
+  private final int registerLimit;
 
-  public RequestSecurity(AuthService auth, Db db, ObjectMapper json, ClientIdentity clients) {
+  public RequestSecurity(
+      AuthService auth,
+      Db db,
+      ObjectMapper json,
+      ClientIdentity clients,
+      int registerLimit) {
     this.auth = auth;
     this.db = db;
     this.json = json;
     this.clients = clients;
+    this.registerLimit = registerLimit;
   }
 
   @Override
@@ -63,7 +70,7 @@ public class RequestSecurity extends OncePerRequestFilter {
         windowSeconds = 60;
       } else if (uri.equals("/api/v1/auth/register")) {
         prefix = "auth-register:";
-        limit = 5;
+        limit = registerLimit;
         windowSeconds = 900;
       } else if (uri.equals("/api/v1/auth/forgot-password")
           || uri.equals("/api/v1/auth/resend-verification")) {

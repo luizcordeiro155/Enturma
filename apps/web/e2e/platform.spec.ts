@@ -15,6 +15,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await page.getByLabel("Nome de usuário").fill(`e2e_${tag}`);
   await page.getByLabel("E-mail").fill(email);
   await page.getByLabel("Senha", { exact: true }).fill(password);
+  await page.getByLabel("Confirmar senha").fill(password);
   await page.getByRole("button", { name: "Criar conta" }).click();
   await expect(page).toHaveURL(/onboarding/);
   await expect(
