@@ -1160,6 +1160,10 @@ class PlatformIntegrationTest {
     String resetToken = resetBody.substring(resetBody.indexOf("#token=") + 7);
     auth.consume(resetToken, "RESET", "new-test-password-long");
 
+    assertThat(
+            db.one("SELECT revoked_at FROM user_session WHERE id=?", host.sessionId())
+                .get("revokedAt"))
+        .isNotNull();
     assertThatThrownBy(() -> auth.login(email, "test-password-long", "JUnit"))
         .isInstanceOf(ApiException.class);
     assertThat(auth.login(email, "new-test-password-long", "JUnit").userId()).isEqualTo(host.id());
