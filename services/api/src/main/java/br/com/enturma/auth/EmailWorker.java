@@ -13,16 +13,23 @@ public class EmailWorker {
   private final Db db;
   private final JavaMailSender sender;
   private final String from;
+  private final boolean enabled;
 
-  public EmailWorker(Db db, JavaMailSender sender, @Value("${enturma.mail-from}") String from) {
+  public EmailWorker(
+      Db db,
+      JavaMailSender sender,
+      @Value("${enturma.mail-from}") String from,
+      @Value("${enturma.mail-enabled:false}") boolean enabled) {
     this.db = db;
     this.sender = sender;
     this.from = from;
+    this.enabled = enabled;
   }
 
-  @Scheduled(fixedDelay = 30000)
+  @Scheduled(fixedDelay = 5000)
   @Transactional
   public void deliver() {
+    if (!enabled) return;
     for (var row :
         db.list(
             "SELECT * FROM email_outbox WHERE sent_at IS NULL AND attempts<10 ORDER BY created_at"
@@ -36,7 +43,9 @@ public class EmailWorker {
         sender.send(mail);
         db.jdbc.update("UPDATE email_outbox SET sent_at=now(),body='' WHERE id=?", row.get("id"));
       } catch (org.springframework.mail.MailException e) {
-        db.jdbc.update("UPDATE email_outbox SET attempts=attempts+1 WHERE id=?", row.get("id"));
+        db.jdbc.update(
+            "UPDATE email_outbox SET attempts=attempts+1 WHERE id=?",
+            row.get("id"));
       }
     }
   }
