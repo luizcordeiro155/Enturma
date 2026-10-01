@@ -128,3 +128,21 @@ Para usar:
 3. abra `Enturma.exe`.
 
 Esse pacote usa a mesma aplicação Web oficial e mantém conta e dados sincronizados. O instalador NSIS continua previsto para builds feitos diretamente em Windows.
+
+
+## Atualização automática
+
+A partir da versão **0.2.0**, o Enturma Desktop verifica atualizações automaticamente ao iniciar e depois em intervalos periódicos.
+
+O fluxo é:
+
+1. o aplicativo consulta o manifesto `latest.json` hospedado na Railway;
+2. compara a versão instalada com a versão publicada;
+3. baixa o novo pacote em segundo plano;
+4. valida o tamanho e o SHA-256;
+5. exibe **Atualização pronta**;
+6. ao clicar em **Atualizar e reiniciar**, o Enturma fecha, substitui os arquivos e abre novamente.
+
+O usuário pode escolher **Depois** e continuar usando a versão atual. O app verificará novamente em outra execução.
+
+Atualizações somente do Web/Next.js não exigem nova versão Desktop, porque o Electron utiliza a aplicação Web oficial.
