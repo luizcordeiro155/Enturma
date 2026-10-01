@@ -12,6 +12,7 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
   await page
     .getByLabel("Senha", { exact: true })
     .fill("Test-password-long-123");
+  await page.getByLabel("Confirmar senha").fill("Test-password-long-123");
   await page.getByRole("button", { name: "Criar conta" }).click();
   await expect(page).toHaveURL(/onboarding/);
   await page.goto("/notebooks");
@@ -113,6 +114,9 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
   await other.getByLabel("E-mail").fill(`othernotebook_${tag}@example.test`);
   await other
     .getByLabel("Senha", { exact: true })
+    .fill("Test-password-long-123");
+  await other
+    .getByLabel("Confirmar senha")
     .fill("Test-password-long-123");
   await other.getByRole("button", { name: "Criar conta" }).click();
   await expect(other).toHaveURL(/onboarding/);
