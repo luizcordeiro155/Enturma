@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
+import { MailCheck, X } from "lucide-react";
 import { Shell } from "./shell";
 import { ProfileDetailsEditor } from "./profile-details-editor";
 import { Feedback } from "./feedback";
@@ -24,6 +25,9 @@ export function ProfileView({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [verificationBusy, setVerificationBusy] = useState(false);
+  const [verificationWaitingUntil, setVerificationWaitingUntil] = useState<number | null>(null);
+  const [verificationNow, setVerificationNow] = useState(() => Date.now());
+  const [verificationConfirmed, setVerificationConfirmed] = useState(false);
 
   async function loadProfile() {
     setP(await api<Profile>("/users/me"));
@@ -50,6 +54,67 @@ export function ProfileView({
       active = false;
     };
   }, [settings]);
+
+  useEffect(() => {
+    if (!verificationWaitingUntil) return;
+    const tick = window.setInterval(() => setVerificationNow(Date.now()), 1000);
+    const poll = window.setInterval(() => {
+      api<Profile>("/users/me")
+        .then((profile) => {
+          setP(profile);
+          if (profile.emailVerified) {
+            setVerificationConfirmed(true);
+            setNotice("E-mail confirmado com sucesso.");
+            setVerificationWaitingUntil(null);
+          }
+        })
+        .catch(() => {});
+    }, 5000);
+
+    const channel =
+      typeof BroadcastChannel !== "undefined"
+        ? new BroadcastChannel("enturma-account-status")
+        : null;
+    channel?.addEventListener("message", (event) => {
+      if (event.data?.type !== "email-verified") return;
+      void loadProfile().then(() => {
+        setVerificationConfirmed(true);
+        setNotice("E-mail confirmado com sucesso.");
+        setVerificationWaitingUntil(null);
+      });
+    });
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== "enturma-email-verified-at") return;
+      void loadProfile().then(() => {
+        setVerificationConfirmed(true);
+        setNotice("E-mail confirmado com sucesso.");
+        setVerificationWaitingUntil(null);
+      });
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      window.clearInterval(tick);
+      window.clearInterval(poll);
+      channel?.close();
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [verificationWaitingUntil]);
+
+  useEffect(() => {
+    if (!verificationConfirmed) return;
+    const timeout = window.setTimeout(() => setVerificationConfirmed(false), 5000);
+    return () => window.clearTimeout(timeout);
+  }, [verificationConfirmed]);
+
+  const verificationRemaining = useMemo(() => {
+    if (!verificationWaitingUntil) return 0;
+    return Math.max(0, Math.ceil((verificationWaitingUntil - verificationNow) / 1000));
+  }, [verificationNow, verificationWaitingUntil]);
+
+  const verificationClock = `${String(Math.floor(verificationRemaining / 60)).padStart(2, "0")}:${String(verificationRemaining % 60).padStart(2, "0")}`;
+
 
   async function revoke(id: string) {
     try {
@@ -103,8 +168,11 @@ export function ProfileView({
                         setNotice("");
                         try {
                           await post("/auth/resend-verification");
+                          const expiresAt = Date.now() + 30 * 60 * 1000;
+                          setVerificationNow(Date.now());
+                          setVerificationWaitingUntil(expiresAt);
                           setNotice(
-                            "Enviamos um novo link de confirmação para seu e-mail. Verifique também a caixa de spam.",
+                            "Enviamos um novo link de confirmação para seu e-mail. Você tem 30 minutos para confirmar.",
                           );
                         } catch (e) {
                           setError((e as Error).message);
@@ -189,6 +257,83 @@ export function ProfileView({
               </p>
             ) : null}
           </>
+        ) : null}
+
+        {verificationWaitingUntil ? (
+          <div className="verification-wait-backdrop" role="dialog" aria-modal="true" aria-labelledby="verification-wait-title">
+            <section className="verification-wait-card">
+              <button
+                type="button"
+                className="verification-wait-close"
+                aria-label="Fechar"
+                onClick={() => setVerificationWaitingUntil(null)}
+              >
+                <X size={18} />
+              </button>
+              <div className="verification-wait-animation" aria-hidden="true">
+                <span className="verification-mail-orbit orbit-a" />
+                <span className="verification-mail-orbit orbit-b" />
+                <span className="verification-mail-core">
+                  <MailCheck size={44} />
+                </span>
+              </div>
+              <span className="verification-wait-kicker">Aguardando confirmação</span>
+              <h2 id="verification-wait-title">Confirme seu e-mail</h2>
+              <p>
+                Abra o e-mail que enviamos para <strong>{p?.email}</strong> e clique no link de confirmação.
+                Esta tela atualizará sozinha assim que a confirmação for concluída.
+              </p>
+              <div className="verification-countdown" aria-live="polite">
+                <strong>{verificationClock}</strong>
+                <span>tempo restante do link</span>
+              </div>
+              <div className="verification-wait-progress" aria-hidden="true">
+                <span style={{ width: `${Math.max(0, Math.min(100, (verificationRemaining / 1800) * 100))}%` }} />
+              </div>
+              <div className="verification-wait-actions">
+                <button
+                  type="button"
+                  className="button secondary"
+                  onClick={() => setVerificationWaitingUntil(null)}
+                >
+                  Cancelar espera
+                </button>
+                <button
+                  type="button"
+                  className="button"
+                  onClick={async () => {
+                    try {
+                      const profile = await api<Profile>("/users/me");
+                      setP(profile);
+                      if (profile.emailVerified) {
+                        setVerificationConfirmed(true);
+                        setVerificationWaitingUntil(null);
+                        setNotice("E-mail confirmado com sucesso.");
+                      } else {
+                        setNotice("Ainda aguardando a confirmação do e-mail.");
+                      }
+                    } catch (e) {
+                      setError((e as Error).message);
+                    }
+                  }}
+                >
+                  Já confirmei
+                </button>
+              </div>
+            </section>
+          </div>
+        ) : null}
+
+        {verificationConfirmed ? (
+          <div className="verification-confirmed-toast" role="status" aria-live="polite">
+            <span className="verification-confirmed-icon">
+              <MailCheck size={24} />
+            </span>
+            <div>
+              <strong>E-mail confirmado!</strong>
+              <small>Seu perfil foi atualizado automaticamente.</small>
+            </div>
+          </div>
         ) : null}
       </div>
     </Shell>
