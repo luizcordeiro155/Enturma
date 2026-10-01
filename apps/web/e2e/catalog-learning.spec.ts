@@ -22,6 +22,7 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   await page.getByLabel("Nome de usuário").fill(`una_${tag}`);
   await page.getByLabel("E-mail").fill(`una_${tag}@example.test`);
   await page.getByLabel("Senha", { exact: true }).fill("E2E-test-password-123");
+  await page.getByLabel("Confirmar senha").fill("E2E-test-password-123");
   await page.getByRole("button", { name: "Criar conta" }).click();
   await expect(page).toHaveURL(/onboarding/);
   await page.getByRole("button", { name: /Centro Universitário UNA/ }).click();
