@@ -1130,6 +1130,14 @@ class PlatformIntegrationTest {
 
 
   @Test
+  void passwordRecoveryRejectsUnknownEmailBeforeStartingCountdown() {
+    assertThatThrownBy(() -> auth.recover("nao-existe@example.test"))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("Não encontramos uma conta cadastrada com este e-mail");
+  }
+
+
+  @Test
   void emailVerificationAndPasswordRecoveryUseOneTimeLinks() {
     String email =
         (String) db.one("SELECT email FROM app_user WHERE id=?", host.id()).get("email");
