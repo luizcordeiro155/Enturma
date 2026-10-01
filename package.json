@@ -12,7 +12,9 @@
     "build": "npm run build -w @enturma/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
-    "lint": "npm run lint --workspaces --if-present"
+    "lint": "npm run lint --workspaces --if-present",
+    "dev:desktop": "npm run dev -w @enturma/desktop",
+    "dist:desktop:win": "npm run dist:win -w @enturma/desktop"
   },
   "engines": {
     "node": ">=22.14.0"

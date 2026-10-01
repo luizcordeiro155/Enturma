@@ -30,6 +30,20 @@ npm run dev:web
 npm run dev:mobile
 ```
 
+Desktop (Electron):
+
+```powershell
+npm run dev:desktop
+```
+
+Para gerar o instalador Windows e a versão portátil sem GitHub Actions:
+
+```powershell
+npm run dist:desktop:win
+```
+
+Os artefatos são criados em `apps/desktop/dist`.
+
 Web: `http://localhost:3000`. API: `http://localhost:8080`. Mailpit: `http://localhost:8025`. O endereço de API no celular precisa ser o IP local acessível do computador; no emulador Android, geralmente `http://10.0.2.2:8080/api/v1`. Para produção, use HTTPS.
 
 Cadastre uma conta e confirme o e-mail pelo Mailpit. A confirmação também funciona com SMTP real configurado. Para preencher o catálogo, crie um administrador pelo procedimento de [autenticação](docs/AUTHENTICATION.md) e importe registros com fontes oficiais em `/admin`. Não há administrador nem catálogo de demonstração embutidos.
@@ -58,6 +72,7 @@ O `.env.example` da raiz documenta as variáveis básicas e os blocos opcionais 
 ```text
 apps/web                 Next.js App Router, BFF de autenticação e testes E2E
 apps/mobile              Expo Router e SecureStore
+apps/desktop             Electron, instalador Windows e integração com a Web oficial
 services/api             API Spring modular, Flyway e testes PostgreSQL
 packages/contracts       Tipos e cliente HTTP compartilhados
 packages/design-tokens   Identidade visual compartilhada
@@ -84,7 +99,7 @@ E2E exige API e web em execução, API apontando para um banco separado com `e2e
 
 ## Documentação
 
-[Plano](docs/IMPLEMENTATION_PLAN.md) · [Estado e limites](docs/STATUS.md) · [Arquitetura](docs/ARCHITECTURE.md) · [Banco](docs/DATABASE.md) · [API](docs/API.md) · [Autenticação](docs/AUTHENTICATION.md) · [Salas](docs/STUDY_ROOMS.md) · [Tempo real](docs/REALTIME.md) · [Privacidade do chat](docs/CHAT_PRIVACY.md) · [IA](docs/AI.md) · [XP e aprendizagem](docs/LEARNING.md) · [Caronas](docs/CARPOOL.md) · [Segurança](docs/SECURITY.md) · [Deploy](docs/DEPLOYMENT.md)
+[Plano](docs/IMPLEMENTATION_PLAN.md) · [Estado e limites](docs/STATUS.md) · [Arquitetura](docs/ARCHITECTURE.md) · [Banco](docs/DATABASE.md) · [API](docs/API.md) · [Autenticação](docs/AUTHENTICATION.md) · [Salas](docs/STUDY_ROOMS.md) · [Tempo real](docs/REALTIME.md) · [Privacidade do chat](docs/CHAT_PRIVACY.md) · [IA](docs/AI.md) · [XP e aprendizagem](docs/LEARNING.md) · [Caronas](docs/CARPOOL.md) · [Segurança](docs/SECURITY.md) · [Deploy](docs/DEPLOYMENT.md) · [Desktop](docs/DESKTOP.md)
 # Atualização: catálogo acadêmico e laboratório de programação
 
 Catálogo verificado com prioridade UNA Aimorés, matrizes de UNA/PUC Minas/UFMG, importações persistidas, painel `/admin/catalog`, onboarding web/mobile e 12 desafios JavaScript em `/learn`, liberados por matrícula em TI. Veja [cobertura, fontes e operação](docs/ACADEMIC_CATALOG.md). Não exige novas credenciais no `.env`.
