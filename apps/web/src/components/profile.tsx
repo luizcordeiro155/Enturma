@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@enturma/contracts";
@@ -29,9 +29,9 @@ export function ProfileView({
   const [verificationNow, setVerificationNow] = useState(() => Date.now());
   const [verificationConfirmed, setVerificationConfirmed] = useState(false);
 
-  async function loadProfile() {
+  const loadProfile = useCallback(async () => {
     setP(await api<Profile>("/users/me"));
-  }
+  }, []);
 
   useEffect(() => {
     let active = true;
@@ -57,7 +57,14 @@ export function ProfileView({
 
   useEffect(() => {
     if (!verificationWaitingUntil) return;
-    const tick = window.setInterval(() => setVerificationNow(Date.now()), 1000);
+    const tick = window.setInterval(() => {
+      const now = Date.now();
+      setVerificationNow(now);
+      if (now >= verificationWaitingUntil) {
+        setVerificationWaitingUntil(null);
+        setNotice("O link de confirmação expirou. Solicite um novo e-mail.");
+      }
+    }, 1000);
     const poll = window.setInterval(() => {
       api<Profile>("/users/me")
         .then((profile) => {
@@ -100,7 +107,7 @@ export function ProfileView({
       channel?.close();
       window.removeEventListener("storage", onStorage);
     };
-  }, [verificationWaitingUntil]);
+  }, [loadProfile, verificationWaitingUntil]);
 
   useEffect(() => {
     if (!verificationConfirmed) return;
