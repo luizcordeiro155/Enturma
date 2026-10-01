@@ -24,7 +24,7 @@ if (-not $SkipInstall) {
   if ($LASTEXITCODE -ne 0) { throw "npm ci falhou." }
 }
 
-Write-Host "Gerando Enturma Desktop para Windows..."
+Write-Host "Gerando instalador do Enturma Desktop para Windows..."
 npm run dist:desktop:win
 if ($LASTEXITCODE -ne 0) { throw "Falha ao gerar o aplicativo Desktop." }
 
