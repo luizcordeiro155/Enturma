@@ -1,4 +1,4 @@
-FROM electronuserland/builder:wine AS build
+FROM node:22-bookworm AS build
 
 WORKDIR /project
 COPY . .
