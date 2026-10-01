@@ -33,7 +33,8 @@ public class AuthController {
 
   public record Reset(
       @NotBlank @Size(max = 100) String token,
-      @NotNull @Size(min = 12, max = 72) String password) {}
+      @NotNull @Size(min = 12, max = 72) String password,
+      Boolean revokeAllSessions) {}
 
   @PostMapping("/register")
   @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
@@ -66,13 +67,17 @@ public class AuthController {
   @PostMapping("/reset-password")
   @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
   public void reset(@Valid @RequestBody Reset r) {
-    auth.consume(r.token(), "RESET", r.password());
+    auth.consume(
+        r.token(),
+        "RESET",
+        r.password(),
+        r.revokeAllSessions() == null || r.revokeAllSessions());
   }
 
   @PostMapping("/verify-email")
   @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
   public void verify(@Valid @RequestBody Token r) {
-    auth.consume(r.token(), "VERIFY", null);
+    auth.consume(r.token(), "VERIFY", null, false);
   }
 
   @PostMapping("/logout")
