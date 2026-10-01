@@ -21,6 +21,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [success, setSuccess] = useState("");
   const [completed, setCompleted] = useState<"verify" | "reset" | null>(null);
   const [redirectSeconds, setRedirectSeconds] = useState(30);
+  const [recoveryWaitingUntil, setRecoveryWaitingUntil] = useState<number | null>(null);
+  const [recoveryNow, setRecoveryNow] = useState(() => Date.now());
   useEffect(() => {
     if (!completed) return;
     setRedirectSeconds(completed === "reset" ? 30 : 5);
@@ -51,6 +53,22 @@ export function AuthForm({ mode }: { mode: Mode }) {
       window.clearTimeout(timeout);
     };
   }, [completed, router]);
+
+  useEffect(() => {
+    if (!recoveryWaitingUntil) return;
+    const interval = window.setInterval(() => {
+      const now = Date.now();
+      setRecoveryNow(now);
+      if (now >= recoveryWaitingUntil) setRecoveryWaitingUntil(null);
+    }, 1000);
+    return () => window.clearInterval(interval);
+  }, [recoveryWaitingUntil]);
+
+  const recoveryRemaining = recoveryWaitingUntil
+    ? Math.max(0, Math.ceil((recoveryWaitingUntil - recoveryNow) / 1000))
+    : 0;
+  const recoveryClock = `${String(Math.floor(recoveryRemaining / 60)).padStart(2, "0")}:${String(recoveryRemaining % 60).padStart(2, "0")}`;
+
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -90,6 +108,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
         setSuccess(
           "Se houver uma conta com este e-mail, enviaremos as instruções.",
         );
+        setRecoveryNow(Date.now());
+        setRecoveryWaitingUntil(Date.now() + 30 * 60 * 1000);
       }
     } catch (e) {
       setError((e as Error).message);
@@ -97,6 +117,69 @@ export function AuthForm({ mode }: { mode: Mode }) {
       setBusy(false);
     }
   }
+  if (recoveryWaitingUntil) {
+    return (
+      <div className="auth-layout">
+        <section className="auth-story">
+          <Link href="/" className="brand">
+            <BookOpen size={40} />
+            enturma.
+          </Link>
+          <div>
+            <h1>Verifique seu e-mail.</h1>
+            <p>
+              Enviamos um link seguro para redefinir sua senha.
+            </p>
+          </div>
+          <span>O link expira em 30 minutos.</span>
+        </section>
+        <main className="auth-main auth-success-main">
+          <section className="auth-success-card recovery-wait-card" role="status" aria-live="polite">
+            <div className="auth-success-animation" aria-hidden="true">
+              <span className="auth-success-orbit orbit-one" />
+              <span className="auth-success-orbit orbit-two" />
+              <span className="auth-success-check">
+                <MailCheck size={48} />
+              </span>
+            </div>
+            <div className="auth-success-copy">
+              <span className="auth-success-kicker">
+                <Check size={16} />
+                E-mail enviado
+              </span>
+              <h1>Aguardando você abrir o link</h1>
+              <p>
+                Abra o e-mail de recuperação e siga o link para criar uma nova senha.
+                Por segurança, o link só funciona durante 30 minutos.
+              </p>
+              <div className="verification-countdown" aria-live="polite">
+                <strong>{recoveryClock}</strong>
+                <span>tempo restante do link</span>
+              </div>
+              <div className="verification-wait-progress" aria-hidden="true">
+                <span
+                  style={{
+                    width: `${Math.max(0, Math.min(100, (recoveryRemaining / 1800) * 100))}%`,
+                  }}
+                />
+              </div>
+              <button
+                type="button"
+                className="button secondary wide"
+                onClick={() => {
+                  setRecoveryWaitingUntil(null);
+                  router.replace("/login");
+                }}
+              >
+                Cancelar e voltar ao login
+              </button>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   if (completed) {
     const verified = completed === "verify";
     return (
