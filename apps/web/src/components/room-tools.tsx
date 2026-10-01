@@ -405,6 +405,7 @@ export function Voice({
   const [camera, setCamera] = useState(false);
   const [screen, setScreen] = useState(false);
   const [error, setError] = useState("");
+  const [deviceNotice, setDeviceNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [members, setMembers] = useState<CallMember[]>([]);
   const room = useRef<import("livekit-client").Room | null>(null);
@@ -537,6 +538,7 @@ export function Voice({
   async function join() {
     setBusy(true);
     setError("");
+    setDeviceNotice("");
     try {
       const { Room, RoomEvent, Track } = await import("livekit-client");
       const credentials = await post<{ token: string; url: string }>(
@@ -619,13 +621,43 @@ export function Voice({
       await call.connect(credentials.url, credentials.token, {
         autoSubscribe: true,
       });
-      await call.localParticipant.setMicrophoneEnabled(true);
+
+      // Joining the room must not depend on having a microphone.
+      // Some desktops, VMs and browsers legitimately have no audio-input device.
       setConnected(true);
-      setMuted(false);
+      setMuted(true);
+
+      try {
+        if (!navigator.mediaDevices?.getUserMedia)
+          throw new DOMException(
+            "Este navegador não oferece captura de áudio.",
+            "NotSupportedError",
+          );
+
+        const devices = await navigator.mediaDevices
+          .enumerateDevices()
+          .catch(() => []);
+        const hasKnownInput =
+          devices.length === 0 ||
+          devices.some((device) => device.kind === "audioinput");
+
+        if (!hasKnownInput)
+          throw new DOMException(
+            "Nenhum microfone foi encontrado neste computador.",
+            "NotFoundError",
+          );
+
+        await call.localParticipant.setMicrophoneEnabled(true);
+        setMuted(false);
+      } catch (micError) {
+        setMuted(true);
+        setDeviceNotice(mediaDeviceMessage(micError, "microphone"));
+      }
+
       refresh();
     } catch (e) {
       await room.current?.disconnect();
-      setError((e as Error).message);
+      setError(callConnectionMessage(e));
     } finally {
       setBusy(false);
     }
@@ -635,11 +667,14 @@ export function Voice({
     const call = room.current;
     if (!call) return;
     try {
+      setError("");
+      setDeviceNotice("");
       await call.localParticipant.setMicrophoneEnabled(muted);
       setMuted(!muted);
       refreshMembers(call);
     } catch (e) {
-      setError((e as Error).message);
+      setMuted(true);
+      setDeviceNotice(mediaDeviceMessage(e, "microphone"));
     }
   }
 
@@ -647,12 +682,15 @@ export function Voice({
     const call = room.current;
     if (!call) return;
     try {
+      setError("");
+      setDeviceNotice("");
       const next = !camera;
       await call.localParticipant.setCameraEnabled(next);
       setCamera(next);
       refreshMembers(call);
     } catch (e) {
-      setError((e as Error).message);
+      setCamera(false);
+      setDeviceNotice(mediaDeviceMessage(e, "camera"));
     }
   }
 
@@ -675,6 +713,11 @@ export function Voice({
   return (
     <div className="call-panel discord-call">
       <Feedback error={error} />
+      {deviceNotice ? (
+        <div className="call-device-notice" role="status">
+          {deviceNotice}
+        </div>
+      ) : null}
       <div ref={audio} className="call-audio" />
 
       {connected ? (
@@ -814,6 +857,62 @@ export function Voice({
       )}
     </div>
   );
+}
+
+function mediaDeviceMessage(
+  error: unknown,
+  kind: "microphone" | "camera",
+) {
+  const name =
+    error instanceof DOMException
+      ? error.name
+      : error instanceof Error
+        ? error.name
+        : "";
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  const normalized = `${name} ${message}`.toLowerCase();
+  const label = kind === "microphone" ? "microfone" : "câmera";
+
+  if (
+    normalized.includes("notfound") ||
+    normalized.includes("requested device not found") ||
+    normalized.includes("device not found") ||
+    normalized.includes("devicesnotfound") ||
+    normalized.includes("nenhum microfone") ||
+    normalized.includes("no device")
+  )
+    return `Nenhum ${label} foi encontrado. Você entrou na chamada normalmente e pode continuar ouvindo ou compartilhando a tela.`;
+
+  if (
+    normalized.includes("notallowed") ||
+    normalized.includes("permission") ||
+    normalized.includes("denied")
+  )
+    return `O navegador bloqueou o acesso ao ${label}. Libere a permissão do site e tente novamente.`;
+
+  if (
+    normalized.includes("notreadable") ||
+    normalized.includes("trackstarterror") ||
+    normalized.includes("could not start") ||
+    normalized.includes("in use")
+  )
+    return `O ${label} está ocupado por outro aplicativo ou não pôde ser iniciado. Feche outros apps que possam estar usando o dispositivo e tente novamente.`;
+
+  if (normalized.includes("notsupported") || normalized.includes("unsupported"))
+    return `Este navegador não oferece suporte ao ${label} nesta chamada. Você ainda pode permanecer conectado.`;
+
+  return `Não foi possível ativar o ${label}. Você continua conectado à chamada e pode tentar novamente pelo botão de ${label}.`;
+}
+
+function callConnectionMessage(error: unknown) {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  const normalized = message.toLowerCase();
+  if (
+    normalized.includes("requested device not found") ||
+    normalized.includes("device not found")
+  )
+    return "A chamada conectou, mas o navegador não encontrou um dispositivo de áudio. Atualize a página e tente entrar novamente.";
+  return message || "Não foi possível entrar na chamada agora.";
 }
 
 function nextScreenMessage(error: unknown) {
