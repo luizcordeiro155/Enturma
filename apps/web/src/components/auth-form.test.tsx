@@ -37,9 +37,12 @@ describe("autenticação", () => {
   });
   it("exige senha longa para criação de conta", () => {
     render(<AuthForm mode="register" />);
-    expect((screen.getByLabelText(/Senha/) as HTMLInputElement).minLength).toBe(
+    expect((screen.getByLabelText("Senha") as HTMLInputElement).minLength).toBe(
       12,
     );
+    expect(
+      (screen.getByLabelText("Confirmar senha") as HTMLInputElement).minLength,
+    ).toBe(12);
     expect(screen.getByLabelText("Nome de usuário")).toBeTruthy();
   });
 });

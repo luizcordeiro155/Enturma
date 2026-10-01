@@ -137,6 +137,13 @@ public class AuthService {
   }
 
   @Transactional
+  public void resendVerification(Actor actor) {
+    Account user = accounts.findById(actor.id()).orElseThrow();
+    if (user.emailVerified) return;
+    issueAccountToken(user, "VERIFY");
+  }
+
+  @Transactional
   public void recover(String email) {
     accounts
         .findByEmail(email.strip().toLowerCase(Locale.ROOT))

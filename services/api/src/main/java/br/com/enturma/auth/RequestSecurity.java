@@ -65,8 +65,9 @@ public class RequestSecurity extends OncePerRequestFilter {
         prefix = "auth-register:";
         limit = 5;
         windowSeconds = 900;
-      } else if (uri.equals("/api/v1/auth/forgot-password")) {
-        prefix = "auth-forgot:";
+      } else if (uri.equals("/api/v1/auth/forgot-password")
+          || uri.equals("/api/v1/auth/resend-verification")) {
+        prefix = "auth-email:";
         limit = 5;
         windowSeconds = 900;
       } else if (uri.equals("/api/v1/auth/reset-password")

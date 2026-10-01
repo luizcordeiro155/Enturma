@@ -29,6 +29,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
       const token = new URLSearchParams(window.location.hash.slice(1)).get(
         "token",
       );
+      if (
+        (mode === "register" || mode === "reset-password") &&
+        data.password !== data.confirmPassword
+      )
+        throw Error("As senhas não coincidem.");
+
       await post(
         `/auth/${mode}`,
         mode === "verify-email"
@@ -46,8 +52,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
           mode === "forgot-password"
             ? "Se houver uma conta com este e-mail, enviaremos as instruções."
             : mode === "verify-email"
-              ? "E-mail confirmado. Você já pode continuar."
-              : "Senha atualizada. Entre novamente.",
+              ? "E-mail confirmado com sucesso. Sua conta está verificada."
+              : "Senha atualizada com sucesso. Todas as sessões anteriores foram encerradas; entre novamente.",
         );
     } catch (e) {
       setError((e as Error).message);
@@ -140,6 +146,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
               {mode !== "login" ? (
                 <small>Use pelo menos 12 caracteres.</small>
               ) : null}
+            </label>
+          ) : null}
+          {["register", "reset-password"].includes(mode) ? (
+            <label>
+              Confirmar senha
+              <input
+                name="confirmPassword"
+                aria-label="Confirmar senha"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={12}
+                maxLength={72}
+              />
             </label>
           ) : null}
           <button disabled={busy} className="button wide" type="submit">

@@ -1128,6 +1128,44 @@ class PlatformIntegrationTest {
         .isInstanceOf(ApiException.class);
   }
 
+
+  @Test
+  void emailVerificationAndPasswordRecoveryUseOneTimeLinks() {
+    String email =
+        (String) db.one("SELECT email FROM app_user WHERE id=?", host.id()).get("email");
+
+    auth.resendVerification(host);
+    var verifyMail =
+        db.one(
+            "SELECT body FROM email_outbox WHERE recipient=? AND subject LIKE '%Confirme%'"
+                + " ORDER BY created_at DESC LIMIT 1",
+            email);
+    String verifyBody = String.valueOf(verifyMail.get("body"));
+    String verifyToken = verifyBody.substring(verifyBody.indexOf("#token=") + 7);
+    auth.consume(verifyToken, "VERIFY", null);
+    assertThat(
+            db.one("SELECT email_verified FROM app_user WHERE id=?", host.id())
+                .get("emailVerified"))
+        .isEqualTo(true);
+    assertThatThrownBy(() -> auth.consume(verifyToken, "VERIFY", null))
+        .isInstanceOf(ApiException.class);
+
+    auth.recover(email);
+    var resetMail =
+        db.one(
+            "SELECT body FROM email_outbox WHERE recipient=? AND subject LIKE '%senha%'"
+                + " ORDER BY created_at DESC LIMIT 1",
+            email);
+    String resetBody = String.valueOf(resetMail.get("body"));
+    String resetToken = resetBody.substring(resetBody.indexOf("#token=") + 7);
+    auth.consume(resetToken, "RESET", "new-test-password-long");
+
+    assertThatThrownBy(() -> auth.login(email, "test-password-long", "JUnit"))
+        .isInstanceOf(ApiException.class);
+    assertThat(auth.login(email, "new-test-password-long", "JUnit").userId()).isEqualTo(host.id());
+  }
+
+
   @Test
   void endpointsRejectAnonymousAndMassAssignment() throws Exception {
     mvc.perform(

@@ -22,6 +22,8 @@ export function ProfileView({
     { id: string; device: string; createdAt: string }[]
   >([]);
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [verificationBusy, setVerificationBusy] = useState(false);
 
   async function loadProfile() {
     setP(await api<Profile>("/users/me"));
@@ -68,7 +70,7 @@ export function ProfileView({
               ? "Configurações"
               : "Meu perfil"}
         </h1>
-        <Feedback error={error} />
+        <Feedback error={error} success={notice} />
 
         {p ? (
           <>
@@ -86,8 +88,36 @@ export function ProfileView({
                 <dd>@{p.username}</dd>
                 <dt>E-mail</dt>
                 <dd>
-                  {p.email} ·{" "}
-                  {p.emailVerified ? "Confirmado" : "Confirmação pendente"}
+                  <span className="profile-email-status">
+                    {p.email} ·{" "}
+                    {p.emailVerified ? "Confirmado" : "Confirmação pendente"}
+                  </span>
+                  {!p.emailVerified ? (
+                    <button
+                      type="button"
+                      className="button secondary compact"
+                      disabled={verificationBusy}
+                      onClick={async () => {
+                        setVerificationBusy(true);
+                        setError("");
+                        setNotice("");
+                        try {
+                          await post("/auth/resend-verification");
+                          setNotice(
+                            "Enviamos um novo link de confirmação para seu e-mail. Verifique também a caixa de spam.",
+                          );
+                        } catch (e) {
+                          setError((e as Error).message);
+                        } finally {
+                          setVerificationBusy(false);
+                        }
+                      }}
+                    >
+                      {verificationBusy
+                        ? "Enviando…"
+                        : "Reenviar confirmação"}
+                    </button>
+                  ) : null}
                 </dd>
                 <dt>Período</dt>
                 <dd>
