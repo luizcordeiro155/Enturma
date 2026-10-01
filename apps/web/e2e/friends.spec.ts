@@ -14,6 +14,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     await p.getByLabel("Nome de usuário").fill(name);
     await p.getByLabel("E-mail").fill(`${name}@example.test`);
     await p.getByLabel("Senha", { exact: true }).fill("E2E-password-long-123");
+    await p.getByLabel("Confirmar senha").fill("E2E-password-long-123");
     await p.getByRole("button", { name: "Criar conta" }).click();
     await expect(p).toHaveURL(/onboarding/);
     await p.goto("/friends");
