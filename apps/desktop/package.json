@@ -9,7 +9,7 @@
     "dev": "npx --yes electron@44.5.1 .",
     "start": "npx --yes electron@44.5.1 .",
     "pack": "npx --yes electron-builder@26.15.3 --dir",
-    "dist:win": "npx --yes electron-builder@26.15.3 --win nsis --x64 --publish never",
+    "dist:win": "npx --yes electron-builder@26.15.3 --win zip --x64 --publish never",
     "dist:linux": "npx --yes electron-builder@26.15.3 --linux AppImage --x64 --publish never",
     "dist:mac": "npx --yes electron-builder@26.15.3 --mac dmg --publish never"
   },
@@ -37,7 +37,7 @@
     "win": {
       "target": [
         {
-          "target": "nsis",
+          "target": "zip",
           "arch": [
             "x64"
           ]
