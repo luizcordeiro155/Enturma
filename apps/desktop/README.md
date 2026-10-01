@@ -42,3 +42,10 @@ Para usar:
 3. abra `Enturma.exe`.
 
 Esse pacote usa a mesma aplicação Web oficial e mantém conta e dados sincronizados. O instalador NSIS continua previsto para builds feitos diretamente em Windows.
+
+
+## Atualizações automáticas
+
+Desde a versão 0.2.0, o app consulta o manifesto oficial da Railway, baixa atualizações do Desktop, valida SHA-256 e permite aplicar a nova versão com **Atualizar e reiniciar**.
+
+Alterações somente na aplicação Web continuam aparecendo sem reinstalar o Desktop.
