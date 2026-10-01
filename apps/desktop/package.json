@@ -17,7 +17,7 @@
     "appId": "br.com.enturma.desktop",
     "productName": "Enturma",
     "asar": true,
-    "compression": "maximum",
+    "compression": "normal",
     "directories": {
       "output": "dist"
     },
@@ -67,7 +67,8 @@
       ],
       "category": "public.app-category.education"
     },
-    "electronVersion": "44.5.1"
+    "electronVersion": "44.5.1",
+    "npmRebuild": false
   },
   "author": "Enturma"
 }
