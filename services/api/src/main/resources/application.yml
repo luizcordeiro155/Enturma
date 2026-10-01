@@ -44,5 +44,6 @@ springdoc:
 enturma:
   app-url: ${APP_URL:http://localhost:3000}
   origins: ${CORS_ORIGINS:${APP_URL:http://localhost:3000}}
+  mail-enabled: ${MAIL_ENABLED:false}
   mail-from: ${MAIL_FROM:enturma@localhost}
   room-max-minutes: ${ROOM_MAX_MINUTES:180}
