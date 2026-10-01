@@ -60,7 +60,7 @@ jobs:
           PGPASSWORD: ci-ephemeral-only
         run: |
           psql -h localhost -U enturma -d enturma_test -c 'CREATE DATABASE enturma_e2e'
-          DATABASE_URL=jdbc:postgresql://localhost:5432/enturma_e2e DATABASE_USERNAME=enturma APP_URL=http://localhost:3000 java -jar services/api/target/enturma-api-0.1.0.jar --spring.profiles.active=squarecloud --server.port=8080 > /tmp/enturma-api.log 2>&1 &
+          DATABASE_URL=jdbc:postgresql://localhost:5432/enturma_e2e DATABASE_USERNAME=enturma APP_URL=http://localhost:3000 AUTH_REGISTER_RATE_LIMIT=200 java -jar services/api/target/enturma-api-0.1.0.jar --spring.profiles.active=squarecloud --server.port=8080 > /tmp/enturma-api.log 2>&1 &
           API_URL=http://localhost:8080 APP_URL=http://localhost:3000 npm run start -w @enturma/web > /tmp/enturma-web.log 2>&1 &
           for attempt in $(seq 1 60); do
             if curl -fsS http://localhost:8080/actuator/health && curl -fsS http://localhost:3000/login > /dev/null; then exit 0; fi
