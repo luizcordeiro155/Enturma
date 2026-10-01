@@ -1130,6 +1130,20 @@ class PlatformIntegrationTest {
 
 
   @Test
+  void loginExplainsUnknownEmailAndWrongPasswordSeparately() {
+    assertThatThrownBy(() -> auth.login("nao-existe@example.test", "qualquer-senha", "JUnit"))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("Não encontramos uma conta cadastrada com este e-mail");
+
+    String email =
+        (String) db.one("SELECT email FROM app_user WHERE id=?", host.id()).get("email");
+    assertThatThrownBy(() -> auth.login(email, "senha-incorreta", "JUnit"))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("A senha informada está incorreta");
+  }
+
+
+  @Test
   void passwordRecoveryRejectsUnknownEmailBeforeStartingCountdown() {
     assertThatThrownBy(() -> auth.recover("nao-existe@example.test"))
         .isInstanceOf(ApiException.class)
