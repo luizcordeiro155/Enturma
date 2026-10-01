@@ -3,6 +3,9 @@ import styles from "./download.module.css";
 
 export const revalidate = 300;
 
+const hostedWindowsUrl =
+  "https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Windows.zip";
+
 type ReleaseAsset = {
   name: string;
   browser_download_url: string;
@@ -55,6 +58,9 @@ export default async function DownloadPage() {
         asset.name.toLowerCase().includes("portable"),
     ) ?? null;
 
+  const primaryWindowsUrl =
+    windowsInstaller?.browser_download_url ?? hostedWindowsUrl;
+
   return (
     <main className={styles.page}>
       <section className={styles.hero}>
@@ -78,25 +84,16 @@ export default async function DownloadPage() {
             <span className={styles.platform}>Windows 10/11 · 64 bits</span>
             <h2>Enturma Desktop</h2>
             <p>
-              Instalador com suporte a câmera, microfone, notificações e
-              compartilhamento de tela.
+              Aplicativo completo para Windows com suporte a câmera,
+              microfone, notificações e compartilhamento de tela.
             </p>
           </div>
 
-          {windowsInstaller ? (
-            <a className={styles.primary} href={windowsInstaller.browser_download_url}>
-              Baixar para Windows · {formatSize(windowsInstaller.size)}
-            </a>
-          ) : (
-            <a
-              className={styles.primary}
-              href="https://github.com/luizcordeiro155/Enturma/releases"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Ver versões disponíveis
-            </a>
-          )}
+          <a className={styles.primary} href={primaryWindowsUrl}>
+            {windowsInstaller
+              ? `Baixar para Windows · ${formatSize(windowsInstaller.size)}`
+              : "Baixar Enturma para Windows"}
+          </a>
 
           {windowsPortable ? (
             <a
@@ -112,7 +109,7 @@ export default async function DownloadPage() {
               ? `Versão ${release.tag_name} · publicada em ${new Date(
                   release.published_at,
                 ).toLocaleDateString("pt-BR")}`
-              : "A primeira versão instalável será exibida aqui assim que for publicada."}
+              : "Versão 0.1.0 · Windows 10/11 x64. Baixe o ZIP, extraia a pasta e abra Enturma.exe."}
           </small>
         </div>
       </section>
