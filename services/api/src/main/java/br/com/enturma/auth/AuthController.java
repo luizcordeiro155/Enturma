@@ -51,6 +51,12 @@ public class AuthController {
     return auth.refresh(r.token());
   }
 
+  @PostMapping("/resend-verification")
+  @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
+  public void resendVerification(@AuthenticationPrincipal Actor a) {
+    auth.resendVerification(a);
+  }
+
   @PostMapping("/forgot-password")
   @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
   public void forgot(@Valid @RequestBody EmailRequest r) {
