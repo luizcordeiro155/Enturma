@@ -20,10 +20,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [completed, setCompleted] = useState<"verify" | "reset" | null>(null);
-  const [redirectSeconds, setRedirectSeconds] = useState(4);
+  const [redirectSeconds, setRedirectSeconds] = useState(30);
   useEffect(() => {
     if (!completed) return;
-    setRedirectSeconds(4);
+    setRedirectSeconds(completed === "reset" ? 30 : 5);
     const channel =
       typeof BroadcastChannel !== "undefined"
         ? new BroadcastChannel("enturma-account-status")
@@ -40,9 +40,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const interval = window.setInterval(() => {
       setRedirectSeconds((value) => Math.max(0, value - 1));
     }, 1000);
+    const redirectDelay = completed === "verify" ? 5000 : 30000;
     const timeout = window.setTimeout(() => {
       router.replace(completed === "verify" ? "/profile" : "/login");
-    }, 4000);
+    }, redirectDelay);
 
     return () => {
       channel?.close();
@@ -72,11 +73,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         mode === "verify-email"
           ? { token }
           : mode === "reset-password"
-            ? {
-                token,
-                password: data.password,
-                revokeAllSessions: data.revokeAllSessions !== "keep",
-              }
+            ? { token, password: data.password }
             : mode === "forgot-password"
               ? data
               : { ...data, device: "Navegador web" },
@@ -142,13 +139,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
               <p>
                 {verified
                   ? "O status da sua conta foi atualizado. Se o seu perfil estiver aberto em outra aba, ele também será atualizado automaticamente."
-                  : "Por segurança, você será enviado para o login. Use sua nova senha para entrar no Enturma."}
+                  : "Por segurança, todas as sessões foram encerradas. Você será enviado para o login e precisará entrar novamente em todos os dispositivos."}
               </p>
               {!verified ? (
                 <div className="auth-security-note">
                   <ShieldCheck size={20} />
                   <span>
-                    A opção escolhida para as outras sessões já foi aplicada.
+                    Todas as sessões anteriores foram revogadas para proteger sua conta.
                   </span>
                 </div>
               ) : null}
@@ -275,38 +272,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 maxLength={72}
               />
             </label>
-          ) : null}
-          {mode === "reset-password" ? (
-            <fieldset className="reset-session-choice">
-              <legend>O que fazer com os outros dispositivos conectados?</legend>
-              <label>
-                <input
-                  type="radio"
-                  name="revokeAllSessions"
-                  value="revoke"
-                  defaultChecked
-                />
-                <span>
-                  <strong>Revogar todas as sessões</strong>
-                  <small>
-                    Recomendado. Todos os celulares, navegadores e o app precisarão entrar novamente.
-                  </small>
-                </span>
-              </label>
-              <label>
-                <input
-                  type="radio"
-                  name="revokeAllSessions"
-                  value="keep"
-                />
-                <span>
-                  <strong>Manter os outros dispositivos conectados</strong>
-                  <small>
-                    A nova senha entra em vigor, mas as sessões atuais permanecem abertas.
-                  </small>
-                </span>
-              </label>
-            </fieldset>
           ) : null}
           <button disabled={busy} className="button wide" type="submit">
             {busy
