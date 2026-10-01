@@ -64,7 +64,6 @@ export function RoomTools({
   const [artifacts, setArtifacts] = useState<Artifact[]>([]);
   const [answer, setAnswer] = useState<Answer>();
   const [error, setError] = useState("");
-  const [deviceNotice, setDeviceNotice] = useState("");
   const [busy, setBusy] = useState(false);
 
   useEffect(() => {
@@ -406,6 +405,7 @@ export function Voice({
   const [camera, setCamera] = useState(false);
   const [screen, setScreen] = useState(false);
   const [error, setError] = useState("");
+  const [deviceNotice, setDeviceNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [members, setMembers] = useState<CallMember[]>([]);
   const room = useRef<import("livekit-client").Room | null>(null);
