@@ -2353,3 +2353,15 @@ html[data-theme="dark"] .ai-web-sources a {
 .private-sync-form label { display: grid; gap: .4rem; }
 .private-sync-form input { width: 100%; min-width: 0; }
 .private-key-sync > .text-button { margin-top: .75rem; }
+
+
+.call-device-notice {
+  margin: 14px;
+  padding: 11px 13px;
+  border: 1px solid rgba(217, 245, 109, 0.35);
+  border-radius: 10px;
+  background: rgba(217, 245, 109, 0.12);
+  color: #eaf5c5;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
