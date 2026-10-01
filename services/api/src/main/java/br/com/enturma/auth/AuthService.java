@@ -79,9 +79,17 @@ public class AuthService {
   @Transactional
   public Credentials login(String email, String password, String device) {
     Account user = accounts.findByEmail(email.strip().toLowerCase(Locale.ROOT)).orElse(null);
-    boolean matches = encoder.matches(password, user == null ? dummyHash : user.passwordHash);
-    if (user == null || !matches || !user.status.equals("ACTIVE"))
-      throw new ApiException(401, "INVALID_CREDENTIALS", "E-mail ou senha inválidos.");
+    if (user == null)
+      throw new ApiException(
+          404, "EMAIL_NOT_REGISTERED", "Não encontramos uma conta cadastrada com este e-mail.");
+
+    boolean matches = encoder.matches(password, user.passwordHash);
+    if (!matches)
+      throw new ApiException(401, "INVALID_PASSWORD", "A senha informada está incorreta.");
+
+    if (!user.status.equals("ACTIVE"))
+      throw new ApiException(403, "ACCOUNT_UNAVAILABLE", "Esta conta não está disponível para login.");
+
     return session(user.id, device);
   }
 
