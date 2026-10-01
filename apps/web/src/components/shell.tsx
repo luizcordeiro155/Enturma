@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { Gamepad2 } from "lucide-react";
+import { Check, Gamepad2, MailCheck } from "lucide-react";
 import { NotificationBell } from "./notifications";
 import { ExperienceControls } from "./experience-controls";
 import { usePathname } from "next/navigation";
@@ -29,6 +29,9 @@ const links = [
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const [learning, setLearning] = useState(false);
+  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [emailCelebration, setEmailCelebration] = useState(false);
+  const [emailCelebrationSeconds, setEmailCelebrationSeconds] = useState(8);
   useEffect(() => {
     let active = true;
     api<{ eligible: boolean }>("/learning/access")
@@ -40,6 +43,72 @@ export function Shell({ children }: { children: React.ReactNode }) {
       active = false;
     };
   }, [path]);
+
+  useEffect(() => {
+    let active = true;
+    let previous: boolean | null = emailVerified;
+
+    const refreshVerification = async () => {
+      if (previous === true) return;
+      try {
+        const profile = await api<{ emailVerified: boolean }>("/users/me");
+        if (!active) return;
+
+        const stored = localStorage.getItem("enturma-email-verified-last");
+        const wasUnverified = previous === false || stored === "false";
+
+        setEmailVerified(profile.emailVerified);
+        localStorage.setItem(
+          "enturma-email-verified-last",
+          profile.emailVerified ? "true" : "false",
+        );
+
+        if (profile.emailVerified && wasUnverified) {
+          previous = true;
+          setEmailCelebrationSeconds(8);
+          setEmailCelebration(true);
+          localStorage.setItem("enturma-email-verified-at", String(Date.now()));
+          const channel =
+            typeof BroadcastChannel !== "undefined"
+              ? new BroadcastChannel("enturma-account-status")
+              : null;
+          channel?.postMessage({ type: "email-verified", at: Date.now() });
+          channel?.close();
+        } else {
+          previous = profile.emailVerified;
+        }
+      } catch {
+        // A sessão pode ter expirado; outras rotas já tratam o login novamente.
+      }
+    };
+
+    void refreshVerification();
+    const poll = window.setInterval(refreshVerification, 1500);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void refreshVerification();
+    };
+    window.addEventListener("focus", refreshVerification);
+    document.addEventListener("visibilitychange", onVisible);
+
+    return () => {
+      active = false;
+      window.clearInterval(poll);
+      window.removeEventListener("focus", refreshVerification);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!emailCelebration) return;
+    const tick = window.setInterval(() => {
+      setEmailCelebrationSeconds((value) => Math.max(0, value - 1));
+    }, 1000);
+    const close = window.setTimeout(() => setEmailCelebration(false), 8000);
+    return () => {
+      window.clearInterval(tick);
+      window.clearTimeout(close);
+    };
+  }, [emailCelebration]);
   return (
     <div className="app-shell">
       <a className="skip" href="#content">
@@ -92,6 +161,49 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <ShieldCheck size={20} /> Catálogo acadêmico com fontes verificadas.
         </footer>
       </div>
+
+      {emailCelebration ? (
+        <div
+          className="account-celebration-backdrop"
+          role="status"
+          aria-live="polite"
+        >
+          <section className="account-celebration-card account-celebration-enter">
+            <div className="account-celebration-animation" aria-hidden="true">
+              <span className="account-celebration-ring ring-one" />
+              <span className="account-celebration-ring ring-two" />
+              <span className="account-celebration-core">
+                <MailCheck size={52} />
+              </span>
+              <span className="account-celebration-spark spark-a" />
+              <span className="account-celebration-spark spark-b" />
+              <span className="account-celebration-spark spark-c" />
+            </div>
+            <span className="account-celebration-kicker">
+              <Check size={16} />
+              Confirmação concluída
+            </span>
+            <h2>E-mail confirmado com sucesso!</h2>
+            <p>
+              Seu e-mail foi verificado em outro dispositivo e o Enturma
+              atualizou sua conta automaticamente.
+            </p>
+            <div className="account-celebration-progress" aria-hidden="true">
+              <span />
+            </div>
+            <small>
+              Esta mensagem fecha automaticamente em {emailCelebrationSeconds}s.
+            </small>
+            <button
+              type="button"
+              className="button wide"
+              onClick={() => setEmailCelebration(false)}
+            >
+              Continuar
+            </button>
+          </section>
+        </div>
+      ) : null}
     </div>
   );
 }

@@ -31,6 +31,10 @@ public class AuthService {
 
   public record Credentials(String accessToken, String refreshToken, long expiresIn, UUID userId) {}
 
+  public record RecoveryStarted(String trackingToken, long expiresIn) {}
+
+  public record RecoveryStatus(String status, long remainingSeconds) {}
+
   @Transactional
   public Credentials register(
       String name, String username, String email, String password, String device) {
@@ -144,11 +148,41 @@ public class AuthService {
   }
 
   @Transactional
-  public void recover(String email) {
-    accounts
-        .findByEmail(email.strip().toLowerCase(Locale.ROOT))
-        .filter(u -> u.status.equals("ACTIVE"))
-        .ifPresent(u -> issueAccountToken(u, "RESET"));
+  public RecoveryStarted recover(String email) {
+    Instant expiresAt = Instant.now().plusSeconds(1800);
+    String trackingToken = Tokens.create();
+    Account user =
+        accounts
+            .findByEmail(email.strip().toLowerCase(Locale.ROOT))
+            .filter(u -> u.status.equals("ACTIVE"))
+            .orElse(null);
+
+    db.jdbc.update("DELETE FROM password_reset_flow WHERE expires_at<now()-interval '1 day'");
+    db.jdbc.update(
+        "INSERT INTO password_reset_flow(id,tracking_hash,user_id,expires_at) VALUES (?,?,?,?)",
+        UUID.randomUUID(),
+        Tokens.hash(trackingToken),
+        user == null ? null : user.id,
+        Timestamp.from(expiresAt));
+
+    if (user != null) issueAccountToken(user, "RESET");
+    return new RecoveryStarted(trackingToken, 1800);
+  }
+
+  public RecoveryStatus recoveryStatus(String trackingToken) {
+    var rows =
+        db.list(
+            "SELECT completed_at IS NOT NULL AS completed,expires_at<=now() AS expired,"
+                + " GREATEST(0,FLOOR(EXTRACT(EPOCH FROM (expires_at-now()))))::bigint"
+                + " AS remaining_seconds FROM password_reset_flow WHERE tracking_hash=?",
+            Tokens.hash(trackingToken));
+    if (rows.isEmpty()) return new RecoveryStatus("EXPIRED", 0);
+
+    var row = rows.getFirst();
+    if (Boolean.TRUE.equals(row.get("completed"))) return new RecoveryStatus("COMPLETED", 0);
+    if (Boolean.TRUE.equals(row.get("expired"))) return new RecoveryStatus("EXPIRED", 0);
+    Number remaining = (Number) row.get("remainingSeconds");
+    return new RecoveryStatus("PENDING", remaining == null ? 0 : remaining.longValue());
   }
 
   private void issueAccountToken(Account user, String purpose) {
@@ -186,6 +220,10 @@ public class AuthService {
       db.jdbc.update(
           "UPDATE app_user SET password_hash=? WHERE id=?", encoder.encode(password), user);
       db.jdbc.update("UPDATE user_session SET revoked_at=now() WHERE user_id=?", user);
+      db.jdbc.update(
+          "UPDATE password_reset_flow SET completed_at=COALESCE(completed_at,now())"
+              + " WHERE user_id=? AND completed_at IS NULL AND expires_at>now()",
+          user);
     }
   }
 

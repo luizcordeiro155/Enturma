@@ -58,9 +58,14 @@ public class AuthController {
   }
 
   @PostMapping("/forgot-password")
-  @ResponseStatus(org.springframework.http.HttpStatus.NO_CONTENT)
-  public void forgot(@Valid @RequestBody EmailRequest r) {
-    auth.recover(r.email());
+  public Object forgot(@Valid @RequestBody EmailRequest r) {
+    return auth.recover(r.email());
+  }
+
+  @GetMapping("/recovery-status")
+  public Object recoveryStatus(
+      @RequestParam @NotBlank @Size(max = 100) String trackingToken) {
+    return auth.recoveryStatus(trackingToken);
   }
 
   @PostMapping("/reset-password")
