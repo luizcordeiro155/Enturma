@@ -24,6 +24,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [recoveryWaitingUntil, setRecoveryWaitingUntil] = useState<number | null>(null);
   const [recoveryNow, setRecoveryNow] = useState(() => Date.now());
   useEffect(() => {
+    if (mode !== "reset-password") return;
+    if (sessionStorage.getItem("enturma-password-reset-complete") !== "1") return;
+    sessionStorage.removeItem("enturma-password-reset-complete");
+    router.replace("/login");
+  }, [mode, router]);
+
+  useEffect(() => {
     if (!completed) return;
     setRedirectSeconds(completed === "reset" ? 30 : 5);
     const channel =
@@ -102,6 +109,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
         setSuccess("E-mail confirmado com sucesso.");
         setCompleted("verify");
       } else if (mode === "reset-password") {
+        sessionStorage.setItem("enturma-password-reset-complete", "1");
+        window.history.replaceState(null, "", "/reset-password");
         setSuccess("Senha atualizada com sucesso.");
         setCompleted("reset");
       } else {
