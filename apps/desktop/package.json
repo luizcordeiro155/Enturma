@@ -9,7 +9,7 @@
     "dev": "npx --yes electron@44.5.1 .",
     "start": "npx --yes electron@44.5.1 .",
     "pack": "npx --yes electron-builder@26.15.3 --dir",
-    "dist:win": "npx --yes electron-builder@26.15.3 --win nsis portable --x64 --publish never",
+    "dist:win": "npx --yes electron-builder@26.15.3 --win nsis --x64 --publish never",
     "dist:linux": "npx --yes electron-builder@26.15.3 --linux AppImage --x64 --publish never",
     "dist:mac": "npx --yes electron-builder@26.15.3 --mac dmg --publish never"
   },
@@ -41,12 +41,6 @@
           "arch": [
             "x64"
           ]
-        },
-        {
-          "target": "portable",
-          "arch": [
-            "x64"
-          ]
         }
       ],
       "publisherName": "Enturma"
@@ -71,6 +65,7 @@
         "dmg"
       ],
       "category": "public.app-category.education"
-    }
+    },
+    "electronVersion": "44.5.1"
   }
 }
