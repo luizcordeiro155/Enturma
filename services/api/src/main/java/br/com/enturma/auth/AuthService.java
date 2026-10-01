@@ -170,7 +170,8 @@ public class AuthService {
   }
 
   @Transactional
-  public void consume(String token, String purpose, String password) {
+  public void consume(
+      String token, String purpose, String password, boolean revokeAllSessions) {
     if (purpose.equals("RESET")) validatePassword(password);
     var rows =
         db.list(
@@ -185,7 +186,8 @@ public class AuthService {
     else {
       db.jdbc.update(
           "UPDATE app_user SET password_hash=? WHERE id=?", encoder.encode(password), user);
-      db.jdbc.update("UPDATE user_session SET revoked_at=now() WHERE user_id=?", user);
+      if (revokeAllSessions)
+        db.jdbc.update("UPDATE user_session SET revoked_at=now() WHERE user_id=?", user);
     }
   }
 
