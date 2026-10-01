@@ -20,7 +20,7 @@ Para usar a Web local, altere `ENTURMA_WEB_URL` para `http://localhost:3000`.
 npm run dist:win
 ```
 
-Os arquivos ficam em `apps/desktop/dist` e incluem instalador NSIS e versão portátil.
+Os arquivos ficam em `apps/desktop/dist` e incluem instalador NSIS.
 
 ## Distribuição
 
