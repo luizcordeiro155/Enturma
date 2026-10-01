@@ -85,7 +85,8 @@ export default async function DownloadPage() {
             <h2>Enturma Desktop</h2>
             <p>
               Aplicativo completo para Windows com suporte a câmera,
-              microfone, notificações e compartilhamento de tela.
+              microfone, notificações, compartilhamento de tela e atualização
+              automática.
             </p>
           </div>
 
@@ -109,7 +110,7 @@ export default async function DownloadPage() {
               ? `Versão ${release.tag_name} · publicada em ${new Date(
                   release.published_at,
                 ).toLocaleDateString("pt-BR")}`
-              : "Versão 0.1.0 · Windows 10/11 x64. Baixe o ZIP, extraia a pasta e abra Enturma.exe."}
+              : "Versão 0.2.0 · Windows 10/11 x64. Baixe o ZIP, extraia a pasta e abra Enturma.exe. As próximas versões serão atualizadas pelo próprio aplicativo."}
           </small>
         </div>
       </section>
