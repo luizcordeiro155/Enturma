@@ -78,36 +78,39 @@ export function ProfileView({
         .catch(() => {});
     }, 5000);
 
+    return () => {
+      window.clearInterval(tick);
+      window.clearInterval(poll);
+    };
+  }, [verificationWaitingUntil]);
+
+  useEffect(() => {
+    const refreshVerifiedProfile = () => {
+      void loadProfile().then(() => {
+        setVerificationConfirmed(true);
+        setVerificationWaitingUntil(null);
+        setNotice("E-mail confirmado com sucesso.");
+      });
+    };
+
     const channel =
       typeof BroadcastChannel !== "undefined"
         ? new BroadcastChannel("enturma-account-status")
         : null;
     channel?.addEventListener("message", (event) => {
-      if (event.data?.type !== "email-verified") return;
-      void loadProfile().then(() => {
-        setVerificationConfirmed(true);
-        setNotice("E-mail confirmado com sucesso.");
-        setVerificationWaitingUntil(null);
-      });
+      if (event.data?.type === "email-verified") refreshVerifiedProfile();
     });
 
     const onStorage = (event: StorageEvent) => {
-      if (event.key !== "enturma-email-verified-at") return;
-      void loadProfile().then(() => {
-        setVerificationConfirmed(true);
-        setNotice("E-mail confirmado com sucesso.");
-        setVerificationWaitingUntil(null);
-      });
+      if (event.key === "enturma-email-verified-at") refreshVerifiedProfile();
     };
     window.addEventListener("storage", onStorage);
 
     return () => {
-      window.clearInterval(tick);
-      window.clearInterval(poll);
       channel?.close();
       window.removeEventListener("storage", onStorage);
     };
-  }, [loadProfile, verificationWaitingUntil]);
+  }, [loadProfile]);
 
   useEffect(() => {
     if (!verificationConfirmed) return;
