@@ -1,12 +1,18 @@
 "use client";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { BookOpen, ArrowRight, Check, KeyRound, MailCheck, ShieldCheck } from "lucide-react";
-import { post } from "@/lib/api";
+import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
 type Mode =
   "login" | "register" | "forgot-password" | "reset-password" | "verify-email";
+type RecoveryStarted = { trackingToken: string; expiresIn: number };
+type RecoveryStatus = {
+  status: "PENDING" | "COMPLETED" | "EXPIRED";
+  remainingSeconds: number;
+};
+
 const titles: Record<Mode, string> = {
   login: "Bom te ver de novo.",
   register: "Encontre a sua turma.",
@@ -22,7 +28,18 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [completed, setCompleted] = useState<"verify" | "reset" | null>(null);
   const [redirectSeconds, setRedirectSeconds] = useState(15);
   const [recoveryWaitingUntil, setRecoveryWaitingUntil] = useState<number | null>(null);
+  const [recoveryTrackingToken, setRecoveryTrackingToken] = useState<string | null>(null);
   const [recoveryNow, setRecoveryNow] = useState(() => Date.now());
+
+  const finishRecoveryWaiting = useCallback(() => {
+    sessionStorage.removeItem("enturma-password-recovery-tracking");
+    sessionStorage.removeItem("enturma-password-recovery-expires");
+    setRecoveryTrackingToken(null);
+    setRecoveryWaitingUntil(null);
+    setSuccess("Senha atualizada com sucesso.");
+    setRedirectSeconds(15);
+    setCompleted("reset");
+  }, []);
   useEffect(() => {
     if (mode !== "reset-password") return;
     if (sessionStorage.getItem("enturma-password-reset-complete") !== "1") return;
@@ -75,13 +92,6 @@ export function AuthForm({ mode }: { mode: Mode }) {
   useEffect(() => {
     if (mode !== "forgot-password") return;
 
-    const finishRecoveryWaiting = () => {
-      setRecoveryWaitingUntil(null);
-      setSuccess("Senha atualizada com sucesso.");
-      setRedirectSeconds(15);
-      setCompleted("reset");
-    };
-
     const channel =
       typeof BroadcastChannel !== "undefined"
         ? new BroadcastChannel("enturma-account-status")
@@ -104,7 +114,45 @@ export function AuthForm({ mode }: { mode: Mode }) {
       channel?.close();
       window.removeEventListener("storage", onStorage);
     };
-  }, [mode]);
+  }, [finishRecoveryWaiting, mode]);
+
+  useEffect(() => {
+    if (mode !== "forgot-password" || !recoveryTrackingToken) return;
+    let active = true;
+
+    const checkServer = async () => {
+      try {
+        const status = await api<RecoveryStatus>(
+          `/auth/recovery-status?trackingToken=${encodeURIComponent(recoveryTrackingToken)}`,
+        );
+        if (!active) return;
+        if (status.status === "COMPLETED") {
+          finishRecoveryWaiting();
+          return;
+        }
+        if (status.status === "EXPIRED") {
+          sessionStorage.removeItem("enturma-password-recovery-tracking");
+          sessionStorage.removeItem("enturma-password-recovery-expires");
+          setRecoveryTrackingToken(null);
+          setRecoveryWaitingUntil(null);
+          setSuccess("");
+          setError("O link de recuperação expirou. Solicite um novo e-mail.");
+          return;
+        }
+        const serverExpiresAt = Date.now() + status.remainingSeconds * 1000;
+        setRecoveryWaitingUntil(serverExpiresAt);
+      } catch {
+        // Mantém a contagem local e tenta novamente no próximo ciclo.
+      }
+    };
+
+    void checkServer();
+    const poll = window.setInterval(checkServer, 1500);
+    return () => {
+      active = false;
+      window.clearInterval(poll);
+    };
+  }, [finishRecoveryWaiting, mode, recoveryTrackingToken]);
 
   const recoveryRemaining = recoveryWaitingUntil
     ? Math.max(0, Math.ceil((recoveryWaitingUntil - recoveryNow) / 1000))
@@ -128,7 +176,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
       )
         throw Error("As senhas não coincidem.");
 
-      await post(
+      const response = await post<RecoveryStarted | void>(
         `/auth/${mode}`,
         mode === "verify-email"
           ? { token }
@@ -162,11 +210,23 @@ export function AuthForm({ mode }: { mode: Mode }) {
         setRedirectSeconds(15);
         setCompleted("reset");
       } else {
+        const recovery = response as RecoveryStarted;
+        const expiresAt =
+          Date.now() + Math.max(1, recovery.expiresIn ?? 1800) * 1000;
+        sessionStorage.setItem(
+          "enturma-password-recovery-tracking",
+          recovery.trackingToken,
+        );
+        sessionStorage.setItem(
+          "enturma-password-recovery-expires",
+          String(expiresAt),
+        );
+        setRecoveryTrackingToken(recovery.trackingToken);
         setSuccess(
           "Se houver uma conta com este e-mail, enviaremos as instruções.",
         );
         setRecoveryNow(Date.now());
-        setRecoveryWaitingUntil(Date.now() + 30 * 60 * 1000);
+        setRecoveryWaitingUntil(expiresAt);
       }
     } catch (e) {
       setError((e as Error).message);
