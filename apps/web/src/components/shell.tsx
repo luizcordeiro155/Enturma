@@ -49,6 +49,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     let previous: boolean | null = emailVerified;
 
     const refreshVerification = async () => {
+      if (previous === true) return;
       try {
         const profile = await api<{ emailVerified: boolean }>("/users/me");
         if (!active) return;
