@@ -11,6 +11,10 @@ const {
 } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
+const crypto = require("node:crypto");
+const { spawn } = require("node:child_process");
+const { Readable } = require("node:stream");
+const { pipeline } = require("node:stream/promises");
 const { URL } = require("node:url");
 
 function loadLocalEnv() {
@@ -32,8 +36,9 @@ loadLocalEnv();
 const WEB_URL = process.env.ENTURMA_WEB_URL || "https://enturma-flax.vercel.app";
 const WEB_ORIGIN = new URL(WEB_URL).origin;
 const APP_PARTITION = "persist:enturma";
-const RELEASE_API =
-  "https://api.github.com/repos/luizcordeiro155/Enturma/releases/latest";
+const UPDATE_MANIFEST_URL =
+  process.env.ENTURMA_UPDATE_MANIFEST_URL ||
+  "https://enturma-desktop-download-v5-production.up.railway.app/latest.json";
 const RELEASES_URL =
   "https://github.com/luizcordeiro155/Enturma/releases";
 const ALLOWED_PERMISSIONS = new Set([
@@ -46,6 +51,8 @@ const ALLOWED_PERMISSIONS = new Set([
 let mainWindow = null;
 let pendingDeepLink = process.argv.find((arg) => arg.startsWith("enturma://")) || null;
 let updateTimer = null;
+let updateInProgress = false;
+let lastPromptedVersion = null;
 
 if (process.platform === "linux") {
   app.commandLine.appendSwitch("enable-features", "WebRTCPipeWireCapturer");
@@ -127,6 +134,214 @@ function newerThan(remote, current) {
   return false;
 }
 
+function updateDirectory() {
+  return path.join(app.getPath("userData"), "updates");
+}
+
+function sha256File(file) {
+  return new Promise((resolve, reject) => {
+    const hash = crypto.createHash("sha256");
+    const input = fs.createReadStream(file);
+    input.on("error", reject);
+    input.on("data", (chunk) => hash.update(chunk));
+    input.on("end", () => resolve(hash.digest("hex")));
+  });
+}
+
+async function downloadUpdate(manifest) {
+  const dir = updateDirectory();
+  fs.mkdirSync(dir, { recursive: true });
+
+  const finalPath = path.join(dir, `Enturma-${manifest.version}-win-x64.zip`);
+  const partialPath = `${finalPath}.part`;
+
+  if (fs.existsSync(finalPath)) {
+    const currentHash = await sha256File(finalPath);
+    if (currentHash.toLowerCase() === String(manifest.sha256).toLowerCase()) {
+      return finalPath;
+    }
+    fs.rmSync(finalPath, { force: true });
+  }
+
+  fs.rmSync(partialPath, { force: true });
+
+  const response = await net.fetch(manifest.downloadUrl, {
+    cache: "no-store",
+    headers: {
+      "User-Agent": `EnturmaDesktop/${app.getVersion()}`,
+    },
+  });
+  if (!response.ok || !response.body) {
+    throw new Error(`Download respondeu ${response.status}`);
+  }
+
+  await pipeline(
+    Readable.fromWeb(response.body),
+    fs.createWriteStream(partialPath),
+  );
+
+  if (manifest.size) {
+    const actualSize = fs.statSync(partialPath).size;
+    if (actualSize !== Number(manifest.size)) {
+      fs.rmSync(partialPath, { force: true });
+      throw new Error("Tamanho da atualização não confere.");
+    }
+  }
+
+  const hash = await sha256File(partialPath);
+  if (hash.toLowerCase() !== String(manifest.sha256).toLowerCase()) {
+    fs.rmSync(partialPath, { force: true });
+    throw new Error("A atualização baixada falhou na verificação SHA-256.");
+  }
+
+  fs.renameSync(partialPath, finalPath);
+  fs.writeFileSync(
+    path.join(dir, "pending-update.json"),
+    JSON.stringify(
+      {
+        version: manifest.version,
+        sha256: manifest.sha256,
+        file: finalPath,
+        downloadedAt: new Date().toISOString(),
+      },
+      null,
+      2,
+    ),
+  );
+  return finalPath;
+}
+
+function ps(value) {
+  return `'${String(value).replace(/'/g, "''")}'`;
+}
+
+function installDownloadedUpdate(manifest, zipPath) {
+  if (process.platform !== "win32") {
+    void shell.openExternal(manifest.downloadUrl || RELEASES_URL);
+    return;
+  }
+
+  const targetDir = path.dirname(process.execPath);
+  const updatesDir = updateDirectory();
+  const scriptPath = path.join(updatesDir, `install-${manifest.version}.ps1`);
+  const extractDir = path.join(updatesDir, `extract-${manifest.version}`);
+  const executableName = path.basename(process.execPath);
+  const currentPid = process.pid;
+
+  const script = `$ErrorActionPreference = "Stop"
+$zip = ${ps(zipPath)}
+$target = ${ps(targetDir)}
+$extract = ${ps(extractDir)}
+$exeName = ${ps(executableName)}
+$pidToWait = ${currentPid}
+
+while (Get-Process -Id $pidToWait -ErrorAction SilentlyContinue) {
+  Start-Sleep -Milliseconds 400
+}
+Start-Sleep -Seconds 2
+
+if (Test-Path $extract) {
+  Remove-Item $extract -Recurse -Force -ErrorAction SilentlyContinue
+}
+New-Item -ItemType Directory -Path $extract -Force | Out-Null
+Expand-Archive -Path $zip -DestinationPath $extract -Force
+
+$newExe = Join-Path $extract $exeName
+if (-not (Test-Path $newExe)) {
+  throw "Enturma.exe não foi encontrado no pacote da atualização."
+}
+
+$updated = $false
+for ($attempt = 0; $attempt -lt 20 -and -not $updated; $attempt++) {
+  try {
+    Get-ChildItem -Path $target -Force | Remove-Item -Recurse -Force -ErrorAction Stop
+    Copy-Item -Path (Join-Path $extract "*") -Destination $target -Recurse -Force -ErrorAction Stop
+    $updated = $true
+  } catch {
+    Start-Sleep -Milliseconds 750
+  }
+}
+
+if (-not $updated) {
+  throw "Não foi possível substituir os arquivos do Enturma."
+}
+
+Start-Process (Join-Path $target $exeName)
+Remove-Item $extract -Recurse -Force -ErrorAction SilentlyContinue
+Remove-Item $zip -Force -ErrorAction SilentlyContinue
+Remove-Item (Join-Path ${ps(updatesDir)} "pending-update.json") -Force -ErrorAction SilentlyContinue
+Remove-Item $MyInvocation.MyCommand.Path -Force -ErrorAction SilentlyContinue
+`;
+
+  fs.mkdirSync(updatesDir, { recursive: true });
+  fs.writeFileSync(scriptPath, script, "utf8");
+
+  const updater = spawn(
+    "powershell.exe",
+    [
+      "-NoProfile",
+      "-NonInteractive",
+      "-ExecutionPolicy",
+      "Bypass",
+      "-File",
+      scriptPath,
+    ],
+    {
+      detached: true,
+      stdio: "ignore",
+      windowsHide: true,
+    },
+  );
+  updater.unref();
+  app.quit();
+}
+
+async function promptUpdateReady(manifest, zipPath) {
+  if (!mainWindow || mainWindow.isDestroyed()) return;
+  if (lastPromptedVersion === manifest.version) return;
+  lastPromptedVersion = manifest.version;
+
+  const result = await dialog.showMessageBox(mainWindow, {
+    type: "info",
+    title: "Atualização pronta",
+    message: `Enturma ${manifest.version} está pronto para instalar.`,
+    detail:
+      "A atualização já foi baixada e verificada. O Enturma será reiniciado para concluir a instalação.",
+    buttons: ["Atualizar e reiniciar", "Depois"],
+    defaultId: 0,
+    cancelId: 1,
+  });
+
+  if (result.response === 0) {
+    installDownloadedUpdate(manifest, zipPath);
+  }
+}
+
+async function fetchUpdateManifest() {
+  const response = await net.fetch(
+    `${UPDATE_MANIFEST_URL}?t=${Date.now()}`,
+    {
+      cache: "no-store",
+      headers: {
+        Accept: "application/json",
+        "User-Agent": `EnturmaDesktop/${app.getVersion()}`,
+      },
+    },
+  );
+  if (!response.ok) {
+    throw new Error(`Servidor de atualização respondeu ${response.status}`);
+  }
+  const manifest = await response.json();
+  if (
+    !manifest?.version ||
+    !manifest?.downloadUrl ||
+    !manifest?.sha256
+  ) {
+    throw new Error("Manifesto de atualização inválido.");
+  }
+  return manifest;
+}
+
 async function checkForUpdates(showResult) {
   if (!app.isPackaged) {
     if (showResult && mainWindow) {
@@ -139,59 +354,66 @@ async function checkForUpdates(showResult) {
     return;
   }
 
+  if (process.platform !== "win32") {
+    if (showResult && mainWindow) {
+      await dialog.showMessageBox(mainWindow, {
+        type: "info",
+        title: "Atualizações",
+        message: "A atualização automática está disponível no Windows.",
+        detail: "No macOS e Linux, utilize a página oficial de downloads.",
+      });
+    }
+    return;
+  }
+
   try {
-    const response = await net.fetch(RELEASE_API, {
-      headers: {
-        Accept: "application/vnd.github+json",
-        "User-Agent": `EnturmaDesktop/${app.getVersion()}`,
-      },
-    });
-    if (response.status === 404) {
+    const manifest = await fetchUpdateManifest();
+    if (!newerThan(manifest.version, app.getVersion())) {
       if (showResult && mainWindow) {
         await dialog.showMessageBox(mainWindow, {
           type: "info",
           title: "Atualizações",
-          message: "Nenhuma versão pública mais recente foi encontrada.",
+          message: "Você já está usando a versão mais recente do Enturma.",
+          detail: `Versão instalada: ${app.getVersion()}`,
         });
       }
       return;
     }
-    if (!response.ok) throw new Error(`GitHub respondeu ${response.status}`);
-    const release = await response.json();
-    const remote = release.tag_name || release.name || "";
-    if (newerThan(remote, app.getVersion())) {
-      if (!mainWindow) return;
-      const result = await dialog.showMessageBox(mainWindow, {
-        type: "info",
-        title: "Atualização disponível",
-        message: `Uma nova versão do Enturma (${remote}) está disponível.`,
-        detail:
-          "Abra a página oficial de versões para baixar o instalador mais recente.",
-        buttons: ["Abrir download", "Depois"],
-        defaultId: 0,
-        cancelId: 1,
-      });
-      if (result.response === 0) {
-        await shell.openExternal(release.html_url || RELEASES_URL);
-      }
-    } else if (showResult && mainWindow) {
-      await dialog.showMessageBox(mainWindow, {
-        type: "info",
-        title: "Atualizações",
-        message: "Você já está usando a versão mais recente do Enturma.",
-      });
+
+    if (updateInProgress) return;
+    updateInProgress = true;
+
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setProgressBar(2);
     }
-  } catch {
+
+    const zipPath = await downloadUpdate(manifest);
+
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setProgressBar(-1);
+    }
+
+    await promptUpdateReady(manifest, zipPath);
+  } catch (error) {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      mainWindow.setProgressBar(-1);
+    }
     if (showResult && mainWindow) {
       await dialog.showMessageBox(mainWindow, {
         type: "warning",
         title: "Atualizações",
-        message: "Não foi possível verificar atualizações agora.",
-        detail: "Confira sua conexão e tente novamente mais tarde.",
+        message: "Não foi possível verificar ou baixar a atualização.",
+        detail:
+          error instanceof Error
+            ? error.message
+            : "Confira sua conexão e tente novamente mais tarde.",
       });
     }
+  } finally {
+    updateInProgress = false;
   }
 }
+
 
 function createMenu() {
   const template = [
