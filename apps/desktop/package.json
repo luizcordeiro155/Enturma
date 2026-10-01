@@ -1,0 +1,76 @@
+{
+  "name": "@enturma/desktop",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Aplicativo desktop oficial do Enturma",
+  "main": "src/main.cjs",
+  "license": "UNLICENSED",
+  "scripts": {
+    "dev": "npx --yes electron@44.5.1 .",
+    "start": "npx --yes electron@44.5.1 .",
+    "pack": "npx --yes electron-builder@26.15.3 --dir",
+    "dist:win": "npx --yes electron-builder@26.15.3 --win nsis portable --x64 --publish never",
+    "dist:linux": "npx --yes electron-builder@26.15.3 --linux AppImage --x64 --publish never",
+    "dist:mac": "npx --yes electron-builder@26.15.3 --mac dmg --publish never"
+  },
+  "build": {
+    "appId": "br.com.enturma.desktop",
+    "productName": "Enturma",
+    "asar": true,
+    "compression": "maximum",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "package.json"
+    ],
+    "artifactName": "Enturma-${version}-${os}-${arch}.${ext}",
+    "protocols": [
+      {
+        "name": "Enturma",
+        "schemes": [
+          "enturma"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "publisherName": "Enturma"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Enturma",
+      "deleteAppDataOnUninstall": false
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Education"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.education"
+    }
+  }
+}
