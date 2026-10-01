@@ -23,7 +23,15 @@ COMMIT;
 
 Não criar conta ou senha administrativa fixa em migrations. O usuário comum não pode enviar role no cadastro. Para promover SUPER_ADMIN, adote um procedimento operacional separado e auditado.
 
-Limites atuais: Google OAuth, reenvio de confirmação e alteração de senha com senha atual não têm interface dedicada. Recuperação de senha já existe. Confirmação de e-mail é registrada, mas ainda não é requisito para entrar em salas; decidir a política antes do lançamento.
+Fluxos de e-mail transacional:
+- cadastro gera token único de confirmação válido por 30 minutos;
+- usuário com confirmação pendente pode solicitar novo link pelo próprio perfil;
+- recuperação de senha envia link único válido por 30 minutos;
+- redefinir a senha revoga todas as sessões ativas;
+- o worker de e-mail usa a tabela `email_outbox`, tenta novamente em caso de falha e limpa o corpo após o envio;
+- em produção, configure `MAIL_ENABLED=true` e as credenciais SMTP apenas no backend/SquareCloud.
+
+Confirmação de e-mail continua registrada no perfil; a política de bloquear recursos para contas não confirmadas pode ser endurecida separadamente sem alterar o fluxo de envio.
 
 
 ## Proteções contra abuso
@@ -39,7 +47,7 @@ Rate limits por identidade de cliente:
 |---|---|
 | `POST /auth/login` | 8 tentativas / 60 s |
 | `POST /auth/register` | 5 / 15 min |
-| `POST /auth/forgot-password` | 5 / 15 min |
+| `POST /auth/forgot-password` e `POST /auth/resend-verification` | 5 / 15 min |
 | verify/reset token | 10 / 5 min |
 | outras mutações de auth | 20 / min |
 
