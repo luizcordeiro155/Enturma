@@ -176,6 +176,46 @@ export function AuthForm({ mode }: { mode: Mode }) {
     : 0;
   const recoveryClock = `${String(Math.floor(recoveryRemaining / 60)).padStart(2, "0")}:${String(recoveryRemaining % 60).padStart(2, "0")}`;
 
+  function validateAuthFields(data: Record<string, FormDataEntryValue>) {
+    const errors: Record<string, string> = {};
+    const name = String(data.name ?? "").trim();
+    const username = String(data.username ?? "").trim();
+    const email = String(data.email ?? "").trim();
+    const password = String(data.password ?? "");
+    const confirmPassword = String(data.confirmPassword ?? "");
+
+    if (mode === "register") {
+      if (!name) errors.name = "Informe seu nome para criar a conta.";
+      if (!username)
+        errors.username = "Escolha um nome de usuário.";
+      else if (!/^[\p{L}\p{M}\p{N}_]{1,40}$/u.test(username))
+        errors.username =
+          "Use até 40 letras, números ou _. Espaços e símbolos não são aceitos.";
+    }
+
+    if (["login", "register", "forgot-password"].includes(mode)) {
+      if (!email) errors.email = "Informe seu e-mail.";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        errors.email = "Digite um e-mail válido, por exemplo nome@provedor.com.";
+    }
+
+    if (["login", "register", "reset-password"].includes(mode)) {
+      if (!password) errors.password = "Informe sua senha.";
+      else if (mode !== "login" && password.length < 12)
+        errors.password = "A senha precisa ter pelo menos 12 caracteres.";
+    }
+
+    if (["register", "reset-password"].includes(mode)) {
+      if (!confirmPassword)
+        errors.confirmPassword = "Confirme a senha digitada acima.";
+      else if (password !== confirmPassword) {
+        errors.password = "Confira a senha: os dois campos precisam ser iguais.";
+        errors.confirmPassword = "A confirmação não corresponde à senha.";
+      }
+    }
+
+    return errors;
+  }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -184,23 +224,22 @@ export function AuthForm({ mode }: { mode: Mode }) {
     setSuccess("");
     setFieldErrors({});
     const data = Object.fromEntries(new FormData(event.currentTarget));
+    const validationErrors = validateAuthFields(data);
+    if (Object.keys(validationErrors).length) {
+      setFieldErrors(validationErrors);
+      setError("Revise os campos destacados em vermelho.");
+      const firstField = Object.keys(validationErrors)[0];
+      requestAnimationFrame(() => {
+        document.querySelector<HTMLInputElement>(`input[name="${firstField}"]`)?.focus();
+      });
+      setBusy(false);
+      return;
+    }
+
     try {
       const token = new URLSearchParams(window.location.hash.slice(1)).get(
         "token",
       );
-      if (
-        (mode === "register" || mode === "reset-password") &&
-        data.password !== data.confirmPassword
-      ) {
-        setFieldErrors({
-          password: "As duas senhas precisam ser iguais.",
-          confirmPassword: "A confirmação não corresponde à senha informada.",
-        });
-        requestAnimationFrame(() => {
-          document.querySelector<HTMLInputElement>('input[name="confirmPassword"]')?.focus();
-        });
-        return;
-      }
 
       const response = await post<RecoveryStarted | void>(
         `/auth/${mode}`,
@@ -579,7 +618,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         <span>Seu espaço de estudo e conexão.</span>
       </section>
       <main className="auth-main">
-        <form onSubmit={submit}>
+        <form onSubmit={submit} noValidate>
           <h1>{titles[mode]}</h1>
           <p className="muted">
             {mode === "register"
@@ -594,9 +633,24 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <input
                   name="name"
                   autoComplete="name"
+                  aria-invalid={Boolean(fieldErrors.name)}
+                  aria-describedby={fieldErrors.name ? "name-error" : undefined}
+                  className={fieldErrors.name ? "auth-field-invalid" : undefined}
                   required
                   maxLength={100}
+                  onChange={() =>
+                    setFieldErrors((current) => {
+                      const next = { ...current };
+                      delete next.name;
+                      return next;
+                    })
+                  }
                 />
+                {fieldErrors.name ? (
+                  <small id="name-error" className="auth-field-error" role="alert">
+                    {fieldErrors.name}
+                  </small>
+                ) : null}
               </label>
               <label>
                 Nome de usuário
