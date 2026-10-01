@@ -20,7 +20,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [completed, setCompleted] = useState<"verify" | "reset" | null>(null);
-  const [redirectSeconds, setRedirectSeconds] = useState(30);
+  const [redirectSeconds, setRedirectSeconds] = useState(15);
   const [recoveryWaitingUntil, setRecoveryWaitingUntil] = useState<number | null>(null);
   const [recoveryNow, setRecoveryNow] = useState(() => Date.now());
   useEffect(() => {
@@ -42,16 +42,18 @@ export function AuthForm({ mode }: { mode: Mode }) {
       localStorage.setItem("enturma-email-verified-at", String(Date.now()));
     }
     if (completed === "reset") {
+      channel?.postMessage({ type: "password-reset", at: Date.now() });
       localStorage.setItem("enturma-password-reset-at", String(Date.now()));
     }
 
+    const redirectSecondsForFlow = completed === "verify" ? 5 : 15;
+    setRedirectSeconds(redirectSecondsForFlow);
     const interval = window.setInterval(() => {
       setRedirectSeconds((value) => Math.max(0, value - 1));
     }, 1000);
-    const redirectDelay = completed === "verify" ? 5000 : 30000;
     const timeout = window.setTimeout(() => {
       router.replace(completed === "verify" ? "/profile" : "/login");
-    }, redirectDelay);
+    }, redirectSecondsForFlow * 1000);
 
     return () => {
       channel?.close();
@@ -69,6 +71,40 @@ export function AuthForm({ mode }: { mode: Mode }) {
     }, 1000);
     return () => window.clearInterval(interval);
   }, [recoveryWaitingUntil]);
+
+  useEffect(() => {
+    if (mode !== "forgot-password") return;
+
+    const finishRecoveryWaiting = () => {
+      setRecoveryWaitingUntil(null);
+      setSuccess("Senha atualizada com sucesso.");
+      setRedirectSeconds(15);
+      setCompleted("reset");
+    };
+
+    const channel =
+      typeof BroadcastChannel !== "undefined"
+        ? new BroadcastChannel("enturma-account-status")
+        : null;
+
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === "password-reset") finishRecoveryWaiting();
+    };
+    channel?.addEventListener("message", onMessage);
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key === "enturma-password-reset-at" && event.newValue) {
+        finishRecoveryWaiting();
+      }
+    };
+    window.addEventListener("storage", onStorage);
+
+    return () => {
+      channel?.removeEventListener("message", onMessage);
+      channel?.close();
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [mode]);
 
   const recoveryRemaining = recoveryWaitingUntil
     ? Math.max(0, Math.ceil((recoveryWaitingUntil - recoveryNow) / 1000))
@@ -123,7 +159,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         sessionStorage.setItem("enturma-password-reset-complete", "1");
         window.history.replaceState(null, "", "/reset-password");
         setSuccess("Senha atualizada com sucesso.");
-        setRedirectSeconds(30);
+        setRedirectSeconds(15);
         setCompleted("reset");
       } else {
         setSuccess(
@@ -254,7 +290,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 </div>
               ) : null}
               <div className="auth-redirect-progress" aria-hidden="true">
-                <span />
+                <span
+                  style={{
+                    animationDuration: verified ? "5s" : "15s",
+                  }}
+                />
               </div>
               <small>
                 Redirecionando em {redirectSeconds}s…
