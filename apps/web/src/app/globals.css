@@ -2823,3 +2823,22 @@ html[data-theme="dark"] .ai-web-sources a {
     animation: none !important;
   }
 }
+
+.account-state-animation{position:relative;width:154px;height:154px;display:grid;place-items:center}
+.account-state-core{position:relative;z-index:3;width:94px;height:94px;display:grid;place-items:center;border-radius:50%;background:#d9f56d;color:#163d35;animation:account-state-pop .62s ease both}
+.account-state-orbit{position:absolute;border-radius:50%;border:2px solid rgba(143,174,70,.34)}
+.account-state-orbit.orbit-one{inset:12px;animation:account-state-spin 5s linear infinite}
+.account-state-orbit.orbit-two{inset:27px 2px;border-style:dashed;animation:account-state-spin 7s linear infinite reverse}
+.account-state-pulse{position:absolute;width:9px;height:9px;border-radius:50%;background:#d9f56d;animation:account-state-pulse 1.5s ease-in-out infinite alternate}
+.account-state-pulse.pulse-one{top:18px;right:16px}.account-state-pulse.pulse-two{bottom:20px;left:14px}.account-state-pulse.pulse-three{top:70px;left:0}
+.account-state-actions{width:100%;display:grid;gap:10px;margin-top:4px}
+@keyframes account-state-pop{from{transform:scale(.58);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes account-state-spin{to{transform:rotate(360deg)}}
+@keyframes account-state-pulse{from{transform:scale(.62);opacity:.38}to{transform:scale(1.18);opacity:1}}
+@media (prefers-reduced-motion:reduce){.account-state-core,.account-state-orbit,.account-state-pulse{animation:none!important}}
+
+.auth-field-invalid{border:2px solid #d33!important;outline:2px solid rgba(221,51,51,.16);animation:auth-invalid-flash .45s ease-in-out 3 alternate}
+.auth-field-invalid:focus{outline:3px solid rgba(221,51,51,.24)}
+.auth-field-error{display:block;margin-top:6px;color:#b42318!important;font-weight:700;line-height:1.35}
+@keyframes auth-invalid-flash{from{opacity:.72}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){.auth-field-invalid{animation:none!important}}

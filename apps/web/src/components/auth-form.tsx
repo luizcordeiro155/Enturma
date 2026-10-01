@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { BookOpen, ArrowRight, Check, KeyRound, MailCheck, ShieldCheck } from "lucide-react";
+import { BookOpen, ArrowRight, Check, KeyRound, MailCheck, ShieldCheck, UserRoundX, LogIn } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
 type Mode =
@@ -30,6 +30,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [recoveryWaitingUntil, setRecoveryWaitingUntil] = useState<number | null>(null);
   const [recoveryTrackingToken, setRecoveryTrackingToken] = useState<string | null>(null);
   const [recoveryNow, setRecoveryNow] = useState(() => Date.now());
+  const [accountState, setAccountState] = useState<"email-exists" | "email-missing" | null>(null);
+  const [accountRedirectSeconds, setAccountRedirectSeconds] = useState(10);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const finishRecoveryWaiting = useCallback(() => {
     sessionStorage.removeItem("enturma-password-recovery-tracking");
@@ -40,6 +43,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
     setRedirectSeconds(15);
     setCompleted("reset");
   }, []);
+
+  useEffect(() => {
+    if (!accountState) return;
+    setAccountRedirectSeconds(10);
+    const tick = window.setInterval(() => {
+      setAccountRedirectSeconds((value) => Math.max(0, value - 1));
+    }, 1000);
+    const destination = accountState === "email-exists" ? "/login" : "/register";
+    const redirect = window.setTimeout(() => router.replace(destination), 10000);
+    return () => {
+      window.clearInterval(tick);
+      window.clearTimeout(redirect);
+    };
+  }, [accountState, router]);
   useEffect(() => {
     if (mode !== "reset-password") return;
     if (sessionStorage.getItem("enturma-password-reset-complete") !== "1") return;
@@ -159,22 +176,70 @@ export function AuthForm({ mode }: { mode: Mode }) {
     : 0;
   const recoveryClock = `${String(Math.floor(recoveryRemaining / 60)).padStart(2, "0")}:${String(recoveryRemaining % 60).padStart(2, "0")}`;
 
+  function validateAuthFields(data: Record<string, FormDataEntryValue>) {
+    const errors: Record<string, string> = {};
+    const name = String(data.name ?? "").trim();
+    const username = String(data.username ?? "").trim();
+    const email = String(data.email ?? "").trim();
+    const password = String(data.password ?? "");
+    const confirmPassword = String(data.confirmPassword ?? "");
+
+    if (mode === "register") {
+      if (!name) errors.name = "Informe seu nome para criar a conta.";
+      if (!username)
+        errors.username = "Escolha um nome de usuário.";
+      else if (!/^[\p{L}\p{M}\p{N}_]{1,40}$/u.test(username))
+        errors.username =
+          "Use até 40 letras, números ou _. Espaços e símbolos não são aceitos.";
+    }
+
+    if (["login", "register", "forgot-password"].includes(mode)) {
+      if (!email) errors.email = "Informe seu e-mail.";
+      else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+        errors.email = "Digite um e-mail válido, por exemplo nome@provedor.com.";
+    }
+
+    if (["login", "register", "reset-password"].includes(mode)) {
+      if (!password) errors.password = "Informe sua senha.";
+      else if (mode !== "login" && password.length < 12)
+        errors.password = "A senha precisa ter pelo menos 12 caracteres.";
+    }
+
+    if (["register", "reset-password"].includes(mode)) {
+      if (!confirmPassword)
+        errors.confirmPassword = "Confirme a senha digitada acima.";
+      else if (password !== confirmPassword) {
+        errors.password = "Confira a senha: os dois campos precisam ser iguais.";
+        errors.confirmPassword = "A confirmação não corresponde à senha.";
+      }
+    }
+
+    return errors;
+  }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
     setError("");
     setSuccess("");
+    setFieldErrors({});
     const data = Object.fromEntries(new FormData(event.currentTarget));
+    const validationErrors = validateAuthFields(data);
+    if (Object.keys(validationErrors).length) {
+      setFieldErrors(validationErrors);
+      setError("Revise os campos destacados em vermelho.");
+      const firstField = Object.keys(validationErrors)[0];
+      requestAnimationFrame(() => {
+        document.querySelector<HTMLInputElement>(`input[name="${firstField}"]`)?.focus();
+      });
+      setBusy(false);
+      return;
+    }
+
     try {
       const token = new URLSearchParams(window.location.hash.slice(1)).get(
         "token",
       );
-      if (
-        (mode === "register" || mode === "reset-password") &&
-        data.password !== data.confirmPassword
-      )
-        throw Error("As senhas não coincidem.");
 
       const response = await post<RecoveryStarted | void>(
         `/auth/${mode}`,
@@ -229,11 +294,164 @@ export function AuthForm({ mode }: { mode: Mode }) {
         setRecoveryWaitingUntil(expiresAt);
       }
     } catch (e) {
-      setError((e as Error).message);
+      const message = (e as Error).message;
+      if (
+        mode === "register" &&
+        message.includes("Já existe uma conta cadastrada com este e-mail")
+      ) {
+        setFieldErrors({
+          email: "Este e-mail já está vinculado a uma conta do Enturma.",
+        });
+        setAccountState("email-exists");
+        setError("");
+      } else if (
+        mode === "register" &&
+        message.includes("Este nome de usuário já está em uso")
+      ) {
+        setFieldErrors({
+          username: "Este nome de usuário já está sendo usado. Escolha outro.",
+        });
+        setError("Revise o campo destacado para concluir o cadastro.");
+        requestAnimationFrame(() => {
+          document.querySelector<HTMLInputElement>('input[name="username"]')?.focus();
+        });
+      } else if (
+        mode === "forgot-password" &&
+        message.includes("Não encontramos uma conta cadastrada com este e-mail")
+      ) {
+        setFieldErrors({
+          email: "Não existe uma conta cadastrada com este e-mail.",
+        });
+        setAccountState("email-missing");
+        setError("");
+      } else if (
+        mode === "login" &&
+        message.includes("Não encontramos uma conta cadastrada com este e-mail")
+      ) {
+        setFieldErrors({
+          email: "Não encontramos nenhuma conta com este e-mail.",
+        });
+        setError("Confira o e-mail ou crie uma nova conta.");
+        requestAnimationFrame(() => {
+          document.querySelector<HTMLInputElement>('input[name="email"]')?.focus();
+        });
+      } else if (
+        mode === "login" &&
+        message.includes("A senha informada está incorreta")
+      ) {
+        setFieldErrors({
+          password: "Senha incorreta. Tente novamente ou recupere sua senha.",
+        });
+        setError("A senha informada não corresponde a esta conta.");
+        requestAnimationFrame(() => {
+          const password = document.querySelector<HTMLInputElement>('input[name="password"]');
+          password?.focus();
+          password?.select();
+        });
+      } else {
+        setError(message);
+      }
     } finally {
       setBusy(false);
     }
   }
+  if (accountState) {
+    const existing = accountState === "email-exists";
+    const destination = existing ? "/login" : "/register";
+    return (
+      <div className="auth-layout">
+        <section className="auth-story">
+          <Link href="/" className="brand">
+            <BookOpen size={40} />
+            enturma.
+          </Link>
+          <div>
+            <h1>{existing ? "Você já faz parte." : "Vamos criar sua conta."}</h1>
+            <p>
+              {existing
+                ? "Encontramos uma conta vinculada a este e-mail."
+                : "Este e-mail ainda não possui uma conta no Enturma."}
+            </p>
+          </div>
+          <span>Seu espaço de estudo e conexão.</span>
+        </section>
+        <main className="auth-main auth-success-main">
+          <section
+            className="auth-success-card account-state-card"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="account-state-animation" aria-hidden="true">
+              <span className="account-state-orbit orbit-one" />
+              <span className="account-state-orbit orbit-two" />
+              <span className="account-state-core">
+                {existing ? <LogIn size={48} /> : <UserRoundX size={48} />}
+              </span>
+              <span className="account-state-pulse pulse-one" />
+              <span className="account-state-pulse pulse-two" />
+              <span className="account-state-pulse pulse-three" />
+            </div>
+
+            <div className="auth-success-copy">
+              <span className="auth-success-kicker">
+                <Check size={16} />
+                {existing ? "Conta encontrada" : "E-mail disponível"}
+              </span>
+              <h1>
+                {existing
+                  ? "Este e-mail já possui uma conta"
+                  : "Não encontramos uma conta com este e-mail"}
+              </h1>
+              <p>
+                {existing
+                  ? "Você não precisa criar outra conta. Entre com sua senha ou use a recuperação de senha caso não se lembre dela."
+                  : "Você pode criar sua conta agora e começar a usar o Enturma."}
+              </p>
+
+              <div className="auth-redirect-progress account-state-progress" aria-hidden="true">
+                <span style={{ animationDuration: "10s" }} />
+              </div>
+              <small>
+                Redirecionando em {accountRedirectSeconds}s…
+              </small>
+
+              <div className="account-state-actions">
+                <button
+                  type="button"
+                  className="button wide"
+                  onClick={() => router.replace(destination)}
+                >
+                  {existing ? "Ir para o login" : "Criar minha conta"}
+                  <ArrowRight size={18} />
+                </button>
+                {existing ? (
+                  <button
+                    type="button"
+                    className="button secondary wide"
+                    onClick={() => router.replace("/forgot-password")}
+                  >
+                    Recuperar minha senha
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="button secondary wide"
+                    onClick={() => {
+                      setAccountState(null);
+                      router.replace("/forgot-password");
+                    }}
+                  >
+                    Tentar outro e-mail
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   if (recoveryWaitingUntil) {
     return (
       <div className="auth-layout">
@@ -400,7 +618,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         <span>Seu espaço de estudo e conexão.</span>
       </section>
       <main className="auth-main">
-        <form onSubmit={submit}>
+        <form onSubmit={submit} noValidate>
           <h1>{titles[mode]}</h1>
           <p className="muted">
             {mode === "register"
@@ -415,20 +633,50 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <input
                   name="name"
                   autoComplete="name"
+                  aria-invalid={Boolean(fieldErrors.name)}
+                  aria-describedby={fieldErrors.name ? "name-error" : undefined}
+                  className={fieldErrors.name ? "auth-field-invalid" : undefined}
                   required
                   maxLength={100}
+                  onChange={() =>
+                    setFieldErrors((current) => {
+                      const next = { ...current };
+                      delete next.name;
+                      return next;
+                    })
+                  }
                 />
+                {fieldErrors.name ? (
+                  <small id="name-error" className="auth-field-error" role="alert">
+                    {fieldErrors.name}
+                  </small>
+                ) : null}
               </label>
               <label>
                 Nome de usuário
                 <input
                   name="username"
                   autoComplete="username"
+                  aria-invalid={Boolean(fieldErrors.username)}
+                  aria-describedby={fieldErrors.username ? "username-error" : undefined}
+                  className={fieldErrors.username ? "auth-field-invalid" : undefined}
                   maxLength={40}
                   autoCapitalize="none"
                   required
                   placeholder="Ex.: Cleitão ou Clton_junin"
+                  onChange={() =>
+                    setFieldErrors((current) => {
+                      const next = { ...current };
+                      delete next.username;
+                      return next;
+                    })
+                  }
                 />
+                {fieldErrors.username ? (
+                  <small id="username-error" className="auth-field-error" role="alert">
+                    {fieldErrors.username}
+                  </small>
+                ) : null}
               </label>
             </>
           ) : null}
@@ -438,10 +686,25 @@ export function AuthForm({ mode }: { mode: Mode }) {
               <input
                 name="email"
                 type="email"
+                aria-invalid={Boolean(fieldErrors.email)}
+                aria-describedby={fieldErrors.email ? "email-error" : undefined}
+                className={fieldErrors.email ? "auth-field-invalid" : undefined}
                 autoComplete="email"
                 required
                 maxLength={254}
+                onChange={() =>
+                  setFieldErrors((current) => {
+                    const next = { ...current };
+                    delete next.email;
+                    return next;
+                  })
+                }
               />
+              {fieldErrors.email ? (
+                <small id="email-error" className="auth-field-error" role="alert">
+                  {fieldErrors.email}
+                </small>
+              ) : null}
             </label>
           ) : null}
           {["login", "register", "reset-password"].includes(mode) ? (
@@ -450,6 +713,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
               <input
                 name="password"
                 aria-label="Senha"
+                aria-invalid={Boolean(fieldErrors.password)}
+                aria-describedby={fieldErrors.password ? "password-error" : undefined}
+                className={fieldErrors.password ? "auth-field-invalid" : undefined}
                 type="password"
                 autoComplete={
                   mode === "login" ? "current-password" : "new-password"
@@ -457,8 +723,19 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 required
                 minLength={mode === "login" ? 1 : 12}
                 maxLength={72}
+                onChange={() =>
+                  setFieldErrors((current) => {
+                    const next = { ...current };
+                    delete next.password;
+                    return next;
+                  })
+                }
               />
-              {mode !== "login" ? (
+              {fieldErrors.password ? (
+                <small id="password-error" className="auth-field-error" role="alert">
+                  {fieldErrors.password}
+                </small>
+              ) : mode !== "login" ? (
                 <small>Use pelo menos 12 caracteres.</small>
               ) : null}
             </label>
@@ -469,12 +746,27 @@ export function AuthForm({ mode }: { mode: Mode }) {
               <input
                 name="confirmPassword"
                 aria-label="Confirmar senha"
+                aria-invalid={Boolean(fieldErrors.confirmPassword)}
+                aria-describedby={fieldErrors.confirmPassword ? "confirm-password-error" : undefined}
+                className={fieldErrors.confirmPassword ? "auth-field-invalid" : undefined}
                 type="password"
                 autoComplete="new-password"
                 required
                 minLength={12}
                 maxLength={72}
+                onChange={() =>
+                  setFieldErrors((current) => {
+                    const next = { ...current };
+                    delete next.confirmPassword;
+                    return next;
+                  })
+                }
               />
+              {fieldErrors.confirmPassword ? (
+                <small id="confirm-password-error" className="auth-field-error" role="alert">
+                  {fieldErrors.confirmPassword}
+                </small>
+              ) : null}
             </label>
           ) : null}
           <button disabled={busy} className="button wide" type="submit">
