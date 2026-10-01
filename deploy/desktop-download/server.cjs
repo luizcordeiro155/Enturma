@@ -9,7 +9,7 @@ function files() {
   try {
     return fs
       .readdirSync(dir)
-      .filter((name) => name.toLowerCase().endsWith(".exe"))
+      .filter((name) => name.toLowerCase().endsWith(".zip"))
       .sort();
   } catch {
     return [];
@@ -25,7 +25,7 @@ function sendFile(req, res, file) {
   }
   const stat = fs.statSync(full);
   res.writeHead(200, {
-    "Content-Type": "application/vnd.microsoft.portable-executable",
+    "Content-Type": "application/zip",
     "Content-Length": stat.size,
     "Content-Disposition": `attachment; filename="${file}"`,
     "Cache-Control": "public, max-age=3600",
@@ -35,7 +35,7 @@ function sendFile(req, res, file) {
 
 const server = http.createServer((req, res) => {
   const list = files();
-  const installer = list.find((name) => !name.toLowerCase().includes("portable")) || list[0];
+  const installer = list[0];
 
   if (req.url === "/health") {
     res.writeHead(installer ? 200 : 503, {
@@ -45,10 +45,10 @@ const server = http.createServer((req, res) => {
     return;
   }
 
-  if (req.url === "/" || req.url === "/download" || req.url === "/Enturma-Setup.exe") {
+  if (req.url === "/" || req.url === "/download" || req.url === "/Enturma-Windows.zip") {
     if (!installer) {
       res.writeHead(503, { "Content-Type": "text/plain; charset=utf-8" });
-      res.end("O instalador ainda não foi gerado.");
+      res.end("O aplicativo ainda não foi gerado.");
       return;
     }
     sendFile(req, res, installer);
