@@ -113,3 +113,18 @@ Antes de uma distribuição pública maior, recomenda-se adquirir um certificado
 ## macOS e Linux
 
 A configuração já possui alvos para DMG e AppImage. Eles devem ser gerados e testados no sistema correspondente antes de serem oferecidos como downloads oficiais.
+
+
+## Download público atual
+
+A versão Windows x64 também é gerada automaticamente em um ambiente Railway e disponibilizada em:
+
+https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Windows.zip
+
+Para usar:
+
+1. baixe o ZIP;
+2. extraia todo o conteúdo para uma pasta;
+3. abra `Enturma.exe`.
+
+Esse pacote usa a mesma aplicação Web oficial e mantém conta e dados sincronizados. O instalador NSIS continua previsto para builds feitos diretamente em Windows.
