@@ -80,7 +80,6 @@ apps/desktop/dist/
 A configuração gera:
 
 - instalador NSIS;
-- versão portátil;
 - arquitetura x64.
 
 ## Publicar para download
