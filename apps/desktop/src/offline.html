@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Enturma sem conexão</title>
+  <style>
+    :root{color-scheme:dark;font-family:Inter,Segoe UI,Arial,sans-serif;background:#0f1917;color:#f4f8f6}
+    *{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;padding:24px;background:radial-gradient(circle at top,#183d34 0,#0f1917 48%,#09100f 100%)}
+    main{width:min(520px,100%);padding:38px;border:1px solid #2d4941;border-radius:24px;background:#13211e;text-align:center;box-shadow:0 24px 80px rgba(0,0,0,.35)}
+    .logo{width:84px;height:84px;margin:0 auto 24px;border-radius:24px;display:grid;place-items:center;background:#d9f56d;color:#163d35;font-size:40px;font-weight:900}h1{margin:0 0 12px;font-size:30px}p{color:#b7c7c1;line-height:1.6;margin:0 0 26px}
+    button{border:0;border-radius:12px;background:#d9f56d;color:#163d35;font-weight:900;padding:13px 22px;cursor:pointer;font-size:15px}small{display:block;margin-top:18px;color:#82958f}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="logo">E</div>
+    <h1>Não foi possível abrir o Enturma</h1>
+    <p>Confira sua conexão com a internet. O aplicativo usa a versão oficial do Enturma para manter conta, salas e dados sincronizados com a Web.</p>
+    <button id="retry" type="button">Tentar novamente</button>
+    <small>Se o problema continuar, a plataforma pode estar temporariamente indisponível.</small>
+  </main>
+  <script>document.getElementById("retry").addEventListener("click",()=>window.enturmaOffline.retry());</script>
+</body>
+</html>
