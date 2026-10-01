@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { BookOpen, ArrowRight, Check, KeyRound, MailCheck, ShieldCheck } from "lucide-react";
+import { BookOpen, ArrowRight, Check, KeyRound, MailCheck, ShieldCheck, UserRoundX, LogIn } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
 type Mode =
@@ -30,6 +30,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [recoveryWaitingUntil, setRecoveryWaitingUntil] = useState<number | null>(null);
   const [recoveryTrackingToken, setRecoveryTrackingToken] = useState<string | null>(null);
   const [recoveryNow, setRecoveryNow] = useState(() => Date.now());
+  const [accountState, setAccountState] = useState<"email-exists" | "email-missing" | null>(null);
+  const [accountRedirectSeconds, setAccountRedirectSeconds] = useState(10);
 
   const finishRecoveryWaiting = useCallback(() => {
     sessionStorage.removeItem("enturma-password-recovery-tracking");
@@ -40,6 +42,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
     setRedirectSeconds(15);
     setCompleted("reset");
   }, []);
+
+  useEffect(() => {
+    if (!accountState) return;
+    setAccountRedirectSeconds(10);
+    const tick = window.setInterval(() => {
+      setAccountRedirectSeconds((value) => Math.max(0, value - 1));
+    }, 1000);
+    const destination = accountState === "email-exists" ? "/login" : "/register";
+    const redirect = window.setTimeout(() => router.replace(destination), 10000);
+    return () => {
+      window.clearInterval(tick);
+      window.clearTimeout(redirect);
+    };
+  }, [accountState, router]);
   useEffect(() => {
     if (mode !== "reset-password") return;
     if (sessionStorage.getItem("enturma-password-reset-complete") !== "1") return;
@@ -229,11 +245,123 @@ export function AuthForm({ mode }: { mode: Mode }) {
         setRecoveryWaitingUntil(expiresAt);
       }
     } catch (e) {
-      setError((e as Error).message);
+      const message = (e as Error).message;
+      if (
+        mode === "register" &&
+        message.includes("Já existe uma conta cadastrada com este e-mail")
+      ) {
+        setAccountState("email-exists");
+        setError("");
+      } else if (
+        mode === "forgot-password" &&
+        message.includes("Não encontramos uma conta cadastrada com este e-mail")
+      ) {
+        setAccountState("email-missing");
+        setError("");
+      } else {
+        setError(message);
+      }
     } finally {
       setBusy(false);
     }
   }
+  if (accountState) {
+    const existing = accountState === "email-exists";
+    const destination = existing ? "/login" : "/register";
+    return (
+      <div className="auth-layout">
+        <section className="auth-story">
+          <Link href="/" className="brand">
+            <BookOpen size={40} />
+            enturma.
+          </Link>
+          <div>
+            <h1>{existing ? "Você já faz parte." : "Vamos criar sua conta."}</h1>
+            <p>
+              {existing
+                ? "Encontramos uma conta vinculada a este e-mail."
+                : "Este e-mail ainda não possui uma conta no Enturma."}
+            </p>
+          </div>
+          <span>Seu espaço de estudo e conexão.</span>
+        </section>
+        <main className="auth-main auth-success-main">
+          <section
+            className="auth-success-card account-state-card"
+            role="status"
+            aria-live="polite"
+          >
+            <div className="account-state-animation" aria-hidden="true">
+              <span className="account-state-orbit orbit-one" />
+              <span className="account-state-orbit orbit-two" />
+              <span className="account-state-core">
+                {existing ? <LogIn size={48} /> : <UserRoundX size={48} />}
+              </span>
+              <span className="account-state-pulse pulse-one" />
+              <span className="account-state-pulse pulse-two" />
+              <span className="account-state-pulse pulse-three" />
+            </div>
+
+            <div className="auth-success-copy">
+              <span className="auth-success-kicker">
+                <Check size={16} />
+                {existing ? "Conta encontrada" : "E-mail disponível"}
+              </span>
+              <h1>
+                {existing
+                  ? "Este e-mail já possui uma conta"
+                  : "Não encontramos uma conta com este e-mail"}
+              </h1>
+              <p>
+                {existing
+                  ? "Você não precisa criar outra conta. Entre com sua senha ou use a recuperação de senha caso não se lembre dela."
+                  : "Você pode criar sua conta agora e começar a usar o Enturma."}
+              </p>
+
+              <div className="auth-redirect-progress account-state-progress" aria-hidden="true">
+                <span style={{ animationDuration: "10s" }} />
+              </div>
+              <small>
+                Redirecionando em {accountRedirectSeconds}s…
+              </small>
+
+              <div className="account-state-actions">
+                <button
+                  type="button"
+                  className="button wide"
+                  onClick={() => router.replace(destination)}
+                >
+                  {existing ? "Ir para o login" : "Criar minha conta"}
+                  <ArrowRight size={18} />
+                </button>
+                {existing ? (
+                  <button
+                    type="button"
+                    className="button secondary wide"
+                    onClick={() => router.replace("/forgot-password")}
+                  >
+                    Recuperar minha senha
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="button secondary wide"
+                    onClick={() => {
+                      setAccountState(null);
+                      router.replace("/forgot-password");
+                    }}
+                  >
+                    Tentar outro e-mail
+                  </button>
+                )}
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
   if (recoveryWaitingUntil) {
     return (
       <div className="auth-layout">
