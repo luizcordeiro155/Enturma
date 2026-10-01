@@ -2683,3 +2683,143 @@ html[data-theme="dark"] .ai-web-sources a {
     animation: none !important;
   }
 }
+
+
+/* Cross-device account confirmation celebration */
+.account-celebration-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  background: rgba(5, 15, 13, .74);
+  backdrop-filter: blur(9px);
+}
+.account-celebration-card {
+  width: min(520px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  padding: 36px 32px 30px;
+  border: 1px solid var(--room-border, #d9e1dd);
+  border-radius: 24px;
+  background: var(--room-panel, #fff);
+  color: var(--room-ink, #163d35);
+  box-shadow: 0 30px 100px rgba(0,0,0,.34);
+  text-align: center;
+}
+.account-celebration-enter {
+  animation: account-celebration-enter .48s cubic-bezier(.2,.8,.2,1) both;
+}
+.account-celebration-animation {
+  position: relative;
+  width: 156px;
+  height: 156px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+}
+.account-celebration-core {
+  position: relative;
+  z-index: 3;
+  width: 96px;
+  height: 96px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #d9f56d;
+  color: #163d35;
+  box-shadow: 0 18px 52px rgba(119, 157, 63, .28);
+  animation: account-celebration-pop .7s cubic-bezier(.2,.8,.2,1) both;
+}
+.account-celebration-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 2px solid rgba(143, 174, 70, .38);
+}
+.account-celebration-ring.ring-one {
+  inset: 12px;
+  animation: account-celebration-spin 5s linear infinite;
+}
+.account-celebration-ring.ring-two {
+  inset: 28px 2px;
+  border-style: dashed;
+  animation: account-celebration-spin 7s linear infinite reverse;
+}
+.account-celebration-spark {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #d9f56d;
+  box-shadow: 0 0 18px rgba(217, 245, 109, .68);
+  animation: account-celebration-spark 1.5s ease-in-out infinite alternate;
+}
+.account-celebration-spark.spark-a { top: 15px; right: 18px; }
+.account-celebration-spark.spark-b { bottom: 20px; left: 13px; animation-delay: .25s; }
+.account-celebration-spark.spark-c { top: 72px; left: -2px; animation-delay: .5s; }
+.account-celebration-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: .78rem;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.account-celebration-card h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 4vw, 2.1rem);
+}
+.account-celebration-card p {
+  max-width: 430px;
+  margin: 0;
+  color: var(--room-muted, #64736e);
+  line-height: 1.55;
+}
+.account-celebration-card small {
+  color: var(--room-muted, #64736e);
+}
+.account-celebration-progress {
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: #e8ede9;
+  margin-top: 8px;
+}
+.account-celebration-progress > span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: left;
+  border-radius: inherit;
+  background: #8fae46;
+  animation: account-celebration-progress 8s linear forwards;
+}
+@keyframes account-celebration-enter {
+  from { transform: translateY(18px) scale(.965); opacity: 0; }
+  to { transform: translateY(0) scale(1); opacity: 1; }
+}
+@keyframes account-celebration-pop {
+  0% { transform: scale(.55) rotate(-8deg); opacity: 0; }
+  70% { transform: scale(1.08) rotate(2deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0); }
+}
+@keyframes account-celebration-spin { to { transform: rotate(360deg); } }
+@keyframes account-celebration-spark {
+  from { transform: scale(.65); opacity: .4; }
+  to { transform: scale(1.2); opacity: 1; }
+}
+@keyframes account-celebration-progress { to { transform: scaleX(0); } }
+
+@media (prefers-reduced-motion: reduce) {
+  .account-celebration-enter,
+  .account-celebration-core,
+  .account-celebration-ring,
+  .account-celebration-spark,
+  .account-celebration-progress > span {
+    animation: none !important;
+  }
+}
