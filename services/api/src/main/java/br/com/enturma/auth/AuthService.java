@@ -155,17 +155,22 @@ public class AuthService {
         accounts
             .findByEmail(email.strip().toLowerCase(Locale.ROOT))
             .filter(u -> u.status.equals("ACTIVE"))
-            .orElse(null);
+            .orElseThrow(
+                () ->
+                    new ApiException(
+                        404,
+                        "EMAIL_NOT_REGISTERED",
+                        "Não encontramos uma conta cadastrada com este e-mail."));
 
     db.jdbc.update("DELETE FROM password_reset_flow WHERE expires_at<now()-interval '1 day'");
     db.jdbc.update(
         "INSERT INTO password_reset_flow(id,tracking_hash,user_id,expires_at) VALUES (?,?,?,?)",
         UUID.randomUUID(),
         Tokens.hash(trackingToken),
-        user == null ? null : user.id,
+        user.id,
         Timestamp.from(expiresAt));
 
-    if (user != null) issueAccountToken(user, "RESET");
+    issueAccountToken(user, "RESET");
     return new RecoveryStarted(trackingToken, 1800);
   }
 
