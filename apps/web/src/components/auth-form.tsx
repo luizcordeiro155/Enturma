@@ -99,8 +99,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
           : mode === "reset-password"
             ? { token, password: data.password }
             : mode === "forgot-password"
-              ? data
-              : { ...data, device: "Navegador web" },
+              ? { email: data.email }
+              : mode === "register"
+                ? {
+                    name: data.name,
+                    username: data.username,
+                    email: data.email,
+                    password: data.password,
+                    device: "Navegador web",
+                  }
+                : {
+                    email: data.email,
+                    password: data.password,
+                    device: "Navegador web",
+                  },
       );
       if (mode === "login" || mode === "register")
         router.push(mode === "register" ? "/onboarding" : "/home");
