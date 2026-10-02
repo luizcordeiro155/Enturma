@@ -18,7 +18,7 @@ import {
   Download,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
-import { isDesktop, isInstalledApp } from "./desktop-updates";
+import { isInstalledApp } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
@@ -34,13 +34,9 @@ const links = [
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
-  const [desktop, setDesktop] = useState(false);
   const [installedApp, setInstalledApp] = useState(false);
   useEffect(() => {
-    const t = setTimeout(() => {
-      setDesktop(isDesktop());
-      setInstalledApp(isInstalledApp());
-    }, 0);
+    const t = setTimeout(() => setInstalledApp(isInstalledApp()), 0);
     return () => clearTimeout(t);
   }, []);
   const [learning, setLearning] = useState(false);
