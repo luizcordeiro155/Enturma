@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import type { Message, Profile, Room } from "@enturma/contracts";
 import {
   Bot,
+  ChevronLeft,
   Clock,
   FileText,
   Hash,
@@ -13,6 +14,7 @@ import {
   Phone,
   Sparkles,
   Users,
+  X,
 } from "lucide-react";
 import { prepareChatImage } from "@/lib/chat-image";
 import { api, post } from "@/lib/api";
@@ -44,6 +46,7 @@ export function RoomView({ id }: { id: string }) {
   const [section, setSection] = useState<Section>(
     params.get("panel") === "call" ? "call" : "chat",
   );
+  const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [connected, setConnected] = useState(false);
@@ -341,10 +344,22 @@ export function RoomView({ id }: { id: string }) {
     }
   }
 
+  async function leave() {
+    try {
+      await post(`/study-rooms/${id}/leave`);
+      if (callSession.session?.roomId === id) callSession.leave();
+      router.push("/home");
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
   const seconds = room
     ? Math.max(0, Math.floor((Date.parse(room.endsAt) - now) / 1000))
     : 0;
   const ended = room?.status === "ENDED" || seconds === 0;
+  const activeMemberCount =
+    room?.members?.filter((member) => !member.leftAt).length ?? 0;
 
   if (!room && !error)
     return (
@@ -383,6 +398,37 @@ export function RoomView({ id }: { id: string }) {
         <Feedback error={error} />
         {room ? (
           <>
+            <header className="room-mobile-toolbar">
+              <button
+                type="button"
+                className="room-mobile-icon-button"
+                aria-label="Voltar para minhas turmas"
+                onClick={() => router.push("/rooms")}
+              >
+                <ChevronLeft size={24} />
+              </button>
+
+              <div className="room-mobile-title">
+                <span className="room-mobile-channel-mark">
+                  <Hash size={19} />
+                </span>
+                <div>
+                  <strong>{room.title}</strong>
+                  <small>{room.subjectName}</small>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                className="room-mobile-info-button"
+                aria-label="Ver detalhes e participantes da turma"
+                onClick={() => setMobileDetailsOpen(true)}
+              >
+                <Users size={20} />
+                <span>{activeMemberCount}</span>
+              </button>
+            </header>
+
             <header className="study-room-header">
               <div>
                 <button
@@ -413,8 +459,7 @@ export function RoomView({ id }: { id: string }) {
                 </span>
                 <span>
                   <Users size={16} />
-                  {room.members?.filter((m) => !m.leftAt).length ?? 0}{" "}
-                  participantes
+                  {activeMemberCount} participantes
                 </span>
                 {room.hostId === me?.id && !ended ? (
                   <button className="secondary" onClick={end}>
@@ -613,25 +658,105 @@ export function RoomView({ id }: { id: string }) {
                   ))}
 
                   {!ended ? (
-                    <button
-                      className="text-button leave-room"
-                      onClick={async () => {
-                        try {
-                          await post(`/study-rooms/${id}/leave`);
-                          if (callSession.session?.roomId === id)
-                            callSession.leave();
-                          router.push("/home");
-                        } catch (e) {
-                          setError((e as Error).message);
-                        }
-                      }}
-                    >
+                    <button className="text-button leave-room" onClick={leave}>
                       Sair da turma
                     </button>
                   ) : null}
                 </aside>
               ) : null}
             </div>
+
+            {mobileDetailsOpen ? (
+              <div className="room-mobile-details-layer">
+                <button
+                  type="button"
+                  className="room-mobile-details-backdrop"
+                  aria-label="Fechar detalhes da turma"
+                  onClick={() => setMobileDetailsOpen(false)}
+                />
+                <aside
+                  className="room-mobile-details-sheet"
+                  aria-label="Detalhes da turma"
+                >
+                  <header>
+                    <div>
+                      <span className="eyebrow">Turma atual</span>
+                      <h2>{room.title}</h2>
+                      <p>{room.subjectName}</p>
+                    </div>
+                    <button
+                      type="button"
+                      className="room-mobile-icon-button"
+                      aria-label="Fechar detalhes"
+                      onClick={() => setMobileDetailsOpen(false)}
+                    >
+                      <X size={21} />
+                    </button>
+                  </header>
+
+                  <div className="room-mobile-meta-grid">
+                    <span>
+                      <Clock size={17} />
+                      {ended
+                        ? "Encerrada"
+                        : seconds > 86400
+                          ? `${Math.ceil(seconds / 86400)} dias`
+                          : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`}
+                    </span>
+                    <span>
+                      <Users size={17} />
+                      {activeMemberCount} online
+                    </span>
+                  </div>
+
+                  {room.topicText ? (
+                    <div className="room-mobile-topic">
+                      <strong>Sobre esta turma</strong>
+                      <p>{room.topicText}</p>
+                    </div>
+                  ) : null}
+
+                  <div className="room-mobile-members">
+                    <div className="participants-heading">
+                      <h3>Participantes</h3>
+                      <span>{room.members?.length ?? 0}</span>
+                    </div>
+                    <div className="room-mobile-members-list">
+                      {room.members?.map((member) => (
+                        <div
+                          key={member.userId}
+                          className={`participant-row ${member.leftAt ? "offline" : ""}`}
+                        >
+                          <UserIdentity
+                            user={{ ...member, id: member.userId }}
+                            subtitle={
+                              member.role === "HOST"
+                                ? "Anfitrião"
+                                : member.leftAt
+                                  ? "Offline"
+                                  : "Estudante"
+                            }
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="room-mobile-sheet-actions">
+                    {me?.id === room.hostId && !ended ? (
+                      <button className="secondary" onClick={end}>
+                        Encerrar sessão
+                      </button>
+                    ) : null}
+                    {!ended ? (
+                      <button className="text-button leave-room" onClick={leave}>
+                        Sair da turma
+                      </button>
+                    ) : null}
+                  </div>
+                </aside>
+              </div>
+            ) : null}
 
             <nav className="room-mobile-nav" aria-label="Navegação da turma">
               <ChannelButton
@@ -656,7 +781,7 @@ export function RoomView({ id }: { id: string }) {
                 active={section === "ai"}
                 onClick={() => setSection("ai")}
                 icon={<Sparkles size={20} />}
-                label="IA"
+                label="Enturma AI"
               />
             </nav>
           </>
