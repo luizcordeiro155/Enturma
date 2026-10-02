@@ -186,44 +186,14 @@ export function DesktopUpdateProvider({
             message:
               "Uma nova versão do Enturma para Android está pronta para instalar.",
           };
-          const fromUpdateNotification =
-            new URLSearchParams(window.location.search).get("update") === "1";
-
-          if (fromUpdateNotification && window.EnturmaNative?.installUpdate) {
-            const autoKey = `enturma-auto-update-${release.version}`;
-            const alreadyStarted =
-              sessionStorage.getItem(autoKey) === "started";
-
-            if (!alreadyStarted) {
-              sessionStorage.setItem(autoKey, "started");
-              prompted.current = release.version;
-              window.EnturmaNative.installUpdate(release.downloadUrl);
-              setState({
-                ...next,
-                status: "downloading",
-                message:
-                  "Download iniciado. O Android abrirá a instalação quando terminar.",
-              });
-              setOpen(false);
-
-              const cleanUrl = new URL(window.location.href);
-              cleanUrl.searchParams.delete("update");
-              window.history.replaceState(
-                {},
-                "",
-                cleanUrl.pathname +
-                  (cleanUrl.searchParams.size ? `?${cleanUrl.searchParams}` : "") +
-                  cleanUrl.hash,
-              );
-              return;
-            }
-          }
-
-          setState(next);
-          if (prompted.current !== release.version) {
-            prompted.current = release.version;
-            setOpen(true);
-          }
+          setState((current) => {
+            if (
+              current?.status === "downloading" &&
+              current.version === release.version
+            )
+              return current;
+            return next;
+          });
         } else {
           setState({
             status: "current",
@@ -281,9 +251,32 @@ export function DesktopUpdateProvider({
     };
   }, [open]);
   return (
-    <Context.Provider value={{ state, open: () => setOpen(true) }}>
+    <Context.Provider
+      value={{
+        state,
+        open: () => {
+          if (
+            isMobileApp() &&
+            state?.status === "available" &&
+            state.downloadUrl &&
+            window.EnturmaNative?.installUpdate
+          ) {
+            window.EnturmaNative.installUpdate(state.downloadUrl);
+            setState({
+              ...state,
+              status: "downloading",
+              message:
+                "Baixando atualização em segundo plano. Continue usando o Enturma normalmente.",
+            });
+            return;
+          }
+          if (isMobileApp() && state?.status === "downloading") return;
+          setOpen(true);
+        },
+      }}
+    >
       {children}
-      {open && state && (
+      {open && state && !isMobileApp() && (
         <dialog
           ref={dialog}
           className="desktop-update-dialog"
@@ -450,7 +443,7 @@ export function DesktopUpdateButton() {
       className={`icon-control desktop-update-icon ${state.status}`}
       aria-label={label}
       title={label}
-      aria-haspopup="dialog"
+      aria-haspopup={isMobileApp() ? undefined : "dialog"}
       onClick={open}
     >
       <RefreshCw size={20} aria-hidden="true" />

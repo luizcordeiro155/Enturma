@@ -28,7 +28,7 @@ export default function Layout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="pt-BR" suppressHydrationWarning>
+    <html lang="pt-BR" suppressHydrationWarning data-enturma-update-ui="web">
       <head>
         <script
           dangerouslySetInnerHTML={{

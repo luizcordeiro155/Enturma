@@ -277,97 +277,8 @@ class EnturmaBootReceiver : BroadcastReceiver() {
 
 class EnturmaUpdateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        val async = goAsync()
-        Thread {
-            try {
-                val connection =
-                    URL("\${ANDROID_UPDATE_ORIGIN}/latest-android.json?ts=\${System.currentTimeMillis()}")
-                        .openConnection() as HttpURLConnection
-                connection.connectTimeout = 8000
-                connection.readTimeout = 8000
-                connection.setRequestProperty(
-                    "User-Agent",
-                    "EnturmaMobile/\${BuildConfig.VERSION_NAME}",
-                )
-                connection.setRequestProperty("Cache-Control", "no-cache")
-                if (connection.responseCode !in 200..299) return@Thread
-
-                val body = connection.inputStream.bufferedReader().use { it.readText() }
-                val json = JSONObject(body)
-                val remote = json.optString("version")
-                val downloadUrl = json.optString("downloadUrl")
-                if (
-                    !remote.matches(Regex("""\\d+\\.\\d+\\.\\d+""")) ||
-                    !downloadUrl.startsWith("\${ANDROID_UPDATE_ORIGIN}/") ||
-                    !isNewerVersion(remote, BuildConfig.VERSION_NAME)
-                ) return@Thread
-
-                val prefs =
-                    context.getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
-                if (EnturmaAppState.foreground) return@Thread
-                if (prefs.getString(PREF_NOTIFIED_VERSION, null) == remote) {
-                    return@Thread
-                }
-
-                if (
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
-                    context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
-                        PackageManager.PERMISSION_GRANTED
-                ) return@Thread
-
-                val manager =
-                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    manager.createNotificationChannel(
-                        NotificationChannel(
-                            UPDATE_CHANNEL_ID,
-                            "Atualizações do Enturma",
-                            NotificationManager.IMPORTANCE_HIGH,
-                        ).apply {
-                            description =
-                                "Avisa quando uma nova versão do Enturma está pronta."
-                        },
-                    )
-                }
-
-                val open = Intent(context, MainActivity::class.java).apply {
-                    action = UPDATE_ACTION_INSTALL
-                    putExtra(UPDATE_EXTRA_URL, downloadUrl)
-                    flags =
-                        Intent.FLAG_ACTIVITY_NEW_TASK or
-                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
-                            Intent.FLAG_ACTIVITY_SINGLE_TOP
-                }
-                val pending = PendingIntent.getActivity(
-                    context,
-                    UPDATE_NOTIFICATION_ID,
-                    open,
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
-                )
-                val builder =
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        Notification.Builder(context, UPDATE_CHANNEL_ID)
-                    else Notification.Builder(context)
-
-                val notification = builder
-                    .setSmallIcon(android.R.drawable.stat_sys_download_done)
-                    .setContentTitle("Nova atualização do Enturma")
-                    .setContentText("Versão \${remote} disponível. Toque para baixar e instalar.")
-                    .setContentIntent(pending)
-                    .setAutoCancel(true)
-                    .setOnlyAlertOnce(true)
-                    .build()
-
-                manager.notify(UPDATE_NOTIFICATION_ID, notification)
-                prefs.edit()
-                    .putString(PREF_NOTIFIED_VERSION, remote)
-                    .apply()
-            } catch (_: Exception) {
-                // A próxima verificação tenta novamente.
-            } finally {
-                async.finish()
-            }
-        }.start()
+        // Disponibilidade de atualização é mostrada somente dentro de Configurações.
+        // Nenhuma notificação do sistema é criada antes do usuário iniciar o download.
     }
 }
 
@@ -467,7 +378,9 @@ class EnturmaDownloadCompleteReceiver : BroadcastReceiver() {
             downloadedApkUri(context, downloadId) == null
         ) return
 
-        showInstallReadyNotification(context, downloadId)
+        if (!EnturmaAppState.foreground) {
+            showInstallReadyNotification(context, downloadId)
+        }
     }
 }
 
@@ -595,11 +508,7 @@ class MainActivity : Activity() {
         applySystemBarTheme(false)
         webView.addJavascriptInterface(EnturmaNativeBridge(), "EnturmaNative")
         registerUpdateDownloadReceiver()
-        EnturmaUpdateScheduler.schedule(this)
-        val updateIntentHandled = handleUpdateIntent(intent)
-        if (!updateIntentHandled) {
-            EnturmaUpdateScheduler.checkNow(this)
-        }
+        handleUpdateIntent(intent)
 
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -779,7 +688,6 @@ class MainActivity : Activity() {
         super.onResume()
         EnturmaAppState.foreground = true
         refreshNativePushToken()
-        EnturmaUpdateScheduler.checkNow(this)
         val pending = pendingUpdateUrl
         if (
             pending != null &&
@@ -826,9 +734,6 @@ class MainActivity : Activity() {
     }
 
     private fun routeFromIntent(intent: Intent?): String? {
-        if (intent?.action == UPDATE_ACTION_INSTALL) {
-            return "/settings?update=1"
-        }
         if (intent?.action == PUSH_ACTION_OPEN) {
             return safePushHref(intent.getStringExtra(PUSH_EXTRA_HREF))
         }
@@ -911,6 +816,10 @@ class MainActivity : Activity() {
         uri: Uri,
         downloadId: Long? = null,
     ): Boolean {
+        if (downloadId != null && downloadId > 0) {
+            val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+            if (prefs.getLong(PREF_INSTALL_PROMPTED_ID, -1L) == downloadId) return true
+        }
         return runCatching {
             startActivity(
                 Intent(Intent.ACTION_VIEW).apply {
@@ -968,6 +877,48 @@ class MainActivity : Activity() {
         openDownloadedInstaller(uri, downloadId)
     }
 
+    private fun watchUpdateDownload(downloadId: Long) {
+        Thread {
+            val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            repeat(1800) {
+                val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+                if (
+                    prefs.getLong(PREF_DOWNLOAD_ID, -1L) != downloadId ||
+                    prefs.getString(PREF_DOWNLOAD_BASE_VERSION, null) != APP_VERSION
+                ) return@Thread
+
+                val cursor = manager.query(DownloadManager.Query().setFilterById(downloadId))
+                var status = -1
+                cursor.use {
+                    if (it.moveToFirst()) {
+                        status = it.getInt(
+                            it.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS),
+                        )
+                    }
+                }
+
+                when (status) {
+                    DownloadManager.STATUS_SUCCESSFUL -> {
+                        val uri = manager.getUriForDownloadedFile(downloadId) ?: return@Thread
+                        runOnUiThread {
+                            if (!isFinishing && !isDestroyed) {
+                                openDownloadedInstaller(uri, downloadId)
+                            }
+                        }
+                        return@Thread
+                    }
+                    DownloadManager.STATUS_FAILED -> return@Thread
+                }
+
+                try {
+                    Thread.sleep(1000)
+                } catch (_: InterruptedException) {
+                    return@Thread
+                }
+            }
+        }.start()
+    }
+
     private fun startUpdateInstall(downloadUrl: String) {
         val uri = runCatching { Uri.parse(downloadUrl) }.getOrNull() ?: return
         val expected = Uri.parse(ANDROID_UPDATE_ORIGIN)
@@ -1017,7 +968,7 @@ class MainActivity : Activity() {
                         DownloadManager.STATUS_PENDING,
                         DownloadManager.STATUS_RUNNING,
                         DownloadManager.STATUS_PAUSED -> {
-                            Toast.makeText(this, "A atualização já está sendo baixada.", Toast.LENGTH_SHORT).show()
+                            watchUpdateDownload(previousId)
                             return
                         }
                         DownloadManager.STATUS_SUCCESSFUL -> {
@@ -1047,11 +998,7 @@ class MainActivity : Activity() {
             .apply()
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
             .cancel(UPDATE_NOTIFICATION_ID)
-        Toast.makeText(
-            this,
-            "Atualização iniciada. O instalador abrirá quando o download terminar.",
-            Toast.LENGTH_LONG,
-        ).show()
+        updateDownloadId?.let { watchUpdateDownload(it) }
     }
 
     private fun applySystemBarTheme(light: Boolean) {
@@ -1382,7 +1329,6 @@ class MainActivity : Activity() {
             if (request != null) grantAvailableMedia(request)
         }
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST) {
-            EnturmaUpdateScheduler.checkNow(this)
             refreshNativePushToken()
         }
     }
