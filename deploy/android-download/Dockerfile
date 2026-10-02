@@ -1,10 +1,18 @@
 FROM node:22-bookworm AS build
 
 ARG EXPO_PUBLIC_API_URL
+ARG ANDROID_KEYSTORE_BASE64
+ARG ANDROID_KEYSTORE_PASSWORD
+ARG ANDROID_KEY_ALIAS
+ARG ANDROID_KEY_PASSWORD
 
 ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
 ENV EAS_BUILD_PROFILE=preview
 ENV CI=1
+ENV ANDROID_KEYSTORE_BASE64=$ANDROID_KEYSTORE_BASE64
+ENV ANDROID_KEYSTORE_PASSWORD=$ANDROID_KEYSTORE_PASSWORD
+ENV ANDROID_KEY_ALIAS=$ANDROID_KEY_ALIAS
+ENV ANDROID_KEY_PASSWORD=$ANDROID_KEY_PASSWORD
 ENV ANDROID_HOME=/opt/android-sdk
 ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
@@ -20,6 +28,9 @@ RUN npm ci
 
 WORKDIR /project/apps/mobile
 RUN npx expo prebuild --platform android --no-install --clean
+
+WORKDIR /project
+RUN node deploy/android-download/configure-signing.cjs
 
 WORKDIR /project/apps/mobile/android
 RUN chmod +x gradlew && ./gradlew :app:assembleRelease --no-daemon
