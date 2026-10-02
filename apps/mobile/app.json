@@ -3,7 +3,7 @@
     "name": "Enturma",
     "slug": "enturma",
     "scheme": "enturma",
-    "version": "0.3.0",
+    "version": "0.3.1",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -18,8 +18,11 @@
     },
     "android": {
       "package": "br.com.enturma.app",
-      "versionCode": 3,
-      "permissions": ["CAMERA", "RECORD_AUDIO"],
+      "versionCode": 4,
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/icon.png",
         "backgroundColor": "#183f36"
