@@ -112,3 +112,13 @@ A API precisa de `FCM_SERVICE_ACCOUNT_BASE64`, contendo em Base64 o JSON da serv
 - Cards públicos usam o degradê das duas cores de forma consistente no corpo e no banner.
 - Participantes de salas e chamadas exibem um card compacto com banner/gradiente atrás do avatar e nome, semelhante à leitura visual de membros do Discord.
 - O perfil completo continua abrindo ao tocar no usuário; o card compacto não remove nenhuma ação existente.
+
+
+## Atualizador 0.3.15
+
+- Configurações passa a exibir um card textual **Atualização do aplicativo** com versão instalada, versão disponível e botão **Atualizar agora**.
+- O botão inicia o download pelo bridge nativo; durante o download continua exibindo o estado sem permitir iniciar cópias repetidas.
+- O Android volta a verificar novas versões em segundo plano e exibe uma única notificação por versão disponível.
+- Tocar na notificação abre diretamente **Configurações**, onde o usuário decide quando iniciar a atualização.
+- A notificação de disponibilidade não baixa o APK sozinha; o download só começa ao tocar em **Atualizar agora**.
+- O agendador de atualização é ativado ao abrir o app, ao voltar para primeiro plano e após reiniciar o aparelho.
