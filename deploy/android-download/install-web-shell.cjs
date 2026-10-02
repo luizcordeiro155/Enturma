@@ -716,5 +716,29 @@ class MainActivity : Activity() {
 `;
 
 fs.writeFileSync(target, source, "utf8");
+
+const manifestTarget = path.join(
+  mobile,
+  "android",
+  "app",
+  "src",
+  "main",
+  "AndroidManifest.xml",
+);
+let manifest = fs.readFileSync(manifestTarget, "utf8");
+if (!manifest.includes("EnturmaUpdateReceiver")) {
+  manifest = manifest.replace(
+    "</application>",
+    `    <receiver android:name=".EnturmaUpdateReceiver" android:exported="false" />
+    <receiver android:name=".EnturmaBootReceiver" android:enabled="true" android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.BOOT_COMPLETED" />
+      </intent-filter>
+    </receiver>
+  </application>`,
+  );
+}
+fs.writeFileSync(manifestTarget, manifest, "utf8");
+
 console.log(`Enturma Android Web shell instalado em ${target}`);
 console.log(`Origem Web: ${webOrigin} | Versão: ${version}`);
