@@ -256,17 +256,19 @@ export function DesktopUpdateProvider({
 }
 export function DesktopUpdateButton() {
   const { state, open } = useContext(Context);
+  const label = state
+    ? `Atualizações: ${labels[state.status]}${state.status === "downloading" ? ` · ${state.progress}%` : ""}`
+    : "Atualizações";
   return state ? (
     <button
       type="button"
-      className={`desktop-update-chip ${state.status}`}
+      className={`icon-control desktop-update-icon ${state.status}`}
+      aria-label={label}
+      title={label}
+      aria-haspopup="dialog"
       onClick={open}
     >
-      <RefreshCw size={17} />
-      <span>
-        {labels[state.status]}
-        {state.status === "downloading" ? ` · ${state.progress}%` : ""}
-      </span>
+      <RefreshCw size={20} aria-hidden="true" />
     </button>
   ) : null;
 }

@@ -427,12 +427,20 @@
 [data-desktop="true"] a[href="/download"] {
   display: none;
 }
-.desktop-update-chip {
+.profile-page-heading {
   display: flex;
-  gap: 8px;
+  gap: 16px;
   align-items: center;
-  padding: 8px 12px;
-  font-size: 0.8rem;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+.profile-page-heading h1 {
+  margin: 0;
+}
+.desktop-update-icon {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
 }
 .desktop-update-dialog {
   width: min(500px, calc(100vw - 24px));
@@ -465,13 +473,8 @@
 .desktop-update-dialog .actions {
   flex-wrap: wrap;
 }
-.desktop-update-chip.ready {
+.desktop-update-icon.ready {
   outline: 2px solid var(--accent);
-}
-@media (max-width: 760px) {
-  .desktop-update-chip span {
-    display: none;
-  }
 }
 
 .mobile-bottom-nav {
