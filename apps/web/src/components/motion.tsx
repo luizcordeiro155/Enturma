@@ -19,6 +19,8 @@ const REVEAL_SELECTOR = [
   ".forum-entry",
   ".friends-workspace article",
   ".call-member",
+  ".user-profile-dialog",
+  ".room-mobile-details-sheet",
   ".option-list > button",
   ".study-journey",
   ".guide-welcome",
