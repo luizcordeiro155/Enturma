@@ -212,12 +212,57 @@ class MainActivity : Activity() {
     private var safeRightCssPx = 0
     private var safeBottomCssPx = 0
     private var safeLeftCssPx = 0
+    private var updateDownloadId: Long? = null
+    private var updateReceiverRegistered = false
+    private var pendingUpdateUrl: String? = null
+
+    private val updateDownloadReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (intent?.action != DownloadManager.ACTION_DOWNLOAD_COMPLETE) return
+            val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
+            if (id <= 0 || id != updateDownloadId) return
+
+            val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+            val uri = manager.getUriForDownloadedFile(id)
+            if (uri == null) {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Não foi possível concluir a atualização.",
+                    Toast.LENGTH_LONG,
+                ).show()
+                return
+            }
+
+            runCatching {
+                startActivity(
+                    Intent(Intent.ACTION_VIEW).apply {
+                        setDataAndType(uri, "application/vnd.android.package-archive")
+                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    },
+                )
+            }.onFailure {
+                Toast.makeText(
+                    this@MainActivity,
+                    "Abra o download concluído para instalar a atualização.",
+                    Toast.LENGTH_LONG,
+                ).show()
+            }
+        }
+    }
 
     private inner class EnturmaNativeBridge {
         @JavascriptInterface
         fun setLightTheme(light: Boolean) {
             runOnUiThread {
                 applySystemBarTheme(light)
+            }
+        }
+
+        @JavascriptInterface
+        fun installUpdate(downloadUrl: String) {
+            runOnUiThread {
+                startUpdateInstall(downloadUrl)
             }
         }
     }
@@ -237,6 +282,20 @@ class MainActivity : Activity() {
 
         applySystemBarTheme(false)
         webView.addJavascriptInterface(EnturmaNativeBridge(), "EnturmaNative")
+        registerUpdateDownloadReceiver()
+        EnturmaUpdateScheduler.schedule(this)
+        EnturmaUpdateScheduler.checkNow(this)
+
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(
+                arrayOf(Manifest.permission.POST_NOTIFICATIONS),
+                NOTIFICATION_PERMISSION_REQUEST,
+            )
+        }
 
         ViewCompat.setOnApplyWindowInsetsListener(webView) { _, insets ->
             val safeInsets = insets.getInsets(
@@ -382,10 +441,99 @@ class MainActivity : Activity() {
         }
 
         if (savedInstanceState == null) {
-            webView.loadUrl("\${WEB_ORIGIN}/home")
+            webView.loadUrl("\${WEB_ORIGIN}\${routeFromIntent(intent) ?: "/home"}")
         } else {
             webView.restoreState(savedInstanceState)
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        EnturmaUpdateScheduler.checkNow(this)
+        val pending = pendingUpdateUrl
+        if (
+            pending != null &&
+            (Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
+                packageManager.canRequestPackageInstalls())
+        ) {
+            pendingUpdateUrl = null
+            startUpdateInstall(pending)
+        }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val route = routeFromIntent(intent) ?: return
+        if (::webView.isInitialized) webView.loadUrl("\${WEB_ORIGIN}\${route}")
+    }
+
+    private fun routeFromIntent(intent: Intent?): String? {
+        val uri = intent?.data ?: return null
+        if (uri.scheme != "enturma") return null
+        val path = uri.path?.takeIf { it.startsWith("/") } ?: return null
+        val query = uri.encodedQuery?.let { "?\${it}" } ?: ""
+        return "\${path}\${query}"
+    }
+
+    private fun registerUpdateDownloadReceiver() {
+        if (updateReceiverRegistered) return
+        val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            registerReceiver(updateDownloadReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            @Suppress("DEPRECATION")
+            registerReceiver(updateDownloadReceiver, filter)
+        }
+        updateReceiverRegistered = true
+    }
+
+    private fun startUpdateInstall(downloadUrl: String) {
+        val uri = runCatching { Uri.parse(downloadUrl) }.getOrNull() ?: return
+        val expected = Uri.parse(ANDROID_UPDATE_ORIGIN)
+        val valid =
+            uri.scheme == "https" &&
+                uri.host.equals(expected.host, ignoreCase = true) &&
+                uri.path?.endsWith(".apk") == true
+        if (!valid) {
+            Toast.makeText(this, "Atualização inválida.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+            !packageManager.canRequestPackageInstalls()
+        ) {
+            pendingUpdateUrl = downloadUrl
+            startActivity(
+                Intent(
+                    Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
+                    Uri.parse("package:\${packageName}"),
+                ),
+            )
+            Toast.makeText(
+                this,
+                "Permita instalar atualizações do Enturma e volte ao aplicativo.",
+                Toast.LENGTH_LONG,
+            ).show()
+            return
+        }
+
+        val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        updateDownloadId = manager.enqueue(
+            DownloadManager.Request(uri)
+                .setTitle("Atualização do Enturma")
+                .setDescription("Baixando a nova versão do aplicativo")
+                .setMimeType("application/vnd.android.package-archive")
+                .setNotificationVisibility(
+                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
+                ),
+        )
+        Toast.makeText(
+            this,
+            "Atualização iniciada. O Android abrirá a instalação quando terminar.",
+            Toast.LENGTH_LONG,
+        ).show()
     }
 
     private fun applySystemBarTheme(light: Boolean) {
@@ -511,6 +659,9 @@ class MainActivity : Activity() {
             pendingPermissionRequest = null
             if (request != null) grantAvailableMedia(request)
         }
+        if (requestCode == NOTIFICATION_PERMISSION_REQUEST) {
+            EnturmaUpdateScheduler.checkNow(this)
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -546,6 +697,11 @@ class MainActivity : Activity() {
         pendingPermissionRequest = null
         fileChooserCallback?.onReceiveValue(null)
         fileChooserCallback = null
+
+        if (updateReceiverRegistered) {
+            runCatching { unregisterReceiver(updateDownloadReceiver) }
+            updateReceiverRegistered = false
+        }
 
         if (::webView.isInitialized) {
             webView.stopLoading()
