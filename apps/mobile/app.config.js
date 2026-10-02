@@ -1,14 +1,27 @@
 const configuration = require("./app.json");
 
 module.exports = () => {
-  const api = process.env.EXPO_PUBLIC_API_URL;
+  const api =
+    process.env.EXPO_PUBLIC_API_URL ||
+    "https://enturma-flax.vercel.app/api/mobile-backend";
+
   if (
     process.env.EAS_BUILD_PROFILE &&
-    (!api || !/^https:\/\/[^/]+\/api\/v1\/?$/.test(api))
+    !(
+      /^https:\/\/[^/]+\/api\/v1\/?$/.test(api) ||
+      api === "https://enturma-flax.vercel.app/api/mobile-backend"
+    )
   ) {
     throw new Error(
-      "Configure EXPO_PUBLIC_API_URL com a origem HTTPS real da API e /api/v1 no ambiente EAS antes de gerar APK/AAB.",
+      "Configure EXPO_PUBLIC_API_URL com a API HTTPS do Enturma ou use o proxy mobile oficial.",
     );
   }
-  return configuration.expo;
+
+  return {
+    ...configuration.expo,
+    extra: {
+      ...(configuration.expo.extra || {}),
+      apiUrl: api,
+    },
+  };
 };
