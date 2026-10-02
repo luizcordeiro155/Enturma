@@ -32,6 +32,7 @@ public class NotificationController {
   public record PushDevice(
       @jakarta.validation.constraints.NotBlank @Size(max = 100) String installationId,
       @jakarta.validation.constraints.NotBlank @Size(max = 4096) String token,
+      @jakarta.validation.constraints.NotBlank
       @jakarta.validation.constraints.Pattern(regexp = "ANDROID") String platform) {}
 
   @GetMapping("/preferences")
