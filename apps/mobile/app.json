@@ -3,11 +3,41 @@
     "name": "Enturma",
     "slug": "enturma",
     "scheme": "enturma",
-    "version": "0.1.0",
-    "orientation": "portrait",
-    "userInterfaceStyle": "light",
-    "ios": { "supportsTablet": true, "bundleIdentifier": "br.com.enturma.app" },
-    "android": { "package": "br.com.enturma.app" },
-    "plugins": ["expo-router", "expo-secure-store"]
+    "version": "0.3.0",
+    "orientation": "default",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "br.com.enturma.app",
+      "buildNumber": "3",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Use sua câmera nas chamadas de estudo.",
+        "NSMicrophoneUsageDescription": "Converse por voz com sua turma.",
+        "NSPhotoLibraryUsageDescription": "Escolha imagens para compartilhar ou personalizar seu perfil."
+      }
+    },
+    "android": {
+      "package": "br.com.enturma.app",
+      "versionCode": 3,
+      "permissions": ["CAMERA", "RECORD_AUDIO"],
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#183f36"
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "@livekit/react-native-expo-plugin",
+      "@config-plugins/react-native-webrtc",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Escolha imagens para estudar em companhia."
+        }
+      ],
+      "expo-document-picker"
+    ],
+    "icon": "./assets/icon.png"
   }
 }

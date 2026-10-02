@@ -2,12 +2,15 @@ import { useCallback, useState } from "react";
 import { Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import type { Profile, Room } from "@enturma/contracts";
-import { api, logout } from "../src/api";
-import { Screen, Button, ErrorMessage, styles } from "../src/ui";
+import { api, logout } from "../../src/api";
+import { Screen, Button, Field, ErrorMessage, useStyles } from "../../src/ui";
 export default function Home() {
+  const styles = useStyles();
   const [p, setP] = useState<Profile>();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [error, setError] = useState("");
+  const [days, setDays] = useState("0"),
+    [minutes, setMinutes] = useState("50");
   const router = useRouter();
   useFocusEffect(
     useCallback(() => {
@@ -35,7 +38,8 @@ export default function Home() {
           subjectId,
           topicId: null,
           title: `Estudar ${title}`,
-          minutes: 50,
+          minutes: Number(minutes),
+          days: Number(days),
           maxParticipants: 8,
         }),
       });
@@ -52,11 +56,35 @@ export default function Home() {
         title="Meu perfil acadêmico"
         onPress={() => router.push("/onboarding")}
       />
+      <Text style={styles.label}>Duração da próxima sala</Text>
+      <Field
+        label="Dias (0 para sessão rápida, 1 a 5 para sala longa)"
+        value={days}
+        onChangeText={setDays}
+        keyboardType="number-pad"
+      />
+      {days === "0" && (
+        <Field
+          label="Minutos: 25, 50, 60, 90, 120 ou 180"
+          value={minutes}
+          onChangeText={setMinutes}
+          keyboardType="number-pad"
+        />
+      )}
       {p?.subjects.map((s) => (
         <View key={s.id} style={styles.row}>
           <Text style={styles.text}>{s.name}</Text>
           <Button
-            title="Estudar agora · 50 min"
+            title={
+              Number(days) > 0
+                ? `Criar sala de ${days} dia(s)`
+                : `Estudar agora · ${minutes} min`
+            }
+            disabled={
+              !/^[0-5]$/.test(days) ||
+              (days === "0" &&
+                ![25, 50, 60, 90, 120, 180].includes(Number(minutes)))
+            }
             onPress={() => study(s.id, s.name)}
           />
         </View>

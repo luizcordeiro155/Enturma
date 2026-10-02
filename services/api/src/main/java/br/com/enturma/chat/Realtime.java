@@ -15,6 +15,7 @@ import org.springframework.web.socket.handler.TextWebSocketHandler;
 @Configuration
 @EnableWebSocket
 public class Realtime extends TextWebSocketHandler implements WebSocketConfigurer {
+  private final br.com.enturma.common.Db db;
   private final AuthService auth;
   private final ChatService chat;
   private final StudyService study;
@@ -31,6 +32,9 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
     volatile boolean rides;
     volatile boolean activity;
     String previous = "";
+    String name = "";
+    String typingPrevious = "";
+    long typingUntil = 0, lastTyping = 0, lastHeartbeat = 0;
 
     Connection(WebSocketSession socket) {
       this.socket = socket;
@@ -39,10 +43,12 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
 
   public Realtime(
       AuthService auth,
+      br.com.enturma.common.Db db,
       ChatService chat,
       StudyService study,
       ObjectMapper json,
       @Value("${enturma.origins}") String origins) {
+    this.db = db;
     this.auth = auth;
     this.chat = chat;
     this.study = study;
@@ -68,7 +74,25 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
   @Override
   protected void handleTextMessage(WebSocketSession socket, TextMessage message) throws Exception {
     var c = connections.get(socket.getId());
-    if (c == null || c.token != null) {
+    if (c != null && c.token != null) {
+      try {
+        var data = json.readTree(message.getPayload());
+        Actor actor = auth.authenticate(c.token).orElseThrow();
+        if (c.room == null) return;
+        study.member(actor, c.room);
+        String type = data.path("type").asText();
+        long now = System.currentTimeMillis();
+        if (type.equals("typing_stopped")) c.typingUntil = 0;
+        else if (type.equals("typing_started") && now - c.lastTyping >= 2000) {
+          c.lastTyping = now;
+          c.typingUntil = now + 5000;
+        }
+      } catch (Exception e) {
+        socket.close(CloseStatus.POLICY_VIOLATION);
+      }
+      return;
+    }
+    if (c == null) {
       socket.close(CloseStatus.POLICY_VIOLATION);
       return;
     }
@@ -77,6 +101,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       String token = data.path("token").asText();
       Actor actor = auth.authenticate(token).orElseThrow();
       c.user = actor.id();
+      c.name = (String) db.one("SELECT name FROM app_user WHERE id=?", actor.id()).get("name");
       if ("activity".equals(data.path("scope").asText())) {
         c.activity = true;
         c.token = token;
@@ -115,6 +140,38 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
         }
         Actor actor = auth.authenticate(c.token).orElseThrow();
         if (c.rides || c.activity) continue;
+        if (System.currentTimeMillis() - c.lastHeartbeat > 30000) {
+          study.heartbeat(actor, c.room);
+          c.lastHeartbeat = System.currentTimeMillis();
+        }
+        var typing = new LinkedHashMap<UUID, String>();
+        for (var peer : connections.values())
+          if (Objects.equals(peer.room, c.room)
+              && !Objects.equals(peer.user, c.user)
+              && peer.typingUntil > System.currentTimeMillis()
+              && peer.user != null
+              && !db.exists(
+                  "SELECT EXISTS(SELECT 1 FROM user_block WHERE (user_id=? AND blocked_id=?) OR"
+                      + " (user_id=? AND blocked_id=?))",
+                  c.user,
+                  peer.user,
+                  peer.user,
+                  c.user)) typing.put(peer.user, peer.name);
+        String typingPayload =
+            json.writeValueAsString(
+                Map.of(
+                    "type",
+                    "typing",
+                    "users",
+                    typing.entrySet().stream()
+                        .map(e -> Map.of("id", e.getKey(), "name", e.getValue()))
+                        .toList()));
+        if (!typingPayload.equals(c.typingPrevious)) {
+          synchronized (c) {
+            c.socket.sendMessage(new TextMessage(typingPayload));
+          }
+          c.typingPrevious = typingPayload;
+        }
         var detail = study.detail(actor, c.room);
         String payload =
             json.writeValueAsString(

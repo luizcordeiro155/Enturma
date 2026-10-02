@@ -7,6 +7,7 @@ import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
 export function StudyForm() {
+  const [longRoom, setLongRoom] = useState(false);
   const [profile, setProfile] = useState<Profile>();
   const [subject, setSubject] = useState("");
   const [topics, setTopics] = useState<AcademicEntry[]>([]);
@@ -40,7 +41,8 @@ export function StudyForm() {
         subjectId: subject,
         topicId: f.get("topic") || null,
         title: f.get("title"),
-        minutes: Number(f.get("minutes")),
+        minutes: longRoom ? 50 : Number(f.get("minutes")),
+        days: longRoom ? Number(f.get("days")) : 0,
         maxParticipants: Number(f.get("capacity")),
       });
       router.push(`/rooms/${room.id}${room.reused ? "?reused=1" : ""}`);
@@ -107,8 +109,34 @@ export function StudyForm() {
                 placeholder="O que você quer aprender ou revisar?"
               />
             </label>
-            <div className="form-row">
+            <label>
+              Modalidade
+              <select
+                value={longRoom ? "days" : "quick"}
+                onChange={(e) => setLongRoom(e.target.value === "days")}
+              >
+                <option value="quick">Sessão rápida</option>
+                <option value="days">Sala de vários dias</option>
+              </select>
+            </label>
+            {longRoom && (
               <label>
+                Duração em dias
+                <select name="days">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <option key={n} value={n}>
+                      {n} {n === 1 ? "dia" : "dias"}
+                    </option>
+                  ))}
+                </select>
+                <small>
+                  Sua vaga é reservada ao fechar o aplicativo. A sala não pode
+                  ser estendida além do prazo.
+                </small>
+              </label>
+            )}
+            <div className="form-row">
+              <label hidden={longRoom}>
                 Duração
                 <select name="minutes" defaultValue="50">
                   {[25, 50, 60, 90, 120, 180].map((n) => (

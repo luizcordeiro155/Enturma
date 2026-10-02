@@ -7,7 +7,7 @@ import {
   catalogOptions,
 } from "@enturma/contracts";
 import { api } from "../src/api";
-import { Screen, Button, Field, ErrorMessage, styles } from "../src/ui";
+import { Screen, Button, Field, ErrorMessage, useStyles } from "../src/ui";
 const kinds = [
   "INSTITUTION",
   "CAMPUS",
@@ -25,6 +25,7 @@ const names = [
   "Matérias",
 ];
 export default function Onboarding() {
+  const styles = useStyles();
   const [step, setStep] = useState(0);
   const [ids, setIds] = useState<string[]>([]);
   const [subjects, setSubjects] = useState<string[]>([]);

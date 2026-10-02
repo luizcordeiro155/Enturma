@@ -4,6 +4,7 @@ import type { AcademicEntry } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
+import { ModerationAdmin } from "./moderation-admin";
 export function Admin() {
   const [kind, setKind] = useState("INSTITUTION");
   const [entries, setEntries] = useState<AcademicEntry[]>([]);
@@ -33,6 +34,7 @@ export function Admin() {
   return (
     <Shell>
       <div className="narrow">
+        <ModerationAdmin />
         <h1>Catálogo acadêmico</h1>
         <p className="lead">
           Dados com procedência, verificação e histórico de alterações.

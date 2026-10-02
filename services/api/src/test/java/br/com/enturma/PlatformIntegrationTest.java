@@ -1128,20 +1128,17 @@ class PlatformIntegrationTest {
         .isInstanceOf(ApiException.class);
   }
 
-
   @Test
   void loginExplainsUnknownEmailAndWrongPasswordSeparately() {
     assertThatThrownBy(() -> auth.login("nao-existe@example.test", "qualquer-senha", "JUnit"))
         .isInstanceOf(ApiException.class)
         .hasMessageContaining("Não encontramos uma conta cadastrada com este e-mail");
 
-    String email =
-        (String) db.one("SELECT email FROM app_user WHERE id=?", host.id()).get("email");
+    String email = (String) db.one("SELECT email FROM app_user WHERE id=?", host.id()).get("email");
     assertThatThrownBy(() -> auth.login(email, "senha-incorreta", "JUnit"))
         .isInstanceOf(ApiException.class)
         .hasMessageContaining("A senha informada está incorreta");
   }
-
 
   @Test
   void passwordRecoveryRejectsUnknownEmailBeforeStartingCountdown() {
@@ -1150,11 +1147,9 @@ class PlatformIntegrationTest {
         .hasMessageContaining("Não encontramos uma conta cadastrada com este e-mail");
   }
 
-
   @Test
   void emailVerificationAndPasswordRecoveryUseOneTimeLinks() {
-    String email =
-        (String) db.one("SELECT email FROM app_user WHERE id=?", host.id()).get("email");
+    String email = (String) db.one("SELECT email FROM app_user WHERE id=?", host.id()).get("email");
 
     auth.resendVerification(host);
     var verifyMail =
@@ -1193,7 +1188,6 @@ class PlatformIntegrationTest {
     assertThat(auth.login(email, "new-test-password-long", "JUnit").userId()).isEqualTo(host.id());
   }
 
-
   @Test
   void endpointsRejectAnonymousAndMassAssignment() throws Exception {
     mvc.perform(
@@ -1219,5 +1213,280 @@ class PlatformIntegrationTest {
         db.one("SELECT access_hash,refresh_hash FROM user_session WHERE id=?", host.sessionId());
     assertThat(s.get("accessHash")).isNotEqualTo(hostCredentials.accessToken());
     assertThat(s.get("refreshHash")).isNotEqualTo(hostCredentials.refreshToken());
+  }
+
+  @Autowired br.com.enturma.community.ProfileShowcaseController showcase;
+  @Autowired br.com.enturma.community.AchievementService achievements;
+  @Autowired br.com.enturma.learning.AcademicGames academicGames;
+  @Autowired br.com.enturma.moderation.AutoModService automod;
+  @Autowired org.springframework.transaction.support.TransactionTemplate transactions;
+  @Autowired com.fasterxml.jackson.databind.ObjectMapper json;
+
+  @Test
+  void optionalClassifierOnlyCreatesOneAuditedProposalAndNeverPunishes() {
+    UUID roomId = room(8);
+    UUID messageId =
+        (UUID)
+            ((Map<?, ?>) chat.send(host, roomId, "Discussão para revisão contextual", null))
+                .get("id");
+    // Other fixtures are outside this worker run; only this message is due.
+    db.jdbc.update(
+        "UPDATE moderation_review_queue SET available_at=now()+interval '1 hour' WHERE"
+            + " message_id<>?",
+        messageId);
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq("MODERATION_REVIEW")))
+        .thenReturn(
+            "{\"review\":true,\"confidence\":0.94,\"reason\":\"Requer análise humana de"
+                + " contexto\"}");
+    var worker =
+        new br.com.enturma.moderation.ModerationReviewWorker(
+            db, aiProvider, json, transactions, true);
+    worker.run();
+    db.jdbc.update(
+        "UPDATE moderation_review_queue SET completed_at=NULL,available_at=now() WHERE"
+            + " message_id=?",
+        messageId);
+    worker.run();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM moderation_case WHERE dedupe_key=? AND source='CLASSIFIER'"
+                    + " AND status='REVIEW'",
+                Integer.class,
+                "classifier:" + messageId))
+        .isEqualTo(1);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM moderation_evidence WHERE message_id=?",
+                Integer.class,
+                messageId))
+        .isEqualTo(1);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM moderation_action a JOIN moderation_case c ON c.id=a.case_id"
+                    + " WHERE c.dedupe_key=?",
+                Integer.class,
+                "classifier:" + messageId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT completed_at IS NOT NULL FROM moderation_review_queue WHERE message_id=?",
+                Boolean.class,
+                messageId))
+        .isTrue();
+  }
+
+  @Autowired br.com.enturma.notifications.NotificationPreferences notificationPreferences;
+
+  @Test
+  void multiDayRoomsReserveMembersLockEntriesAndNotifyOnce() {
+    UUID id = (UUID) study.create(host, subject, null, "Sala longa", 50, 8, 3).get("id");
+    study.join(member, id);
+    db.jdbc.update(
+        "UPDATE room_participant SET last_seen_at=now()-interval '1 day' WHERE room_id=?", id);
+    db.jdbc.update("UPDATE study_room SET empty_since=now()-interval '1 day' WHERE id=?", id);
+    study.expire();
+    assertThat(study.detail(host, id))
+        .containsEntry("lifecycle", "MULTIDAY")
+        .containsEntry("status", "OPEN");
+    study.configure(host, id, "Sala reservada", "Revisão", true);
+    assertThatThrownBy(() -> study.join(outsider, id)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> study.configure(member, id, "Invasão", "", false))
+        .isInstanceOf(ApiException.class);
+    study.heartbeat(member, id);
+    db.jdbc.update("UPDATE study_room SET ends_at=now()+interval '50 minutes' WHERE id=?", id);
+    study.expire();
+    study.expire();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM notification WHERE user_id=? AND context_key=? AND"
+                    + " kind='ROOM_NOTICE'",
+                Integer.class,
+                host.id(),
+                "room:" + id))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void quickRoomClosesOnlyAfterPresenceGrace() {
+    UUID id = room(8);
+    db.jdbc.update(
+        "UPDATE room_participant SET last_seen_at=now()-interval '2 minutes' WHERE room_id=?", id);
+    study.expire();
+    assertThat(study.detail(host, id).get("status")).isEqualTo("OPEN");
+    db.jdbc.update("UPDATE study_room SET empty_since=now()-interval '10 minutes' WHERE id=?", id);
+    study.expire();
+    assertThat(study.detail(host, id).get("status")).isEqualTo("ENDED");
+  }
+
+  @Test
+  void showcaseRespectsPrivacyAndRejectsUnearnedBadges() {
+    var hidden = (Map<String, Object>) showcase.get(member, host.id());
+    assertThat(hidden).doesNotContainKeys("stats", "academic", "achievements", "joinedAt");
+    var input =
+        new br.com.enturma.community.ProfileShowcaseController.Save(
+            "#a020b9",
+            "GRADIENT",
+            "AURORA",
+            "IDENTITY_FIRST",
+            "Estudar Java",
+            "Java",
+            "Projeto de teste",
+            Map.of("WIDGETS", true, "STATS", true),
+            List.of(
+                new br.com.enturma.community.ProfileShowcaseController.Widget("GOAL", true, true)),
+            List.of());
+    showcase.save(host, input);
+    var shown = (Map<String, Object>) showcase.get(member, host.id());
+    assertThat(shown).containsKey("stats").doesNotContainKeys("academic", "privacy");
+    assertThat((List<?>) shown.get("widgets")).hasSize(1);
+    assertThatThrownBy(
+            () ->
+                showcase.save(
+                    host,
+                    new br.com.enturma.community.ProfileShowcaseController.Save(
+                        "#a020b9",
+                        "SOLID",
+                        "NONE",
+                        "IDENTITY_FIRST",
+                        "",
+                        "",
+                        "",
+                        Map.of(),
+                        List.of(),
+                        List.of("VETERAN"))))
+        .isInstanceOf(ApiException.class);
+    db.jdbc.update(
+        "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", member.id(), host.id());
+    assertThatThrownBy(() -> showcase.get(member, host.id())).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void academicChallengesHideAnswersAndAwardDailyXpOnlyOnce() {
+    db.jdbc.update("UPDATE academic_entry SET name='Algoritmos' WHERE id=?", subject);
+    var input = new br.com.enturma.learning.AcademicGames.Start(subject, "logic-trace", true, 1);
+    var challenge = (Map<String, Object>) academicGames.start(host, input);
+    assertThat(challenge).doesNotContainKey("answer");
+    assertThat((Map<String, Object>) academicGames.start(host, input))
+        .containsEntry("id", challenge.get("id"));
+    UUID id = (UUID) challenge.get("id");
+    String solution =
+        ((com.fasterxml.jackson.databind.JsonNode)
+                db.one("SELECT definition FROM academic_game_progress WHERE id=?", id)
+                    .get("definition"))
+            .path("answer")
+            .asText();
+    assertThatThrownBy(
+            () ->
+                academicGames.answer(
+                    member, id, new br.com.enturma.learning.AcademicGames.Answer(solution)))
+        .isInstanceOf(ApiException.class);
+    assertThat(
+            (Map<String, Object>)
+                academicGames.answer(
+                    host, id, new br.com.enturma.learning.AcademicGames.Answer("errado")))
+        .containsEntry("correct", false)
+        .doesNotContainKey("answer");
+    assertThat(
+            (Map<String, Object>)
+                academicGames.answer(
+                    host, id, new br.com.enturma.learning.AcademicGames.Answer(solution)))
+        .containsEntry("correct", true)
+        .containsEntry("xpAwarded", 25);
+    assertThat(
+            (Map<String, Object>)
+                academicGames.answer(
+                    host, id, new br.com.enturma.learning.AcademicGames.Answer(solution)))
+        .containsEntry("xpAwarded", 0);
+    achievements.sync(host.id());
+    achievements.sync(host.id());
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM learning_xp_event WHERE user_id=? AND"
+                    + " event_key='achievement:FIRST_SPARK'",
+                Integer.class,
+                host.id()))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void moderationEvidenceSurvivesRejectedMessageAndCanBeAppealed() {
+    UUID id = room(8);
+    chat.send(host, id, "Oferta repetida para teste", null);
+    chat.send(host, id, "Oferta repetida para teste", null);
+    assertThatThrownBy(() -> chat.send(host, id, "Oferta repetida para teste", null))
+        .isInstanceOf(br.com.enturma.moderation.PenaltyException.class);
+    UUID caseId =
+        (UUID)
+            db.one(
+                    "SELECT id FROM moderation_case WHERE user_id=? ORDER BY created_at DESC",
+                    host.id())
+                .get("id");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM moderation_evidence WHERE case_id=?", Integer.class, caseId))
+        .isEqualTo(1);
+    assertThatThrownBy(() -> automod.appeal(member, caseId, "Não é minha infração"))
+        .isInstanceOf(ApiException.class);
+    automod.appeal(host, caseId, "Solicito análise de contexto do exercício.");
+    automod.review(admin, caseId, true, "Exercício confirmado pelo moderador.");
+    assertThat(db.one("SELECT status FROM moderation_case WHERE id=?", caseId))
+        .containsEntry("status", "REVOKED");
+  }
+
+  @Test
+  void preferencesDeduplicateEmailAndKeepSecurityMailIndependent() {
+    db.jdbc.update("UPDATE app_user SET email_verified=true WHERE id=?", member.id());
+    notificationPreferences.save(member, "FORUM", false, true);
+    UUID target = UUID.randomUUID();
+    notices.send(
+        host.id(),
+        member.id(),
+        "FORUM_LIKE",
+        "forum:" + target,
+        target,
+        "/forum/" + target,
+        "Nova reação");
+    notices.send(
+        host.id(),
+        member.id(),
+        "FORUM_LIKE",
+        "forum:" + target,
+        target,
+        "/forum/" + target,
+        "Nova reação");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM email_outbox WHERE user_id=? AND category='FORUM'",
+                Integer.class,
+                member.id()))
+        .isEqualTo(1);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM notification WHERE user_id=? AND target_id=?",
+                Integer.class,
+                member.id(),
+                target))
+        .isZero();
+    notificationPreferences.save(member, "FORUM", false, false);
+    UUID another = UUID.randomUUID();
+    notices.send(
+        host.id(),
+        member.id(),
+        "FORUM_LIKE",
+        "forum:" + another,
+        another,
+        "/forum/" + another,
+        "Nova reação");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM email_outbox WHERE user_id=? AND category='FORUM'",
+                Integer.class,
+                member.id()))
+        .isEqualTo(1);
   }
 }

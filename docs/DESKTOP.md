@@ -1,148 +1,27 @@
-# Enturma Desktop
+# Enturma Desktop 0.3.0
 
-O Enturma Desktop utiliza Electron para oferecer uma versão instalável do sistema sem duplicar o frontend.
+Electron 44 abre a aplicação oficial Next.js/BFF, compartilhando API, conta e dados com o Web. O renderer mantém contextIsolation e sandbox, sem Node. IPC valida o frame/origem; links externos passam pelo fluxo de confirmação do Enturma. O protocolo é `enturma://`.
 
-A janela do aplicativo abre a versão Web oficial do Enturma. Dessa forma, conta, banco de dados, salas, mensagens, fórum, cadernos, IA, amigos e caronas continuam usando os mesmos serviços do site.
+## Build e distribuição
 
-## Por que esse modelo
+No Windows, execute `scripts/build-desktop-windows.ps1 -SkipInstall` após `npm ci`. O electron-builder gera `apps/desktop/dist/Enturma-Setup-0.3.0.exe` (NSIS por usuário, atalhos, desinstalador e protocolo) e `Enturma-0.3.0-win-x64.zip` (atualizações). Não há assinatura Code Signing configurada; o instalador pode receber aviso do Windows.
 
-O Web atual depende do Next.js/BFF para autenticação e cookies HttpOnly. Empacotar uma cópia estática do frontend quebraria parte desses fluxos.
+A página Web `/download` oferece o executável, não o ZIP. Dentro do Desktop, a bridge/UA ocultam Download e a rota redireciona para Início. Android aparece disponível apenas quando existe uma URL HTTPS de APK configurada; iOS permanece em preparação.
 
-Por isso o Desktop funciona como cliente nativo da aplicação oficial:
+`deploy/desktop-download/Dockerfile` compila os artefatos para o serviço Railway existente. `server.cjs` fornece `/latest.json`, `/Enturma-Setup.exe`, o nome versionado e `/Enturma-Windows.zip`. A URL do ZIP e os campos version/downloadUrl/size/sha256 continuam compatíveis com 0.2.0. O manifesto só anuncia um par instalador/ZIP da mesma versão. Não usa GitHub Actions nem GitHub Releases como origem do atualizador.
 
-```text
-Enturma Desktop
-       |
-       v
-Vercel / Next.js / BFF
-       |
-       v
-API Java / SquareCloud
-       |
-       v
-PostgreSQL / Railway
-```
+## Atualização integrada
 
-## Recursos nativos
+O main publica checking, available, downloading (progress), ready, installing e error por uma bridge restrita. O React mostra o progresso, permite adiar e solicita o reinício; uma chamada ativa recebe aviso antes da instalação. O renderer não recebe acesso a arquivos ou comandos. Acessibilidade e reduced motion continuam ativos.
 
-- janela própria do Windows;
-- sessão persistente separada do navegador;
-- câmera e microfone;
-- seletor de tela/janela para compartilhamento;
-- captura de áudio do sistema no Windows quando solicitada;
-- notificações do navegador permitidas para o domínio oficial;
-- links externos abertos no navegador padrão;
-- protocolo `enturma://`;
-- tela local para falha de conexão;
-- verificação de novas GitHub Releases;
-- bloqueio de navegação não autorizada dentro da janela do app.
+Downloads exigem HTTPS na origem permitida, tamanho limitado e SHA-256. O ZIP é validado novamente antes de extrair; entradas fora do diretório, expansões excessivas e pontos de reanálise são recusados. O instalador usa backup/rollback e preserva arquivos alheios ao pacote. Logs ficam em userData/updates. PowerShell é iniciado por caminho absoluto e Start-Process oculto; não se usa DETACHED_PROCESS, que no teste Windows encerrava o PowerShell 5.1 sem executar o arquivo.
 
-O renderer usa `contextIsolation`, `sandbox` e mantém `nodeIntegration` desativado.
+## Homologação e compatibilidade legada
 
-## Desenvolvimento
+Testes Node cobrem manifesto, origem, nomes de arquivo, IPC e servidor HTTP. A verificação Electron usa aplicativo empacotado, servidor HTTPS local e download/hash/instalação reais em diretório isolado; não é apenas um mock visual.
 
-```powershell
-npm run dev:desktop
-```
+**Recuperação 0.2.0:** o iniciador já distribuído com `detached: true` pode fechar sem aplicar o ZIP no Windows. O site identifica a bridge antiga e oferece “Baixar atualização oficial”, usando exclusivamente o instalador HTTPS do serviço Enturma. O usuário fecha a versão antiga, executa o EXE e abre o novo atalho; não deve excluir a conta nem desinstalar/limpar dados. A mesma identidade Electron e a partição persistente são preservadas. Essa recuperação inicial é assistida, não uma migração silenciosa; as próximas versões usam o iniciador corrigido. O formato do manifesto e a URL do ZIP continuam disponíveis para clientes legados em que o iniciador funciona.
 
-Por padrão o aplicativo usa:
+Atualizações somente do Web não exigem trocar o binário. macOS/Linux ainda precisam de build e homologação próprios antes de oferecer download público.
 
-```text
-https://enturma-flax.vercel.app
-```
-
-Para desenvolvimento local, crie `apps/desktop/.env`:
-
-```dotenv
-ENTURMA_WEB_URL=http://localhost:3000
-```
-
-## Gerar Windows
-
-Execute em um computador Windows com Node.js 22.14+:
-
-```powershell
-.\scripts\build-desktop-windows.ps1
-```
-
-Também é possível executar diretamente:
-
-```powershell
-npm run dist:desktop:win
-```
-
-Os arquivos ficam em:
-
-```text
-apps/desktop/dist/
-```
-
-A configuração gera:
-
-- instalador NSIS;
-- arquitetura x64.
-
-## Publicar para download
-
-O projeto não depende de GitHub Actions.
-
-Depois de gerar os arquivos, com o GitHub CLI autenticado:
-
-```powershell
-.\scripts\publish-desktop-windows.ps1
-```
-
-O script publica os executáveis em uma GitHub Release. A página `/download` consulta a release mais recente e passa a mostrar o instalador automaticamente.
-
-## Versão
-
-A versão do Desktop fica em:
-
-```text
-apps/desktop/package.json
-```
-
-Antes de publicar uma atualização, altere `version` para uma nova versão.
-
-## Assinatura digital
-
-O aplicativo funciona sem certificado, mas o Windows pode exibir SmartScreen para um executável novo e não assinado.
-
-Antes de uma distribuição pública maior, recomenda-se adquirir um certificado de Code Signing e configurar a assinatura do instalador.
-
-## macOS e Linux
-
-A configuração já possui alvos para DMG e AppImage. Eles devem ser gerados e testados no sistema correspondente antes de serem oferecidos como downloads oficiais.
-
-
-## Download público atual
-
-A versão Windows x64 também é gerada automaticamente em um ambiente Railway e disponibilizada em:
-
-https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Windows.zip
-
-Para usar:
-
-1. baixe o ZIP;
-2. extraia todo o conteúdo para uma pasta;
-3. abra `Enturma.exe`.
-
-Esse pacote usa a mesma aplicação Web oficial e mantém conta e dados sincronizados. O instalador NSIS continua previsto para builds feitos diretamente em Windows.
-
-
-## Atualização automática
-
-A partir da versão **0.2.0**, o Enturma Desktop verifica atualizações automaticamente ao iniciar e depois em intervalos periódicos.
-
-O fluxo é:
-
-1. o aplicativo consulta o manifesto `latest.json` hospedado na Railway;
-2. compara a versão instalada com a versão publicada;
-3. baixa o novo pacote em segundo plano;
-4. valida o tamanho e o SHA-256;
-5. exibe **Atualização pronta**;
-6. ao clicar em **Atualizar e reiniciar**, o Enturma fecha, substitui os arquivos e abre novamente.
-
-O usuário pode escolher **Depois** e continuar usando a versão atual. O app verificará novamente em outra execução.
-
-Atualizações somente do Web/Next.js não exigem nova versão Desktop, porque o Electron utiliza a aplicação Web oficial.
+Validação final do novo iniciador em 02/10/2026: um manifesto e um download HTTPS, SHA-256 `84465771468944056b17c3e960565eb8b8f69d391fbadd5cb9c83e46fa16bbf3`, ZIP 152868743 bytes. A cópia isolada passou de 0.2.9 (bridge nova) para 0.3.0 e preservou arquivo alheio ao pacote. Essa prova cobre a bridge nova, não o iniciador antigo 0.2.0.

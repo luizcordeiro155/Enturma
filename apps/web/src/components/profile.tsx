@@ -10,6 +10,7 @@ import { Shell } from "./shell";
 import { ProfileDetailsEditor } from "./profile-details-editor";
 import { Feedback } from "./feedback";
 
+import { NotificationPreferences } from "./community-feedback";
 export function ProfileView({
   subjectsOnly = false,
   settings = false,
@@ -25,7 +26,9 @@ export function ProfileView({
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [verificationBusy, setVerificationBusy] = useState(false);
-  const [verificationWaitingUntil, setVerificationWaitingUntil] = useState<number | null>(null);
+  const [verificationWaitingUntil, setVerificationWaitingUntil] = useState<
+    number | null
+  >(null);
   const [verificationNow, setVerificationNow] = useState(() => Date.now());
   const [verificationConfirmed, setVerificationConfirmed] = useState(false);
 
@@ -114,17 +117,22 @@ export function ProfileView({
 
   useEffect(() => {
     if (!verificationConfirmed) return;
-    const timeout = window.setTimeout(() => setVerificationConfirmed(false), 5000);
+    const timeout = window.setTimeout(
+      () => setVerificationConfirmed(false),
+      5000,
+    );
     return () => window.clearTimeout(timeout);
   }, [verificationConfirmed]);
 
   const verificationRemaining = useMemo(() => {
     if (!verificationWaitingUntil) return 0;
-    return Math.max(0, Math.ceil((verificationWaitingUntil - verificationNow) / 1000));
+    return Math.max(
+      0,
+      Math.ceil((verificationWaitingUntil - verificationNow) / 1000),
+    );
   }, [verificationNow, verificationWaitingUntil]);
 
   const verificationClock = `${String(Math.floor(verificationRemaining / 60)).padStart(2, "0")}:${String(verificationRemaining % 60).padStart(2, "0")}`;
-
 
   async function revoke(id: string) {
     try {
@@ -191,9 +199,7 @@ export function ProfileView({
                         }
                       }}
                     >
-                      {verificationBusy
-                        ? "Enviando…"
-                        : "Reenviar confirmação"}
+                      {verificationBusy ? "Enviando…" : "Reenviar confirmação"}
                     </button>
                   ) : null}
                 </dd>
@@ -232,6 +238,7 @@ export function ProfileView({
 
             {settings ? (
               <>
+                <NotificationPreferences />
                 <h2 className="section-heading">Sessões ativas</h2>
                 {sessions.map((s) => (
                   <div className="room-row" key={s.id}>
@@ -270,7 +277,12 @@ export function ProfileView({
         ) : null}
 
         {verificationWaitingUntil ? (
-          <div className="verification-wait-backdrop" role="dialog" aria-modal="true" aria-labelledby="verification-wait-title">
+          <div
+            className="verification-wait-backdrop"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="verification-wait-title"
+          >
             <section className="verification-wait-card">
               <button
                 type="button"
@@ -287,18 +299,25 @@ export function ProfileView({
                   <MailCheck size={44} />
                 </span>
               </div>
-              <span className="verification-wait-kicker">Aguardando confirmação</span>
+              <span className="verification-wait-kicker">
+                Aguardando confirmação
+              </span>
               <h2 id="verification-wait-title">Confirme seu e-mail</h2>
               <p>
-                Abra o e-mail que enviamos para <strong>{p?.email}</strong> e clique no link de confirmação.
-                Esta tela atualizará sozinha assim que a confirmação for concluída.
+                Abra o e-mail que enviamos para <strong>{p?.email}</strong> e
+                clique no link de confirmação. Esta tela atualizará sozinha
+                assim que a confirmação for concluída.
               </p>
               <div className="verification-countdown" aria-live="polite">
                 <strong>{verificationClock}</strong>
                 <span>tempo restante do link</span>
               </div>
               <div className="verification-wait-progress" aria-hidden="true">
-                <span style={{ width: `${Math.max(0, Math.min(100, (verificationRemaining / 1800) * 100))}%` }} />
+                <span
+                  style={{
+                    width: `${Math.max(0, Math.min(100, (verificationRemaining / 1800) * 100))}%`,
+                  }}
+                />
               </div>
               <div className="verification-wait-actions">
                 <button
@@ -335,7 +354,11 @@ export function ProfileView({
         ) : null}
 
         {verificationConfirmed ? (
-          <div className="verification-confirmed-toast" role="status" aria-live="polite">
+          <div
+            className="verification-confirmed-toast"
+            role="status"
+            aria-live="polite"
+          >
             <span className="verification-confirmed-icon">
               <MailCheck size={24} />
             </span>

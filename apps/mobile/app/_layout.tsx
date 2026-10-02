@@ -1,16 +1,35 @@
 import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
-export default function Layout() {
+import { SafeAreaProvider } from "react-native-safe-area-context";
+import { NativeCallProvider } from "../src/native-call";
+import { MobileThemeProvider, useStyles } from "../src/ui";
+function Navigation() {
+  const styles = useStyles();
   return (
-    <>
-      <StatusBar style="dark" />
+    <NativeCallProvider>
+      <StatusBar
+        style={styles.screen.backgroundColor === "#101819" ? "light" : "dark"}
+      />
       <Stack
         screenOptions={{
           headerTitle: "enturma.",
-          headerTintColor: "#183f36",
+          headerTintColor: styles.text.color,
+          headerStyle: { backgroundColor: styles.screen.backgroundColor },
+          contentStyle: { backgroundColor: styles.screen.backgroundColor },
           headerShadowVisible: false,
         }}
-      />
-    </>
+      >
+        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+      </Stack>
+    </NativeCallProvider>
+  );
+}
+export default function Layout() {
+  return (
+    <SafeAreaProvider>
+      <MobileThemeProvider>
+        <Navigation />
+      </MobileThemeProvider>
+    </SafeAreaProvider>
   );
 }

@@ -21,10 +21,13 @@ Módulos: auth emite e revoga sessões; academics mantém a árvore curricular; 
 
 Fronteiras externas: ObjectStorageService, VoiceProvider e AiProvider. EmailWorker processa outbox durável; envio SMTP ocorre após o commit que criou a conta. PushNotificationService, OAuth, filas de parsing e embeddings são extensões ainda não implementadas.
 
-Tokens opacos foram escolhidos em vez de JWT para a API: cada chamada consulta a sessão, permitindo revogação imediata. JWT é usado exclusivamente no grant LiveKit. A infraestrutura inicial não depende de Redis. O WebSocket de chat é um relay em memória por instância. Ele não consulta nem grava mensagens no PostgreSQL. Antes de aumentar para várias réplicas, adicionar pub/sub que transporte somente envelopes cifrados e preserve a propriedade de o servidor não possuir a chave da sala.
+Tokens opacos permitem revogação imediata das sessões API. JWT é usado nos grants LiveKit. O WS consulta snapshots autorizados do chat persistente de sala; digitação fica em memória. Conversas privadas de amigos usam E2EE e cofre separado, sem plaintext no servidor. Em múltiplas instâncias será necessário pub/sub com escopos de autorização equivalentes.
 
-O catálogo usa `academic_entry`, com tipos explícitos e hierarquia imutável: instituição → campus → curso → versão curricular → período → disciplina → tópico. A versão inicial representa ofertas de disciplina dentro da grade. Identidade canônica de disciplinas reutilizáveis em múltiplas grades e pré-requisitos ainda precisam de modelagem adicional.
+O catálogo combina academic_entry com relações normalizadas de instituição, campus, oferta, grade, período, disciplina canônica e pré-requisitos. Providers oficiais versionados mantêm fonte/hash/auditoria. Grupos de optativas sem semestre são identificados como ELECTIVES e têm número nulo (V25).
 
+CallSessionProvider e DesktopUpdateProvider vivem no layout raiz Web. O primeiro preserva a instância LiveKit e move o host visual entre sala e dock; o segundo usa somente a bridge restrita do preload. O Mobile utiliza NativeCallProvider. Notificações e invalidações usam conexão autenticada separada das mensagens da sala.
+
+Módulos community/learning/moderation acrescentam widgets, conquistas, registry de desafios e casos auditáveis. Concessões usam ledger e constraints únicas. Revisão por IA é opcional, assíncrona e não aplica sanções. Veja [COMMUNITY_V03](COMMUNITY_V03.md).
 
 ## Aprendizagem
 

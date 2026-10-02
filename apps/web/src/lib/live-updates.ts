@@ -23,7 +23,15 @@ export function useAppConnection() {
               attempt = 0;
               window.dispatchEvent(new Event("enturma-live-ready"));
             } else if (
-              ["forum_changed", "notifications_changed"].includes(type)
+              [
+                "forum_changed",
+                "notifications_changed",
+                "achievement_unlocked",
+                "moderation_action",
+                "room_member_joined",
+                "room_member_left",
+                "room_expiring",
+              ].includes(type)
             )
               window.dispatchEvent(new Event(`enturma-${type}`));
           } catch {}

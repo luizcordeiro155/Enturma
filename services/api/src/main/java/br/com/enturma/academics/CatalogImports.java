@@ -171,7 +171,10 @@ public class CatalogImports {
     if (e.kind().equals("CURRICULUM")
         && (e.curriculumVersion() == null || e.curriculumVersion().isBlank()))
       throw ApiException.invalid("Informe uma versão para a grade.");
-    if (e.kind().equals("PERIOD") && e.periodNumber() == null)
+    if (e.kind().equals("PERIOD")
+        && e.periodNumber() == null
+        && !(e.attributes() != null
+            && "ELECTIVES".equals(e.attributes().path("organization").asText())))
       throw ApiException.invalid("Informe o número do período.");
     JsonNode a = e.attributes();
     if (a == null || a.isNull()) return;

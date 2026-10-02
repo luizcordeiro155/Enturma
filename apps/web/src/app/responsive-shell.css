@@ -24,6 +24,7 @@
     flex: none;
   }
   .sidebar nav {
+    flex: 1;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
@@ -36,6 +37,18 @@
   }
   .sidebar nav a {
     flex-shrink: 0;
+  }
+}
+@media (min-width: 761px) and (max-height: 640px) {
+  .sidebar {
+    padding-block: 12px;
+  }
+  .sidebar nav {
+    margin-top: 12px;
+    gap: 2px;
+  }
+  .sidebar nav a {
+    padding-block: 8px;
   }
 }
 @media (min-width: 761px) and (max-height: 800px) {

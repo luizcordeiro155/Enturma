@@ -2,7 +2,16 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { BookOpen, ArrowRight, Check, KeyRound, MailCheck, ShieldCheck, UserRoundX, LogIn } from "lucide-react";
+import {
+  BookOpen,
+  ArrowRight,
+  Check,
+  KeyRound,
+  MailCheck,
+  ShieldCheck,
+  UserRoundX,
+  LogIn,
+} from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
 type Mode =
@@ -27,10 +36,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
   const [success, setSuccess] = useState("");
   const [completed, setCompleted] = useState<"verify" | "reset" | null>(null);
   const [redirectSeconds, setRedirectSeconds] = useState(15);
-  const [recoveryWaitingUntil, setRecoveryWaitingUntil] = useState<number | null>(null);
-  const [recoveryTrackingToken, setRecoveryTrackingToken] = useState<string | null>(null);
+  const [recoveryWaitingUntil, setRecoveryWaitingUntil] = useState<
+    number | null
+  >(null);
+  const [recoveryTrackingToken, setRecoveryTrackingToken] = useState<
+    string | null
+  >(null);
   const [recoveryNow, setRecoveryNow] = useState(() => Date.now());
-  const [accountState, setAccountState] = useState<"email-exists" | "email-missing" | null>(null);
+  const [accountState, setAccountState] = useState<
+    "email-exists" | "email-missing" | null
+  >(null);
   const [accountRedirectSeconds, setAccountRedirectSeconds] = useState(10);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
@@ -46,12 +61,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   useEffect(() => {
     if (!accountState) return;
-    setAccountRedirectSeconds(10);
+    queueMicrotask(() => setAccountRedirectSeconds(10));
     const tick = window.setInterval(() => {
       setAccountRedirectSeconds((value) => Math.max(0, value - 1));
     }, 1000);
-    const destination = accountState === "email-exists" ? "/login" : "/register";
-    const redirect = window.setTimeout(() => router.replace(destination), 10000);
+    const destination =
+      accountState === "email-exists" ? "/login" : "/register";
+    const redirect = window.setTimeout(
+      () => router.replace(destination),
+      10000,
+    );
     return () => {
       window.clearInterval(tick);
       window.clearTimeout(redirect);
@@ -59,7 +78,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }, [accountState, router]);
   useEffect(() => {
     if (mode !== "reset-password") return;
-    if (sessionStorage.getItem("enturma-password-reset-complete") !== "1") return;
+    if (sessionStorage.getItem("enturma-password-reset-complete") !== "1")
+      return;
     sessionStorage.removeItem("enturma-password-reset-complete");
     router.replace("/login");
   }, [mode, router]);
@@ -81,7 +101,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     }
 
     const redirectSecondsForFlow = completed === "verify" ? 5 : 15;
-    setRedirectSeconds(redirectSecondsForFlow);
+    queueMicrotask(() => setRedirectSeconds(redirectSecondsForFlow));
     const interval = window.setInterval(() => {
       setRedirectSeconds((value) => Math.max(0, value - 1));
     }, 1000);
@@ -186,8 +206,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
     if (mode === "register") {
       if (!name) errors.name = "Informe seu nome para criar a conta.";
-      if (!username)
-        errors.username = "Escolha um nome de usuário.";
+      if (!username) errors.username = "Escolha um nome de usuário.";
       else if (!/^[\p{L}\p{M}\p{N}_]{1,40}$/u.test(username))
         errors.username =
           "Use até 40 letras, números ou _. Espaços e símbolos não são aceitos.";
@@ -196,7 +215,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
     if (["login", "register", "forgot-password"].includes(mode)) {
       if (!email) errors.email = "Informe seu e-mail.";
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
-        errors.email = "Digite um e-mail válido, por exemplo nome@provedor.com.";
+        errors.email =
+          "Digite um e-mail válido, por exemplo nome@provedor.com.";
     }
 
     if (["login", "register", "reset-password"].includes(mode)) {
@@ -209,7 +229,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
       if (!confirmPassword)
         errors.confirmPassword = "Confirme a senha digitada acima.";
       else if (password !== confirmPassword) {
-        errors.password = "Confira a senha: os dois campos precisam ser iguais.";
+        errors.password =
+          "Confira a senha: os dois campos precisam ser iguais.";
         errors.confirmPassword = "A confirmação não corresponde à senha.";
       }
     }
@@ -230,7 +251,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
       setError("Revise os campos destacados em vermelho.");
       const firstField = Object.keys(validationErrors)[0];
       requestAnimationFrame(() => {
-        document.querySelector<HTMLInputElement>(`input[name="${firstField}"]`)?.focus();
+        document
+          .querySelector<HTMLInputElement>(`input[name="${firstField}"]`)
+          ?.focus();
       });
       setBusy(false);
       return;
@@ -313,7 +336,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
         });
         setError("Revise o campo destacado para concluir o cadastro.");
         requestAnimationFrame(() => {
-          document.querySelector<HTMLInputElement>('input[name="username"]')?.focus();
+          document
+            .querySelector<HTMLInputElement>('input[name="username"]')
+            ?.focus();
         });
       } else if (
         mode === "forgot-password" &&
@@ -333,7 +358,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
         });
         setError("Confira o e-mail ou crie uma nova conta.");
         requestAnimationFrame(() => {
-          document.querySelector<HTMLInputElement>('input[name="email"]')?.focus();
+          document
+            .querySelector<HTMLInputElement>('input[name="email"]')
+            ?.focus();
         });
       } else if (
         mode === "login" &&
@@ -344,7 +371,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
         });
         setError("A senha informada não corresponde a esta conta.");
         requestAnimationFrame(() => {
-          const password = document.querySelector<HTMLInputElement>('input[name="password"]');
+          const password = document.querySelector<HTMLInputElement>(
+            'input[name="password"]',
+          );
           password?.focus();
           password?.select();
         });
@@ -366,7 +395,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
             enturma.
           </Link>
           <div>
-            <h1>{existing ? "Você já faz parte." : "Vamos criar sua conta."}</h1>
+            <h1>
+              {existing ? "Você já faz parte." : "Vamos criar sua conta."}
+            </h1>
             <p>
               {existing
                 ? "Encontramos uma conta vinculada a este e-mail."
@@ -408,12 +439,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   : "Você pode criar sua conta agora e começar a usar o Enturma."}
               </p>
 
-              <div className="auth-redirect-progress account-state-progress" aria-hidden="true">
+              <div
+                className="auth-redirect-progress account-state-progress"
+                aria-hidden="true"
+              >
                 <span style={{ animationDuration: "10s" }} />
               </div>
-              <small>
-                Redirecionando em {accountRedirectSeconds}s…
-              </small>
+              <small>Redirecionando em {accountRedirectSeconds}s…</small>
 
               <div className="account-state-actions">
                 <button
@@ -462,14 +494,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </Link>
           <div>
             <h1>Verifique seu e-mail.</h1>
-            <p>
-              Enviamos um link seguro para redefinir sua senha.
-            </p>
+            <p>Enviamos um link seguro para redefinir sua senha.</p>
           </div>
           <span>O link expira em 30 minutos.</span>
         </section>
         <main className="auth-main auth-success-main">
-          <section className="auth-success-card recovery-wait-card" role="status" aria-live="polite">
+          <section
+            className="auth-success-card recovery-wait-card"
+            role="status"
+            aria-live="polite"
+          >
             <div className="auth-success-animation" aria-hidden="true">
               <span className="auth-success-orbit orbit-one" />
               <span className="auth-success-orbit orbit-two" />
@@ -484,8 +518,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
               </span>
               <h1>Aguardando você abrir o link</h1>
               <p>
-                Abra o e-mail de recuperação e siga o link para criar uma nova senha.
-                Por segurança, o link só funciona durante 30 minutos.
+                Abra o e-mail de recuperação e siga o link para criar uma nova
+                senha. Por segurança, o link só funciona durante 30 minutos.
               </p>
               <div className="verification-countdown" aria-live="polite">
                 <strong>{recoveryClock}</strong>
@@ -525,9 +559,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             enturma.
           </Link>
           <div>
-            <h1>
-              {verified ? "E-mail confirmado." : "Senha alterada."}
-            </h1>
+            <h1>{verified ? "E-mail confirmado." : "Senha alterada."}</h1>
             <p>
               {verified
                 ? "Sua conta agora está verificada e o perfil será atualizado automaticamente."
@@ -537,7 +569,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <span>Seu espaço de estudo e conexão.</span>
         </section>
         <main className="auth-main auth-success-main">
-          <section className="auth-success-card" role="status" aria-live="polite">
+          <section
+            className="auth-success-card"
+            role="status"
+            aria-live="polite"
+          >
             <div className="auth-success-animation" aria-hidden="true">
               <span className="auth-success-orbit orbit-one" />
               <span className="auth-success-orbit orbit-two" />
@@ -553,7 +589,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <Check size={16} />
                 Tudo certo
               </span>
-              <h1>{verified ? "Seu e-mail foi confirmado!" : "Sua senha foi alterada!"}</h1>
+              <h1>
+                {verified
+                  ? "Seu e-mail foi confirmado!"
+                  : "Sua senha foi alterada!"}
+              </h1>
               <p>
                 {verified
                   ? "O status da sua conta foi atualizado. Se o seu perfil estiver aberto em outra aba, ele também será atualizado automaticamente."
@@ -563,7 +603,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 <div className="auth-security-note">
                   <ShieldCheck size={20} />
                   <span>
-                    Todas as sessões anteriores foram revogadas para proteger sua conta.
+                    Todas as sessões anteriores foram revogadas para proteger
+                    sua conta.
                   </span>
                 </div>
               ) : null}
@@ -574,15 +615,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   }}
                 />
               </div>
-              <small>
-                Redirecionando em {redirectSeconds}s…
-              </small>
+              <small>Redirecionando em {redirectSeconds}s…</small>
               <button
                 type="button"
                 className="button wide"
-                onClick={() =>
-                  router.replace(verified ? "/profile" : "/login")
-                }
+                onClick={() => router.replace(verified ? "/profile" : "/login")}
               >
                 {verified ? "Ir para meu perfil" : "Ir para o login"}
                 <ArrowRight size={18} />
@@ -635,7 +672,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   autoComplete="name"
                   aria-invalid={Boolean(fieldErrors.name)}
                   aria-describedby={fieldErrors.name ? "name-error" : undefined}
-                  className={fieldErrors.name ? "auth-field-invalid" : undefined}
+                  className={
+                    fieldErrors.name ? "auth-field-invalid" : undefined
+                  }
                   required
                   maxLength={100}
                   onChange={() =>
@@ -647,7 +686,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   }
                 />
                 {fieldErrors.name ? (
-                  <small id="name-error" className="auth-field-error" role="alert">
+                  <small
+                    id="name-error"
+                    className="auth-field-error"
+                    role="alert"
+                  >
                     {fieldErrors.name}
                   </small>
                 ) : null}
@@ -658,8 +701,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   name="username"
                   autoComplete="username"
                   aria-invalid={Boolean(fieldErrors.username)}
-                  aria-describedby={fieldErrors.username ? "username-error" : undefined}
-                  className={fieldErrors.username ? "auth-field-invalid" : undefined}
+                  aria-describedby={
+                    fieldErrors.username ? "username-error" : undefined
+                  }
+                  className={
+                    fieldErrors.username ? "auth-field-invalid" : undefined
+                  }
                   maxLength={40}
                   autoCapitalize="none"
                   required
@@ -673,7 +720,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   }
                 />
                 {fieldErrors.username ? (
-                  <small id="username-error" className="auth-field-error" role="alert">
+                  <small
+                    id="username-error"
+                    className="auth-field-error"
+                    role="alert"
+                  >
                     {fieldErrors.username}
                   </small>
                 ) : null}
@@ -701,7 +752,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 }
               />
               {fieldErrors.email ? (
-                <small id="email-error" className="auth-field-error" role="alert">
+                <small
+                  id="email-error"
+                  className="auth-field-error"
+                  role="alert"
+                >
                   {fieldErrors.email}
                 </small>
               ) : null}
@@ -714,8 +769,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 name="password"
                 aria-label="Senha"
                 aria-invalid={Boolean(fieldErrors.password)}
-                aria-describedby={fieldErrors.password ? "password-error" : undefined}
-                className={fieldErrors.password ? "auth-field-invalid" : undefined}
+                aria-describedby={
+                  fieldErrors.password ? "password-error" : undefined
+                }
+                className={
+                  fieldErrors.password ? "auth-field-invalid" : undefined
+                }
                 type="password"
                 autoComplete={
                   mode === "login" ? "current-password" : "new-password"
@@ -732,7 +791,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 }
               />
               {fieldErrors.password ? (
-                <small id="password-error" className="auth-field-error" role="alert">
+                <small
+                  id="password-error"
+                  className="auth-field-error"
+                  role="alert"
+                >
                   {fieldErrors.password}
                 </small>
               ) : mode !== "login" ? (
@@ -747,8 +810,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 name="confirmPassword"
                 aria-label="Confirmar senha"
                 aria-invalid={Boolean(fieldErrors.confirmPassword)}
-                aria-describedby={fieldErrors.confirmPassword ? "confirm-password-error" : undefined}
-                className={fieldErrors.confirmPassword ? "auth-field-invalid" : undefined}
+                aria-describedby={
+                  fieldErrors.confirmPassword
+                    ? "confirm-password-error"
+                    : undefined
+                }
+                className={
+                  fieldErrors.confirmPassword ? "auth-field-invalid" : undefined
+                }
                 type="password"
                 autoComplete="new-password"
                 required
@@ -763,7 +832,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 }
               />
               {fieldErrors.confirmPassword ? (
-                <small id="confirm-password-error" className="auth-field-error" role="alert">
+                <small
+                  id="confirm-password-error"
+                  className="auth-field-error"
+                  role="alert"
+                >
                   {fieldErrors.confirmPassword}
                 </small>
               ) : null}

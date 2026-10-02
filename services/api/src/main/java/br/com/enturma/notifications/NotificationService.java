@@ -11,9 +11,12 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class NotificationService {
   private final Db db;
+  private final NotificationPreferences preferences;
   private final ApplicationEventPublisher events;
 
-  public NotificationService(Db db, ApplicationEventPublisher events) {
+  public NotificationService(
+      Db db, ApplicationEventPublisher events, NotificationPreferences preferences) {
+    this.preferences = preferences;
     this.db = db;
     this.events = events;
   }
@@ -51,7 +54,18 @@ public class NotificationService {
       UUID target,
       String href,
       String message) {
-    if (actor.equals(user)) return;
+    if (Objects.equals(actor, user)) return;
+    if (actor != null
+        && db.exists(
+            "SELECT EXISTS(SELECT 1 FROM user_block WHERE (user_id=? AND blocked_id=?) OR"
+                + " (user_id=? AND blocked_id=?))",
+            actor,
+            user,
+            user,
+            actor)) return;
+    String category = preferences.category(kind, context);
+    preferences.queue(user, category, kind + ":" + target + ":" + actor, message);
+    if (!preferences.enabled(user, category, false)) return;
     int inserted =
         db.jdbc.update(
             "INSERT INTO"
@@ -100,8 +114,8 @@ public class NotificationService {
 
   private String visible() {
     return " n.user_id=? AND n.dismissed_at IS NULL AND NOT EXISTS(SELECT 1 FROM user_block b WHERE"
-               + " (b.user_id=n.user_id AND b.blocked_id=n.actor_id) OR (b.blocked_id=n.user_id AND"
-               + " b.user_id=n.actor_id))";
+        + " (b.user_id=n.user_id AND b.blocked_id=n.actor_id) OR (b.blocked_id=n.user_id AND"
+        + " b.user_id=n.actor_id))";
   }
 
   public Object inbox(Actor a) {

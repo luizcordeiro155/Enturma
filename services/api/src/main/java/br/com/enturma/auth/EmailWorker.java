@@ -34,6 +34,15 @@ public class EmailWorker {
         db.list(
             "SELECT * FROM email_outbox WHERE sent_at IS NULL AND attempts<10 ORDER BY created_at"
                 + " LIMIT 10 FOR UPDATE SKIP LOCKED")) {
+      if (row.get("category") != null
+          && !db.exists(
+              "SELECT EXISTS(SELECT 1 FROM notification_preference WHERE user_id=? AND category=?"
+                  + " AND email)",
+              row.get("userId"),
+              row.get("category"))) {
+        db.jdbc.update("UPDATE email_outbox SET sent_at=now(),body='' WHERE id=?", row.get("id"));
+        continue;
+      }
       try {
         var mail = new SimpleMailMessage();
         mail.setFrom(from);
@@ -43,9 +52,7 @@ public class EmailWorker {
         sender.send(mail);
         db.jdbc.update("UPDATE email_outbox SET sent_at=now(),body='' WHERE id=?", row.get("id"));
       } catch (org.springframework.mail.MailException e) {
-        db.jdbc.update(
-            "UPDATE email_outbox SET attempts=attempts+1 WHERE id=?",
-            row.get("id"));
+        db.jdbc.update("UPDATE email_outbox SET attempts=attempts+1 WHERE id=?", row.get("id"));
       }
     }
   }

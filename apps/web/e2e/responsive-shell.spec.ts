@@ -64,14 +64,20 @@ test("login contrast and navigation remain accessible at every viewport", async 
     [320, 568],
   ]) {
     await page.setViewportSize({ width, height });
-    const settings = page
-      .getByRole("navigation", { name: "Principal" })
-      .getByRole("link", { name: "Configurações" });
-    await page
-      .getByRole("navigation", { name: "Principal" })
-      .getByRole("link", { name: "Início", exact: true })
-      .focus();
+    if (width <= 760)
+      await page
+        .getByRole("button", { name: "Mais opções", exact: true })
+        .click();
+    const nav =
+      width <= 760
+        ? page.getByRole("dialog", { name: "Mais opções do Enturma" })
+        : page.getByRole("navigation", { name: "Principal" });
+    const settings = nav.getByRole("link", {
+      name: "Configurações",
+      exact: true,
+    });
     await settings.focus();
+    await settings.scrollIntoViewIfNeeded();
     const box = await settings.boundingBox();
     expect(box!.y).toBeGreaterThanOrEqual(0);
     expect(box!.y + box!.height).toBeLessThanOrEqual(height);
@@ -87,6 +93,10 @@ test("login contrast and navigation remain accessible at every viewport", async 
         path: `../../.local/shell-${width}-${height}.png`,
         animations: "disabled",
       });
+    if (width <= 760)
+      await page
+        .getByRole("button", { name: "Fechar menu", exact: true })
+        .click();
   }
   await page.setViewportSize({ width: 1376, height: 766 });
   await page.evaluate(() =>

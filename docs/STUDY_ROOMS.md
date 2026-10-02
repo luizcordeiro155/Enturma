@@ -27,3 +27,11 @@ Ao encerrar uma sala:
 - a sala LiveKit é removida pelo reconciliador;
 - o chat deixa de aceitar novos envios e mantém seu histórico;
 - materiais e histórico seguem a política de retenção do produto.
+
+## Ciclo de vida 0.3.0
+
+POST /study-rooms aceita days=1..5 para MULTIDAY; days=0/ausente mantém QUICK e minutes. Prazo nasce na criação e não pode ser prorrogado. Sala longa preserva vínculo enquanto o usuário fecha o aplicativo; saída explícita libera vínculo. O anfitrião pode alterar título/tópico, bloquear entradas, remover membros e encerrar.
+
+Heartbeat atualiza last_seen_at e tempo de presença. Ausência por 90 segundos deixa de contar como presença online. Sala rápida vazia inicia empty_since; retorno cancela a contagem. Grace configurável por ENTURMA_ROOM_EMPTY_GRACE_SECONDS (300, mínimo 30). Sala longa não encerra por vazio. Avisos de 24h, 1h e fechamento usam eventos únicos e preferências/outbox.
+
+A interface alterna conversa/chamada/materiais/IA sem destruir a chamada global. O dock mantém controles e retorno à sala. Chat lateral da chamada tem tokens próprios para contraste em ambos os temas.

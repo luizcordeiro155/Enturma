@@ -17,12 +17,16 @@ import {
   Users,
   Download,
 } from "lucide-react";
+import { CommunityFeedback } from "./community-feedback";
+import { DesktopUpdateButton, isDesktop } from "./desktop-updates";
+import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
   { href: "/forum", label: "Fórum", icon: MessageCircle },
   { href: "/notebooks", label: "Cadernos IA", icon: BookOpen },
   { href: "/friends", label: "Amigos", icon: Users },
   { href: "/explore", label: "Explorar", icon: Search },
+  { href: "/challenges", label: "Desafios acadêmicos", icon: Gamepad2 },
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },
   { href: "/caronas", label: "Caronas", icon: Car },
   { href: "/settings", label: "Configurações", icon: Settings },
@@ -30,8 +34,13 @@ const links = [
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const [desktop, setDesktop] = useState(false);
+  useEffect(() => {
+    const t = setTimeout(() => setDesktop(isDesktop()), 0);
+    return () => clearTimeout(t);
+  }, []);
   const [learning, setLearning] = useState(false);
-  const [emailVerified, setEmailVerified] = useState<boolean | null>(null);
+  const [, setEmailVerified] = useState<boolean | null>(null);
   const [emailCelebration, setEmailCelebration] = useState(false);
   const [emailCelebrationSeconds, setEmailCelebrationSeconds] = useState(8);
   useEffect(() => {
@@ -48,10 +57,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    let previous: boolean | null = emailVerified;
+    let previous: boolean | null = null;
 
     const refreshVerification = async () => {
-      if (previous === true) return;
+      if (previous === true || document.visibilityState !== "visible") return;
       try {
         const profile = await api<{ emailVerified: boolean }>("/users/me");
         if (!active) return;
@@ -85,7 +94,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     };
 
     void refreshVerification();
-    const poll = window.setInterval(refreshVerification, 1500);
+    const poll = window.setInterval(refreshVerification, 15000);
     const onVisible = () => {
       if (document.visibilityState === "visible") void refreshVerification();
     };
@@ -133,16 +142,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
               Praticar programação
             </Link>
           ) : null}
-          {links.map(({ href, label, icon: Icon }) => (
-            <Link
-              key={href}
-              href={href}
-              aria-current={path === href ? "page" : undefined}
-            >
-              <Icon size={21} />
-              {label}
-            </Link>
-          ))}
+          {links
+            .filter((l) => !desktop || l.href !== "/download")
+            .map(({ href, label, icon: Icon }) => (
+              <Link
+                key={href}
+                href={href}
+                aria-current={path === href ? "page" : undefined}
+              >
+                <Icon size={21} />
+                {label}
+              </Link>
+            ))}
         </nav>
       </aside>
       <div className="workspace">
@@ -151,6 +162,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
           </span>
           <div className="topbar-actions">
+            <DesktopUpdateButton />
             <NotificationBell />
             <ExperienceControls />
             <Link className="button" href="/profile">
@@ -158,13 +170,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
         </header>
-        <main id="content">{children}</main>
+        <main id="content">
+          <CommunityFeedback />
+          {children}
+        </main>
         <footer>
           <ShieldCheck size={20} /> Catálogo acadêmico com fontes verificadas.
-          <span>Enturma Web v0.2.0</span>
+          <span>Enturma Web v0.3.0</span>
         </footer>
       </div>
 
+      <MobileNavigation />
       {emailCelebration ? (
         <div
           className="account-celebration-backdrop"

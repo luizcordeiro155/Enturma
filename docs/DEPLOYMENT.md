@@ -21,13 +21,13 @@ A configuração define Java `recommended`, 1024 MB, reinício automático, heap
 
 Preencha `.env` dentro do ZIP, ou use as variáveis do painel da SquareCloud (têm precedência). A aplicação lê `.env` na pasta do JAR como propriedades UTF-8, com valores sem aspas. Para valores com barras invertidas, prefira o painel ou escape cada barra como `\\`.
 
-| Variável | Valor |
-|---|---|
-| `DATABASE_URL` | URI pública `postgresql://USUARIO:SENHA@HOST:PORT/BANCO?...` ou URL JDBC `jdbc:postgresql://HOST:PORT/BANCO?...` |
-| `DATABASE_USERNAME` | Usuário do banco; opcional quando incluído na URI |
-| `DATABASE_PASSWORD` | Senha do banco; opcional quando incluída na URI |
-| `APP_URL` | URL HTTPS web; modelo: `https://enturma-flax.vercel.app` |
-| `BFF_PROXY_SECRET` | Chave aleatória de 32+ caracteres, igual à configurada na Vercel |
+| Variável            | Valor                                                                                                            |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `DATABASE_URL`      | URI pública `postgresql://USUARIO:SENHA@HOST:PORT/BANCO?...` ou URL JDBC `jdbc:postgresql://HOST:PORT/BANCO?...` |
+| `DATABASE_USERNAME` | Usuário do banco; opcional quando incluído na URI                                                                |
+| `DATABASE_PASSWORD` | Senha do banco; opcional quando incluída na URI                                                                  |
+| `APP_URL`           | URL HTTPS web; modelo: `https://enturma-flax.vercel.app`                                                         |
+| `BFF_PROXY_SECRET`  | Chave aleatória de 32+ caracteres, igual à configurada na Vercel                                                 |
 
 Gere a chave localmente com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Não a coloque no Git. Ela autentica a identidade anônima que o BFF encaminha para os limites de requisição; evita que todos os visitantes compartilhem o limite do proxy e não substitui a autenticação de usuário.
 
@@ -83,15 +83,15 @@ O script só inclui os nomes de certificado documentados. Esse ZIP privado não 
 
 No projeto conectado a `luizcordeiro155/Enturma`, configure:
 
-| Campo | Valor |
-|---|---|
-| Framework | Next.js |
-| Root Directory | `apps/web` |
+| Campo                                       | Valor                              |
+| ------------------------------------------- | ---------------------------------- |
+| Framework                                   | Next.js                            |
+| Root Directory                              | `apps/web`                         |
 | Include source files outside Root Directory | Ativado (contratos compartilhados) |
-| Node.js | 24.x |
-| Install Command | `npm ci --prefix ../..` |
-| Build Command | `npm run build` |
-| Output Directory | Padrão do Next.js; não usar `out` |
+| Node.js                                     | 24.x                               |
+| Install Command                             | `npm ci --prefix ../..`            |
+| Build Command                               | `npm run build`                    |
+| Output Directory                            | Padrão do Next.js; não usar `out`  |
 
 `apps/web/vercel.json` versiona o framework, os comandos e a região São Paulo. O Root Directory é uma configuração do projeto na Vercel, não uma propriedade de `vercel.json`. A branch selecionada para produção precisa conter este código; o commit inicial com somente README não consegue gerar o app. [Monorepos na Vercel](https://vercel.com/docs/monorepos)
 
@@ -122,8 +122,7 @@ O CI usa build web de produção e executa o JAR compilado para Java 21 no runti
 
 Ative backups do PostgreSQL, teste restauração em banco separado e acompanhe saúde, memória, conexões e falhas de provedores. A API não depende de arquivo local permanente para dados dos usuários. Certificados de conexão são configuração privada.
 
-O app Expo continua usando a mesma API por `EXPO_PUBLIC_API_URL=https://SEU-SUBDOMINIO.squareweb.app/api/v1`. Não participa do build da Vercel. A prioridade desta configuração é web; não houve publicação em lojas.
-
+O app Expo continua usando a mesma API por `EXPO_PUBLIC_API_URL=https://SEU-SUBDOMINIO.squareweb.app/api/v1`. Não participa do build da Vercel. A versão 0.3.0 possui navegação nativa, chamadas persistentes e perfis EAS APK/AAB/iOS; consulte MOBILE.md. Não houve publicação em lojas.
 
 ## 5. Ativar Enturma AI
 
@@ -159,3 +158,9 @@ Após o redeploy, `GET /api/v1/capabilities` deve retornar `voice=true`. Teste e
 `V8__collaboration_and_learning_xp.sql` adiciona XP, sequência e desafio diário. V9 foi uma migração histórica do chat. V10 reintroduziu o histórico persistente; V12/V13 preservam anexos e memória incremental. Não reexecutar migrações antigas manualmente.
 
 **Atenção:** V9 apaga o histórico antigo de chat por design. Faça backup antes do primeiro deploy se precisar preservar esse conteúdo fora da aplicação por motivo operacional/legal.
+
+## Enturma 0.3.0
+
+Novas migrations V23–V25 acrescentam comunidade/perfil/salas, fila opcional de revisão e grupos de optativas oficiais sem semestre artificial. Nenhuma migration antiga foi alterada. O catálogo UFMG passa a incluir 43 optativas da fonte verificada.
+
+Publicação por um PR/squash na main, seguida das integrações nativas Vercel/SquareCloud/Railway. Não usar Actions para deploy. Desktop 0.2.0 dispõe de recuperação assistida pelo instalador oficial; as próximas atualizações usam o iniciador corrigido. Consulte `V0_3_IMPLEMENTATION.md`. Verificar saúde Web/API e manifesto/EXE/ZIP Railway após uma publicação autorizada.

@@ -14,17 +14,24 @@ public class VoiceService {
   private final VoiceProvider provider;
   private final StudyService study;
   private final Db db;
+  private final br.com.enturma.moderation.AutoModService automod;
 
-  public VoiceService(VoiceProvider provider, StudyService study, Db db) {
+  public VoiceService(
+      VoiceProvider provider,
+      StudyService study,
+      Db db,
+      br.com.enturma.moderation.AutoModService automod) {
     this.provider = provider;
     this.study = study;
     this.db = db;
+    this.automod = automod;
   }
 
   @Transactional
   public Object join(Actor a, UUID room) {
     var r = study.activeLocked(room);
     study.member(a, room);
+    automod.allowed(a.id(), room);
     long expires =
         Math.min(
             Instant.now().plusSeconds(60).getEpochSecond(),
@@ -60,6 +67,12 @@ public class VoiceService {
             try {
               user = UUID.fromString(identity);
             } catch (IllegalArgumentException e) {
+              provider.remove(room.toString(), identity);
+              continue;
+            }
+            try {
+              automod.allowed(user, room);
+            } catch (br.com.enturma.moderation.PenaltyException denied) {
               provider.remove(room.toString(), identity);
               continue;
             }

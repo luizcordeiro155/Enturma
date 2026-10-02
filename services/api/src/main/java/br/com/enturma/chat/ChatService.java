@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class ChatService {
   private final Db db;
+  private final br.com.enturma.moderation.AutoModService automod;
   private final br.com.enturma.notifications.NotificationService notices;
   private final StudyService study;
   private final ObjectStorageService storage;
@@ -19,7 +20,9 @@ public class ChatService {
       Db db,
       StudyService study,
       ObjectStorageService storage,
-      br.com.enturma.notifications.NotificationService notices) {
+      br.com.enturma.notifications.NotificationService notices,
+      br.com.enturma.moderation.AutoModService automod) {
+    this.automod = automod;
     this.notices = notices;
     this.db = db;
     this.study = study;
@@ -47,11 +50,15 @@ public class ChatService {
         "SELECT"
             + " m.id,m.user_id,m.body,m.reply_to,m.created_at,m.edited_at,m.deleted_at,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes"
             + " IS NOT NULL has_avatar, a.id attachment_id,a.file_name attachment_name,a.mime_type"
-            + " attachment_mime, a.file_size attachment_size FROM room_message m JOIN app_user u ON"
-            + " u.id=m.user_id LEFT JOIN room_attachment a ON a.id=m.attachment_id WHERE"
-            + " m.room_id=? AND (?::uuid IS NULL OR m.id=?) AND NOT EXISTS(SELECT 1 FROM user_block"
-            + " b WHERE (b.user_id=? AND b.blocked_id=m.user_id) OR (b.blocked_id=? AND"
-            + " b.user_id=m.user_id)) ORDER BY m.created_at DESC,m.id DESC LIMIT 50 OFFSET ?",
+            + " attachment_mime, a.file_size attachment_size, COALESCE((SELECT jsonb_agg(r) FROM"
+            + " (SELECT emoji,count(*) count,bool_or(user_id=?::uuid) mine FROM room_reaction WHERE"
+            + " message_id=m.id GROUP BY emoji ORDER BY min(created_at)) r),'[]'::jsonb) reactions"
+            + " FROM room_message m JOIN app_user u ON u.id=m.user_id LEFT JOIN room_attachment a"
+            + " ON a.id=m.attachment_id WHERE m.room_id=? AND (?::uuid IS NULL OR m.id=?) AND NOT"
+            + " EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND b.blocked_id=m.user_id) OR"
+            + " (b.blocked_id=? AND b.user_id=m.user_id)) ORDER BY m.created_at DESC,m.id DESC"
+            + " LIMIT 50 OFFSET ?",
+        a.id(),
         room,
         target,
         target,
@@ -72,12 +79,12 @@ public class ChatService {
         message);
   }
 
-  @Transactional
+  @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
   public Object send(Actor a, UUID room, String body, UUID reply) {
     return send(a, room, body, reply, null);
   }
 
-  @Transactional
+  @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
   public Object send(Actor a, UUID room, String body, UUID reply, UUID attachment) {
     study.activeLocked(room);
     study.member(a, room);
@@ -97,6 +104,7 @@ public class ChatService {
             attachment,
             room,
             a.id())) throw ApiException.invalid("Anexo inválido.");
+    automod.inspect(a, room, text);
     UUID id = UUID.randomUUID();
     db.jdbc.update(
         "INSERT INTO room_message(id,room_id,user_id,body,reply_to,attachment_id) VALUES"
@@ -128,12 +136,19 @@ public class ChatService {
     return Map.of("id", id);
   }
 
-  @Transactional
+  @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
   public void edit(Actor a, UUID room, UUID id, String body) {
     study.activeLocked(room);
     study.member(a, room);
     String text = body == null ? "" : body.strip();
     if (text.isBlank() || text.length() > 4000) throw ApiException.invalid("Mensagem inválida.");
+    if (!db.exists(
+        "SELECT EXISTS(SELECT 1 FROM room_message WHERE id=? AND room_id=? AND user_id=? AND"
+            + " deleted_at IS NULL)",
+        id,
+        room,
+        a.id())) throw ApiException.forbidden();
+    automod.inspect(a, room, text);
     if (db.jdbc.update(
             "UPDATE room_message SET body=?,edited_at=now() WHERE id=? AND room_id=? AND user_id=?"
                 + " AND deleted_at IS NULL",
@@ -162,6 +177,7 @@ public class ChatService {
   public Object upload(Actor a, UUID room, String fileName, String mime, byte[] bytes) {
     study.activeLocked(room);
     study.member(a, room);
+    automod.allowed(a.id(), room);
     if (bytes.length == 0 || bytes.length > 8 * 1024 * 1024)
       throw ApiException.invalid("A imagem deve ter no máximo 8 MB.");
     if (!Set.of("image/jpeg", "image/png", "image/webp", "image/gif").contains(mime))
@@ -203,6 +219,7 @@ public class ChatService {
   public void react(Actor a, UUID room, UUID message, String emoji) {
     study.activeLocked(room);
     study.member(a, room);
+    automod.allowed(a.id(), room);
     if (emoji == null || emoji.isBlank() || emoji.length() > 16)
       throw ApiException.invalid("Reação inválida.");
     if (!db.exists(

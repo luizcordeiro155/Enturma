@@ -1,6 +1,6 @@
 {
   "name": "enturma",
-  "version": "0.1.0",
+  "version": "0.3.0",
   "private": true,
   "workspaces": [
     "apps/*",
@@ -29,6 +29,9 @@
   },
   "overrides": {
     "react-native-reanimated": "4.2.1",
-    "react-native-worklets": "0.7.4"
+    "react-native-worklets": "0.7.4",
+    "xcode": {
+      "uuid": "11.1.1"
+    }
   }
 }

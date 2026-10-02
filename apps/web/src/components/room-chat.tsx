@@ -1,15 +1,28 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
-import type { Message, Profile } from "@enturma/contracts";
-import { Hash, ImagePlus, Loader2, Reply, Trash2, X } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import type { Message, Profile, RoomSystemEvent } from "@enturma/contracts";
+import {
+  BookOpen,
+  Pencil,
+  Hash,
+  ImagePlus,
+  Loader2,
+  Reply,
+  Trash2,
+  X,
+} from "lucide-react";
 import { UserIdentity } from "./user-identity";
 import { ConversationNotice, useNotificationTarget } from "./notifications";
 import { api } from "@/lib/api";
 
+import { RichMessage } from "./rich-message";
+
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
 
 type Props = {
+  typing?: { id: string; name: string }[];
+  systemEvents?: RoomSystemEvent[];
   roomId: string;
   ended: boolean;
   connected: boolean;
@@ -56,6 +69,12 @@ export function RoomChat(props: Props) {
     setError,
   } = props;
 
+  const [editing, setEditing] = useState<string | null>(null);
+  const [editBody, setEditBody] = useState("");
+  const [unseen, setUnseen] = useState(0);
+  const [firstUnread, setFirstUnread] = useState<string | null>(null);
+  const newestRef = useRef<string | undefined>(undefined);
+  const countRef = useRef(messages.length);
   useNotificationTarget();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -66,9 +85,25 @@ export function RoomChat(props: Props) {
   );
 
   useEffect(() => {
+    const latest = messages.at(-1)?.id;
+    const previousIndex = messages.findIndex((m) => m.id === newestRef.current);
+    if (
+      !nearBottom.current &&
+      newestRef.current &&
+      previousIndex >= 0 &&
+      latest !== newestRef.current
+    ) {
+      const incoming = messages.slice(previousIndex + 1);
+      queueMicrotask(() => {
+        setUnseen((n) => n + incoming.length);
+        setFirstUnread((old) => old ?? incoming[0]?.id ?? null);
+      });
+    }
+    newestRef.current = latest;
+    countRef.current = messages.length;
     if (nearBottom.current && scrollRef.current)
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-  }, [messages.length, compact]);
+  }, [messages, compact]);
 
   function selectImage(file: File | null) {
     if (!file) return;
@@ -120,6 +155,10 @@ export function RoomChat(props: Props) {
           const el = e.currentTarget;
           nearBottom.current =
             el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+          if (nearBottom.current) {
+            setUnseen(0);
+            setFirstUnread(null);
+          }
         }}
       >
         {hasOlder ? (
@@ -142,6 +181,52 @@ export function RoomChat(props: Props) {
           </button>
         ) : null}
 
+        {(props.systemEvents ?? [])
+          .slice(0, 4)
+          .reverse()
+          .map((event) => (
+            <article className="monitor-card" key={event.id}>
+              <BookOpen size={22} />
+              <div>
+                <strong>
+                  Monitor Enturma <span className="privacy-pill">APP</span>
+                </strong>
+                <p>
+                  {event.kind === "WELCOME"
+                    ? `Bem-vindo à sala${event.name ? ", " + event.name : ""}!`
+                    : event.kind === "FAREWELL"
+                      ? `Até a próxima${event.name ? ", " + event.name : ""}.`
+                      : event.message}
+                </p>
+                {event.userId && event.name && (
+                  <UserIdentity
+                    compact
+                    user={{
+                      id: event.userId,
+                      name: event.name,
+                      username: event.username ?? "",
+                      hasAvatar: event.hasAvatar,
+                    }}
+                  />
+                )}
+                {event.kind === "WELCOME" && (
+                  <p className="muted">
+                    {event.subjectName} · anfitrião: {event.hostName}
+                    <br />
+                    {event.topicText ||
+                      "Troque dúvidas e compartilhe seu aprendizado."}
+                    <br />
+                    Converse com respeito, evite spam e proteja seus dados.
+                    {event.endsAt &&
+                      ` A sala termina em ${new Date(event.endsAt).toLocaleString("pt-BR")}.`}
+                  </p>
+                )}
+                <small>
+                  {new Date(event.createdAt).toLocaleString("pt-BR")}
+                </small>
+              </div>
+            </article>
+          ))}
         {messages.length === 0 ? (
           <div className="chat-empty modern-empty">
             <Hash size={compact ? 34 : 44} />
@@ -158,6 +243,15 @@ export function RoomChat(props: Props) {
                 className={`message persistent-message ${message.userId === me?.id ? "mine" : ""}`}
                 key={message.id}
               >
+                {message.id === firstUnread && (
+                  <div
+                    className="unread-divider"
+                    role="separator"
+                    aria-label="Mensagens não lidas"
+                  >
+                    Novas mensagens
+                  </div>
+                )}
                 <div className="message-avatar">
                   <UserIdentity
                     compact
@@ -214,7 +308,48 @@ export function RoomChat(props: Props) {
                       <p className="muted">Mensagem removida.</p>
                     ) : (
                       <>
-                        {message.body ? <p>{message.body}</p> : null}
+                        {editing === message.id ? (
+                          <form
+                            onSubmit={async (e) => {
+                              e.preventDefault();
+                              try {
+                                await api(
+                                  `/study-rooms/${roomId}/messages/${message.id}`,
+                                  {
+                                    method: "PUT",
+                                    body: JSON.stringify({ body: editBody }),
+                                  },
+                                );
+                                setEditing(null);
+                                await onReloadMessages();
+                              } catch (e) {
+                                setError((e as Error).message);
+                              }
+                            }}
+                          >
+                            <label>
+                              Editar mensagem
+                              <textarea
+                                value={editBody}
+                                onChange={(e) => setEditBody(e.target.value)}
+                                maxLength={4000}
+                              />
+                            </label>
+                            <button>Salvar edição</button>
+                            <button
+                              type="button"
+                              className="secondary"
+                              onClick={() => setEditing(null)}
+                            >
+                              Cancelar
+                            </button>
+                          </form>
+                        ) : message.body ? (
+                          <RichMessage text={message.body} />
+                        ) : null}
+                        {message.editedAt && (
+                          <small className="muted">editada</small>
+                        )}
                         {message.attachmentId ? (
                           <a
                             className="chat-image-link"
@@ -237,6 +372,27 @@ export function RoomChat(props: Props) {
                     )}
                   </div>
 
+                  {!message.deletedAt && (
+                    <div className="message-reactions">
+                      {message.reactions?.map((r) => (
+                        <button
+                          type="button"
+                          key={r.emoji}
+                          aria-pressed={r.mine}
+                          onClick={() =>
+                            api(
+                              `/study-rooms/${roomId}/messages/${message.id}/reactions?emoji=${encodeURIComponent(r.emoji)}`,
+                              { method: "POST" },
+                            )
+                              .then(onReloadMessages)
+                              .catch((e) => setError(e.message))
+                          }
+                        >
+                          {r.emoji} {r.count}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                   {!message.deletedAt ? (
                     <div className="message-actions">
                       <button
@@ -266,6 +422,18 @@ export function RoomChat(props: Props) {
                         ))}
                       </div>
 
+                      {message.userId === me?.id && message.body && !ended && (
+                        <button
+                          type="button"
+                          className="text-button"
+                          onClick={() => {
+                            setEditing(message.id);
+                            setEditBody(message.body ?? "");
+                          }}
+                        >
+                          <Pencil size={14} /> Editar
+                        </button>
+                      )}
                       {message.userId === me?.id ? (
                         <button
                           className="text-button"
@@ -297,6 +465,25 @@ export function RoomChat(props: Props) {
         <div ref={bottomRef} />
       </div>
 
+      {unseen > 0 && (
+        <button
+          type="button"
+          className="chat-unread"
+          onClick={() => {
+            if (scrollRef.current)
+              scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+            nearBottom.current = true;
+            setUnseen(0);
+          }}
+        >
+          {unseen} nova(s) mensagem(ns) ↓
+        </button>
+      )}
+      <div className="typing-status" role="status">
+        {props.typing?.length
+          ? `${props.typing.map((p) => p.name).join(", ")} ${props.typing.length === 1 ? "está digitando" : "estão digitando"}…`
+          : ""}
+      </div>
       {!ended ? (
         <form onSubmit={onSubmit} className="chat-composer persistent-composer">
           {replyTo ? (

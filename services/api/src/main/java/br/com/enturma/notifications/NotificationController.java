@@ -11,9 +11,24 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/notifications")
 public class NotificationController {
   private final NotificationService service;
+  private final NotificationPreferences preferences;
 
-  public NotificationController(NotificationService service) {
+  public NotificationController(NotificationService service, NotificationPreferences preferences) {
+    this.preferences = preferences;
     this.service = service;
+  }
+
+  public record Preference(
+      @jakarta.validation.constraints.NotBlank String category, boolean inApp, boolean email) {}
+
+  @GetMapping("/preferences")
+  public Object preferences(@AuthenticationPrincipal Actor a) {
+    return preferences.list(a);
+  }
+
+  @PutMapping("/preferences")
+  public void preference(@AuthenticationPrincipal Actor a, @Valid @RequestBody Preference p) {
+    preferences.save(a, p.category(), p.inApp(), p.email());
   }
 
   @GetMapping("/inbox")

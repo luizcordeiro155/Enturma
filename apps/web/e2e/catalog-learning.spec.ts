@@ -221,13 +221,26 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   });
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  for (const name of ["Cadernos IA", "Amigos", "Minhas matérias"]) {
+  for (const name of ["Cadernos", "Amigos", "Minhas matérias"]) {
     const response = page.waitForResponse(
       (r) =>
         r.url().includes("/users/me/experience") &&
         r.request().method() === "GET",
     );
+    if (name !== "Cadernos")
+      await page
+        .getByRole("button", { name: "Mais opções", exact: true })
+        .click();
     await page.getByRole("link", { name, exact: true }).click();
+    await expect(page).toHaveURL(
+      new RegExp(
+        name === "Cadernos"
+          ? "/notebooks"
+          : name === "Amigos"
+            ? "/friends"
+            : "/subjects",
+      ),
+    );
     await response;
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   }

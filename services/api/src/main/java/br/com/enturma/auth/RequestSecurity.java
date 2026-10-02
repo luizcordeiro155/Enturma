@@ -19,11 +19,7 @@ public class RequestSecurity extends OncePerRequestFilter {
   private final int registerLimit;
 
   public RequestSecurity(
-      AuthService auth,
-      Db db,
-      ObjectMapper json,
-      ClientIdentity clients,
-      int registerLimit) {
+      AuthService auth, Db db, ObjectMapper json, ClientIdentity clients, int registerLimit) {
     this.auth = auth;
     this.db = db;
     this.json = json;
@@ -51,6 +47,32 @@ public class RequestSecurity extends OncePerRequestFilter {
                               actor,
                               null,
                               List.of(new SimpleGrantedAuthority("ROLE_" + actor.role())))));
+    var current = SecurityContextHolder.getContext().getAuthentication();
+    String route = req.getRequestURI();
+    if (current != null
+        && !route.startsWith("/api/v1/auth/")
+        && !route.startsWith("/api/v1/moderation/")
+        && !route.equals("/api/v1/users/me")
+        && !route.startsWith("/api/v1/notifications")) {
+      Actor actor = (Actor) current.getPrincipal();
+      if (db.exists(
+          "SELECT EXISTS(SELECT 1 FROM moderation_case c JOIN moderation_action a ON a.case_id=c.id"
+              + " WHERE c.user_id=? AND c.room_id IS NULL AND a.kind IN"
+              + " ('BAN','SUSPENSION','RESTRICTION') AND a.revoked_at IS NULL AND (a.ends_at IS"
+              + " NULL OR a.ends_at>now()))",
+          actor.id())) {
+        res.setStatus(403);
+        res.setContentType("application/json");
+        json.writeValue(
+            res.getOutputStream(),
+            Errors.body(
+                403,
+                "MODERATION_ACTION",
+                "Sua conta possui uma medida de moderação. Consulte o motivo e solicite revisão.",
+                req));
+        return;
+      }
+    }
     if (!Set.of("GET", "HEAD", "OPTIONS").contains(req.getMethod())
         && req.getRequestURI().startsWith("/api/")) {
       var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -95,10 +117,10 @@ public class RequestSecurity extends OncePerRequestFilter {
       String bucket = prefix + Tokens.hash(subject);
       Integer hits =
           db.jdbc.queryForObject(
-              "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,1,now()+(? * interval '1 second'))"
-                  + " ON CONFLICT(bucket) DO UPDATE SET hits=CASE WHEN rate_limit.resets_at<now()"
-                  + " THEN 1 ELSE rate_limit.hits+1 END,resets_at=CASE WHEN"
-                  + " rate_limit.resets_at<now() THEN now()+(? * interval '1 second') ELSE"
+              "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,1,now()+(? * interval '1"
+                  + " second')) ON CONFLICT(bucket) DO UPDATE SET hits=CASE WHEN"
+                  + " rate_limit.resets_at<now() THEN 1 ELSE rate_limit.hits+1 END,resets_at=CASE"
+                  + " WHEN rate_limit.resets_at<now() THEN now()+(? * interval '1 second') ELSE"
                   + " rate_limit.resets_at END RETURNING hits",
               Integer.class,
               bucket,
