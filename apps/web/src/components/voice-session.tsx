@@ -41,6 +41,7 @@ export default function VoiceSession({
   const [muted, setMuted] = useState(false);
   const [camera, setCamera] = useState(false);
   const [screen, setScreen] = useState(false);
+  const [screenSupported, setScreenSupported] = useState(true);
   const [error, setError] = useState("");
   const [deviceNotice, setDeviceNotice] = useState("");
   const [busy, setBusy] = useState(false);
@@ -158,6 +159,15 @@ export default function VoiceSession({
       ?.querySelector(`[data-call-key="${CSS.escape(key)}"]`)
       ?.remove();
   }
+
+  useEffect(() => {
+    setScreenSupported(
+      Boolean(
+        navigator.mediaDevices &&
+          typeof navigator.mediaDevices.getDisplayMedia === "function",
+      ),
+    );
+  }, []);
 
   useEffect(
     () => () => {
@@ -515,10 +525,23 @@ export default function VoiceSession({
               type="button"
               className={screen ? "call-control active" : "call-control"}
               onClick={() => void toggleScreen()}
-              title={screen ? "Parar compartilhamento" : "Compartilhar tela"}
+              disabled={!screenSupported}
+              title={
+                screenSupported
+                  ? screen
+                    ? "Parar compartilhamento"
+                    : "Compartilhar tela"
+                  : "Compartilhamento de tela indisponível neste Android"
+              }
             >
               <MonitorUp size={20} />
-              <span>{screen ? "Parar tela" : "Compartilhar"}</span>
+              <span>
+                {screen
+                  ? "Parar tela"
+                  : screenSupported
+                    ? "Compartilhar"
+                    : "Tela indisponível"}
+              </span>
             </button>
             <button
               type="button"
