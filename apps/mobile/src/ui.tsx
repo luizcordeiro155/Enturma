@@ -10,74 +10,124 @@ import {
   View,
   type TextInputProps,
 } from "react-native";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ExperiencePreference } from "@enturma/contracts";
 import { api, session } from "./api";
 import { usePathname } from "expo-router";
-import { colors } from "@enturma/design-tokens";
+
+const darkPalette = {
+  background: "#0f1917",
+  surface: "#14211e",
+  elevated: "#182925",
+  text: "#f5f8f6",
+  muted: "#aebdb7",
+  border: "#2c433c",
+  accent: "#d8ef79",
+  accentInk: "#173f36",
+  danger: "#ffb7b7",
+};
+
+const lightPalette = {
+  background: "#f4f7f5",
+  surface: "#ffffff",
+  elevated: "#eef3ef",
+  text: "#183f36",
+  muted: "#6d7f78",
+  border: "#d4ded9",
+  accent: "#183f36",
+  accentInk: "#ffffff",
+  danger: "#b42318",
+};
+
 const createStyles = (
   dark: boolean,
   fontScale: number,
   highContrast: boolean,
 ) => {
-  const palette = dark
-    ? {
-        ...colors,
-        background: "#101819",
-        text: "#f2f6f3",
-        muted: "#b4c5be",
-        border: highContrast ? "#edf7ef" : "#41534c",
-        danger: "#ffb7b7",
-      }
-    : { ...colors, border: highContrast ? "#183f36" : colors.border };
+  const palette = dark ? darkPalette : lightPalette;
+  const border = highContrast ? palette.text : palette.border;
   return StyleSheet.create({
     screen: {
-      padding: 24,
-      paddingBottom: 60,
-      gap: 20,
+      paddingHorizontal: 18,
+      paddingTop: 18,
+      paddingBottom: 72,
+      gap: 16,
       backgroundColor: palette.background,
       flexGrow: 1,
     },
     title: {
-      fontSize: 32,
-      lineHeight: 38,
-      fontWeight: "700",
+      fontSize: 30,
+      lineHeight: 36,
+      fontWeight: "800",
+      letterSpacing: -0.8,
       color: palette.text,
     },
-    text: { fontSize: 16 * fontScale, lineHeight: 24, color: palette.text },
-    muted: { fontSize: 14 * fontScale, color: palette.muted },
+    text: {
+      fontSize: 16 * fontScale,
+      lineHeight: 24,
+      color: palette.text,
+    },
+    muted: {
+      fontSize: 14 * fontScale,
+      lineHeight: 20,
+      color: palette.muted,
+    },
     input: {
+      minHeight: 48,
       borderWidth: 1,
-      borderColor: palette.border,
-      borderRadius: 10,
-      padding: 14,
+      borderColor: border,
+      borderRadius: 12,
+      paddingHorizontal: 14,
+      paddingVertical: 12,
       fontSize: 16 * fontScale,
       color: palette.text,
+      backgroundColor: palette.surface,
     },
     button: {
-      backgroundColor: dark ? "#d8ef79" : "#183f36",
-      padding: 16,
-      borderRadius: 10,
+      minHeight: 48,
+      backgroundColor: palette.accent,
+      paddingHorizontal: 16,
+      paddingVertical: 13,
+      borderRadius: 12,
       alignItems: "center",
+      justifyContent: "center",
     },
     buttonText: {
-      color: dark ? "#183f36" : "#fff",
-      fontWeight: "600",
-      fontSize: 16,
+      color: palette.accentInk,
+      fontWeight: "800",
+      fontSize: 15,
     },
     row: {
-      padding: 18,
+      padding: 16,
       gap: 10,
       borderWidth: 1,
-      borderColor: palette.border,
-      borderRadius: 10,
+      borderColor: border,
+      borderRadius: 14,
+      backgroundColor: palette.surface,
     },
-    error: { color: palette.danger, fontSize: 15 },
-    label: { fontWeight: "600", color: palette.text, marginBottom: 8 },
+    error: { color: palette.danger, fontSize: 14, lineHeight: 20 },
+    label: {
+      fontWeight: "750",
+      color: palette.text,
+      marginBottom: 8,
+      fontSize: 14,
+    },
+    card: {
+      padding: 16,
+      borderWidth: 1,
+      borderColor: border,
+      borderRadius: 14,
+      backgroundColor: palette.surface,
+    },
+    surface: { backgroundColor: palette.surface },
+    elevated: { backgroundColor: palette.elevated },
+    accent: { color: palette.accent },
+    border: { borderColor: border },
   });
 };
+
 const defaults: ExperiencePreference = {
   theme: "SYSTEM",
   fontScale: 1,
@@ -85,10 +135,12 @@ const defaults: ExperiencePreference = {
   reducedMotion: false,
   enhancedFocus: true,
 };
+
 const ThemeContext = createContext({
   preference: defaults,
   save: async (_p: ExperiencePreference) => {},
 });
+
 export function MobileThemeProvider({
   children,
 }: {
@@ -96,6 +148,7 @@ export function MobileThemeProvider({
 }) {
   const [preference, setPreference] = useState(defaults);
   const pathname = usePathname();
+
   useEffect(() => {
     let live = true;
     void session()
@@ -118,6 +171,7 @@ export function MobileThemeProvider({
       live = false;
     };
   }, [pathname]);
+
   useEffect(() => {
     SecureStore.getItemAsync("enturma_experience")
       .then((v) => {
@@ -125,6 +179,7 @@ export function MobileThemeProvider({
       })
       .catch(() => {});
   }, []);
+
   async function save(p: ExperiencePreference) {
     await api("/users/me/experience", {
       method: "PUT",
@@ -133,24 +188,32 @@ export function MobileThemeProvider({
     await SecureStore.setItemAsync("enturma_experience", JSON.stringify(p));
     setPreference(p);
   }
+
   return (
     <ThemeContext.Provider value={{ preference, save }}>
       {children}
     </ThemeContext.Provider>
   );
 }
+
 export function useExperience() {
   return useContext(ThemeContext);
 }
+
 export function useStyles() {
   const { preference: p } = useExperience();
   const native = useColorScheme();
-  return createStyles(
-    p.theme === "DARK" || (p.theme === "SYSTEM" && native === "dark"),
-    p.fontScale,
-    p.highContrast,
+  return useMemo(
+    () =>
+      createStyles(
+        p.theme === "DARK" || (p.theme === "SYSTEM" && native === "dark"),
+        p.fontScale,
+        p.highContrast,
+      ),
+    [p.theme, p.fontScale, p.highContrast, native],
   );
 }
+
 export function Screen({
   title,
   children,
@@ -163,13 +226,13 @@ export function Screen({
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: styles.screen.backgroundColor }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={90}
     >
       <ScrollView
         contentContainerStyle={[
           styles.screen,
-          { paddingBottom: Math.max(70, insets.bottom + 50) },
+          { paddingBottom: Math.max(92, insets.bottom + 74) },
         ]}
         keyboardShouldPersistTaps="handled"
       >
@@ -181,6 +244,7 @@ export function Screen({
     </KeyboardAvoidingView>
   );
 }
+
 export function Button({
   title,
   onPress,
@@ -197,12 +261,17 @@ export function Button({
       accessibilityState={{ disabled }}
       disabled={disabled}
       onPress={onPress}
-      style={[styles.button, disabled ? { opacity: 0.5 } : {}]}
+      style={({ pressed }) => [
+        styles.button,
+        disabled ? { opacity: 0.5 } : {},
+        pressed && !disabled ? { opacity: 0.86, transform: [{ scale: 0.99 }] } : {},
+      ]}
     >
       <Text style={styles.buttonText}>{title}</Text>
     </Pressable>
   );
 }
+
 export function Field({ label, ...props }: TextInputProps & { label: string }) {
   const styles = useStyles();
   return (
@@ -217,11 +286,14 @@ export function Field({ label, ...props }: TextInputProps & { label: string }) {
     </View>
   );
 }
+
 export function ErrorMessage({ message }: { message: string }) {
   const styles = useStyles();
   return message ? (
-    <Text accessibilityRole="alert" style={styles.error}>
-      {message}
-    </Text>
+    <View style={[styles.card, { borderColor: styles.error.color }]}>
+      <Text accessibilityRole="alert" style={styles.error}>
+        {message}
+      </Text>
+    </View>
   ) : null;
 }
