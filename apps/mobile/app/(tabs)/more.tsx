@@ -1,27 +1,39 @@
+import { View } from "react-native";
 import { useRouter } from "expo-router";
-import { Screen, Button } from "../../src/ui";
+import { Ionicons } from "@expo/vector-icons";
+import { Screen, Button, useStyles } from "../../src/ui";
 import { logout } from "../../src/api";
 import { useNativeCall } from "../../src/native-call";
+
 export default function More() {
   const router = useRouter();
   const call = useNativeCall();
+  const styles = useStyles();
+
   return (
-    <Screen title="Seu Enturma">
-      <Button title="Amigos" onPress={() => router.push("/friends")} />
-      <Button title="Caronas" onPress={() => router.push("/rides")} />
-      <Button
-        title="Notificações"
-        onPress={() => router.push("/notifications")}
-      />
-      <Button
-        title="Minhas matérias"
-        onPress={() => router.push("/onboarding")}
-      />
-      <Button
-        title="Minigames acadêmicos"
-        onPress={() => router.push("/challenges")}
-      />
-      <Button title="Configurações" onPress={() => router.push("/settings")} />
+    <Screen title="Mais no Enturma">
+      <View style={[styles.card, { gap: 10 }]}>
+        <Ionicons name="grid-outline" size={28} color={styles.text.color} />
+        <Button title="Amigos" onPress={() => router.push("/friends")} />
+        <Button title="Caronas" onPress={() => router.push("/rides")} />
+        <Button
+          title="Notificações"
+          onPress={() => router.push("/notifications")}
+        />
+        <Button
+          title="Minhas matérias"
+          onPress={() => router.push("/onboarding")}
+        />
+        <Button
+          title="Minigames acadêmicos"
+          onPress={() => router.push("/challenges")}
+        />
+        <Button
+          title="Configurações"
+          onPress={() => router.push("/settings")}
+        />
+      </View>
+
       <Button
         title="Sair da conta"
         onPress={() =>

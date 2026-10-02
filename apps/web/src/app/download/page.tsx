@@ -43,8 +43,8 @@ export default async function DownloadPage() {
   if (ua.includes("EnturmaDesktop/")) redirect("/home");
   const android = /Android/i.test(ua);
   const androidRelease = await currentAndroidRelease();
-  const androidVersion = androidRelease?.version ?? "0.3.1";
-  let androidUrl = androidRelease?.downloadUrl ?? `${androidOrigin}/Enturma-Android.apk`;
+  const androidVersion = androidRelease?.version ?? "mais recente";
+  let androidUrl = androidRelease?.downloadUrl ?? `${androidOrigin}/Enturma-Android.apk?fresh=${Date.now()}`;
   try {
     const candidate = new URL(process.env.ANDROID_DOWNLOAD_URL ?? androidUrl);
     if (

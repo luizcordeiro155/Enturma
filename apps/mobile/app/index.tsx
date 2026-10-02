@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Text } from "react-native";
+import { Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 import { request, type Credentials } from "@enturma/contracts";
 import { base, save } from "../src/api";
 import { Screen, Field, Button, ErrorMessage, useStyles } from "../src/ui";
+
 export default function Login() {
   const styles = useStyles();
   const [register, setRegister] = useState(false);
@@ -14,6 +16,7 @@ export default function Login() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
+
   async function submit() {
     setBusy(true);
     setError("");
@@ -39,44 +42,77 @@ export default function Login() {
       setBusy(false);
     }
   }
+
   return (
-    <Screen title={register ? "Encontre a sua turma." : "Bom te ver de novo."}>
-      <Text style={styles.muted}>Seu espaço para aprender em companhia.</Text>
-      <ErrorMessage message={error} />
-      {register ? (
-        <>
-          <Field label="Nome" value={name} onChangeText={setName} />
-          <Field
-            label="Usuário"
-            value={username}
-            onChangeText={setUsername}
-            autoCapitalize="none"
-          />
-        </>
-      ) : null}
-      <Field
-        label="E-mail"
-        value={email}
-        onChangeText={setEmail}
-        keyboardType="email-address"
-        autoCapitalize="none"
-        autoComplete="email"
-      />
-      <Field
-        label="Senha"
-        value={password}
-        onChangeText={setPassword}
-        secureTextEntry
-        autoCapitalize="none"
-        autoComplete={register ? "new-password" : "current-password"}
-      />
+    <Screen title="">
+      <View style={{ alignItems: "center", paddingTop: 18, gap: 8 }}>
+        <View
+          style={[
+            styles.card,
+            {
+              width: 68,
+              height: 68,
+              borderRadius: 20,
+              alignItems: "center",
+              justifyContent: "center",
+            },
+          ]}
+        >
+          <Ionicons name="book-outline" size={38} color={styles.text.color} />
+        </View>
+        <Text style={styles.title}>
+          enturma<Text style={styles.accent}>.</Text>
+        </Text>
+        <Text style={[styles.muted, { textAlign: "center" }]}>
+          Seu espaço para estudar em companhia, agora com a mesma identidade do
+          Enturma Web e Desktop.
+        </Text>
+      </View>
+
+      <View style={[styles.card, { gap: 14 }]}>
+        <Text style={[styles.title, { fontSize: 24, lineHeight: 30 }]}>
+          {register ? "Crie sua conta" : "Bom te ver de novo"}
+        </Text>
+        <ErrorMessage message={error} />
+
+        {register ? (
+          <>
+            <Field label="Nome" value={name} onChangeText={setName} />
+            <Field
+              label="Usuário"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+            />
+          </>
+        ) : null}
+
+        <Field
+          label="E-mail"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+        />
+        <Field
+          label="Senha"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+          autoComplete={register ? "new-password" : "current-password"}
+        />
+
+        <Button
+          title={busy ? "Aguarde…" : register ? "Criar conta" : "Entrar"}
+          disabled={busy}
+          onPress={submit}
+        />
+      </View>
+
       <Button
-        title={busy ? "Aguarde…" : register ? "Criar conta" : "Entrar"}
-        disabled={busy}
-        onPress={submit}
-      />
-      <Button
-        title={register ? "Já tenho conta" : "Criar minha conta"}
+        title={register ? "Já tenho uma conta" : "Criar minha conta"}
         onPress={() => setRegister((v) => !v)}
       />
     </Screen>
