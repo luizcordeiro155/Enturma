@@ -10,8 +10,13 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@config-plugins/react-native-webrtc": "^14.0.0",
     "@enturma/contracts": "*",
     "@enturma/design-tokens": "*",
+    "@livekit/components-react": "^2.9.24",
+    "@livekit/react-native": "^3.0.0",
+    "@livekit/react-native-expo-plugin": "^1.0.3",
+    "@livekit/react-native-webrtc": "^144.2.0",
     "expo": "55.0.31",
     "expo-constants": "~55.0.17",
     "expo-crypto": "~55.0.19",
@@ -23,6 +28,7 @@
     "expo-secure-store": "~55.0.18",
     "expo-status-bar": "~55.0.6",
     "expo-system-ui": "~55.0.0",
+    "livekit-client": "^2.22.3",
     "react": "19.2.0",
     "react-dom": "^19.2.0",
     "react-native": "^0.83.10",
@@ -30,8 +36,7 @@
     "react-native-reanimated": "^4.2.1",
     "react-native-safe-area-context": "~5.6.2",
     "react-native-screens": "~4.23.0",
-    "react-native-worklets": "^0.7.4",
-    "react-native-webview": "14.0.1"
+    "react-native-worklets": "^0.7.4"
   },
   "devDependencies": {
     "@types/react": "~19.2.10",
