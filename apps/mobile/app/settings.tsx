@@ -11,12 +11,13 @@ import { api } from "../src/api";
 type Preference = { category: string; inApp: boolean; email: boolean; push: boolean };
 const labels: Record<string, string> = {
   ROOM_MESSAGE: "Mensagens de salas",
+  PRIVATE_MESSAGE: "Mensagens privadas",
   MENTION: "Menções a você",
   ROOM_NOTICE: "Avisos de salas",
   FORUM: "Fórum",
   ACHIEVEMENT: "Conquistas",
   RIDE: "Caronas",
-  FRIEND: "Amigos",
+  FRIEND: "Amizades",
 };
 export default function Settings() {
   const styles = useStyles();
