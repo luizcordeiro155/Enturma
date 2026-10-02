@@ -193,7 +193,9 @@ class EnturmaMessagingService : FirebaseMessagingService() {
     }
 
     override fun onMessageReceived(message: RemoteMessage) {
-        if (EnturmaAppState.foreground) return
+        val showInForeground =
+            message.data["showInForeground"].equals("true", ignoreCase = true)
+        if (EnturmaAppState.foreground && !showInForeground) return
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
