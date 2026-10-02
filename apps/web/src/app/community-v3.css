@@ -1247,3 +1247,466 @@
     color: #cf3f4d !important;
   }
 }
+
+
+/* Mobile room responsive recovery v2 */
+@media (max-width: 760px) {
+  /*
+   * A sala mobile funciona como uma tela de app: toolbar no topo,
+   * conteúdo realmente flexível no meio e navegação da turma no rodapé.
+   * Não deixe filhos criarem altura própria além do viewport.
+   */
+  .room-active-shell .study-room-page,
+  .room-active-shell .study-room-shell,
+  .room-active-shell .room-main-panel {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .room-active-shell .study-room-shell {
+    flex: 1 1 auto;
+    height: 0;
+  }
+
+  .room-active-shell .room-main-panel {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
+  /*
+   * CHAT
+   * O grid anterior criava linhas automáticas para aviso, digitando e
+   * compositor, empurrando o campo de mensagem para fora da tela.
+   */
+  .room-active-shell .persistent-chat,
+  .room-active-shell .call-chat-pane {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden;
+  }
+
+  .room-active-shell .persistent-heading,
+  .room-active-shell .conversation-notice,
+  .room-active-shell .chat-unread,
+  .room-active-shell .typing-status,
+  .room-active-shell .persistent-composer,
+  .room-active-shell .ended-chat-note {
+    flex: 0 0 auto;
+  }
+
+  .room-active-shell .persistent-heading {
+    min-height: 46px;
+    padding: 9px 12px;
+  }
+
+  .room-active-shell .persistent-heading > div {
+    min-width: 0;
+  }
+
+  .room-active-shell .persistent-heading h2 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .room-active-shell .conversation-notice {
+    width: calc(100% - 16px);
+    min-height: 38px;
+    margin: 6px 8px 0;
+    padding: 8px 10px;
+  }
+
+  .room-active-shell .persistent-messages {
+    flex: 1 1 0;
+    width: 100%;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 8px 7px 12px;
+  }
+
+  .room-active-shell .persistent-message {
+    width: 100%;
+    grid-template-columns: 34px minmax(0, 1fr);
+    gap: 8px;
+    padding: 6px 5px !important;
+  }
+
+  .room-active-shell .message-content,
+  .room-active-shell .message-content > * {
+    min-width: 0;
+  }
+
+  .room-active-shell .message-content header {
+    flex-wrap: wrap;
+    row-gap: 1px;
+  }
+
+  .room-active-shell .message-content p,
+  .room-active-shell .rich-message {
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .room-active-shell .monitor-card {
+    width: 100%;
+    max-width: none;
+    gap: 9px;
+    margin: 7px 0;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  .room-active-shell .monitor-card > svg {
+    width: 18px;
+    height: 18px;
+    flex: none;
+  }
+
+  .room-active-shell .monitor-card strong {
+    font-size: 0.9rem;
+  }
+
+  .room-active-shell .monitor-card p {
+    margin: 4px 0;
+    font-size: 0.82rem;
+    line-height: 1.38;
+  }
+
+  .room-active-shell .typing-status {
+    min-height: 18px;
+    padding: 1px 10px 2px;
+    line-height: 1.2;
+  }
+
+  .room-active-shell .persistent-composer {
+    width: 100%;
+    margin: 0;
+    padding: 7px 8px 8px;
+    box-sizing: border-box;
+  }
+
+  .room-active-shell .persistent-composer textarea {
+    width: 100%;
+    min-height: 44px;
+    max-height: 92px;
+    padding: 10px 12px;
+    border-radius: 16px;
+    line-height: 1.35;
+  }
+
+  .room-active-shell .persistent-composer .composer-tools {
+    grid-template-columns: minmax(0, 1fr) auto !important;
+    align-items: stretch;
+    gap: 7px;
+    margin-top: 6px;
+  }
+
+  .room-active-shell .persistent-composer .image-picker,
+  .room-active-shell .persistent-composer .composer-tools > button {
+    min-height: 38px;
+    margin: 0;
+  }
+
+  .room-active-shell .persistent-composer .composer-tools > button {
+    min-width: 78px;
+  }
+
+  .room-active-shell .attachment-preview {
+    max-height: 88px;
+    overflow: hidden;
+  }
+
+  /*
+   * CHAMADA
+   * No celular o chat já possui aba própria e a sessão de voz permanece no
+   * provider. A aba Chamada usa toda a área disponível para voz/vídeo/tela.
+   */
+  .room-active-shell .call-chat-layout {
+    display: block !important;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    background: #111719;
+  }
+
+  .room-active-shell .call-stage {
+    width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+    max-height: none;
+    padding: 7px;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .room-active-shell .call-chat-layout > .call-chat-pane {
+    display: none !important;
+  }
+
+  .room-active-shell .call-stage .room-tools,
+  .room-active-shell .call-stage .room-channel-content {
+    width: 100%;
+    height: auto !important;
+    min-height: 0;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 0;
+    overflow: visible !important;
+  }
+
+  .room-active-shell .call-stage .room-tool-card {
+    gap: 10px;
+  }
+
+  .room-active-shell
+    .call-stage
+    .room-tool-card
+    > div:first-child:not(.call-panel) {
+    padding: 8px 8px 10px;
+  }
+
+  .room-active-shell
+    .call-stage
+    .room-tool-card
+    > div:first-child:not(.call-panel)
+    h2 {
+    margin: 2px 0 4px;
+    font-size: 1.35rem;
+  }
+
+  .room-active-shell
+    .call-stage
+    .room-tool-card
+    > div:first-child:not(.call-panel)
+    .muted {
+    font-size: 0.88rem;
+    line-height: 1.4;
+  }
+
+  .room-active-shell .discord-call {
+    width: 100%;
+    min-height: 0 !important;
+    height: auto;
+    grid-template-rows: auto auto minmax(180px, auto) auto auto auto;
+  }
+
+  .room-active-shell .call-entry {
+    margin: 0;
+    padding: 14px;
+  }
+
+  .room-active-shell .call-video-grid {
+    grid-template-columns: 1fr;
+    grid-auto-rows: auto;
+  }
+
+  .room-active-shell .call-media-tile {
+    min-height: 180px;
+  }
+
+  .room-active-shell .call-media-tile.screen-share {
+    min-height: 220px !important;
+    max-height: 52dvh !important;
+  }
+
+  .room-active-shell .call-members {
+    grid-template-columns: 1fr;
+    max-height: none;
+  }
+
+  .room-active-shell .discord-controls,
+  .room-active-shell .call-controls {
+    position: sticky;
+    bottom: 0;
+    z-index: 8;
+    background: #111719;
+  }
+
+  /*
+   * MATERIAIS + ENTURMA AI
+   * Remova larguras e margens de desktop e deixe somente o conteúdo interno
+   * rolar. Assim todos os formulários continuam acima da navegação fixa.
+   */
+  .room-active-shell .room-main-panel > .room-tools,
+  .room-active-shell .room-channel-content {
+    width: 100%;
+    height: 100% !important;
+    max-width: none !important;
+    max-height: none !important;
+    min-height: 0;
+    margin: 0 !important;
+    padding: 9px !important;
+    box-sizing: border-box;
+    overflow-y: auto !important;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .room-active-shell .room-tools form {
+    width: 100%;
+    max-width: none;
+  }
+
+  .room-active-shell .room-tool-card {
+    width: 100%;
+    min-width: 0;
+    padding: 14px;
+    gap: 13px;
+    box-sizing: border-box;
+    border-radius: 16px;
+  }
+
+  .room-active-shell .room-tool-card h2 {
+    margin-block: 3px 6px;
+    font-size: clamp(1.35rem, 7vw, 1.75rem);
+    line-height: 1.05;
+  }
+
+  .room-active-shell .room-tool-card .muted {
+    font-size: 0.9rem;
+    line-height: 1.48;
+  }
+
+  .room-active-shell .ai-channel-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: start;
+  }
+
+  .room-active-shell .ai-channel-heading > div {
+    min-width: 0;
+  }
+
+  .room-active-shell .ai-channel-heading > svg {
+    width: 23px;
+    height: 23px;
+  }
+
+  .room-active-shell .ai-channel-heading .button {
+    width: 100%;
+    min-height: 44px;
+    margin: 7px 0 8px;
+    padding: 9px 11px;
+    white-space: normal;
+    text-align: center;
+  }
+
+  .room-active-shell .ai-quick-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .room-active-shell .ai-quick-actions > button {
+    width: 100%;
+    min-width: 0;
+    min-height: 46px;
+    padding: 9px 10px;
+    white-space: normal;
+    line-height: 1.25;
+  }
+
+  .room-active-shell .ai-quick-actions > button:first-child {
+    grid-column: 1 / -1;
+  }
+
+  .room-active-shell .ai-channel form {
+    display: grid;
+    gap: 11px;
+  }
+
+  .room-active-shell .ai-channel form label {
+    min-width: 0;
+  }
+
+  .room-active-shell .ai-channel select,
+  .room-active-shell .ai-channel textarea,
+  .room-active-shell .room-tools input[type="file"] {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+  }
+
+  .room-active-shell .ai-channel textarea {
+    min-height: 110px;
+    resize: vertical;
+  }
+
+  .room-active-shell .ai-answer {
+    width: 100%;
+    min-width: 0;
+    padding: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .room-active-shell .room-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 0;
+  }
+
+  .room-active-shell .room-row > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .room-active-shell .room-row > span small {
+    display: block;
+    margin-top: 3px;
+  }
+
+  .room-active-shell .room-row > button {
+    min-width: 78px;
+    padding: 9px 11px;
+  }
+
+  .room-active-shell .session-artifacts,
+  .room-active-shell .artifact-row {
+    min-width: 0;
+  }
+
+  .room-active-shell .artifact-row span {
+    min-width: 0;
+  }
+
+  .room-active-shell .artifact-row strong,
+  .room-active-shell .artifact-row small {
+    overflow-wrap: anywhere;
+  }
+
+  /*
+   * Telas muito estreitas: ações deixam de disputar largura.
+   */
+  @media (max-width: 390px) {
+    .room-active-shell .ai-quick-actions {
+      grid-template-columns: 1fr;
+    }
+
+    .room-active-shell .ai-quick-actions > button:first-child {
+      grid-column: auto;
+    }
+
+    .room-active-shell .room-row {
+      grid-template-columns: 1fr;
+    }
+
+    .room-active-shell .room-row > button {
+      width: 100%;
+    }
+  }
+}
