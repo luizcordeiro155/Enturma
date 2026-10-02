@@ -12,6 +12,12 @@ A página Web `/download` oferece o executável, não o ZIP. Dentro do Desktop, 
 
 ## Atualização integrada
 
+### Compilação Linux do instalador
+
+Na Railway, `build-windows.cjs` usa o `UninstallerReader` do próprio electron-builder 26.15.3 para extrair e validar o desinstalador PE/NSIS, como no caminho de compilação macOS da ferramenta. O kernel do builder não executa o bootstrap de 32 bits via Wine. O adaptador aceita somente o bootstrap esperado, rejeita outras operações e mantém o script NSIS padrão e suas verificações. Antes de atualizar electron-builder, revisar essa integração interna; uma versão diferente falha explicitamente. O build Windows local convencional continua disponível.
+
+O serviço Railway precisa da GitHub App autorizada no repositório para redeploy automático por push; configurar apenas `source.branch=main` não instala essa autorização. Enquanto essa integração estiver ausente, publicar explicitamente o SHA aprovado no serviço existente.
+
 O main publica checking, available, downloading (progress), ready, installing e error por uma bridge restrita. O React mostra o progresso, permite adiar e solicita o reinício; uma chamada ativa recebe aviso antes da instalação. O renderer não recebe acesso a arquivos ou comandos. Acessibilidade e reduced motion continuam ativos.
 
 Downloads exigem HTTPS na origem permitida, tamanho limitado e SHA-256. O ZIP é validado novamente antes de extrair; entradas fora do diretório, expansões excessivas e pontos de reanálise são recusados. O instalador usa backup/rollback e preserva arquivos alheios ao pacote. Logs ficam em userData/updates. PowerShell é iniciado por caminho absoluto e Start-Process oculto; não se usa DETACHED_PROCESS, que no teste Windows encerrava o PowerShell 5.1 sem executar o arquivo.
