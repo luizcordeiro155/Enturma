@@ -298,7 +298,7 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
                     val uri = runCatching { Uri.parse(downloadUrl) }.getOrNull() ?: return@Thread
                     val origin = Uri.parse(ANDROID_UPDATE_ORIGIN)
                     if (
-                        !version.matches(Regex("^\\d+\\.\\d+\\.\\d+$")) ||
+                        !version.matches(Regex("^[0-9]+[.][0-9]+[.][0-9]+$")) ||
                         !isNewerVersion(version, BuildConfig.VERSION_NAME) ||
                         uri.scheme != "https" ||
                         !uri.host.equals(origin.host, ignoreCase = true) ||
