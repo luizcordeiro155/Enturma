@@ -109,7 +109,7 @@ const createStyles = (
     },
     error: { color: palette.danger, fontSize: 14, lineHeight: 20 },
     label: {
-      fontWeight: "750",
+      fontWeight: "700",
       color: palette.text,
       marginBottom: 8,
       fontSize: 14,
