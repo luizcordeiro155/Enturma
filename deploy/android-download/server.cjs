@@ -41,7 +41,7 @@ function send(req, res, file) {
     "Content-Type": "application/vnd.android.package-archive",
     "Content-Length": stat.size,
     "Content-Disposition": `attachment; filename="${file}"`,
-    "Cache-Control": "public,max-age=3600",
+    "Cache-Control": "public, max-age=31536000, immutable",
     "X-Content-Type-Options": "nosniff",
   });
   if (req.method === "HEAD") res.end();
@@ -87,19 +87,30 @@ const server = http.createServer((req, res) => {
         file: apk,
         size: stat.size,
         sha256: checksum(apk),
-        downloadUrl: `${base}/Enturma-Android.apk`,
+        downloadUrl: `${base}/${encodeURIComponent(apk)}`,
         publishedAt: stat.mtime.toISOString(),
       }));
       return;
     }
 
+    if (pathname === "/" || pathname === "/download" || pathname === "/Enturma-Android.apk") {
+      if (!apk) {
+        res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+        res.end("APK não disponível.");
+        return;
+      }
+      res.writeHead(302, {
+        Location: `/${encodeURIComponent(apk)}`,
+        "Cache-Control": "no-store, max-age=0",
+        Pragma: "no-cache",
+        Expires: "0",
+      });
+      res.end();
+      return;
+    }
+
     const requested = decodeURIComponent(pathname.slice(1));
-    const chosen =
-      ["/", "/download", "/Enturma-Android.apk"].includes(pathname)
-        ? apk
-        : files().includes(requested)
-          ? requested
-          : null;
+    const chosen = files().includes(requested) ? requested : null;
 
     if (!chosen) {
       res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
