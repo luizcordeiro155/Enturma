@@ -2670,3 +2670,5 @@
     max-height: var(--room-visual-viewport-height, 100dvh) !important;
   }
 }
+
+/* redeploy: keyboard viewport recovery v6 */
