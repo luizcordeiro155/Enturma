@@ -12,7 +12,7 @@ import {
   VideoOff,
   Headphones,
 } from "lucide-react";
-import { LiveIdentity } from "./user-identity";
+import { LiveMemberIdentityCard } from "./user-identity";
 import { post } from "@/lib/api";
 import { Feedback } from "./feedback";
 type CallMember = {
@@ -469,20 +469,19 @@ export default function VoiceSession({
                 }
                 key={member.identity}
               >
-                <LiveIdentity id={member.identity} name={member.name} />
-                <div className="call-member-info">
-                  <strong>
-                    {member.name}
-                    {member.local ? " (você)" : ""}
-                  </strong>
-                  <small>
-                    {member.screen
+                <LiveMemberIdentityCard
+                  id={member.identity}
+                  name={member.name}
+                  subtitle={
+                    member.screen
                       ? "Compartilhando tela"
                       : member.speaking
                         ? "Falando agora"
-                        : "Na chamada"}
-                  </small>
-                </div>
+                        : member.local
+                          ? "Você"
+                          : "Na chamada"
+                  }
+                />
                 <div className="call-member-icons">
                   {member.microphone ? <Mic size={16} /> : <MicOff size={16} />}
                   {member.camera ? <Video size={16} /> : <VideoOff size={16} />}
