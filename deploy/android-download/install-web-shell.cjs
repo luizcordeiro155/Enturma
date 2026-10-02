@@ -246,6 +246,14 @@ class MainActivity : Activity() {
               root.style.setProperty("--native-safe-right", "\${safeRightCssPx}px");
               root.style.setProperty("--native-safe-bottom", "\${safeBottomCssPx}px");
               root.style.setProperty("--native-safe-left", "\${safeLeftCssPx}px");
+
+              var topbar = document.querySelector(".topbar");
+              if (topbar) {
+                var mobile = window.matchMedia("(max-width: 760px)").matches;
+                var baseHeight = mobile ? 58 : 68;
+                topbar.style.paddingTop = (10 + \${safeTopCssPx}) + "px";
+                topbar.style.minHeight = (baseHeight + \${safeTopCssPx}) + "px";
+              }
             })();
         """.trimIndent()
 
