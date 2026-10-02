@@ -87,3 +87,17 @@ FIREBASE_ANDROID_SENDER_ID=...
 ```
 
 A API precisa de `FCM_SERVICE_ACCOUNT_BASE64`, contendo em Base64 o JSON da service account autorizada a enviar mensagens pelo Firebase Cloud Messaging HTTP v1. A chave privada fica apenas na API e nunca é incluída no APK.
+
+
+## Atualizador 0.3.13
+
+- Remove o modal automático de atualização no Android.
+- A disponibilidade de nova versão fica indicada somente em **Configurações**.
+- Tocar no ícone de atualização em Configurações inicia o download sem bloquear a navegação.
+- Durante o download, o usuário pode continuar usando o Enturma normalmente.
+- O indicador interno permanece enquanto a versão instalada continuar desatualizada e desaparece somente após instalar a nova versão.
+- O Android usa apenas a notificação de download em andamento; não cria aviso separado de "nova versão disponível".
+- Ao concluir o download, o Enturma tenta abrir o instalador automaticamente.
+- Além do broadcast `DOWNLOAD_COMPLETE`, o app monitora o `DownloadManager` enquanto está aberto para detectar conclusão mesmo quando o broadcast falhar.
+- Se o app estiver em segundo plano e o Android impedir a abertura automática, a mesma identificação de atualização é usada para oferecer a ação **Instalar**, sem empilhar notificações duplicadas.
+- Uma trava por `downloadId` impede abrir o instalador duas vezes quando receiver e monitor local detectarem a conclusão simultaneamente.
