@@ -146,6 +146,7 @@ public class PushNotificationService {
     data.put("href", safeHref(event.href()));
     data.put("kind", event.kind() == null ? "SYSTEM" : event.kind());
     data.put("category", event.category() == null ? "ROOM_NOTICE" : event.category());
+    data.put("showInForeground", Boolean.toString(!preferences.enabled(event.user(), event.category(), false)));
     if (event.target() != null) data.put("notificationId", event.target().toString());
 
     Map<String, Object> message = new HashMap<>();
