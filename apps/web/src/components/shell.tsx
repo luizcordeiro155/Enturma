@@ -18,7 +18,11 @@ import {
   Download,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
-import { isInstalledApp } from "./desktop-updates";
+import {
+  isInstalledApp,
+  isMobileApp,
+  useAppUpdateState,
+} from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
@@ -35,6 +39,10 @@ const links = [
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
+  const updateState = useAppUpdateState();
+  const updatePending =
+    isMobileApp() &&
+    ["available", "downloading", "ready"].includes(updateState?.status ?? "");
   const [installedApp, setInstalledApp] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setInstalledApp(isInstalledApp()), 0);
@@ -149,10 +157,18 @@ export function Shell({ children }: { children: React.ReactNode }) {
               <Link
                 key={href}
                 href={href}
+                className={
+                  updatePending && href === "/settings"
+                    ? "app-update-pending-link"
+                    : undefined
+                }
                 aria-current={path === href ? "page" : undefined}
               >
                 <Icon size={21} />
                 {label}
+                {updatePending && href === "/settings" ? (
+                  <span className="app-update-badge">Atualização</span>
+                ) : null}
               </Link>
             ))}
         </nav>
