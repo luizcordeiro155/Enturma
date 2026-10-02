@@ -95,8 +95,9 @@ public class PushNotificationService {
     String title = title(event.kind(), actorName);
     for (var row :
         db.list(
-            "SELECT id,token FROM notification_push_device"
-                + " WHERE user_id=? AND platform='ANDROID' AND enabled",
+            "SELECT d.id,d.token FROM notification_push_device d"
+                + " JOIN app_user u ON u.id=d.user_id AND u.status='ACTIVE'"
+                + " WHERE d.user_id=? AND d.platform='ANDROID' AND d.enabled",
             event.user())) {
       UUID device = (UUID) row.get("id");
       String token = (String) row.get("token");
@@ -106,7 +107,7 @@ public class PushNotificationService {
           db.jdbc.update(
               "UPDATE notification_push_device SET enabled=false,updated_at=now() WHERE id=?",
               device);
-        } else {
+        } else if (result == Delivery.OK) {
           db.jdbc.update(
               "UPDATE notification_push_device SET last_seen_at=now() WHERE id=?",
               device);
