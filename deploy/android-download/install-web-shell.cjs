@@ -1451,6 +1451,47 @@ if (!manifest.includes("EnturmaMessagingService")) {
 }
 fs.writeFileSync(manifestTarget, manifest, "utf8");
 
+const firebaseConfigured = Boolean(
+  firebaseProjectId && firebaseAppId && firebaseApiKey && firebaseSenderId,
+);
+
+if (firebaseConfigured) {
+  const googleServices = {
+    project_info: {
+      project_number: firebaseSenderId,
+      project_id: firebaseProjectId,
+    },
+    client: [
+      {
+        client_info: {
+          mobilesdk_app_id: firebaseAppId,
+          android_client_info: {
+            package_name: "br.com.enturma.app",
+          },
+        },
+        api_key: [{ current_key: firebaseApiKey }],
+      },
+    ],
+    configuration_version: "1",
+  };
+  fs.writeFileSync(
+    path.join(mobile, "android", "app", "google-services.json"),
+    JSON.stringify(googleServices, null, 2),
+    "utf8",
+  );
+
+  const rootGradleTarget = path.join(mobile, "android", "build.gradle");
+  let rootGradle = fs.readFileSync(rootGradleTarget, "utf8");
+  if (!rootGradle.includes("com.google.gms:google-services")) {
+    rootGradle = rootGradle.replace(
+      /dependencies\s*\{/,
+      `dependencies {
+        classpath("com.google.gms:google-services:4.5.0")`,
+    );
+  }
+  fs.writeFileSync(rootGradleTarget, rootGradle, "utf8");
+}
+
 const appGradleTarget = path.join(mobile, "android", "app", "build.gradle");
 let appGradle = fs.readFileSync(appGradleTarget, "utf8");
 if (!appGradle.includes("com.google.firebase:firebase-messaging")) {
@@ -1460,6 +1501,10 @@ if (!appGradle.includes("com.google.firebase:firebase-messaging")) {
     implementation platform("com.google.firebase:firebase-bom:34.19.0")
     implementation "com.google.firebase:firebase-messaging"`,
   );
+}
+if (firebaseConfigured && !appGradle.includes("com.google.gms.google-services")) {
+  appGradle =
+    'apply plugin: "com.google.gms.google-services"\n' + appGradle;
 }
 fs.writeFileSync(appGradleTarget, appGradle, "utf8");
 console.log(`Enturma Android Web shell instalado em ${target}`);
