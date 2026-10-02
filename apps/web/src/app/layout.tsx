@@ -15,6 +15,10 @@ import { Motion } from "@/components/motion";
 export const metadata: Metadata = {
   title: "Enturma — estude em companhia",
   description: "Encontre sua matéria, entre em uma turma e aprenda junto.",
+  applicationName: "Enturma",
+  other: {
+    "application-version": "0.2.0",
+  },
 };
 export default function Layout({
   children,
