@@ -1504,8 +1504,10 @@ if (!appGradle.includes("com.google.firebase:firebase-messaging")) {
   );
 }
 if (firebaseConfigured && !appGradle.includes("com.google.gms.google-services")) {
-  appGradle =
-    'apply plugin: "com.google.gms.google-services"\n' + appGradle;
+  appGradle = appGradle.replace(
+    'apply plugin: "com.android.application"',
+    'apply plugin: "com.android.application"\napply plugin: "com.google.gms.google-services"',
+  );
 }
 fs.writeFileSync(appGradleTarget, appGradle, "utf8");
 console.log(`Enturma Android Web shell instalado em ${target}`);
