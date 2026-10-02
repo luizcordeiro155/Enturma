@@ -1,9 +1,13 @@
-FROM node:22-bookworm AS build
+# Wine 11 WoW64 runs the 32-bit NSIS bootstrap on 64-bit-only build kernels.
+# Pin the official Electron builder image to keep native Git builds reproducible.
+FROM electronuserland/builder:22-wine@sha256:b226b27b1a7e95ad25eb3d6414ea90c56c04eb6d8329967f4d721dce50b989ff AS build
+
+ENV WINEARCH=wow64
 
 WORKDIR /project
 COPY . .
 
-RUN dpkg --add-architecture i386 && apt-get update && apt-get install -y --no-install-recommends wine wine32 wine64 && rm -rf /var/lib/apt/lists/*
+RUN wine --version && wine cmd /c echo Enturma-Windows-builder-ready
 RUN npm ci
 RUN npm run dist:desktop:win
 
