@@ -48,6 +48,7 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
+import android.widget.FrameLayout
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
@@ -71,6 +72,13 @@ private const val ANDROID_UPDATE_ORIGIN =
 private const val UPDATE_CHANNEL_ID = "enturma_app_updates"
 private const val UPDATE_NOTIFICATION_ID = 4801
 private const val UPDATE_ALARM_REQUEST = 4802
+private const val UPDATE_ACTION_INSTALL = "br.com.enturma.app.action.INSTALL_UPDATE"
+private const val UPDATE_EXTRA_URL = "downloadUrl"
+private const val UPDATE_PREFS = "enturma_update_state"
+private const val PREF_NOTIFIED_VERSION = "notified_version"
+private const val PREF_DOWNLOAD_ID = "download_id"
+private const val PREF_DOWNLOAD_URL = "download_url"
+private const val PREF_DOWNLOAD_BASE_VERSION = "download_base_version"
 
 private fun isNewerVersion(remote: String, current: String): Boolean {
     val a = remote.split(".").map { it.toIntOrNull() ?: 0 }
@@ -141,6 +149,12 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
                     !isNewerVersion(remote, BuildConfig.VERSION_NAME)
                 ) return@Thread
 
+                val prefs =
+                    context.getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+                if (prefs.getString(PREF_NOTIFIED_VERSION, null) == remote) {
+                    return@Thread
+                }
+
                 if (
                     Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
                     context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
@@ -163,13 +177,16 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
                 }
 
                 val open = Intent(context, MainActivity::class.java).apply {
-                    action = Intent.ACTION_VIEW
-                    data = Uri.parse("enturma:///settings?update=1")
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    action = UPDATE_ACTION_INSTALL
+                    putExtra(UPDATE_EXTRA_URL, downloadUrl)
+                    flags =
+                        Intent.FLAG_ACTIVITY_NEW_TASK or
+                            Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                            Intent.FLAG_ACTIVITY_SINGLE_TOP
                 }
                 val pending = PendingIntent.getActivity(
                     context,
-                    remote.hashCode(),
+                    UPDATE_NOTIFICATION_ID,
                     open,
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
                 )
@@ -181,13 +198,16 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
                 val notification = builder
                     .setSmallIcon(android.R.drawable.stat_sys_download_done)
                     .setContentTitle("Nova atualização do Enturma")
-                    .setContentText("Versão \${remote} disponível. Toque para atualizar.")
+                    .setContentText("Versão \${remote} disponível. Toque para baixar e instalar.")
                     .setContentIntent(pending)
                     .setAutoCancel(true)
                     .setOnlyAlertOnce(true)
                     .build()
 
                 manager.notify(UPDATE_NOTIFICATION_ID, notification)
+                prefs.edit()
+                    .putString(PREF_NOTIFIED_VERSION, remote)
+                    .apply()
             } catch (_: Exception) {
                 // A próxima verificação tenta novamente.
             } finally {
@@ -206,6 +226,7 @@ class MainActivity : Activity() {
         private const val APP_VERSION = "${version}"
     }
 
+    private lateinit var rootLayout: FrameLayout
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private var pendingPermissionRequest: PermissionRequest? = null
@@ -223,7 +244,9 @@ class MainActivity : Activity() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action != DownloadManager.ACTION_DOWNLOAD_COMPLETE) return
             val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
-            if (id <= 0 || id != updateDownloadId) return
+            val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+            val expectedId = prefs.getLong(PREF_DOWNLOAD_ID, -1L)
+            if (id <= 0 || id != expectedId) return
 
             val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
             val uri = manager.getUriForDownloadedFile(id)
@@ -236,21 +259,9 @@ class MainActivity : Activity() {
                 return
             }
 
-            runCatching {
-                startActivity(
-                    Intent(Intent.ACTION_VIEW).apply {
-                        setDataAndType(uri, "application/vnd.android.package-archive")
-                        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                    },
-                )
-            }.onFailure {
-                Toast.makeText(
-                    this@MainActivity,
-                    "Abra o download concluído para instalar a atualização.",
-                    Toast.LENGTH_LONG,
-                ).show()
-            }
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                .cancel(UPDATE_NOTIFICATION_ID)
+            openDownloadedInstaller(uri)
         }
     }
 
@@ -280,15 +291,26 @@ class MainActivity : Activity() {
 
         CookieManager.getInstance().setAcceptCookie(true)
 
+        rootLayout = FrameLayout(this)
         webView = WebView(this)
         webView.setBackgroundColor(Color.parseColor("#0f1917"))
-        setContentView(webView)
+        rootLayout.addView(
+            webView,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
+        )
+        setContentView(rootLayout)
 
         applySystemBarTheme(false)
         webView.addJavascriptInterface(EnturmaNativeBridge(), "EnturmaNative")
         registerUpdateDownloadReceiver()
         EnturmaUpdateScheduler.schedule(this)
-        EnturmaUpdateScheduler.checkNow(this)
+        val updateIntentHandled = handleUpdateIntent(intent)
+        if (!updateIntentHandled) {
+            EnturmaUpdateScheduler.checkNow(this)
+        }
 
         if (
             Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
@@ -301,7 +323,7 @@ class MainActivity : Activity() {
             )
         }
 
-        ViewCompat.setOnApplyWindowInsetsListener(webView) { _, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(rootLayout) { _, insets ->
             val safeInsets = insets.getInsets(
                 WindowInsetsCompat.Type.statusBars() or
                     WindowInsetsCompat.Type.navigationBars() or
@@ -314,13 +336,19 @@ class MainActivity : Activity() {
             safeBottomCssPx = (safeInsets.bottom / density).toInt()
             safeLeftCssPx = (safeInsets.left / density).toInt()
             keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            keyboardBottomCssPx =
-                if (keyboardVisible) (imeInsets.bottom / density).toInt().coerceAtLeast(0)
-                else 0
+
+            val params = webView.layoutParams as FrameLayout.LayoutParams
+            val targetBottomMargin = if (keyboardVisible) imeInsets.bottom else 0
+            if (params.bottomMargin != targetBottomMargin) {
+                params.bottomMargin = targetBottomMargin
+                webView.layoutParams = params
+            }
+
+            keyboardBottomCssPx = 0
             syncSafeAreaCss()
             insets
         }
-        ViewCompat.requestApplyInsets(webView)
+        ViewCompat.requestApplyInsets(rootLayout)
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
         webView.settings.apply {
@@ -473,8 +501,16 @@ class MainActivity : Activity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
+        if (handleUpdateIntent(intent)) return
         val route = routeFromIntent(intent) ?: return
         if (::webView.isInitialized) webView.loadUrl("\${WEB_ORIGIN}\${route}")
+    }
+
+    private fun handleUpdateIntent(intent: Intent?): Boolean {
+        if (intent?.action != UPDATE_ACTION_INSTALL) return false
+        val downloadUrl = intent.getStringExtra(UPDATE_EXTRA_URL) ?: return false
+        startUpdateInstall(downloadUrl)
+        return true
     }
 
     private fun routeFromIntent(intent: Intent?): String? {
@@ -495,6 +531,24 @@ class MainActivity : Activity() {
             registerReceiver(updateDownloadReceiver, filter)
         }
         updateReceiverRegistered = true
+    }
+
+    private fun openDownloadedInstaller(uri: Uri) {
+        runCatching {
+            startActivity(
+                Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/vnd.android.package-archive")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                },
+            )
+        }.onFailure {
+            Toast.makeText(
+                this,
+                "Não foi possível abrir o instalador automaticamente.",
+                Toast.LENGTH_LONG,
+            ).show()
+        }
     }
 
     private fun startUpdateInstall(downloadUrl: String) {
@@ -529,18 +583,55 @@ class MainActivity : Activity() {
         }
 
         val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+        val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+        val previousId = prefs.getLong(PREF_DOWNLOAD_ID, -1L)
+        val previousUrl = prefs.getString(PREF_DOWNLOAD_URL, null)
+        val previousBaseVersion = prefs.getString(PREF_DOWNLOAD_BASE_VERSION, null)
+
+        if (
+            previousId > 0 &&
+            previousUrl == downloadUrl &&
+            previousBaseVersion == APP_VERSION
+        ) {
+            val cursor = manager.query(DownloadManager.Query().setFilterById(previousId))
+            cursor.use {
+                if (it.moveToFirst()) {
+                    when (it.getInt(it.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS))) {
+                        DownloadManager.STATUS_PENDING,
+                        DownloadManager.STATUS_RUNNING,
+                        DownloadManager.STATUS_PAUSED -> {
+                            Toast.makeText(this, "A atualização já está sendo baixada.", Toast.LENGTH_SHORT).show()
+                            return
+                        }
+                        DownloadManager.STATUS_SUCCESSFUL -> {
+                            val downloaded = manager.getUriForDownloadedFile(previousId)
+                            if (downloaded != null) {
+                                openDownloadedInstaller(downloaded)
+                                return
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         updateDownloadId = manager.enqueue(
             DownloadManager.Request(uri)
                 .setTitle("Atualização do Enturma")
                 .setDescription("Baixando a nova versão do aplicativo")
                 .setMimeType("application/vnd.android.package-archive")
-                .setNotificationVisibility(
-                    DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED,
-                ),
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED),
         )
+        prefs.edit()
+            .putLong(PREF_DOWNLOAD_ID, updateDownloadId ?: -1L)
+            .putString(PREF_DOWNLOAD_URL, downloadUrl)
+            .putString(PREF_DOWNLOAD_BASE_VERSION, APP_VERSION)
+            .apply()
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .cancel(UPDATE_NOTIFICATION_ID)
         Toast.makeText(
             this,
-            "Atualização iniciada. O Android abrirá a instalação quando terminar.",
+            "Atualização iniciada. O instalador abrirá quando o download terminar.",
             Toast.LENGTH_LONG,
         ).show()
     }

@@ -43,3 +43,13 @@ O servidor de downloads publica um APK versionado e o `latest-android.json` apon
 ## Segurança
 
 O WebView aceita navegação interna somente na origem HTTPS oficial. Links externos não são renderizados dentro do contexto autenticado do Enturma. Nenhuma credencial backend é incluída no APK.
+
+
+## Atualizador 0.3.10
+
+- O toque na notificação inicia o download diretamente.
+- Uma mesma versão gera apenas um aviso nativo.
+- Toques repetidos não criam downloads duplicados.
+- O instalador do Android abre automaticamente ao concluir o download quando permitido.
+- O WebView é fisicamente redimensionado acima do teclado para manter o texto do chat visível.
+- O editor de perfil ocupa a tela inteira no mobile e não deixa os botões finais atrás da navegação.

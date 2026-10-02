@@ -2742,3 +2742,20 @@
   html[data-enturma-ime="true"] .room-active-shell .room-main-panel>.room-tools>.room-tool-card{padding-bottom:calc(var(--native-keyboard-bottom,0px) + 32px)!important}
   html[data-enturma-ime="true"] .room-active-shell :is(.ai-channel textarea,.ai-channel select,.room-tools input,.room-tools textarea){scroll-margin-bottom:calc(var(--native-keyboard-bottom,0px) + 24px)!important}
 }
+
+
+/* Profile mobile v5: editor owns the full viewport */
+@media(max-width:760px){
+  body:has(.profile-discord-editor) .mobile-bottom-nav{display:none!important}
+  body:has(.profile-discord-editor) .workspace{padding-bottom:0!important}
+  .profile-discord-editor .profile-editor-scroll{
+    padding-bottom:calc(52px + max(env(safe-area-inset-bottom,0px),var(--native-safe-bottom,0px)))!important;
+    scroll-padding-bottom:calc(52px + max(env(safe-area-inset-bottom,0px),var(--native-safe-bottom,0px)));
+  }
+  .profile-discord-editor .profile-editor-bottom-space{
+    height:calc(42px + max(env(safe-area-inset-bottom,0px),var(--native-safe-bottom,0px)))!important;
+  }
+  .profile-discord-editor .showcase-fields,
+  .profile-discord-editor .profile-showcase-preview,
+  .profile-discord-editor .profile-editor-section{scroll-margin-bottom:72px}
+}

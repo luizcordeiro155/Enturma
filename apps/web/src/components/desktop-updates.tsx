@@ -186,6 +186,39 @@ export function DesktopUpdateProvider({
             message:
               "Uma nova versão do Enturma para Android está pronta para instalar.",
           };
+          const fromUpdateNotification =
+            new URLSearchParams(window.location.search).get("update") === "1";
+
+          if (fromUpdateNotification && window.EnturmaNative?.installUpdate) {
+            const autoKey = `enturma-auto-update-${release.version}`;
+            const alreadyStarted =
+              sessionStorage.getItem(autoKey) === "started";
+
+            if (!alreadyStarted) {
+              sessionStorage.setItem(autoKey, "started");
+              prompted.current = release.version;
+              window.EnturmaNative.installUpdate(release.downloadUrl);
+              setState({
+                ...next,
+                status: "downloading",
+                message:
+                  "Download iniciado. O Android abrirá a instalação quando terminar.",
+              });
+              setOpen(false);
+
+              const cleanUrl = new URL(window.location.href);
+              cleanUrl.searchParams.delete("update");
+              window.history.replaceState(
+                {},
+                "",
+                cleanUrl.pathname +
+                  (cleanUrl.searchParams.size ? `?${cleanUrl.searchParams}` : "") +
+                  cleanUrl.hash,
+              );
+              return;
+            }
+          }
+
           setState(next);
           if (prompted.current !== release.version) {
             prompted.current = release.version;
