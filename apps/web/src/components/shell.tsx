@@ -34,6 +34,7 @@ const links = [
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
+  const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
   const [installedApp, setInstalledApp] = useState(false);
   useEffect(() => {
     const t = setTimeout(() => setInstalledApp(isInstalledApp()), 0);
@@ -121,7 +122,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     };
   }, [emailCelebration]);
   return (
-    <div className="app-shell">
+    <div className={inStudyRoom ? "app-shell room-active-shell" : "app-shell"}>
       <a className="skip" href="#content">
         Pular para o conteúdo
       </a>
@@ -179,7 +180,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </footer>
       </div>
 
-      <MobileNavigation />
+      {!inStudyRoom ? <MobileNavigation /> : null}
       {emailCelebration ? (
         <div
           className="account-celebration-backdrop"

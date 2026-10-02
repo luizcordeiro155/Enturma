@@ -2314,7 +2314,7 @@ html[data-theme="dark"] .ai-web-sources a {
   }
   .room-mobile-nav {
     position: fixed;
-    z-index: 50;
+    z-index: 110;
     left: 0;
     right: 0;
     bottom: 0;
@@ -2334,6 +2334,15 @@ html[data-theme="dark"] .ai-web-sources a {
   }
   .room-mobile-nav .room-channel.active {
     background: var(--room-subtle) !important;
+  }
+  .room-active-shell .workspace {
+    padding-bottom: 0 !important;
+  }
+  .room-active-shell .workspace > footer {
+    display: none;
+  }
+  .room-active-shell .study-room-page {
+    padding-bottom: calc(70px + env(safe-area-inset-bottom));
   }
   .privacy-pill {
     display: none;

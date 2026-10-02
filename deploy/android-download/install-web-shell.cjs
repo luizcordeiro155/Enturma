@@ -36,6 +36,7 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
+import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
@@ -44,7 +45,10 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import android.widget.FrameLayout
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 
 class MainActivity : Activity() {
     companion object {
@@ -66,8 +70,25 @@ class MainActivity : Activity() {
 
         CookieManager.getInstance().setAcceptCookie(true)
 
+        val root = FrameLayout(this)
         webView = WebView(this)
-        setContentView(webView)
+        root.addView(
+            webView,
+            FrameLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT,
+            ),
+        )
+        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+            val safeInsets = insets.getInsets(
+                WindowInsetsCompat.Type.statusBars() or
+                    WindowInsetsCompat.Type.displayCutout(),
+            )
+            view.setPadding(safeInsets.left, safeInsets.top, safeInsets.right, 0)
+            insets
+        }
+        setContentView(root)
+        ViewCompat.requestApplyInsets(root)
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
 

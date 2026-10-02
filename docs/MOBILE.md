@@ -1,6 +1,10 @@
-# Mobile 0.3.4
+# Mobile 0.3.5
 
 A versão Android usa a aplicação Web responsiva oficial dentro de um shell Android seguro. Com isso, Web, Desktop e Android passam a compartilhar as mesmas páginas e a mesma implementação de salas, chamadas, fórum, perfil, cadernos, caronas, configurações e recursos futuros.
+
+## Ajustes mobile 0.3.5
+
+A navegação interna da sala agora tem prioridade no celular: **Conversa, Chamada, Materiais e Enturma AI** permanecem clicáveis sem conflito com a barra global do aplicativo. No APK Android, o WebView também respeita a barra de status e recortes da tela, evitando conteúdo por baixo do relógio, sinal e notificações.
 
 ## Paridade entre plataformas
 
