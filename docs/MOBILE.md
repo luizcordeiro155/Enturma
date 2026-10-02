@@ -101,3 +101,14 @@ A API precisa de `FCM_SERVICE_ACCOUNT_BASE64`, contendo em Base64 o JSON da serv
 - Além do broadcast `DOWNLOAD_COMPLETE`, o app monitora o `DownloadManager` enquanto está aberto para detectar conclusão mesmo quando o broadcast falhar.
 - Se o app estiver em segundo plano e o Android impedir a abertura automática, a mesma identificação de atualização é usada para oferecer a ação **Instalar**, sem empilhar notificações duplicadas.
 - Uma trava por `downloadId` impede abrir o instalador duas vezes quando receiver e monitor local detectarem a conclusão simultaneamente.
+
+
+## Visual e perfil 0.3.14
+
+- Amplia o motor de animações em JavaScript para entradas de tela, cards, botões, navegação, diálogos, sheets e perfis.
+- Mantém `prefers-reduced-motion` e a preferência de movimento reduzido do Enturma como prioridade.
+- Perfil passa a destacar **Cor principal + Cor secundária** diretamente no editor, com modo sólido ou degradê e prévia imediata.
+- Banners GIF continuam animados quando o usuário escolhe **Usar GIF animado** no editor.
+- Cards públicos usam o degradê das duas cores de forma consistente no corpo e no banner.
+- Participantes de salas e chamadas exibem um card compacto com banner/gradiente atrás do avatar e nome, semelhante à leitura visual de membros do Discord.
+- O perfil completo continua abrindo ao tocar no usuário; o card compacto não remove nenhuma ação existente.

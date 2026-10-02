@@ -208,7 +208,7 @@ export function ProfileDetailsEditor({
 
               <label className="profile-media-action">
                 <span className="profile-media-icon"><ImageIcon size={22} /></span>
-                <span><strong>Banner</strong><small>Personalize o topo do perfil</small></span>
+                <span><strong>Banner</strong><small>JPG, PNG, WEBP ou GIF animado</small></span>
                 <ChevronRight size={20} />
                 <input
                   type="file"
@@ -283,6 +283,81 @@ export function ProfileDetailsEditor({
                 }
               />
             </label>
+
+            {showcase ? (
+              <>
+                <label className="profile-setting-row profile-color-row">
+                  <span className="profile-setting-icon"><Palette size={21} /></span>
+                  <span>
+                    <strong>Cor secundária</strong>
+                    <small>{showcase.appearance.secondaryColor}</small>
+                  </span>
+                  <input
+                    type="color"
+                    value={showcase.appearance.secondaryColor}
+                    aria-label="Cor secundária do perfil"
+                    onChange={(event) =>
+                      setShowcase((current) =>
+                        current
+                          ? {
+                              ...current,
+                              appearance: {
+                                ...current.appearance,
+                                secondaryColor: event.target.value,
+                              },
+                            }
+                          : current,
+                      )
+                    }
+                  />
+                </label>
+
+                <label className="profile-setting-row">
+                  <span className="profile-setting-icon"><Sparkles size={21} /></span>
+                  <span>
+                    <strong>Cores do perfil</strong>
+                    <small>
+                      {showcase.appearance.theme === "GRADIENT"
+                        ? "Degradê entre as duas cores"
+                        : "Cor principal sólida"}
+                    </small>
+                  </span>
+                  <select
+                    value={showcase.appearance.theme}
+                    aria-label="Modo das cores do perfil"
+                    onChange={(event) =>
+                      setShowcase((current) =>
+                        current
+                          ? {
+                              ...current,
+                              appearance: {
+                                ...current.appearance,
+                                theme: event.target.value,
+                              },
+                            }
+                          : current,
+                      )
+                    }
+                  >
+                    <option value="SOLID">Cor sólida</option>
+                    <option value="GRADIENT">Duas cores</option>
+                  </select>
+                </label>
+
+                <div
+                  className="profile-dual-color-preview"
+                  aria-label="Prévia das cores do perfil"
+                  style={{
+                    background:
+                      showcase.appearance.theme === "GRADIENT"
+                        ? `linear-gradient(135deg,${appearance.accentColor},${showcase.appearance.secondaryColor})`
+                        : appearance.accentColor,
+                  }}
+                >
+                  <span>Prévia das cores</span>
+                </div>
+              </>
+            ) : null}
 
             <label className="profile-setting-row">
               <span className="profile-setting-icon"><Sparkles size={21} /></span>

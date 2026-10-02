@@ -30,11 +30,39 @@ export type PublicProfile = {
     layout: string;
   };
 };
+
+const profileCache = new Map<string, Promise<PublicProfile>>();
+
+function loadPublicProfile(id: string) {
+  let pending = profileCache.get(id);
+  if (!pending) {
+    pending = api<PublicProfile>(`/users/${id}/profile`).catch((error) => {
+      profileCache.delete(id);
+      throw error;
+    });
+    profileCache.set(id, pending);
+  }
+  return pending;
+}
+
+function profileStyle(user: PublicProfile): React.CSSProperties {
+  const primary = user.accentColor ?? "#527d65";
+  const secondary = user.showcaseAppearance?.secondaryColor ?? primary;
+  const gradient =
+    user.showcaseAppearance?.theme === "GRADIENT"
+      ? `linear-gradient(135deg,${primary},${secondary})`
+      : primary;
+  return {
+    "--profile-accent": primary,
+    "--profile-secondary": secondary,
+    "--profile-banner": gradient,
+  } as React.CSSProperties;
+}
 export function LiveIdentity({ id, name }: { id: string; name: string }) {
   const [user, setUser] = useState<PublicProfile>({ id, name });
   useEffect(() => {
     let active = true;
-    api<PublicProfile>(`/users/${id}/profile`)
+    loadPublicProfile(id)
       .then((p) => {
         if (active) setUser(p);
       })
@@ -50,19 +78,7 @@ export function Avatar({ user }: { user: PublicProfile }) {
   return (
     <span
       className={`identity-avatar decoration-${d?.decoration ?? "NONE"}`}
-      style={
-        {
-          "--profile-accent": user.accentColor ?? "#527d65",
-          "--profile-secondary":
-            user.showcaseAppearance?.secondaryColor ??
-            user.accentColor ??
-            "#527d65",
-          "--profile-banner":
-            user.showcaseAppearance?.theme === "GRADIENT"
-              ? `linear-gradient(135deg,${user.accentColor ?? "#527d65"},${user.showcaseAppearance.secondaryColor})`
-              : (user.accentColor ?? "#527d65"),
-        } as React.CSSProperties
-      }
+      style={profileStyle(user)}
     >
       {user.hasAvatar ? (
         <img
@@ -79,26 +95,17 @@ export function ProfileCard({ user }: { user: PublicProfile }) {
   const d = user.profileDetails ?? {};
   return (
     <div
-      className={`public-profile-card profile-effect-${user.showcaseAppearance?.effect ?? "NONE"}`}
-      style={
-        {
-          "--profile-accent": user.accentColor ?? "#527d65",
-          "--profile-secondary":
-            user.showcaseAppearance?.secondaryColor ??
-            user.accentColor ??
-            "#527d65",
-          "--profile-banner":
-            user.showcaseAppearance?.theme === "GRADIENT"
-              ? `linear-gradient(135deg,${user.accentColor ?? "#527d65"},${user.showcaseAppearance.secondaryColor})`
-              : (user.accentColor ?? "#527d65"),
-        } as React.CSSProperties
-      }
+      className={`public-profile-card profile-theme-${user.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${user.showcaseAppearance?.effect ?? "NONE"}`}
+      style={profileStyle(user)}
     >
       <div className="public-profile-banner">
         {user.hasBanner ? (
           <img
             src={`/api/backend/users/${user.id}/banner?v=${user.mediaVersion ?? 0}`}
             alt="Banner do perfil"
+            className="profile-banner-media"
+            loading="eager"
+            decoding="async"
           />
         ) : null}
       </div>
@@ -126,6 +133,73 @@ export function ProfileCard({ user }: { user: PublicProfile }) {
     </div>
   );
 }
+export function MemberIdentityCard({
+  user,
+  subtitle,
+  className = "",
+}: {
+  user: PublicProfile;
+  subtitle?: string;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`member-profile-strip profile-theme-${user.showcaseAppearance?.theme ?? "SOLID"} ${className}`.trim()}
+      style={profileStyle(user)}
+    >
+      <div className="member-profile-strip-media" aria-hidden="true">
+        {user.hasBanner ? (
+          <img
+            className="member-profile-strip-banner"
+            src={`/api/backend/users/${user.id}/banner?v=${user.mediaVersion ?? 0}`}
+            alt=""
+            loading="lazy"
+            decoding="async"
+          />
+        ) : (
+          <span className="member-profile-strip-gradient" />
+        )}
+        <span className="member-profile-strip-shade" />
+      </div>
+      <div className="member-profile-strip-content">
+        <UserIdentity user={user} subtitle={subtitle} />
+      </div>
+    </div>
+  );
+}
+
+export function LiveMemberIdentityCard({
+  id,
+  name,
+  subtitle,
+  className,
+}: {
+  id: string;
+  name: string;
+  subtitle?: string;
+  className?: string;
+}) {
+  const [user, setUser] = useState<PublicProfile>({ id, name });
+  useEffect(() => {
+    let active = true;
+    loadPublicProfile(id)
+      .then((profile) => {
+        if (active) setUser(profile);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [id]);
+  return (
+    <MemberIdentityCard
+      user={user}
+      subtitle={subtitle}
+      className={className}
+    />
+  );
+}
+
 export function UserIdentity({
   user,
   compact = false,
@@ -194,7 +268,7 @@ export function UserIdentity({
     setMessage("");
     setOpen(true);
     try {
-      setProfile(await api<PublicProfile>(`/users/${user.id}/profile`));
+      setProfile(await loadPublicProfile(user.id));
     } catch (e) {
       setMessage((e as Error).message);
     }

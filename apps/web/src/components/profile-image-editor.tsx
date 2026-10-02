@@ -198,8 +198,7 @@ export function ProfileImageEditor({
       </label>
       {file.type === "image/gif" ? (
         <p>
-          O recorte salva uma imagem estática. Para manter a animação, use o GIF
-          original.
+          O recorte transforma o GIF em imagem estática. Use o GIF original para manter a animação no perfil e nos cards de membros.
         </p>
       ) : null}
       <p role="alert">{error}</p>
@@ -219,7 +218,7 @@ export function ProfileImageEditor({
         </button>
         {file.type === "image/gif" ? (
           <button disabled={busy} onClick={() => void apply(true)}>
-            Manter GIF original
+            Usar GIF animado
           </button>
         ) : null}
         <button disabled={busy || !src} onClick={() => void apply()}>

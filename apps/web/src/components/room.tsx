@@ -21,7 +21,7 @@ import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
 import { RoomTools } from "./room-tools";
-import { UserIdentity } from "./user-identity";
+import { LiveMemberIdentityCard } from "./user-identity";
 import { focusMessage } from "./notifications";
 import { useCallSession } from "./call-session-provider";
 import { RoomChat } from "./room-chat";
@@ -703,8 +703,9 @@ export function RoomView({ id }: { id: string }) {
                       key={member.userId}
                       className={`participant-row ${member.leftAt ? "offline" : ""}`}
                     >
-                      <UserIdentity
-                        user={{ ...member, id: member.userId }}
+                      <LiveMemberIdentityCard
+                        id={member.userId}
+                        name={member.name}
                         subtitle={
                           member.role === "HOST"
                             ? "Anfitrião"
@@ -810,8 +811,9 @@ export function RoomView({ id }: { id: string }) {
                           key={member.userId}
                           className={`participant-row ${member.leftAt ? "offline" : ""}`}
                         >
-                          <UserIdentity
-                            user={{ ...member, id: member.userId }}
+                          <LiveMemberIdentityCard
+                            id={member.userId}
+                            name={member.name}
                             subtitle={
                               member.role === "HOST"
                                 ? "Anfitrião"
