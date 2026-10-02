@@ -53,3 +53,12 @@ O WebView aceita navegação interna somente na origem HTTPS oficial. Links exte
 - O instalador do Android abre automaticamente ao concluir o download quando permitido.
 - O WebView é fisicamente redimensionado acima do teclado para manter o texto do chat visível.
 - O editor de perfil ocupa a tela inteira no mobile e não deixa os botões finais atrás da navegação.
+
+
+## Atualizador 0.3.11
+
+- Corrige o recebimento de `ACTION_DOWNLOAD_COMPLETE` no Android 13+ para que o Enturma reaja ao término do download.
+- O instalador do Android é aberto automaticamente quando o Enturma está em primeiro plano.
+- Se o download terminar em segundo plano, o Enturma mostra uma ação direta para abrir o instalador sem procurar o APK em Downloads.
+- Ao reabrir o aplicativo, um APK já concluído é detectado automaticamente.
+- A confirmação final continua sendo a tela oficial do instalador do Android, onde o usuário toca em **Instalar**.

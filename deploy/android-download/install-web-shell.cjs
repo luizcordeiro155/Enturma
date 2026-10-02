@@ -38,6 +38,7 @@ import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.ActivityNotFoundException
 import android.content.BroadcastReceiver
+import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -73,12 +74,16 @@ private const val UPDATE_CHANNEL_ID = "enturma_app_updates"
 private const val UPDATE_NOTIFICATION_ID = 4801
 private const val UPDATE_ALARM_REQUEST = 4802
 private const val UPDATE_ACTION_INSTALL = "br.com.enturma.app.action.INSTALL_UPDATE"
+private const val UPDATE_ACTION_OPEN_INSTALLER = "br.com.enturma.app.action.OPEN_DOWNLOADED_UPDATE"
 private const val UPDATE_EXTRA_URL = "downloadUrl"
+private const val UPDATE_EXTRA_DOWNLOAD_ID = "downloadId"
+private const val UPDATE_READY_NOTIFICATION_ID = 4803
 private const val UPDATE_PREFS = "enturma_update_state"
 private const val PREF_NOTIFIED_VERSION = "notified_version"
 private const val PREF_DOWNLOAD_ID = "download_id"
 private const val PREF_DOWNLOAD_URL = "download_url"
 private const val PREF_DOWNLOAD_BASE_VERSION = "download_base_version"
+private const val PREF_INSTALL_PROMPTED_ID = "install_prompted_id"
 
 private fun isNewerVersion(remote: String, current: String): Boolean {
     val a = remote.split(".").map { it.toIntOrNull() ?: 0 }
@@ -217,6 +222,106 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
     }
 }
 
+
+private fun downloadedApkUri(context: Context, downloadId: Long): Uri? {
+    if (downloadId <= 0) return null
+    val manager = context.getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
+    val cursor = manager.query(DownloadManager.Query().setFilterById(downloadId))
+    cursor.use {
+        if (!it.moveToFirst()) return null
+        val statusColumn = it.getColumnIndex(DownloadManager.COLUMN_STATUS)
+        if (
+            statusColumn < 0 ||
+            it.getInt(statusColumn) != DownloadManager.STATUS_SUCCESSFUL
+        ) return null
+    }
+    return manager.getUriForDownloadedFile(downloadId)
+}
+
+private fun ensureUpdateNotificationChannel(context: Context) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+    val manager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    manager.createNotificationChannel(
+        NotificationChannel(
+            UPDATE_CHANNEL_ID,
+            "Atualizações do Enturma",
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description = "Avisa quando uma nova versão do Enturma está pronta."
+        },
+    )
+}
+
+private fun showInstallReadyNotification(context: Context, downloadId: Long) {
+    if (
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+    ) return
+
+    ensureUpdateNotificationChannel(context)
+
+    val open = Intent(context, MainActivity::class.java).apply {
+        action = UPDATE_ACTION_OPEN_INSTALLER
+        putExtra(UPDATE_EXTRA_DOWNLOAD_ID, downloadId)
+        flags =
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_SINGLE_TOP
+    }
+    val pending = PendingIntent.getActivity(
+        context,
+        UPDATE_READY_NOTIFICATION_ID,
+        open,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+    )
+    val builder =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            Notification.Builder(context, UPDATE_CHANNEL_ID)
+        else Notification.Builder(context)
+
+    val installAction =
+        Notification.Action.Builder(
+            android.R.drawable.stat_sys_download_done,
+            "Instalar",
+            pending,
+        ).build()
+    val notification = builder
+        .setSmallIcon(android.R.drawable.stat_sys_download_done)
+        .setContentTitle("Atualização pronta para instalar")
+        .setContentText("Toque em Instalar para continuar.")
+        .setContentIntent(pending)
+        .addAction(installAction)
+        .setAutoCancel(true)
+        .setOnlyAlertOnce(true)
+        .build()
+    val manager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    manager.notify(UPDATE_READY_NOTIFICATION_ID, notification)
+}
+
+class EnturmaDownloadCompleteReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent?) {
+        if (intent?.action != DownloadManager.ACTION_DOWNLOAD_COMPLETE) return
+        val downloadId =
+            intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
+        val prefs =
+            context.getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+        val expectedId = prefs.getLong(PREF_DOWNLOAD_ID, -1L)
+        val baseVersion = prefs.getString(PREF_DOWNLOAD_BASE_VERSION, null)
+
+        if (
+            downloadId <= 0 ||
+            downloadId != expectedId ||
+            baseVersion != BuildConfig.VERSION_NAME ||
+            downloadedApkUri(context, downloadId) == null
+        ) return
+
+        showInstallReadyNotification(context, downloadId)
+    }
+}
+
 class MainActivity : Activity() {
     companion object {
         private const val FILE_CHOOSER_REQUEST = 4101
@@ -239,17 +344,24 @@ class MainActivity : Activity() {
     private var updateDownloadId: Long? = null
     private var updateReceiverRegistered = false
     private var pendingUpdateUrl: String? = null
+    private var appInForeground = false
 
     private val updateDownloadReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             if (intent?.action != DownloadManager.ACTION_DOWNLOAD_COMPLETE) return
-            val id = intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
+            val downloadId =
+                intent.getLongExtra(DownloadManager.EXTRA_DOWNLOAD_ID, -1L)
             val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
             val expectedId = prefs.getLong(PREF_DOWNLOAD_ID, -1L)
-            if (id <= 0 || id != expectedId) return
+            val baseVersion = prefs.getString(PREF_DOWNLOAD_BASE_VERSION, null)
 
-            val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            val uri = manager.getUriForDownloadedFile(id)
+            if (
+                downloadId <= 0 ||
+                downloadId != expectedId ||
+                baseVersion != APP_VERSION
+            ) return
+
+            val uri = downloadedApkUri(this@MainActivity, downloadId)
             if (uri == null) {
                 Toast.makeText(
                     this@MainActivity,
@@ -259,9 +371,16 @@ class MainActivity : Activity() {
                 return
             }
 
-            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-                .cancel(UPDATE_NOTIFICATION_ID)
-            openDownloadedInstaller(uri)
+            val notifications =
+                getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            notifications.cancel(UPDATE_NOTIFICATION_ID)
+            notifications.cancel(UPDATE_READY_NOTIFICATION_ID)
+
+            if (appInForeground) {
+                openDownloadedInstaller(uri, downloadId)
+            } else {
+                showInstallReadyNotification(this@MainActivity, downloadId)
+            }
         }
     }
 
@@ -486,6 +605,7 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        appInForeground = true
         EnturmaUpdateScheduler.checkNow(this)
         val pending = pendingUpdateUrl
         if (
@@ -496,6 +616,12 @@ class MainActivity : Activity() {
             pendingUpdateUrl = null
             startUpdateInstall(pending)
         }
+        maybeOpenCompletedUpdate()
+    }
+
+    override fun onPause() {
+        appInForeground = false
+        super.onPause()
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -507,10 +633,20 @@ class MainActivity : Activity() {
     }
 
     private fun handleUpdateIntent(intent: Intent?): Boolean {
-        if (intent?.action != UPDATE_ACTION_INSTALL) return false
-        val downloadUrl = intent.getStringExtra(UPDATE_EXTRA_URL) ?: return false
-        startUpdateInstall(downloadUrl)
-        return true
+        return when (intent?.action) {
+            UPDATE_ACTION_INSTALL -> {
+                val downloadUrl = intent.getStringExtra(UPDATE_EXTRA_URL) ?: return true
+                startUpdateInstall(downloadUrl)
+                true
+            }
+            UPDATE_ACTION_OPEN_INSTALLER -> {
+                val downloadId =
+                    intent.getLongExtra(UPDATE_EXTRA_DOWNLOAD_ID, -1L)
+                openDownloadedInstallerById(downloadId)
+                true
+            }
+            else -> false
+        }
     }
 
     private fun routeFromIntent(intent: Intent?): String? {
@@ -525,7 +661,8 @@ class MainActivity : Activity() {
         if (updateReceiverRegistered) return
         val filter = IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(updateDownloadReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+            // ACTION_DOWNLOAD_COMPLETE vem do DownloadManager do sistema.
+            registerReceiver(updateDownloadReceiver, filter, Context.RECEIVER_EXPORTED)
         } else {
             @Suppress("DEPRECATION")
             registerReceiver(updateDownloadReceiver, filter)
@@ -533,22 +670,65 @@ class MainActivity : Activity() {
         updateReceiverRegistered = true
     }
 
-    private fun openDownloadedInstaller(uri: Uri) {
-        runCatching {
+    private fun openDownloadedInstaller(
+        uri: Uri,
+        downloadId: Long? = null,
+    ): Boolean {
+        return runCatching {
             startActivity(
                 Intent(Intent.ACTION_VIEW).apply {
                     setDataAndType(uri, "application/vnd.android.package-archive")
+                    clipData = ClipData.newRawUri("Atualização do Enturma", uri)
                     addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                     addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 },
             )
-        }.onFailure {
+            if (downloadId != null && downloadId > 0) {
+                getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+                    .edit()
+                    .putLong(PREF_INSTALL_PROMPTED_ID, downloadId)
+                    .apply()
+            }
+            (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                .cancel(UPDATE_READY_NOTIFICATION_ID)
+            true
+        }.getOrElse {
+            if (downloadId != null && downloadId > 0) {
+                showInstallReadyNotification(this, downloadId)
+            }
             Toast.makeText(
                 this,
                 "Não foi possível abrir o instalador automaticamente.",
                 Toast.LENGTH_LONG,
             ).show()
+            false
         }
+    }
+
+    private fun openDownloadedInstallerById(downloadId: Long): Boolean {
+        if (downloadId <= 0) return false
+        val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+        if (
+            prefs.getLong(PREF_DOWNLOAD_ID, -1L) != downloadId ||
+            prefs.getString(PREF_DOWNLOAD_BASE_VERSION, null) != APP_VERSION
+        ) return false
+
+        val uri = downloadedApkUri(this, downloadId) ?: return false
+        return openDownloadedInstaller(uri, downloadId)
+    }
+
+    private fun maybeOpenCompletedUpdate() {
+        if (!appInForeground) return
+        val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+        val downloadId = prefs.getLong(PREF_DOWNLOAD_ID, -1L)
+        if (
+            downloadId <= 0 ||
+            prefs.getString(PREF_DOWNLOAD_BASE_VERSION, null) != APP_VERSION ||
+            prefs.getLong(PREF_INSTALL_PROMPTED_ID, -1L) == downloadId
+        ) return
+
+        val uri = downloadedApkUri(this, downloadId) ?: return
+        openDownloadedInstaller(uri, downloadId)
     }
 
     private fun startUpdateInstall(downloadUrl: String) {
@@ -606,7 +786,7 @@ class MainActivity : Activity() {
                         DownloadManager.STATUS_SUCCESSFUL -> {
                             val downloaded = manager.getUriForDownloadedFile(previousId)
                             if (downloaded != null) {
-                                openDownloadedInstaller(downloaded)
+                                openDownloadedInstaller(downloaded, previousId)
                                 return
                             }
                         }
@@ -620,12 +800,13 @@ class MainActivity : Activity() {
                 .setTitle("Atualização do Enturma")
                 .setDescription("Baixando a nova versão do aplicativo")
                 .setMimeType("application/vnd.android.package-archive")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED),
+                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE),
         )
         prefs.edit()
             .putLong(PREF_DOWNLOAD_ID, updateDownloadId ?: -1L)
             .putString(PREF_DOWNLOAD_URL, downloadUrl)
             .putString(PREF_DOWNLOAD_BASE_VERSION, APP_VERSION)
+            .remove(PREF_INSTALL_PROMPTED_ID)
             .apply()
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
             .cancel(UPDATE_NOTIFICATION_ID)
@@ -1037,6 +1218,17 @@ if (!manifest.includes("EnturmaUpdateReceiver")) {
     <receiver android:name=".EnturmaBootReceiver" android:enabled="true" android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />
+      </intent-filter>
+    </receiver>
+  </application>`,
+  );
+}
+if (!manifest.includes("EnturmaDownloadCompleteReceiver")) {
+  manifest = manifest.replace(
+    "</application>",
+    `    <receiver android:name=".EnturmaDownloadCompleteReceiver" android:exported="true">
+      <intent-filter>
+        <action android:name="android.intent.action.DOWNLOAD_COMPLETE" />
       </intent-filter>
     </receiver>
   </application>`,
