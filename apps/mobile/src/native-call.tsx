@@ -105,19 +105,18 @@ export function NativeCallProvider({
 
       if (attempt !== generation.current) return;
 
-      const nextRoom = await runtime.createRoom(() => {
-        setRoomId(null);
-        setRoom(null);
-        roomRef.current = null;
-      });
+      const nextRoom = await runtime.createRoom();
 
       roomRef.current = nextRoom;
       setRoom(nextRoom);
-      cleanupDisconnectRef.current = runtime.observeDisconnect(nextRoom, () => {
-        setRoomId(null);
-        setRoom(null);
-        roomRef.current = null;
-      });
+      cleanupDisconnectRef.current = await runtime.observeDisconnect(
+        nextRoom,
+        () => {
+          setRoomId(null);
+          setRoom(null);
+          roomRef.current = null;
+        },
+      );
 
       await runtime.connectRoom(nextRoom, credentials.url, credentials.token);
 
