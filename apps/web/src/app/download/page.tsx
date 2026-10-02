@@ -15,11 +15,36 @@ const desktopOrigin =
   "https://enturma-desktop-download-v5-production.up.railway.app";
 const androidOrigin =
   "https://enturma-android-download-v3-production.up.railway.app";
+
+type AndroidManifest = {
+  version: string;
+  downloadUrl: string;
+  size?: number;
+  sha256?: string;
+};
+
+async function currentAndroidRelease(): Promise<AndroidManifest | null> {
+  try {
+    const response = await fetch(`${androidOrigin}/latest-android.json`, {
+      cache: "no-store",
+      headers: { "User-Agent": "Enturma-Web" },
+    });
+    if (!response.ok) return null;
+    const manifest = (await response.json()) as AndroidManifest;
+    if (!/^\\d+\\.\\d+\\.\\d+$/.test(manifest.version || "")) return null;
+    if (!manifest.downloadUrl?.startsWith("https://")) return null;
+    return manifest;
+  } catch {
+    return null;
+  }
+}
 export default async function DownloadPage() {
   const ua = (await headers()).get("user-agent") ?? "";
   if (ua.includes("EnturmaDesktop/")) redirect("/home");
   const android = /Android/i.test(ua);
-  let androidUrl = `${androidOrigin}/Enturma-Android.apk`;
+  const androidRelease = await currentAndroidRelease();
+  const androidVersion = androidRelease?.version ?? "0.3.1";
+  let androidUrl = androidRelease?.downloadUrl ?? `${androidOrigin}/Enturma-Android.apk`;
   try {
     const candidate = new URL(process.env.ANDROID_DOWNLOAD_URL ?? androidUrl);
     if (
@@ -49,7 +74,7 @@ export default async function DownloadPage() {
           <div className={styles.heroCopy}>
             <span className={styles.eyebrow}>
               <Monitor size={18} />
-              Enturma 0.3.0
+              Enturma
             </span>
             <h1>Seu espaço de estudo. Na sua tela.</h1>
             <p className={styles.lead}>
@@ -77,7 +102,7 @@ export default async function DownloadPage() {
             {android ? (
               <a className={styles.primary} href={androidUrl}>
                 <Download size={18} />
-                Baixar Enturma Android 0.3.2
+                Baixar Enturma Android {androidVersion}
               </a>
             ) : (
               <a
@@ -90,7 +115,7 @@ export default async function DownloadPage() {
             )}
             <small className={styles.downloadNote}>
               {android
-                ? "APK oficial do Enturma para Android. Sua conta e seus dados continuam sincronizados com a versão Web."
+                ? `APK oficial do Enturma para Android · versão ${androidVersion}. Sua conta e seus dados continuam sincronizados com a versão Web.`
                 : "A instalação Windows é por usuário. Seus dados e sua conta continuam no Enturma."}
             </small>
           </aside>
@@ -117,7 +142,7 @@ export default async function DownloadPage() {
                 Build nativo Expo/React Native. Configurações de APK e AAB
                 prontas para distribuição.
               </p>
-              <a href={androidUrl}>Baixar APK 0.3.2</a>
+              <a href={androidUrl}>Baixar APK {androidVersion}</a>
             </div>
           </article>
           <article>
@@ -163,7 +188,7 @@ export default async function DownloadPage() {
         <footer className={styles.footer}>
           <span>
             <BookOpen size={22} />
-            Enturma 0.3.0
+            Enturma
           </span>
           <span>
             <RefreshCw size={18} />
