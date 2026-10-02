@@ -264,6 +264,7 @@ export function ProfileView({
                         const bridge = window.EnturmaNative as
                           | (typeof window.EnturmaNative & {
                               getPushRegistration?: () => string;
+                              clearPushToken?: () => void;
                             })
                           | undefined;
                         const raw = bridge?.getPushRegistration?.();
@@ -277,6 +278,7 @@ export function ProfileView({
                           ).catch(() => {});
                         }
                         localStorage.removeItem("enturma-push-registration-v1");
+                        bridge?.clearPushToken?.();
                       } catch {}
                       await post("/auth/logout");
                       router.push("/login");
