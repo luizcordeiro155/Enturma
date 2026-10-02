@@ -96,7 +96,7 @@ private object EnturmaUpdateScheduler {
         alarm.setInexactRepeating(
             AlarmManager.RTC_WAKEUP,
             System.currentTimeMillis() + 2 * 60 * 1000,
-            AlarmManager.INTERVAL_HOUR,
+            AlarmManager.INTERVAL_FIFTEEN_MINUTES,
             pending,
         )
     }
