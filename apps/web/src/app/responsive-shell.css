@@ -3,10 +3,11 @@
 }
 .topbar {
   height: auto;
-  min-height: 68px;
+  min-height: calc(68px + var(--native-safe-top, 0px));
   gap: 12px;
   flex-wrap: wrap;
-  padding-block: 10px;
+  padding-top: calc(10px + var(--native-safe-top, 0px));
+  padding-bottom: 10px;
 }
 .topbar-actions {
   flex-wrap: wrap;
@@ -65,7 +66,7 @@
 }
 @media (max-width: 760px) {
   .topbar {
-    min-height: 58px;
+    min-height: calc(58px + var(--native-safe-top, 0px));
   }
   .sidebar nav {
     scroll-padding-inline: 10px;
