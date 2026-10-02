@@ -36,7 +36,6 @@ import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
@@ -45,10 +44,11 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 
 class MainActivity : Activity() {
     companion object {
@@ -61,38 +61,46 @@ class MainActivity : Activity() {
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private var pendingPermissionRequest: PermissionRequest? = null
+    private var safeTopCssPx = 0
+    private var safeRightCssPx = 0
+    private var safeBottomCssPx = 0
+    private var safeLeftCssPx = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         window.statusBarColor = Color.parseColor("#0f1917")
         window.navigationBarColor = Color.parseColor("#0f1917")
 
         CookieManager.getInstance().setAcceptCookie(true)
 
-        val root = FrameLayout(this)
         webView = WebView(this)
-        root.addView(
-            webView,
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT,
-            ),
-        )
-        ViewCompat.setOnApplyWindowInsetsListener(root) { view, insets ->
+        webView.setBackgroundColor(Color.parseColor("#0f1917"))
+        setContentView(webView)
+
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = false
+            isAppearanceLightNavigationBars = false
+        }
+
+        ViewCompat.setOnApplyWindowInsetsListener(webView) { _, insets ->
             val safeInsets = insets.getInsets(
                 WindowInsetsCompat.Type.statusBars() or
+                    WindowInsetsCompat.Type.navigationBars() or
                     WindowInsetsCompat.Type.displayCutout(),
             )
-            view.setPadding(safeInsets.left, safeInsets.top, safeInsets.right, 0)
+            val density = resources.displayMetrics.density.takeIf { it > 0f } ?: 1f
+            safeTopCssPx = (safeInsets.top / density).toInt()
+            safeRightCssPx = (safeInsets.right / density).toInt()
+            safeBottomCssPx = (safeInsets.bottom / density).toInt()
+            safeLeftCssPx = (safeInsets.left / density).toInt()
+            syncSafeAreaCss()
             insets
         }
-        setContentView(root)
-        ViewCompat.requestApplyInsets(root)
+        ViewCompat.requestApplyInsets(webView)
 
         CookieManager.getInstance().setAcceptThirdPartyCookies(webView, true)
-
-        webView.setBackgroundColor(Color.parseColor("#0f1917"))
         webView.settings.apply {
             javaScriptEnabled = true
             domStorageEnabled = true
@@ -109,6 +117,11 @@ class MainActivity : Activity() {
         }
 
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+                syncSafeAreaCss()
+            }
+
             override fun shouldOverrideUrlLoading(
                 view: WebView?,
                 request: WebResourceRequest?,
@@ -219,6 +232,24 @@ class MainActivity : Activity() {
         } else {
             webView.restoreState(savedInstanceState)
         }
+    }
+
+    private fun syncSafeAreaCss() {
+        if (!::webView.isInitialized) return
+
+        val script = """
+            (function() {
+              var root = document.documentElement;
+              if (!root) return;
+              root.dataset.enturmaMobile = "true";
+              root.style.setProperty("--native-safe-top", "${safeTopCssPx}px");
+              root.style.setProperty("--native-safe-right", "${safeRightCssPx}px");
+              root.style.setProperty("--native-safe-bottom", "${safeBottomCssPx}px");
+              root.style.setProperty("--native-safe-left", "${safeLeftCssPx}px");
+            })();
+        """.trimIndent()
+
+        webView.evaluateJavascript(script, null)
     }
 
     private fun grantAvailableMedia(request: PermissionRequest) {
