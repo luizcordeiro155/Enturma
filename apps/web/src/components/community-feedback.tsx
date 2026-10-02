@@ -201,7 +201,7 @@ const categoryNames: Record<string, string> = {
   PRIVATE_MESSAGE: "Mensagens privadas",
   MENTION: "Menções a você",
   ROOM_NOTICE: "Avisos e encerramento de salas",
-  FORUM: "Fórum e menções",
+  FORUM: "Fórum, respostas e reações",
   ACHIEVEMENT: "Conquistas",
   RIDE: "Caronas",
   FRIEND: "Amizades",
