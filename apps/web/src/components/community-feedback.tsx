@@ -198,13 +198,14 @@ export function CommunityFeedback() {
 }
 const categoryNames: Record<string, string> = {
   ROOM_MESSAGE: "Mensagens de salas",
+  MENTION: "Menções a você",
   ROOM_NOTICE: "Avisos e encerramento de salas",
   FORUM: "Fórum e menções",
   ACHIEVEMENT: "Conquistas",
   RIDE: "Caronas",
   FRIEND: "Amizades e mensagens privadas",
 };
-type Preference = { category: string; inApp: boolean; email: boolean };
+type Preference = { category: string; inApp: boolean; email: boolean; push: boolean };
 export function NotificationPreferences() {
   const [items, setItems] = useState<Preference[]>([]);
   const [busy, setBusy] = useState(false);
@@ -235,8 +236,9 @@ export function NotificationPreferences() {
     <section className="notification-preferences">
       <h2>Como você recebe novidades</h2>
       <p>
-        E-mails de segurança, confirmação de conta e recuperação de senha
-        continuam ativos.
+        Escolha separadamente o que aparece dentro do Enturma, chega por push no celular
+        ou é enviado por e-mail. E-mails de segurança, confirmação de conta e recuperação
+        de senha continuam ativos.
       </p>
       {items.map((item) => (
         <fieldset key={item.category}>
@@ -249,6 +251,15 @@ export function NotificationPreferences() {
               onChange={(e) => void save({ ...item, inApp: e.target.checked })}
             />
             Caixa de entrada no Enturma
+          </label>
+          <label className="check-row">
+            <input
+              type="checkbox"
+              disabled={busy}
+              checked={item.push}
+              onChange={(e) => void save({ ...item, push: e.target.checked })}
+            />
+            No celular (push)
           </label>
           <label className="check-row">
             <input
