@@ -468,7 +468,7 @@ export function DesktopUpdateButton() {
 
 export function AppUpdateSettingsCard() {
   const { state, open, check } = useContext(Context);
-  if (!isInstalledApp()) return null;
+  if (!state || !isInstalledApp()) return null;
 
   const mobile = isMobileApp();
   const available = state?.status === "available";
