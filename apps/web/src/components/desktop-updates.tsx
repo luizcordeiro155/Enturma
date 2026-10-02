@@ -17,6 +17,15 @@ export type UpdateState = {
   version?: string;
   progress: number;
   message?: string;
+  downloadUrl?: string;
+};
+type MobileBridge = {
+  setLightTheme?: (light: boolean) => void;
+  installUpdate?: (downloadUrl: string) => void;
+};
+type AndroidRelease = {
+  version: string;
+  downloadUrl: string;
 };
 type DesktopBridge = {
   isDesktop: boolean;
@@ -30,6 +39,7 @@ type DesktopBridge = {
 declare global {
   interface Window {
     enturmaDesktop?: DesktopBridge;
+    EnturmaNative?: MobileBridge;
   }
 }
 export function isDesktop() {
@@ -50,10 +60,32 @@ export function isMobileApp() {
 export function isInstalledApp() {
   return isDesktop() || isMobileApp();
 }
+const androidUpdateOrigin =
+  "https://enturma-android-download-v3-production.up.railway.app";
+function mobileVersion() {
+  if (typeof window === "undefined") return "0.0.0";
+  return (
+    navigator.userAgent.match(/EnturmaMobile\/(\d+\.\d+\.\d+)/)?.[1] ??
+    "0.0.0"
+  );
+}
+function isNewer(remote: string, current: string) {
+  const a = remote.split(".").map(Number);
+  const b = current.split(".").map(Number);
+  for (let i = 0; i < Math.max(a.length, b.length); i += 1) {
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    if (av !== bv) return av > bv;
+  }
+  return false;
+}
 const Context = createContext<{ state: UpdateState | null; open: () => void }>({
   state: null,
   open: () => {},
 });
+export function useAppUpdateState() {
+  return useContext(Context).state;
+}
 const labels: Record<UpdateState["status"], string> = {
   idle: "Atualizações",
   checking: "Verificando atualização…",
@@ -78,54 +110,117 @@ export function DesktopUpdateProvider({
   const { session } = useCallSession();
   useEffect(() => {
     const bridge = window.enturmaDesktop;
-    if (!bridge) return;
-    let live = true;
-    const receive = (next: UpdateState) => {
-      if (!live) return;
-      setState(next);
-      if (next.status === "ready" && prompted.current !== next.version) {
-        prompted.current = next.version ?? "";
-        setOpen(true);
-      }
-    };
-    if (bridge.getUpdateState)
-      void bridge
-        .getUpdateState()
-        .then(receive)
-        .catch(() => {});
-    else
-      void bridge
-        .getInfo()
-        .then((info) => {
-          const legacy = info.platform === "win32";
-          if (!live) return;
-          setLegacyWindows(legacy);
-          receive({
-            status: "unsupported",
-            progress: 0,
-            currentVersion: info.version,
-            message: legacy
-              ? "Atualize o aplicativo antigo pelo instalador oficial para ativar as próximas atualizações automáticas."
-              : "Use a página de downloads para atualizar este sistema.",
-          });
-          if (legacy) {
-            try {
-              if (
-                sessionStorage.getItem("enturma-legacy-update") !== info.version
-              ) {
-                sessionStorage.setItem("enturma-legacy-update", info.version);
+    if (bridge) {
+      let live = true;
+      const receive = (next: UpdateState) => {
+        if (!live) return;
+        setState(next);
+        if (next.status === "ready" && prompted.current !== next.version) {
+          prompted.current = next.version ?? "";
+          setOpen(true);
+        }
+      };
+      if (bridge.getUpdateState)
+        void bridge.getUpdateState().then(receive).catch(() => {});
+      else
+        void bridge
+          .getInfo()
+          .then((info) => {
+            const legacy = info.platform === "win32";
+            if (!live) return;
+            setLegacyWindows(legacy);
+            receive({
+              status: "unsupported",
+              progress: 0,
+              currentVersion: info.version,
+              message: legacy
+                ? "Atualize o aplicativo antigo pelo instalador oficial para ativar as próximas atualizações automáticas."
+                : "Use a página de downloads para atualizar este sistema.",
+            });
+            if (legacy) {
+              try {
+                if (sessionStorage.getItem("enturma-legacy-update") !== info.version) {
+                  sessionStorage.setItem("enturma-legacy-update", info.version);
+                  setOpen(true);
+                }
+              } catch {
                 setOpen(true);
               }
-            } catch {
-              setOpen(true);
             }
+          })
+          .catch(() => {});
+      const unsubscribe = bridge.onUpdateState?.(receive);
+      return () => {
+        live = false;
+        unsubscribe?.();
+      };
+    }
+
+    if (!isMobileApp()) return;
+    let live = true;
+    const currentVersion = mobileVersion();
+    const check = async () => {
+      try {
+        const response = await fetch(
+          androidUpdateOrigin + "/latest-android.json?ts=" + Date.now(),
+          { cache: "no-store" },
+        );
+        if (!response.ok)
+          throw new Error("Não foi possível verificar a atualização.");
+        const release = (await response.json()) as AndroidRelease;
+        if (
+          !/^\d+\.\d+\.\d+$/.test(release.version) ||
+          !release.downloadUrl?.startsWith(androidUpdateOrigin + "/")
+        )
+          throw new Error("Manifesto de atualização inválido.");
+
+        if (!live) return;
+        if (isNewer(release.version, currentVersion)) {
+          const next: UpdateState = {
+            status: "available",
+            progress: 0,
+            currentVersion,
+            version: release.version,
+            downloadUrl: release.downloadUrl,
+            message:
+              "Uma nova versão do Enturma para Android está pronta para instalar.",
+          };
+          setState(next);
+          if (prompted.current !== release.version) {
+            prompted.current = release.version;
+            setOpen(true);
           }
-        })
-        .catch(() => {});
-    const unsubscribe = bridge.onUpdateState?.(receive);
+        } else {
+          setState({
+            status: "current",
+            progress: 100,
+            currentVersion,
+            version: release.version,
+          });
+        }
+      } catch (error) {
+        if (!live) return;
+        setState({
+          status: "error",
+          progress: 0,
+          currentVersion,
+          message: (error as Error).message,
+        });
+      }
+    };
+    const onCheck = () => void check();
+    void check();
+    const interval = window.setInterval(check, 15 * 60 * 1000);
+    const onVisible = () => {
+      if (document.visibilityState === "visible") void check();
+    };
+    window.addEventListener("enturma-mobile-update-check", onCheck);
+    document.addEventListener("visibilitychange", onVisible);
     return () => {
       live = false;
-      unsubscribe?.();
+      window.clearInterval(interval);
+      window.removeEventListener("enturma-mobile-update-check", onCheck);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
   useEffect(() => {
@@ -182,7 +277,47 @@ export function DesktopUpdateProvider({
             </>
           )}
           {state.message && <p role="status">{state.message}</p>}
-          {legacyWindows ? (
+          {isMobileApp() && state.status === "available" ? (
+            <>
+              <p>
+                Atualização Android {state.version} disponível. Recomendamos manter
+                o Enturma atualizado para receber correções e novos recursos.
+              </p>
+              <div className="actions">
+                <button
+                  onClick={() => {
+                    if (!state.downloadUrl) return;
+                    if (window.EnturmaNative?.installUpdate) {
+                      window.EnturmaNative.installUpdate(state.downloadUrl);
+                      setState({
+                        ...state,
+                        status: "downloading",
+                        message:
+                          "Download iniciado. O Android pedirá sua confirmação para instalar a atualização.",
+                      });
+                    } else {
+                      window.location.href = state.downloadUrl;
+                    }
+                  }}
+                >
+                  Atualizar agora
+                </button>
+                <button className="secondary" onClick={() => setOpen(false)}>
+                  Depois
+                </button>
+              </div>
+            </>
+          ) : isMobileApp() && state.status === "downloading" ? (
+            <>
+              <p>
+                O Android está baixando a atualização. Quando terminar, confirme
+                a instalação mostrada pelo sistema.
+              </p>
+              <button className="secondary" onClick={() => setOpen(false)}>
+                Continuar usando o Enturma
+              </button>
+            </>
+          ) : legacyWindows ? (
             <>
               <p>
                 O atualizador desta versão pode fechar sem concluir. Não é
@@ -250,6 +385,10 @@ export function DesktopUpdateProvider({
                 state.status,
               )}
               onClick={() => {
+                if (isMobileApp()) {
+                  window.dispatchEvent(new Event("enturma-mobile-update-check"));
+                  return;
+                }
                 void window.enturmaDesktop
                   ?.checkForUpdates()
                   .catch((e) =>
@@ -280,6 +419,9 @@ export function DesktopUpdateButton() {
       onClick={open}
     >
       <RefreshCw size={20} aria-hidden="true" />
+      {["available", "downloading", "ready"].includes(state.status) ? (
+        <span className="app-update-dot" aria-hidden="true" />
+      ) : null}
     </button>
   ) : null;
 }
