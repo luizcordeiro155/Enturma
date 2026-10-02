@@ -15,7 +15,11 @@ import {
   Gamepad2,
   Download,
 } from "lucide-react";
-import { isInstalledApp } from "./desktop-updates";
+import {
+  isInstalledApp,
+  isMobileApp,
+  useAppUpdateState,
+} from "./desktop-updates";
 const tabs = [
   ["/home", "Início", Home],
   ["/explore", "Salas", Users],
@@ -25,6 +29,10 @@ const tabs = [
 ] as const;
 export function MobileNavigation() {
   const path = usePathname();
+  const updateState = useAppUpdateState();
+  const updatePending =
+    isMobileApp() &&
+    ["available", "downloading", "ready"].includes(updateState?.status ?? "");
   const [open, setOpen] = useState(false);
   const sheet = useRef<HTMLDialogElement>(null);
   useEffect(() => {
@@ -60,6 +68,7 @@ export function MobileNavigation() {
         <button
           type="button"
           aria-label="Mais opções"
+          className={updatePending ? "app-update-pending" : undefined}
           onClick={() => setOpen(true)}
         >
           <Menu size={21} />
@@ -96,9 +105,21 @@ export function MobileNavigation() {
           )
             .filter(([href]) => href !== "/download" || !isInstalledApp())
             .map(([href, label, Icon]) => (
-              <Link href={href} key={href} onClick={() => setOpen(false)}>
+              <Link
+                href={href}
+                key={href}
+                className={
+                  updatePending && href === "/settings"
+                    ? "app-update-pending-link"
+                    : undefined
+                }
+                onClick={() => setOpen(false)}
+              >
                 <Icon size={22} />
                 {label}
+                {updatePending && href === "/settings" ? (
+                  <span className="app-update-badge">Atualização</span>
+                ) : null}
               </Link>
             ))}
         </dialog>
