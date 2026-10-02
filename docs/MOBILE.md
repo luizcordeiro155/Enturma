@@ -62,3 +62,28 @@ O WebView aceita navegação interna somente na origem HTTPS oficial. Links exte
 - Se o download terminar em segundo plano, o Enturma mostra uma ação direta para abrir o instalador sem procurar o APK em Downloads.
 - Ao reabrir o aplicativo, um APK já concluído é detectado automaticamente.
 - A confirmação final continua sendo a tela oficial do instalador do Android, onde o usuário toca em **Instalar**.
+
+
+## Notificações 0.3.12
+
+- O Android registra cada instalação com um token FCM e recebe notificações mesmo com o Enturma minimizado ou fechado.
+- Mensagens de salas, mensagens privadas, menções, respostas/interações do fórum e demais eventos já emitidos pelo `NotificationService` podem chegar como push.
+- Ao tocar em uma notificação, o app abre diretamente a rota correspondente da conversa, sala ou fórum.
+- Configurações → Notificações separa **No aplicativo**, **No celular (push)** e **E-mail** por categoria.
+- **Menções** possuem categoria própria, independente de mensagens comuns.
+- O logout desvincula a instalação da conta atual.
+- O atualizador usa um único ID de notificação; ao concluir o download, a mesma notificação passa a oferecer **Instalar**.
+- Quando o Enturma está aberto, o aviso nativo de nova versão é suprimido para não duplicar o diálogo interno do atualizador.
+
+### Variáveis Firebase do APK
+
+O build Android habilita FCM somente quando as quatro variáveis abaixo estiverem definidas no serviço que gera o APK:
+
+```dotenv
+FIREBASE_ANDROID_PROJECT_ID=...
+FIREBASE_ANDROID_APP_ID=...
+FIREBASE_ANDROID_API_KEY=...
+FIREBASE_ANDROID_SENDER_ID=...
+```
+
+A API precisa de `FCM_SERVICE_ACCOUNT_BASE64`, contendo em Base64 o JSON da service account autorizada a enviar mensagens pelo Firebase Cloud Messaging HTTP v1. A chave privada fica apenas na API e nunca é incluída no APK.
