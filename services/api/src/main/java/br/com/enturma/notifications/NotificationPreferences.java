@@ -9,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class NotificationPreferences {
   public static final Set<String> CATEGORIES =
-      Set.of("ROOM_MESSAGE", "MENTION", "ROOM_NOTICE", "FORUM", "ACHIEVEMENT", "RIDE", "FRIEND");
+      Set.of("ROOM_MESSAGE", "PRIVATE_MESSAGE", "MENTION", "ROOM_NOTICE", "FORUM", "ACHIEVEMENT", "RIDE", "FRIEND");
   private final Db db;
 
   public NotificationPreferences(Db db) {
@@ -18,6 +18,7 @@ public class NotificationPreferences {
 
   public String category(String kind, String context) {
     if (kind.equals("MENTION")) return "MENTION";
+    if (kind.equals("PRIVATE_MESSAGE")) return "PRIVATE_MESSAGE";
     if (kind.equals("ACHIEVEMENT")) return "ACHIEVEMENT";
     if (context != null && context.startsWith("forum:")) return "FORUM";
     if (context != null && (context.startsWith("ride:") || context.startsWith("ride-match:")))
