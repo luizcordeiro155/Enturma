@@ -22,6 +22,8 @@
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
+        "FOREGROUND_SERVICE",
+        "FOREGROUND_SERVICE_MEDIA_PROJECTION",
         "POST_NOTIFICATIONS"
       ],
       "adaptiveIcon": {
@@ -32,6 +34,19 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
+      [
+        "@livekit/react-native-expo-plugin",
+        {
+          "android": {
+            "audioType": "communication",
+            "enableScreenShareService": true
+          },
+          "ios": {
+            "enableMultitaskingCameraAccess": false
+          }
+        }
+      ],
+      "@config-plugins/react-native-webrtc",
       [
         "expo-image-picker",
         {
