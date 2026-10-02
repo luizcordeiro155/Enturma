@@ -851,11 +851,19 @@ class MainActivity : Activity() {
             .put("installationId", pushInstallationId(this))
             .put("token", token)
             .put("platform", "ANDROID")
-        webView.evaluateJavascript(
-            "window.dispatchEvent(new CustomEvent(\'enturma-native-push-token\',{detail:" +
-                payload.toString() + "}));",
-            null,
-        )
+        val script =
+            "(function(){var detail=" + payload.toString() +
+                ";window.dispatchEvent(new CustomEvent('enturma-native-push-token',{detail:detail}));" +
+                "try{var key=detail.installationId+':'+detail.token;" +
+                "var raw=localStorage.getItem('enturma-native-push-registration-v2');" +
+                "var cached=raw?JSON.parse(raw):{};" +
+                "if(cached.key===key&&Date.now()-Number(cached.at||0)<21600000)return;" +
+                "fetch('/api/backend/notifications/push-device',{" +
+                "method:'POST',credentials:'include',headers:{'Content-Type':'application/json'}," +
+                "body:JSON.stringify(detail)}).then(function(response){" +
+                "if(response.ok)localStorage.setItem('enturma-native-push-registration-v2'," +
+                "JSON.stringify({key:key,at:Date.now()}));});}catch(_){}})();"
+        webView.evaluateJavascript(script, null)
     }
 
     private fun refreshNativePushToken() {
