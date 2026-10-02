@@ -473,8 +473,49 @@
 .desktop-update-dialog .actions {
   flex-wrap: wrap;
 }
-.desktop-update-icon.ready {
+.desktop-update-icon.ready,
+.desktop-update-icon.available,
+.desktop-update-icon.downloading {
+  position: relative;
   outline: 2px solid var(--accent);
+}
+.app-update-dot {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+  background: #e53935;
+}
+.app-update-pending {
+  position: relative;
+}
+.app-update-pending::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  right: 12px;
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--bg);
+  border-radius: 999px;
+  background: #e53935;
+}
+.app-update-pending-link {
+  position: relative;
+  outline: 2px solid var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--bg));
+}
+.app-update-badge {
+  margin-left: auto;
+  padding: 3px 7px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #10211c;
+  font-size: 0.68rem;
+  font-weight: 800;
 }
 
 .mobile-bottom-nav {
