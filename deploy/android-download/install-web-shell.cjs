@@ -242,10 +242,10 @@ class MainActivity : Activity() {
               var root = document.documentElement;
               if (!root) return;
               root.dataset.enturmaMobile = "true";
-              root.style.setProperty("--native-safe-top", "${safeTopCssPx}px");
-              root.style.setProperty("--native-safe-right", "${safeRightCssPx}px");
-              root.style.setProperty("--native-safe-bottom", "${safeBottomCssPx}px");
-              root.style.setProperty("--native-safe-left", "${safeLeftCssPx}px");
+              root.style.setProperty("--native-safe-top", "\${safeTopCssPx}px");
+              root.style.setProperty("--native-safe-right", "\${safeRightCssPx}px");
+              root.style.setProperty("--native-safe-bottom", "\${safeBottomCssPx}px");
+              root.style.setProperty("--native-safe-left", "\${safeLeftCssPx}px");
             })();
         """.trimIndent()
 
