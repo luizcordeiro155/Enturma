@@ -260,6 +260,24 @@ export function ProfileView({
                   className="button"
                   onClick={async () => {
                     try {
+                      try {
+                        const bridge = window.EnturmaNative as
+                          | (typeof window.EnturmaNative & {
+                              getPushRegistration?: () => string;
+                            })
+                          | undefined;
+                        const raw = bridge?.getPushRegistration?.();
+                        const installationId = raw
+                          ? String(JSON.parse(raw).installationId || "")
+                          : "";
+                        if (installationId) {
+                          await api(
+                            `/notifications/push-device/${encodeURIComponent(installationId)}`,
+                            { method: "DELETE" },
+                          ).catch(() => {});
+                        }
+                        localStorage.removeItem("enturma-push-registration-v1");
+                      } catch {}
                       await post("/auth/logout");
                       router.push("/login");
                     } catch (e) {
