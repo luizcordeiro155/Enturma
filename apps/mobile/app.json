@@ -3,7 +3,7 @@
     "name": "Enturma",
     "slug": "enturma",
     "scheme": "enturma",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "ios": {
@@ -18,7 +18,7 @@
     },
     "android": {
       "package": "br.com.enturma.app",
-      "versionCode": 4,
+      "versionCode": 5,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO"
