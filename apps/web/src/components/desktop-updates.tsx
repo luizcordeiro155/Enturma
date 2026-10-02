@@ -79,9 +79,14 @@ function isNewer(remote: string, current: string) {
   }
   return false;
 }
-const Context = createContext<{ state: UpdateState | null; open: () => void }>({
+const Context = createContext<{
+  state: UpdateState | null;
+  open: () => void;
+  check: () => void;
+}>({
   state: null,
   open: () => {},
+  check: () => {},
 });
 export function useAppUpdateState() {
   return useContext(Context).state;
@@ -266,12 +271,19 @@ export function DesktopUpdateProvider({
               ...state,
               status: "downloading",
               message:
-                "Baixando atualização em segundo plano. Continue usando o Enturma normalmente.",
+                "Baixando atualização em segundo plano. Você pode continuar usando o Enturma.",
             });
             return;
           }
           if (isMobileApp() && state?.status === "downloading") return;
           setOpen(true);
+        },
+        check: () => {
+          if (isMobileApp()) {
+            window.dispatchEvent(new Event("enturma-mobile-update-check"));
+            return;
+          }
+          void window.enturmaDesktop?.checkForUpdates().catch(() => {});
         },
       }}
     >
@@ -452,4 +464,65 @@ export function DesktopUpdateButton() {
       ) : null}
     </button>
   ) : null;
+}
+
+export function AppUpdateSettingsCard() {
+  const { state, open, check } = useContext(Context);
+  if (!isInstalledApp()) return null;
+
+  const mobile = isMobileApp();
+  const available = state?.status === "available";
+  const downloading = state?.status === "downloading";
+  const current = state?.status === "current";
+  const error = state?.status === "error";
+  const busy = state?.status === "checking" || downloading || state?.status === "installing";
+
+  return (
+    <section className={`app-update-settings-card ${state?.status ?? "checking"}`}>
+      <div className="app-update-settings-icon" aria-hidden="true">
+        <RefreshCw size={22} />
+        {available || downloading || state?.status === "ready" ? (
+          <span className="app-update-dot" />
+        ) : null}
+      </div>
+      <div className="app-update-settings-copy">
+        <strong>Atualização do aplicativo</strong>
+        <span>
+          {state
+            ? labels[state.status]
+            : "Verificando se há uma nova versão…"}
+        </span>
+        {state?.currentVersion ? (
+          <small>
+            Instalada: {state.currentVersion}
+            {state.version ? ` · Disponível: ${state.version}` : ""}
+          </small>
+        ) : null}
+        {state?.message ? <small>{state.message}</small> : null}
+      </div>
+      <div className="app-update-settings-actions">
+        {mobile && available ? (
+          <button type="button" onClick={open}>
+            Atualizar agora
+          </button>
+        ) : mobile && downloading ? (
+          <button type="button" disabled>
+            Baixando…
+          </button>
+        ) : current ? (
+          <button type="button" className="secondary" onClick={check}>
+            Verificar novamente
+          </button>
+        ) : error ? (
+          <button type="button" onClick={check}>
+            Tentar novamente
+          </button>
+        ) : (
+          <button type="button" className="secondary" disabled={busy} onClick={check}>
+            {busy ? "Verificando…" : "Verificar atualização"}
+          </button>
+        )}
+      </div>
+    </section>
+  );
 }
