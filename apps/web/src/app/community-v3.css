@@ -2575,3 +2575,98 @@
 }
 
 /* redeploy: publish mobile room recovery v5 */
+
+
+/* Mobile room keyboard recovery v6 */
+@media (max-width: 760px) {
+  .room-active-shell {
+    --room-keyboard-offset: 0px;
+    --room-bottom-ui-height: var(--room-mobile-nav-height);
+  }
+
+  /*
+   * Ao abrir o teclado, as abas somem temporariamente e o compositor sobe
+   * exatamente até o limite visível do teclado. Isso evita que o texto sendo
+   * digitado fique escondido pelo IME do Android.
+   */
+  html[data-room-keyboard="true"] .room-active-shell {
+    --room-bottom-ui-height: 0px;
+  }
+
+  html[data-room-keyboard="true"] .room-active-shell .room-mobile-nav {
+    display: none !important;
+  }
+
+  html[data-room-keyboard="true"] .room-active-shell .study-room-page {
+    padding-bottom: 0 !important;
+  }
+
+  .room-active-shell .persistent-composer {
+    bottom: calc(
+      var(--room-bottom-ui-height) + var(--room-keyboard-offset)
+    ) !important;
+  }
+
+  .room-active-shell .typing-status {
+    bottom: calc(
+      var(--room-bottom-ui-height) +
+        var(--room-keyboard-offset) +
+        var(--room-chat-composer-height) -
+        19px
+    ) !important;
+  }
+
+  html[data-room-keyboard="true"]
+    .room-active-shell
+    .persistent-composer {
+    max-height: min(156px, 42dvh);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  html[data-room-keyboard="true"]
+    .room-active-shell
+    .persistent-messages {
+    padding-bottom: calc(
+      var(--room-chat-composer-height) +
+        var(--room-keyboard-offset) +
+        28px
+    ) !important;
+  }
+
+  /*
+   * Campos de IA e Materiais continuam roláveis quando o teclado ocupa
+   * metade da tela. O foco é trazido ao centro pelo visualViewport handler.
+   */
+  html[data-room-keyboard="true"]
+    .room-active-shell
+    .room-main-panel
+    > .room-tools
+    > .room-tool-card {
+    padding-bottom: calc(var(--room-keyboard-offset) + 28px) !important;
+  }
+
+  html[data-room-keyboard="true"]
+    .room-active-shell
+    .ai-channel textarea,
+  html[data-room-keyboard="true"]
+    .room-active-shell
+    .ai-channel select,
+  html[data-room-keyboard="true"]
+    .room-active-shell
+    .room-tools input,
+  html[data-room-keyboard="true"]
+    .room-active-shell
+    .room-tools textarea {
+    scroll-margin-top: 18px;
+    scroll-margin-bottom: calc(var(--room-keyboard-offset) + 24px);
+  }
+
+  /*
+   * Se o WebView já estiver em adjustResize e não houver offset de overlay,
+   * use a altura real do visualViewport para não manter uma área invisível
+   * atrás do teclado.
+   */
+  html[data-room-keyboard="true"] .room-active-shell .study-room-shell {
+    max-height: var(--room-visual-viewport-height, 100dvh) !important;
+  }
+}
