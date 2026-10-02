@@ -816,6 +816,10 @@ class MainActivity : Activity() {
         uri: Uri,
         downloadId: Long? = null,
     ): Boolean {
+        if (downloadId != null && downloadId > 0) {
+            val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+            if (prefs.getLong(PREF_INSTALL_PROMPTED_ID, -1L) == downloadId) return true
+        }
         return runCatching {
             startActivity(
                 Intent(Intent.ACTION_VIEW).apply {
