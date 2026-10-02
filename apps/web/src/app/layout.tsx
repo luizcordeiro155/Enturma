@@ -15,6 +15,7 @@ import { CallSessionProvider } from "@/components/call-session-provider";
 import "./community-v3.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
+import { MobilePushRegistration } from "@/components/mobile-push-registration";
 export const metadata: Metadata = {
   title: "Enturma — estude em companhia",
   description: "Encontre sua matéria, entre em uma turma e aprenda junto.",
@@ -37,6 +38,7 @@ export default function Layout({
       </head>
       <body>
         <Motion />
+        <MobilePushRegistration />
         <CallSessionProvider>
           <DesktopUpdateProvider>
             <RideActivity>{children}</RideActivity>

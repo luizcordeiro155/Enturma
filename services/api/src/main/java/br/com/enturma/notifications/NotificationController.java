@@ -12,14 +12,28 @@ import org.springframework.web.bind.annotation.*;
 public class NotificationController {
   private final NotificationService service;
   private final NotificationPreferences preferences;
+  private final PushNotificationService push;
 
-  public NotificationController(NotificationService service, NotificationPreferences preferences) {
+  public NotificationController(
+      NotificationService service,
+      NotificationPreferences preferences,
+      PushNotificationService push) {
     this.preferences = preferences;
     this.service = service;
+    this.push = push;
   }
 
   public record Preference(
-      @jakarta.validation.constraints.NotBlank String category, boolean inApp, boolean email) {}
+      @jakarta.validation.constraints.NotBlank String category,
+      boolean inApp,
+      boolean email,
+      Boolean push) {}
+
+  public record PushDevice(
+      @jakarta.validation.constraints.NotBlank @Size(max = 100) String installationId,
+      @jakarta.validation.constraints.NotBlank @Size(max = 4096) String token,
+      @jakarta.validation.constraints.NotBlank
+      @jakarta.validation.constraints.Pattern(regexp = "ANDROID") String platform) {}
 
   @GetMapping("/preferences")
   public Object preferences(@AuthenticationPrincipal Actor a) {
@@ -28,7 +42,18 @@ public class NotificationController {
 
   @PutMapping("/preferences")
   public void preference(@AuthenticationPrincipal Actor a, @Valid @RequestBody Preference p) {
-    preferences.save(a, p.category(), p.inApp(), p.email());
+    preferences.save(a, p.category(), p.inApp(), p.email(), p.push());
+  }
+
+  @PostMapping("/push-device")
+  public void registerPush(@AuthenticationPrincipal Actor a, @Valid @RequestBody PushDevice device) {
+    push.register(a, device.installationId(), device.token(), device.platform());
+  }
+
+  @DeleteMapping("/push-device/{installationId}")
+  public void unregisterPush(
+      @AuthenticationPrincipal Actor a, @PathVariable @Size(max = 100) String installationId) {
+    push.unregister(a, installationId);
   }
 
   @GetMapping("/inbox")

@@ -8,14 +8,16 @@ import {
   useExperience,
 } from "../src/ui";
 import { api } from "../src/api";
-type Preference = { category: string; inApp: boolean; email: boolean };
+type Preference = { category: string; inApp: boolean; email: boolean; push: boolean };
 const labels: Record<string, string> = {
   ROOM_MESSAGE: "Mensagens de salas",
+  PRIVATE_MESSAGE: "Mensagens privadas",
+  MENTION: "Menções a você",
   ROOM_NOTICE: "Avisos de salas",
   FORUM: "Fórum",
   ACHIEVEMENT: "Conquistas",
   RIDE: "Caronas",
-  FRIEND: "Amigos",
+  FRIEND: "Amizades",
 };
 export default function Settings() {
   const styles = useStyles();
@@ -80,7 +82,7 @@ export default function Settings() {
         />
       </View>
       <Text style={styles.label}>Notificações</Text>
-      <Text style={styles.muted}>E-mails de segurança permanecem ativos.</Text>
+      <Text style={styles.muted}>Escolha o que aparece no app, chega no celular ou por e-mail. E-mails de segurança permanecem ativos.</Text>
       {items.map((i) => (
         <View style={styles.row} key={i.category}>
           <Text style={styles.label}>{labels[i.category]}</Text>
@@ -88,6 +90,11 @@ export default function Settings() {
           <Switch
             value={i.inApp}
             onValueChange={(inApp) => void update({ ...i, inApp })}
+          />
+          <Text style={styles.text}>No celular</Text>
+          <Switch
+            value={i.push}
+            onValueChange={(push) => void update({ ...i, push })}
           />
           <Text style={styles.text}>Por e-mail</Text>
           <Switch

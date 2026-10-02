@@ -5,6 +5,11 @@ const project = process.cwd();
 const mobile = path.join(project, "apps", "mobile");
 const version = require(path.join(mobile, "package.json")).version;
 const webOrigin = (process.env.ENTURMA_WEB_URL || "https://enturma-flax.vercel.app").replace(/\/$/, "");
+const firebaseProjectId = process.env.FIREBASE_ANDROID_PROJECT_ID || "";
+const firebaseAppId = process.env.FIREBASE_ANDROID_APP_ID || "";
+const firebaseApiKey = process.env.FIREBASE_ANDROID_API_KEY || "";
+const firebaseSenderId = process.env.FIREBASE_ANDROID_SENDER_ID || "";
+const kotlinString = (value) => JSON.stringify(String(value));
 
 if (!/^https:\/\/[^/]+$/.test(webOrigin)) {
   throw new Error("ENTURMA_WEB_URL precisa ser uma origem HTTPS sem caminho.");
@@ -49,6 +54,11 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
 import android.widget.FrameLayout
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
@@ -67,6 +77,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.UUID
 
 private const val ANDROID_UPDATE_ORIGIN =
     "https://enturma-android-download-v3-production.up.railway.app"
@@ -77,7 +88,16 @@ private const val UPDATE_ACTION_INSTALL = "br.com.enturma.app.action.INSTALL_UPD
 private const val UPDATE_ACTION_OPEN_INSTALLER = "br.com.enturma.app.action.OPEN_DOWNLOADED_UPDATE"
 private const val UPDATE_EXTRA_URL = "downloadUrl"
 private const val UPDATE_EXTRA_DOWNLOAD_ID = "downloadId"
-private const val UPDATE_READY_NOTIFICATION_ID = 4803
+private const val PUSH_ACTION_OPEN = "br.com.enturma.app.action.OPEN_PUSH"
+private const val PUSH_EXTRA_HREF = "href"
+private const val PUSH_CHANNEL_ID = "enturma_social"
+private const val PUSH_PREFS = "enturma_push_state"
+private const val PREF_PUSH_INSTALLATION_ID = "installation_id"
+private const val PREF_PUSH_TOKEN = "push_token"
+private const val FIREBASE_PROJECT_ID = ${kotlinString(firebaseProjectId)}
+private const val FIREBASE_APP_ID = ${kotlinString(firebaseAppId)}
+private const val FIREBASE_API_KEY = ${kotlinString(firebaseApiKey)}
+private const val FIREBASE_SENDER_ID = ${kotlinString(firebaseSenderId)}
 private const val UPDATE_PREFS = "enturma_update_state"
 private const val PREF_NOTIFIED_VERSION = "notified_version"
 private const val PREF_DOWNLOAD_ID = "download_id"
@@ -95,6 +115,134 @@ private fun isNewerVersion(remote: String, current: String): Boolean {
         if (av != bv) return av > bv
     }
     return false
+}
+
+
+private object EnturmaAppState {
+    @Volatile var foreground = false
+}
+
+private fun safePushHref(value: String?): String {
+    val href = value?.takeIf {
+        it.startsWith("/") && !it.startsWith("//") && it.length <= 300
+    }
+    return href ?: "/notifications"
+}
+
+private fun pushInstallationId(context: Context): String {
+    val prefs = context.getSharedPreferences(PUSH_PREFS, Context.MODE_PRIVATE)
+    val existing = prefs.getString(PREF_PUSH_INSTALLATION_ID, null)
+    if (!existing.isNullOrBlank()) return existing
+    val created = UUID.randomUUID().toString()
+    prefs.edit().putString(PREF_PUSH_INSTALLATION_ID, created).apply()
+    return created
+}
+
+private fun initializeFirebase(context: Context): Boolean {
+    if (
+        FIREBASE_PROJECT_ID.isBlank() ||
+        FIREBASE_APP_ID.isBlank() ||
+        FIREBASE_API_KEY.isBlank() ||
+        FIREBASE_SENDER_ID.isBlank()
+    ) return false
+
+    return runCatching {
+        if (FirebaseApp.getApps(context).isEmpty()) {
+            FirebaseApp.initializeApp(
+                context,
+                FirebaseOptions.Builder()
+                    .setProjectId(FIREBASE_PROJECT_ID)
+                    .setApplicationId(FIREBASE_APP_ID)
+                    .setApiKey(FIREBASE_API_KEY)
+                    .setGcmSenderId(FIREBASE_SENDER_ID)
+                    .build(),
+            )
+        }
+        FirebaseMessaging.getInstance().isAutoInitEnabled = true
+        true
+    }.getOrDefault(false)
+}
+
+private fun storePushToken(context: Context, token: String) {
+    if (token.isBlank()) return
+    context.getSharedPreferences(PUSH_PREFS, Context.MODE_PRIVATE)
+        .edit()
+        .putString(PREF_PUSH_TOKEN, token)
+        .apply()
+}
+
+private fun ensurePushNotificationChannel(context: Context) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+    val manager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    manager.createNotificationChannel(
+        NotificationChannel(
+            PUSH_CHANNEL_ID,
+            "Mensagens e atividades",
+            NotificationManager.IMPORTANCE_HIGH,
+        ).apply {
+            description =
+                "Mensagens, menções, respostas do fórum e outras atividades escolhidas pelo usuário."
+        },
+    )
+}
+
+class EnturmaMessagingService : FirebaseMessagingService() {
+    override fun onNewToken(token: String) {
+        storePushToken(this, token)
+    }
+
+    override fun onMessageReceived(message: RemoteMessage) {
+        val showInForeground =
+            message.data["showInForeground"].equals("true", ignoreCase = true)
+        if (EnturmaAppState.foreground && !showInForeground) return
+        if (
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                PackageManager.PERMISSION_GRANTED
+        ) return
+
+        val data = message.data
+        val title = data["title"]?.take(120) ?: "Enturma"
+        val body = data["body"]?.take(240) ?: "Você tem uma nova notificação."
+        val href = safePushHref(data["href"])
+        ensurePushNotificationChannel(this)
+
+        val open = Intent(this, MainActivity::class.java).apply {
+            action = PUSH_ACTION_OPEN
+            putExtra(PUSH_EXTRA_HREF, href)
+            flags =
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP
+        }
+        val requestCode =
+            (data["notificationId"] ?: href + body).hashCode()
+        val pending = PendingIntent.getActivity(
+            this,
+            requestCode,
+            open,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val builder =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                Notification.Builder(this, PUSH_CHANNEL_ID)
+            else Notification.Builder(this)
+
+        val notification = builder
+            .setSmallIcon(android.R.drawable.stat_notify_chat)
+            .setContentTitle(title)
+            .setContentText(body)
+            .setStyle(Notification.BigTextStyle().bigText(body))
+            .setContentIntent(pending)
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+            .build()
+
+        val manager =
+            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(requestCode, notification)
+    }
 }
 
 private object EnturmaUpdateScheduler {
@@ -156,6 +304,7 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
 
                 val prefs =
                     context.getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+                if (EnturmaAppState.foreground) return@Thread
                 if (prefs.getString(PREF_NOTIFIED_VERSION, null) == remote) {
                     return@Thread
                 }
@@ -272,7 +421,7 @@ private fun showInstallReadyNotification(context: Context, downloadId: Long) {
     }
     val pending = PendingIntent.getActivity(
         context,
-        UPDATE_READY_NOTIFICATION_ID,
+        UPDATE_NOTIFICATION_ID,
         open,
         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
     )
@@ -298,7 +447,7 @@ private fun showInstallReadyNotification(context: Context, downloadId: Long) {
         .build()
     val manager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    manager.notify(UPDATE_READY_NOTIFICATION_ID, notification)
+    manager.notify(UPDATE_NOTIFICATION_ID, notification)
 }
 
 class EnturmaDownloadCompleteReceiver : BroadcastReceiver() {
@@ -344,7 +493,6 @@ class MainActivity : Activity() {
     private var updateDownloadId: Long? = null
     private var updateReceiverRegistered = false
     private var pendingUpdateUrl: String? = null
-    private var appInForeground = false
 
     private val updateDownloadReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -374,9 +522,8 @@ class MainActivity : Activity() {
             val notifications =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notifications.cancel(UPDATE_NOTIFICATION_ID)
-            notifications.cancel(UPDATE_READY_NOTIFICATION_ID)
 
-            if (appInForeground) {
+            if (EnturmaAppState.foreground) {
                 openDownloadedInstaller(uri, downloadId)
             } else {
                 showInstallReadyNotification(this@MainActivity, downloadId)
@@ -398,11 +545,34 @@ class MainActivity : Activity() {
                 startUpdateInstall(downloadUrl)
             }
         }
+
+        @JavascriptInterface
+        fun getPushRegistration(): String {
+            return pushRegistrationJson()
+        }
+
+        @JavascriptInterface
+        fun refreshPushToken() {
+            runOnUiThread {
+                refreshNativePushToken()
+            }
+        }
+
+        @JavascriptInterface
+        fun clearPushToken() {
+            runOnUiThread {
+                clearNativePushToken()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        EnturmaAppState.foreground = true
+        initializeFirebase(this)
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .cancel(UPDATE_NOTIFICATION_ID)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         window.statusBarColor = Color.TRANSPARENT
@@ -489,6 +659,8 @@ class MainActivity : Activity() {
             override fun onPageFinished(view: WebView?, url: String?) {
                 super.onPageFinished(view, url)
                 syncSafeAreaCss()
+                dispatchCachedPushRegistration()
+                refreshNativePushToken()
             }
 
             override fun shouldOverrideUrlLoading(
@@ -605,7 +777,8 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
-        appInForeground = true
+        EnturmaAppState.foreground = true
+        refreshNativePushToken()
         EnturmaUpdateScheduler.checkNow(this)
         val pending = pendingUpdateUrl
         if (
@@ -620,7 +793,7 @@ class MainActivity : Activity() {
     }
 
     override fun onPause() {
-        appInForeground = false
+        EnturmaAppState.foreground = false
         super.onPause()
     }
 
@@ -650,11 +823,61 @@ class MainActivity : Activity() {
     }
 
     private fun routeFromIntent(intent: Intent?): String? {
+        if (intent?.action == PUSH_ACTION_OPEN) {
+            return safePushHref(intent.getStringExtra(PUSH_EXTRA_HREF))
+        }
         val uri = intent?.data ?: return null
         if (uri.scheme != "enturma") return null
         val path = uri.path?.takeIf { it.startsWith("/") } ?: return null
         val query = uri.encodedQuery?.let { "?\${it}" } ?: ""
         return "\${path}\${query}"
+    }
+
+    private fun pushRegistrationJson(): String {
+        val prefs = getSharedPreferences(PUSH_PREFS, Context.MODE_PRIVATE)
+        return JSONObject()
+            .put("installationId", pushInstallationId(this))
+            .put("token", prefs.getString(PREF_PUSH_TOKEN, "") ?: "")
+            .put("platform", "ANDROID")
+            .toString()
+    }
+
+    private fun dispatchCachedPushRegistration() {
+        if (!::webView.isInitialized) return
+        val prefs = getSharedPreferences(PUSH_PREFS, Context.MODE_PRIVATE)
+        val token = prefs.getString(PREF_PUSH_TOKEN, null) ?: return
+        if (token.isBlank()) return
+        val payload = JSONObject()
+            .put("installationId", pushInstallationId(this))
+            .put("token", token)
+            .put("platform", "ANDROID")
+        webView.evaluateJavascript(
+            "window.dispatchEvent(new CustomEvent(\'enturma-native-push-token\',{detail:" +
+                payload.toString() + "}));",
+            null,
+        )
+    }
+
+    private fun refreshNativePushToken() {
+        if (!initializeFirebase(this)) return
+        FirebaseMessaging.getInstance().token.addOnCompleteListener { task ->
+            if (!task.isSuccessful) return@addOnCompleteListener
+            val token = task.result ?: return@addOnCompleteListener
+            storePushToken(this, token)
+            runOnUiThread {
+                dispatchCachedPushRegistration()
+            }
+        }
+    }
+
+    private fun clearNativePushToken() {
+        getSharedPreferences(PUSH_PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .remove(PREF_PUSH_TOKEN)
+            .apply()
+        if (initializeFirebase(this)) {
+            FirebaseMessaging.getInstance().deleteToken()
+        }
     }
 
     private fun registerUpdateDownloadReceiver() {
@@ -690,7 +913,7 @@ class MainActivity : Activity() {
                     .apply()
             }
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-                .cancel(UPDATE_READY_NOTIFICATION_ID)
+                .cancel(UPDATE_NOTIFICATION_ID)
             true
         }.getOrElse {
             if (downloadId != null && downloadId > 0) {
@@ -718,7 +941,7 @@ class MainActivity : Activity() {
     }
 
     private fun maybeOpenCompletedUpdate() {
-        if (!appInForeground) return
+        if (!EnturmaAppState.foreground) return
         val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
         val downloadId = prefs.getLong(PREF_DOWNLOAD_ID, -1L)
         if (
@@ -1146,6 +1369,7 @@ class MainActivity : Activity() {
         }
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST) {
             EnturmaUpdateScheduler.checkNow(this)
+            refreshNativePushToken()
         }
     }
 
@@ -1234,7 +1458,76 @@ if (!manifest.includes("EnturmaDownloadCompleteReceiver")) {
   </application>`,
   );
 }
+if (!manifest.includes("EnturmaMessagingService")) {
+  manifest = manifest.replace(
+    "</application>",
+    `    <service android:name=".EnturmaMessagingService" android:exported="false">
+      <intent-filter>
+        <action android:name="com.google.firebase.MESSAGING_EVENT" />
+      </intent-filter>
+    </service>
+  </application>`,
+  );
+}
 fs.writeFileSync(manifestTarget, manifest, "utf8");
 
+const firebaseConfigured = Boolean(
+  firebaseProjectId && firebaseAppId && firebaseApiKey && firebaseSenderId,
+);
+
+if (firebaseConfigured) {
+  const googleServices = {
+    project_info: {
+      project_number: firebaseSenderId,
+      project_id: firebaseProjectId,
+    },
+    client: [
+      {
+        client_info: {
+          mobilesdk_app_id: firebaseAppId,
+          android_client_info: {
+            package_name: "br.com.enturma.app",
+          },
+        },
+        api_key: [{ current_key: firebaseApiKey }],
+      },
+    ],
+    configuration_version: "1",
+  };
+  fs.writeFileSync(
+    path.join(mobile, "android", "app", "google-services.json"),
+    JSON.stringify(googleServices, null, 2),
+    "utf8",
+  );
+
+  const rootGradleTarget = path.join(mobile, "android", "build.gradle");
+  let rootGradle = fs.readFileSync(rootGradleTarget, "utf8");
+  if (!rootGradle.includes("com.google.gms:google-services")) {
+    rootGradle = rootGradle.replace(
+      /dependencies\s*\{/,
+      `dependencies {
+        classpath("com.google.gms:google-services:4.5.0")`,
+    );
+  }
+  fs.writeFileSync(rootGradleTarget, rootGradle, "utf8");
+}
+
+const appGradleTarget = path.join(mobile, "android", "app", "build.gradle");
+let appGradle = fs.readFileSync(appGradleTarget, "utf8");
+if (!appGradle.includes("com.google.firebase:firebase-messaging")) {
+  appGradle = appGradle.replace(
+    /dependencies\s*\{/,
+    `dependencies {
+    implementation platform("com.google.firebase:firebase-bom:34.19.0")
+    implementation "com.google.firebase:firebase-messaging"`,
+  );
+}
+if (firebaseConfigured && !appGradle.includes("com.google.gms.google-services")) {
+  appGradle = appGradle.replace(
+    'apply plugin: "com.android.application"',
+    'apply plugin: "com.android.application"\napply plugin: "com.google.gms.google-services"',
+  );
+}
+fs.writeFileSync(appGradleTarget, appGradle, "utf8");
 console.log(`Enturma Android Web shell instalado em ${target}`);
 console.log(`Origem Web: ${webOrigin} | Versão: ${version}`);

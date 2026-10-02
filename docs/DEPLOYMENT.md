@@ -28,6 +28,7 @@ Preencha `.env` dentro do ZIP, ou use as variáveis do painel da SquareCloud (t�
 | `DATABASE_PASSWORD` | Senha do banco; opcional quando incluída na URI                                                                  |
 | `APP_URL`           | URL HTTPS web; modelo: `https://enturma-flax.vercel.app`                                                         |
 | `BFF_PROXY_SECRET`  | Chave aleatória de 32+ caracteres, igual à configurada na Vercel                                                 |
+| `FCM_SERVICE_ACCOUNT_BASE64` | Opcional; JSON da service account Firebase codificado em Base64 para push Android                               |
 
 Gere a chave localmente com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Não a coloque no Git. Ela autentica a identidade anônima que o BFF encaminha para os limites de requisição; evita que todos os visitantes compartilhem o limite do proxy e não substitui a autenticação de usuário.
 
@@ -123,6 +124,12 @@ O CI usa build web de produção e executa o JAR compilado para Java 21 no runti
 Ative backups do PostgreSQL, teste restauração em banco separado e acompanhe saúde, memória, conexões e falhas de provedores. A API não depende de arquivo local permanente para dados dos usuários. Certificados de conexão são configuração privada.
 
 O app Expo continua usando a mesma API por `EXPO_PUBLIC_API_URL=https://SEU-SUBDOMINIO.squareweb.app/api/v1`. Não participa do build da Vercel. A versão 0.3.0 possui navegação nativa, chamadas persistentes e perfis EAS APK/AAB/iOS; consulte MOBILE.md. Não houve publicação em lojas.
+
+### Push Android
+
+Para habilitar notificações no celular, configure `FCM_SERVICE_ACCOUNT_BASE64` somente na API/SquareCloud. No serviço Railway que gera o APK, configure `FIREBASE_ANDROID_PROJECT_ID`, `FIREBASE_ANDROID_APP_ID`, `FIREBASE_ANDROID_API_KEY` e `FIREBASE_ANDROID_SENDER_ID`. O builder gera a configuração Android durante a compilação; nenhum JSON privado é versionado no Git.
+
+As quatro variáveis do APK identificam o projeto Firebase e não substituem a service account do backend. O backend usa a credencial privada apenas para enviar pelo FCM HTTP v1.
 
 ## 5. Ativar Enturma AI
 

@@ -19,7 +19,7 @@ flowchart LR
 
 Módulos: auth emite e revoga sessões; academics mantém a árvore curricular; users gerencia matrícula; study controla salas/participantes; chat valida associação e persiste mensagens e anexos; voice fornece grants LiveKit para voz/câmera/tela; materials valida e armazena documentos; ai recupera chunks apenas da sala e integra a OpenAI Responses API; rides controla interesse/aceite; moderation aplica bloqueios e ações auditáveis. As dependências partem dos módulos consumidores para auth/common/study, sem dependência inversa do domínio para controllers ou SDKs.
 
-Fronteiras externas: ObjectStorageService, VoiceProvider e AiProvider. EmailWorker processa outbox durável; envio SMTP ocorre após o commit que criou a conta. PushNotificationService, OAuth, filas de parsing e embeddings são extensões ainda não implementadas.
+Fronteiras externas: ObjectStorageService, VoiceProvider, AiProvider e PushNotificationService. EmailWorker processa outbox durável; envio SMTP ocorre após o commit que criou a conta. PushNotificationService entrega eventos após commit pelo Firebase Cloud Messaging HTTP v1 e respeita preferências por categoria. OAuth, filas de parsing e embeddings continuam como extensões não implementadas.
 
 Tokens opacos permitem revogação imediata das sessões API. JWT é usado nos grants LiveKit. O WS consulta snapshots autorizados do chat persistente de sala; digitação fica em memória. Conversas privadas de amigos usam E2EE e cofre separado, sem plaintext no servidor. Em múltiplas instâncias será necessário pub/sub com escopos de autorização equivalentes.
 
@@ -38,3 +38,4 @@ O módulo `learning` registra progresso por desafio, ledger idempotente de XP, n
 - OpenAI Responses API: tutor com materiais e pesquisa web opcional com citações.
 - LiveKit: voz, câmera e compartilhamento de tela no Web.
 - S3/R2/MinIO: materiais persistentes enviados explicitamente para estudo.
+- Firebase Cloud Messaging: push Android para mensagens, menções, fórum e demais categorias escolhidas pelo usuário.

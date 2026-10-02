@@ -77,7 +77,8 @@ Os exemplos de testes não representam nenhuma universidade real. Não use as fi
 | GET /users/me/showcase; /users/{id}/showcase           | Aparência, widgets, stats e badges filtrados por privacidade/bloqueio                                                          |
 | PUT /users/me/showcase                                 | secondaryColor, theme, effect, layout, goal, technologies, projects, privacy, widgets[{kind,visible,favorite}], badges[código] |
 | GET /achievements                                      | Definições, progresso e datas do usuário                                                                                       |
-| GET/PUT /notifications/preferences                     | Lista / {category,inApp,email}                                                                                                 |
+| GET/PUT /notifications/preferences                     | Lista / {category,inApp,email,push}; categorias independentes                                                                  |
+| POST /notifications/push-device; DELETE /notifications/push-device/{installationId} | Registrar/remover instalação Android para push                                                                  |
 | POST /study-rooms                                      | Durações rápidas existentes ou days 1..5                                                                                       |
 | POST /study-rooms/{id}/heartbeat                       | Presença do participante                                                                                                       |
 | PUT /study-rooms/{id}/settings                         | title, topic, locked; host                                                                                                     |

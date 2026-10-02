@@ -64,30 +64,46 @@ public class NotificationService {
             user,
             actor)) return;
     String category = preferences.category(kind, context);
-    preferences.queue(user, category, kind + ":" + target + ":" + actor, message);
-    if (!preferences.enabled(user, category, false)) return;
-    int inserted =
-        db.jdbc.update(
-            "INSERT INTO"
-                + " notification(id,user_id,actor_id,kind,context_key,target_id,href,message,dedupe_key)"
-                + " SELECT ?,u.id,?,?,?,?,?,?,? FROM app_user u WHERE u.id=? AND u.status='ACTIVE'"
-                + " AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
-                + " b.blocked_id=?) OR (b.user_id=? AND b.blocked_id=?)) ON"
-                + " CONFLICT(user_id,dedupe_key) DO NOTHING",
-            UUID.randomUUID(),
-            actor,
-            kind,
-            context,
-            target,
-            href,
-            message,
-            kind + ":" + target + ":" + actor,
-            user,
-            actor,
-            user,
-            user,
-            actor);
-    if (inserted > 0) changed(user);
+    String dedupe = kind + ":" + target + ":" + actor;
+    preferences.queue(user, category, dedupe, message);
+
+    if (preferences.pushEnabled(user, category)) {
+      int pushInserted =
+          db.jdbc.update(
+              "INSERT INTO notification_push_delivery(id,user_id,dedupe_key) VALUES (?,?,?)"
+                  + " ON CONFLICT(user_id,dedupe_key) DO NOTHING",
+              UUID.randomUUID(),
+              user,
+              dedupe);
+      if (pushInserted > 0)
+        events.publishEvent(
+            new PushRequested(user, actor, category, kind, target, href, message));
+    }
+
+    if (preferences.enabled(user, category, false)) {
+      int inserted =
+          db.jdbc.update(
+              "INSERT INTO"
+                  + " notification(id,user_id,actor_id,kind,context_key,target_id,href,message,dedupe_key)"
+                  + " SELECT ?,u.id,?,?,?,?,?,?,? FROM app_user u WHERE u.id=? AND u.status='ACTIVE'"
+                  + " AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
+                  + " b.blocked_id=?) OR (b.user_id=? AND b.blocked_id=?)) ON"
+                  + " CONFLICT(user_id,dedupe_key) DO NOTHING",
+              UUID.randomUUID(),
+              actor,
+              kind,
+              context,
+              target,
+              href,
+              message,
+              dedupe,
+              user,
+              actor,
+              user,
+              user,
+              actor);
+      if (inserted > 0) changed(user);
+    }
   }
 
   public void forumMentions(UUID actor, UUID root, UUID target, String body) {
