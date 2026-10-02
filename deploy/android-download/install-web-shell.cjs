@@ -47,6 +47,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.WindowManager
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
@@ -212,6 +213,8 @@ class MainActivity : Activity() {
     private var safeRightCssPx = 0
     private var safeBottomCssPx = 0
     private var safeLeftCssPx = 0
+    private var keyboardBottomCssPx = 0
+    private var keyboardVisible = false
     private var updateDownloadId: Long? = null
     private var updateReceiverRegistered = false
     private var pendingUpdateUrl: String? = null
@@ -271,6 +274,7 @@ class MainActivity : Activity() {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = Color.TRANSPARENT
 
@@ -303,11 +307,16 @@ class MainActivity : Activity() {
                     WindowInsetsCompat.Type.navigationBars() or
                     WindowInsetsCompat.Type.displayCutout(),
             )
+            val imeInsets = insets.getInsets(WindowInsetsCompat.Type.ime())
             val density = resources.displayMetrics.density.takeIf { it > 0f } ?: 1f
             safeTopCssPx = (safeInsets.top / density).toInt()
             safeRightCssPx = (safeInsets.right / density).toInt()
             safeBottomCssPx = (safeInsets.bottom / density).toInt()
             safeLeftCssPx = (safeInsets.left / density).toInt()
+            keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            keyboardBottomCssPx =
+                if (keyboardVisible) (imeInsets.bottom / density).toInt().coerceAtLeast(0)
+                else 0
             syncSafeAreaCss()
             insets
         }
@@ -548,6 +557,7 @@ class MainActivity : Activity() {
     private fun syncSafeAreaCss() {
         if (!::webView.isInitialized) return
 
+        val keyboardState = if (keyboardVisible) "true" else "false"
         val script = """
             (function() {
               var root = document.documentElement;
@@ -558,6 +568,8 @@ class MainActivity : Activity() {
               root.style.setProperty("--native-safe-right", "\${safeRightCssPx}px");
               root.style.setProperty("--native-safe-bottom", "\${safeBottomCssPx}px");
               root.style.setProperty("--native-safe-left", "\${safeLeftCssPx}px");
+              root.style.setProperty("--native-keyboard-bottom", "\${keyboardBottomCssPx}px");
+              root.dataset.enturmaIme = "\${keyboardState}";
 
               var styleId = "enturma-native-safe-area";
               var style = document.getElementById(styleId);
