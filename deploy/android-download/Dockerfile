@@ -1,12 +1,14 @@
 FROM node:22-bookworm AS build
 
 ARG EXPO_PUBLIC_API_URL
+ARG ENTURMA_WEB_URL
 ARG ANDROID_KEYSTORE_BASE64
 ARG ANDROID_KEYSTORE_PASSWORD
 ARG ANDROID_KEY_ALIAS
 ARG ANDROID_KEY_PASSWORD
 
 ENV EXPO_PUBLIC_API_URL=$EXPO_PUBLIC_API_URL
+ENV ENTURMA_WEB_URL=$ENTURMA_WEB_URL
 ENV EAS_BUILD_PROFILE=preview
 ENV CI=1
 ENV ANDROID_KEYSTORE_BASE64=$ANDROID_KEYSTORE_BASE64
@@ -30,6 +32,7 @@ WORKDIR /project/apps/mobile
 RUN npx expo prebuild --platform android --no-install --clean
 
 WORKDIR /project
+RUN node deploy/android-download/install-web-shell.cjs
 RUN node deploy/android-download/configure-signing.cjs
 
 WORKDIR /project/apps/mobile/android
