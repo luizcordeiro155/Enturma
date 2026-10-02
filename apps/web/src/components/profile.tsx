@@ -9,7 +9,7 @@ import { MailCheck, X } from "lucide-react";
 import { Shell } from "./shell";
 import { ProfileDetailsEditor } from "./profile-details-editor";
 import { Feedback } from "./feedback";
-import { DesktopUpdateButton } from "./desktop-updates";
+import { AppUpdateSettingsCard } from "./desktop-updates";
 
 import { NotificationPreferences } from "./community-feedback";
 export function ProfileView({
@@ -155,7 +155,6 @@ export function ProfileView({
                 ? "Configurações"
                 : "Meu perfil"}
           </h1>
-          {settings && <DesktopUpdateButton />}
         </div>
         <Feedback error={error} success={notice} />
 
@@ -242,6 +241,7 @@ export function ProfileView({
 
             {settings ? (
               <>
+                <AppUpdateSettingsCard />
                 <NotificationPreferences />
                 <h2 className="section-heading">Sessões ativas</h2>
                 {sessions.map((s) => (
