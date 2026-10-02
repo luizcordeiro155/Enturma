@@ -9,6 +9,7 @@ import { MailCheck, X } from "lucide-react";
 import { Shell } from "./shell";
 import { ProfileDetailsEditor } from "./profile-details-editor";
 import { Feedback } from "./feedback";
+import { DesktopUpdateButton } from "./desktop-updates";
 
 import { NotificationPreferences } from "./community-feedback";
 export function ProfileView({
@@ -146,13 +147,16 @@ export function ProfileView({
   return (
     <Shell>
       <div className={subjectsOnly ? "narrow" : "profile-page"}>
-        <h1>
-          {subjectsOnly
-            ? "Minhas matérias"
-            : settings
-              ? "Configurações"
-              : "Meu perfil"}
-        </h1>
+        <div className="profile-page-heading">
+          <h1>
+            {subjectsOnly
+              ? "Minhas matérias"
+              : settings
+                ? "Configurações"
+                : "Meu perfil"}
+          </h1>
+          {settings && <DesktopUpdateButton />}
+        </div>
         <Feedback error={error} success={notice} />
 
         {p ? (

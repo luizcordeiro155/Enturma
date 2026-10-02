@@ -83,7 +83,9 @@ describe("Desktop update UI", () => {
         <DesktopUpdateButton />
       </DesktopUpdateProvider>,
     );
-    await screen.findByText("Você está atualizado");
+    await screen.findByRole("button", {
+      name: "Atualizações: Você está atualizado",
+    });
     act(() =>
       receive({
         status: "downloading",
@@ -92,7 +94,7 @@ describe("Desktop update UI", () => {
         version: "0.3.1",
       }),
     );
-    expect(screen.getByText(/63%/)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /63%/ })).toBeTruthy();
     act(() =>
       receive({
         status: "ready",
@@ -105,7 +107,9 @@ describe("Desktop update UI", () => {
     fireEvent.click(screen.getByRole("button", { name: "Depois" }));
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(install).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole("button", { name: "Atualização pronta" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Atualizações: Atualização pronta" }),
+    );
     fireEvent.click(
       screen.getByRole("button", { name: "Atualizar e reiniciar" }),
     );

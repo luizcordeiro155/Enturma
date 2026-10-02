@@ -18,7 +18,7 @@ import {
   Download,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
-import { DesktopUpdateButton, isDesktop } from "./desktop-updates";
+import { isDesktop } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
@@ -162,7 +162,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
             {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
           </span>
           <div className="topbar-actions">
-            <DesktopUpdateButton />
             <NotificationBell />
             <ExperienceControls />
             <Link className="button" href="/profile">
