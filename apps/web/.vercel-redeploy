@@ -2,4 +2,4 @@ Enturma web production redeploy
 version=0.3.15
 source=571b4708fa9784e36d4b1083b7add89f3f157ed3
 reason=updater-settings-button-and-notification
-retry=3
+retry=4
