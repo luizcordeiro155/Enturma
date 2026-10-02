@@ -1,140 +1,120 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import {
-  ActivityIndicator,
-  BackHandler,
-  Linking,
-  Pressable,
-  Text,
-  View,
-} from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { WebView, type WebViewNavigation } from "react-native-webview";
+import { useState } from "react";
+import { Text, View } from "react-native";
+import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
+import { request, type Credentials } from "@enturma/contracts";
+import { base, save } from "../src/api";
+import { Screen, Field, Button, ErrorMessage, useStyles } from "../src/ui";
 
-const ENTURMA_ORIGIN = "https://enturma-flax.vercel.app";
-const APP_VERSION = "0.3.4";
+export default function Login() {
+  const styles = useStyles();
+  const [register, setRegister] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [username, setUsername] = useState("");
+  const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
+  const router = useRouter();
 
-export default function EnturmaApp() {
-  const web = useRef<WebView>(null);
-  const insets = useSafeAreaInsets();
-  const [canGoBack, setCanGoBack] = useState(false);
-  const [failed, setFailed] = useState(false);
-
-  useEffect(() => {
-    const listener = BackHandler.addEventListener("hardwareBackPress", () => {
-      if (!canGoBack) return false;
-      web.current?.goBack();
-      return true;
-    });
-    return () => listener.remove();
-  }, [canGoBack]);
-
-  const allow = useCallback((request: WebViewNavigation) => {
+  async function submit() {
+    setBusy(true);
+    setError("");
     try {
-      const url = new URL(request.url);
-      if (
-        url.protocol === "about:" ||
-        (url.protocol === "https:" && url.origin === ENTURMA_ORIGIN)
-      )
-        return true;
-
-      if (url.protocol === "http:" || url.protocol === "https:") {
-        void Linking.openURL(request.url);
-        return false;
-      }
-
-      if (["mailto:", "tel:", "enturma:"].includes(url.protocol)) {
-        void Linking.openURL(request.url);
-        return false;
-      }
-    } catch {}
-    return false;
-  }, []);
-
-  if (failed) {
-    return (
-      <View
-        style={{
-          flex: 1,
-          backgroundColor: "#0f1917",
-          justifyContent: "center",
-          padding: 28,
-          gap: 16,
-        }}
-      >
-        <Text style={{ color: "#f5f8f6", fontSize: 28, fontWeight: "800" }}>
-          enturma<Text style={{ color: "#9bc24b" }}>.</Text>
-        </Text>
-        <Text style={{ color: "#aebdb7", fontSize: 16, lineHeight: 24 }}>
-          Não foi possível carregar o Enturma agora. Confira sua conexão e tente
-          novamente.
-        </Text>
-        <Pressable
-          accessibilityRole="button"
-          onPress={() => setFailed(false)}
-          style={{
-            minHeight: 50,
-            borderRadius: 12,
-            backgroundColor: "#d8ef79",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Text style={{ color: "#173f36", fontWeight: "800" }}>
-            Tentar novamente
-          </Text>
-        </Pressable>
-      </View>
-    );
+      const c = await request<Credentials>(
+        base,
+        `/auth/${register ? "register" : "login"}`,
+        {
+          method: "POST",
+          body: JSON.stringify({
+            email,
+            password,
+            device: "Aplicativo Enturma",
+            ...(register ? { name, username } : {}),
+          }),
+        },
+      );
+      await save(c);
+      router.replace(register ? "/onboarding" : "/home");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   return (
-    <View
-      style={{
-        flex: 1,
-        backgroundColor: "#0f1917",
-        paddingTop: insets.top,
-      }}
-    >
-      <WebView
-        ref={web}
-        source={{ uri: `${ENTURMA_ORIGIN}/home` }}
-        applicationNameForUserAgent={`EnturmaMobile/${APP_VERSION}`}
-        originWhitelist={["https://*", "about:blank"]}
-        javaScriptEnabled
-        domStorageEnabled
-        sharedCookiesEnabled
-        thirdPartyCookiesEnabled
-        cacheEnabled
-        allowsInlineMediaPlayback
-        mediaPlaybackRequiresUserAction={false}
-        setSupportMultipleWindows={false}
-        pullToRefreshEnabled
-        onShouldStartLoadWithRequest={allow}
-        onNavigationStateChange={(state) => setCanGoBack(state.canGoBack)}
-        onError={() => setFailed(true)}
-        onHttpError={(event) => {
-          if (event.nativeEvent.statusCode >= 500) setFailed(true);
-        }}
-        startInLoadingState
-        renderLoading={() => (
-          <View
-            style={{
-              position: "absolute",
-              inset: 0,
-              backgroundColor: "#0f1917",
+    <Screen title="">
+      <View style={{ alignItems: "center", paddingTop: 18, gap: 8 }}>
+        <View
+          style={[
+            styles.card,
+            {
+              width: 68,
+              height: 68,
+              borderRadius: 20,
               alignItems: "center",
               justifyContent: "center",
-              gap: 14,
-            }}
-          >
-            <ActivityIndicator size="large" color="#d8ef79" />
-            <Text style={{ color: "#f5f8f6", fontWeight: "700" }}>
-              Abrindo Enturma…
-            </Text>
-          </View>
-        )}
-        style={{ flex: 1, backgroundColor: "#0f1917" }}
+            },
+          ]}
+        >
+          <Ionicons name="book-outline" size={38} color={styles.text.color} />
+        </View>
+        <Text style={styles.title}>
+          enturma<Text style={styles.accent}>.</Text>
+        </Text>
+        <Text style={[styles.muted, { textAlign: "center" }]}>
+          Seu espaço para estudar em companhia, agora com a mesma identidade do
+          Enturma Web e Desktop.
+        </Text>
+      </View>
+
+      <View style={[styles.card, { gap: 14 }]}>
+        <Text style={[styles.title, { fontSize: 24, lineHeight: 30 }]}>
+          {register ? "Crie sua conta" : "Bom te ver de novo"}
+        </Text>
+        <ErrorMessage message={error} />
+
+        {register ? (
+          <>
+            <Field label="Nome" value={name} onChangeText={setName} />
+            <Field
+              label="Usuário"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+            />
+          </>
+        ) : null}
+
+        <Field
+          label="E-mail"
+          value={email}
+          onChangeText={setEmail}
+          keyboardType="email-address"
+          autoCapitalize="none"
+          autoComplete="email"
+        />
+        <Field
+          label="Senha"
+          value={password}
+          onChangeText={setPassword}
+          secureTextEntry
+          autoCapitalize="none"
+          autoComplete={register ? "new-password" : "current-password"}
+        />
+
+        <Button
+          title={busy ? "Aguarde…" : register ? "Criar conta" : "Entrar"}
+          disabled={busy}
+          onPress={submit}
+        />
+      </View>
+
+      <Button
+        title={register ? "Já tenho uma conta" : "Criar minha conta"}
+        onPress={() => setRegister((v) => !v)}
       />
-    </View>
+    </Screen>
   );
 }
