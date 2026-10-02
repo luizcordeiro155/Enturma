@@ -610,6 +610,207 @@ class MainActivity : Activity() {
                 attributes: true,
                 attributeFilter: ["data-theme"]
               });
+
+              function nativeVersionIsNewer(remote, current) {
+                var a = String(remote || "").split(".").map(Number);
+                var b = String(current || "").split(".").map(Number);
+                var size = Math.max(a.length, b.length);
+                for (var i = 0; i < size; i++) {
+                  var av = a[i] || 0;
+                  var bv = b[i] || 0;
+                  if (av !== bv) return av > bv;
+                }
+                return false;
+              }
+
+              function nativeCurrentVersion() {
+                var match = navigator.userAgent.match(/EnturmaMobile\\/(\\d+\\.\\d+\\.\\d+)/);
+                return match ? match[1] : "0.0.0";
+              }
+
+              function ensureNativeUpdateStyles() {
+                var id = "enturma-native-update-style";
+                var existing = document.getElementById(id);
+                if (existing) return;
+                var style = document.createElement("style");
+                style.id = id;
+                style.textContent = [
+                  ".enturma-native-update-pending{position:relative!important;outline:2px solid var(--accent,#d9f56d)!important;}",
+                  ".enturma-native-update-pending::after{content:'';position:absolute;top:3px;right:8px;width:10px;height:10px;border-radius:50%;background:#e53935;border:2px solid var(--bg,#0f1917);}",
+                  ".enturma-native-update-button{position:relative!important;outline:2px solid var(--accent,#d9f56d)!important;font-size:22px!important;font-weight:800!important;}",
+                  ".enturma-native-update-button::after{content:'';position:absolute;top:-4px;right:-4px;width:10px;height:10px;border-radius:50%;background:#e53935;border:2px solid var(--bg,#0f1917);}",
+                  "#enturma-native-update-dialog{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:20px;background:#0009;}",
+                  "#enturma-native-update-dialog .enturma-native-update-card{width:min(500px,100%);border:1px solid var(--border,#33413d);border-radius:20px;background:var(--bg,#0f1917);color:var(--ink,#f5f8ee);padding:24px;box-shadow:0 24px 80px #0008;}",
+                  "#enturma-native-update-dialog h2{margin:0 0 12px;font-size:1.45rem;}",
+                  "#enturma-native-update-dialog p{margin:10px 0 18px;line-height:1.55;}",
+                  "#enturma-native-update-dialog .enturma-native-update-actions{display:flex;gap:10px;flex-wrap:wrap;}",
+                  "#enturma-native-update-dialog button{min-height:46px;padding:10px 16px;border-radius:12px;border:0;font:inherit;font-weight:800;cursor:pointer;background:var(--accent,#d9f56d);color:#10211c;}",
+                  "#enturma-native-update-dialog button.secondary{background:transparent;color:var(--ink,#f5f8ee);border:1px solid var(--border,#33413d);}"
+                ].join("\\n");
+                (document.head || root).appendChild(style);
+              }
+
+              function openNativeUpdateDialog(release) {
+                if (!release || !release.downloadUrl) return;
+                var old = document.getElementById("enturma-native-update-dialog");
+                if (old) old.remove();
+
+                ensureNativeUpdateStyles();
+
+                var overlay = document.createElement("div");
+                overlay.id = "enturma-native-update-dialog";
+                overlay.setAttribute("role", "dialog");
+                overlay.setAttribute("aria-modal", "true");
+                overlay.setAttribute("aria-label", "Atualização do Enturma");
+
+                var card = document.createElement("section");
+                card.className = "enturma-native-update-card";
+
+                var title = document.createElement("h2");
+                title.textContent = "Nova atualização do Enturma";
+
+                var versionText = document.createElement("p");
+                versionText.textContent =
+                  "Versão " + release.version +
+                  " disponível. Recomendamos atualizar para receber correções e novos recursos.";
+
+                var actions = document.createElement("div");
+                actions.className = "enturma-native-update-actions";
+
+                var update = document.createElement("button");
+                update.type = "button";
+                update.textContent = "Atualizar agora";
+                update.onclick = function() {
+                  try {
+                    if (
+                      window.EnturmaNative &&
+                      typeof window.EnturmaNative.installUpdate === "function"
+                    ) {
+                      window.EnturmaNative.installUpdate(release.downloadUrl);
+                      update.disabled = true;
+                      update.textContent = "Download iniciado";
+                    } else {
+                      window.location.href = release.downloadUrl;
+                    }
+                  } catch (_) {
+                    window.location.href = release.downloadUrl;
+                  }
+                };
+
+                var later = document.createElement("button");
+                later.type = "button";
+                later.className = "secondary";
+                later.textContent = "Depois";
+                later.onclick = function() {
+                  overlay.remove();
+                };
+
+                actions.appendChild(update);
+                actions.appendChild(later);
+                card.appendChild(title);
+                card.appendChild(versionText);
+                card.appendChild(actions);
+                overlay.appendChild(card);
+                document.body.appendChild(overlay);
+              }
+
+              function applyNativeUpdateMarkers(release) {
+                if (!release) return;
+                ensureNativeUpdateStyles();
+
+                document
+                  .querySelectorAll('a[href="/settings"],a[href^="/settings?"]')
+                  .forEach(function(link) {
+                    link.classList.add("enturma-native-update-pending");
+                  });
+
+                var more = document.querySelector(
+                  '.mobile-bottom-nav button[aria-label="Mais opções"]'
+                );
+                if (more) more.classList.add("enturma-native-update-pending");
+
+                if (location.pathname === "/settings") {
+                  var heading = document.querySelector(".profile-page-heading");
+                  if (
+                    heading &&
+                    !heading.querySelector(".enturma-native-update-button")
+                  ) {
+                    var button = document.createElement("button");
+                    button.type = "button";
+                    button.className =
+                      "icon-control enturma-native-update-button";
+                    button.setAttribute(
+                      "aria-label",
+                      "Atualização do Enturma disponível"
+                    );
+                    button.setAttribute(
+                      "title",
+                      "Atualização do Enturma disponível"
+                    );
+                    button.textContent = "↻";
+                    button.onclick = function() {
+                      openNativeUpdateDialog(release);
+                    };
+                    heading.appendChild(button);
+                  }
+                }
+
+                var query = new URLSearchParams(location.search);
+                if (
+                  query.get("update") === "1" &&
+                  window.__enturmaNativeUpdatePrompted !== release.version
+                ) {
+                  window.__enturmaNativeUpdatePrompted = release.version;
+                  openNativeUpdateDialog(release);
+                }
+              }
+
+              async function checkNativeUpdate() {
+                if (root.dataset.enturmaUpdateUi === "web") return;
+                try {
+                  var response = await fetch(
+                    "https://enturma-android-download-v3-production.up.railway.app/latest-android.json?ts=" +
+                      Date.now(),
+                    { cache: "no-store" }
+                  );
+                  if (!response.ok) return;
+                  var release = await response.json();
+                  if (
+                    !/^\\d+\\.\\d+\\.\\d+$/.test(release.version || "") ||
+                    !String(release.downloadUrl || "").startsWith(
+                      "https://enturma-android-download-v3-production.up.railway.app/"
+                    ) ||
+                    !nativeVersionIsNewer(
+                      release.version,
+                      nativeCurrentVersion()
+                    )
+                  ) return;
+
+                  window.__enturmaNativeRelease = release;
+                  applyNativeUpdateMarkers(release);
+                } catch (_) {}
+              }
+
+              if (window.__enturmaNativeUpdateObserver) {
+                window.__enturmaNativeUpdateObserver.disconnect();
+              }
+              window.__enturmaNativeUpdateObserver = new MutationObserver(function() {
+                if (window.__enturmaNativeRelease) {
+                  applyNativeUpdateMarkers(window.__enturmaNativeRelease);
+                }
+              });
+              window.__enturmaNativeUpdateObserver.observe(
+                document.body || root,
+                { childList: true, subtree: true }
+              );
+
+              void checkNativeUpdate();
+              if (!window.__enturmaNativeUpdateInterval) {
+                window.__enturmaNativeUpdateInterval = setInterval(
+                  checkNativeUpdate,
+                  15 * 60 * 1000
+                );
+              }
             })();
         """.trimIndent()
 
