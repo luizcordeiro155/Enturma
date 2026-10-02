@@ -84,7 +84,7 @@ class MainActivity : Activity() {
             javaScriptCanOpenWindowsAutomatically = false
             builtInZoomControls = false
             displayZoomControls = false
-            userAgentString = "${userAgentString} EnturmaMobile/${APP_VERSION}"
+            userAgentString = "\${userAgentString} EnturmaMobile/\${APP_VERSION}"
         }
 
         webView.webViewClient = object : WebViewClient() {
@@ -104,7 +104,7 @@ class MainActivity : Activity() {
 
                 if (uri.scheme == "enturma") {
                     val appPath = uri.path?.takeIf { it.startsWith("/") } ?: "/home"
-                    webView.loadUrl("${WEB_ORIGIN}${appPath}")
+                    webView.loadUrl("\${WEB_ORIGIN}\${appPath}")
                     return true
                 }
 
@@ -194,7 +194,7 @@ class MainActivity : Activity() {
         }
 
         if (savedInstanceState == null) {
-            webView.loadUrl("${WEB_ORIGIN}/home")
+            webView.loadUrl("\${WEB_ORIGIN}/home")
         } else {
             webView.restoreState(savedInstanceState)
         }
