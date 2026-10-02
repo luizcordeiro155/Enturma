@@ -25,3 +25,14 @@ CREATE TABLE notification_push_device (
 CREATE INDEX notification_push_device_user
   ON notification_push_device(user_id)
   WHERE enabled;
+
+CREATE TABLE notification_push_delivery (
+  id uuid PRIMARY KEY,
+  user_id uuid NOT NULL REFERENCES app_user(id) ON DELETE CASCADE,
+  dedupe_key varchar(220) NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now(),
+  UNIQUE(user_id, dedupe_key)
+);
+
+CREATE INDEX notification_push_delivery_created
+  ON notification_push_delivery(created_at);
