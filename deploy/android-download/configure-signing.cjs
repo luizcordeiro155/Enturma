@@ -23,8 +23,8 @@ for (const [name, value] of Object.entries({
 fs.writeFileSync(keystore, Buffer.from(encoded, "base64"));
 
 let source = fs.readFileSync(gradle, "utf8");
-if (!source.includes("signingConfigs {")) {
-  throw new Error("Bloco signingConfigs não encontrado no build.gradle gerado.");
+if (!source.includes("signingConfigs {") || !source.includes("buildTypes {")) {
+  throw new Error("Estrutura Android esperada não encontrada no build.gradle.");
 }
 
 const releaseConfig = `
@@ -41,8 +41,12 @@ source = source.replace(
   (match) => `${match}${releaseConfig}`,
 );
 
+const buildTypesIndex = source.indexOf("buildTypes {");
+const beforeBuildTypes = source.slice(0, buildTypesIndex);
+let buildTypes = source.slice(buildTypesIndex);
+
 const releaseBlock = /release\s*\{([\s\S]*?)\n\s*\}/m;
-const found = source.match(releaseBlock);
+const found = buildTypes.match(releaseBlock);
 if (!found) throw new Error("buildTypes.release não encontrado.");
 
 let body = found[1];
@@ -54,7 +58,12 @@ if (/signingConfig\s+signingConfigs\.debug/.test(body)) {
 } else if (!/signingConfig\s+signingConfigs\.release/.test(body)) {
   body = `\n            signingConfig signingConfigs.release${body}`;
 }
-source = source.replace(releaseBlock, `release {${body}\n        }`);
+
+buildTypes = buildTypes.replace(
+  releaseBlock,
+  `release {${body}\n        }`,
+);
+source = beforeBuildTypes + buildTypes;
 
 fs.writeFileSync(gradle, source);
 console.log("Assinatura release do Android configurada.");
