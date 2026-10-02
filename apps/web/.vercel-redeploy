@@ -1,4 +1,5 @@
 Enturma web production redeploy
 version=0.3.13
 source=36e21accd3f5481c8340c66ad238513718afdaff
-reason=mobile-update-ui
+reason=retry-vercel-production
+retry=2
