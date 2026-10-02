@@ -3,13 +3,13 @@
     "name": "Enturma",
     "slug": "enturma",
     "scheme": "enturma",
-    "version": "0.3.3",
+    "version": "0.3.4",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "br.com.enturma.app",
-      "buildNumber": "4",
+      "buildNumber": "5",
       "infoPlist": {
         "NSCameraUsageDescription": "Use sua câmera nas chamadas de estudo.",
         "NSMicrophoneUsageDescription": "Converse por voz com sua turma.",
@@ -18,12 +18,10 @@
     },
     "android": {
       "package": "br.com.enturma.app",
-      "versionCode": 6,
+      "versionCode": 7,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
-        "FOREGROUND_SERVICE",
-        "FOREGROUND_SERVICE_MEDIA_PROJECTION",
         "POST_NOTIFICATIONS"
       ],
       "adaptiveIcon": {
@@ -34,19 +32,6 @@
     "plugins": [
       "expo-router",
       "expo-secure-store",
-      [
-        "@livekit/react-native-expo-plugin",
-        {
-          "android": {
-            "audioType": "communication",
-            "enableScreenShareService": true
-          },
-          "ios": {
-            "enableMultitaskingCameraAccess": false
-          }
-        }
-      ],
-      "@config-plugins/react-native-webrtc",
       [
         "expo-image-picker",
         {
