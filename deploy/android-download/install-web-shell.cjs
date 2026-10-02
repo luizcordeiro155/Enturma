@@ -5,6 +5,11 @@ const project = process.cwd();
 const mobile = path.join(project, "apps", "mobile");
 const version = require(path.join(mobile, "package.json")).version;
 const webOrigin = (process.env.ENTURMA_WEB_URL || "https://enturma-flax.vercel.app").replace(/\/$/, "");
+const firebaseProjectId = process.env.FIREBASE_ANDROID_PROJECT_ID || "";
+const firebaseAppId = process.env.FIREBASE_ANDROID_APP_ID || "";
+const firebaseApiKey = process.env.FIREBASE_ANDROID_API_KEY || "";
+const firebaseSenderId = process.env.FIREBASE_ANDROID_SENDER_ID || "";
+const kotlinString = (value) => JSON.stringify(String(value));
 
 if (!/^https:\/\/[^/]+$/.test(webOrigin)) {
   throw new Error("ENTURMA_WEB_URL precisa ser uma origem HTTPS sem caminho.");
@@ -49,6 +54,11 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.view.WindowManager
+import com.google.firebase.FirebaseApp
+import com.google.firebase.FirebaseOptions
+import com.google.firebase.messaging.FirebaseMessaging
+import com.google.firebase.messaging.FirebaseMessagingService
+import com.google.firebase.messaging.RemoteMessage
 import android.widget.FrameLayout
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
@@ -77,7 +87,16 @@ private const val UPDATE_ACTION_INSTALL = "br.com.enturma.app.action.INSTALL_UPD
 private const val UPDATE_ACTION_OPEN_INSTALLER = "br.com.enturma.app.action.OPEN_DOWNLOADED_UPDATE"
 private const val UPDATE_EXTRA_URL = "downloadUrl"
 private const val UPDATE_EXTRA_DOWNLOAD_ID = "downloadId"
-private const val UPDATE_READY_NOTIFICATION_ID = 4803
+private const val PUSH_ACTION_OPEN = "br.com.enturma.app.action.OPEN_PUSH"
+private const val PUSH_EXTRA_HREF = "href"
+private const val PUSH_CHANNEL_ID = "enturma_social"
+private const val PUSH_PREFS = "enturma_push_state"
+private const val PREF_PUSH_INSTALLATION_ID = "installation_id"
+private const val PREF_PUSH_TOKEN = "push_token"
+private const val FIREBASE_PROJECT_ID = ${kotlinString(firebaseProjectId)}
+private const val FIREBASE_APP_ID = ${kotlinString(firebaseAppId)}
+private const val FIREBASE_API_KEY = ${kotlinString(firebaseApiKey)}
+private const val FIREBASE_SENDER_ID = ${kotlinString(firebaseSenderId)}
 private const val UPDATE_PREFS = "enturma_update_state"
 private const val PREF_NOTIFIED_VERSION = "notified_version"
 private const val PREF_DOWNLOAD_ID = "download_id"
