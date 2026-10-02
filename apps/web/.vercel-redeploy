@@ -1,4 +1,4 @@
 Enturma web production redeploy
-version=0.3.14
-source=340539a6a82a05dca83fffce228017aa14ab360a
-reason=motion-profile-banners
+version=0.3.15
+source=571b4708fa9784e36d4b1083b7add89f3f157ed3
+reason=updater-settings-button-and-notification
