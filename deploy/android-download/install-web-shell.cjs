@@ -119,13 +119,13 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
         Thread {
             try {
                 val connection =
-                    URL("${ANDROID_UPDATE_ORIGIN}/latest-android.json?ts=${System.currentTimeMillis()}")
+                    URL("\${ANDROID_UPDATE_ORIGIN}/latest-android.json?ts=\${System.currentTimeMillis()}")
                         .openConnection() as HttpURLConnection
                 connection.connectTimeout = 8000
                 connection.readTimeout = 8000
                 connection.setRequestProperty(
                     "User-Agent",
-                    "EnturmaMobile/${BuildConfig.VERSION_NAME}",
+                    "EnturmaMobile/\${BuildConfig.VERSION_NAME}",
                 )
                 connection.setRequestProperty("Cache-Control", "no-cache")
                 if (connection.responseCode !in 200..299) return@Thread
@@ -136,7 +136,7 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
                 val downloadUrl = json.optString("downloadUrl")
                 if (
                     !remote.matches(Regex("\\d+\\.\\d+\\.\\d+")) ||
-                    !downloadUrl.startsWith("${ANDROID_UPDATE_ORIGIN}/") ||
+                    !downloadUrl.startsWith("\${ANDROID_UPDATE_ORIGIN}/") ||
                     !isNewerVersion(remote, BuildConfig.VERSION_NAME)
                 ) return@Thread
 
@@ -180,7 +180,7 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
                 val notification = builder
                     .setSmallIcon(android.R.drawable.stat_sys_download_done)
                     .setContentTitle("Nova atualização do Enturma")
-                    .setContentText("Versão ${remote} disponível. Toque para atualizar.")
+                    .setContentText("Versão \${remote} disponível. Toque para atualizar.")
                     .setContentIntent(pending)
                     .setAutoCancel(true)
                     .setOnlyAlertOnce(true)
