@@ -108,18 +108,32 @@ public class SocialController {
     if (peer.equals(a.id())) throw ApiException.invalid("Escolha outra pessoa.");
     unblocked(a.id(), peer);
     UUID id = UUID.randomUUID();
-    db.jdbc.update(
-        "INSERT INTO friendship(id,requester,recipient) VALUES (?,?,?) ON CONFLICT DO NOTHING",
-        id,
-        a.id(),
-        peer);
-    return db.one(
-        "SELECT id,status FROM friendship WHERE (requester=? AND recipient=?) OR (requester=? AND"
-            + " recipient=?)",
-        a.id(),
-        peer,
-        peer,
-        a.id());
+    int inserted =
+        db.jdbc.update(
+            "INSERT INTO friendship(id,requester,recipient) VALUES (?,?,?) ON CONFLICT DO NOTHING",
+            id,
+            a.id(),
+            peer);
+    var friendship =
+        db.one(
+            "SELECT id,status FROM friendship WHERE (requester=? AND recipient=?) OR (requester=? AND"
+                + " recipient=?)",
+            a.id(),
+            peer,
+            peer,
+            a.id());
+    if (inserted > 0) {
+      UUID friendshipId = (UUID) friendship.get("id");
+      notices.send(
+          a.id(),
+          peer,
+          "FRIEND_REQUEST",
+          "friend:" + friendshipId,
+          friendshipId,
+          "/friends",
+          "Você recebeu uma solicitação de amizade.");
+    }
+    return friendship;
   }
 
   private Map<String, Object> access(Actor a, UUID id, boolean accepted) {
