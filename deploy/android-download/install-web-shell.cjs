@@ -520,7 +520,6 @@ class MainActivity : Activity() {
             val notifications =
                 getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             notifications.cancel(UPDATE_NOTIFICATION_ID)
-            notifications.cancel(UPDATE_NOTIFICATION_ID)
 
             if (EnturmaAppState.foreground) {
                 openDownloadedInstaller(uri, downloadId)
@@ -563,6 +562,8 @@ class MainActivity : Activity() {
 
         EnturmaAppState.foreground = true
         initializeFirebase(this)
+        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .cancel(UPDATE_NOTIFICATION_ID)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         window.statusBarColor = Color.TRANSPARENT
