@@ -1,21 +1,22 @@
-import {
-  AudioSession,
-  registerGlobals,
-} from "@livekit/react-native";
-import { Room, RoomEvent } from "livekit-client";
+import { AudioSession, registerGlobals } from "@livekit/react-native";
+import type { Room } from "livekit-client";
 
 let initialized = false;
+let clientPromise: Promise<typeof import("livekit-client")> | null = null;
 
-function ensureGlobals() {
-  if (initialized) return;
-  registerGlobals();
-  initialized = true;
+async function livekit() {
+  if (!initialized) {
+    registerGlobals();
+    initialized = true;
+  }
+  if (!clientPromise) clientPromise = import("livekit-client");
+  return clientPromise;
 }
 
 export async function createRoom(
   onDisconnected?: () => void,
 ): Promise<Room> {
-  ensureGlobals();
+  const { Room, RoomEvent } = await livekit();
   const room = new Room({
     adaptiveStream: { pixelDensity: "screen" },
     dynacast: true,
@@ -24,13 +25,17 @@ export async function createRoom(
   return room;
 }
 
-export function observeDisconnect(room: Room, callback: () => void) {
+export async function observeDisconnect(
+  room: Room,
+  callback: () => void,
+) {
+  const { RoomEvent } = await livekit();
   room.on(RoomEvent.Disconnected, callback);
   return () => room.off(RoomEvent.Disconnected, callback);
 }
 
 export async function connectRoom(room: Room, url: string, token: string) {
-  ensureGlobals();
+  await livekit();
   await AudioSession.startAudioSession();
   try {
     await room.connect(url, token);
