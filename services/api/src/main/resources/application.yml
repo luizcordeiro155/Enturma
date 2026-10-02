@@ -47,4 +47,5 @@ enturma:
   mail-enabled: ${MAIL_ENABLED:false}
   auth-register-limit: ${AUTH_REGISTER_RATE_LIMIT:5}
   mail-from: ${MAIL_FROM:enturma@localhost}
+  fcm-service-account-base64: ${FCM_SERVICE_ACCOUNT_BASE64:}
   room-max-minutes: ${ROOM_MAX_MINUTES:180}
