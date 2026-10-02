@@ -157,6 +157,7 @@ export function DesktopUpdateProvider({
     }
 
     if (!isMobileApp()) return;
+    document.documentElement.dataset.enturmaUpdateUi = "web";
     let live = true;
     const currentVersion = mobileVersion();
     const check = async () => {
@@ -218,6 +219,7 @@ export function DesktopUpdateProvider({
     document.addEventListener("visibilitychange", onVisible);
     return () => {
       live = false;
+      delete document.documentElement.dataset.enturmaUpdateUi;
       window.clearInterval(interval);
       window.removeEventListener("enturma-mobile-update-check", onCheck);
       document.removeEventListener("visibilitychange", onVisible);
