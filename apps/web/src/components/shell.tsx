@@ -161,6 +161,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         <main id="content">{children}</main>
         <footer>
           <ShieldCheck size={20} /> Catálogo acadêmico com fontes verificadas.
+          <span>Enturma Web v0.2.0</span>
         </footer>
       </div>
 
