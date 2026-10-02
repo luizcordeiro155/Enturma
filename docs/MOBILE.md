@@ -1,16 +1,16 @@
-# Mobile 0.3.6
+# Mobile 0.3.7
 
 A versão Android usa a aplicação Web responsiva oficial dentro de um shell Android seguro. Com isso, Web, Desktop e Android passam a compartilhar as mesmas páginas e a mesma implementação de salas, chamadas, fórum, perfil, cadernos, caronas, configurações e recursos futuros.
 
-## Ajustes mobile 0.3.6
+## Ajustes mobile 0.3.7
 
-O Android agora usa edge-to-edge sem adicionar padding nativo vazio. A área da barra de status é preenchida pela própria interface do Enturma, enquanto o inset real do aparelho é aplicado dentro do topbar. Isso remove a faixa branca no topo sem esconder relógio, sinal, bateria ou notificações.
+O Android agora usa edge-to-edge sem adicionar padding nativo vazio. A área da barra de status é preenchida pela própria interface do Enturma, enquanto o inset real do aparelho é aplicado dentro do topbar. Isso remove a faixa branca no topo sem esconder relógio, sinal, bateria ou notificações. A proteção da safe area agora é persistente durante a navegação SPA entre páginas. O shell também acompanha `data-theme` e troca automaticamente os ícones da barra de status entre claros e escuros, mantendo contraste correto nos modos claro e escuro.
 
 A navegação interna da sala continua com prioridade no celular: **Conversa, Chamada, Materiais e Enturma AI** permanecem clicáveis sem conflito com a barra global do aplicativo.
 
 ## Paridade entre plataformas
 
-O APK abre a origem oficial do Enturma em um WebView Android e adiciona `EnturmaMobile/0.3.6` ao User-Agent. A aplicação Web detecta esse marcador para ocultar a opção **Baixar aplicativo** quando o usuário já está no app.
+O APK abre a origem oficial do Enturma em um WebView Android e adiciona `EnturmaMobile/0.3.7` ao User-Agent. A aplicação Web detecta esse marcador para ocultar a opção **Baixar aplicativo** quando o usuário já está no app.
 
 Não existe mais uma segunda interface Android separada que precise ser mantida página por página. Ao publicar uma página ou ajuste responsivo no Web, o Android recebe a mesma experiência automaticamente.
 

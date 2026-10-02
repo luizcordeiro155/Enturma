@@ -37,6 +37,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
@@ -66,12 +67,21 @@ class MainActivity : Activity() {
     private var safeBottomCssPx = 0
     private var safeLeftCssPx = 0
 
+    private inner class EnturmaNativeBridge {
+        @JavascriptInterface
+        fun setLightTheme(light: Boolean) {
+            runOnUiThread {
+                applySystemBarTheme(light)
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        window.statusBarColor = Color.parseColor("#0f1917")
-        window.navigationBarColor = Color.parseColor("#0f1917")
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
 
         CookieManager.getInstance().setAcceptCookie(true)
 
@@ -79,10 +89,8 @@ class MainActivity : Activity() {
         webView.setBackgroundColor(Color.parseColor("#0f1917"))
         setContentView(webView)
 
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = false
-            isAppearanceLightNavigationBars = false
-        }
+        applySystemBarTheme(false)
+        webView.addJavascriptInterface(EnturmaNativeBridge(), "EnturmaNative")
 
         ViewCompat.setOnApplyWindowInsetsListener(webView) { _, insets ->
             val safeInsets = insets.getInsets(
@@ -234,6 +242,15 @@ class MainActivity : Activity() {
         }
     }
 
+    private fun applySystemBarTheme(light: Boolean) {
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = light
+            isAppearanceLightNavigationBars = light
+        }
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = Color.TRANSPARENT
+    }
+
     private fun syncSafeAreaCss() {
         if (!::webView.isInitialized) return
 
@@ -241,19 +258,64 @@ class MainActivity : Activity() {
             (function() {
               var root = document.documentElement;
               if (!root) return;
+
               root.dataset.enturmaMobile = "true";
               root.style.setProperty("--native-safe-top", "\${safeTopCssPx}px");
               root.style.setProperty("--native-safe-right", "\${safeRightCssPx}px");
               root.style.setProperty("--native-safe-bottom", "\${safeBottomCssPx}px");
               root.style.setProperty("--native-safe-left", "\${safeLeftCssPx}px");
 
-              var topbar = document.querySelector(".topbar");
-              if (topbar) {
-                var mobile = window.matchMedia("(max-width: 760px)").matches;
-                var baseHeight = mobile ? 58 : 68;
-                topbar.style.paddingTop = (10 + \${safeTopCssPx}) + "px";
-                topbar.style.minHeight = (baseHeight + \${safeTopCssPx}) + "px";
+              var styleId = "enturma-native-safe-area";
+              var style = document.getElementById(styleId);
+              if (!style) {
+                style = document.createElement("style");
+                style.id = styleId;
+                (document.head || root).appendChild(style);
               }
+
+              style.textContent = [
+                'html[data-enturma-mobile="true"] .topbar {',
+                '  box-sizing: border-box !important;',
+                '  padding-top: calc(10px + var(--native-safe-top, 0px)) !important;',
+                '  min-height: calc(68px + var(--native-safe-top, 0px)) !important;',
+                '}',
+                '@media (max-width: 760px) {',
+                '  html[data-enturma-mobile="true"] .topbar {',
+                '    min-height: calc(58px + var(--native-safe-top, 0px)) !important;',
+                '  }',
+                '}'
+              ].join("\\n");
+
+              function syncNativeTheme() {
+                var theme = root.dataset.theme || "light";
+                var light = theme !== "dark";
+                if (theme === "system" && window.matchMedia) {
+                  light = !window.matchMedia("(prefers-color-scheme: dark)").matches;
+                }
+                try {
+                  if (window.EnturmaNative && typeof window.EnturmaNative.setLightTheme === "function") {
+                    window.EnturmaNative.setLightTheme(light);
+                  }
+                } catch (_) {}
+              }
+
+              syncNativeTheme();
+
+              if (window.__enturmaThemeObserver) {
+                window.__enturmaThemeObserver.disconnect();
+              }
+              window.__enturmaThemeObserver = new MutationObserver(function(mutations) {
+                for (var i = 0; i < mutations.length; i++) {
+                  if (mutations[i].attributeName === "data-theme") {
+                    syncNativeTheme();
+                    break;
+                  }
+                }
+              });
+              window.__enturmaThemeObserver.observe(root, {
+                attributes: true,
+                attributeFilter: ["data-theme"]
+              });
             })();
         """.trimIndent()
 
