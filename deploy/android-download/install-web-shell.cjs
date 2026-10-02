@@ -30,12 +30,23 @@ const source = `package br.com.enturma.app
 
 import android.Manifest
 import android.app.Activity
+import android.app.AlarmManager
+import android.app.DownloadManager
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.ActivityNotFoundException
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
@@ -50,11 +61,146 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+
+private const val ANDROID_UPDATE_ORIGIN =
+    "https://enturma-android-download-v3-production.up.railway.app"
+private const val UPDATE_CHANNEL_ID = "enturma_app_updates"
+private const val UPDATE_NOTIFICATION_ID = 4801
+private const val UPDATE_ALARM_REQUEST = 4802
+
+private fun isNewerVersion(remote: String, current: String): Boolean {
+    val a = remote.split(".").map { it.toIntOrNull() ?: 0 }
+    val b = current.split(".").map { it.toIntOrNull() ?: 0 }
+    val size = maxOf(a.size, b.size)
+    for (i in 0 until size) {
+        val av = a.getOrElse(i) { 0 }
+        val bv = b.getOrElse(i) { 0 }
+        if (av != bv) return av > bv
+    }
+    return false
+}
+
+private object EnturmaUpdateScheduler {
+    fun schedule(context: Context) {
+        val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, EnturmaUpdateReceiver::class.java)
+        val pending = PendingIntent.getBroadcast(
+            context,
+            UPDATE_ALARM_REQUEST,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        alarm.setInexactRepeating(
+            AlarmManager.RTC_WAKEUP,
+            System.currentTimeMillis() + 2 * 60 * 1000,
+            AlarmManager.INTERVAL_HOUR,
+            pending,
+        )
+    }
+
+    fun checkNow(context: Context) {
+        context.sendBroadcast(Intent(context, EnturmaUpdateReceiver::class.java))
+    }
+}
+
+class EnturmaBootReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent?) {
+        EnturmaUpdateScheduler.schedule(context)
+        EnturmaUpdateScheduler.checkNow(context)
+    }
+}
+
+class EnturmaUpdateReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent?) {
+        val async = goAsync()
+        Thread {
+            try {
+                val connection =
+                    URL("${ANDROID_UPDATE_ORIGIN}/latest-android.json?ts=${System.currentTimeMillis()}")
+                        .openConnection() as HttpURLConnection
+                connection.connectTimeout = 8000
+                connection.readTimeout = 8000
+                connection.setRequestProperty(
+                    "User-Agent",
+                    "EnturmaMobile/${BuildConfig.VERSION_NAME}",
+                )
+                connection.setRequestProperty("Cache-Control", "no-cache")
+                if (connection.responseCode !in 200..299) return@Thread
+
+                val body = connection.inputStream.bufferedReader().use { it.readText() }
+                val json = JSONObject(body)
+                val remote = json.optString("version")
+                val downloadUrl = json.optString("downloadUrl")
+                if (
+                    !remote.matches(Regex("\\d+\\.\\d+\\.\\d+")) ||
+                    !downloadUrl.startsWith("${ANDROID_UPDATE_ORIGIN}/") ||
+                    !isNewerVersion(remote, BuildConfig.VERSION_NAME)
+                ) return@Thread
+
+                if (
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                    context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                        PackageManager.PERMISSION_GRANTED
+                ) return@Thread
+
+                val manager =
+                    context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    manager.createNotificationChannel(
+                        NotificationChannel(
+                            UPDATE_CHANNEL_ID,
+                            "Atualizações do Enturma",
+                            NotificationManager.IMPORTANCE_HIGH,
+                        ).apply {
+                            description =
+                                "Avisa quando uma nova versão do Enturma está pronta."
+                        },
+                    )
+                }
+
+                val open = Intent(context, MainActivity::class.java).apply {
+                    action = Intent.ACTION_VIEW
+                    data = Uri.parse("enturma:///settings?update=1")
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                }
+                val pending = PendingIntent.getActivity(
+                    context,
+                    remote.hashCode(),
+                    open,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                )
+                val builder =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        Notification.Builder(context, UPDATE_CHANNEL_ID)
+                    else Notification.Builder(context)
+
+                val notification = builder
+                    .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                    .setContentTitle("Nova atualização do Enturma")
+                    .setContentText("Versão ${remote} disponível. Toque para atualizar.")
+                    .setContentIntent(pending)
+                    .setAutoCancel(true)
+                    .setOnlyAlertOnce(true)
+                    .build()
+
+                manager.notify(UPDATE_NOTIFICATION_ID, notification)
+            } catch (_: Exception) {
+                // A próxima verificação tenta novamente.
+            } finally {
+                async.finish()
+            }
+        }.start()
+    }
+}
 
 class MainActivity : Activity() {
     companion object {
         private const val FILE_CHOOSER_REQUEST = 4101
         private const val MEDIA_PERMISSION_REQUEST = 4102
+        private const val NOTIFICATION_PERMISSION_REQUEST = 4103
         private const val WEB_ORIGIN = "${webOrigin}"
         private const val APP_VERSION = "${version}"
     }
