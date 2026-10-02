@@ -557,6 +557,13 @@ class MainActivity : Activity() {
                 refreshNativePushToken()
             }
         }
+
+        @JavascriptInterface
+        fun clearPushToken() {
+            runOnUiThread {
+                clearNativePushToken()
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -860,6 +867,16 @@ class MainActivity : Activity() {
             runOnUiThread {
                 dispatchCachedPushRegistration()
             }
+        }
+    }
+
+    private fun clearNativePushToken() {
+        getSharedPreferences(PUSH_PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .remove(PREF_PUSH_TOKEN)
+            .apply()
+        if (initializeFirebase(this)) {
+            FirebaseMessaging.getInstance().deleteToken()
         }
     }
 
