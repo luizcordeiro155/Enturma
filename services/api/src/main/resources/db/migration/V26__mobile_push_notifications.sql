@@ -6,7 +6,7 @@ ALTER TABLE notification_preference
 
 ALTER TABLE notification_preference
   ADD CONSTRAINT notification_preference_category_check
-  CHECK(category IN ('ROOM_MESSAGE','MENTION','ROOM_NOTICE','FORUM','ACHIEVEMENT','RIDE','FRIEND'));
+  CHECK(category IN ('ROOM_MESSAGE','PRIVATE_MESSAGE','MENTION','ROOM_NOTICE','FORUM','ACHIEVEMENT','RIDE','FRIEND'));
 
 CREATE TABLE notification_push_device (
   id uuid PRIMARY KEY,
