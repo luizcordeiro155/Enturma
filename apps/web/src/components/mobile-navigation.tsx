@@ -68,7 +68,6 @@ export function MobileNavigation() {
         <button
           type="button"
           aria-label="Mais opções"
-          className={updatePending ? "app-update-pending" : undefined}
           onClick={() => setOpen(true)}
         >
           <Menu size={21} />
