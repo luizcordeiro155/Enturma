@@ -39,6 +39,17 @@ export function isDesktop() {
       /EnturmaDesktop\//.test(navigator.userAgent))
   );
 }
+
+export function isMobileApp() {
+  return (
+    typeof window !== "undefined" &&
+    /EnturmaMobile\//.test(navigator.userAgent)
+  );
+}
+
+export function isInstalledApp() {
+  return isDesktop() || isMobileApp();
+}
 const Context = createContext<{ state: UpdateState | null; open: () => void }>({
   state: null,
   open: () => {},

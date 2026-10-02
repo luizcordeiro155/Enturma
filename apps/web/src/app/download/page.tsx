@@ -40,7 +40,7 @@ async function currentAndroidRelease(): Promise<AndroidManifest | null> {
 }
 export default async function DownloadPage() {
   const ua = (await headers()).get("user-agent") ?? "";
-  if (ua.includes("EnturmaDesktop/")) redirect("/home");
+  if (ua.includes("EnturmaDesktop/") || ua.includes("EnturmaMobile/")) redirect("/home");
   const android = /Android/i.test(ua);
   const androidRelease = await currentAndroidRelease();
   const androidVersion = androidRelease?.version ?? "mais recente";

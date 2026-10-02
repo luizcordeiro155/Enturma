@@ -15,7 +15,7 @@ import {
   Gamepad2,
   Download,
 } from "lucide-react";
-import { isDesktop } from "./desktop-updates";
+import { isInstalledApp } from "./desktop-updates";
 const tabs = [
   ["/home", "Início", Home],
   ["/explore", "Salas", Users],
@@ -94,7 +94,7 @@ export function MobileNavigation() {
               ["/download", "Baixar aplicativo", Download],
             ] as const
           )
-            .filter(([href]) => href !== "/download" || !isDesktop())
+            .filter(([href]) => href !== "/download" || !isInstalledApp())
             .map(([href, label, Icon]) => (
               <Link href={href} key={href} onClick={() => setOpen(false)}>
                 <Icon size={22} />
