@@ -53,6 +53,14 @@ test("download service serves NSIS while preserving verified legacy ZIP updates"
   );
   assert.equal(await (await fetch(base + "/download")).text(), "installer");
   assert.equal(
+    await (await fetch(base + "/Enturma-Windows.exe")).text(),
+    "installer",
+  );
+  assert.equal(
+    await (await fetch(base + "/Enturma-Setup.exe")).text(),
+    "installer",
+  );
+  assert.equal(
     (
       await fetch(base + "/Enturma-Setup-0.3.0.exe", { method: "HEAD" })
     ).headers.get("content-length"),
@@ -64,4 +72,6 @@ test("download service serves NSIS while preserving verified legacy ZIP updates"
     (await fetch(base + "/latest.json", { method: "POST" })).status,
     405,
   );
+  fs.unlinkSync(path.join(dir, "Enturma-Setup-0.3.0.exe"));
+  assert.equal((await fetch(base + "/latest.json")).status, 503);
 });

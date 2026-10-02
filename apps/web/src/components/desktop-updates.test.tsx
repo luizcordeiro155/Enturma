@@ -48,8 +48,35 @@ afterEach(() => {
   delete window.enturmaDesktop;
   delete document.documentElement.dataset.reducedMotion;
   vi.clearAllMocks();
+  sessionStorage.clear();
 });
 describe("Desktop update UI", () => {
+  it("offers official installer recovery to the old bridge without invoking the failing updater", async () => {
+    const external = vi.fn().mockResolvedValue(undefined);
+    const oldCheck = vi.fn();
+    window.enturmaDesktop = {
+      isDesktop: true,
+      getInfo: async () => ({ version: "0.2.0", platform: "win32" }),
+      checkForUpdates: oldCheck,
+      openExternal: external,
+    };
+    render(
+      <DesktopUpdateProvider>
+        <DesktopUpdateButton />
+      </DesktopUpdateProvider>,
+    );
+    const recovery = await screen.findByRole("button", {
+      name: "Baixar atualização oficial",
+    });
+    fireEvent.click(recovery);
+    expect(external).toHaveBeenCalledWith(
+      "https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Windows.exe",
+    );
+    expect(oldCheck).not.toHaveBeenCalled();
+    expect(
+      screen.queryByRole("button", { name: "Verificar novamente" }),
+    ).toBeNull();
+  });
   it("keeps a downloaded update available after deferring and installs only on request", async () => {
     render(
       <DesktopUpdateProvider>

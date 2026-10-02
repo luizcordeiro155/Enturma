@@ -17,14 +17,14 @@ Base main `937a3be`; branch `codex/enturma-v0.3.0`. Um único PR, squash somente
 
 - 64 testes Java aprovados; migrations V1–V25 em banco de teste limpo.
 - 9 fluxos Playwright aprovados (6 na suíte + 3 com banco E2E configurado), incluindo dois Chromium com mídia LiveKit real, navegação e screen share.
-- 22 testes Web, 5 Desktop e 4 de sessão mobile.
+- 23 testes Web, 5 Desktop e 4 de sessão mobile.
 - Typecheck Web/mobile e lint Web. Bundles Hermes Android/iOS; prebuild Android; NSIS/ZIP Windows.
 - IA de cadernos no E2E usa provedor local controlado; não é homologação de qualidade de um modelo externo.
 
-## Gates de produção
+## Publicação e limites
 
-- [ ] Homologar migração automática do Desktop 0.2.0. O helper antigo encerrou sem instalar neste Windows; novo helper e execução separada do script antigo não comprovam esse requisito.
-- [ ] Merge squash e checagem Vercel/SquareCloud/Railway após resolver esse gate.
-- [ ] Android/iOS em aparelhos reais, assinatura e lojas. Configuração e bundles preparados; distribuição não anunciada sem artefato válido.
+- Recuperação assistida para Desktop 0.2.0 via instalador oficial; não exige apagar conta ou dados. A primeira recuperação não é silenciosa. O novo iniciador e as próximas atualizações foram validados com instalação real.
+- PR #21 será publicado com squash único e verificação Vercel/SquareCloud/Railway; sem Actions.
+- Android/iOS: configuração e bundles preparados. Assinatura, lojas e homologação em aparelhos físicos permanecem etapas próprias; downloads não anunciados sem artefato.
 
-Abertura de PR para revisão não equivale a publicação concluída. Nenhuma credencial, banco de teste, binário ou artefato local entra no Git.
+Nenhuma credencial, banco de teste ou binário local entra no Git.

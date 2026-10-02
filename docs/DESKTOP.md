@@ -20,7 +20,7 @@ Downloads exigem HTTPS na origem permitida, tamanho limitado e SHA-256. O ZIP é
 
 Testes Node cobrem manifesto, origem, nomes de arquivo, IPC e servidor HTTP. A verificação Electron usa aplicativo empacotado, servidor HTTPS local e download/hash/instalação reais em diretório isolado; não é apenas um mock visual.
 
-**Gate de publicação:** a versão 0.2.0 já distribuída contém o início do PowerShell com `detached: true`. Neste Windows ela baixou/verificou 0.3.0, mas o auxiliar encerrou sem aplicar o pacote. O script legado aplica o ZIP quando executado separadamente; isso não comprova a atualização automática. Alterar 0.3.0 não modifica código já instalado em 0.2.0. O PR deve manter essa limitação explícita e não declarar a migração automática homologada, nem fazer merge/deploy de produção antes de resolver ou aceitar esse gate.
+**Recuperação 0.2.0:** o iniciador já distribuído com `detached: true` pode fechar sem aplicar o ZIP no Windows. O site identifica a bridge antiga e oferece “Baixar atualização oficial”, usando exclusivamente o instalador HTTPS do serviço Enturma. O usuário fecha a versão antiga, executa o EXE e abre o novo atalho; não deve excluir a conta nem desinstalar/limpar dados. A mesma identidade Electron e a partição persistente são preservadas. Essa recuperação inicial é assistida, não uma migração silenciosa; as próximas versões usam o iniciador corrigido. O formato do manifesto e a URL do ZIP continuam disponíveis para clientes legados em que o iniciador funciona.
 
 Atualizações somente do Web não exigem trocar o binário. macOS/Linux ainda precisam de build e homologação próprios antes de oferecer download público.
 

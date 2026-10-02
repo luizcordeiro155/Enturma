@@ -163,4 +163,4 @@ Após o redeploy, `GET /api/v1/capabilities` deve retornar `voice=true`. Teste e
 
 Novas migrations V23–V25 acrescentam comunidade/perfil/salas, fila opcional de revisão e grupos de optativas oficiais sem semestre artificial. Nenhuma migration antiga foi alterada. O catálogo UFMG passa a incluir 43 optativas da fonte verificada.
 
-Publicação por um PR/squash na main, seguida das integrações nativas Vercel/SquareCloud/Railway. Não usar Actions para deploy. Antes do merge, fechar os gates de `V0_3_IMPLEMENTATION.md`, especialmente o atualizador Desktop 0.2.0. Verificar saúde Web/API e manifesto/EXE/ZIP Railway após uma publicação autorizada.
+Publicação por um PR/squash na main, seguida das integrações nativas Vercel/SquareCloud/Railway. Não usar Actions para deploy. Desktop 0.2.0 dispõe de recuperação assistida pelo instalador oficial; as próximas atualizações usam o iniciador corrigido. Consulte `V0_3_IMPLEMENTATION.md`. Verificar saúde Web/API e manifesto/EXE/ZIP Railway após uma publicação autorizada.

@@ -31,6 +31,6 @@ Responsividade: 320×568, 390×844, 1024×600, 1376×766/768, 1920×1080 e 3440�
 
 Checklist e publicação: [V0_3_IMPLEMENTATION](V0_3_IMPLEMENTATION.md).
 
-### Gate final da versão 0.3.0
+### Recuperação do Desktop legado
 
-O atualizador legado 0.2.0 baixou o pacote, mas não iniciou a instalação automaticamente neste Windows. A versão nova corrige o lançamento do PowerShell; isso não atualiza o código antigo já distribuído. PR de revisão pode ser aberto, mas o merge/deploy e a compatibilidade automática 0.2→0.3 não estão homologados. Detalhes em DESKTOP.md.
+A versão 0.2.0 recebe uma orientação dentro do app para baixar o instalador oficial quando o iniciador antigo falha. A recuperação inicial exige executar o EXE, sem excluir conta/dados. A instalação da bridge nova foi validada; não se afirma que o código antigo foi corrigido remotamente. Produção é publicada via PR #21 e squash, conforme a solicitação de liberação de 02/10/2026.

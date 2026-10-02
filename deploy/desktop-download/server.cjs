@@ -74,7 +74,7 @@ const server = http.createServer((req, res) => {
       exe = names.find((n) => n === `Enturma-Setup-${version(zip || "")}.exe`);
     const pathname = new URL(req.url, "http://localhost").pathname;
     if (pathname === "/latest.json") {
-      if (!zip) {
+      if (!zip || !exe) {
         res.writeHead(503);
         res.end("{}");
         return;
@@ -120,7 +120,12 @@ const server = http.createServer((req, res) => {
     const chosen =
       pathname === "/Enturma-Windows.zip"
         ? zip
-        : ["/", "/download", "/Enturma-Windows.exe"].includes(pathname)
+        : [
+              "/",
+              "/download",
+              "/Enturma-Windows.exe",
+              "/Enturma-Setup.exe",
+            ].includes(pathname)
           ? exe
           : names.includes(requested)
             ? requested

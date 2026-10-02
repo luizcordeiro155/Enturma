@@ -61,6 +61,7 @@ export function DesktopUpdateProvider({
 }) {
   const [state, setState] = useState<UpdateState | null>(null),
     [open, setOpen] = useState(false);
+  const [legacyWindows, setLegacyWindows] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const prompted = useRef("");
   const { session } = useCallSession();
@@ -82,15 +83,34 @@ export function DesktopUpdateProvider({
         .then(receive)
         .catch(() => {});
     else
-      void bridge.getInfo().then((info) =>
-        receive({
-          status: "unsupported",
-          progress: 0,
-          currentVersion: info.version,
-          message:
-            "Esta versão usa o atualizador anterior. Atualize pelo menu do aplicativo.",
-        }),
-      );
+      void bridge
+        .getInfo()
+        .then((info) => {
+          const legacy = info.platform === "win32";
+          if (!live) return;
+          setLegacyWindows(legacy);
+          receive({
+            status: "unsupported",
+            progress: 0,
+            currentVersion: info.version,
+            message: legacy
+              ? "Atualize o aplicativo antigo pelo instalador oficial para ativar as próximas atualizações automáticas."
+              : "Use a página de downloads para atualizar este sistema.",
+          });
+          if (legacy) {
+            try {
+              if (
+                sessionStorage.getItem("enturma-legacy-update") !== info.version
+              ) {
+                sessionStorage.setItem("enturma-legacy-update", info.version);
+                setOpen(true);
+              }
+            } catch {
+              setOpen(true);
+            }
+          }
+        })
+        .catch(() => {});
     const unsubscribe = bridge.onUpdateState?.(receive);
     return () => {
       live = false;
@@ -151,7 +171,41 @@ export function DesktopUpdateProvider({
             </>
           )}
           {state.message && <p role="status">{state.message}</p>}
-          {state.status === "ready" ? (
+          {legacyWindows ? (
+            <>
+              <p>
+                O atualizador desta versão pode fechar sem concluir. Não é
+                necessário excluir sua conta nem desinstalar o aplicativo.
+              </p>
+              <ol>
+                <li>Baixe o instalador oficial abaixo.</li>
+                <li>Feche o Enturma antigo e execute o arquivo baixado.</li>
+                <li>
+                  Abra o Enturma pelo novo atalho. Seus dados e sua conta
+                  permanecem disponíveis.
+                </li>
+              </ol>
+              {session && (
+                <p>Finalize sua chamada antes de fechar o aplicativo.</p>
+              )}
+              <div className="actions">
+                <button
+                  onClick={() =>
+                    void window.enturmaDesktop
+                      ?.openExternal(
+                        "https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Windows.exe",
+                      )
+                      .catch((e) => setState({ ...state, message: e.message }))
+                  }
+                >
+                  Baixar atualização oficial
+                </button>
+                <button className="secondary" onClick={() => setOpen(false)}>
+                  Depois
+                </button>
+              </div>
+            </>
+          ) : state.status === "ready" ? (
             <>
               <p>
                 A atualização foi baixada e verificada. O Enturma será fechado e
