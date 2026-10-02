@@ -13,13 +13,15 @@ import {
 import styles from "./download.module.css";
 const desktopOrigin =
   "https://enturma-desktop-download-v5-production.up.railway.app";
+const androidOrigin =
+  "https://enturma-android-download-v3-production.up.railway.app";
 export default async function DownloadPage() {
   const ua = (await headers()).get("user-agent") ?? "";
   if (ua.includes("EnturmaDesktop/")) redirect("/home");
   const android = /Android/i.test(ua);
-  let androidUrl: string | undefined;
+  let androidUrl = `${androidOrigin}/Enturma-Android.apk`;
   try {
-    const candidate = new URL(process.env.ANDROID_DOWNLOAD_URL ?? "");
+    const candidate = new URL(process.env.ANDROID_DOWNLOAD_URL ?? androidUrl);
     if (
       candidate.protocol === "https:" &&
       !candidate.username &&
@@ -72,15 +74,11 @@ export default async function DownloadPage() {
                 ? "Aplicativo nativo com navegação por abas, salas e comunidade."
                 : "Um arquivo para instalar o Enturma, criar seus atalhos e receber as próximas atualizações no aplicativo."}
             </p>
-            {android && androidUrl ? (
+            {android ? (
               <a className={styles.primary} href={androidUrl}>
-                Baixar APK para Android
+                <Download size={18} />
+                Baixar Enturma Android 0.3.0
               </a>
-            ) : android ? (
-              <p>
-                O APK está em preparação. Enquanto isso, acesse todos os
-                recursos pelo navegador.
-              </p>
             ) : (
               <a
                 className={styles.primary}
@@ -91,8 +89,9 @@ export default async function DownloadPage() {
               </a>
             )}
             <small className={styles.downloadNote}>
-              A instalação Windows é por usuário. Seus dados e sua conta
-              continuam no Enturma.
+              {android
+                ? "APK oficial do Enturma para Android. Sua conta e seus dados continuam sincronizados com a versão Web."
+                : "A instalação Windows é por usuário. Seus dados e sua conta continuam no Enturma."}
             </small>
           </aside>
         </section>
@@ -118,11 +117,7 @@ export default async function DownloadPage() {
                 Build nativo Expo/React Native. Configurações de APK e AAB
                 prontas para distribuição.
               </p>
-              {androidUrl ? (
-                <a href={androidUrl}>Baixar APK</a>
-              ) : (
-                <p>APK em preparação</p>
-              )}
+              <a href={androidUrl}>Baixar APK 0.3.0</a>
             </div>
           </article>
           <article>
