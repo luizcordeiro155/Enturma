@@ -8,8 +8,7 @@ O rate limit padrão usa usuário autenticado ou IP de conexão, sem confiar em 
 
 Este repositório não representa certificação de segurança ou conformidade LGPD. Antes de operação pública: consentimento/termos revisados, exportação/exclusão de conta, política de retenção, controle de acessos operacionais, alertas, testes de carga, antivírus, análise de dependências, teste de restauração e revisão dos provedores externos.
 
-Bloqueios/denúncias têm API e aplicação nas interações suportadas. A interface completa de moderação e resolução de denúncias ainda está pendente. Para relatar vulnerabilidade, não publique tokens ou dados pessoais em issues públicas; combine um canal privado com o mantenedor.
-
+Bloqueios/denúncias têm API e aplicação nas interações suportadas. A revisão administrativa de casos/penalidades está disponível; denúncias seguem os endpoints existentes. Para relatar vulnerabilidade, não publique tokens ou dados pessoais em issues públicas; combine um canal privado com o mantenedor.
 
 ## Chat e retenção
 
@@ -18,3 +17,11 @@ O fluxo atual persiste conversas e anexos com autorização por sala. HTTPS/WSS 
 ## Proteções de autenticação
 
 Login, cadastro e recuperação possuem janelas específicas de rate limit. E-mail e username possuem validação de duplicidade no serviço e constraints únicas no banco. Em escala, adicionar limitação distribuída/borda, alertas de credential stuffing e observabilidade de abuso sem registrar senhas.
+
+## Moderação, cliente Desktop e dependências 0.3.0
+
+A UI administrativa permite revisar evidências, registrar sanção com requestId e justificativa e responder ao recurso. Classificação opcional de sala cria caso para revisão; nunca bane automaticamente. E2EE/cofre privado não passa pela fila ou regras. Detalhes em COMMUNITY_V03.md.
+
+Electron mantém contextIsolation/sandbox, sem nodeIntegration. IPC exige main frame da janela/origem autorizada. Manifesto/ZIP exigem HTTPS, origem idêntica, tamanho limitado e SHA-256; sem redirects. Instalador valida caminhos, entrada ZIP e junções, preserva arquivos não substituídos e mantém backup para rollback. ENTURMA_PORTABLE=1 evita registrar protocolo em execução portátil/testes. Nenhuma chave privada é embutida no app.
+
+Audit de dependências do Expo ainda aponta advisories transitivos em node-forge (ferramenta de assinatura do CLI; versão publicada 1.4.0 sem correção para GHSA-86w9-cpqp-85rv) e decode-uri-component/query-string (GHSA-vcc3-ghjq-m6fr). Não se aplicou downgrade inseguro do Expo sugerido por audit --force. uuid de xcode foi atualizado via override compatível 11.1.1. Reavaliar patches upstream antes da distribuição nativa pública; não anunciar ausência de vulnerabilidades.

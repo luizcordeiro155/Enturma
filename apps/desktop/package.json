@@ -1,6 +1,6 @@
 {
   "name": "@enturma/desktop",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "description": "Aplicativo desktop oficial do Enturma",
   "main": "src/main.cjs",
@@ -9,9 +9,10 @@
     "dev": "npx --yes electron@44.5.1 .",
     "start": "npx --yes electron@44.5.1 .",
     "pack": "npx --yes electron-builder@26.15.3 --dir",
-    "dist:win": "npx --yes electron-builder@26.15.3 --win zip --x64 --publish never",
+    "dist:win": "npx --yes electron-builder@26.15.3 --win nsis zip --x64 --publish never",
     "dist:linux": "npx --yes electron-builder@26.15.3 --linux AppImage --x64 --publish never",
-    "dist:mac": "npx --yes electron-builder@26.15.3 --mac dmg --publish never"
+    "dist:mac": "npx --yes electron-builder@26.15.3 --mac dmg --publish never",
+    "test": "node --test test/*.test.cjs"
   },
   "build": {
     "appId": "br.com.enturma.desktop",
@@ -23,7 +24,8 @@
     },
     "files": [
       "src/**/*",
-      "package.json"
+      "package.json",
+      "assets/**/*"
     ],
     "artifactName": "Enturma-${version}-${os}-${arch}.${ext}",
     "protocols": [
@@ -37,14 +39,21 @@
     "win": {
       "target": [
         {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
           "target": "zip",
           "arch": [
             "x64"
           ]
         }
       ],
-      "signAndEditExecutable": false,
-      "signExecutable": false
+      "signAndEditExecutable": true,
+      "signExecutable": false,
+      "icon": "assets/icon.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -53,7 +62,8 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Enturma",
-      "deleteAppDataOnUninstall": false
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "Enturma-Setup-${version}.exe"
     },
     "linux": {
       "target": [

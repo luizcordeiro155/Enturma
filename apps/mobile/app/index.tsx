@@ -3,8 +3,9 @@ import { Text } from "react-native";
 import { useRouter } from "expo-router";
 import { request, type Credentials } from "@enturma/contracts";
 import { base, save } from "../src/api";
-import { Screen, Field, Button, ErrorMessage, styles } from "../src/ui";
+import { Screen, Field, Button, ErrorMessage, useStyles } from "../src/ui";
 export default function Login() {
+  const styles = useStyles();
   const [register, setRegister] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

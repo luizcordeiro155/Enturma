@@ -29,3 +29,11 @@ WebRTC fornece criptografia de transporte. Não documentar a mídia como E2EE de
 ## Escala
 
 O relay atual é em memória por instância. Antes de executar várias réplicas da API, introduzir um barramento/pub-sub compatível com envelopes cifrados sem descriptografá-los. O conteúdo deve continuar opaco ao broker.
+
+## Eventos 0.3.0
+
+A conexão activity emite invalidações privadas achievement_unlocked, moderation_action, room_member_joined, room_member_left e room_expiring somente aos usuários autorizados. Eventos não incluem corpo de mensagens. Fórum pode invalidar listagem pública; notificações continuam privadas.
+
+Typing usa frames da conexão da sala com throttle de 2s e validade de 5s. Não há tabela de digitação. Reconexão recupera snapshot e histórico autorizado. Heartbeat/presença continuam independentes da digitação.
+
+CallSessionProvider reside no layout raiz e preserva a instância LiveKit entre rotas. Logout, saída explícita, perda irrecuperável ou encerramento terminam mídia. Trocar abas/rotas move a visualização, sem reconectar ou recriar os elementos de mídia.

@@ -11,3 +11,7 @@ O contador representa notificações não lidas. Abrir um aviso leva ao post ou 
 Mensagens privadas continuam usando ECDH + AES-GCM. A caixa de entrada não armazena nem recebe o texto delas: apenas autor, destinatário, identificadores e aviso genérico. Uma menção privada é indicada pelo cliente como metadado; o servidor limita o destinatário ao outro participante da amizade aceita. Os endpoints de mensagem específica preservam as verificações de associação à conversa e bloqueio.
 
 As animações de entrada, sino e destaque usam JavaScript e respeitam a preferência de movimento reduzido. Os testes cobrem a confirmação de links, chegada de posts sem reload, leitura e deduplicação, bloqueios, menções, navegação para mensagens e supressão de avisos nos chats abertos, além de temas e tela móvel.
+
+## Preferências 0.3.0
+
+Configurações → Notificações oferece in-app e e-mail independentes por ROOM_MESSAGE, ROOM_NOTICE, FORUM, ACHIEVEMENT, RIDE, FRIEND. E-mail inicia desabilitado. A outbox registra categoria/dedupe e o worker confere opt-out novamente antes do envio. Confirmação, recuperação e segurança não entram no opt-out. Ver [COMMUNITY_V03](COMMUNITY_V03.md).

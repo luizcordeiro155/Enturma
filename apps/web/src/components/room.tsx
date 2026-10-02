@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import type { Message, Profile, Room } from "@enturma/contracts";
 import {
   Bot,
@@ -21,6 +21,7 @@ import { Feedback, Loading } from "./feedback";
 import { RoomTools } from "./room-tools";
 import { UserIdentity } from "./user-identity";
 import { focusMessage } from "./notifications";
+import { useCallSession } from "./call-session-provider";
 import { RoomChat } from "./room-chat";
 
 type Section = "chat" | "call" | "materials" | "ai";
@@ -32,10 +33,17 @@ type Upload = {
 };
 
 export function RoomView({ id }: { id: string }) {
+  const callSession = useCallSession();
+  const params = useSearchParams();
+  const requestedPanel = params.get("panel");
+  const [typing, setTyping] = useState<{ id: string; name: string }[]>([]);
+  const lastTyping = useRef(0);
   const [room, setRoom] = useState<Room>();
   const [me, setMe] = useState<Profile>();
   const [messages, setMessages] = useState<Message[]>([]);
-  const [section, setSection] = useState<Section>("chat");
+  const [section, setSection] = useState<Section>(
+    params.get("panel") === "call" ? "call" : "chat",
+  );
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [connected, setConnected] = useState(false);
@@ -81,6 +89,12 @@ export function RoomView({ id }: { id: string }) {
       window.removeEventListener("enturma-notification-open", jump);
     };
   }, [id]);
+  useEffect(() => {
+    if (requestedPanel === "call") {
+      const t = setTimeout(() => setSection("call"), 0);
+      return () => clearTimeout(t);
+    }
+  }, [requestedPanel]);
   const normalize = useCallback((items: Message[]) => [...items].reverse(), []);
 
   const reloadRoom = useCallback(async () => {
@@ -132,6 +146,10 @@ export function RoomView({ id }: { id: string }) {
         socket.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
+            if (data.type === "typing") {
+              setTyping(data.users);
+              return;
+            }
             if (data.type !== "snapshot") return;
             setConnected(true);
             connectedRef.current = true;
@@ -180,6 +198,7 @@ export function RoomView({ id }: { id: string }) {
         return;
       void Promise.all([
         reloadRoom(),
+        post(`/study-rooms/${id}/heartbeat`),
         api<Message[]>(`/study-rooms/${id}/messages?page=0`).then(
           (incoming) => {
             if (!alive) return;
@@ -215,6 +234,37 @@ export function RoomView({ id }: { id: string }) {
     };
   }, [imagePreview]);
 
+  const myId = me?.id;
+  useEffect(() => {
+    if (!myId) return;
+    const draftKey = `enturma-room-draft:${myId}:${id}`;
+    const timer = setTimeout(() => {
+      try {
+        setDraft(localStorage.getItem(draftKey) || "");
+      } catch {}
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [myId, id]);
+  function changeDraft(value: string) {
+    setDraft(value);
+    if (me)
+      try {
+        localStorage.setItem(`enturma-room-draft:${me.id}:${id}`, value);
+      } catch {}
+    const socket = socketRef.current;
+    const now = Date.now();
+    if (
+      socket?.readyState === WebSocket.OPEN &&
+      (!value.trim() || now - lastTyping.current >= 2500)
+    ) {
+      socket.send(
+        JSON.stringify({
+          type: value.trim() ? "typing_started" : "typing_stopped",
+        }),
+      );
+      lastTyping.current = now;
+    }
+  }
   async function loadOlder() {
     if (!hasOlder || busy) return;
     setBusy(true);
@@ -266,7 +316,7 @@ export function RoomView({ id }: { id: string }) {
         replyTo: replyTo?.id ?? null,
         attachmentId: attachment?.id ?? null,
       });
-      setDraft("");
+      changeDraft("");
       setReplyTo(null);
       setImage(null);
       if (imagePreview) URL.revokeObjectURL(imagePreview);
@@ -318,7 +368,9 @@ export function RoomView({ id }: { id: string }) {
     onLoadOlder: loadOlder,
     onSubmit: send,
     onReloadMessages: loadMessages,
-    setDraft,
+    setDraft: changeDraft,
+    typing,
+    systemEvents: room?.systemEvents ?? [],
     setImage,
     setImagePreview,
     setReplyTo,
@@ -340,6 +392,13 @@ export function RoomView({ id }: { id: string }) {
                   ← Minhas turmas
                 </button>
                 <h1>{room.title}</h1>
+                {room.topicText && <p>{room.topicText}</p>}
+                {room.lifecycle === "MULTIDAY" && (
+                  <small>
+                    Sala de vários dias · sua vaga permanece reservada enquanto
+                    estiver vinculado.
+                  </small>
+                )}
                 <p>{room.subjectName}</p>
               </div>
 
@@ -348,7 +407,9 @@ export function RoomView({ id }: { id: string }) {
                   <Clock size={16} />
                   {ended
                     ? "Sessão encerrada"
-                    : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")} restantes`}
+                    : seconds > 86400
+                      ? `${Math.ceil(seconds / 86400)} dias restantes`
+                      : `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")} restantes`}
                 </span>
                 <span>
                   <Users size={16} />
@@ -419,6 +480,57 @@ export function RoomView({ id }: { id: string }) {
                   label="Enturma AI"
                 />
 
+                {me?.id === room.hostId && !ended && (
+                  <details className="room-owner-settings">
+                    <summary>Gerenciar sala</summary>
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        const f = new FormData(e.currentTarget);
+                        try {
+                          await api(`/study-rooms/${id}/settings`, {
+                            method: "PUT",
+                            body: JSON.stringify({
+                              title: f.get("title"),
+                              topic: f.get("topic"),
+                              locked: f.get("locked") === "on",
+                            }),
+                          });
+                          await reloadRoom();
+                        } catch (e) {
+                          setError((e as Error).message);
+                        }
+                      }}
+                    >
+                      <label>
+                        Nome
+                        <input
+                          name="title"
+                          defaultValue={room.title}
+                          maxLength={150}
+                          required
+                        />
+                      </label>
+                      <label>
+                        Tópico
+                        <textarea
+                          name="topic"
+                          defaultValue={room.topicText}
+                          maxLength={500}
+                        />
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          name="locked"
+                          defaultChecked={room.entriesLocked}
+                        />
+                        Fechar novas entradas
+                      </label>
+                      <button>Salvar sala</button>
+                    </form>
+                  </details>
+                )}
                 <div className="room-channel-note">
                   <MessageCircle size={17} />
                   <span>
@@ -506,6 +618,8 @@ export function RoomView({ id }: { id: string }) {
                       onClick={async () => {
                         try {
                           await post(`/study-rooms/${id}/leave`);
+                          if (callSession.session?.roomId === id)
+                            callSession.leave();
                           router.push("/home");
                         } catch (e) {
                           setError((e as Error).message);

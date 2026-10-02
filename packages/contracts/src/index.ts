@@ -84,7 +84,25 @@ export interface Profile extends IdentityStyle {
   enrollment: { periodId: string; periodName: string; shift: string } | null;
   subjects: AcademicEntry[];
 }
+export type RoomSystemEvent = {
+  id: string;
+  kind: string;
+  message: string;
+  name?: string;
+  username?: string;
+  userId?: string;
+  hasAvatar?: boolean;
+  createdAt: string;
+  subjectName?: string;
+  topicText?: string;
+  endsAt?: string;
+  hostName?: string;
+};
 export interface Room {
+  lifecycle?: "QUICK" | "MULTIDAY";
+  topicText?: string;
+  entriesLocked?: boolean;
+  systemEvents?: RoomSystemEvent[];
   id: string;
   title: string;
   subjectId: string;
@@ -102,6 +120,7 @@ export interface Room {
     userId: string;
     name: string;
     role: string;
+    online?: boolean;
     joinedAt?: string;
     leftAt?: string | null;
   })[];
@@ -112,6 +131,7 @@ export interface MessageReaction {
   mine: boolean;
 }
 export interface Message extends IdentityStyle {
+  reactions?: MessageReaction[];
   id: string;
   userId: string;
   name: string;
@@ -165,7 +185,12 @@ export async function request<T>(
     response = await fetch(`${base}${path}`, {
       ...options,
       signal: options.signal ?? controller.signal,
-      headers: { "Content-Type": "application/json", ...options.headers },
+      headers: {
+        ...(typeof FormData !== "undefined" && options.body instanceof FormData
+          ? {}
+          : { "Content-Type": "application/json" }),
+        ...options.headers,
+      },
     });
   } catch {
     throw new ApiError(

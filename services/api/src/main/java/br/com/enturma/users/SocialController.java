@@ -37,11 +37,17 @@ public class SocialController {
   @GetMapping("/users/{id}/profile")
   public Object profile(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
     unblocked(a.id(), id);
-    return db.one(
-        "SELECT id,name,username,bio,accent_color,profile_details,avatar_bytes IS NOT NULL"
-            + " has_avatar,banner_bytes IS NOT NULL has_banner FROM app_user WHERE id=? AND"
-            + " status='ACTIVE'",
-        id);
+    var profile =
+        db.one(
+            "SELECT id,name,username,bio,accent_color,profile_details,avatar_bytes IS NOT NULL"
+                + " has_avatar,banner_bytes IS NOT NULL has_banner FROM app_user WHERE id=? AND"
+                + " status='ACTIVE'",
+            id);
+    var appearance =
+        db.list(
+            "SELECT secondary_color,theme,effect,layout FROM profile_showcase WHERE user_id=?", id);
+    if (!appearance.isEmpty()) profile.put("showcaseAppearance", appearance.getFirst());
+    return profile;
   }
 
   public record Details(

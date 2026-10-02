@@ -13,7 +13,12 @@ const path = require("node:path");
 const fs = require("node:fs");
 const crypto = require("node:crypto");
 const { spawn } = require("node:child_process");
-const { Readable } = require("node:stream");
+const {
+  validateManifest,
+  trustedSender,
+  inside,
+} = require("./update-security.cjs");
+const { Readable, Transform } = require("node:stream");
 const { pipeline } = require("node:stream/promises");
 const { URL } = require("node:url");
 
@@ -26,21 +31,24 @@ function loadLocalEnv() {
     const index = trimmed.indexOf("=");
     if (index < 1) continue;
     const key = trimmed.slice(0, index).trim();
-    const value = trimmed.slice(index + 1).trim().replace(/^['"]|['"]$/g, "");
+    const value = trimmed
+      .slice(index + 1)
+      .trim()
+      .replace(/^['"]|['"]$/g, "");
     if (!(key in process.env)) process.env[key] = value;
   }
 }
 
 loadLocalEnv();
 
-const WEB_URL = process.env.ENTURMA_WEB_URL || "https://enturma-flax.vercel.app";
+const WEB_URL =
+  process.env.ENTURMA_WEB_URL || "https://enturma-flax.vercel.app";
 const WEB_ORIGIN = new URL(WEB_URL).origin;
 const APP_PARTITION = "persist:enturma";
 const UPDATE_MANIFEST_URL =
   process.env.ENTURMA_UPDATE_MANIFEST_URL ||
   "https://enturma-desktop-download-v5-production.up.railway.app/latest.json";
-const RELEASES_URL =
-  "https://github.com/luizcordeiro155/Enturma/releases";
+const RELEASES_URL = "https://github.com/luizcordeiro155/Enturma/releases";
 const ALLOWED_PERMISSIONS = new Set([
   "media",
   "notifications",
@@ -49,10 +57,29 @@ const ALLOWED_PERMISSIONS = new Set([
 ]);
 
 let mainWindow = null;
-let pendingDeepLink = process.argv.find((arg) => arg.startsWith("enturma://")) || null;
+let pendingDeepLink =
+  process.argv.find((arg) => arg.startsWith("enturma://")) || null;
 let updateTimer = null;
 let updateInProgress = false;
-let lastPromptedVersion = null;
+let pendingUpdate = null;
+let updateState = {
+  status: "idle",
+  currentVersion: app.getVersion(),
+  progress: 0,
+};
+function updateStatus(status, details = {}) {
+  updateState = { ...updateState, ...details, status };
+  if (
+    mainWindow &&
+    !mainWindow.isDestroyed() &&
+    isEnturmaUrl(mainWindow.webContents.getURL())
+  )
+    mainWindow.webContents.send("desktop:update-state", updateState);
+}
+function requireTrusted(event) {
+  if (!trustedSender(event, mainWindow, WEB_ORIGIN))
+    throw Error("Origem IPC não autorizada.");
+}
 
 if (process.platform === "linux") {
   app.commandLine.appendSwitch("enable-features", "WebRTCPipeWireCapturer");
@@ -79,7 +106,8 @@ function deepLinkToWeb(raw) {
     const link = new URL(raw);
     if (link.protocol !== "enturma:") return null;
     const host = link.hostname ? `/${link.hostname}` : "";
-    const pathname = link.pathname && link.pathname !== "/" ? link.pathname : "";
+    const pathname =
+      link.pathname && link.pathname !== "/" ? link.pathname : "";
     const target = new URL(`${host}${pathname}` || "/home", WEB_URL);
     target.search = link.search;
     target.hash = link.hash;
@@ -108,6 +136,7 @@ function handleDeepLink(raw) {
 }
 
 function registerProtocol() {
+  if (process.env.ENTURMA_PORTABLE === "1") return;
   if (process.defaultApp && process.argv[1]) {
     app.setAsDefaultProtocolClient("enturma", process.execPath, [
       path.resolve(process.argv[1]),
@@ -165,7 +194,10 @@ async function downloadUpdate(manifest) {
 
   fs.rmSync(partialPath, { force: true });
 
+  updateStatus("downloading", { version: manifest.version, progress: 0 });
   const response = await net.fetch(manifest.downloadUrl, {
+    redirect: "error",
+    signal: AbortSignal.timeout(300000),
     cache: "no-store",
     headers: {
       "User-Agent": `EnturmaDesktop/${app.getVersion()}`,
@@ -175,10 +207,32 @@ async function downloadUpdate(manifest) {
     throw new Error(`Download respondeu ${response.status}`);
   }
 
-  await pipeline(
-    Readable.fromWeb(response.body),
-    fs.createWriteStream(partialPath),
-  );
+  let received = 0,
+    lastProgress = -1;
+  const meter = new Transform({
+    transform(chunk, encoding, callback) {
+      received += chunk.length;
+      if (received > manifest.size)
+        return callback(Error("Download excedeu o tamanho autorizado."));
+      const progress = Math.floor((received * 100) / manifest.size);
+      if (progress !== lastProgress) {
+        lastProgress = progress;
+        updateStatus("downloading", { progress });
+        mainWindow?.setProgressBar(progress / 100);
+      }
+      callback(null, chunk);
+    },
+  });
+  try {
+    await pipeline(
+      Readable.fromWeb(response.body),
+      meter,
+      fs.createWriteStream(partialPath),
+    );
+  } catch (error) {
+    fs.rmSync(partialPath, { force: true });
+    throw error;
+  }
 
   if (manifest.size) {
     const actualSize = fs.statSync(partialPath).size;
@@ -228,192 +282,186 @@ function installDownloadedUpdate(manifest, zipPath) {
   const executableName = path.basename(process.execPath);
   const currentPid = process.pid;
 
+  if (
+    !inside(updatesDir, zipPath) ||
+    !inside(updatesDir, extractDir) ||
+    !inside(updatesDir, scriptPath)
+  )
+    throw Error("Diretório de atualização inválido.");
+  const backupDir = path.join(
+    updatesDir,
+    `backup-${manifest.version}-${Date.now()}`,
+  );
   const script = `$ErrorActionPreference = "Stop"
 $zip = ${ps(zipPath)}
-$target = ${ps(targetDir)}
-$extract = ${ps(extractDir)}
+$target = [IO.Path]::GetFullPath(${ps(targetDir)})
+$updatesRoot = [IO.Path]::GetFullPath(${ps(updatesDir)})
+$extract = [IO.Path]::GetFullPath(${ps(extractDir)})
+$backup = [IO.Path]::GetFullPath(${ps(backupDir)})
 $exeName = ${ps(executableName)}
 $pidToWait = ${currentPid}
-
-while (Get-Process -Id $pidToWait -ErrorAction SilentlyContinue) {
-  Start-Sleep -Milliseconds 400
+function Assert-Child([string]$root,[string]$child) {
+ $rootPrefix = [IO.Path]::GetFullPath($root).TrimEnd([IO.Path]::DirectorySeparatorChar) + [IO.Path]::DirectorySeparatorChar
+ if (-not [IO.Path]::GetFullPath($child).StartsWith($rootPrefix,[StringComparison]::OrdinalIgnoreCase)) {throw "Caminho fora do diretório permitido."}
 }
-Start-Sleep -Seconds 2
-
-if (Test-Path $extract) {
-  Remove-Item $extract -Recurse -Force -ErrorAction SilentlyContinue
-}
+Assert-Child $updatesRoot $extract
+Assert-Child $updatesRoot $backup
+Assert-Child $updatesRoot $zip
+if (-not (Test-Path -LiteralPath (Join-Path $target $exeName))) {throw "Instalação de origem não encontrada."}
+if ((Get-FileHash -LiteralPath $zip -Algorithm SHA256).Hash -ne ${ps(manifest.sha256)}) {throw "SHA-256 divergente."}
+Add-Type -AssemblyName System.IO.Compression.FileSystem
+$archive = [IO.Compression.ZipFile]::OpenRead($zip)
+try {
+ $total = 0
+ foreach ($entry in $archive.Entries) {Assert-Child $extract (Join-Path $extract $entry.FullName);$total += $entry.Length;if ($total -gt 2147483648) {throw "Pacote expandido excede o limite."}}
+} finally {$archive.Dispose()}
+if (Test-Path -LiteralPath $extract) {Remove-Item -LiteralPath $extract -Recurse -Force}
 New-Item -ItemType Directory -Path $extract -Force | Out-Null
-Expand-Archive -Path $zip -DestinationPath $extract -Force
-
-$newExe = Join-Path $extract $exeName
-if (-not (Test-Path $newExe)) {
-  throw "Enturma.exe não foi encontrado no pacote da atualização."
+Expand-Archive -LiteralPath $zip -DestinationPath $extract -Force
+if (-not (Test-Path -LiteralPath (Join-Path $extract $exeName))) {throw "Executável ausente no pacote."}
+while (Get-Process -Id $pidToWait -ErrorAction SilentlyContinue) {Start-Sleep -Milliseconds 400}
+Start-Sleep -Seconds 2
+New-Item -ItemType Directory -Path $backup -Force | Out-Null
+$written = [System.Collections.Generic.List[string]]::new()
+try {
+ foreach ($file in Get-ChildItem -LiteralPath $extract -Recurse -File) {
+  $relative = $file.FullName.Substring($extract.Length).TrimStart([IO.Path]::DirectorySeparatorChar)
+  $destination = [IO.Path]::GetFullPath((Join-Path $target $relative))
+  $saved = [IO.Path]::GetFullPath((Join-Path $backup $relative))
+  Assert-Child $target $destination
+  Assert-Child $backup $saved
+  $parent = Split-Path $destination
+  $check = $parent
+  while ($check.Length -ge $target.Length) {if ((Test-Path -LiteralPath $check) -and ((Get-Item -LiteralPath $check).Attributes -band [IO.FileAttributes]::ReparsePoint)) {throw "Junção não permitida na instalação."};$check=Split-Path $check}
+  if (Test-Path -LiteralPath $destination) {New-Item -ItemType Directory -Path (Split-Path $saved) -Force | Out-Null;Copy-Item -LiteralPath $destination -Destination $saved -Force}
+  New-Item -ItemType Directory -Path $parent -Force | Out-Null
+  $written.Add($relative)
+  Copy-Item -LiteralPath $file.FullName -Destination $destination -Force
+ }
+ Start-Process -FilePath (Join-Path $target $exeName) -WindowStyle Hidden
+ Remove-Item -LiteralPath (Join-Path $updatesRoot "pending-update.json") -Force -ErrorAction SilentlyContinue
+ Assert-Child $updatesRoot $extract
+ Remove-Item -LiteralPath $extract -Recurse -Force
+ Remove-Item -LiteralPath $zip -Force
+} catch {
+ foreach ($relative in $written) {
+  $destination=Join-Path $target $relative;$saved=Join-Path $backup $relative
+  Assert-Child $target $destination;Assert-Child $backup $saved
+  if(Test-Path -LiteralPath $saved){Copy-Item -LiteralPath $saved -Destination $destination -Force}else{Remove-Item -LiteralPath $destination -Force -ErrorAction SilentlyContinue}
+ }
+ "Atualização não aplicada. A versão anterior foi restaurada." | Set-Content -LiteralPath (Join-Path $updatesRoot "last-error.txt")
+ Start-Process -FilePath (Join-Path $target $exeName) -WindowStyle Hidden
+ throw
 }
-
-$updated = $false
-for ($attempt = 0; $attempt -lt 20 -and -not $updated; $attempt++) {
-  try {
-    Get-ChildItem -Path $target -Force | Remove-Item -Recurse -Force -ErrorAction Stop
-    Copy-Item -Path (Join-Path $extract "*") -Destination $target -Recurse -Force -ErrorAction Stop
-    $updated = $true
-  } catch {
-    Start-Sleep -Milliseconds 750
-  }
-}
-
-if (-not $updated) {
-  throw "Não foi possível substituir os arquivos do Enturma."
-}
-
-Start-Process (Join-Path $target $exeName)
-Remove-Item $extract -Recurse -Force -ErrorAction SilentlyContinue
-Remove-Item $zip -Force -ErrorAction SilentlyContinue
-Remove-Item (Join-Path ${ps(updatesDir)} "pending-update.json") -Force -ErrorAction SilentlyContinue
-Remove-Item $MyInvocation.MyCommand.Path -Force -ErrorAction SilentlyContinue
 `;
 
   fs.mkdirSync(updatesDir, { recursive: true });
   fs.writeFileSync(scriptPath, script, "utf8");
 
-  const updater = spawn(
+  const powershell = path.join(
+    process.env.SystemRoot || "C:\\Windows",
+    "System32",
+    "WindowsPowerShell",
+    "v1.0",
     "powershell.exe",
+  );
+  // Start-Process creates an independent hidden console. DETACHED_PROCESS can
+  // make Windows PowerShell 5.1 exit without executing the installer script.
+  const launch = `$ErrorActionPreference='Stop';$ProgressPreference='SilentlyContinue';Start-Process -WindowStyle Hidden -FilePath ${ps(powershell)} -ArgumentList @('-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',${ps('"' + scriptPath + '"')}) -RedirectStandardOutput ${ps(path.join(updatesDir, "install.log"))} -RedirectStandardError ${ps(path.join(updatesDir, "install-error.log"))} -PassThru | Out-Null`;
+  const updater = spawn(
+    powershell,
     [
       "-NoProfile",
       "-NonInteractive",
-      "-ExecutionPolicy",
-      "Bypass",
-      "-File",
-      scriptPath,
+      "-EncodedCommand",
+      Buffer.from(launch, "utf16le").toString("base64"),
     ],
-    {
-      detached: true,
-      stdio: "ignore",
-      windowsHide: true,
-    },
+    { windowsHide: true, stdio: "ignore" },
   );
-  updater.unref();
-  app.quit();
-}
-
-async function promptUpdateReady(manifest, zipPath) {
-  if (!mainWindow || mainWindow.isDestroyed()) return;
-  if (lastPromptedVersion === manifest.version) return;
-  lastPromptedVersion = manifest.version;
-
-  const result = await dialog.showMessageBox(mainWindow, {
-    type: "info",
-    title: "Atualização pronta",
-    message: `Enturma ${manifest.version} está pronto para instalar.`,
-    detail:
-      "A atualização já foi baixada e verificada. O Enturma será reiniciado para concluir a instalação.",
-    buttons: ["Atualizar e reiniciar", "Depois"],
-    defaultId: 0,
-    cancelId: 1,
+  updater.once("error", (error) =>
+    updateStatus("error", {
+      message: "Não foi possível iniciar a atualização: " + error.message,
+    }),
+  );
+  updater.once("close", (code) => {
+    if (code === 0) app.quit();
+    else
+      updateStatus("error", {
+        message:
+          "O instalador não iniciou. Tente novamente ou consulte o log de atualização.",
+      });
   });
-
-  if (result.response === 0) {
-    installDownloadedUpdate(manifest, zipPath);
-  }
 }
 
 async function fetchUpdateManifest() {
-  const response = await net.fetch(
-    `${UPDATE_MANIFEST_URL}?t=${Date.now()}`,
-    {
-      cache: "no-store",
-      headers: {
-        Accept: "application/json",
-        "User-Agent": `EnturmaDesktop/${app.getVersion()}`,
-      },
+  const response = await net.fetch(`${UPDATE_MANIFEST_URL}?t=${Date.now()}`, {
+    cache: "no-store",
+    redirect: "error",
+    signal: AbortSignal.timeout(15000),
+    headers: {
+      Accept: "application/json",
+      "User-Agent": `EnturmaDesktop/${app.getVersion()}`,
     },
-  );
+  });
   if (!response.ok) {
     throw new Error(`Servidor de atualização respondeu ${response.status}`);
   }
   const manifest = await response.json();
-  if (
-    !manifest?.version ||
-    !manifest?.downloadUrl ||
-    !manifest?.sha256
-  ) {
-    throw new Error("Manifesto de atualização inválido.");
-  }
-  return manifest;
+  return validateManifest(manifest, UPDATE_MANIFEST_URL);
 }
-
-async function checkForUpdates(showResult) {
-  if (!app.isPackaged) {
-    if (showResult && mainWindow) {
-      await dialog.showMessageBox(mainWindow, {
-        type: "info",
-        title: "Atualizações",
-        message: "Você está executando o Enturma em modo de desenvolvimento.",
-      });
-    }
-    return;
+async function checkForUpdates() {
+  if (updateInProgress) return updateState;
+  if (!app.isPackaged || process.platform !== "win32") {
+    updateStatus("unsupported", {
+      message: !app.isPackaged
+        ? "Atualizações disponíveis na versão instalada."
+        : "Use a página de downloads para atualizar este sistema.",
+    });
+    return updateState;
   }
-
-  if (process.platform !== "win32") {
-    if (showResult && mainWindow) {
-      await dialog.showMessageBox(mainWindow, {
-        type: "info",
-        title: "Atualizações",
-        message: "A atualização automática está disponível no Windows.",
-        detail: "No macOS e Linux, utilize a página oficial de downloads.",
-      });
-    }
-    return;
+  if (pendingUpdate) {
+    updateStatus("ready");
+    return updateState;
   }
-
+  updateInProgress = true;
+  updateStatus("checking", { message: "", progress: 0 });
   try {
     const manifest = await fetchUpdateManifest();
     if (!newerThan(manifest.version, app.getVersion())) {
-      if (showResult && mainWindow) {
-        await dialog.showMessageBox(mainWindow, {
-          type: "info",
-          title: "Atualizações",
-          message: "Você já está usando a versão mais recente do Enturma.",
-          detail: `Versão instalada: ${app.getVersion()}`,
-        });
-      }
-      return;
+      updateStatus("current");
+      return updateState;
     }
-
-    if (updateInProgress) return;
-    updateInProgress = true;
-
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.setProgressBar(2);
-    }
-
+    updateStatus("available", { version: manifest.version });
     const zipPath = await downloadUpdate(manifest);
-
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.setProgressBar(-1);
-    }
-
-    await promptUpdateReady(manifest, zipPath);
+    pendingUpdate = { manifest, zipPath };
+    updateStatus("ready", { version: manifest.version, progress: 100 });
   } catch (error) {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      mainWindow.setProgressBar(-1);
-    }
-    if (showResult && mainWindow) {
-      await dialog.showMessageBox(mainWindow, {
-        type: "warning",
-        title: "Atualizações",
-        message: "Não foi possível verificar ou baixar a atualização.",
-        detail:
-          error instanceof Error
-            ? error.message
-            : "Confira sua conexão e tente novamente mais tarde.",
-      });
-    }
+    updateStatus("error", {
+      message:
+        error instanceof Error ? error.message : "Não foi possível atualizar.",
+    });
   } finally {
     updateInProgress = false;
+    mainWindow?.setProgressBar(-1);
+  }
+  return updateState;
+}
+async function installUpdate() {
+  if (!pendingUpdate || updateState.status !== "ready")
+    throw Error("Nenhuma atualização pronta.");
+  if (
+    (await sha256File(pendingUpdate.zipPath)) !==
+    pendingUpdate.manifest.sha256.toLowerCase()
+  )
+    throw Error("Verificação de integridade falhou.");
+  updateStatus("installing");
+  try {
+    installDownloadedUpdate(pendingUpdate.manifest, pendingUpdate.zipPath);
+  } catch (e) {
+    updateStatus("error", { message: e.message });
+    throw e;
   }
 }
-
 
 function createMenu() {
   const template = [
@@ -578,9 +626,7 @@ function configureSession(ses) {
         details.securityOrigin ||
         webContents?.getURL() ||
         "";
-      callback(
-        isEnturmaUrl(origin) && ALLOWED_PERMISSIONS.has(permission),
-      );
+      callback(isEnturmaUrl(origin) && ALLOWED_PERMISSIONS.has(permission));
     },
   );
 
@@ -620,8 +666,8 @@ function createMainWindow() {
   mainWindow = new BrowserWindow({
     width: 1440,
     height: 900,
-    minWidth: 980,
-    minHeight: 640,
+    minWidth: 360,
+    minHeight: 480,
     show: false,
     title: "Enturma",
     backgroundColor: "#0f1917",
@@ -682,18 +728,42 @@ function createMainWindow() {
   void mainWindow.loadURL(target);
 }
 
-ipcMain.handle("desktop:get-info", () => ({
-  version: app.getVersion(),
-  platform: process.platform,
-  webUrl: WEB_URL,
-}));
-ipcMain.handle("desktop:check-for-updates", () => checkForUpdates(true));
-ipcMain.handle("desktop:open-external", (_event, url) => {
-  if (isExternalUrl(url)) return shell.openExternal(url);
+ipcMain.handle("desktop:get-info", (event) => {
+  requireTrusted(event);
+  return {
+    version: app.getVersion(),
+    platform: process.platform,
+    webUrl: WEB_URL,
+  };
+});
+ipcMain.handle("desktop:update-state", (event) => {
+  requireTrusted(event);
+  return updateState;
+});
+ipcMain.handle("desktop:check-for-updates", (event) => {
+  requireTrusted(event);
+  return checkForUpdates();
+});
+ipcMain.handle("desktop:install-update", (event) => {
+  requireTrusted(event);
+  return installUpdate();
+});
+ipcMain.handle("desktop:open-external", (event, url) => {
+  requireTrusted(event);
+  if (typeof url === "string" && url.length < 4096 && isExternalUrl(url))
+    return shell.openExternal(url);
   return false;
 });
-ipcMain.on("desktop:retry", () => {
-  if (mainWindow) void mainWindow.loadURL(WEB_URL);
+ipcMain.on("desktop:retry", (event) => {
+  if (
+    mainWindow &&
+    event.sender === mainWindow.webContents &&
+    event.senderFrame === mainWindow.webContents.mainFrame &&
+    event.senderFrame.url ===
+      require("node:url").pathToFileURL(path.join(__dirname, "offline.html"))
+        .href
+  )
+    void mainWindow.loadURL(WEB_URL);
 });
 
 registerProtocol();

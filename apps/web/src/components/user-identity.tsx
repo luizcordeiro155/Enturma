@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { api, post } from "@/lib/api";
+import { PublicShowcase } from "./profile-showcase";
 export type ProfileDetails = {
   pronouns?: string;
   statusText?: string;
@@ -22,6 +23,12 @@ export type PublicProfile = {
   hasBanner?: boolean;
   profileDetails?: ProfileDetails;
   mediaVersion?: number;
+  showcaseAppearance?: {
+    secondaryColor: string;
+    theme: string;
+    effect: string;
+    layout: string;
+  };
 };
 export function LiveIdentity({ id, name }: { id: string; name: string }) {
   const [user, setUser] = useState<PublicProfile>({ id, name });
@@ -46,6 +53,14 @@ export function Avatar({ user }: { user: PublicProfile }) {
       style={
         {
           "--profile-accent": user.accentColor ?? "#527d65",
+          "--profile-secondary":
+            user.showcaseAppearance?.secondaryColor ??
+            user.accentColor ??
+            "#527d65",
+          "--profile-banner":
+            user.showcaseAppearance?.theme === "GRADIENT"
+              ? `linear-gradient(135deg,${user.accentColor ?? "#527d65"},${user.showcaseAppearance.secondaryColor})`
+              : (user.accentColor ?? "#527d65"),
         } as React.CSSProperties
       }
     >
@@ -64,10 +79,18 @@ export function ProfileCard({ user }: { user: PublicProfile }) {
   const d = user.profileDetails ?? {};
   return (
     <div
-      className="public-profile-card"
+      className={`public-profile-card profile-effect-${user.showcaseAppearance?.effect ?? "NONE"}`}
       style={
         {
           "--profile-accent": user.accentColor ?? "#527d65",
+          "--profile-secondary":
+            user.showcaseAppearance?.secondaryColor ??
+            user.accentColor ??
+            "#527d65",
+          "--profile-banner":
+            user.showcaseAppearance?.theme === "GRADIENT"
+              ? `linear-gradient(135deg,${user.accentColor ?? "#527d65"},${user.showcaseAppearance.secondaryColor})`
+              : (user.accentColor ?? "#527d65"),
         } as React.CSSProperties
       }
     >
@@ -223,8 +246,11 @@ export function UserIdentity({
                 ×
               </button>
               {profile ? (
-                <>
+                <div
+                  className={`profile-public-content ${profile.showcaseAppearance?.layout === "WIDGETS_FIRST" ? "widgets-first" : ""}`}
+                >
                   <ProfileCard user={profile} />
+                  <PublicShowcase userId={profile.id} />
                   <div className="profile-dialog-actions">
                     <button
                       onClick={async () => {
@@ -246,7 +272,7 @@ export function UserIdentity({
                       Conversas privadas
                     </Link>
                   </div>
-                </>
+                </div>
               ) : (
                 <p>Carregando perfil…</p>
               )}

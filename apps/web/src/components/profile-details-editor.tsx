@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ProfileImageEditor } from "./profile-image-editor";
 import { api } from "@/lib/api";
 import {
@@ -7,6 +7,12 @@ import {
   type PublicProfile,
   type ProfileDetails,
 } from "./user-identity";
+import {
+  ShowcaseFields,
+  ShowcaseView,
+  AchievementGrid,
+  type Showcase,
+} from "./profile-showcase";
 export function ProfileDetailsEditor({
   profile,
   onSaved,
@@ -14,6 +20,19 @@ export function ProfileDetailsEditor({
   profile: PublicProfile;
   onSaved: () => Promise<void>;
 }) {
+  const [status, setStatus] = useState("");
+  const [showcase, setShowcase] = useState<Showcase>();
+  useEffect(() => {
+    let active = true;
+    api<Showcase>(`/users/${profile.id}/showcase`)
+      .then((s) => {
+        if (active) setShowcase(s);
+      })
+      .catch((e) => setStatus(e.message));
+    return () => {
+      active = false;
+    };
+  }, [profile.id]);
   const [appearance, setAppearance] = useState({
     name: profile.name,
     bio: profile.bio ?? "",
@@ -57,7 +76,6 @@ export function ProfileDetailsEditor({
       );
     await onSaved();
     // Upload completion needs a fresh URL to invalidate the browser image cache.
-    // eslint-disable-next-line react-hooks/purity
     setMediaVersion(Date.now());
     setStatus("Imagem atualizada.");
   }
@@ -66,7 +84,7 @@ export function ProfileDetailsEditor({
     nameFont: "SYSTEM",
     ...profile.profileDetails,
   });
-  const [status, setStatus] = useState("");
+
   const [busy, setBusy] = useState(false);
   function set(field: keyof ProfileDetails, value: string) {
     setDetails((d) => ({ ...d, [field]: value }));
@@ -79,18 +97,25 @@ export function ProfileDetailsEditor({
         decoram o perfil sem reduzir o contraste do texto.
       </p>
       <div className="profile-details-layout">
-        <ProfileCard
-          user={{
-            ...profile,
-            ...appearance,
-            mediaVersion,
-            profileDetails: details,
-          }}
-        />
+        <div
+          className={`profile-preview-column ${showcase?.appearance.layout === "WIDGETS_FIRST" ? "widgets-first" : ""}`}
+        >
+          <ProfileCard
+            user={{
+              ...profile,
+              ...appearance,
+              mediaVersion,
+              profileDetails: details,
+              showcaseAppearance: showcase?.appearance,
+            }}
+          />
+          {showcase && <ShowcaseView value={showcase} />}
+        </div>
         <form
           onSubmit={async (e) => {
             e.preventDefault();
             setBusy(true);
+            setStatus("");
             try {
               await api("/users/me/appearance", {
                 method: "PUT",
@@ -99,6 +124,23 @@ export function ProfileDetailsEditor({
               await api("/users/me/profile-details", {
                 method: "PUT",
                 body: JSON.stringify(details),
+              });
+              if (!showcase)
+                throw Error("Aguarde o carregamento do mural antes de salvar.");
+              await api("/users/me/showcase", {
+                method: "PUT",
+                body: JSON.stringify({
+                  ...showcase.appearance,
+                  privacy: showcase.privacy,
+                  widgets: showcase.widgets.map(
+                    ({ kind, visible, favorite }) => ({
+                      kind,
+                      visible,
+                      favorite,
+                    }),
+                  ),
+                  badges: showcase.badges?.map((b) => b.code) ?? [],
+                }),
               });
               await onSaved();
               setStatus("Personalização salva para todas as suas conversas.");
@@ -227,12 +269,21 @@ export function ProfileDetailsEditor({
               <option value="SERIF">Editorial</option>
             </select>
           </label>
-          <button disabled={busy}>
+          {showcase && (
+            <ShowcaseFields value={showcase} onChange={setShowcase} />
+          )}
+          <button disabled={busy || !showcase}>
             {busy ? "Salvando…" : "Salvar perfil"}
           </button>
           <p role="status">{status}</p>
         </form>
       </div>
+      {showcase?.achievements && (
+        <section>
+          <h2>Suas conquistas</h2>
+          <AchievementGrid achievements={showcase.achievements} />
+        </section>
+      )}
       {crop ? (
         <ProfileImageEditor
           file={crop.file}

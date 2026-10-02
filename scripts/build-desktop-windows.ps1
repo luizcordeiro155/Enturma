@@ -3,6 +3,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$env:Path = "$env:SystemRoot\System32\WindowsPowerShell\v1.0;" + $env:Path
 
 if ($env:OS -ne "Windows_NT") {
   throw "Este script deve ser executado no Windows para gerar o instalador oficial."

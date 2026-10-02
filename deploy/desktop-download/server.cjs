@@ -1,122 +1,141 @@
-const http = require("node:http");
-const fs = require("node:fs");
-const path = require("node:path");
-const crypto = require("node:crypto");
-
-const port = Number(process.env.PORT || 3000);
-const dir = path.join(__dirname, "downloads");
-
+const http = require("node:http"),
+  fs = require("node:fs"),
+  path = require("node:path"),
+  crypto = require("node:crypto");
+const port = Number(process.env.PORT || 3000),
+  dir = path.join(__dirname, "downloads");
+function version(file) {
+  return (
+    file.match(/(?:Enturma-|Enturma-Setup-)(\d+\.\d+\.\d+)/)?.[1] || "0.0.0"
+  );
+}
+function newest(a, b) {
+  const aa = version(a).split(".").map(Number),
+    bb = version(b).split(".").map(Number);
+  for (let i = 0; i < 3; i++) if (aa[i] !== bb[i]) return bb[i] - aa[i];
+  return a.localeCompare(b);
+}
 function files() {
   try {
     return fs
       .readdirSync(dir)
-      .filter((name) => name.toLowerCase().endsWith(".zip"))
-      .sort();
+      .filter((n) => /^Enturma-[\w.-]+\.(zip|exe|apk|aab)$/.test(n))
+      .sort(newest);
   } catch {
     return [];
   }
 }
-
-function parseVersion(file) {
-  const match = file.match(/Enturma-([0-9]+\.[0-9]+\.[0-9]+)-win-x64\.zip$/i);
-  return match?.[1] ?? "0.0.0";
-}
-
-function sha256(file) {
-  const full = path.join(dir, file);
-  const hash = crypto.createHash("sha256");
-  hash.update(fs.readFileSync(full));
-  return hash.digest("hex");
-}
-
-function publicOrigin(req) {
-  const forwardedProto = req.headers["x-forwarded-proto"];
-  const proto =
-    typeof forwardedProto === "string"
-      ? forwardedProto.split(",")[0].trim()
-      : "https";
-  const host = req.headers.host;
-  return `${proto}://${host}`;
-}
-
-function sendFile(req, res, file) {
-  const full = path.join(dir, file);
-  if (!fs.existsSync(full)) {
-    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-    res.end("Arquivo não encontrado.");
-    return;
-  }
-  const stat = fs.statSync(full);
-  res.writeHead(200, {
-    "Content-Type": "application/zip",
-    "Content-Length": stat.size,
-    "Content-Disposition": `attachment; filename="${file}"`,
-    "Cache-Control": "public, max-age=3600",
-  });
-  fs.createReadStream(full).pipe(res);
-}
-
-const server = http.createServer((req, res) => {
-  const list = files();
-  const installer = list[0];
-
-  if (req.url?.startsWith("/latest.json")) {
-    if (!installer) {
-      res.writeHead(503, { "Content-Type": "application/json; charset=utf-8" });
-      res.end(JSON.stringify({ ok: false }));
-      return;
-    }
-    const full = path.join(dir, installer);
-    const stat = fs.statSync(full);
-    res.writeHead(200, {
-      "Content-Type": "application/json; charset=utf-8",
-      "Cache-Control": "no-store, max-age=0",
-      "Access-Control-Allow-Origin": "*",
-    });
-    res.end(
-      JSON.stringify({
-        version: parseVersion(installer),
-        platform: "win32",
-        arch: "x64",
-        file: installer,
-        size: stat.size,
-        sha256: sha256(installer),
-        downloadUrl: `${publicOrigin(req)}/Enturma-Windows.zip`,
-        publishedAt: stat.mtime.toISOString(),
-      }),
+const checksums = new Map();
+function checksum(name) {
+  const file = path.join(dir, name),
+    stat = fs.statSync(file),
+    key = name + stat.mtimeMs;
+  if (!checksums.has(key))
+    checksums.set(
+      key,
+      crypto.createHash("sha256").update(fs.readFileSync(file)).digest("hex"),
     );
-    return;
-  }
-
-  if (req.url === "/health") {
-    res.writeHead(installer ? 200 : 503, {
-      "Content-Type": "application/json; charset=utf-8",
-    });
-    res.end(JSON.stringify({ ok: Boolean(installer), installer }));
-    return;
-  }
-
-  if (req.url === "/" || req.url === "/download" || req.url === "/Enturma-Windows.zip") {
-    if (!installer) {
-      res.writeHead(503, { "Content-Type": "text/plain; charset=utf-8" });
-      res.end("O aplicativo ainda não foi gerado.");
+  return checksums.get(key);
+}
+function origin(req) {
+  const host = process.env.RAILWAY_PUBLIC_DOMAIN || req.headers.host;
+  if (!host || !/^[a-z0-9.:-]+$/i.test(host)) throw Error("Host inválido");
+  return `https://${host}`;
+}
+function send(req, res, name) {
+  const file = path.join(dir, name),
+    stat = fs.statSync(file);
+  res.writeHead(200, {
+    "Content-Type": name.endsWith(".zip")
+      ? "application/zip"
+      : name.endsWith(".apk")
+        ? "application/vnd.android.package-archive"
+        : "application/octet-stream",
+    "Content-Length": stat.size,
+    "Content-Disposition": `attachment; filename="${name}"`,
+    "Cache-Control": "public,max-age=3600",
+    "X-Content-Type-Options": "nosniff",
+  });
+  if (req.method === "HEAD") res.end();
+  else
+    fs.createReadStream(file)
+      .on("error", () => res.destroy())
+      .pipe(res);
+}
+const server = http.createServer((req, res) => {
+  try {
+    if (!["GET", "HEAD"].includes(req.method)) {
+      res.writeHead(405);
+      res.end();
       return;
     }
-    sendFile(req, res, installer);
-    return;
+    const names = files(),
+      zip = names.find((n) => n.endsWith("-win-x64.zip")),
+      exe = names.find((n) => n === `Enturma-Setup-${version(zip || "")}.exe`);
+    const pathname = new URL(req.url, "http://localhost").pathname;
+    if (pathname === "/latest.json") {
+      if (!zip) {
+        res.writeHead(503);
+        res.end("{}");
+        return;
+      }
+      const base = origin(req),
+        stat = fs.statSync(path.join(dir, zip));
+      res.writeHead(200, {
+        "Content-Type": "application/json; charset=utf-8",
+        "Cache-Control": "no-store,max-age=0",
+        "Access-Control-Allow-Origin": "*",
+      });
+      res.end(
+        JSON.stringify({
+          version: version(zip),
+          platform: "win32",
+          arch: "x64",
+          file: zip,
+          size: stat.size,
+          sha256: checksum(zip),
+          downloadUrl: `${base}/Enturma-Windows.zip`,
+          installerUrl: exe ? `${base}/${exe}` : null,
+          installerSha256: exe ? checksum(exe) : null,
+          publishedAt: stat.mtime.toISOString(),
+        }),
+      );
+      return;
+    }
+    if (pathname === "/health") {
+      res.writeHead(zip && exe ? 200 : 503, {
+        "Content-Type": "application/json",
+      });
+      res.end(
+        JSON.stringify({
+          ok: !!(zip && exe),
+          version: version(zip || ""),
+          zip,
+          installer: exe,
+        }),
+      );
+      return;
+    }
+    const requested = decodeURIComponent(pathname.slice(1));
+    const chosen =
+      pathname === "/Enturma-Windows.zip"
+        ? zip
+        : ["/", "/download", "/Enturma-Windows.exe"].includes(pathname)
+          ? exe
+          : names.includes(requested)
+            ? requested
+            : null;
+    if (chosen) {
+      send(req, res, chosen);
+      return;
+    }
+    res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
+    res.end("Arquivo não disponível.");
+  } catch {
+    res.writeHead(400);
+    res.end("Solicitação inválida.");
   }
-
-  const requested = decodeURIComponent(req.url.slice(1));
-  if (list.includes(requested)) {
-    sendFile(req, res, requested);
-    return;
-  }
-
-  res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
-  res.end("Não encontrado.");
 });
-
-server.listen(port, "0.0.0.0", () => {
-  console.log(`Enturma Desktop download disponível na porta ${port}`);
-  console.log("Arquivos:", files());
-});
+server.listen(port, "0.0.0.0", () =>
+  console.log(`Enturma downloads: ${server.address().port}`),
+);

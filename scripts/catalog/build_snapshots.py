@@ -11,8 +11,6 @@ import unicodedata
 import uuid
 from collections import Counter
 from pathlib import Path
-import pymupdf
-from bs4 import BeautifulSoup
 
 ROOT = Path(__file__).resolve().parents[2]
 STAMP = "2026-09-29T03:30:00Z"
@@ -40,6 +38,7 @@ def source(path,url,name):
     return dict(url=url,name=name,type='OFFICIAL_PDF' if path.suffix=='.pdf' else 'OFFICIAL_WEBPAGE',contentHash=hashlib.sha256(path.read_bytes()).hexdigest(),retrievedAt=STAMP,verifiedAt=STAMP)
 
 def una(root):
+    import pymupdf
     out=Snapshot('UNA'); directory=root/'una'
     page_source=source(root/'una-aimores.html','https://www.una.br/unidades/aimores','UNA — unidade Aimorés')
     out.add('INSTITUTION','una-344','Centro Universitário UNA',None,page_source,dict(shortName='UNA',emecCode='344',organizationType='CENTRO_UNIVERSITARIO',city='Belo Horizonte',state='MG',websiteUrl='https://www.una.br'))
@@ -132,6 +131,7 @@ def una(root):
     return out
 
 def puc(root):
+    from bs4 import BeautifulSoup
     out=Snapshot('PUCMINAS')
     configs=[('puc-barreiro-si','Barreiro','Sistemas de Informação','https://www.pucminas.br/campus/barreiro/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx?moda=2'),('puc-pocos-cc','Poços de Caldas','Ciência da Computação','https://www.pucminas.br/campus/pocos-de-caldas/ensino/graduacao/Paginas/ci%C3%AAncia-da-computacao.aspx')]
     for filename,campus,name,url in configs:
@@ -178,6 +178,28 @@ def ufmg(root):
     for order,(period,code,name,hours,prereq) in enumerate(subjects):
         dependencies=[code_keys[c] for c in re.findall(r'[A-Z]+\d+',prereq) if c in code_keys]
         out.add('SUBJECT',code_keys[code],name,f'si-n2019-9-p{period}',src,dict(workloadHours=hours,orderIndex=order,learningArea='IT',prerequisiteText=prereq,prerequisites=dependencies),code=code)
+    # The source assigns electives to the curriculum, not to a semester.
+    # Keep that distinction rather than inventing a tenth period.
+    electives=[]
+    for table in json.loads((root/'ufmg-si-tables.json').read_text(encoding='utf-8')):
+        for row in table:
+            if len(row)!=10 or row[6]!='3' or not row[0]: continue
+            match=re.match(r'DIG - ([A-Z]+\d+) - (.+)',clean(row[0]))
+            if match and str(row[4]).isdigit():
+                electives.append((match[1],match[2],int(row[4]),clean(row[8]),row[5]=='S'))
+    assert len(electives)>20, 'Elective table missing or changed'
+    group='si-n2019-9-optativas'
+    out.add('PERIOD',group,'Optativas · sem semestre definido','si-n2019-9',src,dict(organization='ELECTIVES',note='Atividades optativas no percurso. A fonte não fixa semestre; consulte os pré-requisitos.'))
+    optional_keys={code:f'{group}-{code}' for code,_,_,_,_ in electives}
+    all_keys={**code_keys,**optional_keys}
+    # Parents and prerequisite targets must precede dependent records in import.
+    pending=electives.copy();added=set(code_keys)
+    while pending:
+        ready=[s for s in pending if all(c in added for c in re.findall(r'[A-Z]+\d+',s[3]) if c in all_keys)]
+        assert ready, 'Cycle in official elective prerequisites'
+        for code,name,hours,prereq,variable in ready:
+            out.add('SUBJECT',optional_keys[code],name,group,src,dict(workloadHours=hours,learningArea='IT',required=False,variableContent=variable,prerequisiteText=prereq,prerequisites=[all_keys[c] for c in re.findall(r'[A-Z]+\d+',prereq) if c in all_keys]),code=code)
+            added.add(code);pending.remove((code,name,hours,prereq,variable))
     return out
 
 def main():

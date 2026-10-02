@@ -1,252 +1,180 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 import {
   ArrowLeft,
   BookOpen,
   Download,
   Monitor,
+  Smartphone,
   RefreshCw,
   ShieldCheck,
-  Video,
 } from "lucide-react";
 import styles from "./download.module.css";
-
-export const revalidate = 300;
-
-const hostedWindowsUrl =
-  "https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Windows.zip";
-
-type ReleaseAsset = {
-  name: string;
-  browser_download_url: string;
-  size: number;
-};
-
-type Release = {
-  tag_name: string;
-  name: string | null;
-  html_url: string;
-  published_at: string;
-  assets: ReleaseAsset[];
-};
-
-async function latestRelease(): Promise<Release | null> {
-  try {
-    const response = await fetch(
-      "https://api.github.com/repos/luizcordeiro155/Enturma/releases/latest",
-      {
-        headers: {
-          Accept: "application/vnd.github+json",
-          "User-Agent": "Enturma-Web",
-        },
-        next: { revalidate: 300 },
-      },
-    );
-    if (!response.ok) return null;
-    return (await response.json()) as Release;
-  } catch {
-    return null;
-  }
-}
-
-function formatSize(bytes: number) {
-  return `${Math.max(1, Math.round(bytes / 1024 / 1024))} MB`;
-}
-
+const desktopOrigin =
+  "https://enturma-desktop-download-v5-production.up.railway.app";
 export default async function DownloadPage() {
-  const release = await latestRelease();
-  const windowsInstaller =
-    release?.assets.find(
-      (asset) =>
-        asset.name.toLowerCase().endsWith(".exe") &&
-        !asset.name.toLowerCase().includes("portable"),
-    ) ?? null;
-
-  const windowsPortable =
-    release?.assets.find(
-      (asset) =>
-        asset.name.toLowerCase().endsWith(".exe") &&
-        asset.name.toLowerCase().includes("portable"),
-    ) ?? null;
-
-  const primaryWindowsUrl =
-    windowsInstaller?.browser_download_url ?? hostedWindowsUrl;
-
+  const ua = (await headers()).get("user-agent") ?? "";
+  if (ua.includes("EnturmaDesktop/")) redirect("/home");
+  const android = /Android/i.test(ua);
+  let androidUrl: string | undefined;
+  try {
+    const candidate = new URL(process.env.ANDROID_DOWNLOAD_URL ?? "");
+    if (
+      candidate.protocol === "https:" &&
+      !candidate.username &&
+      !candidate.password &&
+      candidate.pathname.endsWith(".apk")
+    )
+      androidUrl = candidate.href;
+  } catch {}
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
         <header className={styles.header}>
-          <Link href="/home" className={styles.brand} aria-label="Enturma">
-            <BookOpen size={40} strokeWidth={2.2} />
+          <Link href="/home" className={styles.brand}>
+            <BookOpen size={40} />
             <span>
               enturma<span className={styles.dot}>.</span>
             </span>
           </Link>
-
-          <div className={styles.headerActions}>
-            <span className={styles.version}>Web v0.2.0</span>
-            <Link href="/home" className={styles.backLink}>
-              <ArrowLeft size={17} />
-              Voltar ao Enturma
-            </Link>
-          </div>
+          <Link href="/home" className={styles.backLink}>
+            <ArrowLeft size={18} />
+            Voltar ao Enturma
+          </Link>
         </header>
-
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <span className={styles.eyebrow}>
-              <Monitor size={16} />
-              Aplicativo para computador
+              <Monitor size={18} />
+              Enturma 0.3.0
             </span>
-
-            <h1>O Enturma que você já conhece, agora no seu PC.</h1>
-
+            <h1>Seu espaço de estudo. Na sua tela.</h1>
             <p className={styles.lead}>
-              Use a mesma conta, suas salas, mensagens, chamadas, materiais,
-              cadernos, IA, fórum, amigos e caronas em uma janela própria do
-              Enturma.
+              Salas, chamadas, comunidade, perfil e cadernos de estudo na mesma
+              conta. Escolha seu dispositivo para continuar aprendendo em
+              companhia.
             </p>
-
             <div className={styles.heroMeta}>
               <span>
-                <ShieldCheck size={16} />
-                Windows 10/11
+                <ShieldCheck size={18} />
+                Windows 10/11 · 64 bits
               </span>
-              <span>64 bits</span>
-              <span>Versão 0.2.0</span>
+              <span>Android</span>
+              <span>iOS em preparação</span>
             </div>
           </div>
-
           <aside className={styles.downloadCard}>
-            <div className={styles.downloadIcon}>
-              <Download size={28} />
-            </div>
-
-            <div>
-              <span className={styles.cardLabel}>Enturma Desktop</span>
-              <h2>Baixar para Windows</h2>
-              <p>
-                A versão Desktop permanece sincronizada com o Enturma Web e
-                recebe as próximas atualizações pelo próprio aplicativo.
-              </p>
-            </div>
-
-            <a className={styles.primary} href={primaryWindowsUrl}>
-              <Download size={19} />
-              {windowsInstaller
-                ? `Baixar Enturma · ${formatSize(windowsInstaller.size)}`
-                : "Baixar Enturma para Windows"}
-            </a>
-
-            {windowsPortable ? (
-              <a
-                className={styles.secondary}
-                href={windowsPortable.browser_download_url}
-              >
-                Versão portátil · {formatSize(windowsPortable.size)}
+            <Download size={30} />
+            <h2>{android ? "Enturma para Android" : "Enturma para Windows"}</h2>
+            <p>
+              {android
+                ? "Aplicativo nativo com navegação por abas, salas e comunidade."
+                : "Um arquivo para instalar o Enturma, criar seus atalhos e receber as próximas atualizações no aplicativo."}
+            </p>
+            {android && androidUrl ? (
+              <a className={styles.primary} href={androidUrl}>
+                Baixar APK para Android
               </a>
-            ) : null}
-
+            ) : android ? (
+              <p>
+                O APK está em preparação. Enquanto isso, acesse todos os
+                recursos pelo navegador.
+              </p>
+            ) : (
+              <a
+                className={styles.primary}
+                href={`${desktopOrigin}/Enturma-Setup-0.3.0.exe`}
+              >
+                <Download size={18} />
+                Baixar Enturma-Setup-0.3.0.exe
+              </a>
+            )}
             <small className={styles.downloadNote}>
-              {release
-                ? `Versão ${release.tag_name} · publicada em ${new Date(
-                    release.published_at,
-                  ).toLocaleDateString("pt-BR")}`
-                : "Versão 0.2.0 · Baixe o ZIP, extraia a pasta e abra Enturma.exe. Depois disso, as próximas versões poderão ser atualizadas pelo próprio aplicativo."}
+              A instalação Windows é por usuário. Seus dados e sua conta
+              continuam no Enturma.
             </small>
           </aside>
         </section>
-
-        <section className={styles.features} aria-label="Recursos do aplicativo">
+        <section
+          className={styles.features}
+          aria-label="Plataformas disponíveis"
+        >
           <article>
-            <span className={styles.featureIcon}>
-              <BookOpen size={21} />
-            </span>
+            <Monitor size={28} />
             <div>
-              <strong>Mesma experiência</strong>
-              <p>
-                O visual e os recursos seguem o mesmo Enturma que você usa no
-                navegador.
-              </p>
+              <h2>Windows</h2>
+              <p>Instalador NSIS, atalhos e atualização pelo aplicativo.</p>
+              <a href={`${desktopOrigin}/Enturma-Setup-0.3.0.exe`}>
+                Baixar instalador 0.3.0
+              </a>
             </div>
           </article>
-
           <article>
-            <span className={styles.featureIcon}>
-              <Video size={21} />
-            </span>
+            <Smartphone size={28} />
             <div>
-              <strong>Chamadas completas</strong>
+              <h2>Android</h2>
               <p>
-                Continue usando microfone, câmera e compartilhamento de tela no
-                aplicativo.
+                Build nativo Expo/React Native. Configurações de APK e AAB
+                prontas para distribuição.
               </p>
+              {androidUrl ? (
+                <a href={androidUrl}>Baixar APK</a>
+              ) : (
+                <p>APK em preparação</p>
+              )}
             </div>
           </article>
-
           <article>
-            <span className={styles.featureIcon}>
-              <RefreshCw size={21} />
-            </span>
+            <Smartphone size={28} />
             <div>
-              <strong>Atualizações automáticas</strong>
+              <h2>iOS</h2>
               <p>
-                Novas versões do Desktop são verificadas, baixadas e aplicadas
-                pelo próprio Enturma.
+                Em preparação. A distribuição será liberada após assinatura e
+                validação para dispositivos Apple.
               </p>
             </div>
           </article>
         </section>
-
         <section className={styles.steps}>
           <div>
-            <span className={styles.eyebrow}>Primeiro acesso</span>
-            <h2>Abra o Enturma em poucos passos</h2>
+            <span className={styles.eyebrow}>Windows em poucos passos</span>
+            <h2>Instale e entre na sua turma</h2>
           </div>
-
           <ol>
             <li>
               <span>1</span>
               <div>
                 <strong>Baixe</strong>
-                <p>Faça o download da versão para Windows.</p>
+                <p>Salve o arquivo Enturma-Setup-0.3.0.exe.</p>
               </div>
             </li>
             <li>
               <span>2</span>
               <div>
-                <strong>Extraia</strong>
-                <p>Extraia o conteúdo do ZIP para uma pasta do computador.</p>
+                <strong>Instale</strong>
+                <p>Execute o instalador e escolha seus atalhos.</p>
               </div>
             </li>
             <li>
               <span>3</span>
               <div>
-                <strong>Abra</strong>
-                <p>Execute Enturma.exe e entre com a sua conta normalmente.</p>
+                <strong>Entre</strong>
+                <p>Abra o Enturma e use sua conta habitual.</p>
               </div>
             </li>
           </ol>
         </section>
-
         <footer className={styles.footer}>
-          <div className={styles.footerBrand}>
+          <span>
             <BookOpen size={22} />
-            <span>
-              enturma<span className={styles.dot}>.</span>
-            </span>
-            <small>Web e Desktop v0.2.0</small>
-          </div>
-
-          <div className={styles.footerLinks}>
-            <Link href="/home">Enturma Web</Link>
-            <a
-              href="https://github.com/luizcordeiro155/Enturma"
-              target="_blank"
-              rel="noreferrer"
-            >
-              GitHub
-            </a>
-          </div>
+            Enturma 0.3.0
+          </span>
+          <span>
+            <RefreshCw size={18} />
+            Atualizações pelo aplicativo
+          </span>
+          <Link href="/home">Continuar no navegador</Link>
         </footer>
       </div>
     </main>

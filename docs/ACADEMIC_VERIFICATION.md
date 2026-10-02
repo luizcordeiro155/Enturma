@@ -25,3 +25,7 @@ Execução local em 29/09/2026: 34 testes Java, 13 web, 4 mobile, 2 de empacotam
 Durante a implantação separada, onboarding tenta V2 e usa a leitura legada se a API antiga ainda não tiver a rota (404/500). Falhas de autorização não acionam esse fallback. Novos jogos e painel exigem o JAR atualizado; a Vercel não publica o backend da SquareCloud.
 
 Catálogo não equivale a confirmação de matrícula institucional. Não armazenar screenshots privados ou credenciais nos snapshots. Não renomear captura pública como grade de ingresso 2026 sem documento que comprove essa vigência.
+
+## Ampliação 0.3.0 — UFMG
+
+43 optativas adicionais vêm das tabelas já arquivadas do relatório oficial BSI de 02/01/2025, percurso N-2019/9. Mesmo campus/oferta/versão/URL/hash; nomes, cargas, conteúdo variável e pré-requisitos preservados. Não se atribui semestre: grupo ELECTIVES “Optativas · sem semestre definido”, número nulo. Agora 78 disciplinas no snapshot UFMG. Não foram promovidas grades pendentes de outras instituições.
