@@ -135,7 +135,7 @@ class EnturmaUpdateReceiver : BroadcastReceiver() {
                 val remote = json.optString("version")
                 val downloadUrl = json.optString("downloadUrl")
                 if (
-                    !remote.matches(Regex("\\d+\\.\\d+\\.\\d+")) ||
+                    !remote.matches(Regex("""\\d+\\.\\d+\\.\\d+""")) ||
                     !downloadUrl.startsWith("\${ANDROID_UPDATE_ORIGIN}/") ||
                     !isNewerVersion(remote, BuildConfig.VERSION_NAME)
                 ) return@Thread
