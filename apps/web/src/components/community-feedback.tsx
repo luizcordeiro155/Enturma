@@ -198,12 +198,13 @@ export function CommunityFeedback() {
 }
 const categoryNames: Record<string, string> = {
   ROOM_MESSAGE: "Mensagens de salas",
+  PRIVATE_MESSAGE: "Mensagens privadas",
   MENTION: "Menções a você",
   ROOM_NOTICE: "Avisos e encerramento de salas",
   FORUM: "Fórum e menções",
   ACHIEVEMENT: "Conquistas",
   RIDE: "Caronas",
-  FRIEND: "Amizades e mensagens privadas",
+  FRIEND: "Amizades",
 };
 type Preference = { category: string; inApp: boolean; email: boolean; push: boolean };
 export function NotificationPreferences() {
