@@ -800,9 +800,12 @@ class MainActivity : Activity() {
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
         setIntent(intent)
-        if (handleUpdateIntent(intent)) return
-        val route = routeFromIntent(intent) ?: return
-        if (::webView.isInitialized) webView.loadUrl("\${WEB_ORIGIN}\${route}")
+        val updateHandled = handleUpdateIntent(intent)
+        val route = routeFromIntent(intent)
+        if (route != null && ::webView.isInitialized) {
+            webView.loadUrl("\${WEB_ORIGIN}\${route}")
+        }
+        if (updateHandled) return
     }
 
     private fun handleUpdateIntent(intent: Intent?): Boolean {
@@ -823,6 +826,9 @@ class MainActivity : Activity() {
     }
 
     private fun routeFromIntent(intent: Intent?): String? {
+        if (intent?.action == UPDATE_ACTION_INSTALL) {
+            return "/settings?update=1"
+        }
         if (intent?.action == PUSH_ACTION_OPEN) {
             return safePushHref(intent.getStringExtra(PUSH_EXTRA_HREF))
         }
