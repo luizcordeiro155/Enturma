@@ -806,7 +806,7 @@ class MainActivity : Activity() {
         return when (intent?.action) {
             UPDATE_ACTION_SETTINGS -> {
                 if (::webView.isInitialized) {
-                    webView.loadUrl("${WEB_ORIGIN}/settings")
+                    webView.loadUrl("\${WEB_ORIGIN}/settings")
                 }
                 true
             }
