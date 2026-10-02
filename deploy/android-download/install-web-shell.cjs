@@ -85,6 +85,7 @@ private const val UPDATE_CHANNEL_ID = "enturma_app_updates"
 private const val UPDATE_NOTIFICATION_ID = 4801
 private const val UPDATE_ALARM_REQUEST = 4802
 private const val UPDATE_ACTION_INSTALL = "br.com.enturma.app.action.INSTALL_UPDATE"
+private const val UPDATE_ACTION_SETTINGS = "br.com.enturma.app.action.OPEN_UPDATE_SETTINGS"
 private const val UPDATE_ACTION_OPEN_INSTALLER = "br.com.enturma.app.action.OPEN_DOWNLOADED_UPDATE"
 private const val UPDATE_EXTRA_URL = "downloadUrl"
 private const val UPDATE_EXTRA_DOWNLOAD_ID = "downloadId"
@@ -277,8 +278,90 @@ class EnturmaBootReceiver : BroadcastReceiver() {
 
 class EnturmaUpdateReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
-        // Disponibilidade de atualização é mostrada somente dentro de Configurações.
-        // Nenhuma notificação do sistema é criada antes do usuário iniciar o download.
+        val pendingResult = goAsync()
+        Thread {
+            try {
+                val connection =
+                    (URL(ANDROID_UPDATE_ORIGIN + "/latest-android.json?ts=" + System.currentTimeMillis())
+                        .openConnection() as HttpURLConnection).apply {
+                        connectTimeout = 7000
+                        readTimeout = 7000
+                        requestMethod = "GET"
+                        useCaches = false
+                    }
+                try {
+                    if (connection.responseCode !in 200..299) return@Thread
+                    val payload = connection.inputStream.bufferedReader().use { it.readText() }
+                    val json = JSONObject(payload)
+                    val version = json.optString("version", "")
+                    val downloadUrl = json.optString("downloadUrl", "")
+                    val uri = runCatching { Uri.parse(downloadUrl) }.getOrNull() ?: return@Thread
+                    val origin = Uri.parse(ANDROID_UPDATE_ORIGIN)
+                    if (
+                        !version.matches(Regex("^\\d+\\.\\d+\\.\\d+$")) ||
+                        !isNewerVersion(version, BuildConfig.VERSION_NAME) ||
+                        uri.scheme != "https" ||
+                        !uri.host.equals(origin.host, ignoreCase = true) ||
+                        uri.path?.endsWith(".apk") != true
+                    ) return@Thread
+
+                    val prefs = context.getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+                    if (prefs.getString(PREF_NOTIFIED_VERSION, null) == version) return@Thread
+
+                    if (
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                        context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) !=
+                            PackageManager.PERMISSION_GRANTED
+                    ) return@Thread
+
+                    ensureUpdateNotificationChannel(context)
+
+                    val open = Intent(context, MainActivity::class.java).apply {
+                        action = UPDATE_ACTION_SETTINGS
+                        flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or
+                                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                                Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    }
+                    val openPending = PendingIntent.getActivity(
+                        context,
+                        UPDATE_NOTIFICATION_ID,
+                        open,
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    )
+                    val builder =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                            Notification.Builder(context, UPDATE_CHANNEL_ID)
+                        else Notification.Builder(context)
+
+                    val notification = builder
+                        .setSmallIcon(android.R.drawable.stat_sys_download_done)
+                        .setContentTitle("Atualização do Enturma disponível")
+                        .setContentText("Versão " + version + " pronta. Toque para atualizar.")
+                        .setStyle(
+                            Notification.BigTextStyle().bigText(
+                                "A versão " + version +
+                                    " do Enturma está disponível. Toque para abrir Configurações e iniciar a atualização.",
+                            ),
+                        )
+                        .setContentIntent(openPending)
+                        .setAutoCancel(true)
+                        .setOnlyAlertOnce(true)
+                        .build()
+
+                    val manager =
+                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                    manager.notify(UPDATE_NOTIFICATION_ID, notification)
+                    prefs.edit().putString(PREF_NOTIFIED_VERSION, version).apply()
+                } finally {
+                    connection.disconnect()
+                }
+            } catch (_: Exception) {
+                // A próxima verificação agendada tenta novamente.
+            } finally {
+                pendingResult.finish()
+            }
+        }.start()
     }
 }
 
@@ -508,6 +591,8 @@ class MainActivity : Activity() {
         applySystemBarTheme(false)
         webView.addJavascriptInterface(EnturmaNativeBridge(), "EnturmaNative")
         registerUpdateDownloadReceiver()
+        EnturmaUpdateScheduler.schedule(this)
+        EnturmaUpdateScheduler.checkNow(this)
         handleUpdateIntent(intent)
 
         if (
@@ -688,6 +773,7 @@ class MainActivity : Activity() {
         super.onResume()
         EnturmaAppState.foreground = true
         refreshNativePushToken()
+        EnturmaUpdateScheduler.checkNow(this)
         val pending = pendingUpdateUrl
         if (
             pending != null &&
@@ -718,6 +804,12 @@ class MainActivity : Activity() {
 
     private fun handleUpdateIntent(intent: Intent?): Boolean {
         return when (intent?.action) {
+            UPDATE_ACTION_SETTINGS -> {
+                if (::webView.isInitialized) {
+                    webView.loadUrl("${WEB_ORIGIN}/settings")
+                }
+                true
+            }
             UPDATE_ACTION_INSTALL -> {
                 val downloadUrl = intent.getStringExtra(UPDATE_EXTRA_URL) ?: return true
                 startUpdateInstall(downloadUrl)
@@ -734,6 +826,9 @@ class MainActivity : Activity() {
     }
 
     private fun routeFromIntent(intent: Intent?): String? {
+        if (intent?.action == UPDATE_ACTION_SETTINGS) {
+            return "/settings"
+        }
         if (intent?.action == PUSH_ACTION_OPEN) {
             return safePushHref(intent.getStringExtra(PUSH_EXTRA_HREF))
         }
