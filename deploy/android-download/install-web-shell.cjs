@@ -281,19 +281,24 @@ private fun showInstallReadyNotification(context: Context, downloadId: Long) {
             Notification.Builder(context, UPDATE_CHANNEL_ID)
         else Notification.Builder(context)
 
-    manager@ run {
-        val notification = builder
-            .setSmallIcon(android.R.drawable.stat_sys_download_done)
-            .setContentTitle("Atualização pronta para instalar")
-            .setContentText("Toque para abrir o instalador do Android.")
-            .setContentIntent(pending)
-            .setAutoCancel(true)
-            .setOnlyAlertOnce(true)
-            .build()
-        val manager =
-            context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(UPDATE_READY_NOTIFICATION_ID, notification)
-    }
+    val installAction =
+        Notification.Action.Builder(
+            android.R.drawable.stat_sys_download_done,
+            "Instalar",
+            pending,
+        ).build()
+    val notification = builder
+        .setSmallIcon(android.R.drawable.stat_sys_download_done)
+        .setContentTitle("Atualização pronta para instalar")
+        .setContentText("Toque em Instalar para continuar.")
+        .setContentIntent(pending)
+        .addAction(installAction)
+        .setAutoCancel(true)
+        .setOnlyAlertOnce(true)
+        .build()
+    val manager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    manager.notify(UPDATE_READY_NOTIFICATION_ID, notification)
 }
 
 class EnturmaDownloadCompleteReceiver : BroadcastReceiver() {
