@@ -34,7 +34,9 @@ RUN node deploy/android-download/configure-signing.cjs
 
 WORKDIR /project/apps/mobile/android
 RUN chmod +x gradlew && ./gradlew :app:assembleRelease --no-daemon
-RUN mkdir -p /project/apps/mobile/dist && cp app/build/outputs/apk/release/app-release.apk /project/apps/mobile/dist/Enturma-Android-0.3.0.apk
+RUN mkdir -p /project/apps/mobile/dist \
+    && VERSION="$(node -p "require('../package.json').version")" \
+    && cp app/build/outputs/apk/release/app-release.apk "/project/apps/mobile/dist/Enturma-Android-${VERSION}.apk"
 
 FROM node:22-alpine
 WORKDIR /app

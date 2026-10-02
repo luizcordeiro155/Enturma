@@ -3,7 +3,6 @@ import { Platform, View, Text, Pressable, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import {
   AudioSession,
-  registerGlobals,
   RoomContext,
   VideoTrack,
   useTracks,
@@ -13,7 +12,6 @@ import {
 import { Room, RoomEvent, Track } from "livekit-client";
 import { api } from "./api";
 import { useStyles } from "./ui";
-registerGlobals();
 type Call = {
   room: Room;
   roomId: string | null;

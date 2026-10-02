@@ -77,7 +77,7 @@ export default async function DownloadPage() {
             {android ? (
               <a className={styles.primary} href={androidUrl}>
                 <Download size={18} />
-                Baixar Enturma Android 0.3.0
+                Baixar Enturma Android 0.3.1
               </a>
             ) : (
               <a
@@ -117,7 +117,7 @@ export default async function DownloadPage() {
                 Build nativo Expo/React Native. Configurações de APK e AAB
                 prontas para distribuição.
               </p>
-              <a href={androidUrl}>Baixar APK 0.3.0</a>
+              <a href={androidUrl}>Baixar APK 0.3.1</a>
             </div>
           </article>
           <article>
