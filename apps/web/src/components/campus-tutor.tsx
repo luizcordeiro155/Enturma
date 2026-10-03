@@ -61,9 +61,25 @@ export function CampusTutor({
   useEffect(()=>{
     if(!autoPrompt||autoStarted.current)return;
     autoStarted.current=true;
-    const timer=window.setTimeout(()=>void ask("PLAN",autoPrompt),120);
-    return()=>window.clearTimeout(timer);
-  },[autoPrompt]);
+    let active=true;
+    const timer=window.setTimeout(()=>{
+      setBusy(true);setError("");
+      void post<TutorReply>("/campus/tutor",{
+        subjectId:subjectId??null,
+        focusSessionId:focusSessionId??null,
+        goal,
+        message:autoPrompt,
+        action:"PLAN",
+      }).then(result=>{
+        if(!active)return;
+        setReply(result);
+        return api<TutorProfile>("/campus/tutor/profile",{cache:"no-store"})
+          .then(value=>{if(active)setProfile(value)});
+      }).catch(e=>{if(active)setError((e as Error).message)})
+        .finally(()=>{if(active)setBusy(false)});
+    },120);
+    return()=>{active=false;window.clearTimeout(timer)};
+  },[autoPrompt,focusSessionId,goal,subjectId]);
 
   async function rate(rating:number,preference?:string){
     if(!reply)return;
