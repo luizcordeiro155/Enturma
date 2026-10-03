@@ -33,7 +33,10 @@ export function MobileNavigation() {
   const [open, setOpen] = useState(false);
   const [installedApp, setInstalledApp] = useState(false);
   const sheet = useRef<HTMLDialogElement>(null);
-  useEffect(() => { setInstalledApp(isInstalledApp()); }, []);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setInstalledApp(isInstalledApp()), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   useEffect(() => {
     if (!open || !sheet.current) return;
     const el = sheet.current;
