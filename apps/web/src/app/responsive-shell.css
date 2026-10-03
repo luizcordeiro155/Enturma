@@ -89,3 +89,53 @@
 }
 
 /* Android 0.3.6 safe-area production */
+
+
+/* Atalho de perfil estilo Discord */
+.topbar-profile-link {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  display: inline-grid;
+  place-items: center;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--ink);
+  text-decoration: none;
+  box-shadow: 0 0 0 2px transparent;
+  transition:
+    transform 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease;
+}
+.topbar-profile-link img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.topbar-profile-link:hover {
+  filter: none;
+  transform: translateY(-1px);
+  border-color: color-mix(in srgb, var(--ink) 36%, var(--border));
+  box-shadow: 0 5px 16px rgb(0 0 0 / 0.14);
+}
+.topbar-profile-link[aria-current="page"] {
+  border-color: var(--ink);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 72%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .topbar-profile-link {
+    transition: none;
+  }
+}
+@media (max-width: 380px) {
+  .topbar-profile-link {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+}

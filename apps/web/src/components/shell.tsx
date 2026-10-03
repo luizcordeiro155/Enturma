@@ -1,4 +1,5 @@
 "use client";
+import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
@@ -16,6 +17,7 @@ import {
   ShieldCheck,
   Users,
   Download,
+  UserRound,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
 import {
@@ -44,10 +46,48 @@ export function Shell({ children }: { children: React.ReactNode }) {
     isMobileApp() &&
     ["available", "downloading", "ready"].includes(updateState?.status ?? "");
   const [installedApp, setInstalledApp] = useState(false);
+  const [profileShortcut, setProfileShortcut] = useState<{
+    id: string;
+    hasAvatar: boolean;
+    version: number;
+  } | null>(null);
   useEffect(() => {
     const t = setTimeout(() => setInstalledApp(isInstalledApp()), 0);
     return () => clearTimeout(t);
   }, []);
+
+  useEffect(() => {
+    let active = true;
+    const refreshProfileShortcut = async () => {
+      if (document.visibilityState !== "visible") return;
+      try {
+        const profile = await api<{ id: string; hasAvatar?: boolean }>(
+          "/users/me",
+        );
+        if (!active) return;
+        setProfileShortcut({
+          id: profile.id,
+          hasAvatar: Boolean(profile.hasAvatar),
+          version: Date.now(),
+        });
+      } catch {
+        // Sessão expirada e indisponibilidade já são tratadas pelas páginas.
+      }
+    };
+
+    void refreshProfileShortcut();
+    const onVisible = () => {
+      if (document.visibilityState === "visible")
+        void refreshProfileShortcut();
+    };
+    window.addEventListener("focus", refreshProfileShortcut);
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      active = false;
+      window.removeEventListener("focus", refreshProfileShortcut);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [path]);
   const [learning, setLearning] = useState(false);
   const [, setEmailVerified] = useState<boolean | null>(null);
   const [emailCelebration, setEmailCelebration] = useState(false);
@@ -181,8 +221,24 @@ export function Shell({ children }: { children: React.ReactNode }) {
           <div className="topbar-actions">
             <NotificationBell />
             <ExperienceControls />
-            <Link className="button" href="/profile">
-              Meu perfil
+            <Link
+              className="topbar-profile-link"
+              href="/profile"
+              aria-label="Abrir meu perfil para editar"
+              title="Meu perfil"
+              aria-current={path === "/profile" ? "page" : undefined}
+            >
+              {profileShortcut?.hasAvatar ? (
+                <Image
+                  src={`/api/backend/users/${profileShortcut.id}/avatar?v=${profileShortcut.version}`}
+                  width={44}
+                  height={44}
+                  alt=""
+                  unoptimized
+                />
+              ) : (
+                <UserRound size={22} aria-hidden="true" />
+              )}
             </Link>
           </div>
         </header>
