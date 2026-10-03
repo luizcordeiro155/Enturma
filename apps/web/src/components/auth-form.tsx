@@ -61,7 +61,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     if (!busy || mode !== "login") return;
     const reduced =
       document.documentElement.dataset.reducedMotion === "true" ||
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
     if (reduced) return;
     const animations: Animation[] = [];
     const orbit = document.querySelector<HTMLElement>(".auth-login-progress-orbit");
@@ -947,6 +947,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             <label className="auth-remember-toggle">
               <input
                 type="checkbox"
+                aria-label="Manter conectado"
                 checked={rememberConnected}
                 onChange={(event) => setRememberConnected(event.target.checked)}
               />

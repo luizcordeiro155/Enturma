@@ -97,6 +97,7 @@ const server = http.createServer((req, res) => {
           downloadUrl: `${base}/Enturma-Windows.zip`,
           installerUrl: exe ? `${base}/${exe}` : null,
           installerSha256: exe ? checksum(exe) : null,
+          installerSize: exe ? fs.statSync(path.join(dir, exe)).size : null,
           publishedAt: stat.mtime.toISOString(),
         }),
       );

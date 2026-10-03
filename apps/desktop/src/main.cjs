@@ -285,6 +285,171 @@ function sha256File(file) {
   });
 }
 
+async function downloadInstallerUpdate(manifest) {
+  const dir = updateDirectory();
+  fs.mkdirSync(dir, { recursive: true });
+  const finalPath = path.join(dir, `Enturma-Setup-${manifest.version}.exe`);
+  const partialPath = `${finalPath}.part`;
+
+  if (fs.existsSync(finalPath)) {
+    const currentHash = await sha256File(finalPath);
+    if (
+      currentHash.toLowerCase() ===
+      String(manifest.installerSha256).toLowerCase()
+    )
+      return finalPath;
+    fs.rmSync(finalPath, { force: true });
+  }
+
+  fs.rmSync(partialPath, { force: true });
+  updateStatus("downloading", { version: manifest.version, progress: 0 });
+
+  const response = await net.fetch(manifest.installerUrl, {
+    redirect: "error",
+    signal: AbortSignal.timeout(300000),
+    cache: "no-store",
+    headers: {
+      "User-Agent": `EnturmaDesktop/${app.getVersion()}`,
+    },
+  });
+  if (!response.ok || !response.body)
+    throw new Error(`Download respondeu ${response.status}`);
+
+  let received = 0;
+  let lastProgress = -1;
+  const meter = new Transform({
+    transform(chunk, encoding, callback) {
+      received += chunk.length;
+      if (received > Number(manifest.installerSize))
+        return callback(Error("Download excedeu o tamanho autorizado."));
+      const progress = Math.floor(
+        (received * 100) / Number(manifest.installerSize),
+      );
+      if (progress !== lastProgress) {
+        lastProgress = progress;
+        updateStatus("downloading", { progress });
+        mainWindow?.setProgressBar(progress / 100);
+      }
+      callback(null, chunk);
+    },
+  });
+
+  try {
+    await pipeline(
+      Readable.fromWeb(response.body),
+      meter,
+      fs.createWriteStream(partialPath),
+    );
+  } catch (error) {
+    fs.rmSync(partialPath, { force: true });
+    throw error;
+  }
+
+  if (fs.statSync(partialPath).size !== Number(manifest.installerSize)) {
+    fs.rmSync(partialPath, { force: true });
+    throw new Error("Tamanho do instalador não confere.");
+  }
+
+  const hash = await sha256File(partialPath);
+  if (
+    hash.toLowerCase() !==
+    String(manifest.installerSha256).toLowerCase()
+  ) {
+    fs.rmSync(partialPath, { force: true });
+    throw new Error("O instalador falhou na verificação SHA-256.");
+  }
+
+  fs.renameSync(partialPath, finalPath);
+  return finalPath;
+}
+
+function installDownloadedInstaller(manifest, installerPath) {
+  if (process.platform !== "win32") {
+    void shell.openExternal(manifest.installerUrl || RELEASES_URL);
+    return;
+  }
+
+  const updatesDir = updateDirectory();
+  const scriptPath = path.join(updatesDir, `install-nsis-${manifest.version}.ps1`);
+  const currentExe = process.execPath;
+  const currentPid = process.pid;
+  const logPath = path.join(updatesDir, "install.log");
+  const errorPath = path.join(updatesDir, "install-error.log");
+
+  if (!inside(updatesDir, installerPath) || !inside(updatesDir, scriptPath))
+    throw Error("Diretório de atualização inválido.");
+
+  const script = `$ErrorActionPreference = "Stop"
+$installer = ${ps(installerPath)}
+$currentExe = ${ps(currentExe)}
+$pidToWait = ${currentPid}
+$log = ${ps(logPath)}
+$errorLog = ${ps(errorPath)}
+try {
+ while (Get-Process -Id $pidToWait -ErrorAction SilentlyContinue) {
+  Start-Sleep -Milliseconds 350
+ }
+ Start-Sleep -Milliseconds 700
+ $process = Start-Process -FilePath $installer -ArgumentList @('/S') -PassThru -Wait
+ if ($process.ExitCode -ne 0) { throw "Instalador retornou código $($process.ExitCode)." }
+ Start-Sleep -Seconds 2
+ if (-not (Test-Path -LiteralPath $currentExe)) { throw "Executável atualizado não encontrado." }
+ "Atualização ${manifest.version} instalada com sucesso." | Set-Content -LiteralPath $log
+ Start-Process -FilePath $currentExe
+} catch {
+ $_.Exception.ToString() | Set-Content -LiteralPath $errorLog
+ if (Test-Path -LiteralPath $currentExe) { Start-Process -FilePath $currentExe }
+ exit 1
+}
+`;
+
+  fs.mkdirSync(updatesDir, { recursive: true });
+  fs.writeFileSync(scriptPath, script, "utf8");
+
+  const powershell = path.join(
+    process.env.SystemRoot || "C:\\Windows",
+    "System32",
+    "WindowsPowerShell",
+    "v1.0",
+    "powershell.exe",
+  );
+
+  // Launch a second PowerShell through Start-Process. Passing the script path
+  // without embedded quote characters avoids the 0.3.0/0.3.1 failure where
+  // the app exited but the real updater never executed.
+  const launch = `$ErrorActionPreference='Stop';Start-Process -WindowStyle Hidden -FilePath ${ps(powershell)} -ArgumentList @('-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',${ps(scriptPath)})`;
+  const starter = spawn(
+    powershell,
+    [
+      "-NoProfile",
+      "-NonInteractive",
+      "-EncodedCommand",
+      Buffer.from(launch, "utf16le").toString("base64"),
+    ],
+    { windowsHide: true, stdio: "ignore" },
+  );
+
+  let settled = false;
+  starter.once("error", (error) => {
+    settled = true;
+    updateStatus("error", {
+      message: "Não foi possível iniciar a atualização: " + error.message,
+    });
+  });
+  starter.once("close", (code) => {
+    if (settled) return;
+    settled = true;
+    if (code === 0) {
+      setTimeout(() => app.quit(), 250);
+    } else {
+      updateStatus("error", {
+        message:
+          "O instalador não iniciou. Use a página Downloads para instalar manualmente.",
+      });
+    }
+  });
+}
+
 async function downloadUpdate(manifest) {
   const dir = updateDirectory();
   fs.mkdirSync(dir, { recursive: true });
@@ -540,8 +705,17 @@ async function checkForUpdates() {
       return updateState;
     }
     updateStatus("available", { version: manifest.version });
-    const zipPath = await downloadUpdate(manifest);
-    pendingUpdate = { manifest, zipPath };
+    if (
+      manifest.installerUrl &&
+      manifest.installerSha256 &&
+      manifest.installerSize
+    ) {
+      const installerPath = await downloadInstallerUpdate(manifest);
+      pendingUpdate = { manifest, installerPath, mode: "installer" };
+    } else {
+      const zipPath = await downloadUpdate(manifest);
+      pendingUpdate = { manifest, zipPath, mode: "zip" };
+    }
     updateStatus("ready", { version: manifest.version, progress: 100 });
   } catch (error) {
     updateStatus("error", {
@@ -557,16 +731,32 @@ async function checkForUpdates() {
 async function installUpdate() {
   if (!pendingUpdate || updateState.status !== "ready")
     throw Error("Nenhuma atualização pronta.");
-  if (
-    (await sha256File(pendingUpdate.zipPath)) !==
-    pendingUpdate.manifest.sha256.toLowerCase()
-  )
-    throw Error("Verificação de integridade falhou.");
+
   updateStatus("installing");
   try {
+    if (pendingUpdate.mode === "installer") {
+      if (
+        (await sha256File(pendingUpdate.installerPath)) !==
+        pendingUpdate.manifest.installerSha256.toLowerCase()
+      )
+        throw Error("Verificação de integridade do instalador falhou.");
+      installDownloadedInstaller(
+        pendingUpdate.manifest,
+        pendingUpdate.installerPath,
+      );
+      return;
+    }
+
+    if (
+      (await sha256File(pendingUpdate.zipPath)) !==
+      pendingUpdate.manifest.sha256.toLowerCase()
+    )
+      throw Error("Verificação de integridade falhou.");
     installDownloadedUpdate(pendingUpdate.manifest, pendingUpdate.zipPath);
   } catch (e) {
-    updateStatus("error", { message: e.message });
+    updateStatus("error", {
+      message: e instanceof Error ? e.message : String(e),
+    });
     throw e;
   }
 }

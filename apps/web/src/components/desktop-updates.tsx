@@ -99,6 +99,10 @@ function isNewer(remote: string, current: string) {
   }
   return false;
 }
+
+function needsDesktopInstallerRecovery(version: string) {
+  return !isNewer(version, "0.3.1");
+}
 const Context = createContext<{
   state: UpdateState | null;
   open: () => void;
@@ -137,6 +141,7 @@ export function DesktopUpdateProvider({
     const bridge = window.enturmaDesktop;
     if (bridge) {
       let live = true;
+      let unsubscribe: (() => void) | undefined;
       const receive = (next: UpdateState) => {
         if (!live) return;
         setState(next);
@@ -145,36 +150,50 @@ export function DesktopUpdateProvider({
           setOpen(true);
         }
       };
-      if (bridge.getUpdateState)
-        void bridge.getUpdateState().then(receive).catch(() => {});
-      else
-        void bridge
-          .getInfo()
-          .then((info) => {
-            const legacy = info.platform === "win32";
-            if (!live) return;
-            setLegacyWindows(legacy);
+
+      void bridge
+        .getInfo()
+        .then((info) => {
+          if (!live) return;
+          const recovery =
+            info.platform === "win32" &&
+            (needsDesktopInstallerRecovery(info.version) ||
+              !bridge.getUpdateState ||
+              !bridge.installUpdate);
+          setLegacyWindows(recovery);
+
+          if (recovery) {
             receive({
               status: "unsupported",
               progress: 0,
               currentVersion: info.version,
-              message: legacy
-                ? "Atualize o aplicativo antigo pelo instalador oficial para ativar as próximas atualizações automáticas."
-                : "Use a página de downloads para atualizar este sistema.",
+              version: "0.3.2",
+              message:
+                "Esta versão usa um atualizador que pode fechar sem aplicar a instalação. Use o instalador oficial uma única vez; a partir da 0.3.2 as próximas atualizações voltam a ser automáticas.",
             });
-            if (legacy) {
-              try {
-                if (sessionStorage.getItem("enturma-legacy-update") !== info.version) {
-                  sessionStorage.setItem("enturma-legacy-update", info.version);
-                  setOpen(true);
-                }
-              } catch {
+            try {
+              if (
+                sessionStorage.getItem("enturma-desktop-recovery") !==
+                info.version
+              ) {
+                sessionStorage.setItem(
+                  "enturma-desktop-recovery",
+                  info.version,
+                );
                 setOpen(true);
               }
+            } catch {
+              setOpen(true);
             }
-          })
-          .catch(() => {});
-      const unsubscribe = bridge.onUpdateState?.(receive);
+            return;
+          }
+
+          if (bridge.getUpdateState)
+            void bridge.getUpdateState().then(receive).catch(() => {});
+          unsubscribe = bridge.onUpdateState?.(receive);
+        })
+        .catch(() => {});
+
       return () => {
         live = false;
         unsubscribe?.();
@@ -299,6 +318,10 @@ export function DesktopUpdateProvider({
           setOpen(true);
         },
         check: () => {
+          if (legacyWindows) {
+            setOpen(true);
+            return;
+          }
           if (isMobileApp()) {
             window.dispatchEvent(new Event("enturma-mobile-update-check"));
             return;
@@ -380,12 +403,13 @@ export function DesktopUpdateProvider({
           ) : legacyWindows ? (
             <>
               <p>
-                O atualizador desta versão pode fechar sem concluir. Não é
-                necessário excluir sua conta nem desinstalar o aplicativo.
+                Identificamos o problema que faz esta versão fechar sem
+                aplicar a atualização. Não clique novamente no atualizador
+                antigo: instale a correção oficial uma única vez.
               </p>
               <ol>
-                <li>Baixe o instalador oficial abaixo.</li>
-                <li>Feche o Enturma antigo e execute o arquivo baixado.</li>
+                <li>Baixe o instalador oficial 0.3.2 abaixo.</li>
+                <li>Feche o Enturma e execute o arquivo baixado.</li>
                 <li>
                   Abra o Enturma pelo novo atalho. Seus dados e sua conta
                   permanecem disponíveis.

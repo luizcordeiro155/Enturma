@@ -15,6 +15,26 @@ function validateManifest(manifest, manifestUrl) {
     !url.pathname.endsWith(".zip")
   )
     throw Error("Manifesto de atualização inválido ou origem não autorizada.");
+
+  if (
+    manifest.installerUrl != null ||
+    manifest.installerSha256 != null ||
+    manifest.installerSize != null
+  ) {
+    const installer = new URL(manifest.installerUrl || "invalid:");
+    if (
+      !/^[a-f0-9]{64}$/i.test(manifest.installerSha256 || "") ||
+      !Number.isSafeInteger(manifest.installerSize) ||
+      manifest.installerSize < 1 ||
+      manifest.installerSize > 600 * 1024 * 1024 ||
+      installer.origin !== source.origin ||
+      installer.protocol !== "https:" ||
+      installer.username ||
+      installer.password ||
+      !installer.pathname.endsWith(".exe")
+    )
+      throw Error("Instalador de atualização inválido ou origem não autorizada.");
+  }
   return manifest;
 }
 function trustedSender(event, window, origin) {

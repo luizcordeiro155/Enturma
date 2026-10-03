@@ -45,6 +45,11 @@ test("download service serves NSIS while preserving verified legacy ZIP updates"
     crypto.createHash("sha256").update(zip).digest("hex"),
   );
   assert.ok(manifest.installerUrl.endsWith("Enturma-Setup-0.3.0.exe"));
+  assert.equal(manifest.installerSize, 9);
+  assert.equal(
+    manifest.installerSha256,
+    crypto.createHash("sha256").update("installer").digest("hex"),
+  );
   assert.deepEqual(
     Buffer.from(
       await (await fetch(base + "/Enturma-Windows.zip")).arrayBuffer(),

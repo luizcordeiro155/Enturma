@@ -18,6 +18,8 @@ test("accepts legacy 0.2 ZIP manifest with additive installer fields", () =>
       {
         ...valid,
         installerUrl: "https://downloads.example/Enturma-Setup-0.3.0.exe",
+        installerSha256: "b".repeat(64),
+        installerSize: 67890,
       },
       url,
     ).version,
@@ -34,6 +36,16 @@ test("rejects malformed, oversized, untrusted and credential-bearing artifacts",
     { downloadUrl: "https://other.example/a.zip" },
     { downloadUrl: "https://user:pass@downloads.example/a.zip" },
     { downloadUrl: "https://downloads.example/a.exe" },
+    {
+      installerUrl: "https://other.example/Enturma-Setup-0.3.0.exe",
+      installerSha256: "b".repeat(64),
+      installerSize: 67890,
+    },
+    {
+      installerUrl: "https://downloads.example/Enturma-Setup-0.3.0.exe",
+      installerSha256: "bad",
+      installerSize: 67890,
+    },
   ])
     assert.throws(() => validateManifest({ ...valid, ...patch }, url));
 });
