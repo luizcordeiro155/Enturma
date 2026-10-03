@@ -53,7 +53,7 @@ export function CampusHub(){
       setProfile(p.value); setData(t.value); setOffline(p.offline||t.offline); setError("");
     }catch(e){setError((e as Error).message);}
   }
-  useEffect(()=>{void load();return refreshWhenOnline(()=>void load());},[]);
+  useEffect(()=>{const timer=window.setTimeout(()=>void load(),0);const stop=refreshWhenOnline(()=>void load());return()=>{window.clearTimeout(timer);stop();};},[]);
   useEffect(()=>{
     const cards=root.current?.querySelectorAll<HTMLElement>("[data-campus-card]");
     cards?.forEach((card,index)=>{
@@ -171,6 +171,8 @@ export function CampusHub(){
           {focusId?<div className="focus-running"><strong>{focusClock}</strong><p>O tempo é sincronizado com seu progresso quando você concluir.</p><button className="button" onClick={()=>void finishFocus()}>Concluir sessão</button></div>:
           <div className="focus-ready"><p>Inicie uma sessão de 50 minutos. O Enturma registra seu tempo de estudo sem recompensar spam.</p><button className="button" onClick={()=>void startFocus()}><Target size={17}/> Iniciar 50 min</button></div>}
         </section>
+
+        <CampusTools />
 
         <section className="campus-card" data-campus-card>
           <div className="campus-card-title"><div><Users/><span><small>Match de estudo</small><h2>Colegas disponíveis agora</h2></span></div><Link href="/friends">Ver amigos</Link></div>
