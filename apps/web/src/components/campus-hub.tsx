@@ -168,7 +168,7 @@ export function CampusHub(){
 
         <section className="campus-card" data-campus-card>
           <div className="campus-card-title"><div><Users/><span><small>Match de estudo</small><h2>Colegas disponíveis agora</h2></span></div><Link href="/friends">Ver amigos</Link></div>
-          {data.matches.length?<div className="campus-match-grid">{data.matches.map(m=><Link href={`/users/${m.id}`} className="campus-match" key={m.id}><span className="campus-avatar">{m.name.slice(0,1).toUpperCase()}</span><div><strong>{m.name}</strong><small>{m.subjectName??"Estudo geral"} · {m.goal||"Disponível para estudar"}</small></div></Link>)}</div>:
+          {data.matches.length?<div className="campus-match-grid">{data.matches.map(m=><article className="campus-match" key={m.id}><span className="campus-avatar">{m.name.slice(0,1).toUpperCase()}</span><div><strong>{m.name}</strong><small>{m.subjectName??"Estudo geral"} · {m.goal||"Disponível para estudar"}</small></div></article>)}</div>:
           <div className="campus-empty compact"><Users/><p>Ainda não há colegas compatíveis marcados como disponíveis.</p></div>}
         </section>
       </main>
