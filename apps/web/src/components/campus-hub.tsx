@@ -8,7 +8,7 @@ import {
 } from "lucide-react";
 import type { Profile } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
-import { Feedback, Loading } from "./feedback";
+import { Feedback, Loading } from "./feedback";\nimport { CampusTools } from "./campus-tools";
 
 type Task={id:string;kind:string;title:string;notes:string;dueAt:string;estimatedMinutes:number;priority:string;completedAt?:string|null;subjectName?:string|null};
 type Match={id:string;name:string;username:string;goal:string;preferredMode:string;subjectName?:string|null};
