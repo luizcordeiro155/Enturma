@@ -99,6 +99,7 @@ export function ProfileDetailsEditor({
     }
     await onSaved();
     setMediaVersion(Date.now());
+    window.dispatchEvent(new Event("enturma-profile-updated"));
     setCrop(undefined);
     setStatus("Imagem atualizada.");
   }
@@ -131,6 +132,7 @@ export function ProfileDetailsEditor({
         }),
       });
       await onSaved();
+      window.dispatchEvent(new Event("enturma-profile-updated"));
       setStatus("Perfil salvo com sucesso.");
     } catch (error) {
       setStatus((error as Error).message);

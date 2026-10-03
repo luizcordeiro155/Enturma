@@ -68,10 +68,24 @@ export function Motion() {
       animate(
         content,
         [
-          { opacity: 0.58, transform: "translate3d(0,10px,0) scale(.994)" },
-          { opacity: 1, transform: "translate3d(0,0,0) scale(1)" },
+          {
+            opacity: 0.34,
+            filter: "blur(7px)",
+            transform: "translate3d(18px,8px,0) scale(.992)",
+          },
+          {
+            opacity: 0.82,
+            filter: "blur(1px)",
+            transform: "translate3d(-2px,0,0) scale(1.002)",
+            offset: 0.7,
+          },
+          {
+            opacity: 1,
+            filter: "blur(0)",
+            transform: "translate3d(0,0,0) scale(1)",
+          },
         ],
-        { duration: 360, easing: "cubic-bezier(.16,1,.3,1)" },
+        { duration: 420, easing: "cubic-bezier(.16,1,.3,1)" },
       );
 
       const active = document.querySelector(

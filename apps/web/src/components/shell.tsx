@@ -2,6 +2,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useAppShellState } from "./app-shell-state";
 import { api } from "@/lib/api";
 import { Check, Gamepad2, MailCheck } from "lucide-react";
 import { NotificationBell } from "./notifications";
@@ -45,65 +46,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const updatePending =
     isMobileApp() &&
     ["available", "downloading", "ready"].includes(updateState?.status ?? "");
-  const [installedApp, setInstalledApp] = useState(false);
-  const [profileShortcut, setProfileShortcut] = useState<{
-    id: string;
-    hasAvatar: boolean;
-    version: number;
-  } | null>(null);
-  useEffect(() => {
-    const t = setTimeout(() => setInstalledApp(isInstalledApp()), 0);
-    return () => clearTimeout(t);
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-    const refreshProfileShortcut = async () => {
-      if (document.visibilityState !== "visible") return;
-      try {
-        const profile = await api<{ id: string; hasAvatar?: boolean }>(
-          "/users/me",
-        );
-        if (!active) return;
-        setProfileShortcut({
-          id: profile.id,
-          hasAvatar: Boolean(profile.hasAvatar),
-          version: Date.now(),
-        });
-      } catch {
-        // Sessão expirada e indisponibilidade já são tratadas pelas páginas.
-      }
-    };
-
-    void refreshProfileShortcut();
-    const onVisible = () => {
-      if (document.visibilityState === "visible")
-        void refreshProfileShortcut();
-    };
-    window.addEventListener("focus", refreshProfileShortcut);
-    document.addEventListener("visibilitychange", onVisible);
-    return () => {
-      active = false;
-      window.removeEventListener("focus", refreshProfileShortcut);
-      document.removeEventListener("visibilitychange", onVisible);
-    };
-  }, [path]);
-  const [learning, setLearning] = useState(false);
+  const { installedApp, learning, profileShortcut } = useAppShellState();
   const [, setEmailVerified] = useState<boolean | null>(null);
   const [emailCelebration, setEmailCelebration] = useState(false);
   const [emailCelebrationSeconds, setEmailCelebrationSeconds] = useState(8);
-  useEffect(() => {
-    let active = true;
-    api<{ eligible: boolean }>("/learning/access")
-      .then((r) => {
-        if (active) setLearning(r.eligible);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [path]);
-
   useEffect(() => {
     let active = true;
     let previous: boolean | null = null;

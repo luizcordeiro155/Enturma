@@ -16,6 +16,7 @@ import "./community-v3.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { MobilePushRegistration } from "@/components/mobile-push-registration";
+import { AppShellStateProvider } from "@/components/app-shell-state";
 export const metadata: Metadata = {
   title: "Enturma — estude em companhia",
   description: "Encontre sua matéria, entre em uma turma e aprenda junto.",
@@ -41,7 +42,9 @@ export default function Layout({
         <MobilePushRegistration />
         <CallSessionProvider>
           <DesktopUpdateProvider>
-            <RideActivity>{children}</RideActivity>
+            <AppShellStateProvider>
+              <RideActivity>{children}</RideActivity>
+            </AppShellStateProvider>
           </DesktopUpdateProvider>
         </CallSessionProvider>
       </body>
