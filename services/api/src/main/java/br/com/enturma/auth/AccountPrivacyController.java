@@ -59,8 +59,8 @@ public class AccountPrivacyController {
     // Remove segredos, dispositivos, conteúdo privado e dados de personalização antes de anonimizar.
     db.jdbc.update("DELETE FROM account_token WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM password_reset_flow WHERE user_id=?",userId);
-    db.jdbc.update("DELETE FROM push_device WHERE user_id=?",userId);
-    db.jdbc.update("DELETE FROM web_push_subscription WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM notification_push_device WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM notification_web_push_subscription WHERE user_id=?",userId);
     db.jdbc.update("UPDATE user_session SET revoked_at=coalesce(revoked_at,now()) WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM study_flashcard WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM focus_session WHERE user_id=?",userId);
@@ -72,10 +72,20 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM profile_featured_badge WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM profile_showcase WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM study_notebook WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM notification_push_delivery WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM notification WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM study_match_profile WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM friendship WHERE requester=? OR recipient=?",userId,userId);
+    db.jdbc.update("DELETE FROM user_block WHERE user_id=? OR blocked_id=?",userId,userId);
+    db.jdbc.update("DELETE FROM private_identity WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM user_subject WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM academic_enrollment WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM email_outbox WHERE user_id=? OR recipient=(SELECT email FROM app_user WHERE id=?)",userId,userId);
 
     String suffix=userId.toString().replace("-","");
     db.jdbc.update(
-        "UPDATE app_user SET name='Conta excluída',username=?,email=?,password_hash=?,status='DELETED',email_verified=false WHERE id=?",
+        "UPDATE app_user SET name='Conta excluída',username=?,email=?,password_hash=?,status='DELETED',email_verified=false,"
+        + " bio=NULL,avatar_mime=NULL,avatar_bytes=NULL,banner_mime=NULL,banner_bytes=NULL,profile_details='{}'::jsonb WHERE id=?",
         "deleted_"+suffix.substring(0,20),
         "deleted+"+suffix+"@invalid.enturma",
         "ACCOUNT_DELETED_"+suffix,
