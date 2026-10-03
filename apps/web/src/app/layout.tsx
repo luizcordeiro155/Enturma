@@ -9,6 +9,8 @@ import "./forum.css";
 import "./notifications.css";
 import "./study-journey.css";
 import "./ride-activity.css";
+import "./campus.css";
+import "./account-privacy.css";
 import { RideActivity } from "@/components/ride-activity";
 import "./study-workspace.css";
 import "./responsive-shell.css";
