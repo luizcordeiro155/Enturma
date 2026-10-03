@@ -169,10 +169,11 @@ export function useRideUpdates(refresh: () => Promise<void>) {
 
     refreshers.add(run);
     statusListeners.add(onStatus);
-    setLive(connected);
+    const initialStatusTimer = window.setTimeout(() => setLive(connected), 0);
     startTransport();
 
     return () => {
+      window.clearTimeout(initialStatusTimer);
       refreshers.delete(run);
       statusListeners.delete(onStatus);
       stopTransport();
