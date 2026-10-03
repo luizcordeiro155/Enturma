@@ -11,6 +11,7 @@ import {
   type Showcase,
 } from "./profile-showcase";
 import { ConfirmedLink, ForumLinks } from "./forum-links";
+import { useLiveRefresh } from "@/lib/live-updates";
 export type ProfileDetails = {
   pronouns?: string;
   statusText?: string;
@@ -85,6 +86,11 @@ export function LiveIdentity({ id, name }: { id: string; name: string }) {
       active = false;
     };
   }, [id]);
+  useLiveRefresh("profile_changed", async () => {
+    profileCache.delete(id);
+    const fresh = await loadPublicProfile(id);
+    setUser(fresh);
+  }, 8000);
   return <UserIdentity user={user} />;
 }
 export function Avatar({ user }: { user: PublicProfile }) {
@@ -212,6 +218,11 @@ export function LiveMemberIdentityCard({
       active = false;
     };
   }, [id]);
+  useLiveRefresh("profile_changed", async () => {
+    profileCache.delete(id);
+    const fresh = await loadPublicProfile(id);
+    setUser(fresh);
+  }, 8000);
   return (
     <MemberIdentityCard
       user={user}
