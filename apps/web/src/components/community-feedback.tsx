@@ -237,7 +237,7 @@ export function NotificationPreferences() {
     <section className="notification-preferences">
       <h2>Como você recebe novidades</h2>
       <p>
-        Escolha separadamente o que aparece dentro do Enturma, chega por push no celular
+        Escolha separadamente o que aparece dentro do Enturma, chega por push no celular ou PC
         ou é enviado por e-mail. E-mails de segurança, confirmação de conta e recuperação
         de senha continuam ativos.
       </p>
@@ -258,9 +258,13 @@ export function NotificationPreferences() {
               type="checkbox"
               disabled={busy}
               checked={item.push}
-              onChange={(e) => void save({ ...item, push: e.target.checked })}
+              onChange={(e) => {
+                if (e.target.checked)
+                  window.dispatchEvent(new Event("enturma-enable-web-push"));
+                void save({ ...item, push: e.target.checked });
+              }}
             />
-            No celular (push)
+            No celular ou PC (push)
           </label>
           <label className="check-row">
             <input

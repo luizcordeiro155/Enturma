@@ -16,6 +16,7 @@ import "./community-v3.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { MobilePushRegistration } from "@/components/mobile-push-registration";
+import { WebPushRegistration } from "@/components/web-push-registration";
 import { AppShellStateProvider } from "@/components/app-shell-state";
 import { PwaProvider } from "@/components/pwa-install";
 export const metadata: Metadata = {
@@ -23,8 +24,8 @@ export const metadata: Metadata = {
   description: "Encontre sua matéria, entre em uma turma e aprenda junto.",
   applicationName: "Enturma",
   icons: {
-    icon: [{ url: "/enturma-app-icon-v2.png", type: "image/png" }],
-    apple: [{ url: "/enturma-app-icon-v2.png", type: "image/png" }],
+    icon: [{ url: "/pwa/enturma-192-v5.png", type: "image/png" }],
+    apple: [{ url: "/pwa/enturma-192-v5.png", type: "image/png" }],
   },
   other: {
     "application-version": "0.3.0",
@@ -45,6 +46,7 @@ export default function Layout({
       <body>
         <Motion />
         <MobilePushRegistration />
+        <WebPushRegistration />
         <PwaProvider>
           <CallSessionProvider>
             <DesktopUpdateProvider>

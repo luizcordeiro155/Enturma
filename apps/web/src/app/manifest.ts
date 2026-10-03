@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    id: "/",
+    id: "/enturma-app-v5",
     name: "Enturma — estude em companhia",
     short_name: "Enturma",
     description:
@@ -18,14 +18,20 @@ export default function manifest(): MetadataRoute.Manifest {
     dir: "ltr",
     icons: [
       {
-        src: "/enturma-app-icon-v2.png",
-        sizes: "1024x1024",
+        src: "/pwa/enturma-192-v5.png",
+        sizes: "192x192",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/enturma-app-icon-v2.png",
-        sizes: "1024x1024",
+        src: "/pwa/enturma-v5.svg",
+        sizes: "any",
+        type: "image/svg+xml",
+        purpose: "any maskable",
+      },
+      {
+        src: "/pwa/enturma-192-v5.png",
+        sizes: "192x192",
         type: "image/png",
         purpose: "maskable",
       },
@@ -36,28 +42,28 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: "Início",
         description: "Abrir o início do Enturma",
         url: "/home",
-        icons: [{ src: "/enturma-app-icon-v2.png", sizes: "1024x1024", type: "image/png" }],
+        icons: [{ src: "/pwa/enturma-192-v5.png", sizes: "192x192", type: "image/png" }],
       },
       {
         name: "Salas",
         short_name: "Salas",
         description: "Encontrar suas salas de estudo",
         url: "/explore",
-        icons: [{ src: "/enturma-app-icon-v2.png", sizes: "1024x1024", type: "image/png" }],
+        icons: [{ src: "/pwa/enturma-192-v5.png", sizes: "192x192", type: "image/png" }],
       },
       {
         name: "Comunidade",
         short_name: "Comunidade",
         description: "Abrir o fórum do Enturma",
         url: "/forum",
-        icons: [{ src: "/enturma-app-icon-v2.png", sizes: "1024x1024", type: "image/png" }],
+        icons: [{ src: "/pwa/enturma-192-v5.png", sizes: "192x192", type: "image/png" }],
       },
       {
         name: "Cadernos",
         short_name: "Cadernos",
         description: "Abrir seus cadernos de estudo",
         url: "/notebooks",
-        icons: [{ src: "/enturma-app-icon-v2.png", sizes: "1024x1024", type: "image/png" }],
+        icons: [{ src: "/pwa/enturma-192-v5.png", sizes: "192x192", type: "image/png" }],
       },
     ],
   };

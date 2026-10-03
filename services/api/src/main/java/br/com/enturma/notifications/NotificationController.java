@@ -13,14 +13,17 @@ public class NotificationController {
   private final NotificationService service;
   private final NotificationPreferences preferences;
   private final PushNotificationService push;
+  private final WebPushNotificationService webPush;
 
   public NotificationController(
       NotificationService service,
       NotificationPreferences preferences,
-      PushNotificationService push) {
+      PushNotificationService push,
+      WebPushNotificationService webPush) {
     this.preferences = preferences;
     this.service = service;
     this.push = push;
+    this.webPush = webPush;
   }
 
   public record Preference(
@@ -54,6 +57,34 @@ public class NotificationController {
   public void unregisterPush(
       @AuthenticationPrincipal Actor a, @PathVariable @Size(max = 100) String installationId) {
     push.unregister(a, installationId);
+  }
+
+  public record WebPushSubscription(
+      @jakarta.validation.constraints.NotBlank @Size(max = 100) String installationId,
+      @jakarta.validation.constraints.NotBlank @Size(max = 2048) String endpoint,
+      @jakarta.validation.constraints.NotBlank @Size(max = 1024) String p256dh,
+      @jakarta.validation.constraints.NotBlank @Size(max = 512) String auth) {}
+
+  @GetMapping("/web-push/public-key")
+  public Object webPushPublicKey(@AuthenticationPrincipal Actor a) {
+    return Map.of("publicKey", webPush.publicKey());
+  }
+
+  @PostMapping("/web-push/subscribe")
+  public void subscribeWebPush(
+      @AuthenticationPrincipal Actor a, @Valid @RequestBody WebPushSubscription subscription) {
+    webPush.register(
+        a,
+        subscription.installationId(),
+        subscription.endpoint(),
+        subscription.p256dh(),
+        subscription.auth());
+  }
+
+  @DeleteMapping("/web-push/{installationId}")
+  public void unsubscribeWebPush(
+      @AuthenticationPrincipal Actor a, @PathVariable @Size(max = 100) String installationId) {
+    webPush.unregister(a, installationId);
   }
 
   @GetMapping("/inbox")

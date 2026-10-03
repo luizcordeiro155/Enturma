@@ -94,6 +94,19 @@ export function NotificationsProvider({
       pending.current = false;
     }
   }
+  useEffect(() => {
+    const badge = navigator as Navigator & {
+      setAppBadge?: (count?: number) => Promise<void>;
+      clearAppBadge?: () => Promise<void>;
+    };
+    if (inbox.unreadCount > 0) void badge.setAppBadge?.(inbox.unreadCount);
+    else void badge.clearAppBadge?.();
+    navigator.serviceWorker?.controller?.postMessage({
+      type: "ENTURMA_BADGE",
+      count: inbox.unreadCount,
+    });
+  }, [inbox.unreadCount]);
+
   useLiveRefresh("notifications_changed", refresh, 5000);
   useEffect(() => {
     const timer = setTimeout(() => void refresh(), 0);
@@ -213,6 +226,8 @@ export function NotificationBell() {
         aria-haspopup="dialog"
         onClick={() => {
           setOpen(true);
+          if ("Notification" in window && Notification.permission === "default")
+            window.dispatchEvent(new Event("enturma-enable-web-push"));
           void data.refresh();
         }}
       >
