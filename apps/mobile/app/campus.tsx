@@ -152,7 +152,7 @@ export default function Campus() {
       </View>
 
       <View style={[styles.card,{gap:10}]}>
-       <View style={{flexDirection:"row",alignItems:"center",gap:9}}><Ionicons name="brain-outline" size={24} color={styles.text.color}/><Text style={styles.label}>Prática adaptativa</Text></View>
+       <View style={{flexDirection:"row",alignItems:"center",gap:9}}><Ionicons name="bulb-outline" size={24} color={styles.text.color}/><Text style={styles.label}>Prática adaptativa</Text></View>
        <Text style={styles.muted}>{diag?.totals.attempts??0} questões respondidas{diag?.topics[0]?" · próximo foco: "+diag.topics[0].topic:""}</Text>
        <Field label="Assunto" value={practiceTopic} onChangeText={setPracticeTopic} placeholder="Ex.: JOIN ou recursividade"/>
        {profile?.subjects.slice(0,6).map(s=><Button key={s.id} title={(practiceSubject===s.id?"✓ ":"")+s.name} onPress={()=>setPracticeSubject(practiceSubject===s.id?undefined:s.id)}/>)}
