@@ -22,6 +22,10 @@ export const metadata: Metadata = {
   title: "Enturma — estude em companhia",
   description: "Encontre sua matéria, entre em uma turma e aprenda junto.",
   applicationName: "Enturma",
+  icons: {
+    icon: [{ url: "/enturma-app-icon.png", type: "image/png" }],
+    apple: [{ url: "/enturma-app-icon.png", type: "image/png" }],
+  },
   other: {
     "application-version": "0.3.0",
   },

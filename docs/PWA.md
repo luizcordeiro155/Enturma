@@ -34,3 +34,11 @@ Isso preserva atualizações Web imediatas e evita servir dados privados antigos
 ## Detecção
 
 `isInstalledApp()` considera Electron, Android nativo e o modo PWA standalone. Quando a PWA está instalada, o menu **Instalar aplicativo** é ocultado automaticamente.
+
+
+## Ajustes após instalação
+
+- O item **Instalar aplicativo** some imediatamente quando o navegador confirma a instalação e permanece oculto nas próximas aberturas desse navegador.
+- O ícone de instalação e os ícones do manifesto usam exatamente o mesmo `apps/mobile/assets/icon.png` da versão mobile do Enturma.
+- A página de instalação não oferece mais EXE/APK como alternativas visíveis; o fluxo principal passa a ser somente PWA.
+- As notificações internas continuam funcionando na PWA enquanto ela está aberta. Push do sistema com a PWA fechada ainda depende de Web Push; o FCM atual registra somente o aplicativo Android nativo.

@@ -4,7 +4,6 @@ import { redirect } from "next/navigation";
 import {
   ArrowLeft,
   BookOpen,
-  Download,
   Monitor,
   Smartphone,
   RefreshCw,
@@ -12,43 +11,13 @@ import {
   Sparkles,
 } from "lucide-react";
 import { PwaInstallButton } from "@/components/pwa-install";
+import { EnturmaAppIcon } from "@/components/enturma-app-icon";
 import styles from "./download.module.css";
-
-const desktopOrigin =
-  "https://enturma-desktop-download-v5-production.up.railway.app";
-const androidOrigin =
-  "https://enturma-android-download-v3-production.up.railway.app";
-
-type AndroidManifest = {
-  version: string;
-  downloadUrl: string;
-};
-
-async function currentAndroidRelease(): Promise<AndroidManifest | null> {
-  try {
-    const response = await fetch(`${androidOrigin}/latest-android.json`, {
-      cache: "no-store",
-      headers: { "User-Agent": "Enturma-Web" },
-    });
-    if (!response.ok) return null;
-    const manifest = (await response.json()) as AndroidManifest;
-    if (!/^\d+\.\d+\.\d+$/.test(manifest.version || "")) return null;
-    if (!manifest.downloadUrl?.startsWith(androidOrigin + "/")) return null;
-    return manifest;
-  } catch {
-    return null;
-  }
-}
 
 export default async function DownloadPage() {
   const ua = (await headers()).get("user-agent") ?? "";
   if (ua.includes("EnturmaDesktop/") || ua.includes("EnturmaMobile/"))
     redirect("/home");
-
-  const androidRelease = await currentAndroidRelease();
-  const androidVersion = androidRelease?.version ?? "mais recente";
-  const androidUrl =
-    androidRelease?.downloadUrl ?? `${androidOrigin}/Enturma-Android.apk`;
 
   return (
     <main className={styles.page}>
@@ -70,18 +39,18 @@ export default async function DownloadPage() {
           <div className={styles.heroCopy}>
             <span className={styles.eyebrow}>
               <Sparkles size={18} />
-              Instalação recomendada
+              Instalação pelo navegador
             </span>
             <h1>Instale o Enturma sem baixar EXE ou APK.</h1>
             <p className={styles.lead}>
               O navegador instala o Enturma como aplicativo no Windows ou
-              Android. Ele ganha ícone próprio, abre em uma janela independente
-              e continua usando a mesma conta, salas e dados da versão Web.
+              Android. Ele ganha o mesmo ícone da versão mobile, abre em uma
+              janela independente e continua usando sua conta, salas e dados.
             </p>
             <div className={styles.heroMeta}>
               <span>
                 <ShieldCheck size={18} />
-                Instalação pelo navegador
+                Sem instalador tradicional
               </span>
               <span>Windows</span>
               <span>Android</span>
@@ -91,19 +60,18 @@ export default async function DownloadPage() {
 
           <aside className={styles.downloadCard}>
             <div className={styles.downloadIcon}>
-              <Download size={28} />
+              <EnturmaAppIcon size={48} />
             </div>
-            <span className={styles.cardLabel}>Enturma PWA</span>
+            <span className={styles.cardLabel}>Enturma</span>
             <h2>Instalar Enturma</h2>
             <p>
-              Esta é a opção principal. Não é necessário executar instalador
-              baixado nem liberar instalação de fontes desconhecidas.
+              A instalação é feita pelo próprio navegador. Não há download de
+              EXE nem APK nesta versão.
             </p>
             <PwaInstallButton />
             <small className={styles.downloadNote}>
-              Em navegadores compatíveis, o botão abre a instalação nativa. Se
-              o navegador exigir ação manual, o próprio Enturma mostra as
-              instruções.
+              Depois de instalado, o item “Instalar aplicativo” é removido do
+              Enturma automaticamente.
             </small>
           </aside>
         </section>
@@ -125,7 +93,7 @@ export default async function DownloadPage() {
               <h2>Android</h2>
               <p>
                 Chrome e navegadores compatíveis adicionam o Enturma como app
-                sem precisar instalar o APK manualmente.
+                sem precisar liberar instalação de APK externo.
               </p>
             </div>
           </article>
@@ -158,48 +126,18 @@ export default async function DownloadPage() {
               <span>2</span>
               <div>
                 <strong>Confirme no navegador</strong>
-                <p>Não existe EXE ou APK nesse método.</p>
+                <p>O Enturma é adicionado como aplicativo do navegador.</p>
               </div>
             </li>
             <li>
               <span>3</span>
               <div>
-                <strong>Abra pelo novo ícone</strong>
+                <strong>Abra pelo ícone do Enturma</strong>
                 <p>Sua conta e seus dados continuam exatamente os mesmos.</p>
               </div>
             </li>
           </ol>
         </section>
-
-        <details className={styles.advanced}>
-          <summary>Opções avançadas: instaladores tradicionais</summary>
-          <div className={styles.advancedGrid}>
-            <article>
-              <Monitor size={24} />
-              <div>
-                <strong>Windows EXE</strong>
-                <p>
-                  Mantido para compatibilidade com a versão Electron completa.
-                  O Windows pode mostrar avisos para executáveis sem reputação.
-                </p>
-                <a href={`${desktopOrigin}/Enturma-Setup-0.3.0.exe`}>
-                  Baixar Enturma-Setup-0.3.0.exe
-                </a>
-              </div>
-            </article>
-            <article>
-              <Smartphone size={24} />
-              <div>
-                <strong>Android APK {androidVersion}</strong>
-                <p>
-                  Mantido como alternativa nativa. A instalação direta pode
-                  exigir autorização de fonte externa no Android.
-                </p>
-                <a href={androidUrl}>Baixar APK {androidVersion}</a>
-              </div>
-            </article>
-          </div>
-        </details>
 
         <footer className={styles.footer}>
           <span>
@@ -208,7 +146,7 @@ export default async function DownloadPage() {
           </span>
           <span>
             <ShieldCheck size={18} />
-            Instalação recomendada via navegador
+            Instalação pelo navegador
           </span>
           <Link href="/home">Continuar no navegador</Link>
         </footer>

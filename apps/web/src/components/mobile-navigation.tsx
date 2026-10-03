@@ -2,6 +2,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { EnturmaAppIcon } from "./enturma-app-icon";
 import {
   Home,
   Users,
@@ -13,7 +14,6 @@ import {
   Car,
   Settings,
   Gamepad2,
-  Download,
 } from "lucide-react";
 import {
   isInstalledApp,
@@ -99,7 +99,7 @@ export function MobileNavigation() {
               ["/challenges", "Desafios acadêmicos", Gamepad2],
               ["/learn", "Programação", Gamepad2],
               ["/subjects", "Minhas matérias", BookOpen],
-              ["/download", "Instalar aplicativo", Download],
+              ["/download", "Instalar aplicativo", EnturmaAppIcon],
             ] as const
           )
             .filter(([href]) => href !== "/download" || !isInstalledApp())

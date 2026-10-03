@@ -1,7 +1,8 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { Check, Download, MoreVertical } from "lucide-react";
+import { Check, MoreVertical } from "lucide-react";
+import { EnturmaAppIcon } from "./enturma-app-icon";
 import styles from "./pwa-install.module.css";
 
 type InstallChoice = {
@@ -36,6 +37,8 @@ function platform(): PwaPlatform {
   return "desktop";
 }
 
+const PWA_INSTALLED_KEY = "enturma-pwa-installed";
+
 export function isPwaMode() {
   if (typeof window === "undefined") return false;
   const nav = navigator as Navigator & { standalone?: boolean };
@@ -44,6 +47,13 @@ export function isPwaMode() {
     nav.standalone === true ||
     document.referrer.startsWith("android-app://")
   );
+}
+
+export function isKnownPwaInstalled() {
+  if (typeof window === "undefined") return false;
+  if (isPwaMode()) return true;
+  try { return localStorage.getItem(PWA_INSTALLED_KEY) === "1"; }
+  catch { return false; }
 }
 
 export function PwaProvider({ children }: { children: React.ReactNode }) {
@@ -61,7 +71,7 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
         });
     }
 
-    if (isPwaMode()) {
+    if (isKnownPwaInstalled()) {
       setState("installed");
       document.documentElement.dataset.pwaInstalled = "true";
       return;
@@ -78,6 +88,7 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
       setPromptEvent(null);
       setState("installed");
       document.documentElement.dataset.pwaInstalled = "true";
+      try { localStorage.setItem(PWA_INSTALLED_KEY, "1"); } catch {}
       window.dispatchEvent(new Event("enturma-pwa-installed"));
     };
 
@@ -110,6 +121,10 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
         const choice = await promptEvent.userChoice;
         if (choice.outcome === "accepted") {
           setPromptEvent(null);
+          setState("installed");
+          document.documentElement.dataset.pwaInstalled = "true";
+          try { localStorage.setItem(PWA_INSTALLED_KEY, "1"); } catch {}
+          window.dispatchEvent(new Event("enturma-pwa-installed"));
           return true;
         }
         return false;
@@ -158,7 +173,7 @@ export function PwaInstallButton() {
         disabled={installed || installing || state === "loading"}
         onClick={() => void startInstall()}
       >
-        {installed ? <Check size={19} /> : <Download size={19} />}
+        {installed ? <Check size={19} /> : <EnturmaAppIcon size={21} />}
         {installed
           ? "Enturma já está instalado"
           : installing

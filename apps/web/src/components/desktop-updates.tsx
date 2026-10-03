@@ -68,7 +68,10 @@ export function isPwaApp() {
 }
 
 export function isInstalledApp() {
-  return isDesktop() || isMobileApp() || isPwaApp();
+  if (isDesktop() || isMobileApp() || isPwaApp()) return true;
+  if (typeof window === "undefined") return false;
+  try { return localStorage.getItem("enturma-pwa-installed") === "1"; }
+  catch { return false; }
 }
 const androidUpdateOrigin =
   "https://enturma-android-download-v3-production.up.railway.app";

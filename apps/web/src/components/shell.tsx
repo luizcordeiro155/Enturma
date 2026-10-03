@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useAppShellState } from "./app-shell-state";
+import { EnturmaAppIcon } from "./enturma-app-icon";
 import { api } from "@/lib/api";
 import { Check, Gamepad2, MailCheck } from "lucide-react";
 import { NotificationBell } from "./notifications";
@@ -17,7 +18,6 @@ import {
   Settings,
   ShieldCheck,
   Users,
-  Download,
   UserRound,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
@@ -37,7 +37,7 @@ const links = [
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },
   { href: "/caronas", label: "Caronas", icon: Car },
   { href: "/settings", label: "Configurações", icon: Settings },
-  { href: "/download", label: "Instalar aplicativo", icon: Download },
+  { href: "/download", label: "Instalar aplicativo", icon: EnturmaAppIcon },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();

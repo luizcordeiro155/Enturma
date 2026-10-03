@@ -84,11 +84,16 @@ export function AppShellStateProvider({
         void refreshProfileShortcut(false);
     };
 
+    const markInstalled = () => setInstalledApp(true);
     window.addEventListener("enturma-profile-updated", refreshAvatar);
+    window.addEventListener("enturma-pwa-installed", markInstalled);
+    window.addEventListener("appinstalled", markInstalled);
     window.addEventListener("focus", refreshOnFocus);
     document.addEventListener("visibilitychange", refreshOnFocus);
     return () => {
       window.removeEventListener("enturma-profile-updated", refreshAvatar);
+      window.removeEventListener("enturma-pwa-installed", markInstalled);
+      window.removeEventListener("appinstalled", markInstalled);
       window.removeEventListener("focus", refreshOnFocus);
       document.removeEventListener("visibilitychange", refreshOnFocus);
     };

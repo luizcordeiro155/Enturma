@@ -14,6 +14,14 @@ export type ProfileDetails = {
   website?: string;
   interests?: string;
 };
+type FriendshipSummary = {
+  id: string;
+  userId: string;
+  requester?: string;
+  recipient?: string;
+  status: "PENDING" | "ACCEPTED";
+};
+
 export type PublicProfile = {
   id: string;
   name: string;
@@ -211,6 +219,8 @@ export function UserIdentity({
   subtitle?: string;
 }) {
   const [profile, setProfile] = useState<PublicProfile>();
+  const [friendship, setFriendship] = useState<FriendshipSummary>();
+  const [friendshipLoading, setFriendshipLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const trigger = useRef<HTMLButtonElement>(null);
@@ -265,11 +275,19 @@ export function UserIdentity({
   }, [open]);
   async function show() {
     setMessage("");
+    setFriendshipLoading(true);
     setOpen(true);
     try {
-      setProfile(await loadPublicProfile(user.id));
+      const [loadedProfile, friendships] = await Promise.all([
+        loadPublicProfile(user.id),
+        api<FriendshipSummary[]>("/friends", { cache: "no-store" }),
+      ]);
+      setProfile(loadedProfile);
+      setFriendship(friendships.find((item) => item.userId === user.id));
     } catch (e) {
       setMessage((e as Error).message);
+    } finally {
+      setFriendshipLoading(false);
     }
   }
   return (
@@ -325,25 +343,55 @@ export function UserIdentity({
                   <ProfileCard user={profile} />
                   <PublicShowcase userId={profile.id} />
                   <div className="profile-dialog-actions">
-                    <button
-                      onClick={async () => {
-                        try {
-                          await post("/friends", {
-                            username: profile.username,
-                          });
-                          setMessage(
-                            "Solicitação enviada. Gerencie o convite em Amigos.",
-                          );
-                        } catch (e) {
-                          setMessage((e as Error).message);
-                        }
-                      }}
-                    >
-                      Adicionar amizade
-                    </button>
-                    <Link className="button secondary" href="/friends">
-                      Conversas privadas
-                    </Link>
+                    {friendshipLoading ? (
+                      <button type="button" disabled>
+                        Verificando amizade…
+                      </button>
+                    ) : friendship?.status === "ACCEPTED" ? (
+                      <Link
+                        className="button"
+                        href={`/friends?chat=${friendship.id}`}
+                        onClick={() => setOpen(false)}
+                      >
+                        Iniciar conversa
+                      </Link>
+                    ) : friendship?.status === "PENDING" ? (
+                      <>
+                        <button type="button" disabled>
+                          Solicitação pendente
+                        </button>
+                        <Link className="button secondary" href="/friends">
+                          Gerenciar convite
+                        </Link>
+                      </>
+                    ) : (
+                      <button
+                        onClick={async () => {
+                          try {
+                            const created = await post<{
+                              id: string;
+                              status: "PENDING" | "ACCEPTED";
+                            }>("/friends", {
+                              username: profile.username,
+                            });
+                            setFriendship({
+                              id: created.id,
+                              userId: profile.id,
+                              status: created.status,
+                            });
+                            setMessage(
+                              created.status === "ACCEPTED"
+                                ? "Amizade confirmada."
+                                : "Solicitação enviada.",
+                            );
+                          } catch (e) {
+                            setMessage((e as Error).message);
+                          }
+                        }}
+                      >
+                        Adicionar amizade
+                      </button>
+                    )}
                   </div>
                 </div>
               ) : (
