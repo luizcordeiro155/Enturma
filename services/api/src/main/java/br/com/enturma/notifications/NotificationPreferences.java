@@ -65,6 +65,10 @@ public class NotificationPreferences {
         .toList();
   }
 
+  public void save(Actor a, String category, boolean inApp, boolean email) {
+    save(a, category, inApp, email, null);
+  }
+
   @Transactional
   public void save(Actor a, String category, boolean inApp, boolean email, Boolean push) {
     if (!CATEGORIES.contains(category)) throw ApiException.invalid("Categoria inválida.");
