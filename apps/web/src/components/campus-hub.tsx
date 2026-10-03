@@ -13,6 +13,8 @@ import { resilientRead, refreshWhenOnline } from "@/lib/offline-data";
 import { CampusTools } from "./campus-tools";
 import { AdaptivePractice } from "./adaptive-practice";
 import { StudyGroups } from "./study-groups";
+import { LiveMemberIdentityCard } from "./user-identity";
+import { useLiveRefresh } from "@/lib/live-updates";
 
 type Task={id:string;kind:string;title:string;notes:string;dueAt:string;estimatedMinutes:number;priority:string;completedAt?:string|null;subjectName?:string|null};
 type Match={id:string;name:string;username:string;goal:string;preferredMode:string;subjectName?:string|null};
@@ -56,6 +58,8 @@ export function CampusHub(){
     }catch(e){setError((e as Error).message);}
   }
   useEffect(()=>{const timer=window.setTimeout(()=>void load(),0);const stop=refreshWhenOnline(()=>void load());return()=>{window.clearTimeout(timer);stop();};},[]);
+  useLiveRefresh("campus_changed",load,12000);
+  useLiveRefresh("rooms_changed",load,12000);
   useEffect(()=>{
     const cards=root.current?.querySelectorAll<HTMLElement>("[data-campus-card]");
     cards?.forEach((card,index)=>{
@@ -178,7 +182,7 @@ export function CampusHub(){
 
         <section className="campus-card" data-campus-card>
           <div className="campus-card-title"><div><Users/><span><small>Match de estudo</small><h2>Colegas disponíveis agora</h2></span></div><Link href="/friends">Ver amigos</Link></div>
-          {data.matches.length?<div className="campus-match-grid">{data.matches.map(m=><article className="campus-match" key={m.id}><span className="campus-avatar">{m.name.slice(0,1).toUpperCase()}</span><div><strong>{m.name}</strong><small>{m.subjectName??"Estudo geral"} · {m.goal||"Disponível para estudar"}</small></div></article>)}</div>:
+          {data.matches.length?<div className="campus-match-grid">{data.matches.map(m=><article className="campus-match" key={m.id}><LiveMemberIdentityCard id={m.id} name={m.name} subtitle={`${m.subjectName??"Estudo geral"} · ${m.goal||"Disponível para estudar"}`} /></article>)}</div>:
           <div className="campus-empty compact"><Users/><p>Ainda não há colegas compatíveis marcados como disponíveis.</p></div>}
         </section>
       </main>
