@@ -1939,3 +1939,28 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
     padding-left: 14px;
   }
 }
+
+/* Study match and room member cards */
+.study-match-profile-preview{margin:14px 0 16px;max-width:620px}
+.campus-match{padding:0;border:0;background:transparent}
+.campus-match>.member-profile-strip{min-width:0}
+.room-members-panel .participant-row,
+.room-mobile-members-list .participant-row{
+  grid-template-columns:minmax(0,1fr) auto;
+  align-items:center;
+  gap:8px;
+  padding:7px 0;
+}
+.room-members-panel .participant-row>.member-profile-strip,
+.room-mobile-members-list .participant-row>.member-profile-strip{
+  grid-column:1;
+  min-width:0;
+}
+.room-members-panel .participant-row>.icon-control{grid-column:2}
+.room-members-panel .member-profile-strip{--member-strip-height:62px}
+.room-members-panel .member-profile-strip-content{padding:7px 9px}
+.room-members-panel .member-profile-strip .identity-avatar{width:40px;height:40px;flex-basis:40px}
+@media(max-width:760px){
+  .study-match-profile-preview{max-width:none}
+  .room-mobile-members-list .participant-row{grid-template-columns:minmax(0,1fr)}
+}
