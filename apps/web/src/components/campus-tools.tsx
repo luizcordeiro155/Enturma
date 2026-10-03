@@ -5,6 +5,7 @@ import { Brain, CalendarClock, Check, Plus, Users } from "lucide-react";
 import type { Profile } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
+import { LiveMemberIdentityCard } from "./user-identity";
 
 type Flashcard={
   id:string;front:string;back:string;nextReviewAt:string;reviewCount:number;
@@ -143,6 +144,13 @@ export function CampusTools(){
         <div><Users/><span><small>Estudo social</small><h2>Quero estudar com alguém</h2></span></div>
       </div>
       <p className="muted">Quando ativado, estudantes com matérias compatíveis podem encontrar você no Match de Estudo.</p>
+      {profile ? <div className="study-match-profile-preview">
+        <LiveMemberIdentityCard
+          id={profile.id}
+          name={profile.name}
+          subtitle={available ? "Disponível para estudar agora" : "Seu perfil no Match de Estudo"}
+        />
+      </div> : null}
       <button className={available?"button secondary":"button"} onClick={()=>void toggleAvailability()}>
         {available?"Sair do Match":"Ficar disponível agora"}
       </button>
