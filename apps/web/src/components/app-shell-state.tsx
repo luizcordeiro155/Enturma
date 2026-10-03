@@ -122,18 +122,21 @@ export function AppShellStateProvider({
   }, [refreshProfileShortcut]);
 
   useEffect(() => {
-    const publicAccountRoute =
-      path === "/" ||
-      /^\/(login|register|forgot-password|reset-password|verify-email)(\/|$)/.test(
-        path,
-      );
-    if (publicAccountRoute) {
-      setProfileShortcut(null);
-    } else {
-      // Route changes are a fallback for account switches completed by an older
-      // client build that did not emit enturma-session-changed.
-      void refreshProfileShortcut(false);
-    }
+    const timer = window.setTimeout(() => {
+      const publicAccountRoute =
+        path === "/" ||
+        /^\/(login|register|forgot-password|reset-password|verify-email)(\/|$)/.test(
+          path,
+        );
+      if (publicAccountRoute) {
+        setProfileShortcut(null);
+      } else {
+        // Route changes are a fallback for account switches completed by an older
+        // client build that did not emit enturma-session-changed.
+        void refreshProfileShortcut(false);
+      }
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [path, refreshProfileShortcut]);
 
   useEffect(() => {
