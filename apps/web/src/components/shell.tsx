@@ -21,11 +21,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
-import {
-  isInstalledApp,
-  isMobileApp,
-  useAppUpdateState,
-} from "./desktop-updates";
+import { isMobileApp, useAppUpdateState } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },

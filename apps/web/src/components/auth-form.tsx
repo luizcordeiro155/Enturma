@@ -48,15 +48,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
   >(null);
   const [accountRedirectSeconds, setAccountRedirectSeconds] = useState(10);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [rememberConnected, setRememberConnected] = useState(true);
-
-  useEffect(() => {
-    if (mode !== "login") return;
+  const [rememberConnected, setRememberConnected] = useState(() => {
+    if (mode !== "login" || typeof window === "undefined") return true;
     try {
-      if (localStorage.getItem("enturma-remember-login") === "0")
-        setRememberConnected(false);
-    } catch {}
-  }, [mode]);
+      return localStorage.getItem("enturma-remember-login") !== "0";
+    } catch {
+      return true;
+    }
+  });
 
   useEffect(() => {
     if (!busy || mode !== "login") return;

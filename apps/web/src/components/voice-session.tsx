@@ -160,15 +160,6 @@ export default function VoiceSession({
       ?.remove();
   }
 
-  useEffect(() => {
-    setScreenSupported(
-      Boolean(
-        navigator.mediaDevices &&
-          typeof navigator.mediaDevices.getDisplayMedia === "function",
-      ),
-    );
-  }, []);
-
   useEffect(
     () => () => {
       generation.current++;

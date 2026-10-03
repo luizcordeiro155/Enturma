@@ -483,19 +483,20 @@ export function AppUpdateSettingsCard() {
   const { state, open, check } = useContext(Context);
   const card = useRef<HTMLElement>(null);
   const [attention, setAttention] = useState(false);
+  const status = state?.status;
+  const version = state?.version;
 
   useEffect(() => {
-    if (!state || !isInstalledApp()) return;
+    if (!status || !isInstalledApp()) return;
     const requested =
       new URLSearchParams(window.location.search).get("update") === "1";
-    const pending = ["available", "downloading", "ready"].includes(state.status);
+    const pending = ["available", "downloading", "ready"].includes(status);
     if (!requested || !pending) return;
-
-    setAttention(true);
     const reduced =
       document.documentElement.dataset.reducedMotion === "true" ||
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const frame = window.requestAnimationFrame(() => {
+      setAttention(true);
       const element = card.current;
       if (!element) return;
       element.scrollIntoView({
@@ -525,7 +526,7 @@ export function AppUpdateSettingsCard() {
       window.cancelAnimationFrame(frame);
       window.clearTimeout(clear);
     };
-  }, [state?.status, state?.version]);
+  }, [status, version]);
 
   if (!state || !isInstalledApp()) return null;
 

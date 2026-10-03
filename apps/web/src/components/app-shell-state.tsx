@@ -75,7 +75,10 @@ export function AppShellStateProvider({
   }, []);
 
   useEffect(() => {
-    setInstalledApp(isInstalledApp());
+    const installedTimer = window.setTimeout(
+      () => setInstalledApp(isInstalledApp()),
+      0,
+    );
     void refreshProfileShortcut();
 
     const refreshAvatar = () => void refreshProfileShortcut(true);
@@ -91,6 +94,7 @@ export function AppShellStateProvider({
     window.addEventListener("focus", refreshOnFocus);
     document.addEventListener("visibilitychange", refreshOnFocus);
     return () => {
+      window.clearTimeout(installedTimer);
       window.removeEventListener("enturma-profile-updated", refreshAvatar);
       window.removeEventListener("enturma-pwa-installed", markInstalled);
       window.removeEventListener("appinstalled", markInstalled);

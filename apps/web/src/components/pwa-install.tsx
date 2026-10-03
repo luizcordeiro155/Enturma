@@ -60,7 +60,7 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
   const [promptEvent, setPromptEvent] =
     useState<BeforeInstallPromptEvent | null>(null);
   const [state, setState] = useState<PwaState>("loading");
-  const currentPlatform = useMemo(platform, []);
+  const currentPlatform = useMemo(() => platform(), []);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -72,9 +72,9 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (isKnownPwaInstalled()) {
-      setState("installed");
       document.documentElement.dataset.pwaInstalled = "true";
-      return;
+      const installedTimer = window.setTimeout(() => setState("installed"), 0);
+      return () => window.clearTimeout(installedTimer);
     }
 
     const beforeInstall = (event: Event) => {
