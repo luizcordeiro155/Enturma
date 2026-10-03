@@ -4,9 +4,11 @@ O Enturma Web também é um Progressive Web App instalável no Windows, Android 
 
 ## Instalação
 
-A rota `/download` prioriza a instalação pelo navegador. Em Edge/Chrome o botão usa `beforeinstallprompt` quando o navegador disponibiliza o prompt nativo. Safari/iOS recebe instruções para **Adicionar à Tela de Início**.
+A rota `/download` prioriza os aplicativos dedicados: **EXE no Windows** e **APK no Android**. A instalação pelo navegador fica como segunda alternativa para quem preferir não baixar o instalador do sistema.
 
-A instalação PWA não baixa EXE ou APK. O navegador cria o atalho/aplicativo usando a origem HTTPS oficial. Os instaladores Electron/NSIS e APK continuam disponíveis apenas como alternativas avançadas.
+Na alternativa PWA, Edge/Chrome usam `beforeinstallprompt` quando o navegador disponibiliza o prompt nativo. Safari/iOS recebe instruções para **Adicionar à Tela de Início**.
+
+A instalação PWA não baixa EXE ou APK. O navegador cria o atalho/aplicativo usando a origem HTTPS oficial. Os instaladores Electron/NSIS e APK são apresentados primeiro por oferecerem integração nativa e a experiência recomendada do Enturma.
 
 ## Manifesto
 
