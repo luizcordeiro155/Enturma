@@ -713,8 +713,11 @@ async function fetchUpdateManifest() {
   const manifest = await response.json();
   return validateManifest(manifest, UPDATE_MANIFEST_URL);
 }
-async function checkForUpdates() {
-  if (updateInProgress) return updateState;
+async function checkForUpdates(force = false) {
+  if (updateInProgress) {
+    if (!force) return updateState;
+    return updateState;
+  }
   if (!app.isPackaged || process.platform !== "win32") {
     updateStatus("unsupported", {
       message: !app.isPackaged
@@ -724,7 +727,16 @@ async function checkForUpdates() {
     return updateState;
   }
   if (pendingUpdate) {
-    updateStatus("ready");
+    if (force && updateState.status !== "installing") {
+      updateStatus("ready", {
+        version: pendingUpdate.manifest?.version ?? updateState.version,
+        progress: 100,
+        message:
+          "A atualização já foi baixada. Use 'Reiniciar e atualizar' para aplicar agora.",
+      });
+    } else {
+      updateStatus("ready");
+    }
     return updateState;
   }
   updateInProgress = true;
@@ -1115,7 +1127,7 @@ ipcMain.handle("desktop:update-state", (event) => {
 });
 ipcMain.handle("desktop:check-for-updates", (event) => {
   requireTrusted(event);
-  return checkForUpdates();
+  return checkForUpdates(true);
 });
 ipcMain.handle("desktop:install-update", (event) => {
   requireTrusted(event);
