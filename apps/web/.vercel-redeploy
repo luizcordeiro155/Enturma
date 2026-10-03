@@ -1,5 +1,5 @@
 Enturma web production redeploy
-version=0.3.16
-source=f69a101e7fc79c7a5222a7bf2a2ab85c7118d11b
-reason=login-persistence-profile-link-safety-update-notification
+version=0.3.17
+source=4ea7d3b8df70398780d1d5ac718c8404fef02d73
+reason=account-switch-avatar-profile-mobile-achievements
 retry=1
