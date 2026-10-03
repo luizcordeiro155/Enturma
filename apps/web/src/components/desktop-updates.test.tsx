@@ -28,14 +28,14 @@ beforeEach(() => {
   };
   window.enturmaDesktop = {
     isDesktop: true,
-    getInfo: async () => ({ version: "0.3.0", platform: "win32" }),
+    getInfo: async () => ({ version: "0.3.3", platform: "win32" }),
     checkForUpdates: vi.fn(),
     installUpdate: install,
     openExternal: vi.fn(),
     getUpdateState: async () => ({
       status: "current",
       progress: 0,
-      currentVersion: "0.3.0",
+      currentVersion: "0.3.3",
     }),
     onUpdateState: (callback) => {
       receive = callback;
@@ -90,8 +90,8 @@ describe("Desktop update UI", () => {
       receive({
         status: "downloading",
         progress: 63,
-        currentVersion: "0.3.0",
-        version: "0.3.1",
+        currentVersion: "0.3.3",
+        version: "0.3.4",
       }),
     );
     expect(screen.getByRole("button", { name: /63%/ })).toBeTruthy();
@@ -99,8 +99,8 @@ describe("Desktop update UI", () => {
       receive({
         status: "ready",
         progress: 100,
-        currentVersion: "0.3.0",
-        version: "0.3.1",
+        currentVersion: "0.3.3",
+        version: "0.3.4",
       }),
     );
     expect(screen.getByRole("dialog")).toBeTruthy();

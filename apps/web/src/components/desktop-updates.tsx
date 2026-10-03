@@ -101,7 +101,7 @@ function isNewer(remote: string, current: string) {
 }
 
 function needsDesktopInstallerRecovery(version: string) {
-  return !isNewer(version, "0.3.1");
+  return !isNewer(version, "0.3.2");
 }
 const Context = createContext<{
   state: UpdateState | null;
@@ -167,9 +167,9 @@ export function DesktopUpdateProvider({
               status: "unsupported",
               progress: 0,
               currentVersion: info.version,
-              version: "0.3.2",
+              version: "0.3.3",
               message:
-                "Esta versão usa um atualizador que pode fechar sem aplicar a instalação. Use o instalador oficial uma única vez; a partir da 0.3.2 as próximas atualizações voltam a ser automáticas.",
+                "As versões até 0.3.2 usam um atualizador que pode fechar sem concluir. Use o instalador oficial uma única vez; a partir da 0.3.3 o Enturma usa o novo fluxo de atualização do Windows.",
             });
             try {
               if (
@@ -408,7 +408,7 @@ export function DesktopUpdateProvider({
                 antigo: instale a correção oficial uma única vez.
               </p>
               <ol>
-                <li>Baixe o instalador oficial 0.3.2 abaixo.</li>
+                <li>Baixe o instalador oficial 0.3.3 abaixo.</li>
                 <li>Feche o Enturma e execute o arquivo baixado.</li>
                 <li>
                   Abra o Enturma pelo novo atalho. Seus dados e sua conta

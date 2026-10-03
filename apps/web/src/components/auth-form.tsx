@@ -67,14 +67,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const orbit = document.querySelector<HTMLElement>(".auth-login-progress-orbit");
     const core = document.querySelector<HTMLElement>(".auth-login-progress-core");
     const dots = document.querySelectorAll<HTMLElement>(".auth-login-progress-dot");
-    if (orbit)
+    if (orbit && typeof orbit.animate === "function")
       animations.push(
         orbit.animate(
           [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
           { duration: 1400, iterations: Infinity, easing: "linear" },
         ),
       );
-    if (core)
+    if (core && typeof core.animate === "function")
       animations.push(
         core.animate(
           [
@@ -85,7 +85,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
           { duration: 1200, iterations: Infinity, easing: "ease-in-out" },
         ),
       );
-    dots.forEach((dot, index) =>
+    dots.forEach((dot, index) => {
+      if (typeof dot.animate !== "function") return;
       animations.push(
         dot.animate(
           [
@@ -100,8 +101,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
             easing: "ease-in-out",
           },
         ),
-      ),
-    );
+      );
+    });
     return () => animations.forEach((animation) => animation.cancel());
   }, [busy, mode]);
 

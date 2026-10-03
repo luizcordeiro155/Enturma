@@ -370,83 +370,54 @@ function installDownloadedInstaller(manifest, installerPath) {
   }
 
   const updatesDir = updateDirectory();
-  const scriptPath = path.join(updatesDir, `install-nsis-${manifest.version}.ps1`);
-  const currentExe = process.execPath;
-  const currentPid = process.pid;
-  const logPath = path.join(updatesDir, "install.log");
-  const errorPath = path.join(updatesDir, "install-error.log");
-
-  if (!inside(updatesDir, installerPath) || !inside(updatesDir, scriptPath))
+  if (!inside(updatesDir, installerPath))
     throw Error("Diretório de atualização inválido.");
 
-  const script = `$ErrorActionPreference = "Stop"
-$installer = ${ps(installerPath)}
-$currentExe = ${ps(currentExe)}
-$pidToWait = ${currentPid}
-$log = ${ps(logPath)}
-$errorLog = ${ps(errorPath)}
-try {
- while (Get-Process -Id $pidToWait -ErrorAction SilentlyContinue) {
-  Start-Sleep -Milliseconds 350
- }
- Start-Sleep -Milliseconds 700
- $process = Start-Process -FilePath $installer -ArgumentList @('/S') -PassThru -Wait
- if ($process.ExitCode -ne 0) { throw "Instalador retornou código $($process.ExitCode)." }
- Start-Sleep -Seconds 2
- if (-not (Test-Path -LiteralPath $currentExe)) { throw "Executável atualizado não encontrado." }
- "Atualização ${manifest.version} instalada com sucesso." | Set-Content -LiteralPath $log
- Start-Process -FilePath $currentExe
-} catch {
- $_.Exception.ToString() | Set-Content -LiteralPath $errorLog
- if (Test-Path -LiteralPath $currentExe) { Start-Process -FilePath $currentExe }
- exit 1
-}
-`;
-
-  fs.mkdirSync(updatesDir, { recursive: true });
-  fs.writeFileSync(scriptPath, script, "utf8");
-
-  const powershell = path.join(
-    process.env.SystemRoot || "C:\\Windows",
-    "System32",
-    "WindowsPowerShell",
-    "v1.0",
-    "powershell.exe",
-  );
-
-  // Launch a second PowerShell through Start-Process. Passing the script path
-  // without embedded quote characters avoids the 0.3.0/0.3.1 failure where
-  // the app exited but the real updater never executed.
-  const launch = `$ErrorActionPreference='Stop';Start-Process -WindowStyle Hidden -FilePath ${ps(powershell)} -ArgumentList @('-NoProfile','-NonInteractive','-ExecutionPolicy','Bypass','-File',${ps(scriptPath)})`;
-  const starter = spawn(
-    powershell,
-    [
-      "-NoProfile",
-      "-NonInteractive",
-      "-EncodedCommand",
-      Buffer.from(launch, "utf16le").toString("base64"),
-    ],
-    { windowsHide: true, stdio: "ignore" },
-  );
+  const args = ["--updated", "/S", "--force-run"];
+  const installer = spawn(installerPath, args, {
+    detached: true,
+    stdio: "ignore",
+    windowsHide: true,
+  });
 
   let settled = false;
-  starter.once("error", (error) => {
-    settled = true;
-    updateStatus("error", {
-      message: "Não foi possível iniciar a atualização: " + error.message,
-    });
-  });
-  starter.once("close", (code) => {
+  installer.once("spawn", () => {
     if (settled) return;
     settled = true;
-    if (code === 0) {
-      setTimeout(() => app.quit(), 250);
-    } else {
+    installer.unref();
+
+    // Only leave after Windows confirms that the NSIS process was actually
+    // created. --force-run makes the installed build reopen after a silent
+    // update, matching electron-updater's Windows flow.
+    setTimeout(() => app.quit(), 350);
+  });
+
+  installer.once("error", async (error) => {
+    if (settled) return;
+    settled = true;
+
+    // If Windows refuses the detached spawn, hand the verified installer to
+    // ShellExecute. This keeps a visible recovery path instead of closing the
+    // app and leaving the user with no installer running.
+    if (error?.code === "EACCES" || error?.code === "ENOENT") {
+      const result = await shell.openPath(installerPath);
+      if (!result) {
+        setTimeout(() => app.quit(), 500);
+        return;
+      }
       updateStatus("error", {
         message:
-          "O instalador não iniciou. Use a página Downloads para instalar manualmente.",
+          "O Windows não conseguiu iniciar o instalador automaticamente: " +
+          result,
       });
+      return;
     }
+
+    updateStatus("error", {
+      message:
+        "Não foi possível iniciar a atualização: " +
+        (error instanceof Error ? error.message : String(error)),
+    });
   });
 }
 
