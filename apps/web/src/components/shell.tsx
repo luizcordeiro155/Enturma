@@ -48,7 +48,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const { learning, profileShortcut } = useAppShellState();
   const [, setEmailVerified] = useState<boolean | null>(null);
   const [emailCelebration, setEmailCelebration] = useState(false);
+  const [installedApp, setInstalledApp] = useState(false);
   const [emailCelebrationSeconds, setEmailCelebrationSeconds] = useState(8);
+  useEffect(() => { setInstalledApp(isInstalledApp()); }, []);
   useEffect(() => {
     let active = true;
     let previous: boolean | null = null;
@@ -136,7 +138,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               Praticar programação
             </Link>
           ) : null}
-          {links.filter(({href})=>!(href==="/download"&&isInstalledApp())).map(({ href, label, icon: Icon }) => (
+          {links.filter(({href})=>!(href==="/download"&&installedApp)).map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
