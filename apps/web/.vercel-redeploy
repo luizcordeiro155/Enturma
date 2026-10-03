@@ -1,5 +1,5 @@
 Enturma web production redeploy
 version=0.3.17
-source=4ea7d3b8df70398780d1d5ac718c8404fef02d73
-reason=account-switch-avatar-profile-mobile-achievements
-retry=1
+source=b2377b325a87881237e62b1b113e42f82e51ed76
+reason=retry-production-after-rate-limit
+retry=2026-10-03T03:05-03:00
