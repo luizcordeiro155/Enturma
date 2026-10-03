@@ -2,6 +2,7 @@ package br.com.enturma.auth;
 
 import br.com.enturma.common.Db;
 import java.time.Instant;
+import java.time.Duration;
 import java.util.*;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
