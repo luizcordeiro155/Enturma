@@ -29,6 +29,7 @@ const Context = createContext<AppShellState | null>(null);
 
 const PREFETCH_ROUTES = [
   "/home",
+  "/campus",
   "/forum",
   "/notebooks",
   "/friends",
