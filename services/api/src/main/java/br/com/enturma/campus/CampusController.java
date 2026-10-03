@@ -3,10 +3,12 @@ package br.com.enturma.campus;
 import br.com.enturma.auth.Actor;
 import br.com.enturma.common.ApiException;
 import br.com.enturma.common.Db;
+import br.com.enturma.notifications.AppChanged;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.time.*;
 import java.util.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -15,8 +17,24 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/campus")
 public class CampusController {
   private final Db db;
+  private final ApplicationEventPublisher events;
 
-  public CampusController(Db db) { this.db = db; }
+  public CampusController(Db db, ApplicationEventPublisher events) {
+    this.db = db;
+    this.events = events;
+  }
+
+  private void changed(UUID user) {
+    events.publishEvent(new AppChanged("campus_changed", Set.of(user)));
+  }
+
+  private void changedForEveryone() {
+    events.publishEvent(new AppChanged("campus_changed", Set.of()));
+  }
+
+  private void groupsChanged() {
+    events.publishEvent(new AppChanged("groups_changed", Set.of()));
+  }
 
   public record TaskRequest(
       UUID subjectId,
@@ -101,6 +119,7 @@ public class CampusController {
         "INSERT INTO campus_task(id,user_id,subject_id,kind,title,notes,due_at,estimated_minutes,priority)"
         + " VALUES (?,?,?,?,?,?,?,?,?)",
         id,a.id(),r.subjectId(),kind,r.title().strip(),Objects.toString(r.notes(),"").strip(),r.dueAt(),r.estimatedMinutes(),priority);
+    changed(a.id());
     return Map.of("id",id);
   }
 
@@ -108,11 +127,13 @@ public class CampusController {
   public void complete(@AuthenticationPrincipal Actor a,@PathVariable UUID id) {
     if (db.jdbc.update("UPDATE campus_task SET completed_at=now() WHERE id=? AND user_id=? AND completed_at IS NULL",id,a.id())==0)
       throw ApiException.missing();
+    changed(a.id());
   }
 
   @DeleteMapping("/tasks/{id}")
   public void deleteTask(@AuthenticationPrincipal Actor a,@PathVariable UUID id) {
     db.jdbc.update("DELETE FROM campus_task WHERE id=? AND user_id=?",id,a.id());
+    changed(a.id());
   }
 
   @PostMapping("/focus")
@@ -121,6 +142,7 @@ public class CampusController {
     UUID id=UUID.randomUUID();
     db.jdbc.update("INSERT INTO focus_session(id,user_id,subject_id,label,planned_minutes) VALUES (?,?,?,?,?)",
         id,a.id(),r.subjectId(),Objects.toString(r.label(),"Sessão de foco").strip(),r.minutes());
+    changed(a.id());
     return Map.of("id",id,"startedAt",Instant.now().toString());
   }
 
@@ -130,6 +152,7 @@ public class CampusController {
         "UPDATE focus_session SET finished_at=now(),actual_seconds=GREATEST(0,EXTRACT(EPOCH FROM (now()-started_at))::bigint)"
         + " WHERE id=? AND user_id=? AND finished_at IS NULL",id,a.id());
     if(changed==0) throw ApiException.missing();
+    changed(a.id());
   }
 
   @PutMapping("/study-match")
@@ -140,6 +163,7 @@ public class CampusController {
         + " VALUES (?,?,?,?,?,now()) ON CONFLICT(user_id) DO UPDATE SET subject_id=EXCLUDED.subject_id,"
         + " goal=EXCLUDED.goal,available_now=EXCLUDED.available_now,preferred_mode=EXCLUDED.preferred_mode,updated_at=now()",
         a.id(),r.subjectId(),Objects.toString(r.goal(),"").strip(),r.availableNow(),mode);
+    changedForEveryone();
   }
 
 
@@ -178,6 +202,7 @@ public class CampusController {
         "INSERT INTO campus_task(id,user_id,subject_id,kind,title,notes,due_at,estimated_minutes,priority)"
         + " VALUES (?,?,?,'EXAM',?,'Gerado pelo plano de preparação.',?,60,'URGENT')",
         examId,a.id(),r.subjectId(),r.title(),r.examAt());
+    changed(a.id());
     return Map.of("sessions",created,"examTaskId",examId);
   }
 
@@ -200,6 +225,7 @@ public class CampusController {
     db.jdbc.update(
         "INSERT INTO study_flashcard(id,user_id,notebook_id,subject_id,front,back) VALUES (?,?,?,?,?,?)",
         id,a.id(),r.notebookId(),r.subjectId(),r.front().strip(),r.back().strip());
+    changed(a.id());
     return Map.of("id",id);
   }
 
@@ -219,6 +245,7 @@ public class CampusController {
         "UPDATE study_flashcard SET interval_days=?,ease=?,review_count=review_count+1,"
         + " next_review_at=now()+(? * interval '1 day') WHERE id=? AND user_id=?",
         interval,ease,interval,id,a.id());
+    changed(a.id());
     return Map.of("intervalDays",interval,"ease",ease);
   }
 
@@ -244,6 +271,7 @@ public class CampusController {
         id,a.id(),r.subjectId(),r.name().strip(),Objects.toString(r.description(),"").strip(),visibility);
     db.jdbc.update(
         "INSERT INTO study_group_member(group_id,user_id,role) VALUES (?,?,'OWNER')",id,a.id());
+    groupsChanged();
     return Map.of("id",id);
   }
 
@@ -254,6 +282,7 @@ public class CampusController {
     db.jdbc.update(
         "INSERT INTO study_group_member(group_id,user_id,role) VALUES (?,?,'MEMBER') ON CONFLICT DO NOTHING",
         id,a.id());
+    groupsChanged();
   }
 
   @GetMapping("/progress")
