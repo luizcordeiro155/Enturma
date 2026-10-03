@@ -138,8 +138,11 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
             c.socket.close(CloseStatus.POLICY_VIOLATION);
           continue;
         }
-        Actor actor = auth.authenticate(c.token).orElseThrow();
+        // Global activity/ride sockets are event-driven. Authenticating every
+        // one of them on the 1.2s room snapshot loop created needless database
+        // traffic and slowed the whole API as connected clients increased.
         if (c.rides || c.activity) continue;
+        Actor actor = auth.authenticate(c.token).orElseThrow();
         if (System.currentTimeMillis() - c.lastHeartbeat > 30000) {
           study.heartbeat(actor, c.room);
           c.lastHeartbeat = System.currentTimeMillis();

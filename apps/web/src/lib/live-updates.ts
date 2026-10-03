@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef } from "react";
-import { api } from "./api";
+import { api, invalidateApiCache } from "./api";
 export function useAppConnection() {
   useEffect(() => {
     let active = true,
@@ -8,7 +8,7 @@ export function useAppConnection() {
     let socket: WebSocket | undefined, retry: ReturnType<typeof setTimeout>;
     async function connect() {
       try {
-        await api("/users/me");
+        await api("/users/me", { cache: "no-store" });
         const response = await fetch("/api/session");
         if (!response.ok) throw Error();
         const { token, url } = await response.json();
@@ -87,8 +87,11 @@ export function useLiveRefresh(
       }
     }
     const refresh = () => {
+      invalidateApiCache(
+        type === "forum_changed" ? "/forum" : "/notifications",
+      );
       clearTimeout(delay);
-      delay = setTimeout(() => void run(), 150);
+      delay = setTimeout(() => void run(), 75);
     };
     const timer = setInterval(refresh, interval);
     window.addEventListener(`enturma-${type}`, refresh);

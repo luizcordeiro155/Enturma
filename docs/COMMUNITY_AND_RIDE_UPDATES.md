@@ -13,3 +13,12 @@ As animações usam a Web Animations API em JavaScript, respeitam movimento redu
 A migração V18 cria as tabelas e índices do fórum automaticamente no boot. Não são necessárias novas variáveis de ambiente. A publicação usa GitHub → sincronização nativa SquareCloud e Vercel, sem depender de Actions.
 
 Validação: testes da API cobrem busca, bloqueios, autoria, votos idempotentes, reações, respostas, exclusões e notificações após commit. Playwright verifica a chegada de uma nova carona em outra sessão sem reload, redirecionamento, indicador durante navegação, celebração nos dois usuários, conversa e o fluxo completo do fórum em desktop/mobile.
+
+
+## Otimizações de tempo real
+
+O transporte de caronas no Web/Desktop/WebView usa uma única conexão WebSocket por aba, compartilhada pelos componentes que precisam de atualização. Ao receber `rides_changed`, o cliente invalida imediatamente os caches de `/rides` e `/matches` antes de buscar o estado confirmado, evitando exibir dados antigos por até 15 segundos.
+
+A abertura de WebSocket força validação sem cache de `/users/me`, então a renovação de access token acontece antes de autenticar o canal em tempo real. Isso evita janelas de reconexão com token expirado. O app nativo também fecha o socket ao ir para segundo plano e cria uma conexão limpa ao voltar.
+
+No backend, conexões globais de atividades/caronas deixaram de consultar a sessão no loop de snapshot das salas a cada 1,2 s. Eventos de conversa de uma carona agora são direcionados somente aos dois participantes daquele match, reduzindo fan-out e refetches desnecessários. A migração V29 adiciona índices para as consultas quentes de caronas e matches.

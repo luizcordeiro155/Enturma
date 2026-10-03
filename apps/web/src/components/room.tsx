@@ -215,9 +215,9 @@ export function RoomView({ id }: { id: string }) {
     async function connect() {
       if (!alive) return;
       try {
-        await api("/users/me");
+        await api("/users/me", { cache: "no-store" });
         if (!alive) return;
-        const session = await fetch("/api/session");
+        const session = await fetch("/api/session", { cache: "no-store" });
         if (!session.ok) throw Error("Sua sessão expirou. Entre novamente.");
         const { token, url } = await session.json();
         if (!alive) return;

@@ -35,6 +35,7 @@ function cacheTtl(path: string) {
     path.startsWith("/calls/")
   )
     return 0;
+  if (path.startsWith("/rides") || path.startsWith("/matches")) return 3_000;
   if (path.startsWith("/forum")) return 20_000;
   if (path === "/users/me" || path === "/learning/access") return 45_000;
   return 15_000;

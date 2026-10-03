@@ -1,91 +1,183 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { api } from "./api";
+import { api, invalidateApiCache } from "./api";
+
+type Refresh = () => Promise<void>;
+type StatusListener = (live: boolean) => void;
+
+const refreshers = new Set<Refresh>();
+const statusListeners = new Set<StatusListener>();
+
+let consumers = 0;
+let connected = false;
+let attempts = 0;
+let socket: WebSocket | undefined;
+let retry: ReturnType<typeof setTimeout> | undefined;
+let fallback: ReturnType<typeof setInterval> | undefined;
+let refreshing = false;
+let queued = false;
+
+function setConnected(value: boolean) {
+  if (connected === value) return;
+  connected = value;
+  for (const listener of statusListeners) listener(value);
+}
+
+async function refreshAll() {
+  if (refreshing) {
+    queued = true;
+    return;
+  }
+  refreshing = true;
+  invalidateApiCache("/rides");
+  invalidateApiCache("/matches");
+  try {
+    await Promise.allSettled([...refreshers].map((refresh) => refresh()));
+  } finally {
+    refreshing = false;
+    if (queued && consumers > 0) {
+      queued = false;
+      void refreshAll();
+    }
+  }
+}
+
+function scheduleReconnect() {
+  if (consumers <= 0) return;
+  if (retry) clearTimeout(retry);
+  retry = setTimeout(
+    () => void connect(),
+    Math.min(15000, 1000 * 2 ** attempts++),
+  );
+}
+
+async function connect() {
+  if (consumers <= 0) return;
+  if (
+    socket &&
+    (socket.readyState === WebSocket.CONNECTING ||
+      socket.readyState === WebSocket.OPEN)
+  )
+    return;
+
+  try {
+    // Never trust the cached profile when opening a realtime channel. A cached
+    // /users/me could keep an expired access token alive for tens of seconds.
+    await api("/users/me", { cache: "no-store" });
+    const response = await fetch("/api/session", { cache: "no-store" });
+    if (!response.ok) throw Error("Sessão indisponível");
+    const { token, url } = await response.json();
+    if (consumers <= 0) return;
+
+    const ws = new WebSocket(url);
+    socket = ws;
+    ws.onopen = () =>
+      ws.send(JSON.stringify({ token, scope: "rides" }));
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "rides_ready") {
+          attempts = 0;
+          setConnected(true);
+          void refreshAll();
+        } else if (data.type === "rides_changed") {
+          void refreshAll();
+        }
+      } catch {}
+    };
+    ws.onerror = () => ws.close();
+    ws.onclose = () => {
+      if (socket === ws) socket = undefined;
+      setConnected(false);
+      scheduleReconnect();
+    };
+  } catch {
+    setConnected(false);
+    scheduleReconnect();
+  }
+}
+
+function startTransport() {
+  consumers += 1;
+  if (consumers > 1) return;
+
+  void connect();
+
+  fallback = setInterval(() => {
+    if (document.hidden) return;
+    // Safety net for half-open mobile/WebView/Desktop connections. Live events
+    // remain the fast path; this only repairs silent connection loss.
+    void refreshAll();
+    if (
+      !socket ||
+      socket.readyState === WebSocket.CLOSED ||
+      socket.readyState === WebSocket.CLOSING
+    )
+      void connect();
+  }, 20000);
+
+  const visible = () => {
+    if (document.hidden) return;
+    void refreshAll();
+    void connect();
+  };
+  const online = () => {
+    void refreshAll();
+    void connect();
+  };
+
+  document.addEventListener("visibilitychange", visible);
+  window.addEventListener("online", online);
+
+  transportCleanup = () => {
+    document.removeEventListener("visibilitychange", visible);
+    window.removeEventListener("online", online);
+  };
+}
+
+let transportCleanup: (() => void) | undefined;
+
+function stopTransport() {
+  consumers = Math.max(0, consumers - 1);
+  if (consumers > 0) return;
+
+  if (retry) clearTimeout(retry);
+  if (fallback) clearInterval(fallback);
+  retry = undefined;
+  fallback = undefined;
+  transportCleanup?.();
+  transportCleanup = undefined;
+
+  const current = socket;
+  socket = undefined;
+  if (current && current.readyState < WebSocket.CLOSING) current.close();
+  setConnected(false);
+  attempts = 0;
+}
+
 export function useRideUpdates(refresh: () => Promise<void>) {
   const latest = useRef(refresh);
-  const [live, setLive] = useState(false);
+  const [live, setLive] = useState(connected);
+
   useEffect(() => {
     latest.current = refresh;
   }, [refresh]);
+
   useEffect(() => {
-    let active = true,
-      connected = false,
-      attempts = 0,
-      running = false,
-      queued = false;
-    let socket: WebSocket | undefined,
-      retry: ReturnType<typeof setTimeout> | undefined;
-    async function update() {
-      if (!active) return;
-      if (running) {
-        queued = true;
-        return;
-      }
-      running = true;
-      try {
-        await latest.current();
-      } catch {
-        /* The page displays fetch failures. */
-      } finally {
-        running = false;
-        if (queued && active) {
-          queued = false;
-          void update();
-        }
-      }
-    }
-    async function connect() {
-      try {
-        await api("/users/me");
-        const response = await fetch("/api/session");
-        if (!response.ok) throw Error("Sessão indisponível");
-        const { token, url } = await response.json();
-        if (!active) return;
-        socket = new WebSocket(url);
-        socket.onopen = () =>
-          socket?.send(JSON.stringify({ token, scope: "rides" }));
-        socket.onmessage = (event) => {
-          try {
-            const data = JSON.parse(event.data);
-            if (data.type === "rides_ready") {
-              connected = true;
-              setLive(true);
-              attempts = 0;
-              void update();
-            } else if (data.type === "rides_changed") void update();
-          } catch {}
-        };
-        socket.onclose = () => {
-          connected = false;
-          if (active) {
-            setLive(false);
-            retry = setTimeout(
-              connect,
-              Math.min(15000, 1000 * 2 ** attempts++),
-            );
-          }
-        };
-        socket.onerror = () => socket?.close();
-      } catch {
-        if (active)
-          retry = setTimeout(connect, Math.min(15000, 1000 * 2 ** attempts++));
-      }
-    }
-    void connect();
-    const fallback = setInterval(() => {
-      if (!connected && !document.hidden) void update();
-    }, 5000);
-    const visible = () => {
-      if (!document.hidden) void update();
-    };
-    document.addEventListener("visibilitychange", visible);
+    const run = () => latest.current();
+    const onStatus = (value: boolean) => setLive(value);
+
+    refreshers.add(run);
+    statusListeners.add(onStatus);
+    setLive(connected);
+    startTransport();
+
     return () => {
-      active = false;
-      clearTimeout(retry);
-      clearInterval(fallback);
-      document.removeEventListener("visibilitychange", visible);
-      socket?.close();
+      refreshers.delete(run);
+      statusListeners.delete(onStatus);
+      stopTransport();
     };
   }, []);
+
   return live;
 }

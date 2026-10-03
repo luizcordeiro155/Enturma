@@ -35,7 +35,17 @@ public class RideService {
   }
 
   private void matchChanged(UUID match) {
-    changed((UUID) db.one("SELECT ride_id FROM ride_match WHERE id=?", match).get("rideId"), false);
+    var participants =
+        db.one(
+            "SELECT m.user_id,r.owner_id FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE"
+                + " m.id=?",
+            match);
+    events.publishEvent(
+        new RideChanged(
+            Set.of(
+                (UUID) participants.get("userId"),
+                (UUID) participants.get("ownerId")),
+            false));
   }
 
   private void unblocked(UUID a, UUID b) {
