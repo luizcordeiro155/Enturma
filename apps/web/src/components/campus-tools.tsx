@@ -6,6 +6,7 @@ import type { Profile } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
 import { LiveMemberIdentityCard } from "./user-identity";
+import { CampusTutor } from "./campus-tutor";
 
 type Flashcard={
   id:string;front:string;back:string;nextReviewAt:string;reviewCount:number;
@@ -20,6 +21,9 @@ export function CampusTools(){
   const [available,setAvailable]=useState(false);
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
+  const [planGoal,setPlanGoal]=useState("Preparar para a próxima prova");
+  const [planSubjectId,setPlanSubjectId]=useState("");
+  const [flashcardSubjectId,setFlashcardSubjectId]=useState("");
   const root=useRef<HTMLDivElement>(null);
 
   async function refreshCards(){
@@ -47,9 +51,13 @@ export function CampusTools(){
     const fd=new FormData(e.currentTarget);
     const topics=String(fd.get("topics")||"").split(",").map(v=>v.trim()).filter(Boolean);
     try{
+      const title=String(fd.get("title")||"");
+      const subjectId=String(fd.get("subjectId")||"");
+      setPlanGoal([title,topics.length?"Tópicos: "+topics.join(", "):""].filter(Boolean).join(" · ")||"Preparar para a próxima prova");
+      setPlanSubjectId(subjectId);
       await post("/campus/exam-plan",{
-        subjectId:fd.get("subjectId")||null,
-        title:String(fd.get("title")||""),
+        subjectId:subjectId||null,
+        title,
         examAt:new Date(String(fd.get("examAt"))).toISOString(),
         topics
       });
@@ -113,6 +121,12 @@ export function CampusTools(){
         <label className="wide">Tópicos separados por vírgula<input name="topics" placeholder="JOIN, Normalização, Procedures"/></label>
         <button className="button" type="submit">Gerar meu plano</button>
       </form>:null}
+      <CampusTutor
+        subjectId={planSubjectId||null}
+        goal={planGoal}
+        mode="PLAN"
+        compact
+      />
     </section>
 
     <section className="campus-card" data-tool-panel>
@@ -123,9 +137,15 @@ export function CampusTools(){
       {showCard?<form className="campus-inline-form" onSubmit={createCard}>
         <label className="wide">Pergunta<input name="front" required maxLength={1200} placeholder="O que é normalização 3FN?"/></label>
         <label className="wide">Resposta<textarea name="back" required maxLength={2400}/></label>
-        <label>Matéria<select name="subjectId" defaultValue=""><option value="">Geral</option>{profile?.subjects.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
+        <label>Matéria<select name="subjectId" value={flashcardSubjectId} onChange={e=>setFlashcardSubjectId(e.target.value)}><option value="">Geral</option>{profile?.subjects.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}</select></label>
         <button className="button" type="submit">Criar flashcard</button>
       </form>:null}
+      <CampusTutor
+        subjectId={flashcardSubjectId||null}
+        goal="Revisar por recuperação ativa: ajudar a lembrar antes de revelar a resposta e adaptar a dificuldade ao meu desempenho"
+        mode="FLASHCARD"
+        compact
+      />
       {cards.length?<div className="flashcard-review-list">{cards.slice(0,5).map(card=><article key={card.id} className="flashcard-review">
         <small>{card.subjectName??card.notebookTitle??"Revisão geral"}</small>
         <h3>{card.front}</h3>
