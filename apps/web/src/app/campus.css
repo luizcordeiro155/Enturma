@@ -16,3 +16,14 @@
 .campus-task-form{border:1px solid var(--line);border-radius:24px;background:var(--panel);padding:20px;display:grid;gap:14px}.campus-form-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.campus-task-form label{display:grid;gap:6px;font-weight:700;font-size:.86rem}.campus-task-form input,.campus-task-form select,.campus-task-form textarea{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:11px}.campus-task-form textarea{min-height:84px;resize:vertical}.text-button{border:0;background:none;color:inherit;text-decoration:underline;cursor:pointer}.campus-loading{padding:40px}
 @media(max-width:950px){.campus-layout{grid-template-columns:1fr}.campus-metrics{grid-template-columns:repeat(2,1fr)}.campus-form-grid{grid-template-columns:1fr 1fr}.campus-hero{align-items:start;flex-direction:column}.focus-ready{align-items:flex-start;flex-direction:column}}
 @media(max-width:620px){.campus-hub{padding:14px;gap:14px}.campus-hero{padding:21px;border-radius:22px}.campus-metrics{grid-template-columns:1fr 1fr;gap:8px}.campus-metrics article{padding:13px}.campus-form-grid{grid-template-columns:1fr}.campus-match-grid{grid-template-columns:1fr}.campus-task{grid-template-columns:58px 1fr auto;padding:10px}.campus-card{padding:15px;border-radius:20px}}
+
+.campus-tools-stack{display:grid;gap:18px}
+.campus-inline-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.campus-inline-form label{display:grid;gap:6px;font-size:.84rem;font-weight:750}.campus-inline-form .wide{grid-column:1/-1}
+.campus-inline-form input,.campus-inline-form select,.campus-inline-form textarea{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:11px;width:100%}
+.campus-inline-form textarea{min-height:90px;resize:vertical}
+.flashcard-review-list{display:grid;gap:10px}.flashcard-review{border:1px solid var(--line);border-radius:16px;padding:14px;background:color-mix(in srgb,var(--panel) 94%,var(--soft) 6%)}
+.flashcard-review small{color:var(--muted)}.flashcard-review h3{margin:5px 0 10px;font-size:1rem}.flashcard-review details{margin-bottom:12px}.flashcard-review summary{cursor:pointer;font-weight:750}.flashcard-review p{color:var(--muted)}
+.flashcard-rating{display:flex;gap:7px;flex-wrap:wrap}.flashcard-rating button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
+.study-match-control .button{justify-self:start}
+@media(max-width:620px){.campus-inline-form{grid-template-columns:1fr}.campus-inline-form .wide{grid-column:auto}.flashcard-rating button{flex:1;justify-content:center}}
