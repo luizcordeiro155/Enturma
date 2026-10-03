@@ -19,12 +19,14 @@ import {
   ShieldCheck,
   Users,
   UserRound,
+  CalendarDays,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
 import { isDesktop, isMobileApp, useAppUpdateState } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
+  { href: "/campus", label: "Hoje / Agenda", icon: CalendarDays },
   { href: "/forum", label: "Fórum", icon: MessageCircle },
   { href: "/notebooks", label: "Cadernos IA", icon: BookOpen },
   { href: "/friends", label: "Amigos", icon: Users },
