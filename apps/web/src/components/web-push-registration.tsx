@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { api } from "@/lib/api";
-import { isMobileApp } from "./desktop-updates";
+import { isDesktop, isMobileApp } from "./desktop-updates";
 
 const INSTALLATION_KEY = "enturma-web-push-installation-v1";
 
@@ -23,6 +23,7 @@ function decodeKey(value: string) {
 
 async function subscribe() {
   if (
+    isDesktop() ||
     isMobileApp() ||
     !("serviceWorker" in navigator) ||
     !("PushManager" in window) ||
@@ -76,7 +77,7 @@ export async function enableDesktopNotifications() {
 
 export function WebPushRegistration() {
   useEffect(() => {
-    if (isMobileApp() || !("Notification" in window)) return;
+    if (isDesktop() || isMobileApp() || !("Notification" in window)) return;
 
     const registerIfAllowed = () => {
       if (Notification.permission === "granted") void subscribe();

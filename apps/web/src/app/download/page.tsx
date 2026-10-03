@@ -4,6 +4,8 @@ import { redirect } from "next/navigation";
 import {
   ArrowLeft,
   BookOpen,
+  Download,
+  FlaskConical,
   Monitor,
   Smartphone,
   RefreshCw,
@@ -39,22 +41,22 @@ export default async function DownloadPage() {
           <div className={styles.heroCopy}>
             <span className={styles.eyebrow}>
               <Sparkles size={18} />
-              Instalação pelo navegador
+              Download recomendado
             </span>
-            <h1>Instale o Enturma sem baixar EXE ou APK.</h1>
+            <h1>Baixe e instale o Enturma do seu jeito.</h1>
             <p className={styles.lead}>
-              O navegador instala o Enturma como aplicativo no Windows ou
-              Android. Ele ganha o mesmo ícone da versão mobile, abre em uma
-              janela independente e continua usando sua conta, salas e dados.
+              A instalação pelo navegador continua sendo a opção principal,
+              simples e estável. Para uma experiência mais integrada ao sistema,
+              você também pode experimentar as versões Beta para Windows e Android.
             </p>
             <div className={styles.heroMeta}>
               <span>
                 <ShieldCheck size={18} />
                 Sem instalador tradicional
               </span>
-              <span>Windows</span>
-              <span>Android</span>
-              <span>Atualizações Web automáticas</span>
+              <span>Windows e Android</span>
+              <span>Sem instalador tradicional</span>
+              <span>Atualizações automáticas</span>
             </div>
           </div>
 
@@ -62,11 +64,12 @@ export default async function DownloadPage() {
             <div className={styles.downloadIcon}>
               <EnturmaAppIcon size={48} />
             </div>
-            <span className={styles.cardLabel}>Enturma</span>
+            <span className={styles.cardLabel}>Versão recomendada</span>
             <h2>Instalar Enturma</h2>
             <p>
-              A instalação é feita pelo próprio navegador. Não há download de
-              EXE nem APK nesta versão.
+              Instale pelo próprio navegador sem precisar baixar EXE ou APK.
+              É a opção mais simples para começar e recebe as atualizações Web
+              automaticamente.
             </p>
             <PwaInstallButton />
             <small className={styles.downloadNote}>
@@ -74,6 +77,71 @@ export default async function DownloadPage() {
               Enturma automaticamente.
             </small>
           </aside>
+        </section>
+
+        <section className={styles.betaSection} aria-labelledby="beta-title">
+          <div className={styles.betaHeading}>
+            <div>
+              <span className={styles.betaEyebrow}>
+                <FlaskConical size={15} />
+                Alternativas em teste
+              </span>
+              <h2 id="beta-title">Quer uma experiência ainda melhor no app?</h2>
+              <p>
+                As versões abaixo são <strong>Beta</strong>. Elas têm integrações
+                extras com o dispositivo e podem receber mudanças com mais frequência.
+              </p>
+            </div>
+          </div>
+
+          <div className={styles.betaGrid}>
+            <article className={styles.betaCard}>
+              <div className={styles.betaCardHeader}>
+                <span className={styles.betaPlatform}>
+                  <Monitor size={20} />
+                  Windows
+                </span>
+                <span className={styles.betaBadge}>BETA</span>
+              </div>
+              <p>
+                EXE com experiência desktop dedicada, notificações nativas,
+                contador de não lidas na barra de tarefas e atualizador do app.
+              </p>
+              <a
+                className={styles.betaLink}
+                href="https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Windows.exe"
+              >
+                <Download size={16} />
+                Baixar EXE Beta
+              </a>
+            </article>
+
+            <article className={styles.betaCard}>
+              <div className={styles.betaCardHeader}>
+                <span className={styles.betaPlatform}>
+                  <Smartphone size={20} />
+                  Android
+                </span>
+                <span className={styles.betaBadge}>BETA</span>
+              </div>
+              <p>
+                APK com integração nativa ao Android, notificações do sistema
+                e experiência otimizada para o celular.
+              </p>
+              <a
+                className={styles.betaLink}
+                href="https://enturma-android-download-v3-production.up.railway.app/Enturma-Android.apk"
+              >
+                <Download size={16} />
+                Baixar APK Beta
+              </a>
+            </article>
+          </div>
+
+          <small className={styles.betaNote}>
+            Beta significa que alguns recursos ainda podem mudar. A instalação
+            recomendada acima continua disponível normalmente.
+          </small>
         </section>
 
         <section className={styles.features} aria-label="Como funciona">

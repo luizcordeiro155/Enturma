@@ -50,7 +50,8 @@ export function NotificationsProvider({
   const [error, setError] = useState("");
   const revision = useRef(0);
   const pending = useRef(false),
-    seen = useRef(new Set<string>());
+    seen = useRef(new Set<string>()),
+    nativePrimed = useRef(false);
   useAppConnection();
   async function refresh() {
     if (pending.current) return;
@@ -85,6 +86,35 @@ export function NotificationsProvider({
         data.unreadCount = Math.max(0, data.unreadCount - viewed.length);
       }
       if (requested !== revision.current) return;
+
+      const desktopFresh = data.items.filter(
+        (n) => !n.readAt && !seen.current.has(n.id),
+      );
+      if (nativePrimed.current && window.enturmaDesktop?.showNotification) {
+        for (const notice of desktopFresh.slice(0, 4)) {
+          const title =
+            notice.kind === "PRIVATE_MESSAGE"
+              ? `${notice.actorName ?? "Alguém"} enviou uma mensagem`
+              : notice.kind === "ROOM_MESSAGE"
+                ? `${notice.actorName ?? "Alguém"} enviou uma mensagem na sala`
+                : notice.kind === "MENTION"
+                  ? `${notice.actorName ?? "Alguém"} mencionou você`
+                  : notice.kind === "FRIEND_REQUEST"
+                    ? "Nova solicitação de amizade"
+                    : notice.kind === "ACHIEVEMENT"
+                      ? "Nova conquista no Enturma"
+                      : "Nova notificação no Enturma";
+          void window.enturmaDesktop
+            .showNotification({
+              id: notice.id,
+              title,
+              body: notice.message,
+              href: notice.href,
+            })
+            .catch(() => {});
+        }
+      }
+      nativePrimed.current = true;
       seen.current = new Set(data.items.map((n) => n.id));
       setInbox(data);
       setError("");
@@ -101,6 +131,9 @@ export function NotificationsProvider({
     };
     if (inbox.unreadCount > 0) void badge.setAppBadge?.(inbox.unreadCount);
     else void badge.clearAppBadge?.();
+    void window.enturmaDesktop
+      ?.setNotificationBadge?.(inbox.unreadCount)
+      .catch(() => {});
     navigator.serviceWorker?.controller?.postMessage({
       type: "ENTURMA_BADGE",
       count: inbox.unreadCount,

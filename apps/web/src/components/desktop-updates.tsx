@@ -35,6 +35,13 @@ type DesktopBridge = {
   checkForUpdates: () => Promise<unknown>;
   installUpdate?: () => Promise<unknown>;
   openExternal: (url: string) => Promise<unknown>;
+  setNotificationBadge?: (count: number) => Promise<unknown>;
+  showNotification?: (payload: {
+    id: string;
+    title: string;
+    body: string;
+    href?: string | null;
+  }) => Promise<unknown>;
 };
 declare global {
   interface Window {

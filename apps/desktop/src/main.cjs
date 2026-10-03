@@ -6,6 +6,8 @@ const {
   dialog,
   ipcMain,
   net,
+  Notification,
+  nativeImage,
   session,
   shell,
 } = require("electron");
@@ -62,6 +64,8 @@ let pendingDeepLink =
 let updateTimer = null;
 let updateInProgress = false;
 let pendingUpdate = null;
+let desktopNotificationBadge = 0;
+const nativeNoticeIds = new Set();
 let updateState = {
   status: "idle",
   currentVersion: app.getVersion(),
@@ -122,6 +126,110 @@ function focusMainWindow() {
   if (mainWindow.isMinimized()) mainWindow.restore();
   mainWindow.show();
   mainWindow.focus();
+}
+
+function notificationTarget(href) {
+  if (typeof href !== "string" || href.length > 2048) return null;
+  try {
+    const target = new URL(href, WEB_URL);
+    return target.origin === WEB_ORIGIN ? target.toString() : null;
+  } catch {
+    return null;
+  }
+}
+
+function taskbarBadgeImage(count) {
+  const label = count > 99 ? "99+" : String(count);
+  const fontSize = label.length > 2 ? 23 : label.length > 1 ? 27 : 32;
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+    <circle cx="32" cy="32" r="29" fill="#e43d5b" stroke="#ffffff" stroke-width="3"/>
+    <text x="32" y="34" dominant-baseline="middle" text-anchor="middle"
+      font-family="Segoe UI,Arial,sans-serif" font-size="${fontSize}"
+      font-weight="800" fill="#ffffff">${label}</text>
+  </svg>`;
+  return nativeImage.createFromDataURL(
+    `data:image/svg+xml;base64,${Buffer.from(svg).toString("base64")}`,
+  );
+}
+
+function setDesktopNotificationBadge(value) {
+  const count = Math.max(0, Math.min(999, Number(value) || 0));
+  desktopNotificationBadge = count;
+
+  // macOS/Linux use the native app badge when supported.
+  if (process.platform === "darwin" && app.dock) {
+    app.dock.setBadge(count > 0 ? (count > 99 ? "99+" : String(count)) : "");
+  } else if (process.platform !== "win32" && app.setBadgeCount) {
+    app.setBadgeCount(count);
+  }
+
+  if (!mainWindow || mainWindow.isDestroyed()) return count;
+  if (process.platform === "win32") {
+    if (count > 0) {
+      const overlay = taskbarBadgeImage(count);
+      if (!overlay.isEmpty()) {
+        mainWindow.setOverlayIcon(
+          overlay,
+          `${count > 99 ? "99+" : count} notificações não lidas`,
+        );
+      }
+    } else {
+      mainWindow.setOverlayIcon(null, "");
+    }
+  }
+  return count;
+}
+
+function rememberNativeNotice(id) {
+  if (!id || nativeNoticeIds.has(id)) return false;
+  nativeNoticeIds.add(id);
+  if (nativeNoticeIds.size > 300) {
+    const oldest = nativeNoticeIds.values().next().value;
+    if (oldest) nativeNoticeIds.delete(oldest);
+  }
+  return true;
+}
+
+function showDesktopNotification(payload) {
+  if (!payload || typeof payload !== "object" || !Notification.isSupported())
+    return false;
+
+  const id =
+    typeof payload.id === "string" && payload.id.length <= 100
+      ? payload.id
+      : null;
+  if (id && !rememberNativeNotice(id)) return false;
+
+  // Like Discord: do not duplicate an OS toast while the app is already focused.
+  if (mainWindow && !mainWindow.isDestroyed() && mainWindow.isFocused())
+    return false;
+
+  const title =
+    typeof payload.title === "string" && payload.title.trim()
+      ? payload.title.trim().slice(0, 120)
+      : "Enturma";
+  const body =
+    typeof payload.body === "string"
+      ? payload.body.trim().slice(0, 360)
+      : "Você tem uma nova notificação.";
+  const target = notificationTarget(payload.href);
+  const icon = path.join(__dirname, "..", "assets", "icon.ico");
+
+  const notice = new Notification({
+    title,
+    body,
+    icon,
+    timeoutType: "default",
+  });
+  notice.on("click", () => {
+    if (target && mainWindow && !mainWindow.isDestroyed())
+      void mainWindow.loadURL(target);
+    focusMainWindow();
+  });
+  notice.on("show", () => mainWindow?.flashFrame(true));
+  notice.on("close", () => mainWindow?.flashFrame(false));
+  notice.show();
+  return true;
 }
 
 function handleDeepLink(raw) {
@@ -681,6 +789,7 @@ function createMainWindow() {
       webSecurity: true,
       allowRunningInsecureContent: false,
       spellcheck: true,
+      backgroundThrottling: false,
     },
   });
 
@@ -716,7 +825,10 @@ function createMainWindow() {
     },
   );
 
-  mainWindow.once("ready-to-show", () => mainWindow?.show());
+  mainWindow.once("ready-to-show", () => {
+    setDesktopNotificationBadge(desktopNotificationBadge);
+    mainWindow?.show();
+  });
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
@@ -754,6 +866,14 @@ ipcMain.handle("desktop:open-external", (event, url) => {
     return shell.openExternal(url);
   return false;
 });
+ipcMain.handle("desktop:set-notification-badge", (event, count) => {
+  requireTrusted(event);
+  return setDesktopNotificationBadge(count);
+});
+ipcMain.handle("desktop:show-notification", (event, payload) => {
+  requireTrusted(event);
+  return showDesktopNotification(payload);
+});
 ipcMain.on("desktop:retry", (event) => {
   if (
     mainWindow &&
@@ -784,6 +904,8 @@ if (!hasLock) {
   });
 
   app.whenReady().then(() => {
+    if (process.platform === "win32")
+      app.setAppUserModelId("br.com.enturma.desktop");
     const appSession = session.fromPartition(APP_PARTITION);
     configureSession(appSession);
     createMenu();

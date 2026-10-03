@@ -13,6 +13,10 @@ contextBridge.exposeInMainWorld("enturmaDesktop", {
   },
   checkForUpdates: () => ipcRenderer.invoke("desktop:check-for-updates"),
   openExternal: (url) => ipcRenderer.invoke("desktop:open-external", url),
+  setNotificationBadge: (count) =>
+    ipcRenderer.invoke("desktop:set-notification-badge", count),
+  showNotification: (payload) =>
+    ipcRenderer.invoke("desktop:show-notification", payload),
 });
 
 contextBridge.exposeInMainWorld("enturmaOffline", {
