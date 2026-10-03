@@ -277,7 +277,7 @@ export function Forum({
         <button
           className="text-button"
           disabled={busy}
-          onClick={() => mutate(`/forum/${current.id}/accept/${entry.id}`, "POST")}
+          onClick={() => mutate(`/forum/${entry.rootId}/accept/${entry.id}`, "POST")}
         >
           {entry.accepted ? "Remover solução" : "Aceitar resposta"}
         </button>
