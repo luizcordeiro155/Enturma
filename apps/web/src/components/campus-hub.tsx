@@ -15,6 +15,7 @@ import { AdaptivePractice } from "./adaptive-practice";
 import { StudyGroups } from "./study-groups";
 import { LiveMemberIdentityCard } from "./user-identity";
 import { useLiveRefresh } from "@/lib/live-updates";
+import { CampusTutor } from "./campus-tutor";
 
 type Task={id:string;kind:string;title:string;notes:string;dueAt:string;estimatedMinutes:number;priority:string;completedAt?:string|null;subjectName?:string|null};
 type Match={id:string;name:string;username:string;goal:string;preferredMode:string;subjectName?:string|null};
@@ -46,6 +47,8 @@ export function CampusHub(){
   const [focusId,setFocusId]=useState<string|null>(null);
   const [focusStarted,setFocusStarted]=useState<number|null>(null);
   const [focusSeconds,setFocusSeconds]=useState(0);
+  const [focusGoal,setFocusGoal]=useState("");
+  const [focusSubjectId,setFocusSubjectId]=useState("");
   const root=useRef<HTMLDivElement>(null);
 
   async function load(){
@@ -91,7 +94,12 @@ export function CampusHub(){
   }
   async function startFocus(){
     try{
-      const result=await post<{id:string}>("/campus/focus",{label:"Modo Foco",minutes:50});
+      const goal=focusGoal.trim()||"Sessão de foco guiada";
+      const result=await post<{id:string}>("/campus/focus",{
+        subjectId:focusSubjectId||null,
+        label:goal,
+        minutes:50
+      });
       setFocusId(result.id);setFocusStarted(Date.now());setFocusSeconds(0);
     }catch(e){setError((e as Error).message);}
   }
@@ -173,9 +181,30 @@ export function CampusHub(){
         </section>
 
         <section className="campus-card focus-card" data-campus-card>
-          <div className="campus-card-title"><div><TimerReset/><span><small>Modo foco</small><h2>{focusId?"Você está estudando agora":"Comece uma sessão sem distrações"}</h2></span></div></div>
-          {focusId?<div className="focus-running"><strong>{focusClock}</strong><p>O tempo é sincronizado com seu progresso quando você concluir.</p><button className="button" onClick={()=>void finishFocus()}>Concluir sessão</button></div>:
-          <div className="focus-ready"><p>Inicie uma sessão de 50 minutos. O Enturma registra seu tempo de estudo sem recompensar spam.</p><button className="button" onClick={()=>void startFocus()}><Target size={17}/> Iniciar 50 min</button></div>}
+          <div className="campus-card-title"><div><TimerReset/><span><small>Modo foco com tutor</small><h2>{focusId?"Você está estudando agora":"Defina o que vai aprender nesta sessão"}</h2></span></div></div>
+          {focusId?<>
+            <div className="focus-running">
+              <div><strong>{focusClock}</strong><p>{focusGoal.trim()||"Sessão de foco guiada"} · o tutor acompanha seu ritmo e adapta as explicações.</p></div>
+              <button className="button" onClick={()=>void finishFocus()}>Concluir sessão</button>
+            </div>
+            <CampusTutor
+              subjectId={focusSubjectId||null}
+              focusSessionId={focusId}
+              goal={focusGoal.trim()||"Aprender o conteúdo desta sessão de foco"}
+            />
+          </>:<div className="focus-setup">
+            <div className="focus-ready-copy">
+              <p>Escolha a matéria e diga o que quer estudar. Durante os 50 minutos, a Enturma AI explica, testa seu entendimento e aprende quais formas de ensino funcionam melhor para você.</p>
+            </div>
+            <div className="focus-setup-fields">
+              <label>Matéria<select value={focusSubjectId} onChange={e=>setFocusSubjectId(e.target.value)}>
+                <option value="">Estudo geral</option>
+                {profile?.subjects.map(s=><option key={s.id} value={s.id}>{s.name}</option>)}
+              </select></label>
+              <label>O que você vai estudar?<input value={focusGoal} onChange={e=>setFocusGoal(e.target.value)} maxLength={180} placeholder="Ex.: JOINs e normalização para a prova"/></label>
+            </div>
+            <button className="button focus-start" onClick={()=>void startFocus()}><Target size={17}/> Iniciar 50 min com tutor</button>
+          </div>}
         </section>
 
         <CampusTools />
