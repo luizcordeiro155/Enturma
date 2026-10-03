@@ -1,6 +1,21 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { api, invalidateApiCache } from "./api";
+
+export type AppEventType =
+  | "forum_changed"
+  | "notifications_changed"
+  | "achievement_unlocked"
+  | "moderation_action"
+  | "room_member_joined"
+  | "room_member_left"
+  | "room_expiring"
+  | "rooms_changed"
+  | "campus_changed"
+  | "teaching_changed"
+  | "friends_changed"
+  | "profile_changed"
+  | "groups_changed";
 export function useAppConnection() {
   useEffect(() => {
     let active = true,
@@ -31,6 +46,12 @@ export function useAppConnection() {
                 "room_member_joined",
                 "room_member_left",
                 "room_expiring",
+                "rooms_changed",
+                "campus_changed",
+                "teaching_changed",
+                "friends_changed",
+                "profile_changed",
+                "groups_changed",
               ].includes(type)
             )
               window.dispatchEvent(new Event(`enturma-${type}`));
@@ -55,7 +76,7 @@ export function useAppConnection() {
   }, []);
 }
 export function useLiveRefresh(
-  type: "forum_changed" | "notifications_changed",
+  type: AppEventType,
   callback: () => Promise<unknown>,
   interval = 10000,
 ) {
@@ -87,9 +108,18 @@ export function useLiveRefresh(
       }
     }
     const refresh = () => {
-      invalidateApiCache(
-        type === "forum_changed" ? "/forum" : "/notifications",
-      );
+      const prefixes: Partial<Record<AppEventType, string>> = {
+        forum_changed: "/forum",
+        notifications_changed: "/notifications",
+        rooms_changed: "/study-rooms",
+        campus_changed: "/campus",
+        teaching_changed: "/teaching",
+        friends_changed: "/friends",
+        profile_changed: "/users",
+        groups_changed: "/campus/groups",
+      };
+      const prefix = prefixes[type];
+      if (prefix) invalidateApiCache(prefix);
       clearTimeout(delay);
       delay = setTimeout(() => void run(), 75);
     };
