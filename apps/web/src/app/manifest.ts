@@ -27,7 +27,7 @@ export default function manifest(): MetadataRoute.Manifest {
         src: "/pwa/enturma-v5.svg",
         sizes: "any",
         type: "image/svg+xml",
-        purpose: "any maskable",
+        purpose: "any",
       },
       {
         src: "/pwa/enturma-192-v5.png",
