@@ -1,6 +1,6 @@
 {
   "name": "@enturma/mobile",
-  "version": "0.3.17",
+  "version": "0.3.18",
   "private": true,
   "main": "./index.js",
   "scripts": {
