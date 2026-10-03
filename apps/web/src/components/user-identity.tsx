@@ -491,7 +491,7 @@ export function UserIdentity({
               ) : (
                 <p>Carregando perfil…</p>
               )}
-              <p role="status">{message}</p>
+              {message ? <p role="status">{message}</p> : null}
             </div>,
             document.body,
           )
