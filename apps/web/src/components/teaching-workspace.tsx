@@ -31,7 +31,7 @@ export function TeachingWorkspace(){
      setProfile(me);setData(d);
    }catch(e){setError((e as Error).message)}
  }
- useEffect(()=>{void load()},[]);
+ useEffect(()=>{const timer=window.setTimeout(()=>void load(),0);return()=>window.clearTimeout(timer)},[]);
  useEffect(()=>{root.current?.querySelectorAll<HTMLElement>("[data-teaching-reveal]").forEach((el,i)=>el.animate([{opacity:.45,transform:"translateY(9px)"},{opacity:1,transform:"none"}],{duration:180+i*30,easing:"cubic-bezier(.16,1,.3,1)"}))},[data,selected]);
 
  async function saveProfile(e:FormEvent<HTMLFormElement>){
