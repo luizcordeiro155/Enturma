@@ -39,6 +39,7 @@ const PREFETCH_ROUTES = [
   "/settings",
   "/profile",
   "/learn",
+  "/download",
 ] as const;
 
 export function AppShellStateProvider({

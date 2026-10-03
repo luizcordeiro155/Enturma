@@ -33,7 +33,7 @@ const links = [
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },
   { href: "/caronas", label: "Caronas", icon: Car },
   { href: "/settings", label: "Configurações", icon: Settings },
-  { href: "/download", label: "Instalar aplicativo", icon: EnturmaAppIcon },
+  { href: "/download", label: "Downloads", icon: EnturmaAppIcon },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
@@ -42,7 +42,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const updatePending =
     isMobileApp() &&
     ["available", "downloading", "ready"].includes(updateState?.status ?? "");
-  const { installedApp, learning, profileShortcut } = useAppShellState();
+  const { learning, profileShortcut } = useAppShellState();
   const [, setEmailVerified] = useState<boolean | null>(null);
   const [emailCelebration, setEmailCelebration] = useState(false);
   const [emailCelebrationSeconds, setEmailCelebrationSeconds] = useState(8);
@@ -133,9 +133,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               Praticar programação
             </Link>
           ) : null}
-          {links
-            .filter((l) => !installedApp || l.href !== "/download")
-            .map(({ href, label, icon: Icon }) => (
+          {links.map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
