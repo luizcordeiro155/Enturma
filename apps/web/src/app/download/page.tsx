@@ -73,8 +73,8 @@ export default async function DownloadPage() {
             </p>
             <PwaInstallButton />
             <small className={styles.downloadNote}>
-              Depois de instalado, o item “Instalar aplicativo” é removido do
-              Enturma automaticamente.
+              O botão continua disponível no navegador. Se você desinstalar
+              a PWA, pode voltar aqui e instalar novamente normalmente.
             </small>
           </aside>
         </section>

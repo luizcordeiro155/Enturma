@@ -117,8 +117,8 @@ public class WebPushNotificationService {
           event.message() == null ? "Você tem uma nova notificação." : event.message());
       payload.put("href", safeHref(event.href()));
       payload.put("kind", event.kind() == null ? "SYSTEM" : event.kind());
-      payload.put("icon", "/pwa/enturma-192-v5.png");
-      payload.put("badge", "/pwa/enturma-192-v5.png");
+      payload.put("icon", "/pwa/enturma-mobile-official-v6.png");
+      payload.put("badge", "/pwa/enturma-mobile-official-v6.png");
       payload.put("unreadCount", unread(event.user()));
       String body = json.writeValueAsString(payload);
 

@@ -24,8 +24,8 @@ export const metadata: Metadata = {
   description: "Encontre sua matéria, entre em uma turma e aprenda junto.",
   applicationName: "Enturma",
   icons: {
-    icon: [{ url: "/pwa/enturma-192-v5.png", type: "image/png" }],
-    apple: [{ url: "/pwa/enturma-192-v5.png", type: "image/png" }],
+    icon: [{ url: "/pwa/enturma-mobile-official-v6.png", type: "image/png" }],
+    apple: [{ url: "/pwa/enturma-mobile-official-v6.png", type: "image/png" }],
   },
   other: {
     "application-version": "0.3.0",

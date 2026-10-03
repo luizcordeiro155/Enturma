@@ -1,6 +1,6 @@
-const CACHE = "enturma-pwa-v5";
+const CACHE = "enturma-pwa-v6";
 const STATIC_PREFIX = "/_next/static/";
-const CORE = ["/offline", "/manifest.webmanifest", "/pwa/enturma-192-v5.png", "/pwa/enturma-v5.svg"];
+const CORE = ["/offline", "/manifest.webmanifest", "/pwa/enturma-mobile-official-v6.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -63,8 +63,7 @@ self.addEventListener("fetch", (event) => {
 
   if (
     url.pathname.startsWith(STATIC_PREFIX) ||
-    url.pathname === "/pwa/enturma-192-v5.png" ||
-    url.pathname === "/pwa/enturma-v5.svg" ||
+    url.pathname === "/pwa/enturma-mobile-official-v6.png" ||
     url.pathname === "/manifest.webmanifest"
   ) {
     event.respondWith(
@@ -116,8 +115,8 @@ self.addEventListener("push", (event) => {
 
     await self.registration.showNotification(data.title || "Enturma", {
       body: data.body || "Você tem uma nova notificação.",
-      icon: data.icon || "/pwa/enturma-192-v5.png",
-      badge: data.badge || "/pwa/enturma-192-v5.png",
+      icon: data.icon || "/pwa/enturma-mobile-official-v6.png",
+      badge: data.badge || "/pwa/enturma-mobile-official-v6.png",
       tag: `enturma-${data.kind || "notification"}-${data.href || ""}`,
       renotify: true,
       data: { href: data.href || "/notifications" },

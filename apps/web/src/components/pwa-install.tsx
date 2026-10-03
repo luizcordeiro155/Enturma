@@ -37,8 +37,6 @@ function platform(): PwaPlatform {
   return "desktop";
 }
 
-const PWA_INSTALLED_KEY = "enturma-pwa-installed";
-
 export function isPwaMode() {
   if (typeof window === "undefined") return false;
   const nav = navigator as Navigator & { standalone?: boolean };
@@ -50,10 +48,7 @@ export function isPwaMode() {
 }
 
 export function isKnownPwaInstalled() {
-  if (typeof window === "undefined") return false;
-  if (isPwaMode()) return true;
-  try { return localStorage.getItem(PWA_INSTALLED_KEY) === "1"; }
-  catch { return false; }
+  return isPwaMode();
 }
 
 export function PwaProvider({ children }: { children: React.ReactNode }) {
@@ -71,10 +66,15 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
         });
     }
 
-    if (isKnownPwaInstalled()) {
+    const runningInstalledApp = isPwaMode();
+    if (runningInstalledApp) {
       document.documentElement.dataset.pwaInstalled = "true";
-      const installedTimer = window.setTimeout(() => setState("installed"), 0);
-      return () => window.clearTimeout(installedTimer);
+      window.setTimeout(() => setState("installed"), 0);
+    } else {
+      delete document.documentElement.dataset.pwaInstalled;
+      // Remove the stale flag left by older Enturma builds. Uninstalling a PWA
+      // does not clear localStorage, which was falsely blocking reinstallation.
+      try { localStorage.removeItem("enturma-pwa-installed"); } catch {}
     }
 
     const beforeInstall = (event: Event) => {
@@ -88,7 +88,6 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
       setPromptEvent(null);
       setState("installed");
       document.documentElement.dataset.pwaInstalled = "true";
-      try { localStorage.setItem(PWA_INSTALLED_KEY, "1"); } catch {}
       window.dispatchEvent(new Event("enturma-pwa-installed"));
     };
 
@@ -111,7 +110,7 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
       state,
       platform: currentPlatform,
       install: async () => {
-        if (state === "installed") return true;
+        if (state === "installed" && isPwaMode()) return true;
         if (!promptEvent) {
           setState("manual");
           return false;
@@ -123,7 +122,6 @@ export function PwaProvider({ children }: { children: React.ReactNode }) {
           setPromptEvent(null);
           setState("installed");
           document.documentElement.dataset.pwaInstalled = "true";
-          try { localStorage.setItem(PWA_INSTALLED_KEY, "1"); } catch {}
           window.dispatchEvent(new Event("enturma-pwa-installed"));
           return true;
         }
@@ -145,14 +143,15 @@ export function PwaInstallButton() {
   const [showHelp, setShowHelp] = useState(false);
   const [installing, setInstalling] = useState(false);
 
-  const installed = state === "installed";
-  const manual = state === "manual";
+  const runningInstalledApp = isPwaMode();
+  const installed = runningInstalledApp;
+  const manual = state === "manual" || (state === "installed" && !runningInstalledApp);
 
   async function startInstall() {
     setInstalling(true);
     try {
       const prompted = await install();
-      if (!prompted && state !== "installed") setShowHelp(true);
+      if (!prompted && !runningInstalledApp) setShowHelp(true);
     } finally {
       setInstalling(false);
     }
@@ -170,20 +169,22 @@ export function PwaInstallButton() {
       <button
         type="button"
         className={styles.install}
-        disabled={installed || installing || state === "loading"}
+        disabled={runningInstalledApp || installing || state === "loading"}
         onClick={() => void startInstall()}
       >
         {installed ? <Check size={19} /> : <EnturmaAppIcon size={21} />}
-        {installed
-          ? "Enturma já está instalado"
+        {runningInstalledApp
+          ? "Você está usando o Enturma instalado"
           : installing
             ? "Abrindo instalação…"
-            : "Instalar Enturma"}
+            : state === "installed"
+              ? "Instalar novamente"
+              : "Instalar Enturma"}
       </button>
 
-      {installed ? (
+      {runningInstalledApp ? (
         <p className={styles.note}>
-          O Enturma abre como aplicativo e continua usando a mesma conta.
+          Você abriu esta página dentro do aplicativo instalado.
         </p>
       ) : (
         <>
