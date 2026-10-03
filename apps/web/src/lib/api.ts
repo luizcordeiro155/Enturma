@@ -9,6 +9,24 @@ const readCache = new Map<string, CacheEntry>();
 const pendingReads = new Map<string, Promise<unknown>>();
 let renewing: Promise<boolean> | null = null;
 
+const SESSION_MUTATIONS = new Set([
+  "/auth/login",
+  "/auth/register",
+  "/auth/logout",
+  "/auth/reset-password",
+]);
+
+function announceSessionChange(path: string) {
+  if (typeof window === "undefined") return;
+  const detail = { path, at: Date.now() };
+  window.dispatchEvent(new CustomEvent("enturma-session-changed", { detail }));
+  if (typeof BroadcastChannel !== "undefined") {
+    const channel = new BroadcastChannel("enturma-session");
+    channel.postMessage(detail);
+    channel.close();
+  }
+}
+
 function cacheTtl(path: string) {
   if (
     path.startsWith("/notifications") ||
@@ -95,6 +113,7 @@ export async function api<T>(path: string, options?: RequestInit): Promise<T> {
       readCache.set(path, { value, expiresAt: Date.now() + ttl });
     } else if (method !== "GET") {
       invalidateApiCache();
+      if (SESSION_MUTATIONS.has(path)) announceSessionChange(path);
     }
     return value;
   } finally {

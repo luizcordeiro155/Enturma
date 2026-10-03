@@ -612,37 +612,43 @@ export function AchievementGrid({
       {achievements.map((a) => {
         const Icon = achievementIcon(a);
         return (
-        <article
-          className={`achievement-card ${a.earnedAt ? "earned" : ""} ${achievementTierClass(a.tier)}`}
-          key={a.code}
-          title={a.description}
-        >
-          <span className="achievement-card-icon">
-            <Icon />
-          </span>
-          <div>
-            <strong>{a.name}</strong>
-            <p>{a.description}</p>
-            <small>
-              {a.tier} · {a.xp} XP
-            </small>
-            {a.earnedAt ? (
-              <p>
-                Recebida em {new Date(a.earnedAt).toLocaleDateString("pt-BR")}
-              </p>
-            ) : (
-              <>
-                <progress
-                  max={a.requirement}
-                  value={Math.min(a.requirement, a.progress)}
-                />
+          <details
+            className={`achievement-card ${a.earnedAt ? "earned" : ""} ${achievementTierClass(a.tier)}`}
+            key={a.code}
+          >
+            <summary
+              className="achievement-card-summary"
+              aria-label={`Ver detalhes da conquista ${a.name}`}
+            >
+              <span className="achievement-card-icon">
+                <Icon />
+              </span>
+              <span className="achievement-card-heading">
+                <strong>{a.name}</strong>
                 <small>
-                  {Math.min(a.requirement, a.progress)}/{a.requirement}
+                  {a.tier} · {a.xp} XP
                 </small>
-              </>
-            )}
-          </div>
-        </article>
+              </span>
+            </summary>
+            <div className="achievement-card-details">
+              <p>{a.description}</p>
+              {a.earnedAt ? (
+                <p>
+                  Recebida em {new Date(a.earnedAt).toLocaleDateString("pt-BR")}
+                </p>
+              ) : (
+                <>
+                  <progress
+                    max={a.requirement}
+                    value={Math.min(a.requirement, a.progress)}
+                  />
+                  <small>
+                    {Math.min(a.requirement, a.progress)}/{a.requirement}
+                  </small>
+                </>
+              )}
+            </div>
+          </details>
         );
       })}
     </div>

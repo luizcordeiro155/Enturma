@@ -2774,3 +2774,84 @@
   .profile-discord-editor .profile-showcase-preview,
   .profile-discord-editor .profile-editor-section{scroll-margin-bottom:72px}
 }
+
+
+/* Mobile public profile interaction recovery: one vertical scroller, no nested traps. */
+@media (max-width: 760px) {
+  .user-profile-popover {
+    overflow: hidden !important;
+    touch-action: pan-y;
+  }
+
+  .user-profile-popover .profile-discord-public-layout {
+    display: block !important;
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+    grid-auto-flow: row !important;
+    grid-auto-columns: auto !important;
+  }
+
+  .user-profile-popover .profile-public-primary,
+  .user-profile-popover .profile-public-advanced {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    scrollbar-gutter: auto !important;
+    overscroll-behavior: auto !important;
+  }
+
+  .profile-achievement-badge > summary {
+    touch-action: manipulation;
+  }
+}
+
+/* Achievement cards must explain themselves on tap, not depend on desktop hover/title. */
+.achievement-card {
+  display: block;
+  padding: 0;
+  overflow: hidden;
+}
+
+.achievement-card > summary {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  list-style: none;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+.achievement-card > summary::-webkit-details-marker {
+  display: none;
+}
+
+.achievement-card-heading {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.achievement-card-heading small {
+  color: var(--muted);
+}
+
+.achievement-card-details {
+  padding: 0 14px 14px 64px;
+}
+
+.achievement-card-details p:first-child {
+  margin-top: 0;
+}
+
+@media (max-width: 760px) {
+  .achievement-card-details {
+    padding-left: 14px;
+  }
+}

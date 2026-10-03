@@ -82,6 +82,15 @@ export function AppShellStateProvider({
     }, 0);
 
     const refreshAvatar = () => void refreshProfileShortcut(true);
+    const refreshSessionProfile = () => {
+      // Never keep the previous account avatar visible while credentials change.
+      setProfileShortcut(null);
+      void refreshProfileShortcut(true);
+    };
+    const sessionChannel =
+      typeof BroadcastChannel !== "undefined"
+        ? new BroadcastChannel("enturma-session")
+        : null;
     const refreshOnFocus = () => {
       if (document.visibilityState === "visible")
         void refreshProfileShortcut(false);
@@ -89,6 +98,8 @@ export function AppShellStateProvider({
 
     const markInstalled = () => setInstalledApp(true);
     window.addEventListener("enturma-profile-updated", refreshAvatar);
+    window.addEventListener("enturma-session-changed", refreshSessionProfile);
+    sessionChannel?.addEventListener("message", refreshSessionProfile);
     window.addEventListener("enturma-pwa-installed", markInstalled);
     window.addEventListener("appinstalled", markInstalled);
     window.addEventListener("focus", refreshOnFocus);
@@ -96,12 +107,30 @@ export function AppShellStateProvider({
     return () => {
       window.clearTimeout(installedTimer);
       window.removeEventListener("enturma-profile-updated", refreshAvatar);
+      window.removeEventListener("enturma-session-changed", refreshSessionProfile);
+      sessionChannel?.removeEventListener("message", refreshSessionProfile);
+      sessionChannel?.close();
       window.removeEventListener("enturma-pwa-installed", markInstalled);
       window.removeEventListener("appinstalled", markInstalled);
       window.removeEventListener("focus", refreshOnFocus);
       document.removeEventListener("visibilitychange", refreshOnFocus);
     };
   }, [refreshProfileShortcut]);
+
+  useEffect(() => {
+    const publicAccountRoute =
+      path === "/" ||
+      /^\/(login|register|forgot-password|reset-password|verify-email)(\/|$)/.test(
+        path,
+      );
+    if (publicAccountRoute) {
+      setProfileShortcut(null);
+    } else {
+      // Route changes are a fallback for account switches completed by an older
+      // client build that did not emit enturma-session-changed.
+      void refreshProfileShortcut(false);
+    }
+  }, [path, refreshProfileShortcut]);
 
   useEffect(() => {
     let active = true;
