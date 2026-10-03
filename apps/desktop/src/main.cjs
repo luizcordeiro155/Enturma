@@ -70,6 +70,7 @@ let updateTimer = null;
 let updateInProgress = false;
 let pendingUpdate = null;
 let desktopNotificationBadge = 0;
+let taskbarAttentionActive = false;
 const nativeNoticeIds = new Set();
 let updateState = {
   status: "idle",
@@ -143,6 +144,29 @@ function notificationTarget(href) {
   }
 }
 
+function requestTaskbarAttention() {
+  if (
+    !mainWindow ||
+    mainWindow.isDestroyed() ||
+    mainWindow.isFocused()
+  )
+    return;
+
+  taskbarAttentionActive = true;
+
+  // Windows handles flashFrame(true) like Discord: the taskbar button keeps
+  // flashing/highlighted until the user brings the app back to the foreground.
+  // Do not stop this when the toast disappears, otherwise the visual cue lasts
+  // only a couple of seconds and is easy to miss.
+  mainWindow.flashFrame(true);
+}
+
+function clearTaskbarAttention() {
+  if (!taskbarAttentionActive) return;
+  taskbarAttentionActive = false;
+  if (mainWindow && !mainWindow.isDestroyed()) mainWindow.flashFrame(false);
+}
+
 function taskbarBadgeImage(count) {
   const label = count > 99 ? "99+" : String(count);
   const fontSize = label.length > 2 ? 23 : label.length > 1 ? 27 : 32;
@@ -159,7 +183,11 @@ function taskbarBadgeImage(count) {
 
 function setDesktopNotificationBadge(value) {
   const count = Math.max(0, Math.min(999, Number(value) || 0));
+  const previous = desktopNotificationBadge;
   desktopNotificationBadge = count;
+
+  if (count > previous) requestTaskbarAttention();
+  if (count === 0) clearTaskbarAttention();
 
   // macOS/Linux use the native app badge when supported.
   if (process.platform === "darwin" && app.dock) {
@@ -256,8 +284,10 @@ function showDesktopNotification(payload) {
       void mainWindow.loadURL(target);
     focusMainWindow();
   });
-  notice.on("show", () => mainWindow?.flashFrame(true));
-  notice.on("close", () => mainWindow?.flashFrame(false));
+
+  // Start the taskbar attention cue immediately instead of waiting for the
+  // Windows toast "show" event. The cue remains active until the app is focused.
+  requestTaskbarAttention();
   notice.show();
   return true;
 }
@@ -1053,6 +1083,7 @@ function createMainWindow() {
     setDesktopNotificationBadge(desktopNotificationBadge);
     mainWindow?.show();
   });
+  mainWindow.on("focus", () => clearTaskbarAttention());
   mainWindow.on("close", (event) => {
     if (!quitting && process.platform === "win32") {
       event.preventDefault();
