@@ -1758,3 +1758,64 @@ html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
     grid-template-columns: 1fr;
   }
 }
+
+
+/* Profile card fills the entire identity column */
+.profile-public-primary {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--profile-accent, #183f36) 22%, #f8f8ef) 0%,
+      color-mix(in srgb, var(--profile-secondary, var(--profile-accent, #183f36)) 14%, #f8f8ef) 100%
+    ) !important;
+  color: #173a32;
+}
+
+.profile-discord-public-layout .public-profile-card {
+  background: transparent !important;
+}
+
+.profile-discord-public-layout .public-profile-body {
+  background: transparent !important;
+}
+
+.profile-public-primary .profile-dialog-actions {
+  background: transparent !important;
+}
+
+.profile-public-primary .profile-main-meta {
+  color: color-mix(in srgb, #173a32 68%, transparent);
+  border-top-color: color-mix(in srgb, #173a32 34%, transparent);
+}
+
+.profile-public-primary .profile-main-meta strong {
+  color: #173a32;
+}
+
+.profile-public-primary::before {
+  z-index: 0;
+}
+
+.profile-public-primary > * {
+  position: relative;
+  z-index: 1;
+}
+
+html[data-theme="dark"] .profile-public-primary {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--profile-accent, #183f36) 30%, #101715) 0%,
+      color-mix(in srgb, var(--profile-secondary, var(--profile-accent, #183f36)) 18%, #101715) 100%
+    ) !important;
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .profile-public-primary .profile-main-meta {
+  color: var(--muted);
+  border-top-color: var(--border);
+}
+
+html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
+  color: var(--ink);
+}
