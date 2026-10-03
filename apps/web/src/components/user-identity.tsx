@@ -443,7 +443,7 @@ export function UserIdentity({
                   </section>
 
                   <section
-                    className={`profile-public-advanced profile-theme-${profile.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${profile.showcaseAppearance?.effect ?? "NONE"}`}
+                    className="profile-public-advanced"
                     style={profileStyle(profile)}
                   >
                     <div className="profile-public-advanced-heading">

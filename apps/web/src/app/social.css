@@ -1866,3 +1866,76 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
     overflow-x: clip !important;
   }
 }
+
+
+/* Profile modal seam fix: advanced panel begins exactly at the profile edge */
+.user-profile-popover,
+.profile-discord-public-layout {
+  overflow-x: hidden !important;
+}
+
+.profile-discord-public-layout {
+  width: 100%;
+  max-width: 100%;
+  grid-auto-flow: column;
+  grid-auto-columns: 0;
+}
+
+.profile-public-primary,
+.profile-public-advanced {
+  max-width: 100%;
+  overflow-x: hidden !important;
+}
+
+.profile-public-advanced {
+  margin: 0 !important;
+  padding-left: 18px;
+  border-left: 1px solid var(--border);
+  background: var(--surface) !important;
+  background-image: none !important;
+  box-shadow: inset 1px 0 0 color-mix(in srgb, var(--border) 38%, transparent);
+}
+
+.profile-public-advanced::before,
+.profile-public-advanced::after {
+  content: none !important;
+  display: none !important;
+}
+
+.profile-discord-public-layout .public-profile-card,
+.profile-discord-public-layout .public-profile-banner,
+.profile-discord-public-layout .public-profile-body {
+  margin-right: 0 !important;
+  padding-right: 0;
+  border-right: 0;
+}
+
+.profile-discord-public-layout .public-profile-body {
+  padding-right: 22px;
+}
+
+/* Prevent the tiny horizontal scrollbar thumb ("black dot") from appearing. */
+.user-profile-popover,
+.profile-discord-public-layout,
+.profile-public-primary,
+.profile-public-advanced {
+  overscroll-behavior-x: none;
+}
+
+.user-profile-popover::-webkit-scrollbar:horizontal,
+.profile-discord-public-layout::-webkit-scrollbar:horizontal,
+.profile-public-primary::-webkit-scrollbar:horizontal,
+.profile-public-advanced::-webkit-scrollbar:horizontal {
+  height: 0 !important;
+  display: none !important;
+}
+
+@media (max-width: 760px) {
+  .profile-discord-public-layout {
+    overflow-x: hidden !important;
+  }
+
+  .profile-public-advanced {
+    padding-left: 14px;
+  }
+}
