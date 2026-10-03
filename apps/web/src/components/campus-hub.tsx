@@ -191,6 +191,7 @@ export function CampusHub(){
               subjectId={focusSubjectId||null}
               focusSessionId={focusId}
               goal={focusGoal.trim()||"Aprender o conteúdo desta sessão de foco"}
+              autoPrompt={"Comece esta sessão criando um roteiro curto de estudo para os próximos 50 minutos. Explique o primeiro passo e faça uma checagem rápida de conhecimento antes de avançar."}
             />
           </>:<div className="focus-setup">
             <div className="focus-ready-copy">
