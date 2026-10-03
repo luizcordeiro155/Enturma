@@ -17,6 +17,7 @@ import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { MobilePushRegistration } from "@/components/mobile-push-registration";
 import { AppShellStateProvider } from "@/components/app-shell-state";
+import { PwaProvider } from "@/components/pwa-install";
 export const metadata: Metadata = {
   title: "Enturma — estude em companhia",
   description: "Encontre sua matéria, entre em uma turma e aprenda junto.",
@@ -40,13 +41,15 @@ export default function Layout({
       <body>
         <Motion />
         <MobilePushRegistration />
-        <CallSessionProvider>
-          <DesktopUpdateProvider>
-            <AppShellStateProvider>
-              <RideActivity>{children}</RideActivity>
-            </AppShellStateProvider>
-          </DesktopUpdateProvider>
-        </CallSessionProvider>
+        <PwaProvider>
+          <CallSessionProvider>
+            <DesktopUpdateProvider>
+              <AppShellStateProvider>
+                <RideActivity>{children}</RideActivity>
+              </AppShellStateProvider>
+            </DesktopUpdateProvider>
+          </CallSessionProvider>
+        </PwaProvider>
       </body>
     </html>
   );

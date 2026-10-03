@@ -57,8 +57,18 @@ export function isMobileApp() {
   );
 }
 
+export function isPwaApp() {
+  if (typeof window === "undefined") return false;
+  const nav = navigator as Navigator & { standalone?: boolean };
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    nav.standalone === true ||
+    document.referrer.startsWith("android-app://")
+  );
+}
+
 export function isInstalledApp() {
-  return isDesktop() || isMobileApp();
+  return isDesktop() || isMobileApp() || isPwaApp();
 }
 const androidUpdateOrigin =
   "https://enturma-android-download-v3-production.up.railway.app";

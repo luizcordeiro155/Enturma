@@ -99,7 +99,7 @@ export function MobileNavigation() {
               ["/challenges", "Desafios acadêmicos", Gamepad2],
               ["/learn", "Programação", Gamepad2],
               ["/subjects", "Minhas matérias", BookOpen],
-              ["/download", "Baixar aplicativo", Download],
+              ["/download", "Instalar aplicativo", Download],
             ] as const
           )
             .filter(([href]) => href !== "/download" || !isInstalledApp())

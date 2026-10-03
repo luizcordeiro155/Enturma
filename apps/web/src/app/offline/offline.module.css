@@ -1,0 +1,59 @@
+.page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: var(--bg);
+  color: var(--ink);
+}
+
+.card {
+  width: min(520px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 16px;
+  padding: 38px 30px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: center;
+}
+
+.brand {
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -1px;
+}
+
+.brand span {
+  color: #7aab32;
+}
+
+.card h1,
+.card p {
+  margin: 0;
+}
+
+.card p {
+  max-width: 430px;
+  color: var(--muted);
+  line-height: 1.65;
+}
+
+.button {
+  min-height: 48px;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 6px;
+  padding: 0 18px;
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--surface);
+  text-decoration: none;
+  font-weight: 800;
+}
+
+:global(html[data-theme="dark"]) .button {
+  color: #10211c;
+}

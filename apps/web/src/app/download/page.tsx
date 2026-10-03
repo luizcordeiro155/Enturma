@@ -9,8 +9,11 @@ import {
   Smartphone,
   RefreshCw,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
+import { PwaInstallButton } from "@/components/pwa-install";
 import styles from "./download.module.css";
+
 const desktopOrigin =
   "https://enturma-desktop-download-v5-production.up.railway.app";
 const androidOrigin =
@@ -19,8 +22,6 @@ const androidOrigin =
 type AndroidManifest = {
   version: string;
   downloadUrl: string;
-  size?: number;
-  sha256?: string;
 };
 
 async function currentAndroidRelease(): Promise<AndroidManifest | null> {
@@ -31,30 +32,24 @@ async function currentAndroidRelease(): Promise<AndroidManifest | null> {
     });
     if (!response.ok) return null;
     const manifest = (await response.json()) as AndroidManifest;
-    if (!/^\\d+\\.\\d+\\.\\d+$/.test(manifest.version || "")) return null;
-    if (!manifest.downloadUrl?.startsWith("https://")) return null;
+    if (!/^\d+\.\d+\.\d+$/.test(manifest.version || "")) return null;
+    if (!manifest.downloadUrl?.startsWith(androidOrigin + "/")) return null;
     return manifest;
   } catch {
     return null;
   }
 }
+
 export default async function DownloadPage() {
   const ua = (await headers()).get("user-agent") ?? "";
-  if (ua.includes("EnturmaDesktop/") || ua.includes("EnturmaMobile/")) redirect("/home");
-  const android = /Android/i.test(ua);
+  if (ua.includes("EnturmaDesktop/") || ua.includes("EnturmaMobile/"))
+    redirect("/home");
+
   const androidRelease = await currentAndroidRelease();
   const androidVersion = androidRelease?.version ?? "mais recente";
-  let androidUrl = androidRelease?.downloadUrl ?? `${androidOrigin}/Enturma-Android.apk?fresh=${Date.now()}`;
-  try {
-    const candidate = new URL(process.env.ANDROID_DOWNLOAD_URL ?? androidUrl);
-    if (
-      candidate.protocol === "https:" &&
-      !candidate.username &&
-      !candidate.password &&
-      candidate.pathname.endsWith(".apk")
-    )
-      androidUrl = candidate.href;
-  } catch {}
+  const androidUrl =
+    androidRelease?.downloadUrl ?? `${androidOrigin}/Enturma-Android.apk`;
+
   return (
     <main className={styles.page}>
       <div className={styles.shell}>
@@ -70,68 +65,58 @@ export default async function DownloadPage() {
             Voltar ao Enturma
           </Link>
         </header>
+
         <section className={styles.hero}>
           <div className={styles.heroCopy}>
             <span className={styles.eyebrow}>
-              <Monitor size={18} />
-              Enturma
+              <Sparkles size={18} />
+              Instalação recomendada
             </span>
-            <h1>Seu espaço de estudo. Na sua tela.</h1>
+            <h1>Instale o Enturma sem baixar EXE ou APK.</h1>
             <p className={styles.lead}>
-              Salas, chamadas, comunidade, perfil e cadernos de estudo na mesma
-              conta. Escolha seu dispositivo para continuar aprendendo em
-              companhia.
+              O navegador instala o Enturma como aplicativo no Windows ou
+              Android. Ele ganha ícone próprio, abre em uma janela independente
+              e continua usando a mesma conta, salas e dados da versão Web.
             </p>
             <div className={styles.heroMeta}>
               <span>
                 <ShieldCheck size={18} />
-                Windows 10/11 · 64 bits
+                Instalação pelo navegador
               </span>
+              <span>Windows</span>
               <span>Android</span>
-              <span>iOS em preparação</span>
+              <span>Atualizações Web automáticas</span>
             </div>
           </div>
+
           <aside className={styles.downloadCard}>
-            <Download size={30} />
-            <h2>{android ? "Enturma para Android" : "Enturma para Windows"}</h2>
+            <div className={styles.downloadIcon}>
+              <Download size={28} />
+            </div>
+            <span className={styles.cardLabel}>Enturma PWA</span>
+            <h2>Instalar Enturma</h2>
             <p>
-              {android
-                ? "Aplicativo nativo com navegação por abas, salas e comunidade."
-                : "Um arquivo para instalar o Enturma, criar seus atalhos e receber as próximas atualizações no aplicativo."}
+              Esta é a opção principal. Não é necessário executar instalador
+              baixado nem liberar instalação de fontes desconhecidas.
             </p>
-            {android ? (
-              <a className={styles.primary} href={androidUrl}>
-                <Download size={18} />
-                Baixar Enturma Android {androidVersion}
-              </a>
-            ) : (
-              <a
-                className={styles.primary}
-                href={`${desktopOrigin}/Enturma-Setup-0.3.0.exe`}
-              >
-                <Download size={18} />
-                Baixar Enturma-Setup-0.3.0.exe
-              </a>
-            )}
+            <PwaInstallButton />
             <small className={styles.downloadNote}>
-              {android
-                ? `APK oficial do Enturma para Android · versão ${androidVersion}. Sua conta e seus dados continuam sincronizados com a versão Web.`
-                : "A instalação Windows é por usuário. Seus dados e sua conta continuam no Enturma."}
+              Em navegadores compatíveis, o botão abre a instalação nativa. Se
+              o navegador exigir ação manual, o próprio Enturma mostra as
+              instruções.
             </small>
           </aside>
         </section>
-        <section
-          className={styles.features}
-          aria-label="Plataformas disponíveis"
-        >
+
+        <section className={styles.features} aria-label="Como funciona">
           <article>
             <Monitor size={28} />
             <div>
               <h2>Windows</h2>
-              <p>Instalador NSIS, atalhos e atualização pelo aplicativo.</p>
-              <a href={`${desktopOrigin}/Enturma-Setup-0.3.0.exe`}>
-                Baixar instalador 0.3.0
-              </a>
+              <p>
+                Edge e Chrome podem instalar o Enturma como aplicativo
+                independente, com ícone e atalho no sistema.
+              </p>
             </div>
           </article>
           <article>
@@ -139,60 +124,91 @@ export default async function DownloadPage() {
             <div>
               <h2>Android</h2>
               <p>
-                Build nativo Expo/React Native. Configurações de APK e AAB
-                prontas para distribuição.
+                Chrome e navegadores compatíveis adicionam o Enturma como app
+                sem precisar instalar o APK manualmente.
               </p>
-              <a href={androidUrl}>Baixar APK {androidVersion}</a>
             </div>
           </article>
           <article>
-            <Smartphone size={28} />
+            <RefreshCw size={28} />
             <div>
-              <h2>iOS</h2>
+              <h2>Sempre atualizado</h2>
               <p>
-                Em preparação. A distribuição será liberada após assinatura e
-                validação para dispositivos Apple.
+                A interface vem da versão Web oficial, então melhorias e
+                correções chegam sem baixar um novo instalador.
               </p>
             </div>
           </article>
         </section>
+
         <section className={styles.steps}>
           <div>
-            <span className={styles.eyebrow}>Windows em poucos passos</span>
-            <h2>Instale e entre na sua turma</h2>
+            <span className={styles.eyebrow}>Instalação simples</span>
+            <h2>Três passos e pronto</h2>
           </div>
           <ol>
             <li>
               <span>1</span>
               <div>
-                <strong>Baixe</strong>
-                <p>Salve o arquivo Enturma-Setup-0.3.0.exe.</p>
+                <strong>Toque em Instalar Enturma</strong>
+                <p>O navegador abre o fluxo de instalação compatível.</p>
               </div>
             </li>
             <li>
               <span>2</span>
               <div>
-                <strong>Instale</strong>
-                <p>Execute o instalador e escolha seus atalhos.</p>
+                <strong>Confirme no navegador</strong>
+                <p>Não existe EXE ou APK nesse método.</p>
               </div>
             </li>
             <li>
               <span>3</span>
               <div>
-                <strong>Entre</strong>
-                <p>Abra o Enturma e use sua conta habitual.</p>
+                <strong>Abra pelo novo ícone</strong>
+                <p>Sua conta e seus dados continuam exatamente os mesmos.</p>
               </div>
             </li>
           </ol>
         </section>
+
+        <details className={styles.advanced}>
+          <summary>Opções avançadas: instaladores tradicionais</summary>
+          <div className={styles.advancedGrid}>
+            <article>
+              <Monitor size={24} />
+              <div>
+                <strong>Windows EXE</strong>
+                <p>
+                  Mantido para compatibilidade com a versão Electron completa.
+                  O Windows pode mostrar avisos para executáveis sem reputação.
+                </p>
+                <a href={`${desktopOrigin}/Enturma-Setup-0.3.0.exe`}>
+                  Baixar Enturma-Setup-0.3.0.exe
+                </a>
+              </div>
+            </article>
+            <article>
+              <Smartphone size={24} />
+              <div>
+                <strong>Android APK {androidVersion}</strong>
+                <p>
+                  Mantido como alternativa nativa. A instalação direta pode
+                  exigir autorização de fonte externa no Android.
+                </p>
+                <a href={androidUrl}>Baixar APK {androidVersion}</a>
+              </div>
+            </article>
+          </div>
+        </details>
+
         <footer className={styles.footer}>
           <span>
             <BookOpen size={22} />
             Enturma
           </span>
           <span>
-            <RefreshCw size={18} />
-            Atualizações pelo aplicativo
+            <ShieldCheck size={18} />
+            Instalação recomendada via navegador
           </span>
           <Link href="/home">Continuar no navegador</Link>
         </footer>

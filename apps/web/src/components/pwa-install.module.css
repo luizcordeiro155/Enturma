@@ -1,0 +1,66 @@
+.wrapper {
+  display: grid;
+  gap: 10px;
+}
+
+.install {
+  min-height: 52px;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: 1px solid var(--ink);
+  border-radius: 10px;
+  background: var(--ink);
+  color: var(--surface);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+:global(html[data-theme="dark"]) .install {
+  color: #10211c;
+}
+
+.install:hover:not(:disabled) {
+  filter: brightness(0.96);
+}
+
+.install:disabled {
+  cursor: default;
+  opacity: 0.78;
+}
+
+.note,
+.help {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.helpButton {
+  min-height: 42px;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 750;
+  cursor: pointer;
+}
+
+.help {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--soft);
+}

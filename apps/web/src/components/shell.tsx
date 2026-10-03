@@ -37,7 +37,7 @@ const links = [
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },
   { href: "/caronas", label: "Caronas", icon: Car },
   { href: "/settings", label: "Configurações", icon: Settings },
-  { href: "/download", label: "Baixar aplicativo", icon: Download },
+  { href: "/download", label: "Instalar aplicativo", icon: Download },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
