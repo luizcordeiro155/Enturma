@@ -105,6 +105,9 @@ private const val PREF_DOWNLOAD_ID = "download_id"
 private const val PREF_DOWNLOAD_URL = "download_url"
 private const val PREF_DOWNLOAD_BASE_VERSION = "download_base_version"
 private const val PREF_INSTALL_PROMPTED_ID = "install_prompted_id"
+private const val PREF_INSTALL_PROMPTED_AT = "install_prompted_at"
+private const val UPDATE_RELAUNCH_REQUEST = 4804
+private const val INSTALLER_DEDUP_MS = 1500L
 
 private fun isNewerVersion(remote: String, current: String): Boolean {
     val a = remote.split(".").map { it.toIntOrNull() ?: 0 }
@@ -442,6 +445,43 @@ private fun showInstallReadyNotification(context: Context, downloadId: Long) {
     val manager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     manager.notify(UPDATE_NOTIFICATION_ID, notification)
+}
+
+class EnturmaPackageReplacedReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent?) {
+        if (intent?.action != Intent.ACTION_MY_PACKAGE_REPLACED) return
+
+        context.getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .clear()
+            .apply()
+        (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+            .cancel(UPDATE_NOTIFICATION_ID)
+
+        val launch = context.packageManager.getLaunchIntentForPackage(context.packageName)
+            ?.apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+            } ?: return
+
+        val pending = PendingIntent.getActivity(
+            context,
+            UPDATE_RELAUNCH_REQUEST,
+            launch,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        runCatching {
+            val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarm.set(
+                AlarmManager.ELAPSED_REALTIME_WAKEUP,
+                android.os.SystemClock.elapsedRealtime() + 900L,
+                pending,
+            )
+        }.onFailure {
+            runCatching { pending.send() }
+        }
+    }
 }
 
 class EnturmaDownloadCompleteReceiver : BroadcastReceiver() {
@@ -782,6 +822,14 @@ class MainActivity : Activity() {
             startUpdateInstall(pending)
         }
         maybeOpenCompletedUpdate()
+        if (::webView.isInitialized) {
+            webView.postDelayed({
+                webView.evaluateJavascript(
+                    "window.dispatchEvent(new Event('enturma-mobile-update-check'));",
+                    null,
+                )
+            }, 350L)
+        }
     }
 
     override fun onPause() {
@@ -911,10 +959,16 @@ class MainActivity : Activity() {
     private fun openDownloadedInstaller(
         uri: Uri,
         downloadId: Long? = null,
+        force: Boolean = false,
     ): Boolean {
-        if (downloadId != null && downloadId > 0) {
+        if (downloadId != null && downloadId > 0 && !force) {
             val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
-            if (prefs.getLong(PREF_INSTALL_PROMPTED_ID, -1L) == downloadId) return true
+            val promptedId = prefs.getLong(PREF_INSTALL_PROMPTED_ID, -1L)
+            val promptedAt = prefs.getLong(PREF_INSTALL_PROMPTED_AT, 0L)
+            if (
+                promptedId == downloadId &&
+                System.currentTimeMillis() - promptedAt < INSTALLER_DEDUP_MS
+            ) return true
         }
         return runCatching {
             startActivity(
@@ -929,6 +983,7 @@ class MainActivity : Activity() {
                 getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
                     .edit()
                     .putLong(PREF_INSTALL_PROMPTED_ID, downloadId)
+                    .putLong(PREF_INSTALL_PROMPTED_AT, System.currentTimeMillis())
                     .apply()
             }
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
@@ -1070,7 +1125,7 @@ class MainActivity : Activity() {
                         DownloadManager.STATUS_SUCCESSFUL -> {
                             val downloaded = manager.getUriForDownloadedFile(previousId)
                             if (downloaded != null) {
-                                openDownloadedInstaller(downloaded, previousId)
+                                openDownloadedInstaller(downloaded, previousId, true)
                                 return
                             }
                         }
@@ -1091,6 +1146,7 @@ class MainActivity : Activity() {
             .putString(PREF_DOWNLOAD_URL, downloadUrl)
             .putString(PREF_DOWNLOAD_BASE_VERSION, APP_VERSION)
             .remove(PREF_INSTALL_PROMPTED_ID)
+            .remove(PREF_INSTALL_PROMPTED_AT)
             .apply()
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
             .cancel(UPDATE_NOTIFICATION_ID)
@@ -1499,6 +1555,17 @@ if (!manifest.includes("EnturmaUpdateReceiver")) {
     <receiver android:name=".EnturmaBootReceiver" android:enabled="true" android:exported="true">
       <intent-filter>
         <action android:name="android.intent.action.BOOT_COMPLETED" />
+      </intent-filter>
+    </receiver>
+  </application>`,
+  );
+}
+if (!manifest.includes("EnturmaPackageReplacedReceiver")) {
+  manifest = manifest.replace(
+    "</application>",
+    `    <receiver android:name=".EnturmaPackageReplacedReceiver" android:enabled="true" android:exported="false">
+      <intent-filter>
+        <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
       </intent-filter>
     </receiver>
   </application>`,
