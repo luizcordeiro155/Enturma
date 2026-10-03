@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Brain, CheckCircle2, Lightbulb, Send, Sparkles } from "lucide-react";
 import { api, post } from "@/lib/api";
 
@@ -14,12 +14,14 @@ export function CampusTutor({
   goal,
   mode="EXPLAIN",
   compact=false,
+  autoPrompt,
 }:{
   subjectId?:string|null;
   focusSessionId?:string|null;
   goal:string;
   mode?:TutorAction;
   compact?:boolean;
+  autoPrompt?:string;
 }){
   const [profile,setProfile]=useState<TutorProfile>();
   const [message,setMessage]=useState("");
@@ -27,6 +29,7 @@ export function CampusTutor({
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
   const [rated,setRated]=useState(false);
+  const autoStarted=useRef(false);
 
   useEffect(()=>{
     let active=true;
@@ -54,6 +57,13 @@ export function CampusTutor({
     }catch(e){setError((e as Error).message)}
     finally{setBusy(false)}
   }
+
+  useEffect(()=>{
+    if(!autoPrompt||autoStarted.current)return;
+    autoStarted.current=true;
+    const timer=window.setTimeout(()=>void ask("PLAN",autoPrompt),120);
+    return()=>window.clearTimeout(timer);
+  },[autoPrompt]);
 
   async function rate(rating:number,preference?:string){
     if(!reply)return;
