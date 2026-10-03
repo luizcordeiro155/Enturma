@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Users, Clock, ArrowRight } from "lucide-react";
+import { BookOpen, Users, Clock, ArrowRight, GraduationCap } from "lucide-react";
 import type { Profile, Room } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
@@ -88,6 +88,57 @@ export function Dashboard() {
               </section>
             ) : null}
           </div>
+          {profile ? (
+            <section id="minhas-materias" className="home-subjects-section">
+              <div className="section-heading">
+                <div>
+                  <span className="home-section-kicker">
+                    <GraduationCap size={16} />
+                    Seu semestre
+                  </span>
+                  <h2>Minhas matérias</h2>
+                </div>
+                <Link className="button secondary" href="/onboarding">
+                  Atualizar matérias
+                </Link>
+              </div>
+              {profile.subjects.length ? (
+                <div className="home-subjects-grid">
+                  {profile.subjects.map((subject) => (
+                    <article key={subject.id} className="home-subject-card">
+                      <div className="subject-mark">
+                        <BookOpen />
+                      </div>
+                      <div>
+                        <h3>
+                          <Link href={`/subjects/${subject.id}`}>
+                            {subject.name}
+                          </Link>
+                        </h3>
+                        <small>{subject.sourceName}</small>
+                      </div>
+                      <Link className="button secondary" href="/rooms/new">
+                        Estudar
+                      </Link>
+                    </article>
+                  ))}
+                </div>
+              ) : (
+                <div className="empty compact">
+                  <GraduationCap size={34} />
+                  <div>
+                    <h3>Escolha suas matérias</h3>
+                    <p>
+                      Elas ficam no Início e conectam você a salas, conteúdos e colegas.
+                    </p>
+                  </div>
+                  <Link className="button" href="/onboarding">
+                    Selecionar matérias
+                  </Link>
+                </div>
+              )}
+            </section>
+          ) : null}
           <div className="dashboard-community">
             <div className="section-heading">
               <h2>Salas acontecendo agora</h2>

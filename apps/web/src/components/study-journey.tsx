@@ -34,7 +34,7 @@ const steps = [
     title: "Escolha sua matéria",
     body: "Salve as matérias do seu perfil acadêmico.",
     action: "Escolher matérias",
-    href: "/subjects",
+    href: "/home#minhas-materias",
   },
   {
     title: "Encontre sua turma",
@@ -64,7 +64,7 @@ const lessons = [
     body: "Complete universidade, campus, curso e período no perfil acadêmico. Selecione as matérias que está estudando para encontrar conteúdo e colegas do mesmo assunto.",
     tip: "Você pode revisar sua seleção em Minhas matérias. Os jogos de programação aparecem para quem estuda cursos ou matérias de TI.",
     action: "Escolher minhas matérias",
-    href: "/subjects",
+    href: "/home#minhas-materias",
   },
   {
     title: "Encontre companhia para estudar",

@@ -1,4 +1,2 @@
-import { ProfileView } from "@/components/profile";
-export default function Page() {
-  return <ProfileView subjectsOnly />;
-}
+import { redirect } from "next/navigation";
+export default function Page(){redirect("/home#minhas-materias");}

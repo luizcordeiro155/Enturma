@@ -85,7 +85,12 @@ export default function Home() {
         ) : null}
       </View>
 
-      <View style={{ gap: 12 }}>
+      <View style={[styles.card,{gap:12}]}>
+        <View style={{flexDirection:"row",alignItems:"center",gap:10}}>
+          <Ionicons name="book-outline" size={22} color={styles.text.color}/>
+          <Text style={[styles.label,{marginBottom:0}]}>Minhas matérias</Text>
+        </View>
+        <Text style={styles.muted}>Suas matérias ficam no Início e conectam você a salas, conteúdos e colegas.</Text>
         {p?.subjects.map((subject) => (
           <View key={subject.id} style={styles.row}>
             <Text style={styles.label}>{subject.name}</Text>
@@ -105,6 +110,8 @@ export default function Home() {
             />
           </View>
         ))}
+        {!p?.subjects.length ? <Text style={styles.muted}>Nenhuma matéria selecionada ainda.</Text> : null}
+        <Button title="Atualizar minhas matérias" onPress={() => router.push("/onboarding")} />
       </View>
 
       <View style={{ gap: 12 }}>

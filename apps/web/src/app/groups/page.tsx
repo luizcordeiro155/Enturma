@@ -1,2 +1,2 @@
-import { StudyGroups } from "@/components/study-groups";
-export default function GroupsPage(){return <StudyGroups/>;}
+import { redirect } from "next/navigation";
+export default function GroupsPage(){redirect("/campus#grupos-estudo");}

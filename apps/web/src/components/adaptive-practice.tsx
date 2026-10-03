@@ -21,7 +21,7 @@ type Result = {
   weakTopics:{topic:string;attempts:number;correct:number;accuracy:number}[];
 };
 
-export function AdaptivePractice(){
+export function AdaptivePractice({ embedded = false }: { embedded?: boolean } = {}){
   const [profile,setProfile]=useState<Profile>();
   const [diagnostic,setDiagnostic]=useState<Diagnostic>();
   const [session,setSession]=useState<Session>();
@@ -78,9 +78,9 @@ export function AdaptivePractice(){
     ? Math.round((diagnostic.totals.correct/diagnostic.totals.attempts)*100)
     : null;
 
-  return <Shell><div className="practice-page" ref={panel}>
+  const content = <section id="pratica-adaptativa" className={embedded ? "practice-page embedded-suite" : "practice-page"} ref={panel}>
     <header className="suite-heading">
-      <div><BrainCircuit size={32}/><h1>Prática adaptativa</h1></div>
+      <div><BrainCircuit size={32}/>{embedded ? <h2>Prática adaptativa</h2> : <h1>Prática adaptativa</h1>}</div>
       <p>O Enturma usa seus próprios resultados para reforçar os assuntos em que você mais erra, sem transformar estudo em spam de XP.</p>
     </header>
     <Feedback error={error}/>
@@ -113,5 +113,6 @@ export function AdaptivePractice(){
       </article>)}
       {!result?<button className="button practice-submit" disabled={busy||Object.keys(answers).length!==session.questions.length} onClick={()=>void submit()}><Target size={17}/> Corrigir prática</button>:<div className="practice-result"><CheckCircle2/><strong>{result.correct} de {result.total}</strong><span>Use o diagnóstico acima para decidir o próximo estudo.</span></div>}
     </section>:null}
-  </div></Shell>;
+  </section>;
+  return embedded ? content : <Shell>{content}</Shell>;
 }

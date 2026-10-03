@@ -34,7 +34,7 @@ export function SubjectDetail({ id }: { id: string }) {
   return (
     <Shell>
       <div className="narrow">
-        <Link href="/subjects">← Minhas matérias</Link>
+        <Link href="/home#minhas-materias">← Minhas matérias no Início</Link>
         <Feedback error={error} />
         {s ? (
           <>

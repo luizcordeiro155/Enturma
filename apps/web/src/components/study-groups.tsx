@@ -13,7 +13,7 @@ type Group={
   subjectName?:string|null;members:number;joined?:boolean|null;
 };
 
-export function StudyGroups(){
+export function StudyGroups({ embedded = false }: { embedded?: boolean } = {}){
   const [profile,setProfile]=useState<Profile>();
   const [groups,setGroups]=useState<Group[]>([]);
   const [showCreate,setShowCreate]=useState(false);
@@ -58,10 +58,10 @@ export function StudyGroups(){
     catch(e){setError((e as Error).message);}
   }
 
-  return <Shell><div ref={root} className="groups-page">
+  const content = <section id="grupos-estudo" ref={root} className={embedded ? "groups-page embedded-suite" : "groups-page"}>
     <header className="groups-hero" data-group-card>
       <div><span className="campus-kicker"><Users size={16}/> Comunidade permanente</span>
-      <h1>Grupos de estudo</h1><p>Organize a turma além de uma única sessão: matéria, projetos, provas e rotina do semestre.</p></div>
+      {embedded ? <h2>Grupos de estudo</h2> : <h1>Grupos de estudo</h1>}<p>Organize a turma além de uma única sessão: matéria, projetos, provas e rotina do semestre.</p></div>
       <button className="button" onClick={()=>setShowCreate(v=>!v)}><Plus size={17}/> Criar grupo</button>
     </header>
     <Feedback error={error} success={notice}/>
@@ -87,5 +87,6 @@ export function StudyGroups(){
       </article>)}
       {!groups.length?<div className="campus-empty"><Users/><h3>Nenhum grupo por aqui ainda.</h3><p>Crie o primeiro grupo permanente da sua turma.</p></div>:null}
     </section>}
-  </div></Shell>;
+  </section>;
+  return embedded ? content : <Shell>{content}</Shell>;
 }

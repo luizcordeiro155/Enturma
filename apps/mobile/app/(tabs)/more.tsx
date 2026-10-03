@@ -16,21 +16,15 @@ export default function More() {
         <Ionicons name="grid-outline" size={28} color={styles.text.color} />
         <Button title="Hoje / Agenda" onPress={() => router.push("/campus")} />
         <Button title="Amigos" onPress={() => router.push("/friends")} />
-        <Button title="Grupos de estudo" onPress={() => router.push("/groups")} />
         <Button title="Caronas" onPress={() => router.push("/rides")} />
         <Button
           title="Notificações"
           onPress={() => router.push("/notifications")}
         />
         <Button
-          title="Minhas matérias"
-          onPress={() => router.push("/onboarding")}
-        />
-        <Button
           title="Minigames acadêmicos"
           onPress={() => router.push("/challenges")}
         />
-        <Button title="Prática adaptativa" onPress={() => router.push("/practice")} />
         <Button title="Portfólio acadêmico" onPress={() => router.push("/portfolio")} />
         <Button title="Turmas / Professor" onPress={() => router.push("/teacher")} />
         <Button

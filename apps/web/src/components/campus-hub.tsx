@@ -11,6 +11,8 @@ import { api, post } from "@/lib/api";
 import { Feedback, Loading } from "./feedback";
 import { resilientRead, refreshWhenOnline } from "@/lib/offline-data";
 import { CampusTools } from "./campus-tools";
+import { AdaptivePractice } from "./adaptive-practice";
+import { StudyGroups } from "./study-groups";
 
 type Task={id:string;kind:string;title:string;notes:string;dueAt:string;estimatedMinutes:number;priority:string;completedAt?:string|null;subjectName?:string|null};
 type Match={id:string;name:string;username:string;goal:string;preferredMode:string;subjectName?:string|null};
@@ -187,7 +189,7 @@ export function CampusHub(){
           <div className="campus-links">
             <Link href="/notebooks"><BookOpen/> Cadernos IA <span>→</span></Link>
             <Link href="/challenges"><Trophy/> Desafios acadêmicos <span>→</span></Link>
-            <Link href="/subjects"><GraduationCap/> Minhas matérias <span>→</span></Link>
+            <Link href="/home#minhas-materias"><GraduationCap/> Minhas matérias no Início <span>→</span></Link>
           </div>
         </section>
 
@@ -201,6 +203,11 @@ export function CampusHub(){
           {data.events.length?data.events.slice(0,4).map(ev=><article className="campus-event" key={ev.id}><strong>{ev.title}</strong><span>{new Date(ev.startsAt).toLocaleString("pt-BR",{day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"})}</span></article>):<p className="muted">Eventos acadêmicos aparecerão aqui.</p>}
         </section>
       </aside>
+    </div>
+
+    <div className="campus-integrated-suites">
+      <AdaptivePractice embedded />
+      <StudyGroups embedded />
     </div>
   </div>;
 }

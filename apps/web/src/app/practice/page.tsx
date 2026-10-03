@@ -1,2 +1,2 @@
-import { AdaptivePractice } from "@/components/adaptive-practice";
-export default function Page(){return <AdaptivePractice/>;}
+import { redirect } from "next/navigation";
+export default function Page(){redirect("/campus#pratica-adaptativa");}

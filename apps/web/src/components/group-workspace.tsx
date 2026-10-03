@@ -35,7 +35,7 @@ export function GroupWorkspace({id}:{id:string}){
  async function remove(taskId:string){try{await api("/campus/groups/"+id+"/tasks/"+taskId,{method:"DELETE"});await load()}catch(e){setError((e as Error).message)}}
  if(!data)return <Shell><p role="status">Abrindo grupo…</p></Shell>;
  return <Shell><div className="group-workspace-page">
-   <Link href="/groups" className="back-link"><ArrowLeft size={16}/> Grupos</Link>
+   <Link href="/campus#grupos-estudo" className="back-link"><ArrowLeft size={16}/> Voltar para Hoje / Agenda</Link>
    <header className="suite-heading"><div><Users size={32}/><h1>{data.name}</h1></div><p>{data.description||data.subjectName||"Espaço permanente para organizar estudos e trabalhos."}</p></header>
    <Feedback error={error} success={success}/>
    <form className="group-task-create" onSubmit={create}><input name="title" required maxLength={180} placeholder="Nova tarefa do grupo"/><input name="dueAt" type="datetime-local"/><select name="assignedTo" defaultValue=""><option value="">Sem responsável</option>{data.members.map(m=><option key={m.id} value={m.id}>{m.name}</option>)}</select><textarea name="description" maxLength={1200} placeholder="Detalhes, links ou definição de pronto"/><button disabled={busy}><Plus size={16}/> Adicionar tarefa</button></form>

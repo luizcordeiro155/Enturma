@@ -187,7 +187,7 @@ export function AcademicLab() {
             {!games.length && (
               <p>
                 Selecione suas matérias verificadas em{" "}
-                <Link href="/subjects">Minhas matérias</Link>. As atividades
+                <Link href="/home#minhas-materias">Minhas matérias no Início</Link>. As atividades
                 compatíveis aparecerão aqui.
               </p>
             )}
