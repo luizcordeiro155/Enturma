@@ -50,7 +50,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
   const [emailCelebration, setEmailCelebration] = useState(false);
   const [installedApp, setInstalledApp] = useState(false);
   const [emailCelebrationSeconds, setEmailCelebrationSeconds] = useState(8);
-  useEffect(() => { setInstalledApp(isInstalledApp()); }, []);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setInstalledApp(isInstalledApp()), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
   useEffect(() => {
     let active = true;
     let previous: boolean | null = null;
