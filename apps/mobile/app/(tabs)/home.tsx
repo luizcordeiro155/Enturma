@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type { Profile, Room } from "@enturma/contracts";
 import { api, logout } from "../../src/api";
 import { Screen, Button, Field, ErrorMessage, useStyles } from "../../src/ui";
+import { useRealtime } from "../../src/realtime";
 
 export default function Home() {
   const styles = useStyles();
@@ -33,6 +34,14 @@ export default function Home() {
       };
     }, []),
   );
+
+  useRealtime((event) => {
+    if (event.type === "rooms_changed") {
+      void api<Room[]>("/study-rooms")
+        .then(setRooms)
+        .catch(() => {});
+    }
+  });
 
   async function study(subjectId: string, title: string) {
     try {
