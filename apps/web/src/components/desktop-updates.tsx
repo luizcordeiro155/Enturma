@@ -311,7 +311,23 @@ export function DesktopUpdateProvider({
             });
             return;
           }
-          if (isMobileApp() && state?.status === "downloading") return;
+          if (
+            isMobileApp() &&
+            state?.status === "downloading" &&
+            state.downloadUrl &&
+            window.EnturmaNative?.installUpdate
+          ) {
+            // Também funciona como "retomar instalação": se o APK já terminou de
+            // baixar e o usuário cancelou o instalador do Android, o bridge nativo
+            // reaproveita o arquivo verificado e abre o instalador novamente.
+            window.EnturmaNative.installUpdate(state.downloadUrl);
+            setState({
+              ...state,
+              message:
+                "Retomando a atualização. Se o download já terminou, o Android abrirá novamente a confirmação de instalação.",
+            });
+            return;
+          }
           setOpen(true);
         },
         check: () => {
@@ -373,7 +389,7 @@ export function DesktopUpdateProvider({
                         ...state,
                         status: "downloading",
                         message:
-                          "Download iniciado. O Android pedirá sua confirmação para instalar a atualização.",
+                          "Download iniciado. Ao concluir, o Enturma abrirá automaticamente a instalação. O Android ainda pode exigir a confirmação de segurança do sistema.",
                       });
                     } else {
                       window.location.href = state.downloadUrl;
@@ -604,8 +620,8 @@ export function AppUpdateSettingsCard() {
             Atualizar agora
           </button>
         ) : mobile && downloading ? (
-          <button type="button" disabled>
-            Baixando…
+          <button type="button" onClick={open}>
+            Retomar atualização
           </button>
         ) : current ? (
           <button type="button" className="secondary" onClick={check}>
