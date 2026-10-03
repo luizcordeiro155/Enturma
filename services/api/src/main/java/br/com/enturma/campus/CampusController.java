@@ -46,10 +46,10 @@ public class CampusController {
         "SELECT count(*) FILTER(WHERE next_review_at<=now()) due_flashcards,count(*) total_flashcards"
         + " FROM study_flashcard WHERE user_id=?", a.id());
     var study = db.one(
-        "SELECT coalesce(total_xp,0) total_xp,coalesce(streak,0) streak"
+        "SELECT coalesce(total_xp,0) total_xp,coalesce(current_streak,0) streak"
         + " FROM learning_stats WHERE user_id=?", a.id());
     var activeRooms = db.one(
-        "SELECT count(*) active_rooms FROM study_room r WHERE r.ends_at>now() AND NOT r.ended");
+        "SELECT count(*) active_rooms FROM study_room r WHERE r.ends_at>now() AND r.status IN ('OPEN','ACTIVE')");
     var matched = db.list(
         "SELECT u.id,u.name,u.username,p.goal,p.preferred_mode,e.name subject_name"
         + " FROM study_match_profile p JOIN app_user u ON u.id=p.user_id"
