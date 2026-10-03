@@ -29,6 +29,21 @@ public class CampusController {
 
   public record FocusRequest(UUID subjectId, @Size(max=180) String label, @Min(5) @Max(240) int minutes) {}
   public record MatchRequest(UUID subjectId, @Size(max=200) String goal, boolean availableNow, String preferredMode) {}
+  public record ExamPlanRequest(
+      UUID subjectId,
+      @NotBlank @Size(max=180) String title,
+      @NotNull Instant examAt,
+      @Size(max=20) List<@Size(max=120) String> topics) {}
+  public record FlashcardRequest(
+      UUID notebookId, UUID subjectId,
+      @NotBlank @Size(max=1200) String front,
+      @NotBlank @Size(max=2400) String back) {}
+  public record FlashcardReview(@Min(1) @Max(4) int rating) {}
+  public record GroupRequest(
+      UUID subjectId,
+      @NotBlank @Size(max=120) String name,
+      @Size(max=600) String description,
+      String visibility) {}
 
   @GetMapping("/today")
   public Object today(@AuthenticationPrincipal Actor a) {
@@ -125,6 +140,120 @@ public class CampusController {
         + " VALUES (?,?,?,?,?,now()) ON CONFLICT(user_id) DO UPDATE SET subject_id=EXCLUDED.subject_id,"
         + " goal=EXCLUDED.goal,available_now=EXCLUDED.available_now,preferred_mode=EXCLUDED.preferred_mode,updated_at=now()",
         a.id(),r.subjectId(),Objects.toString(r.goal(),"").strip(),r.availableNow(),mode);
+  }
+
+
+  @PostMapping("/exam-plan")
+  @Transactional
+  public Object examPlan(@AuthenticationPrincipal Actor a, @Valid @RequestBody ExamPlanRequest r) {
+    if (!r.examAt().isAfter(Instant.now().plusSeconds(3600)))
+      throw ApiException.invalid("A prova precisa estar no futuro.");
+    if (r.subjectId() != null && !db.exists(
+        "SELECT EXISTS(SELECT 1 FROM user_subject WHERE user_id=? AND subject_id=?)", a.id(), r.subjectId()))
+      throw ApiException.invalid("Selecione esta matéria no seu perfil primeiro.");
+
+    long days = Math.max(1, Duration.between(Instant.now(), r.examAt()).toDays());
+    int sessions = (int)Math.min(10, Math.max(2, days));
+    List<String> topics = r.topics() == null ? List.of() : r.topics().stream()
+        .filter(Objects::nonNull).map(String::strip).filter(v -> !v.isBlank()).toList();
+    List<Map<String,Object>> created = new ArrayList<>();
+
+    for (int i=0;i<sessions;i++) {
+      double fraction=(i+1.0)/(sessions+1.0);
+      Instant due=Instant.now().plusSeconds((long)(Duration.between(Instant.now(),r.examAt()).toSeconds()*fraction));
+      String topic=topics.isEmpty() ? "" : topics.get(i % topics.size());
+      String title=(i==sessions-1 ? "Revisão final — " : "Revisão — ") + r.title();
+      String notes=topic.isBlank()
+          ? "Sessão criada automaticamente pelo plano de prova do Enturma."
+          : "Foco: "+topic+". Sessão criada automaticamente pelo plano de prova do Enturma.";
+      UUID id=UUID.randomUUID();
+      db.jdbc.update(
+          "INSERT INTO campus_task(id,user_id,subject_id,kind,title,notes,due_at,estimated_minutes,priority)"
+          + " VALUES (?,?,?,'STUDY',?,?,?,45,?)",
+          id,a.id(),r.subjectId(),title,notes,due,i>=sessions-2 ? "HIGH" : "NORMAL");
+      created.add(Map.of("id",id,"dueAt",due.toString(),"title",title,"topic",topic));
+    }
+    UUID examId=UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO campus_task(id,user_id,subject_id,kind,title,notes,due_at,estimated_minutes,priority)"
+        + " VALUES (?,?,?,'EXAM',?,'Gerado pelo plano de preparação.',?,60,'URGENT')",
+        examId,a.id(),r.subjectId(),r.title(),r.examAt());
+    return Map.of("sessions",created,"examTaskId",examId);
+  }
+
+  @GetMapping("/flashcards/due")
+  public Object dueFlashcards(@AuthenticationPrincipal Actor a) {
+    return db.list(
+        "SELECT f.id,f.front,f.back,f.next_review_at,f.review_count,e.name subject_name,n.title notebook_title"
+        + " FROM study_flashcard f LEFT JOIN academic_entry e ON e.id=f.subject_id"
+        + " LEFT JOIN study_notebook n ON n.id=f.notebook_id"
+        + " WHERE f.user_id=? AND f.next_review_at<=now() ORDER BY f.next_review_at LIMIT 50",
+        a.id());
+  }
+
+  @PostMapping("/flashcards")
+  public Object flashcard(@AuthenticationPrincipal Actor a, @Valid @RequestBody FlashcardRequest r) {
+    if (r.notebookId()!=null && !db.exists(
+        "SELECT EXISTS(SELECT 1 FROM study_notebook WHERE id=? AND user_id=?)",r.notebookId(),a.id()))
+      throw ApiException.forbidden();
+    UUID id=UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO study_flashcard(id,user_id,notebook_id,subject_id,front,back) VALUES (?,?,?,?,?,?)",
+        id,a.id(),r.notebookId(),r.subjectId(),r.front().strip(),r.back().strip());
+    return Map.of("id",id);
+  }
+
+  @PostMapping("/flashcards/{id}/review")
+  @Transactional
+  public Object reviewFlashcard(
+      @AuthenticationPrincipal Actor a,@PathVariable UUID id,@Valid @RequestBody FlashcardReview r) {
+    var card=db.one("SELECT interval_days,ease FROM study_flashcard WHERE id=? AND user_id=? FOR UPDATE",id,a.id());
+    int old=((Number)card.get("intervalDays")).intValue();
+    double ease=((Number)card.get("ease")).doubleValue();
+    int interval;
+    if(r.rating()==1){interval=0;ease=Math.max(1.3,ease-.20);}
+    else if(r.rating()==2){interval=Math.max(1,old==0?1:old);ease=Math.max(1.3,ease-.10);}
+    else if(r.rating()==3){interval=old==0?1:Math.max(2,(int)Math.round(old*ease));}
+    else {interval=old==0?3:Math.max(4,(int)Math.round(old*(ease+.25)));ease=Math.min(3.2,ease+.10);}
+    db.jdbc.update(
+        "UPDATE study_flashcard SET interval_days=?,ease=?,review_count=review_count+1,"
+        + " next_review_at=now()+(? * interval '1 day') WHERE id=? AND user_id=?",
+        interval,ease,interval,id,a.id());
+    return Map.of("intervalDays",interval,"ease",ease);
+  }
+
+  @GetMapping("/groups")
+  public Object groups(@AuthenticationPrincipal Actor a) {
+    return db.list(
+        "SELECT g.id,g.name,g.description,g.visibility,g.owner_id,e.name subject_name,"
+        + " count(m.user_id) members, bool_or(m.user_id=?) joined"
+        + " FROM study_group g LEFT JOIN study_group_member m ON m.group_id=g.id"
+        + " LEFT JOIN academic_entry e ON e.id=g.subject_id"
+        + " WHERE g.visibility='PUBLIC' OR g.owner_id=? OR EXISTS(SELECT 1 FROM study_group_member x WHERE x.group_id=g.id AND x.user_id=?)"
+        + " GROUP BY g.id,e.name ORDER BY g.created_at DESC LIMIT 50",
+        a.id(),a.id(),a.id());
+  }
+
+  @PostMapping("/groups")
+  @Transactional
+  public Object createGroup(@AuthenticationPrincipal Actor a,@Valid @RequestBody GroupRequest r) {
+    String visibility=normalize(r.visibility(),Set.of("PRIVATE","COURSE","PUBLIC"),"PRIVATE");
+    UUID id=UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO study_group(id,owner_id,subject_id,name,description,visibility) VALUES (?,?,?,?,?,?)",
+        id,a.id(),r.subjectId(),r.name().strip(),Objects.toString(r.description(),"").strip(),visibility);
+    db.jdbc.update(
+        "INSERT INTO study_group_member(group_id,user_id,role) VALUES (?,?,'OWNER')",id,a.id());
+    return Map.of("id",id);
+  }
+
+  @PostMapping("/groups/{id}/join")
+  public void joinGroup(@AuthenticationPrincipal Actor a,@PathVariable UUID id) {
+    var g=db.one("SELECT visibility FROM study_group WHERE id=?",id);
+    if("PRIVATE".equals(g.get("visibility"))) throw ApiException.forbidden();
+    db.jdbc.update(
+        "INSERT INTO study_group_member(group_id,user_id,role) VALUES (?,?,'MEMBER') ON CONFLICT DO NOTHING",
+        id,a.id());
   }
 
   @GetMapping("/progress")
