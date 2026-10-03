@@ -75,11 +75,10 @@ export function AppShellStateProvider({
   }, []);
 
   useEffect(() => {
-    const installedTimer = window.setTimeout(
-      () => setInstalledApp(isInstalledApp()),
-      0,
-    );
-    void refreshProfileShortcut();
+    const installedTimer = window.setTimeout(() => {
+      setInstalledApp(isInstalledApp());
+      void refreshProfileShortcut();
+    }, 0);
 
     const refreshAvatar = () => void refreshProfileShortcut(true);
     const refreshOnFocus = () => {

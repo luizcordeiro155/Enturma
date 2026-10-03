@@ -41,7 +41,14 @@ export default function VoiceSession({
   const [muted, setMuted] = useState(false);
   const [camera, setCamera] = useState(false);
   const [screen, setScreen] = useState(false);
-  const [screenSupported, setScreenSupported] = useState(true);
+  const [screenSupported] = useState(
+    () =>
+      typeof navigator !== "undefined" &&
+      Boolean(
+        navigator.mediaDevices &&
+          typeof navigator.mediaDevices.getDisplayMedia === "function",
+      ),
+  );
   const [error, setError] = useState("");
   const [deviceNotice, setDeviceNotice] = useState("");
   const [busy, setBusy] = useState(false);
