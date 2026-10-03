@@ -23,7 +23,7 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
-import { isDesktop, isMobileApp, useAppUpdateState } from "./desktop-updates";
+import { isDesktop, isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
@@ -136,7 +136,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
               Praticar programação
             </Link>
           ) : null}
-          {links.map(({ href, label, icon: Icon }) => (
+          {links.filter(({href})=>!(href==="/download"&&isInstalledApp())).map(({ href, label, icon: Icon }) => (
               <Link
                 key={href}
                 href={href}
