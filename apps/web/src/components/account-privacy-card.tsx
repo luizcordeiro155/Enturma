@@ -15,7 +15,7 @@ export function AccountPrivacyCard(){
  const modal=useRef<HTMLDivElement>(null);
  const router=useRouter();
  async function load(){try{setData(await api<Deletion>("/account/privacy/deletion",{cache:"no-store"}));}catch{}}
- useEffect(()=>{void load();},[]);
+ useEffect(()=>{const timer=window.setTimeout(()=>void load(),0);return()=>window.clearTimeout(timer);},[]);
  useEffect(()=>{if(mode&&modal.current)modal.current.animate([{opacity:0,transform:"translateY(12px) scale(.98)"},{opacity:1,transform:"none"}],{duration:260,easing:"cubic-bezier(.2,.8,.2,1)"});},[mode]);
  const pending=!!data?.executeAt&&!data.cancelledAt&&!data.executedAt&&data.mode==="DELAYED";
  async function schedule(){
