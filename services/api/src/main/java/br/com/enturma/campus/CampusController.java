@@ -32,6 +32,7 @@ public class CampusController {
 
   @GetMapping("/today")
   public Object today(@AuthenticationPrincipal Actor a) {
+    db.jdbc.update("INSERT INTO learning_stats(user_id) VALUES (?) ON CONFLICT DO NOTHING", a.id());
     var tasks = db.list(
         "SELECT t.id,t.kind,t.title,t.notes,t.due_at,t.estimated_minutes,t.priority,t.completed_at,"
         + " e.name subject_name FROM campus_task t LEFT JOIN academic_entry e ON e.id=t.subject_id"
