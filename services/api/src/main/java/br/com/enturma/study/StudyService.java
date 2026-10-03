@@ -3,8 +3,10 @@ package br.com.enturma.study;
 import br.com.enturma.academics.CatalogService;
 import br.com.enturma.auth.Actor;
 import br.com.enturma.common.*;
+import br.com.enturma.notifications.AppChanged;
 import java.util.*;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ public class StudyService {
   private final int maxMinutes;
   private final RoomEvents roomEvents;
   private final br.com.enturma.notifications.NotificationService notices;
+  private final ApplicationEventPublisher events;
 
   @Value("${enturma.room-empty-grace-seconds:300}")
   private int graceSeconds = 300;
@@ -25,12 +28,18 @@ public class StudyService {
       CatalogService catalog,
       @Value("${enturma.room-max-minutes}") int maxMinutes,
       RoomEvents roomEvents,
-      br.com.enturma.notifications.NotificationService notices) {
+      br.com.enturma.notifications.NotificationService notices,
+      ApplicationEventPublisher events) {
     this.roomEvents = roomEvents;
     this.notices = notices;
+    this.events = events;
     this.db = db;
     this.catalog = catalog;
     this.maxMinutes = maxMinutes;
+  }
+
+  private void roomsChanged() {
+    events.publishEvent(new AppChanged("rooms_changed", Set.of()));
   }
 
   public List<Map<String, Object>> list(Actor a, UUID subject, int page) {
@@ -113,6 +122,7 @@ public class StudyService {
     join(a, id);
     var result = detail(a, id);
     result.put("reused", reused);
+    roomsChanged();
     return result;
   }
 
@@ -159,6 +169,7 @@ public class StudyService {
         "WELCOME",
         "Bem-vindo à turma! Respeite os colegas, compartilhe conhecimento e consulte os materiais.",
         "join:" + a.id() + ":" + java.time.Instant.now().getEpochSecond() / 60);
+    roomsChanged();
   }
 
   public Map<String, Object> activeLocked(UUID id) {
@@ -244,6 +255,7 @@ public class StudyService {
         "FAREWELL",
         "Até a próxima! Sua contribuição fica com a turma.",
         "leave:" + a.id() + ":" + java.time.Instant.now().getEpochSecond() / 60);
+    roomsChanged();
   }
 
   @Transactional
@@ -254,6 +266,7 @@ public class StudyService {
         "UPDATE room_participant SET left_at=now(),removed=true WHERE room_id=? AND user_id=?",
         id,
         user);
+    roomsChanged();
   }
 
   @Transactional
@@ -292,6 +305,7 @@ public class StudyService {
         topic.strip(),
         locked,
         id);
+    roomsChanged();
   }
 
   private void announce(UUID id, String key, String message) {
@@ -319,9 +333,11 @@ public class StudyService {
             "UPDATE study_room SET status='ENDED',ended_at=now() WHERE id=? AND status IN"
                 + " ('OPEN','ACTIVE')",
             id)
-        > 0)
+        > 0) {
       announce(
           id, "ROOM_ENDED", "O estudo desta sala chegou ao fim. O histórico continua disponível.");
+      roomsChanged();
+    }
   }
 
   @Scheduled(fixedDelay = 10000)
