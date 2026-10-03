@@ -27,3 +27,36 @@
 .flashcard-rating{display:flex;gap:7px;flex-wrap:wrap}.flashcard-rating button{border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:8px 10px;cursor:pointer;display:inline-flex;align-items:center;gap:5px}
 .study-match-control .button{justify-self:start}
 @media(max-width:620px){.campus-inline-form{grid-template-columns:1fr}.campus-inline-form .wide{grid-column:auto}.flashcard-rating button{flex:1;justify-content:center}}
+
+
+/* Adaptive AI tutor shared by Focus, Smart Plan and Flashcards */
+.focus-setup{display:grid;gap:14px}
+.focus-ready-copy{max-width:760px;color:var(--muted)}
+.focus-setup-fields{display:grid;grid-template-columns:minmax(180px,.7fr) minmax(260px,1.3fr);gap:10px}
+.focus-setup-fields label{display:grid;gap:6px;font-size:.84rem;font-weight:750}
+.focus-setup-fields input,.focus-setup-fields select{width:100%;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:11px}
+.focus-start{justify-self:start}
+.focus-running{display:flex;justify-content:space-between;align-items:center;gap:18px;text-align:left}
+.focus-running>div{min-width:0}.focus-running>div>strong{display:block;font-size:clamp(3rem,9vw,6rem);letter-spacing:-.04em;font-variant-numeric:tabular-nums}
+.campus-tutor{display:grid;gap:12px;margin-top:18px;padding:16px;border-top:1px solid var(--line);background:color-mix(in srgb,var(--panel) 94%,var(--accent) 6%);border-radius:14px}
+.campus-tutor.compact{margin-top:16px;padding:14px}
+.campus-tutor-heading{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.campus-tutor-heading>div{display:flex;align-items:center;gap:9px}
+.campus-tutor-heading span{display:grid;gap:1px}.campus-tutor-heading small{color:var(--muted);font-size:.77rem}
+.campus-tutor-memory{display:inline-flex!important;grid-auto-flow:column;align-items:center;gap:5px;padding:6px 8px;border-radius:999px;background:var(--soft);color:var(--muted);font-size:.73rem;white-space:nowrap}
+.campus-tutor-note{display:flex;align-items:flex-start;gap:8px;margin:0;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--muted);font-size:.84rem;line-height:1.5}
+.campus-tutor-note strong{color:var(--ink)}
+.campus-tutor-answer{display:grid;gap:8px;padding:14px;border-radius:12px;background:var(--surface);border:1px solid var(--line)}
+.campus-tutor-answer-label{display:flex;align-items:center;gap:6px;font-size:.78rem;font-weight:850}.campus-tutor-answer p{margin:0;white-space:pre-wrap;line-height:1.65}
+.campus-tutor-feedback,.campus-tutor-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.campus-tutor-feedback span{display:inline-flex;align-items:center;gap:5px;color:var(--muted);font-size:.78rem}
+.campus-tutor-actions button{padding:8px 10px!important;font-size:.78rem}
+.campus-tutor-compose{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:end}
+.campus-tutor-compose textarea{min-height:72px;max-height:180px;resize:vertical;width:100%;border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:11px}
+.campus-tutor-compose button{min-height:44px;display:inline-flex;align-items:center;gap:6px}
+@media(max-width:720px){
+  .focus-setup-fields{grid-template-columns:1fr}
+  .focus-running{align-items:stretch;flex-direction:column}
+  .focus-running>button{width:100%}
+  .campus-tutor-heading{flex-direction:column}
+  .campus-tutor-compose{grid-template-columns:1fr}.campus-tutor-compose button{width:100%;justify-content:center}
+}
