@@ -16,7 +16,7 @@ import {
   Settings,
   Gamepad2,
 } from "lucide-react";
-import { isMobileApp, useAppUpdateState } from "./desktop-updates";
+import { isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
 const tabs = [
   ["/home", "Início", Home],
   ["/campus", "Hoje", CalendarDays],
@@ -97,7 +97,7 @@ export function MobileNavigation() {
               ["/learn", "Programação", Gamepad2],
               ["/download", "Baixar o Enturma", EnturmaAppIcon],
             ] as const
-          ).map(([href, label, Icon]) => (
+          ).filter(([href])=>!(href==="/download"&&isInstalledApp())).map(([href, label, Icon]) => (
               <Link
                 href={href}
                 key={href}
