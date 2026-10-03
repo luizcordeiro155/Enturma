@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState } from "react";\nimport { useRouter } from "expo-router";
 import { Text, View, Switch } from "react-native";
 import {
   Screen,
@@ -20,7 +20,7 @@ const labels: Record<string, string> = {
   FRIEND: "Amizades",
 };
 export default function Settings() {
-  const styles = useStyles();
+  const styles = useStyles();\n  const router = useRouter();
   const { preference: p, save } = useExperience();
   const [items, setItems] = useState<Preference[]>([]),
     [status, setStatus] = useState("");
@@ -81,7 +81,7 @@ export default function Settings() {
           }
         />
       </View>
-      <Text style={styles.label}>Notificações</Text>
+      <Text style={styles.label}>Privacidade</Text>\n      <Button title="Privacidade e exclusão de conta" onPress={() => router.push("/privacy")} />\n      <Text style={styles.label}>Notificações</Text>
       <Text style={styles.muted}>Escolha o que aparece no app, chega no celular ou por e-mail. E-mails de segurança permanecem ativos.</Text>
       {items.map((i) => (
         <View style={styles.row} key={i.category}>
