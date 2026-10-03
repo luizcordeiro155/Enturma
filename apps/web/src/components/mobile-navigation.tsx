@@ -31,7 +31,9 @@ export function MobileNavigation() {
     isMobileApp() &&
     ["available", "downloading", "ready"].includes(updateState?.status ?? "");
   const [open, setOpen] = useState(false);
+  const [installedApp, setInstalledApp] = useState(false);
   const sheet = useRef<HTMLDialogElement>(null);
+  useEffect(() => { setInstalledApp(isInstalledApp()); }, []);
   useEffect(() => {
     if (!open || !sheet.current) return;
     const el = sheet.current;
@@ -97,7 +99,7 @@ export function MobileNavigation() {
               ["/learn", "Programação", Gamepad2],
               ["/download", "Baixar o Enturma", EnturmaAppIcon],
             ] as const
-          ).filter(([href])=>!(href==="/download"&&isInstalledApp())).map(([href, label, Icon]) => (
+          ).filter(([href])=>!(href==="/download"&&installedApp)).map(([href, label, Icon]) => (
               <Link
                 href={href}
                 key={href}
