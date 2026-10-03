@@ -21,6 +21,10 @@ import {
   Compass,
   Sparkles,
   ShieldCheck,
+  Target,
+  Code2,
+  FolderGit2,
+  School,
   type LucideIcon,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -398,13 +402,50 @@ export function ShowcaseView({
   value,
   showBadges = true,
   compact = false,
+  detailed = false,
 }: {
   value: Showcase;
   showBadges?: boolean;
   compact?: boolean;
+  detailed?: boolean;
 }) {
+  const earnedAchievements =
+    value.achievements?.filter((achievement) => achievement.earnedAt) ?? [];
+  const advancedHighlights = [
+    {
+      key: "GOAL",
+      title: "Objetivo da semana",
+      text: value.appearance.goal?.trim(),
+      Icon: Target,
+    },
+    {
+      key: "TECHNOLOGIES",
+      title: "Tecnologias",
+      text: value.appearance.technologies?.trim(),
+      Icon: Code2,
+    },
+    {
+      key: "PROJECTS",
+      title: "Projetos e portfólio",
+      text: value.appearance.projects?.trim(),
+      Icon: FolderGit2,
+    },
+  ].filter((item) => Boolean(item.text));
+
+  const summarizedKinds = new Set([
+    "GOAL",
+    "TECHNOLOGIES",
+    "PROJECTS",
+    "STREAK",
+    "HOURS",
+    "ACADEMIC",
+    "ACHIEVEMENTS",
+  ]);
+
   return (
-    <div className={`profile-showcase${compact ? " profile-showcase-compact" : ""}`}>
+    <div
+      className={`profile-showcase${compact ? " profile-showcase-compact" : ""}${detailed ? " profile-showcase-detailed" : ""}`}
+    >
       {showBadges ? (
         <div className="badge-row">
           {value.badges?.map((b) => {
@@ -453,9 +494,61 @@ export function ShowcaseView({
           Membro desde {new Date(value.joinedAt).toLocaleDateString("pt-BR")}
         </small>
       )}
+
+      {detailed && advancedHighlights.length ? (
+        <div className="profile-advanced-highlights">
+          {advancedHighlights.map(({ key, title, text, Icon }) => (
+            <article className="profile-advanced-highlight" key={key}>
+              <span className="profile-advanced-highlight-icon">
+                <Icon size={18} />
+              </span>
+              <div>
+                <h3>{title}</h3>
+                <p>{text}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : null}
+
+      {detailed && value.academic?.length ? (
+        <article className="profile-advanced-academic">
+          <span className="profile-advanced-highlight-icon">
+            <School size={18} />
+          </span>
+          <div>
+            <h3>Vida acadêmica</h3>
+            {value.academic.map((academic, index) => (
+              <p key={index}>
+                <strong>{academic.course}</strong>
+                {academic.period ? ` · ${academic.period}` : ""}
+                <br />
+                {academic.institution}
+              </p>
+            ))}
+          </div>
+        </article>
+      ) : null}
+
+      {detailed && earnedAchievements.length ? (
+        <section className="profile-advanced-achievements">
+          <div className="profile-advanced-section-heading">
+            <Award size={18} />
+            <div>
+              <h3>Conquistas</h3>
+              <small>{earnedAchievements.length} desbloqueadas</small>
+            </div>
+          </div>
+          <AchievementGrid achievements={earnedAchievements} />
+        </section>
+      ) : null}
+
       <div className="showcase-grid">
         {value.widgets
-          .filter((w) => w.visible)
+          .filter(
+            (w) =>
+              w.visible && (!detailed || !summarizedKinds.has(w.kind)),
+          )
           .map((w) => (
             <article
               key={w.kind}

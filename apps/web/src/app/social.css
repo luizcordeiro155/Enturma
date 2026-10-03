@@ -1456,3 +1456,305 @@ html .auth-story :is(h1, p, span, a, svg) {
   width: 20px;
   height: 20px;
 }
+
+
+/* Profile dialog stability and complete advanced customization 0.3.16 */
+.user-profile-popover .public-profile-card,
+.user-profile-popover .showcase-widget,
+.user-profile-popover .profile-achievement-badge > summary {
+  transform: none !important;
+  will-change: auto !important;
+}
+
+.profile-discord-public-layout {
+  grid-template-columns: minmax(340px, 43%) minmax(0, 57%);
+}
+
+.profile-public-primary {
+  position: relative;
+  isolation: isolate;
+  gap: 0;
+  padding: 0;
+  overflow-y: auto;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--profile-accent, #183f36) 18%, #0f1513) 0%,
+      color-mix(in srgb, var(--profile-secondary, #183f36) 11%, #0f1513) 48%,
+      #0f1513 100%
+    );
+}
+
+.profile-public-primary::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .72;
+}
+
+.profile-public-primary.profile-theme-GRADIENT::before {
+  background:
+    linear-gradient(
+      155deg,
+      color-mix(in srgb, var(--profile-accent) 30%, transparent),
+      transparent 42%,
+      color-mix(in srgb, var(--profile-secondary) 24%, transparent)
+    );
+}
+
+.profile-public-primary.profile-effect-AURORA::before {
+  background:
+    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--profile-secondary) 36%, transparent), transparent 34%),
+    radial-gradient(circle at 88% 68%, color-mix(in srgb, var(--profile-accent) 28%, transparent), transparent 40%);
+  animation: profile-dialog-aurora 8s ease-in-out infinite alternate;
+}
+
+.profile-public-primary.profile-effect-DOTS::before {
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--profile-secondary) 42%, transparent) 1px, transparent 1.5px);
+  background-size: 18px 18px;
+}
+
+.profile-discord-public-layout .public-profile-card {
+  margin: 0;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  overflow: visible;
+  background: transparent;
+}
+
+.profile-discord-public-layout .public-profile-body {
+  min-height: 0;
+  padding: 0 22px 24px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--profile-accent) 20%, #f8f8ef) 0%,
+      color-mix(in srgb, var(--profile-secondary) 12%, #f8f8ef) 100%
+    );
+  color: #173a32;
+}
+
+html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--profile-accent) 22%, #101715) 0%,
+      color-mix(in srgb, var(--profile-secondary) 14%, #101715) 100%
+    );
+  color: var(--ink);
+}
+
+.profile-discord-public-layout .public-profile-body p,
+.profile-discord-public-layout .public-profile-body a,
+.profile-discord-public-layout .public-profile-body strong {
+  color: inherit;
+}
+
+.profile-public-primary .profile-dialog-actions {
+  margin: 0;
+  padding: 34px 18px 18px;
+  background: #0f1513;
+}
+
+.profile-public-primary .profile-main-meta {
+  margin: 0 18px 18px;
+  padding: 16px 2px 0;
+}
+
+.profile-public-advanced {
+  position: relative;
+  isolation: isolate;
+  align-content: start;
+  gap: 18px;
+  padding: 54px 28px 28px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--profile-secondary, #799f80) 6%, var(--surface)) 0%,
+      var(--surface) 260px
+    );
+}
+
+.profile-public-advanced.profile-effect-AURORA::before,
+.profile-public-advanced.profile-effect-DOTS::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: .34;
+}
+
+.profile-public-advanced.profile-effect-AURORA::before {
+  background:
+    radial-gradient(circle at 70% 4%, color-mix(in srgb, var(--profile-secondary) 24%, transparent), transparent 28%);
+}
+
+.profile-public-advanced.profile-effect-DOTS::before {
+  background-image:
+    radial-gradient(circle, color-mix(in srgb, var(--profile-secondary) 22%, transparent) 1px, transparent 1.2px);
+  background-size: 20px 20px;
+}
+
+.profile-showcase-detailed {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-showcase-detailed > small {
+  color: var(--muted);
+}
+
+.profile-advanced-highlights {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.profile-advanced-highlight,
+.profile-advanced-academic,
+.profile-advanced-achievements {
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 90%, var(--soft));
+}
+
+.profile-advanced-highlight,
+.profile-advanced-academic {
+  display: grid;
+  grid-template-columns: 38px minmax(0, 1fr);
+  gap: 11px;
+  padding: 13px;
+}
+
+.profile-advanced-highlight-icon {
+  width: 38px;
+  height: 38px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--profile-secondary, var(--accent)) 14%, var(--soft));
+  color: color-mix(in srgb, var(--profile-secondary, var(--accent)) 76%, var(--ink));
+}
+
+.profile-advanced-highlight h3,
+.profile-advanced-academic h3,
+.profile-advanced-section-heading h3 {
+  margin: 0 0 4px;
+  font-size: .83rem;
+}
+
+.profile-advanced-highlight p,
+.profile-advanced-academic p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .77rem;
+  line-height: 1.48;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.profile-advanced-academic {
+  grid-template-columns: 38px minmax(0, 1fr);
+}
+
+.profile-advanced-academic p + p {
+  margin-top: 8px;
+}
+
+.profile-advanced-achievements {
+  padding: 13px;
+}
+
+.profile-advanced-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.profile-advanced-section-heading > svg {
+  color: color-mix(in srgb, var(--profile-secondary, var(--accent)) 72%, var(--ink));
+}
+
+.profile-advanced-section-heading small {
+  color: var(--muted);
+  font-size: .69rem;
+}
+
+.profile-showcase-detailed .achievement-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+
+.profile-showcase-detailed .achievement-card {
+  min-width: 0;
+}
+
+.profile-showcase-detailed .showcase-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 0;
+}
+
+.profile-showcase-detailed .showcase-widget {
+  min-height: 0;
+  padding: 13px;
+  transform: none !important;
+}
+
+.profile-showcase-detailed .showcase-widget.favorite {
+  border-color: color-mix(in srgb, var(--profile-secondary, var(--accent)) 58%, var(--border));
+}
+
+@keyframes profile-dialog-aurora {
+  from { opacity: .52; filter: hue-rotate(0deg); }
+  to { opacity: .82; filter: hue-rotate(14deg); }
+}
+
+@media (max-width: 860px) and (min-width: 761px) {
+  .profile-discord-public-layout {
+    grid-template-columns: minmax(300px, 46%) minmax(0, 54%);
+  }
+
+  .profile-advanced-highlights,
+  .profile-showcase-detailed .achievement-grid,
+  .profile-showcase-detailed .showcase-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 760px) {
+  .profile-public-primary {
+    padding: 0;
+  }
+
+  .profile-discord-public-layout .public-profile-card {
+    margin: 0;
+  }
+
+  .profile-public-primary .profile-dialog-actions {
+    padding: 26px 14px 16px;
+  }
+
+  .profile-public-primary .profile-main-meta {
+    margin: 0 14px 16px;
+  }
+
+  .profile-public-advanced {
+    padding-inline: 14px;
+  }
+
+  .profile-advanced-highlights,
+  .profile-showcase-detailed .achievement-grid,
+  .profile-showcase-detailed .showcase-grid {
+    grid-template-columns: 1fr;
+  }
+}

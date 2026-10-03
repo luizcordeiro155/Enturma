@@ -293,12 +293,16 @@ export function UserIdentity({
     setOpen(true);
     try {
       const [loadedProfile, loadedShowcase, me] = await Promise.all([
-        loadPublicProfile(user.id),
+        api<PublicProfile>(`/users/${user.id}/profile`, { cache: "no-store" }),
         api<Showcase>(`/users/${user.id}/showcase`, { cache: "no-store" }),
         api<{ id: string }>("/users/me"),
       ]);
       const own = me.id === user.id;
-      setProfile(loadedProfile);
+      profileCache.set(user.id, Promise.resolve(loadedProfile));
+      setProfile({
+        ...loadedProfile,
+        showcaseAppearance: loadedShowcase.appearance,
+      });
       setShowcase(loadedShowcase);
       setIsOwnProfile(own);
       if (!own) {
@@ -361,7 +365,10 @@ export function UserIdentity({
               </button>
               {profile ? (
                 <div className="profile-public-content profile-discord-public-layout">
-                  <section className="profile-public-primary">
+                  <section
+                    className={`profile-public-primary profile-theme-${profile.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${profile.showcaseAppearance?.effect ?? "NONE"}`}
+                    style={profileStyle(profile)}
+                  >
                     <ProfileCard user={profile} showcase={showcase} />
                     {!isOwnProfile ? (
                       <div className="profile-dialog-actions">
@@ -435,7 +442,10 @@ export function UserIdentity({
                     ) : null}
                   </section>
 
-                  <section className="profile-public-advanced">
+                  <section
+                    className={`profile-public-advanced profile-theme-${profile.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${profile.showcaseAppearance?.effect ?? "NONE"}`}
+                    style={profileStyle(profile)}
+                  >
                     <div className="profile-public-advanced-heading">
                       <span>Personalização avançada</span>
                       <h2>
@@ -471,6 +481,7 @@ export function UserIdentity({
                         value={showcase}
                         showBadges={false}
                         compact
+                        detailed
                       />
                     ) : (
                       <p className="muted">Carregando personalização…</p>

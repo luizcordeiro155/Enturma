@@ -251,7 +251,7 @@ export function Motion() {
     function tilt(event: PointerEvent) {
       if (!finePointer.matches || motionDisabled()) return;
       const target = (event.target as Element).closest<HTMLElement>(TILT_SELECTOR);
-      if (!target) return;
+      if (!target || target.closest(".user-profile-popover")) return;
       const rect = target.getBoundingClientRect();
       if (!rect.width || !rect.height) return;
       const px = (event.clientX - rect.left) / rect.width - 0.5;
@@ -277,7 +277,7 @@ export function Motion() {
     function untilt(event: PointerEvent) {
       if (motionDisabled()) return;
       const target = (event.target as Element).closest<HTMLElement>(TILT_SELECTOR);
-      if (!target) return;
+      if (!target || target.closest(".user-profile-popover")) return;
       hoverAnimations.get(target)?.cancel();
       const animation = target.animate(
         [
