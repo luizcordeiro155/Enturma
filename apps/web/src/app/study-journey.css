@@ -275,6 +275,9 @@
   .dashboard-community {
     order: 3;
   }
+  .home-subjects-section {
+    order: 999;
+  }
   .journey-steps {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     column-gap: 20px;
