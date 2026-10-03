@@ -20,7 +20,7 @@ export function GroupWorkspace({id}:{id:string}){
  const [busy,setBusy]=useState(false);
  const board=useRef<HTMLDivElement>(null);
  async function load(){try{setData(await api<Workspace>("/campus/groups/"+id+"/workspace",{cache:"no-store"}))}catch(e){setError((e as Error).message)}}
- useEffect(()=>{void load()},[id]);
+ useEffect(()=>{const timer=window.setTimeout(()=>void load(),0);return()=>window.clearTimeout(timer)},[id]);
  useEffect(()=>{board.current?.querySelectorAll<HTMLElement>("[data-task]").forEach((el,i)=>el.animate([{opacity:.55,transform:"translateY(7px)"},{opacity:1,transform:"none"}],{duration:170+i*20,easing:"cubic-bezier(.16,1,.3,1)"}))},[data?.tasks]);
 
  async function create(e:FormEvent<HTMLFormElement>){
