@@ -56,7 +56,12 @@ public class SecurityConfig {
                     .permitAll()
                     .requestMatchers("/api/v1/admin/**")
                     .hasAnyRole("ADMIN", "SUPER_ADMIN")
-                    .requestMatchers(org.springframework.http.HttpMethod.GET, "/api/v1/catalog/**")
+                    .requestMatchers(
+                        org.springframework.http.HttpMethod.GET,
+                        "/api/v1/catalog/**",
+                        "/api/v1/public/**",
+                        "/api/v1/users/*/avatar",
+                        "/api/v1/users/*/banner")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

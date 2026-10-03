@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { BookOpen, Lock, Plus, Users } from "lucide-react";
 import type { Profile } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
@@ -82,7 +83,7 @@ export function StudyGroups(){
         <h2>{g.name}</h2>
         <p>{g.description||"Grupo de estudo permanente no Enturma."}</p>
         <div className="group-card-meta"><span><Users size={15}/>{g.members} membros</span><span><BookOpen size={15}/>{g.visibility==="PRIVATE"?"Privado":"Público"}</span></div>
-        {g.joined?<span className="group-joined">Você participa</span>:g.visibility!=="PRIVATE"?<button className="button secondary" onClick={()=>void join(g.id)}>Entrar no grupo</button>:null}
+        {g.joined?<><span className="group-joined">Você participa</span><Link className="button secondary" href={`/groups/${g.id}`}>Abrir espaço</Link></>:g.visibility!=="PRIVATE"?<button className="button secondary" onClick={()=>void join(g.id)}>Entrar no grupo</button>:null}
       </article>)}
       {!groups.length?<div className="campus-empty"><Users/><h3>Nenhum grupo por aqui ainda.</h3><p>Crie o primeiro grupo permanente da sua turma.</p></div>:null}
     </section>}

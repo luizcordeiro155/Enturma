@@ -77,7 +77,7 @@ export function SubjectDetail({ id }: { id: string }) {
               <Link className="button" href="/rooms/new">
                 Estudar esta matéria
               </Link>
-              <Link href="/explore">Encontrar salas de estudo</Link>
+              <Link href="/home">Encontrar salas de estudo</Link>
             </div>
           </>
         ) : !error ? (

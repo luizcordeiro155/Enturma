@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { CatalogSearch } from "./catalog-search";
 import { ForumHighlights } from "./forum-highlights";
 import { StudyJourney } from "./study-journey";
-export function Dashboard({ explore = false }: { explore?: boolean }) {
+export function Dashboard() {
   const [profile, setProfile] = useState<Profile>();
   const [rooms, setRooms] = useState<Room[]>([]);
   const [error, setError] = useState("");
@@ -57,21 +57,13 @@ export function Dashboard({ explore = false }: { explore?: boolean }) {
         <div className="dashboard-main">
           <div className="dashboard-intro">
             <h1>
-              {explore ? (
-                "Encontre sua próxima turma."
-              ) : (
-                <>
-                  Seu próximo estudo
-                  <br />
-                  começa em boa companhia.
-                </>
-              )}
+              <>Seu próximo estudo<br />começa em boa companhia.</>
             </h1>
             <p className="lead">
               Encontre sua matéria, entre em uma turma e aprenda junto.
             </p>
             <Feedback error={error} />
-            {explore ? <CatalogSearch /> : null}
+            <CatalogSearch />
             {profile && !profile.enrollment ? (
               <section className="onboarding-banner">
                 <BookOpen size={44} />
@@ -105,16 +97,11 @@ export function Dashboard({ explore = false }: { explore?: boolean }) {
                 </Link>
               ) : null}
             </div>
-            {explore ? (
-              <label>
-                Filtrar salas nesta página
-                <input
+            <label className="home-room-filter">Filtrar salas<input
                   value={filter}
                   onChange={(e) => setFilter(e.target.value)}
                   placeholder="Busque pelo assunto ou objetivo"
-                />
-              </label>
-            ) : null}
+                /></label>
             {loading ? (
               <Loading />
             ) : !error && rooms.length === 0 ? (
@@ -165,8 +152,7 @@ export function Dashboard({ explore = false }: { explore?: boolean }) {
                   ))}
               </div>
             )}
-            {explore ? (
-              <div className="actions">
+            <div className="actions home-room-pages">
                 <button
                   disabled={page === 0}
                   onClick={() => {
@@ -187,8 +173,7 @@ export function Dashboard({ explore = false }: { explore?: boolean }) {
                   Próxima
                 </button>
               </div>
-            ) : null}
-            {!explore ? <ForumHighlights /> : null}
+            <ForumHighlights />
           </div>
         </div>
         {profile ? <StudyJourney enrolled={!!profile.enrollment} /> : null}

@@ -100,4 +100,12 @@ public class ForumController {
       @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Reaction r) {
     forum.react(a, id, r.emoji());
   }
+
+  @PostMapping("/{root}/accept/{comment}")
+  public void acceptAnswer(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID root,
+      @PathVariable UUID comment) {
+    forum.acceptAnswer(a, root, comment);
+  }
 }

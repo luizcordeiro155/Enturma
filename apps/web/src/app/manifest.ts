@@ -33,10 +33,10 @@ export default function manifest(): MetadataRoute.Manifest {
         icons: [{ src: "/pwa/enturma-mobile-official-v6.png", sizes: "512x512", type: "image/png" }],
       },
       {
-        name: "Salas",
+        name: "Salas no Início",
         short_name: "Salas",
-        description: "Encontrar suas salas de estudo",
-        url: "/explore",
+        description: "Encontrar salas de estudo no Início",
+        url: "/home",
         icons: [{ src: "/pwa/enturma-mobile-official-v6.png", sizes: "512x512", type: "image/png" }],
       },
       {

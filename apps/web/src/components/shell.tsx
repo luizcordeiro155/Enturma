@@ -13,13 +13,15 @@ import {
   MessageCircle,
   BookOpen,
   Home,
-  Search,
   Car,
   Settings,
   ShieldCheck,
   Users,
   UserRound,
   CalendarDays,
+  BrainCircuit,
+  BriefcaseBusiness,
+  GraduationCap,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
 import { isDesktop, isMobileApp, useAppUpdateState } from "./desktop-updates";
@@ -31,7 +33,9 @@ const links = [
   { href: "/notebooks", label: "Cadernos IA", icon: BookOpen },
   { href: "/friends", label: "Amigos", icon: Users },
   { href: "/groups", label: "Grupos de estudo", icon: Users },
-  { href: "/explore", label: "Explorar", icon: Search },
+  { href: "/practice", label: "Prática adaptativa", icon: BrainCircuit },
+  { href: "/portfolio", label: "Portfólio", icon: BriefcaseBusiness },
+  { href: "/teacher", label: "Turmas / Professor", icon: GraduationCap },
   { href: "/challenges", label: "Desafios acadêmicos", icon: Gamepad2 },
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },
   { href: "/caronas", label: "Caronas", icon: Car },

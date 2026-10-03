@@ -44,6 +44,9 @@ type Entry = PublicProfile & {
   myVote: number;
   commentsCount: number;
   reactions: { emoji: string; count: number; mine: boolean }[];
+  acceptedAnswerId?: string | null;
+  accepted?: boolean;
+  reputation?: number;
 };
 type PageData = { items: Entry[]; hasMore: boolean };
 type Me = { id: string; role: string };
@@ -270,6 +273,15 @@ export function Forum({
           Responder
         </button>
       )}
+      {entry.rootId && current?.authorId === me?.id ? (
+        <button
+          className="text-button"
+          disabled={busy}
+          onClick={() => mutate(`/forum/${current.id}/accept/${entry.id}`, "POST")}
+        >
+          {entry.accepted ? "Remover solução" : "Aceitar resposta"}
+        </button>
+      ) : null}
       {me?.id === entry.authorId ? (
         <button
           className="text-button"
@@ -339,6 +351,8 @@ export function Forum({
             })}
             {entry.updatedAt !== entry.createdAt ? " · editado" : ""}
           </span>
+          <span className="forum-reputation">{entry.reputation ?? 0} reputação</span>
+          {entry.accepted ? <span className="forum-accepted-badge">✓ Resposta aceita</span> : null}
           {!entry.rootId ? (
             <Link
               className="forum-category"

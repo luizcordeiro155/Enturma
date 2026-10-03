@@ -42,7 +42,13 @@ public class ForumService {
 
   private String projection() {
     return "SELECT e.*,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS NOT"
-        + " NULL has_avatar,coalesce((SELECT sum(v.value) FROM forum_vote v WHERE"
+        + " NULL has_avatar,"
+        + " ((SELECT accepted_answer_id FROM forum_entry root WHERE root.id=coalesce(e.root_id,e.id))=e.id) accepted,"
+        + " ((SELECT count(*)*25 FROM forum_entry root JOIN forum_entry ans ON ans.id=root.accepted_answer_id"
+        + " WHERE ans.author_id=e.author_id)"
+        + " + (SELECT count(*)*2 FROM forum_vote fv JOIN forum_entry fe ON fe.id=fv.entry_id"
+        + " WHERE fe.author_id=e.author_id AND fv.value=1)) reputation,"
+        + " coalesce((SELECT sum(v.value) FROM forum_vote v WHERE"
         + " v.entry_id=e.id),0) score,coalesce((SELECT v.value FROM forum_vote v WHERE"
         + " v.entry_id=e.id AND v.user_id=?),0) my_vote,(SELECT count(*) FROM forum_entry c"
         + " WHERE c.root_id=e.id AND NOT c.deleted) comments_count,coalesce((SELECT"
@@ -296,6 +302,30 @@ public class ForumService {
           a.id(),
           value);
     if (value == 1) activity(a, e, id, "FORUM_LIKE", "Sua publicação recebeu uma curtida.");
+    notices.forumChanged();
+  }
+
+  @Transactional
+  public void acceptAnswer(Actor a, UUID root, UUID comment) {
+    var post = entry(a, root, true);
+    if (post.get("rootId") != null) throw ApiException.invalid("Escolha a publicação principal.");
+    if (!a.id().equals(post.get("authorId"))) throw ApiException.forbidden();
+    var answer = entry(a, comment, true);
+    if (!root.equals(answer.get("rootId")) || Boolean.TRUE.equals(answer.get("deleted")))
+      throw ApiException.invalid("Escolha uma resposta desta publicação.");
+    UUID current = (UUID) post.get("acceptedAnswerId");
+    UUID next = comment.equals(current) ? null : comment;
+    db.jdbc.update("UPDATE forum_entry SET accepted_answer_id=? WHERE id=?", next, root);
+    if (next != null) {
+      notices.send(
+          a.id(),
+          (UUID) answer.get("authorId"),
+          "FORUM_ACCEPTED",
+          "forum:" + root,
+          comment,
+          "/forum/" + root + "#entry-" + comment,
+          "Sua resposta foi marcada como solução.");
+    }
     notices.forumChanged();
   }
 

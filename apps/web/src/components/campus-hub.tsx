@@ -9,6 +9,7 @@ import {
 import type { Profile } from "@enturma/contracts";
 import { api, post } from "@/lib/api";
 import { Feedback, Loading } from "./feedback";
+import { resilientRead, refreshWhenOnline } from "@/lib/offline-data";
 import { CampusTools } from "./campus-tools";
 
 type Task={id:string;kind:string;title:string;notes:string;dueAt:string;estimatedMinutes:number;priority:string;completedAt?:string|null;subjectName?:string|null};
@@ -36,6 +37,7 @@ export function CampusHub(){
   const [data,setData]=useState<Today>();
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
+  const [offline,setOffline]=useState(false);
   const [showTask,setShowTask]=useState(false);
   const [focusId,setFocusId]=useState<string|null>(null);
   const [focusStarted,setFocusStarted]=useState<number|null>(null);
@@ -44,11 +46,14 @@ export function CampusHub(){
 
   async function load(){
     try{
-      const [p,t]=await Promise.all([api<Profile>("/users/me"),api<Today>("/campus/today",{cache:"no-store"})]);
-      setProfile(p); setData(t); setError("");
+      const [p,t]=await Promise.all([
+        resilientRead("profile:me",()=>api<Profile>("/users/me",{cache:"no-store"})),
+        resilientRead("campus:today",()=>api<Today>("/campus/today",{cache:"no-store"}))
+      ]);
+      setProfile(p.value); setData(t.value); setOffline(p.offline||t.offline); setError("");
     }catch(e){setError((e as Error).message);}
   }
-  useEffect(()=>{void load();},[]);
+  useEffect(()=>{void load();return refreshWhenOnline(()=>void load());},[]);
   useEffect(()=>{
     const cards=root.current?.querySelectorAll<HTMLElement>("[data-campus-card]");
     cards?.forEach((card,index)=>{
@@ -125,7 +130,7 @@ export function CampusHub(){
       </div>
     </header>
 
-    <Feedback error={error} success={notice}/>
+    <Feedback error={error} success={offline?"Modo offline: exibindo a última sincronização salva neste dispositivo.":notice}/>
 
     {showTask&&<form className="campus-task-form" onSubmit={taskSubmit} data-campus-card>
       <div className="campus-form-grid">

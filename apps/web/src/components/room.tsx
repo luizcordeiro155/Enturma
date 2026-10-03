@@ -25,6 +25,7 @@ import { LiveMemberIdentityCard } from "./user-identity";
 import { focusMessage } from "./notifications";
 import { useCallSession } from "./call-session-provider";
 import { RoomChat } from "./room-chat";
+import { RoomSharePanel } from "./room-share-panel";
 
 type Section = "chat" | "call" | "materials" | "ai";
 type Upload = {
@@ -544,6 +545,7 @@ export function RoomView({ id }: { id: string }) {
                   <Users size={16} />
                   {activeMemberCount} participantes
                 </span>
+                <RoomSharePanel roomId={id} />
                 {room.hostId === me?.id && !ended ? (
                   <button className="secondary" onClick={end}>
                     Encerrar sessão

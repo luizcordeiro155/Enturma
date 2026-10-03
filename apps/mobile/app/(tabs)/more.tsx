@@ -30,6 +30,9 @@ export default function More() {
           title="Minigames acadêmicos"
           onPress={() => router.push("/challenges")}
         />
+        <Button title="Prática adaptativa" onPress={() => router.push("/practice")} />
+        <Button title="Portfólio acadêmico" onPress={() => router.push("/portfolio")} />
+        <Button title="Turmas / Professor" onPress={() => router.push("/teacher")} />
         <Button
           title="Configurações"
           onPress={() => router.push("/settings")}

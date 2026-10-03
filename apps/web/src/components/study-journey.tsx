@@ -40,7 +40,7 @@ const steps = [
     title: "Encontre sua turma",
     body: "Entre em uma sala ou crie a sua para estudar.",
     action: "Encontrar turma",
-    href: "/explore",
+    href: "/home",
   },
   {
     title: "Aprenda em companhia",
@@ -69,10 +69,10 @@ const lessons = [
   {
     title: "Encontre companhia para estudar",
     icon: Users,
-    body: "Em Explorar, veja as salas abertas e entre em uma turma. No início, Estudar agora ajuda você a criar uma sessão com matéria, assunto e duração.",
+    body: "No Início, veja as salas abertas, filtre por assunto e encontre universidades, cursos e disciplinas no catálogo. Estudar agora ajuda você a criar uma sessão com matéria, assunto e duração.",
     tip: "Não encontrou uma sala? Crie a sua e compartilhe o estudo com outros estudantes.",
-    action: "Explorar turmas",
-    href: "/explore",
+    action: "Ver salas no Início",
+    href: "/home",
   },
   {
     title: "Converse, participe e compartilhe",

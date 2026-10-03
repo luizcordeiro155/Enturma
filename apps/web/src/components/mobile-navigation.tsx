@@ -6,6 +6,7 @@ import { EnturmaAppIcon } from "./enturma-app-icon";
 import {
   Home,
   Users,
+  CalendarDays,
   MessagesSquare,
   BookOpen,
   UserRound,
@@ -18,7 +19,7 @@ import {
 import { isMobileApp, useAppUpdateState } from "./desktop-updates";
 const tabs = [
   ["/home", "Início", Home],
-  ["/explore", "Salas", Users],
+  ["/campus", "Hoje", CalendarDays],
   ["/forum", "Comunidade", MessagesSquare],
   ["/notebooks", "Cadernos", BookOpen],
   ["/profile", "Perfil", UserRound],
