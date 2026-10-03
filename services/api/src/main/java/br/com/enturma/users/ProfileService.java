@@ -3,7 +3,9 @@ package br.com.enturma.users;
 import br.com.enturma.academics.CatalogService;
 import br.com.enturma.auth.Actor;
 import br.com.enturma.common.*;
+import br.com.enturma.notifications.AppChanged;
 import java.util.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -11,10 +13,16 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProfileService {
   private final Db db;
   private final CatalogService catalog;
+  private final ApplicationEventPublisher events;
 
-  public ProfileService(Db db, CatalogService catalog) {
+  public ProfileService(Db db, CatalogService catalog, ApplicationEventPublisher events) {
     this.db = db;
     this.catalog = catalog;
+    this.events = events;
+  }
+
+  private void profileChanged() {
+    events.publishEvent(new AppChanged("profile_changed", Set.of()));
   }
 
   public Object me(Actor a) {
@@ -59,6 +67,7 @@ public class ProfileService {
         safeBio.isBlank() ? null : safeBio,
         color.toLowerCase(Locale.ROOT),
         a.id());
+    profileChanged();
   }
 
   @Transactional
@@ -66,6 +75,7 @@ public class ProfileService {
     validateImage(mime, bytes, 2 * 1024 * 1024, "avatar");
     db.jdbc.update(
         "UPDATE app_user SET avatar_mime=?,avatar_bytes=? WHERE id=?", mime, bytes, a.id());
+    profileChanged();
   }
 
   @Transactional
@@ -73,6 +83,7 @@ public class ProfileService {
     validateImage(mime, bytes, 3 * 1024 * 1024, "banner");
     db.jdbc.update(
         "UPDATE app_user SET banner_mime=?,banner_bytes=? WHERE id=?", mime, bytes, a.id());
+    profileChanged();
   }
 
   public record ImageAsset(byte[] bytes, String mime) {}
@@ -121,5 +132,7 @@ public class ProfileService {
         preferences);
     db.jdbc.update("DELETE FROM user_subject WHERE user_id=?", a.id());
     for (UUID id : subjects) db.jdbc.update("INSERT INTO user_subject VALUES (?,?)", a.id(), id);
+    events.publishEvent(new AppChanged("campus_changed", Set.of(a.id())));
+    events.publishEvent(new AppChanged("profile_changed", Set.of()));
   }
 }
