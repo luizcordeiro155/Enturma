@@ -36,7 +36,7 @@ public class SocialController {
   }
 
   private void profileChanged(UUID user) {
-    events.publishEvent(new AppChanged("profile_changed", Set.of(user)));
+    events.publishEvent(new AppChanged("profile_changed", Set.of()));
   }
 
   private void unblocked(UUID a, UUID b) {
