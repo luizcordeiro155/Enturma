@@ -290,11 +290,13 @@ export function Friends() {
       return () => clearTimeout(timer);
     }
   }, [requestedChat, friends, selected?.id, choose]);
-  useLiveRefresh("notifications_changed", async () => {
+  const refreshFriendData = async () => {
     await refresh();
     if (selected && key.current)
       await load(selected, key.current, 0, generation.current);
-  });
+  };
+  useLiveRefresh("notifications_changed", refreshFriendData);
+  useLiveRefresh("friends_changed", refreshFriendData, 8000);
   async function send(e: React.FormEvent) {
     e.preventDefault();
     if (!selected || !me || !key.current || busy || !draft.trim()) return;
