@@ -1819,3 +1819,50 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta {
 html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
   color: var(--ink);
 }
+
+
+/* Remove the reserved seam between profile and advanced panel */
+.profile-discord-public-layout {
+  gap: 0 !important;
+  column-gap: 0 !important;
+}
+
+.profile-public-primary,
+.profile-public-advanced {
+  scrollbar-gutter: auto !important;
+}
+
+.profile-public-primary {
+  width: 100%;
+  overflow-x: clip !important;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.profile-public-primary::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+
+.profile-discord-public-layout .public-profile-card,
+.profile-discord-public-layout .public-profile-banner,
+.profile-discord-public-layout .public-profile-body {
+  width: 100%;
+  max-width: none;
+  box-sizing: border-box;
+}
+
+.profile-discord-public-layout .public-profile-card {
+  align-self: stretch;
+}
+
+.profile-public-advanced {
+  margin-left: 0 !important;
+}
+
+@media (max-width: 760px) {
+  .profile-public-primary {
+    overflow-x: clip !important;
+  }
+}
