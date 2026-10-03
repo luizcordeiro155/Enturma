@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type { Profile } from "@enturma/contracts";
 import { api } from "../src/api";
 import { Screen, Button, ErrorMessage, Field, useStyles } from "../src/ui";
+import { useRealtime } from "../src/realtime";
 
 type Task = { id:string; title:string; kind:string; dueAt:string; subjectName?:string; completedAt?:string|null };
 type Group={id:string;name:string;description:string;visibility:string;subjectName?:string|null;members:number;joined?:boolean|null};
@@ -12,6 +13,7 @@ type Question={id:string;topic:string;prompt:string;options:string[];difficulty:
 type PracticeSession={id:string;title:string;questions:Question[]};
 type Diagnostic={topics:{topic:string;accuracy:number}[];totals:{attempts:number;correct:number}};
 type PracticeResult={correct:number;total:number;results:{questionId:string;correct:boolean;explanation:string}[]};
+type TutorReply={id:string;text:string;action:string};
 
 type Today = {
  tasks: Task[];
@@ -38,6 +40,11 @@ export default function Campus() {
  const [answers,setAnswers]=useState<Record<string,number>>({});
  const [practiceResult,setPracticeResult]=useState<PracticeResult>();
  const [practiceBusy,setPracticeBusy]=useState(false);
+ const [focusGoal,setFocusGoal]=useState("");
+ const [focusSubject,setFocusSubject]=useState<string|undefined>();
+ const [tutorMessage,setTutorMessage]=useState("");
+ const [tutorReply,setTutorReply]=useState<TutorReply>();
+ const [tutorBusy,setTutorBusy]=useState(false);
  const started=useRef<number|null>(null);
  const entrance=useRef(new Animated.Value(0)).current;
 
@@ -59,6 +66,9 @@ export default function Campus() {
    return()=>{alive=false};
  },[entrance]);
  useFocusEffect(load);
+ useRealtime(event=>{
+   if(event.type==="campus_changed"||event.type==="groups_changed")load();
+ });
 
  useEffect(()=>{
    if(!focusId||!started.current)return;
@@ -68,7 +78,11 @@ export default function Campus() {
 
  async function startFocus(){
    try{
-     const x=await api<{id:string}>("/campus/focus",{method:"POST",body:JSON.stringify({label:"Modo Foco mobile",minutes:50})});
+     const x=await api<{id:string}>("/campus/focus",{method:"POST",body:JSON.stringify({
+       subjectId:focusSubject??null,
+       label:focusGoal.trim()||"Modo Foco mobile com tutor",
+       minutes:50
+     })});
      started.current=Date.now();setSeconds(0);setFocusId(x.id);
    }catch(e){setError((e as Error).message)}
  }
@@ -94,6 +108,20 @@ export default function Campus() {
      setPracticeResult(await api<PracticeResult>("/practice/"+practice.id+"/submit",{method:"POST",body:JSON.stringify({answers:practice.questions.map(q=>({questionId:q.id,selectedIndex:answers[q.id]}))})}));
      setDiag(await api<Diagnostic>("/practice/diagnostic"));
    }catch(e){setError((e as Error).message)}finally{setPracticeBusy(false)}
+ }
+ async function askTutor(action="EXPLAIN",fallback?:string){
+   const message=(tutorMessage.trim()||fallback||"Explique o conteúdo que estou estudando e confira se eu entendi.").trim();
+   setTutorBusy(true);
+   try{
+     const reply=await api<TutorReply>("/campus/tutor",{method:"POST",body:JSON.stringify({
+       subjectId:focusSubject??practiceSubject??null,
+       focusSessionId:focusId,
+       goal:focusGoal.trim()||practiceTopic||"Aprender e revisar o conteúdo",
+       message,
+       action
+     })});
+     setTutorReply(reply);setTutorMessage("");
+   }catch(e){setError((e as Error).message)}finally{setTutorBusy(false)}
  }
  async function complete(id:string){
    try{await api("/campus/tasks/"+id+"/complete",{method:"POST",body:"{}"});load();}
@@ -132,11 +160,23 @@ export default function Campus() {
        {data.tasks.filter(t=>!t.completedAt).length===0?<Text style={styles.muted}>Nada urgente por aqui. Use a versão Web para adicionar provas, trabalhos e aulas à agenda.</Text>:null}
       </View>
 
-      <View style={[styles.card,{gap:12,alignItems:"center"}]}>
-       <Ionicons name="timer-outline" size={34} color={styles.text.color}/>
-       <Text style={[styles.title,{fontSize:focusId?46:23,lineHeight:52}]}>{focusId?clock:"Modo Foco"}</Text>
-       <Text style={styles.muted}>{focusId?"Continue. O Enturma está registrando esta sessão.":"Sessão de 50 minutos para estudar sem distrações."}</Text>
-       <Button title={focusId?"Concluir sessão":"Iniciar 50 min"} onPress={()=>void(focusId?finishFocus():startFocus())}/>
+      <View style={[styles.card,{gap:12}]}>
+       <View style={{alignItems:"center",gap:8}}>
+        <Ionicons name="timer-outline" size={34} color={styles.text.color}/>
+        <Text style={[styles.title,{fontSize:focusId?46:23,lineHeight:52}]}>{focusId?clock:"Modo Foco com Tutor"}</Text>
+        <Text style={styles.muted}>{focusId?"A IA está disponível durante toda a sessão para explicar, testar e adaptar o ensino.":"Defina o assunto antes de iniciar os 50 minutos."}</Text>
+       </View>
+       {!focusId?<><Field label="O que você vai estudar?" value={focusGoal} onChangeText={setFocusGoal} placeholder="Ex.: JOINs e normalização"/>{profile?.subjects.slice(0,5).map(s=><Button key={s.id} title={(focusSubject===s.id?"✓ ":"")+s.name} onPress={()=>setFocusSubject(focusSubject===s.id?undefined:s.id)}/>)}</>:null}
+       <Button title={focusId?"Concluir sessão":"Iniciar 50 min com tutor"} onPress={()=>void(focusId?finishFocus():startFocus())}/>
+       {focusId?<View style={[styles.row,{gap:9}]}>
+         <Text style={styles.label}>Enturma AI Tutor</Text>
+         <Text style={styles.muted}>Quanto mais você interage e avalia as explicações, mais o tutor aprende como explicar melhor para você.</Text>
+         {tutorReply?<Text style={styles.text}>{tutorReply.text}</Text>:null}
+         <Field label="Pergunte ao tutor" value={tutorMessage} onChangeText={setTutorMessage} multiline placeholder="Onde você travou? Peça outra explicação ou um exemplo."/>
+         <Button title={tutorBusy?"Pensando…":"Perguntar"} disabled={tutorBusy||!tutorMessage.trim()} onPress={()=>void askTutor("EXPLAIN")}/>
+         <Button title="Explicar mais simples" disabled={tutorBusy} onPress={()=>void askTutor("SIMPLIFY","Explique o que estou estudando em passos menores e com linguagem mais simples.")}/>
+         <Button title="Me testar" disabled={tutorBusy} onPress={()=>void askTutor("TEST","Faça uma pergunta curta para conferir meu entendimento e espere minha tentativa.")}/>
+       </View>:null}
       </View>
 
       <View style={[styles.card,{gap:10}]}>
