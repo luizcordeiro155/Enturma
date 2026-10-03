@@ -21,7 +21,7 @@ import {
   UserRound,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
-import { isMobileApp, useAppUpdateState } from "./desktop-updates";
+import { isDesktop, isMobileApp, useAppUpdateState } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
@@ -33,14 +33,14 @@ const links = [
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },
   { href: "/caronas", label: "Caronas", icon: Car },
   { href: "/settings", label: "Configurações", icon: Settings },
-  { href: "/download", label: "Downloads", icon: EnturmaAppIcon },
+  { href: "/download", label: "Baixar o Enturma", icon: EnturmaAppIcon },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
   const updateState = useAppUpdateState();
   const updatePending =
-    isMobileApp() &&
+    (isMobileApp() || isDesktop()) &&
     ["available", "downloading", "ready"].includes(updateState?.status ?? "");
   const { learning, profileShortcut } = useAppShellState();
   const [, setEmailVerified] = useState<boolean | null>(null);

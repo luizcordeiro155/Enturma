@@ -92,7 +92,7 @@ public class PushNotificationService {
     if (!configured() || !preferences.pushEnabled(event.user(), event.category())) return;
 
     String actorName = actorName(event.actor());
-    String title = title(event.kind(), actorName);
+    String title = NotificationPresentation.title(event.kind(), actorName);
     for (var row :
         db.list(
             "SELECT d.id,d.token FROM notification_push_device d"
@@ -124,20 +124,6 @@ public class PushNotificationService {
     return rows.isEmpty() ? "" : String.valueOf(rows.getFirst().get("name"));
   }
 
-  private String title(String kind, String actorName) {
-    String who = actorName == null || actorName.isBlank() ? "Alguém" : actorName;
-    return switch (kind == null ? "" : kind) {
-      case "ROOM_MESSAGE" -> who + " enviou uma mensagem";
-      case "PRIVATE_MESSAGE" -> who + " enviou uma mensagem privada";
-      case "MENTION" -> who + " mencionou você";
-      case "FORUM_REPLY" -> who + " respondeu no fórum";
-      case "FORUM_LIKE" -> who + " curtiu sua publicação";
-      case "FORUM_REACTION" -> who + " reagiu à sua publicação";
-      case "FRIEND_REQUEST" -> who + " enviou uma solicitação de amizade";
-      case "ACHIEVEMENT" -> "Nova conquista no Enturma";
-      default -> "Enturma";
-    };
-  }
 
   private Delivery send(String deviceToken, PushRequested event, String title) throws Exception {
     Map<String, String> data = new HashMap<>();

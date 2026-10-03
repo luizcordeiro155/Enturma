@@ -109,7 +109,7 @@ public class WebPushNotificationService {
     try {
       Keys keys = keys();
       PushService service = new PushService(keys.publicKey(), keys.privateKey(), appUrl);
-      String title = title(event.kind(), actorName(event.actor()));
+      String title = NotificationPresentation.title(event.kind(), actorName(event.actor()));
       var payload = new LinkedHashMap<String, Object>();
       payload.put("title", title);
       payload.put(
@@ -169,20 +169,6 @@ public class WebPushNotificationService {
     return rows.isEmpty() ? "" : String.valueOf(rows.getFirst().get("name"));
   }
 
-  private String title(String kind, String actorName) {
-    String who = actorName == null || actorName.isBlank() ? "Alguém" : actorName;
-    return switch (kind == null ? "" : kind) {
-      case "ROOM_MESSAGE" -> who + " enviou uma mensagem";
-      case "PRIVATE_MESSAGE" -> who + " enviou uma mensagem privada";
-      case "MENTION" -> who + " mencionou você";
-      case "FORUM_REPLY" -> who + " respondeu no fórum";
-      case "FORUM_LIKE" -> who + " curtiu sua publicação";
-      case "FORUM_REACTION" -> who + " reagiu à sua publicação";
-      case "FRIEND_REQUEST" -> who + " enviou uma solicitação de amizade";
-      case "ACHIEVEMENT" -> "Nova conquista no Enturma";
-      default -> "Enturma";
-    };
-  }
 
   private String safeHref(String href) {
     if (href == null || !href.startsWith("/") || href.startsWith("//")) {

@@ -153,6 +153,14 @@ public class SocialController {
     var f = access(a, id, false);
     if (!a.id().equals(f.get("recipient"))) throw ApiException.forbidden();
     db.jdbc.update("UPDATE friendship SET status='ACCEPTED' WHERE id=?", id);
+    notices.send(
+        a.id(),
+        (UUID) f.get("requester"),
+        "FRIEND_ACCEPTED",
+        "friend:" + id,
+        id,
+        "/friends",
+        "Sua solicitação de amizade foi aceita.");
   }
 
   @DeleteMapping("/friends/{id}")

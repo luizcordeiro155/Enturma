@@ -13,12 +13,17 @@ public class RideService {
   private final Db db;
   private final CatalogService catalog;
   private final org.springframework.context.ApplicationEventPublisher events;
+  private final br.com.enturma.notifications.NotificationService notices;
 
   public RideService(
-      Db db, CatalogService catalog, org.springframework.context.ApplicationEventPublisher events) {
+      Db db,
+      CatalogService catalog,
+      org.springframework.context.ApplicationEventPublisher events,
+      br.com.enturma.notifications.NotificationService notices) {
     this.db = db;
     this.catalog = catalog;
     this.events = events;
+    this.notices = notices;
   }
 
   private void changed(UUID ride, boolean publicListing) {
@@ -149,10 +154,13 @@ public class RideService {
     if (count >= ((Number) ride.get("seats")).intValue())
       throw new ApiException(409, "RIDE_FULL", "Não há vagas disponíveis.");
     db.jdbc.update("UPDATE ride_match SET status='ACCEPTED' WHERE id=?", id);
-    db.jdbc.update(
-        "INSERT INTO notification(id,user_id,message) VALUES (?,?,?)",
-        UUID.randomUUID(),
-        match.get("userId"),
+    notices.send(
+        a.id(),
+        (UUID) match.get("userId"),
+        "RIDE_ACCEPTED",
+        "ride:" + ride.get("id"),
+        id,
+        "/caronas?match=" + id,
         "Sua carona foi aceita. Combine o ponto de encontro no chat privado.");
     changed((UUID) ride.get("id"), true);
   }
@@ -213,10 +221,15 @@ public class RideService {
     if (Set.of("PENDING", "ACCEPTED").contains(m.get("status"))) {
       db.jdbc.update("UPDATE ride_match SET status='CANCELLED' WHERE id=?", id);
       close(id);
-      db.jdbc.update(
-          "INSERT INTO notification(id,user_id,message) VALUES (?,?,?)",
-          UUID.randomUUID(),
-          a.id().equals(m.get("ownerId")) ? m.get("userId") : m.get("ownerId"),
+      UUID peer =
+          (UUID) (a.id().equals(m.get("ownerId")) ? m.get("userId") : m.get("ownerId"));
+      notices.send(
+          a.id(),
+          peer,
+          "RIDE_CANCELLED",
+          "ride:" + m.get("rideId"),
+          id,
+          "/caronas?match=" + id,
           "O pedido de carona foi cancelado. A conversa e a chamada foram encerradas.");
       changed((UUID) m.get("rideId"), true);
     }
@@ -281,8 +294,19 @@ public class RideService {
   public void message(Actor a, UUID id, String body) {
     var m = access(a, id);
     requireOpen(m);
+    UUID message = UUID.randomUUID();
     db.jdbc.update(
-        "INSERT INTO ride_message VALUES (?,?,?,?,now())", UUID.randomUUID(), id, a.id(), body);
+        "INSERT INTO ride_message VALUES (?,?,?,?,now())", message, id, a.id(), body);
+    UUID peer =
+        (UUID) (a.id().equals(m.get("ownerId")) ? m.get("userId") : m.get("ownerId"));
+    notices.send(
+        a.id(),
+        peer,
+        "RIDE_MESSAGE",
+        "ride-match:" + id,
+        message,
+        "/caronas?match=" + id,
+        "Você recebeu uma nova mensagem na carona.");
     matchChanged(id);
   }
 

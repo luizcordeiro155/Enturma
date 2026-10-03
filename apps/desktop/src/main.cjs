@@ -8,8 +8,10 @@ const {
   net,
   Notification,
   nativeImage,
+  powerMonitor,
   session,
   shell,
+  Tray,
 } = require("electron");
 const path = require("node:path");
 const fs = require("node:fs");
@@ -59,6 +61,9 @@ const ALLOWED_PERMISSIONS = new Set([
 ]);
 
 let mainWindow = null;
+let tray = null;
+let quitting = false;
+let updateReadyNotifiedVersion = "";
 let pendingDeepLink =
   process.argv.find((arg) => arg.startsWith("enturma://")) || null;
 let updateTimer = null;
@@ -188,6 +193,31 @@ function rememberNativeNotice(id) {
     if (oldest) nativeNoticeIds.delete(oldest);
   }
   return true;
+}
+
+function notifyUpdateReady(version) {
+  if (
+    !version ||
+    updateReadyNotifiedVersion === version ||
+    !Notification.isSupported()
+  )
+    return;
+  updateReadyNotifiedVersion = version;
+  const notice = new Notification({
+    title: `Enturma ${version} está pronto`,
+    body:
+      "A atualização foi baixada e verificada. Abra o Enturma para concluir quando quiser.",
+    icon: path.join(__dirname, "..", "assets", "icon.ico"),
+  });
+  notice.on("click", () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      void mainWindow.loadURL(
+        new URL("/settings?update=1", WEB_URL).toString(),
+      );
+    }
+    focusMainWindow();
+  });
+  notice.show();
 }
 
 function showDesktopNotification(payload) {
@@ -687,7 +717,13 @@ async function checkForUpdates() {
       const zipPath = await downloadUpdate(manifest);
       pendingUpdate = { manifest, zipPath, mode: "zip" };
     }
-    updateStatus("ready", { version: manifest.version, progress: 100 });
+    updateStatus("ready", {
+      version: manifest.version,
+      progress: 100,
+      message:
+        "Atualização baixada automaticamente. Reinicie o Enturma quando for conveniente.",
+    });
+    notifyUpdateReady(manifest.version);
   } catch (error) {
     updateStatus("error", {
       message:
@@ -730,6 +766,33 @@ async function installUpdate() {
     });
     throw e;
   }
+}
+
+function createTray() {
+  if (tray || process.platform !== "win32") return;
+  tray = new Tray(path.join(__dirname, "..", "assets", "icon.ico"));
+  tray.setToolTip("Enturma");
+  tray.setContextMenu(
+    Menu.buildFromTemplate([
+      {
+        label: "Abrir Enturma",
+        click: () => focusMainWindow(),
+      },
+      {
+        label: "Verificar atualizações",
+        click: () => void checkForUpdates(false),
+      },
+      { type: "separator" },
+      {
+        label: "Sair",
+        click: () => {
+          quitting = true;
+          app.quit();
+        },
+      },
+    ]),
+  );
+  tray.on("double-click", () => focusMainWindow());
 }
 
 function createMenu() {
@@ -990,6 +1053,12 @@ function createMainWindow() {
     setDesktopNotificationBadge(desktopNotificationBadge);
     mainWindow?.show();
   });
+  mainWindow.on("close", (event) => {
+    if (!quitting && process.platform === "win32") {
+      event.preventDefault();
+      mainWindow?.hide();
+    }
+  });
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
@@ -1071,11 +1140,16 @@ if (!hasLock) {
     configureSession(appSession);
     createMenu();
     createMainWindow();
-    setTimeout(() => void checkForUpdates(false), 12000);
+    createTray();
+
+    // Igual ao mobile: verifica sozinho, baixa em segundo plano e avisa quando
+    // estiver pronto. O usuário só escolhe o momento do reinício.
+    setTimeout(() => void checkForUpdates(false), 5000);
     updateTimer = setInterval(
       () => void checkForUpdates(false),
-      6 * 60 * 60 * 1000,
+      15 * 60 * 1000,
     );
+    powerMonitor.on("resume", () => void checkForUpdates(false));
   });
 
   app.on("activate", () => {
@@ -1084,10 +1158,12 @@ if (!hasLock) {
   });
 
   app.on("before-quit", () => {
+    quitting = true;
     if (updateTimer) clearInterval(updateTimer);
   });
 
   app.on("window-all-closed", () => {
-    if (process.platform !== "darwin") app.quit();
+    if (process.platform !== "darwin" && process.platform !== "win32")
+      app.quit();
   });
 }

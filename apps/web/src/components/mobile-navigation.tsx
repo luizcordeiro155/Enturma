@@ -95,7 +95,7 @@ export function MobileNavigation() {
               ["/challenges", "Desafios acadêmicos", Gamepad2],
               ["/learn", "Programação", Gamepad2],
               ["/subjects", "Minhas matérias", BookOpen],
-              ["/download", "Downloads", EnturmaAppIcon],
+              ["/download", "Baixar o Enturma", EnturmaAppIcon],
             ] as const
           ).map(([href, label, Icon]) => (
               <Link

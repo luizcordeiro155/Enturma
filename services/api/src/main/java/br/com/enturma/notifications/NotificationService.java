@@ -75,9 +75,23 @@ public class NotificationService {
               UUID.randomUUID(),
               user,
               dedupe);
-      if (pushInserted > 0)
+      if (pushInserted > 0) {
+        db.jdbc.update(
+            "INSERT INTO notification_desktop_push_event"
+                + "(user_id,actor_id,category,kind,target_id,href,message,dedupe_key)"
+                + " VALUES (?,?,?,?,?,?,?,?)"
+                + " ON CONFLICT(user_id,dedupe_key) DO NOTHING",
+            user,
+            actor,
+            category,
+            kind,
+            target,
+            href,
+            message == null ? "Você tem uma nova notificação." : message,
+            dedupe);
         events.publishEvent(
             new PushRequested(user, actor, category, kind, target, href, message));
+      }
     }
 
     if (preferences.enabled(user, category, false)) {
@@ -148,6 +162,54 @@ public class NotificationService {
             Long.class,
             a.id());
     return Map.of("items", rows, "unreadCount", unread);
+  }
+
+  public Object desktopPush(Actor a, Long after) {
+    if (after == null) {
+      Long cursor =
+          db.jdbc.queryForObject(
+              "SELECT coalesce(max(sequence),0) FROM notification_desktop_push_event"
+                  + " WHERE user_id=?",
+              Long.class,
+              a.id());
+      return Map.of("items", List.of(), "cursor", cursor == null ? 0L : cursor);
+    }
+
+    long safeAfter = Math.max(0L, after);
+    var rows =
+        db.list(
+            "SELECT e.sequence,e.category,e.kind,e.target_id,e.href,e.message,e.created_at,"
+                + " u.name actor_name FROM notification_desktop_push_event e"
+                + " LEFT JOIN app_user u ON u.id=e.actor_id"
+                + " WHERE e.user_id=? AND e.sequence>? AND"
+                + " e.created_at>now()-interval '30 days'"
+                + " ORDER BY e.sequence LIMIT 100",
+            a.id(),
+            safeAfter);
+
+    long cursor = safeAfter;
+    var items = new ArrayList<Map<String, Object>>();
+    for (var row : rows) {
+      long sequence = ((Number) row.get("sequence")).longValue();
+      cursor = Math.max(cursor, sequence);
+      var item = new LinkedHashMap<String, Object>(row);
+      item.put(
+          "title",
+          NotificationPresentation.title(
+              String.valueOf(row.get("kind")),
+              row.get("actorName") == null ? "" : String.valueOf(row.get("actorName"))));
+      items.add(item);
+    }
+    return Map.of("items", items, "cursor", cursor);
+  }
+
+  @org.springframework.scheduling.annotation.Scheduled(
+      fixedDelay = 21600000,
+      initialDelay = 120000)
+  public void cleanupDesktopPush() {
+    db.jdbc.update(
+        "DELETE FROM notification_desktop_push_event"
+            + " WHERE created_at<now()-interval '30 days'");
   }
 
   @Transactional

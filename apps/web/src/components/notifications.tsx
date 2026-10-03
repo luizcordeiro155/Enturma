@@ -25,6 +25,18 @@ type Notice = {
   createdAt: string;
 };
 type Inbox = { items: Notice[]; unreadCount: number };
+type DesktopPushNotice = {
+  sequence: number;
+  title: string;
+  message: string;
+  href: string | null;
+  kind: string;
+  category: string;
+};
+type DesktopPushBatch = {
+  items: DesktopPushNotice[];
+  cursor: number;
+};
 type State = Inbox & {
   error: string;
   refresh: () => Promise<void>;
@@ -50,9 +62,74 @@ export function NotificationsProvider({
   const [error, setError] = useState("");
   const revision = useRef(0);
   const pending = useRef(false),
-    seen = useRef(new Set<string>()),
-    nativePrimed = useRef(false);
+    seen = useRef(new Set<string>());
   useAppConnection();
+
+  useEffect(() => {
+    if (!window.enturmaDesktop?.showNotification) return;
+
+    let active = true;
+    let cursor: number | null = null;
+    let running = false;
+    let queued = false;
+
+    const pollDesktopPush = async () => {
+      if (!active) return;
+      if (running) {
+        queued = true;
+        return;
+      }
+      running = true;
+      try {
+        const suffix = cursor == null ? "" : `?after=${cursor}`;
+        const batch = await api<DesktopPushBatch>(
+          `/notifications/desktop-push${suffix}`,
+          { cache: "no-store" },
+        );
+        if (!active) return;
+
+        if (cursor != null) {
+          for (const notice of batch.items) {
+            void window.enturmaDesktop
+              ?.showNotification?.({
+                id: `desktop-push-${notice.sequence}`,
+                title: notice.title,
+                body: notice.message,
+                href: notice.href,
+              })
+              .catch(() => {});
+          }
+        }
+        cursor = batch.cursor;
+      } catch {
+        // A caixa de entrada normal continua funcionando se o stream falhar.
+      } finally {
+        running = false;
+        if (queued && active) {
+          queued = false;
+          void pollDesktopPush();
+        }
+      }
+    };
+
+    void pollDesktopPush();
+    const timer = window.setInterval(pollDesktopPush, 5000);
+    const refreshNow = () => void pollDesktopPush();
+    window.addEventListener("enturma-notifications_changed", refreshNow);
+    window.addEventListener("enturma-live-ready", refreshNow);
+    window.addEventListener("focus", refreshNow);
+    document.addEventListener("visibilitychange", refreshNow);
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("enturma-notifications_changed", refreshNow);
+      window.removeEventListener("enturma-live-ready", refreshNow);
+      window.removeEventListener("focus", refreshNow);
+      document.removeEventListener("visibilitychange", refreshNow);
+    };
+  }, []);
+
   async function refresh() {
     if (pending.current) return;
     pending.current = true;
@@ -87,34 +164,6 @@ export function NotificationsProvider({
       }
       if (requested !== revision.current) return;
 
-      const desktopFresh = data.items.filter(
-        (n) => !n.readAt && !seen.current.has(n.id),
-      );
-      if (nativePrimed.current && window.enturmaDesktop?.showNotification) {
-        for (const notice of desktopFresh.slice(0, 4)) {
-          const title =
-            notice.kind === "PRIVATE_MESSAGE"
-              ? `${notice.actorName ?? "Alguém"} enviou uma mensagem`
-              : notice.kind === "ROOM_MESSAGE"
-                ? `${notice.actorName ?? "Alguém"} enviou uma mensagem na sala`
-                : notice.kind === "MENTION"
-                  ? `${notice.actorName ?? "Alguém"} mencionou você`
-                  : notice.kind === "FRIEND_REQUEST"
-                    ? "Nova solicitação de amizade"
-                    : notice.kind === "ACHIEVEMENT"
-                      ? "Nova conquista no Enturma"
-                      : "Nova notificação no Enturma";
-          void window.enturmaDesktop
-            .showNotification({
-              id: notice.id,
-              title,
-              body: notice.message,
-              href: notice.href,
-            })
-            .catch(() => {});
-        }
-      }
-      nativePrimed.current = true;
       seen.current = new Set(data.items.map((n) => n.id));
       setInbox(data);
       setError("");

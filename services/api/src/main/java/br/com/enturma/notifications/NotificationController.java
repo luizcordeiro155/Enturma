@@ -92,6 +92,14 @@ public class NotificationController {
     return service.inbox(a);
   }
 
+  @GetMapping("/desktop-push")
+  public Object desktopPush(
+      @AuthenticationPrincipal Actor a,
+      @RequestParam(required = false) Long after) {
+    return service.desktopPush(a, after);
+  }
+
+
   @PostMapping("/clear")
   public void clear(@AuthenticationPrincipal Actor a) {
     service.clear(a);

@@ -559,8 +559,10 @@ export function AppUpdateSettingsCard() {
   if (!state || !isInstalledApp()) return null;
 
   const mobile = isMobileApp();
+  const desktop = isDesktop();
   const available = state?.status === "available";
   const downloading = state?.status === "downloading";
+  const ready = state?.status === "ready";
   const current = state?.status === "current";
   const error = state?.status === "error";
   const busy = state?.status === "checking" || downloading || state?.status === "installing";
@@ -593,7 +595,11 @@ export function AppUpdateSettingsCard() {
         {state?.message ? <small>{state.message}</small> : null}
       </div>
       <div className="app-update-settings-actions">
-        {mobile && available ? (
+        {desktop && ready ? (
+          <button type="button" onClick={open}>
+            Reiniciar e atualizar
+          </button>
+        ) : mobile && available ? (
           <button type="button" onClick={open}>
             Atualizar agora
           </button>
