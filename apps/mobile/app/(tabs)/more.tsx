@@ -16,6 +16,7 @@ export default function More() {
         <Ionicons name="grid-outline" size={28} color={styles.text.color} />
         <Button title="Hoje / Agenda" onPress={() => router.push("/campus")} />
         <Button title="Amigos" onPress={() => router.push("/friends")} />
+        <Button title="Grupos de estudo" onPress={() => router.push("/groups")} />
         <Button title="Caronas" onPress={() => router.push("/rides")} />
         <Button
           title="Notificações"
