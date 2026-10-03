@@ -139,3 +139,37 @@
     flex-basis: 40px;
   }
 }
+
+
+/* Navigation stability 0.3.16 */
+html {
+  overflow-x: clip;
+  scrollbar-gutter: stable;
+}
+body,
+.app-shell,
+.workspace,
+.workspace > main {
+  min-width: 0;
+  overflow-x: clip;
+}
+body {
+  min-height: 100dvh;
+}
+.workspace > main {
+  transform-origin: 50% 0%;
+}
+@media (max-width: 760px) {
+  html {
+    scrollbar-gutter: auto;
+  }
+  .mobile-bottom-nav,
+  .mobile-bottom-nav > a,
+  .mobile-bottom-nav > button {
+    will-change: auto;
+  }
+  .mobile-bottom-nav > a:active,
+  .mobile-bottom-nav > button:active {
+    transform: none !important;
+  }
+}

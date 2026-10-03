@@ -69,23 +69,24 @@ export function Motion() {
         content,
         [
           {
-            opacity: 0.34,
-            filter: "blur(7px)",
-            transform: "translate3d(18px,8px,0) scale(.992)",
+            opacity: 0.68,
+            transform: "scale(.996)",
           },
           {
-            opacity: 0.82,
-            filter: "blur(1px)",
-            transform: "translate3d(-2px,0,0) scale(1.002)",
-            offset: 0.7,
+            opacity: 0.9,
+            transform: "scale(.999)",
+            offset: 0.58,
           },
           {
             opacity: 1,
-            filter: "blur(0)",
-            transform: "translate3d(0,0,0) scale(1)",
+            transform: "scale(1)",
           },
         ],
-        { duration: 420, easing: "cubic-bezier(.16,1,.3,1)" },
+        {
+          duration: 300,
+          easing: "cubic-bezier(.16,1,.3,1)",
+          transformOrigin: "50% 0%",
+        },
       );
 
       const active = document.querySelector(
@@ -94,11 +95,10 @@ export function Motion() {
       animate(
         active,
         [
-          { transform: "translateY(3px) scale(.94)" },
-          { transform: "translateY(-2px) scale(1.035)", offset: 0.55 },
-          { transform: "translateY(0) scale(1)" },
+          { opacity: 0.72 },
+          { opacity: 1 },
         ],
-        { duration: 420, easing: "cubic-bezier(.16,1,.3,1)" },
+        { duration: 220, easing: "cubic-bezier(.16,1,.3,1)" },
       );
     }
 
@@ -117,11 +117,11 @@ export function Motion() {
             [
               {
                 opacity: 0,
-                transform: "translate3d(0,18px,0) scale(.985)",
+                transform: "scale(.992)",
               },
               {
                 opacity: 1,
-                transform: "translate3d(0,0,0) scale(1)",
+                transform: "scale(1)",
               },
             ],
             {
@@ -196,17 +196,27 @@ export function Motion() {
       );
       if (!target) return;
       pressAnimations.get(target)?.cancel();
-      const animation = target.animate(
-        [
-          { transform: "scale(1)" },
-          { transform: "scale(.965) translate3d(0,1px,0)" },
-        ],
-        {
-          duration: 115,
-          easing: "cubic-bezier(.2,.8,.2,1)",
-          fill: "forwards",
-        },
-      );
+      const navigationControl = target.closest(".mobile-bottom-nav,.sidebar nav");
+      const animation = navigationControl
+        ? target.animate(
+            [{ opacity: 1 }, { opacity: 0.72 }],
+            {
+              duration: 95,
+              easing: "cubic-bezier(.2,.8,.2,1)",
+              fill: "forwards",
+            },
+          )
+        : target.animate(
+            [
+              { transform: "scale(1)" },
+              { transform: "scale(.965)" },
+            ],
+            {
+              duration: 115,
+              easing: "cubic-bezier(.2,.8,.2,1)",
+              fill: "forwards",
+            },
+          );
       pressAnimations.set(target, animation);
     }
 
@@ -216,17 +226,26 @@ export function Motion() {
       );
       if (!target || motionDisabled()) return;
       pressAnimations.get(target)?.cancel();
-      const animation = target.animate(
-        [
-          { transform: "scale(.965) translate3d(0,1px,0)" },
-          { transform: "scale(1.018)", offset: 0.62 },
-          { transform: "scale(1)" },
-        ],
-        {
-          duration: 260,
-          easing: "cubic-bezier(.16,1,.3,1)",
-        },
-      );
+      const navigationControl = target.closest(".mobile-bottom-nav,.sidebar nav");
+      const animation = navigationControl
+        ? target.animate(
+            [{ opacity: 0.72 }, { opacity: 1 }],
+            {
+              duration: 160,
+              easing: "cubic-bezier(.16,1,.3,1)",
+            },
+          )
+        : target.animate(
+            [
+              { transform: "scale(.965)" },
+              { transform: "scale(1.012)", offset: 0.62 },
+              { transform: "scale(1)" },
+            ],
+            {
+              duration: 240,
+              easing: "cubic-bezier(.16,1,.3,1)",
+            },
+          );
       pressAnimations.set(target, animation);
     }
 
