@@ -85,7 +85,6 @@ export function Motion() {
         {
           duration: 300,
           easing: "cubic-bezier(.16,1,.3,1)",
-          transformOrigin: "50% 0%",
         },
       );
 
