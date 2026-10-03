@@ -3,6 +3,7 @@ import { Text, View, Alert } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { api } from "../src/api";
 import { Screen, Field, Button, ErrorMessage, useStyles } from "../src/ui";
+import { useRealtime } from "../src/realtime";
 type Friend = {
   id: string;
   userId: string;
@@ -36,6 +37,10 @@ export default function Friends() {
       void load();
     }, [load]),
   );
+  useRealtime((event) => {
+    if (event.type === "friends_changed" || event.type === "notifications_changed")
+      void load();
+  });
   async function action(path: string, method = "POST", body?: object) {
     setBusy(true);
     try {
