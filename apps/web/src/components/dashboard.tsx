@@ -10,6 +10,7 @@ import { useRouter } from "next/navigation";
 import { CatalogSearch } from "./catalog-search";
 import { ForumHighlights } from "./forum-highlights";
 import { StudyJourney } from "./study-journey";
+import { useLiveRefresh } from "@/lib/live-updates";
 export function Dashboard() {
   const [profile, setProfile] = useState<Profile>();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -43,6 +44,12 @@ export function Dashboard() {
       alive = false;
     };
   }, [router, page]);
+  async function refreshRooms() {
+    const next = await api<Room[]>(`/study-rooms?page=${page}`, { cache: "no-store" });
+    setRooms(next);
+  }
+  useLiveRefresh("rooms_changed", refreshRooms, 12000);
+
   async function join(id: string) {
     try {
       await post(`/study-rooms/${id}/join`);
