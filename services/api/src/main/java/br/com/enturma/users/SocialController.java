@@ -2,10 +2,12 @@ package br.com.enturma.users;
 
 import br.com.enturma.auth.Actor;
 import br.com.enturma.common.*;
+import br.com.enturma.notifications.AppChanged;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.util.*;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
@@ -16,12 +18,25 @@ public class SocialController {
   private final Db db;
   private final br.com.enturma.notifications.NotificationService notices;
   private final ObjectMapper json;
+  private final ApplicationEventPublisher events;
 
   public SocialController(
-      Db db, ObjectMapper json, br.com.enturma.notifications.NotificationService notices) {
+      Db db,
+      ObjectMapper json,
+      br.com.enturma.notifications.NotificationService notices,
+      ApplicationEventPublisher events) {
     this.notices = notices;
     this.db = db;
     this.json = json;
+    this.events = events;
+  }
+
+  private void friendsChanged(UUID... users) {
+    events.publishEvent(new AppChanged("friends_changed", Set.copyOf(Arrays.asList(users))));
+  }
+
+  private void profileChanged(UUID user) {
+    events.publishEvent(new AppChanged("profile_changed", Set.of(user)));
   }
 
   private void unblocked(UUID a, UUID b) {
@@ -75,6 +90,7 @@ public class SocialController {
         "UPDATE app_user SET profile_details=?::jsonb WHERE id=?",
         json.writeValueAsString(value),
         a.id());
+    profileChanged(a.id());
   }
 
   @GetMapping("/friends")
@@ -132,6 +148,7 @@ public class SocialController {
           friendshipId,
           "/friends",
           "Você recebeu uma solicitação de amizade.");
+      friendsChanged(a.id(), peer);
     }
     return friendship;
   }
@@ -161,12 +178,15 @@ public class SocialController {
         id,
         "/friends",
         "Sua solicitação de amizade foi aceita.");
+    friendsChanged(a.id(), (UUID) f.get("requester"));
   }
 
   @DeleteMapping("/friends/{id}")
   public void remove(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
-    access(a, id, false);
+    var f = access(a, id, false);
+    UUID peer = a.id().equals(f.get("requester")) ? (UUID) f.get("recipient") : (UUID) f.get("requester");
     db.jdbc.update("DELETE FROM friendship WHERE id=?", id);
+    friendsChanged(a.id(), peer);
   }
 
   @GetMapping("/private-identity")
@@ -309,6 +329,7 @@ public class SocialController {
           Boolean.TRUE.equals(body.mentioned())
               ? "Você foi mencionado em uma conversa privada."
               : "Você recebeu uma mensagem privada.");
+      friendsChanged(a.id(), peer);
     }
   }
 }
