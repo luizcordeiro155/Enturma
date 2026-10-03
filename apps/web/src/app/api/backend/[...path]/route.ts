@@ -28,7 +28,10 @@ async function proxy(
       { status: 403 },
     );
   const route = path.join("/");
+  const rememberConnected =
+    route !== "auth/login" || req.headers.get("x-enturma-remember") !== "0";
   const headers = upstreamHeaders(req);
+  headers.delete("x-enturma-remember");
   headers.set(
     "Content-Type",
     req.headers.get("content-type") ?? "application/json",
@@ -85,14 +88,27 @@ async function proxy(
       },
     });
     if (credentials) {
-      res.cookies.set("enturma_access", credentials.accessToken, {
-        ...cookieOptions,
-        maxAge: 600,
-      });
-      res.cookies.set("enturma_refresh", credentials.refreshToken, {
-        ...cookieOptions,
-        maxAge: 30 * 86400,
-      });
+      res.cookies.set(
+        "enturma_access",
+        credentials.accessToken,
+        rememberConnected
+          ? { ...cookieOptions, maxAge: 600 }
+          : cookieOptions,
+      );
+      res.cookies.set(
+        "enturma_refresh",
+        credentials.refreshToken,
+        rememberConnected
+          ? { ...cookieOptions, maxAge: 30 * 86400 }
+          : cookieOptions,
+      );
+      res.cookies.set(
+        "enturma_remember",
+        rememberConnected ? "1" : "0",
+        rememberConnected
+          ? { ...cookieOptions, maxAge: 30 * 86400 }
+          : cookieOptions,
+      );
     }
     if (
       upstream.ok &&
@@ -100,6 +116,7 @@ async function proxy(
     ) {
       res.cookies.delete("enturma_access");
       res.cookies.delete("enturma_refresh");
+      res.cookies.delete("enturma_remember");
     }
     return res;
   } catch {

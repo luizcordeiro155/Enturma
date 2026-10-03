@@ -567,8 +567,6 @@ class MainActivity : Activity() {
 
         EnturmaAppState.foreground = true
         initializeFirebase(this)
-        (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
-            .cancel(UPDATE_NOTIFICATION_ID)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         window.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING)
         window.statusBarColor = Color.TRANSPARENT
@@ -788,6 +786,7 @@ class MainActivity : Activity() {
 
     override fun onPause() {
         EnturmaAppState.foreground = false
+        CookieManager.getInstance().flush()
         super.onPause()
     }
 
@@ -805,8 +804,10 @@ class MainActivity : Activity() {
     private fun handleUpdateIntent(intent: Intent?): Boolean {
         return when (intent?.action) {
             UPDATE_ACTION_SETTINGS -> {
+                (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
+                    .cancel(UPDATE_NOTIFICATION_ID)
                 if (::webView.isInitialized) {
-                    webView.loadUrl("\${WEB_ORIGIN}/settings")
+                    webView.loadUrl("\${WEB_ORIGIN}/settings?update=1")
                 }
                 true
             }
@@ -827,7 +828,7 @@ class MainActivity : Activity() {
 
     private fun routeFromIntent(intent: Intent?): String? {
         if (intent?.action == UPDATE_ACTION_SETTINGS) {
-            return "/settings"
+            return "/settings?update=1"
         }
         if (intent?.action == PUSH_ACTION_OPEN) {
             return safePushHref(intent.getStringExtra(PUSH_EXTRA_HREF))
@@ -1467,6 +1468,7 @@ class MainActivity : Activity() {
             updateReceiverRegistered = false
         }
 
+        CookieManager.getInstance().flush()
         if (::webView.isInitialized) {
             webView.stopLoading()
             webView.webChromeClient = null

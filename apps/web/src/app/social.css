@@ -942,3 +942,27 @@ html .auth-story :is(h1, p, span, a, svg) {
     min-height:48px;
   }
 }
+
+
+/* Destaque ao abrir Configurações por uma notificação de atualização */
+.app-update-settings-card.attention {
+  position: relative;
+  outline: 3px solid var(--accent);
+  outline-offset: 4px;
+  box-shadow:
+    0 0 0 9px color-mix(in srgb, var(--accent) 20%, transparent),
+    0 18px 48px #0003;
+}
+.app-update-settings-card.attention::after {
+  content: "Atualização disponível";
+  position: absolute;
+  top: -13px;
+  right: 16px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #183f36;
+  font-size: .72rem;
+  font-weight: 900;
+  letter-spacing: .02em;
+}

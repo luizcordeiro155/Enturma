@@ -2851,3 +2851,81 @@ html[data-theme="dark"] .ai-web-sources a {
 .auth-field-error{display:block;margin-top:6px;color:#b42318!important;font-weight:700;line-height:1.35}
 @keyframes auth-invalid-flash{from{opacity:.72}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){.auth-field-invalid{animation:none!important}}
+
+
+/* Login persistente 0.3.16 */
+.auth-remember-toggle {
+  display: flex !important;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--soft);
+  cursor: pointer;
+}
+.auth-remember-toggle input {
+  width: 20px !important;
+  height: 20px;
+  flex: 0 0 auto;
+  margin: 2px 0 0;
+  accent-color: var(--ink);
+}
+.auth-remember-toggle span { display: grid; gap: 2px; }
+.auth-remember-toggle strong { font-size: .96rem; }
+.auth-remember-toggle small { color: var(--muted); line-height: 1.35; }
+.auth-login-progress {
+  position: fixed;
+  inset: 0;
+  z-index: 10020;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(12px);
+}
+.auth-login-progress-card {
+  width: min(420px, 100%);
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 28px 24px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--bg);
+  box-shadow: 0 26px 80px #0003;
+  text-align: center;
+}
+.auth-login-progress-card p,
+.auth-login-progress-card small { color: var(--muted); }
+.auth-login-progress-animation {
+  position: relative;
+  width: 112px;
+  height: 112px;
+  display: grid;
+  place-items: center;
+}
+.auth-login-progress-orbit {
+  position: absolute;
+  inset: 6px;
+  border: 3px solid color-mix(in srgb, var(--accent) 28%, var(--border));
+  border-top-color: var(--ink);
+  border-radius: 50%;
+}
+.auth-login-progress-core {
+  width: 68px;
+  height: 68px;
+  display: grid;
+  place-items: center;
+  border-radius: 22px;
+  background: var(--accent);
+  color: #183f36;
+  box-shadow: 0 12px 30px #0002;
+}
+.auth-login-progress-dots { display: flex; gap: 7px; min-height: 14px; }
+.auth-login-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink);
+}

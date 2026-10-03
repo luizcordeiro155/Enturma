@@ -22,6 +22,8 @@ export async function POST(req: NextRequest) {
     }
     const refresh = req.cookies.get("enturma_refresh")?.value;
     if (!refresh) return new NextResponse(null, { status: 401 });
+    const rememberConnected =
+      req.cookies.get("enturma_remember")?.value !== "0";
     const headers = upstreamHeaders(req);
     headers.set("Content-Type", "application/json");
     const result = await fetch(`${base}/api/v1/auth/refresh`, {
@@ -43,17 +45,25 @@ export async function POST(req: NextRequest) {
         sameSite: "lax" as const,
         path: "/",
       };
-      res.cookies.set("enturma_access", c.accessToken, {
-        ...options,
-        maxAge: 600,
-      });
-      res.cookies.set("enturma_refresh", c.refreshToken, {
-        ...options,
-        maxAge: 2592000,
-      });
+      res.cookies.set(
+        "enturma_access",
+        c.accessToken,
+        rememberConnected ? { ...options, maxAge: 600 } : options,
+      );
+      res.cookies.set(
+        "enturma_refresh",
+        c.refreshToken,
+        rememberConnected ? { ...options, maxAge: 2592000 } : options,
+      );
+      res.cookies.set(
+        "enturma_remember",
+        rememberConnected ? "1" : "0",
+        rememberConnected ? { ...options, maxAge: 2592000 } : options,
+      );
     } else if (result.status === 401) {
       res.cookies.delete("enturma_access");
       res.cookies.delete("enturma_refresh");
+      res.cookies.delete("enturma_remember");
     }
     return res;
   } catch {

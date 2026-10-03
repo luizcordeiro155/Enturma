@@ -15,7 +15,7 @@ export function ForumLinks({ text }: { text: string }) {
     </>
   );
 }
-function ConfirmedLink({ href, label }: { href: string; label: string }) {
+export function ConfirmedLink({ href, label }: { href: string; label: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>

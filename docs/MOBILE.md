@@ -122,3 +122,13 @@ A API precisa de `FCM_SERVICE_ACCOUNT_BASE64`, contendo em Base64 o JSON da serv
 - Tocar na notificação abre diretamente **Configurações**, onde o usuário decide quando iniciar a atualização.
 - A notificação de disponibilidade não baixa o APK sozinha; o download só começa ao tocar em **Atualizar agora**.
 - O agendador de atualização é ativado ao abrir o app, ao voltar para primeiro plano e após reiniciar o aparelho.
+
+
+## Conta, links e atualizador 0.3.16
+
+- O login passa a oferecer **Manter conectado**. Marcado, a sessão renovável usa cookie HttpOnly persistente; desmarcado, a renovação fica limitada à sessão atual.
+- O Android força a gravação dos cookies persistentes ao ir para segundo plano ou encerrar a Activity, reduzindo logins repetidos ao reabrir o app.
+- O login exibe uma tela de progresso animada em JavaScript, respeitando movimento reduzido.
+- Links externos publicados na bio ou em **Site ou GitHub** usam a mesma confirmação de segurança do fórum.
+- A notificação nativa de nova versão permanece disponível até ser tocada. Ao tocar, abre **Configurações** com o card de atualização destacado.
+- O agendador Android continua verificando novas versões em segundo plano sem baixar o APK automaticamente.

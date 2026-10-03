@@ -468,6 +468,52 @@ export function DesktopUpdateButton() {
 
 export function AppUpdateSettingsCard() {
   const { state, open, check } = useContext(Context);
+  const card = useRef<HTMLElement>(null);
+  const [attention, setAttention] = useState(false);
+
+  useEffect(() => {
+    if (!state || !isInstalledApp()) return;
+    const requested =
+      new URLSearchParams(window.location.search).get("update") === "1";
+    const pending = ["available", "downloading", "ready"].includes(state.status);
+    if (!requested || !pending) return;
+
+    setAttention(true);
+    const reduced =
+      document.documentElement.dataset.reducedMotion === "true" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const frame = window.requestAnimationFrame(() => {
+      const element = card.current;
+      if (!element) return;
+      element.scrollIntoView({
+        behavior: reduced ? "auto" : "smooth",
+        block: "center",
+      });
+      element.focus({ preventScroll: true });
+      if (!reduced)
+        element.animate(
+          [
+            { transform: "scale(.985)" },
+            { transform: "scale(1.018)" },
+            { transform: "scale(1)" },
+          ],
+          { duration: 760, easing: "cubic-bezier(.2,.9,.2,1)" },
+        );
+    });
+    const clear = window.setTimeout(() => setAttention(false), 8000);
+    const url = new URL(window.location.href);
+    url.searchParams.delete("update");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(clear);
+    };
+  }, [state?.status, state?.version]);
+
   if (!state || !isInstalledApp()) return null;
 
   const mobile = isMobileApp();
@@ -478,7 +524,11 @@ export function AppUpdateSettingsCard() {
   const busy = state?.status === "checking" || downloading || state?.status === "installing";
 
   return (
-    <section className={`app-update-settings-card ${state?.status ?? "checking"}`}>
+    <section
+      ref={card}
+      tabIndex={-1}
+      className={`app-update-settings-card ${state?.status ?? "checking"}${attention ? " attention" : ""}`}
+    >
       <div className="app-update-settings-icon" aria-hidden="true">
         <RefreshCw size={22} />
         {available || downloading || state?.status === "ready" ? (

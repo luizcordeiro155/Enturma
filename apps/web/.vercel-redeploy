@@ -1,5 +1,5 @@
 Enturma web production redeploy
-version=0.3.15
-source=571b4708fa9784e36d4b1083b7add89f3f157ed3
-reason=updater-settings-button-and-notification
-retry=4
+version=0.3.16
+source=f69a101e7fc79c7a5222a7bf2a2ab85c7118d11b
+reason=login-persistence-profile-link-safety-update-notification
+retry=1

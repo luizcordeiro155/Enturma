@@ -48,6 +48,63 @@ export function AuthForm({ mode }: { mode: Mode }) {
   >(null);
   const [accountRedirectSeconds, setAccountRedirectSeconds] = useState(10);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [rememberConnected, setRememberConnected] = useState(true);
+
+  useEffect(() => {
+    if (mode !== "login") return;
+    try {
+      if (localStorage.getItem("enturma-remember-login") === "0")
+        setRememberConnected(false);
+    } catch {}
+  }, [mode]);
+
+  useEffect(() => {
+    if (!busy || mode !== "login") return;
+    const reduced =
+      document.documentElement.dataset.reducedMotion === "true" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const animations: Animation[] = [];
+    const orbit = document.querySelector<HTMLElement>(".auth-login-progress-orbit");
+    const core = document.querySelector<HTMLElement>(".auth-login-progress-core");
+    const dots = document.querySelectorAll<HTMLElement>(".auth-login-progress-dot");
+    if (orbit)
+      animations.push(
+        orbit.animate(
+          [{ transform: "rotate(0deg)" }, { transform: "rotate(360deg)" }],
+          { duration: 1400, iterations: Infinity, easing: "linear" },
+        ),
+      );
+    if (core)
+      animations.push(
+        core.animate(
+          [
+            { transform: "scale(.94)", opacity: 0.72 },
+            { transform: "scale(1.05)", opacity: 1 },
+            { transform: "scale(.94)", opacity: 0.72 },
+          ],
+          { duration: 1200, iterations: Infinity, easing: "ease-in-out" },
+        ),
+      );
+    dots.forEach((dot, index) =>
+      animations.push(
+        dot.animate(
+          [
+            { transform: "translateY(0)", opacity: 0.35 },
+            { transform: "translateY(-7px)", opacity: 1 },
+            { transform: "translateY(0)", opacity: 0.35 },
+          ],
+          {
+            duration: 900,
+            delay: index * 130,
+            iterations: Infinity,
+            easing: "ease-in-out",
+          },
+        ),
+      ),
+    );
+    return () => animations.forEach((animation) => animation.cancel());
+  }, [busy, mode]);
 
   const finishRecoveryWaiting = useCallback(() => {
     sessionStorage.removeItem("enturma-password-recovery-tracking");
@@ -264,8 +321,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         "token",
       );
 
-      const response = await post<RecoveryStarted | void>(
-        `/auth/${mode}`,
+      const payload =
         mode === "verify-email"
           ? { token }
           : mode === "reset-password"
@@ -284,8 +340,25 @@ export function AuthForm({ mode }: { mode: Mode }) {
                     email: data.email,
                     password: data.password,
                     device: "Navegador web",
-                  },
-      );
+                  };
+      if (mode === "login") {
+        try {
+          localStorage.setItem(
+            "enturma-remember-login",
+            rememberConnected ? "1" : "0",
+          );
+        } catch {}
+      }
+      const response =
+        mode === "login"
+          ? await api<RecoveryStarted | void>(`/auth/${mode}`, {
+              method: "POST",
+              headers: {
+                "X-Enturma-Remember": rememberConnected ? "1" : "0",
+              },
+              body: JSON.stringify(payload),
+            })
+          : await post<RecoveryStarted | void>(`/auth/${mode}`, payload);
       if (mode === "login" || mode === "register")
         router.push(mode === "register" ? "/onboarding" : "/home");
       else if (mode === "verify-email") {
@@ -655,6 +728,35 @@ export function AuthForm({ mode }: { mode: Mode }) {
         <span>Seu espaço de estudo e conexão.</span>
       </section>
       <main className="auth-main">
+        {busy && mode === "login" ? (
+          <div
+            className="auth-login-progress"
+            role="status"
+            aria-live="polite"
+            aria-label="Entrando no Enturma"
+          >
+            <section className="auth-login-progress-card">
+              <div className="auth-login-progress-animation" aria-hidden="true">
+                <span className="auth-login-progress-orbit" />
+                <span className="auth-login-progress-core">
+                  <LogIn size={34} />
+                </span>
+              </div>
+              <h2>Entrando no Enturma…</h2>
+              <p>Estamos preparando sua conta e restaurando seu espaço de estudo.</p>
+              <div className="auth-login-progress-dots" aria-hidden="true">
+                <span className="auth-login-progress-dot" />
+                <span className="auth-login-progress-dot" />
+                <span className="auth-login-progress-dot" />
+              </div>
+              <small>
+                {rememberConnected
+                  ? "Este dispositivo continuará conectado."
+                  : "A sessão termina quando você fechar o aplicativo."}
+              </small>
+            </section>
+          </div>
+        ) : null}
         <form onSubmit={submit} noValidate>
           <h1>{titles[mode]}</h1>
           <p className="muted">
@@ -840,6 +942,22 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   {fieldErrors.confirmPassword}
                 </small>
               ) : null}
+            </label>
+          ) : null}
+          {mode === "login" ? (
+            <label className="auth-remember-toggle">
+              <input
+                type="checkbox"
+                checked={rememberConnected}
+                onChange={(event) => setRememberConnected(event.target.checked)}
+              />
+              <span>
+                <strong>Manter conectado</strong>
+                <small>
+                  Mantenha sua sessão neste dispositivo para não precisar entrar
+                  novamente toda vez que abrir o Enturma.
+                </small>
+              </span>
             </label>
           ) : null}
           <button disabled={busy} className="button wide" type="submit">

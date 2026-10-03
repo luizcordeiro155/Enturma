@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { api, post } from "@/lib/api";
 import { PublicShowcase } from "./profile-showcase";
+import { ConfirmedLink, ForumLinks } from "./forum-links";
 export type ProfileDetails = {
   pronouns?: string;
   statusText?: string;
@@ -116,7 +117,7 @@ export function ProfileCard({ user }: { user: PublicProfile }) {
           @{user.username} {d.pronouns ? `· ${d.pronouns}` : ""}
         </p>
         {d.statusText ? <p className="profile-status">{d.statusText}</p> : null}
-        <p>{user.bio || "Estudando em companhia."}</p>
+        <p><ForumLinks text={user.bio || "Estudando em companhia."} /></p>
         {d.interests ? (
           <p>
             <strong>Interesses</strong>
@@ -125,9 +126,7 @@ export function ProfileCard({ user }: { user: PublicProfile }) {
           </p>
         ) : null}
         {d.website ? (
-          <a href={d.website} target="_blank" rel="noreferrer">
-            Site pessoal ↗
-          </a>
+          <ConfirmedLink href={d.website} label="Site pessoal ↗" />
         ) : null}
       </div>
     </div>
