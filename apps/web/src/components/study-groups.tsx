@@ -29,7 +29,7 @@ export function StudyGroups(){
     }catch(e){setError((e as Error).message);}
     finally{setLoading(false);}
   }
-  useEffect(()=>{void load();},[]);
+  useEffect(()=>{const timer=window.setTimeout(()=>void load(),0);return()=>window.clearTimeout(timer);},[]);
   useEffect(()=>{
     root.current?.querySelectorAll<HTMLElement>("[data-group-card]").forEach((el,i)=>{
       el.animate(
