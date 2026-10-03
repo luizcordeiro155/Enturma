@@ -3,8 +3,13 @@
 import { useEffect, useRef, useState, useId } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { CalendarDays } from "lucide-react";
 import { api, post } from "@/lib/api";
-import { PublicShowcase } from "./profile-showcase";
+import {
+  FeaturedAchievementBadges,
+  ShowcaseView,
+  type Showcase,
+} from "./profile-showcase";
 import { ConfirmedLink, ForumLinks } from "./forum-links";
 export type ProfileDetails = {
   pronouns?: string;
@@ -100,7 +105,13 @@ export function Avatar({ user }: { user: PublicProfile }) {
     </span>
   );
 }
-export function ProfileCard({ user }: { user: PublicProfile }) {
+export function ProfileCard({
+  user,
+  showcase,
+}: {
+  user: PublicProfile;
+  showcase?: Showcase;
+}) {
   const d = user.profileDetails ?? {};
   return (
     <div
@@ -121,9 +132,12 @@ export function ProfileCard({ user }: { user: PublicProfile }) {
       <div className="public-profile-body">
         <Avatar user={user} />
         <h2 className={`name-${d.nameFont ?? "SYSTEM"}`}>{user.name}</h2>
-        <p>
-          @{user.username} {d.pronouns ? `· ${d.pronouns}` : ""}
-        </p>
+        <div className="profile-handle-row">
+          <p>
+            @{user.username} {d.pronouns ? `· ${d.pronouns}` : ""}
+          </p>
+          <FeaturedAchievementBadges showcase={showcase} />
+        </div>
         {d.statusText ? <p className="profile-status">{d.statusText}</p> : null}
         <p><ForumLinks text={user.bio || "Estudando em companhia."} /></p>
         {d.interests ? (
@@ -219,6 +233,8 @@ export function UserIdentity({
   subtitle?: string;
 }) {
   const [profile, setProfile] = useState<PublicProfile>();
+  const [showcase, setShowcase] = useState<Showcase>();
+  const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [friendship, setFriendship] = useState<FriendshipSummary>();
   const [friendshipLoading, setFriendshipLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -231,17 +247,21 @@ export function UserIdentity({
     const anchor = trigger.current;
     const panel = card.current;
     if (!anchor || !panel) return;
-    function position() {
-      if (!anchor || !panel) return;
-      const rect = anchor.getBoundingClientRect();
-      const width = panel.offsetWidth;
-      const height = panel.offsetHeight;
-      const right = rect.right + 10;
-      const left =
-        right + width <= innerWidth - 12 ? right : rect.left - width - 10;
-      panel.style.left = `${Math.max(12, Math.min(left, innerWidth - width - 12))}px`;
-      panel.style.top = `${Math.max(12, Math.min(rect.top, innerHeight - height - 12))}px`;
-    }
+    const reduced =
+      document.documentElement.dataset.reducedMotion === "true" ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const entrance = reduced
+      ? undefined
+      : panel.animate(
+          [
+            { opacity: 0, transform: "translateY(12px) scale(.975)" },
+            { opacity: 1, transform: "translateY(0) scale(1)" },
+          ],
+          {
+            duration: 240,
+            easing: "cubic-bezier(.16,1,.3,1)",
+          },
+        );
     function outside(e: PointerEvent) {
       if (
         !panel?.contains(e.target as Node) &&
@@ -255,35 +275,38 @@ export function UserIdentity({
         anchor?.focus();
       }
     }
-    position();
     panel
       .querySelector<HTMLButtonElement>("button")
       ?.focus({ preventScroll: true });
-    const observer = new ResizeObserver(position);
-    observer.observe(panel);
-    window.addEventListener("resize", position);
-    window.addEventListener("scroll", position, true);
     document.addEventListener("pointerdown", outside);
     document.addEventListener("keydown", key);
     return () => {
-      observer.disconnect();
-      window.removeEventListener("resize", position);
-      window.removeEventListener("scroll", position, true);
+      entrance?.cancel();
       document.removeEventListener("pointerdown", outside);
       document.removeEventListener("keydown", key);
     };
   }, [open]);
   async function show() {
     setMessage("");
+    setFriendship(undefined);
     setFriendshipLoading(true);
     setOpen(true);
     try {
-      const [loadedProfile, friendships] = await Promise.all([
+      const [loadedProfile, loadedShowcase, me] = await Promise.all([
         loadPublicProfile(user.id),
-        api<FriendshipSummary[]>("/friends", { cache: "no-store" }),
+        api<Showcase>(`/users/${user.id}/showcase`, { cache: "no-store" }),
+        api<{ id: string }>("/users/me"),
       ]);
+      const own = me.id === user.id;
       setProfile(loadedProfile);
-      setFriendship(friendships.find((item) => item.userId === user.id));
+      setShowcase(loadedShowcase);
+      setIsOwnProfile(own);
+      if (!own) {
+        const friendships = await api<FriendshipSummary[]>("/friends", {
+          cache: "no-store",
+        });
+        setFriendship(friendships.find((item) => item.userId === user.id));
+      }
     } catch (e) {
       setMessage((e as Error).message);
     } finally {
@@ -337,62 +360,122 @@ export function UserIdentity({
                 ×
               </button>
               {profile ? (
-                <div
-                  className={`profile-public-content ${profile.showcaseAppearance?.layout === "WIDGETS_FIRST" ? "widgets-first" : ""}`}
-                >
-                  <ProfileCard user={profile} />
-                  <PublicShowcase userId={profile.id} />
-                  <div className="profile-dialog-actions">
-                    {friendshipLoading ? (
-                      <button type="button" disabled>
-                        Verificando amizade…
-                      </button>
-                    ) : friendship?.status === "ACCEPTED" ? (
-                      <Link
-                        className="button"
-                        href={`/friends?chat=${friendship.id}`}
-                        onClick={() => setOpen(false)}
-                      >
-                        Iniciar conversa
-                      </Link>
-                    ) : friendship?.status === "PENDING" ? (
-                      <>
-                        <button type="button" disabled>
-                          Solicitação pendente
-                        </button>
-                        <Link className="button secondary" href="/friends">
-                          Gerenciar convite
+                <div className="profile-public-content profile-discord-public-layout">
+                  <section className="profile-public-primary">
+                    <ProfileCard user={profile} showcase={showcase} />
+                    {!isOwnProfile ? (
+                      <div className="profile-dialog-actions">
+                        {friendshipLoading ? (
+                          <button type="button" disabled>
+                            Verificando amizade…
+                          </button>
+                        ) : friendship?.status === "ACCEPTED" ? (
+                          <Link
+                            className="button"
+                            href={`/friends?chat=${friendship.id}`}
+                            onClick={() => setOpen(false)}
+                          >
+                            Iniciar conversa
+                          </Link>
+                        ) : friendship?.status === "PENDING" ? (
+                          <>
+                            <button type="button" disabled>
+                              Solicitação pendente
+                            </button>
+                            <Link
+                              className="button secondary"
+                              href="/friends"
+                              onClick={() => setOpen(false)}
+                            >
+                              Gerenciar convite
+                            </Link>
+                          </>
+                        ) : (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const created = await post<{
+                                  id: string;
+                                  status: "PENDING" | "ACCEPTED";
+                                }>("/friends", {
+                                  username: profile.username,
+                                });
+                                setFriendship({
+                                  id: created.id,
+                                  userId: profile.id,
+                                  status: created.status,
+                                });
+                                setMessage(
+                                  created.status === "ACCEPTED"
+                                    ? "Amizade confirmada."
+                                    : "Solicitação enviada.",
+                                );
+                              } catch (e) {
+                                setMessage((e as Error).message);
+                              }
+                            }}
+                          >
+                            Adicionar amizade
+                          </button>
+                        )}
+                      </div>
+                    ) : null}
+                    {showcase?.joinedAt ? (
+                      <div className="profile-main-meta">
+                        <CalendarDays size={15} />
+                        <span>
+                          No Enturma desde{" "}
+                          <strong>
+                            {new Date(showcase.joinedAt).toLocaleDateString(
+                              "pt-BR",
+                            )}
+                          </strong>
+                        </span>
+                      </div>
+                    ) : null}
+                  </section>
+
+                  <section className="profile-public-advanced">
+                    <div className="profile-public-advanced-heading">
+                      <span>Personalização avançada</span>
+                      <h2>
+                        {isOwnProfile
+                          ? "Seu perfil, como as outras pessoas veem"
+                          : "Mais sobre este perfil"}
+                      </h2>
+                      <p>
+                        {isOwnProfile
+                          ? "Tudo que você configurou no Enturma aparece aqui."
+                          : "Conquistas, estatísticas e widgets compartilhados por este usuário."}
+                      </p>
+                    </div>
+
+                    {isOwnProfile ? (
+                      <div className="profile-owner-actions">
+                        <p>
+                          Este é o seu perfil, do jeito que as outras pessoas
+                          veem.
+                        </p>
+                        <Link
+                          className="button"
+                          href="/profile"
+                          onClick={() => setOpen(false)}
+                        >
+                          Editar perfil
                         </Link>
-                      </>
+                      </div>
+                    ) : null}
+
+                    {showcase ? (
+                      <ShowcaseView
+                        value={showcase}
+                        showBadges={false}
+                        compact
+                      />
                     ) : (
-                      <button
-                        onClick={async () => {
-                          try {
-                            const created = await post<{
-                              id: string;
-                              status: "PENDING" | "ACCEPTED";
-                            }>("/friends", {
-                              username: profile.username,
-                            });
-                            setFriendship({
-                              id: created.id,
-                              userId: profile.id,
-                              status: created.status,
-                            });
-                            setMessage(
-                              created.status === "ACCEPTED"
-                                ? "Amizade confirmada."
-                                : "Solicitação enviada.",
-                            );
-                          } catch (e) {
-                            setMessage((e as Error).message);
-                          }
-                        }}
-                      >
-                        Adicionar amizade
-                      </button>
+                      <p className="muted">Carregando personalização…</p>
                     )}
-                  </div>
+                  </section>
                 </div>
               ) : (
                 <p>Carregando perfil…</p>

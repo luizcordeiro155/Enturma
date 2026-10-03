@@ -42,3 +42,8 @@ Isso preserva atualizações Web imediatas e evita servir dados privados antigos
 - O ícone de instalação e os ícones do manifesto usam exatamente o mesmo `apps/mobile/assets/icon.png` da versão mobile do Enturma.
 - A página de instalação não oferece mais EXE/APK como alternativas visíveis; o fluxo principal passa a ser somente PWA.
 - As notificações internas continuam funcionando na PWA enquanto ela está aberta. Push do sistema com a PWA fechada ainda depende de Web Push; o FCM atual registra somente o aplicativo Android nativo.
+
+
+## Ícone oficial da instalação
+
+Os arquivos de metadata gerados em `src/app/icon.tsx` e `src/app/apple-icon.tsx` foram removidos porque tinham prioridade sobre a metadata do layout e faziam Windows/Chrome instalar a PWA com o ícone provisório “e.”. A instalação agora usa somente o mesmo PNG oficial de `apps/mobile/assets/icon.png`, publicado como `/enturma-app-icon-v2.png`. O nome versionado também evita reutilização do ícone antigo em cache.

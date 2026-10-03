@@ -1,12 +1,35 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Award, ArrowUp, ArrowDown, Star, LockKeyhole } from "lucide-react";
+import {
+  Award,
+  ArrowUp,
+  ArrowDown,
+  Star,
+  LockKeyhole,
+  Flame,
+  CalendarDays,
+  Brain,
+  Trophy,
+  MessageCircle,
+  TrendingUp,
+  MessagesSquare,
+  GraduationCap,
+  Users,
+  Clock3,
+  BookOpen,
+  Compass,
+  Sparkles,
+  ShieldCheck,
+  type LucideIcon,
+} from "lucide-react";
 import { api } from "@/lib/api";
 export type Achievement = {
   code: string;
   name: string;
   description: string;
+  icon?: string;
+  category?: string;
   tier: string;
   xp: number;
   requirement: number;
@@ -63,6 +86,90 @@ const PRIVACY_NAMES: Record<string, string> = {
   JOINED: "Data de entrada",
   WIDGETS: "Widgets e textos do mural",
 };
+
+const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
+  Flame,
+  Calendar: CalendarDays,
+  Brain,
+  Trophy,
+  MessageCircle,
+  TrendingUp,
+  MessagesSquare,
+  GraduationCap,
+  Users,
+  Clock: Clock3,
+  BookOpen,
+  Compass,
+  Sparkles,
+  Shield: ShieldCheck,
+};
+
+function achievementIcon(achievement: Achievement) {
+  return ACHIEVEMENT_ICONS[achievement.icon ?? ""] ?? Award;
+}
+
+function achievementTierClass(tier?: string) {
+  return `tier-${(tier ?? "BRONZE").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
+}
+
+export function FeaturedAchievementBadges({
+  showcase,
+}: {
+  showcase?: Showcase;
+}) {
+  const achievements = (showcase?.badges ?? [])
+    .map((badge) =>
+      showcase?.achievements?.find(
+        (achievement) => achievement.code === badge.code,
+      ),
+    )
+    .filter((achievement): achievement is Achievement => Boolean(achievement));
+
+  if (!achievements.length) return null;
+
+  return (
+    <div
+      className="profile-handle-achievements"
+      aria-label="Conquistas em destaque"
+    >
+      {achievements.map((achievement) => {
+        const Icon = achievementIcon(achievement);
+        return (
+          <details
+            className={`profile-achievement-badge ${achievementTierClass(achievement.tier)}`}
+            key={achievement.code}
+          >
+            <summary
+              aria-label={`Conquista: ${achievement.name}`}
+              data-tooltip={achievement.name}
+            >
+              <Icon size={14} strokeWidth={2.2} />
+            </summary>
+            <div className="profile-achievement-popover">
+              <span className="profile-achievement-popover-icon">
+                <Icon size={20} />
+              </span>
+              <div>
+                <strong>{achievement.name}</strong>
+                <small>
+                  {achievement.tier} · {achievement.xp} XP
+                </small>
+                <p>{achievement.description}</p>
+                {achievement.earnedAt ? (
+                  <small>
+                    Conquistada em{" "}
+                    {new Date(achievement.earnedAt).toLocaleDateString("pt-BR")}
+                  </small>
+                ) : null}
+              </div>
+            </div>
+          </details>
+        );
+      })}
+    </div>
+  );
+}
+
 export function ShowcaseFields({
   value,
   onChange,
@@ -287,38 +394,53 @@ export function ShowcaseFields({
     </>
   );
 }
-export function ShowcaseView({ value }: { value: Showcase }) {
+export function ShowcaseView({
+  value,
+  showBadges = true,
+  compact = false,
+}: {
+  value: Showcase;
+  showBadges?: boolean;
+  compact?: boolean;
+}) {
   return (
-    <div className="profile-showcase">
-      <div className="badge-row">
-        {value.badges?.map((b) => {
-          const a = value.achievements?.find((a) => a.code === b.code);
-          return a ? (
-            <details className="badge-detail" key={b.code}>
-              <summary>
-                <Award size={20} />
-                {a.name}
-              </summary>
-              <div className="badge-description">
-                <strong>
-                  {a.name} · {a.tier}
-                </strong>
-                <p>{a.description}</p>
-                <p>
-                  {Math.min(a.requirement, a.progress)}/{a.requirement} · {a.xp}{" "}
-                  XP
-                </p>
-                {a.earnedAt && (
-                  <small>
-                    Recebida em{" "}
-                    {new Date(a.earnedAt).toLocaleDateString("pt-BR")}
-                  </small>
-                )}
-              </div>
-            </details>
-          ) : null;
-        })}
-      </div>
+    <div className={`profile-showcase${compact ? " profile-showcase-compact" : ""}`}>
+      {showBadges ? (
+        <div className="badge-row">
+          {value.badges?.map((b) => {
+            const a = value.achievements?.find((a) => a.code === b.code);
+            if (!a) return null;
+            const Icon = achievementIcon(a);
+            return (
+              <details
+                className={`badge-detail ${achievementTierClass(a.tier)}`}
+                key={b.code}
+              >
+                <summary>
+                  <Icon size={20} />
+                  {a.name}
+                </summary>
+                <div className="badge-description">
+                  <strong>
+                    {a.name} · {a.tier}
+                  </strong>
+                  <p>{a.description}</p>
+                  <p>
+                    {Math.min(a.requirement, a.progress)}/{a.requirement} · {a.xp}{" "}
+                    XP
+                  </p>
+                  {a.earnedAt && (
+                    <small>
+                      Recebida em{" "}
+                      {new Date(a.earnedAt).toLocaleDateString("pt-BR")}
+                    </small>
+                  )}
+                </div>
+              </details>
+            );
+          })}
+        </div>
+      ) : null}
       {value.stats && (
         <div className="profile-stat-row">
           <span>Nível {value.stats.level}</span>
@@ -394,13 +516,17 @@ export function AchievementGrid({
 }) {
   return (
     <div className="achievement-grid">
-      {achievements.map((a) => (
+      {achievements.map((a) => {
+        const Icon = achievementIcon(a);
+        return (
         <article
-          className={`achievement-card ${a.earnedAt ? "earned" : ""}`}
+          className={`achievement-card ${a.earnedAt ? "earned" : ""} ${achievementTierClass(a.tier)}`}
           key={a.code}
           title={a.description}
         >
-          <Award />
+          <span className="achievement-card-icon">
+            <Icon />
+          </span>
           <div>
             <strong>{a.name}</strong>
             <p>{a.description}</p>
@@ -424,7 +550,8 @@ export function AchievementGrid({
             )}
           </div>
         </article>
-      ))}
+        );
+      })}
     </div>
   );
 }

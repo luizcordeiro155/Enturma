@@ -11,7 +11,7 @@ export function EnturmaAppIcon({
 }) {
   return (
     <Image
-      src="/enturma-app-icon.png"
+      src="/enturma-app-icon-v2.png"
       width={size}
       height={size}
       alt=""

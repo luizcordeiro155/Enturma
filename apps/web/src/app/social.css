@@ -966,3 +966,493 @@ html .auth-story :is(h1, p, span, a, svg) {
   font-weight: 900;
   letter-spacing: .02em;
 }
+
+
+/* Discord-inspired public profile panel v2 */
+.user-profile-popover {
+  left: 50% !important;
+  top: 50% !important;
+  right: auto !important;
+  bottom: auto !important;
+  translate: -50% -50%;
+  width: min(940px, calc(100vw - 32px));
+  max-width: none;
+  height: min(610px, calc(100dvh - 32px));
+  max-height: none;
+  overflow: hidden;
+  border-radius: 18px;
+  background: #111816;
+  box-shadow:
+    0 0 0 100vmax rgb(0 0 0 / .66),
+    0 26px 90px rgb(0 0 0 / .52);
+}
+
+.user-profile-popover .profile-close {
+  z-index: 20;
+  top: 14px;
+  right: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent) !important;
+  background: color-mix(in srgb, #111816 86%, transparent) !important;
+  backdrop-filter: blur(10px);
+}
+
+.profile-discord-public-layout {
+  height: 100%;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: minmax(320px, .9fr) minmax(380px, 1.1fr);
+  gap: 0 !important;
+}
+
+.profile-public-primary,
+.profile-public-advanced {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.profile-public-primary {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 0 18px 18px;
+  background:
+    linear-gradient(
+      180deg,
+      color-mix(in srgb, var(--profile-accent, #183f36) 9%, #0f1513),
+      #0f1513 54%
+    );
+}
+
+.profile-discord-public-layout .public-profile-card {
+  flex: none;
+  margin: 0 -18px;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.profile-discord-public-layout .public-profile-banner {
+  height: 150px;
+  overflow: hidden;
+}
+
+.profile-discord-public-layout .public-profile-body {
+  padding: 0 20px 22px;
+}
+
+.profile-discord-public-layout .public-profile-body > .identity-avatar {
+  width: 82px;
+  height: 82px;
+  margin-top: -39px;
+  border-width: 6px;
+  border-color: #0f1513;
+}
+
+.profile-discord-public-layout .public-profile-body h2 {
+  margin-top: 17px;
+  margin-bottom: 2px;
+  font-size: 1.55rem;
+  line-height: 1.15;
+}
+
+.profile-handle-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 7px;
+  min-width: 0;
+  margin: 1px 0 11px;
+}
+
+.profile-handle-row > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .9rem;
+}
+
+.profile-handle-achievements {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.profile-achievement-badge {
+  position: relative;
+  display: inline-flex;
+}
+
+.profile-achievement-badge > summary {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  list-style: none;
+  cursor: pointer;
+  border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface) 75%, transparent);
+  color: var(--ink);
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    background 150ms ease;
+}
+
+.profile-achievement-badge > summary::-webkit-details-marker {
+  display: none;
+}
+
+.profile-achievement-badge > summary:hover,
+.profile-achievement-badge[open] > summary {
+  transform: translateY(-1px);
+  border-color: currentColor;
+  background: color-mix(in srgb, var(--soft) 92%, transparent);
+}
+
+.profile-achievement-badge.tier-bronze > summary,
+.achievement-card.tier-bronze .achievement-card-icon {
+  color: #c58a5b;
+}
+
+.profile-achievement-badge.tier-prata > summary,
+.achievement-card.tier-prata .achievement-card-icon {
+  color: #aeb9c3;
+}
+
+.profile-achievement-badge.tier-ouro > summary,
+.achievement-card.tier-ouro .achievement-card-icon {
+  color: #e2b74d;
+}
+
+.profile-achievement-badge.tier-platina > summary,
+.achievement-card.tier-platina .achievement-card-icon {
+  color: #82d4d0;
+}
+
+.profile-achievement-badge > summary::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  z-index: 40;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  translate: -50% 4px;
+  width: max-content;
+  max-width: 220px;
+  padding: 6px 8px;
+  border: 1px solid #ffffff18;
+  border-radius: 7px;
+  background: #070b0a;
+  color: #f7faf8;
+  box-shadow: 0 8px 24px #0007;
+  font-size: .7rem;
+  font-weight: 800;
+  line-height: 1.25;
+  white-space: normal;
+  pointer-events: none;
+  opacity: 0;
+  transition:
+    opacity 120ms ease,
+    translate 120ms ease;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .profile-achievement-badge > summary:hover::after {
+    opacity: 1;
+    translate: -50% 0;
+  }
+}
+
+.profile-achievement-popover {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 8px);
+  left: 0;
+  width: min(290px, calc(100vw - 56px));
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #101715;
+  color: #f1f6f3;
+  box-shadow: 0 16px 42px #0009;
+}
+
+.profile-achievement-popover-icon {
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: #ffffff0d;
+  color: inherit;
+}
+
+.profile-achievement-popover strong,
+.profile-achievement-popover small {
+  display: block;
+}
+
+.profile-achievement-popover small {
+  margin-top: 2px;
+  color: #aebbb5;
+  font-size: .68rem;
+}
+
+.profile-achievement-popover p {
+  margin: 8px 0 0;
+  color: #dce5e1;
+  font-size: .76rem;
+  line-height: 1.45;
+}
+
+.profile-public-primary .profile-dialog-actions {
+  margin-top: auto;
+  padding: 0;
+}
+
+.profile-public-primary .profile-dialog-actions > :only-child {
+  min-height: 48px;
+}
+
+.profile-public-advanced {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 54px 28px 24px;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.profile-public-advanced-heading {
+  display: grid;
+  gap: 5px;
+  padding-right: 34px;
+}
+
+.profile-public-advanced-heading > span {
+  color: var(--muted);
+  font-size: .68rem;
+  font-weight: 900;
+  letter-spacing: .09em;
+  text-transform: uppercase;
+}
+
+.profile-public-advanced-heading h2,
+.profile-public-advanced-heading p {
+  margin: 0;
+}
+
+.profile-public-advanced-heading h2 {
+  font-size: 1.25rem;
+}
+
+.profile-public-advanced-heading p {
+  color: var(--muted);
+  font-size: .82rem;
+  line-height: 1.5;
+}
+
+.profile-owner-actions {
+  display: grid;
+  justify-items: center;
+  gap: 12px;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--soft) 64%, var(--surface));
+  text-align: center;
+}
+
+.profile-owner-actions p {
+  max-width: 32ch;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.profile-owner-actions .button {
+  min-width: 132px;
+}
+
+.profile-public-advanced .profile-showcase {
+  min-width: 0;
+  padding: 0;
+}
+
+.profile-public-advanced .profile-stat-row {
+  margin: 0;
+}
+
+.profile-public-advanced .profile-stat-row > span {
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--soft);
+  font-size: .72rem;
+}
+
+.profile-showcase-compact .showcase-grid {
+  grid-template-columns: 1fr;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.profile-showcase-compact .showcase-widget {
+  padding: 12px 14px;
+  border-radius: 12px;
+}
+
+.profile-showcase-compact .showcase-widget h3 {
+  margin: 0 0 5px;
+  font-size: .84rem;
+}
+
+.profile-showcase-compact .showcase-widget p {
+  margin: 4px 0;
+  font-size: .78rem;
+  line-height: 1.42;
+}
+
+.profile-showcase-compact .achievement-grid {
+  grid-template-columns: 1fr;
+  margin: 6px 0 0;
+}
+
+.profile-showcase-compact .achievement-card {
+  padding: 10px;
+}
+
+.user-profile-popover > p[role="status"] {
+  position: absolute;
+  z-index: 30;
+  left: 18px;
+  bottom: 16px;
+  max-width: 360px;
+  margin: 0;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: #101715e8;
+  color: #dbe6e1;
+  font-size: .72rem;
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  .user-profile-popover {
+    left: 0 !important;
+    top: max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px)) !important;
+    translate: none;
+    width: 100vw;
+    height: calc(
+      100dvh -
+        max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px))
+    );
+    border: 0;
+    border-radius: 0;
+  }
+
+  .profile-discord-public-layout {
+    display: block !important;
+    height: 100%;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .profile-public-primary,
+  .profile-public-advanced {
+    overflow: visible;
+  }
+
+  .profile-public-primary {
+    padding: 0 14px 16px;
+  }
+
+  .profile-discord-public-layout .public-profile-card {
+    margin-inline: -14px;
+  }
+
+  .profile-public-advanced {
+    padding: 22px 14px
+      calc(30px + max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px)));
+    border-left: 0;
+    border-top: 1px solid var(--border);
+  }
+
+  .profile-public-advanced-heading {
+    padding-right: 42px;
+  }
+
+  .profile-achievement-popover {
+    position: fixed;
+    z-index: 1400;
+    left: 14px;
+    right: 14px;
+    bottom: calc(
+      16px + max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
+    );
+    top: auto;
+    width: auto;
+  }
+
+  .profile-achievement-badge > summary::after {
+    display: none;
+  }
+
+  .user-profile-popover > p[role="status"] {
+    left: 14px;
+    right: 14px;
+    bottom: calc(
+      12px + max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
+    );
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .profile-achievement-badge > summary,
+  .profile-achievement-badge > summary::after {
+    transition: none;
+  }
+}
+
+
+.profile-main-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  padding: 13px 2px 0;
+  border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+  color: var(--muted);
+  font-size: .76rem;
+}
+
+.profile-main-meta strong {
+  color: var(--ink);
+  font-weight: 750;
+}
+
+.achievement-card-icon {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 11px;
+  background: color-mix(in srgb, currentColor 10%, var(--surface));
+}
+
+.achievement-card-icon svg {
+  width: 20px;
+  height: 20px;
+}

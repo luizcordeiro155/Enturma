@@ -1,6 +1,6 @@
-const CACHE = "enturma-pwa-v2";
+const CACHE = "enturma-pwa-v3";
 const STATIC_PREFIX = "/_next/static/";
-const CORE = ["/offline", "/manifest.webmanifest", "/enturma-app-icon.png"];
+const CORE = ["/offline", "/manifest.webmanifest", "/enturma-app-icon-v2.png"];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -63,7 +63,7 @@ self.addEventListener("fetch", (event) => {
 
   if (
     url.pathname.startsWith(STATIC_PREFIX) ||
-    url.pathname === "/enturma-app-icon.png" ||
+    url.pathname === "/enturma-app-icon-v2.png" ||
     url.pathname === "/manifest.webmanifest"
   ) {
     event.respondWith(

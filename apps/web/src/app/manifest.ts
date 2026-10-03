@@ -18,13 +18,13 @@ export default function manifest(): MetadataRoute.Manifest {
     dir: "ltr",
     icons: [
       {
-        src: "/enturma-app-icon.png",
+        src: "/enturma-app-icon-v2.png",
         sizes: "1024x1024",
         type: "image/png",
         purpose: "any",
       },
       {
-        src: "/enturma-app-icon.png",
+        src: "/enturma-app-icon-v2.png",
         sizes: "1024x1024",
         type: "image/png",
         purpose: "maskable",
@@ -36,28 +36,28 @@ export default function manifest(): MetadataRoute.Manifest {
         short_name: "Início",
         description: "Abrir o início do Enturma",
         url: "/home",
-        icons: [{ src: "/enturma-app-icon.png", sizes: "1024x1024", type: "image/png" }],
+        icons: [{ src: "/enturma-app-icon-v2.png", sizes: "1024x1024", type: "image/png" }],
       },
       {
         name: "Salas",
         short_name: "Salas",
         description: "Encontrar suas salas de estudo",
         url: "/explore",
-        icons: [{ src: "/enturma-app-icon.png", sizes: "1024x1024", type: "image/png" }],
+        icons: [{ src: "/enturma-app-icon-v2.png", sizes: "1024x1024", type: "image/png" }],
       },
       {
         name: "Comunidade",
         short_name: "Comunidade",
         description: "Abrir o fórum do Enturma",
         url: "/forum",
-        icons: [{ src: "/enturma-app-icon.png", sizes: "1024x1024", type: "image/png" }],
+        icons: [{ src: "/enturma-app-icon-v2.png", sizes: "1024x1024", type: "image/png" }],
       },
       {
         name: "Cadernos",
         short_name: "Cadernos",
         description: "Abrir seus cadernos de estudo",
         url: "/notebooks",
-        icons: [{ src: "/enturma-app-icon.png", sizes: "1024x1024", type: "image/png" }],
+        icons: [{ src: "/enturma-app-icon-v2.png", sizes: "1024x1024", type: "image/png" }],
       },
     ],
   };

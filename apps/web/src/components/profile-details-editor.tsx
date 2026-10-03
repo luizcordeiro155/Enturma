@@ -185,7 +185,7 @@ export function ProfileDetailsEditor({
         <div className="profile-editor-scroll">
           <section className="profile-preview-stage" aria-label="Prévia do perfil">
             <span className="profile-preview-label">Prévia do perfil</span>
-            <ProfileCard user={previewUser} />
+            <ProfileCard user={previewUser} showcase={showcase} />
           </section>
 
           {status ? <p className="profile-save-status" role="status">{status}</p> : null}
