@@ -64,6 +64,36 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM notification_web_push_subscription WHERE user_id=?",userId);
     db.jdbc.update("UPDATE user_session SET revoked_at=coalesce(revoked_at,now()) WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM study_flashcard WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM notification_desktop_push_event WHERE user_id=? OR actor_id=?",userId,userId);
+    db.jdbc.update("DELETE FROM room_reaction WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM chat_reaction WHERE user_id=?",userId);
+    db.jdbc.update("UPDATE room_session_artifact SET user_id=NULL WHERE user_id=?",userId);
+    db.jdbc.update("UPDATE room_system_event SET user_id=NULL WHERE user_id=?",userId);
+
+    db.jdbc.update("DELETE FROM academic_game_progress WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM learning_mission WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM learning_mission_start WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM word_game_session WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM word_game_result WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM daily_word_progress WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM algorithm_game_result WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM daily_learning_progress WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM learning_xp_event WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM learning_progress WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM learning_stats WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM study_journey WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM user_experience_preference WHERE user_id=?",userId);
+
+    db.jdbc.update("DELETE FROM profile_featured_badge WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM user_achievement WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM achievement_progress WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM achievement_sync_queue WHERE user_id=?",userId);
+
+    db.jdbc.update("DELETE FROM ride_voice WHERE match_id IN (SELECT m.id FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE m.user_id=? OR r.owner_id=?)",userId,userId);
+    db.jdbc.update("DELETE FROM ride_review WHERE match_id IN (SELECT m.id FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE m.user_id=? OR r.owner_id=?) OR reviewer_id=?",userId,userId,userId);
+    db.jdbc.update("DELETE FROM ride_message WHERE match_id IN (SELECT m.id FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE m.user_id=? OR r.owner_id=?)",userId,userId);
+    db.jdbc.update("DELETE FROM ride_match WHERE user_id=? OR ride_id IN (SELECT id FROM ride WHERE owner_id=?)",userId,userId);
+    db.jdbc.update("DELETE FROM ride WHERE owner_id=?",userId);
     db.jdbc.update("DELETE FROM focus_session WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM campus_task WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM study_match_profile WHERE user_id=?",userId);
