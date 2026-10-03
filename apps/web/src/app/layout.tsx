@@ -1,3 +1,4 @@
+// Production redeploy marker: account-switch/mobile-profile fixes 2026-10-03.
 import type { Metadata } from "next";
 import "./globals.css";
 import "./advanced-games.css";
