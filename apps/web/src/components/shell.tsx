@@ -30,6 +30,7 @@ const links = [
   { href: "/forum", label: "Fórum", icon: MessageCircle },
   { href: "/notebooks", label: "Cadernos IA", icon: BookOpen },
   { href: "/friends", label: "Amigos", icon: Users },
+  { href: "/groups", label: "Grupos de estudo", icon: Users },
   { href: "/explore", label: "Explorar", icon: Search },
   { href: "/challenges", label: "Desafios acadêmicos", icon: Gamepad2 },
   { href: "/subjects", label: "Minhas matérias", icon: BookOpen },
