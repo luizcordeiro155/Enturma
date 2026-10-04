@@ -87,10 +87,13 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     expect(dimensions).toEqual([width, height]);
   }
   await page.getByLabel("Cor principal do perfil", { exact: true }).fill("#b328ac");
-  await expect(page.locator(".public-profile-card")).toHaveCSS(
-    "border-top-color",
-    "rgb(179, 40, 172)",
-  );
+  await expect
+    .poll(() =>
+      page.locator(".public-profile-card").evaluate((el) =>
+        getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
+      ),
+    )
+    .toBe("#b328ac");
   await page.getByLabel("Status personalizado").fill("Estudando JavaScript");
   await page
     .getByRole("combobox", { name: "Decoração do avatar" })
@@ -100,10 +103,13 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   await page.reload();
-  await expect(page.locator(".public-profile-card")).toHaveCSS(
-    "border-top-color",
-    "rgb(179, 40, 172)",
-  );
+  await expect
+    .poll(() =>
+      page.locator(".public-profile-card").evaluate((el) =>
+        getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
+      ),
+    )
+    .toBe("#b328ac");
   await page.screenshot({
     path: "../../.local/profile-desktop.png",
     fullPage: true,

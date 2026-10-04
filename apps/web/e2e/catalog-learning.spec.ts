@@ -246,7 +246,7 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
           ? "/notebooks"
           : name === "Amigos"
             ? "/friends"
-            : "/subjects",
+            : "/home#minhas-materias",
       ),
     );
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
