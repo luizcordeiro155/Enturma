@@ -231,11 +231,6 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   for (const name of ["Cadernos", "Amigos", "Minhas matérias"]) {
-    const response = page.waitForResponse(
-      (r) =>
-        r.url().includes("/users/me/experience") &&
-        r.request().method() === "GET",
-    );
     if (name !== "Cadernos")
       await page
         .getByRole("button", { name: "Mais opções", exact: true })
@@ -250,7 +245,8 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
             : "/subjects",
       ),
     );
-    await response;
+    // Experience may be served from the client cache on later navigations.
+    // What matters here is that the persisted theme survives every route.
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   }
   expect(

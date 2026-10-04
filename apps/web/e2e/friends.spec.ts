@@ -54,11 +54,15 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     ["Foto de perfil", "avatar", 512, 512],
     ["Banner", "banner", 1500, 500],
   ] as const) {
-    await page.getByLabel(label, { exact: true }).setInputFiles({
-      name: "crop.png",
-      mimeType: "image/png",
-      buffer: Buffer.from(png, "base64"),
-    });
+    await page
+      .locator(".profile-media-action")
+      .filter({ hasText: label })
+      .locator('input[type="file"]')
+      .setInputFiles({
+        name: "crop.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(png, "base64"),
+      });
     const crop = page.getByRole("dialog", {
       name: kind === "avatar" ? "Editar foto de perfil" : "Editar banner",
     });

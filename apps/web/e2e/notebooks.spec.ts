@@ -83,9 +83,17 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
       mimeType: "image/png",
       buffer: Buffer.from(png, "base64"),
     });
-  await expect(page.getByLabel("Usar aula.png")).toBeEnabled({
-    timeout: 20000,
-  });
+  if (notebookState.aiEnabled) {
+    await expect(page.getByLabel("Usar aula.png")).toBeEnabled({
+      timeout: 20000,
+    });
+  } else {
+    await expect(
+      page.getByRole("alert").filter({
+        hasText: "A leitura de imagens precisa da IA configurada.",
+      }),
+    ).toBeVisible();
+  }
   await page
     .getByLabel("Pergunte sobre suas fontes")
     .fill("Como aplicar algoritmos na matemática?");
