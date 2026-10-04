@@ -113,10 +113,10 @@ export function NotificationsProvider({
     };
 
     void pollDesktopPush();
-    const timer = window.setInterval(pollDesktopPush, 5000);
+    const timer = window.setInterval(pollDesktopPush, 60000);
     const refreshNow = () => void pollDesktopPush();
     window.addEventListener("enturma-notifications_changed", refreshNow);
-    window.addEventListener("enturma-live-ready", refreshNow);
+    window.addEventListener("enturma-live-resync", refreshNow);
     window.addEventListener("focus", refreshNow);
     document.addEventListener("visibilitychange", refreshNow);
 
@@ -124,7 +124,7 @@ export function NotificationsProvider({
       active = false;
       window.clearInterval(timer);
       window.removeEventListener("enturma-notifications_changed", refreshNow);
-      window.removeEventListener("enturma-live-ready", refreshNow);
+      window.removeEventListener("enturma-live-resync", refreshNow);
       window.removeEventListener("focus", refreshNow);
       document.removeEventListener("visibilitychange", refreshNow);
     };
