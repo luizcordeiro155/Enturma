@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+// Enturma Stabilization / Polish validation marker.
 const config: NextConfig = {
   devIndicators: false,
   transpilePackages: ["@enturma/contracts", "@enturma/design-tokens"],
