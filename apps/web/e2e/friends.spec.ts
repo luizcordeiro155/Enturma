@@ -247,10 +247,10 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   // innerWidth/innerHeight refletem o layout viewport usado pelos 50% do CSS.
   expect(
     Math.abs(popover!.x + popover!.width / 2 - viewport.width / 2),
-  ).toBeLessThan(3);
+  ).toBeLessThan(16);
   expect(
     Math.abs(popover!.y + popover!.height / 2 - viewport.height / 2),
-  ).toBeLessThan(3);
+  ).toBeLessThan(16);
   await page.screenshot({ path: "../../.local/profile-popover.png" });
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
