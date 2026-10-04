@@ -1,6 +1,6 @@
 {
   "name": "@enturma/desktop",
-  "version": "0.3.13",
+  "version": "0.3.14",
   "private": true,
   "description": "Aplicativo desktop oficial do Enturma",
   "main": "src/main.cjs",
