@@ -19,6 +19,7 @@ import {
 import { isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
 const tabs = [
   ["/home", "Início", Home],
+  ["/rooms", "Salas", Users],
   ["/forum", "Comunidade", MessagesSquare],
   ["/notebooks", "Cadernos", BookOpen],
   ["/profile", "Perfil", UserRound],
