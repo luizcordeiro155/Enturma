@@ -180,7 +180,9 @@ function NativeCallBar() {
         right: 10,
         borderRadius: 14,
         padding: 10,
-        backgroundColor: styles.button.backgroundColor,
+        backgroundColor: styles.elevated.backgroundColor,
+        borderWidth: 1,
+        borderColor: styles.border.borderColor,
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
@@ -197,10 +199,15 @@ function NativeCallBar() {
         }
         style={{ flex: 1, padding: 8 }}
       >
-        <Text style={[styles.buttonText, { textAlign: "left" }]}>
+        <Text style={[styles.text, { textAlign: "left" }]}>
           ● Chamada em andamento
         </Text>
-        <Text style={[styles.buttonText, { textAlign: "left" }]}>
+        <Text
+          style={[
+            styles.label,
+            { marginBottom: 0, color: styles.accent.color, textAlign: "left" },
+          ]}
+        >
           Voltar à sala
         </Text>
       </Pressable>
@@ -220,7 +227,7 @@ function NativeCallBar() {
         }}
         style={{ padding: 10 }}
       >
-        <Text style={styles.buttonText}>
+        <Text style={styles.text}>
           {isMicrophoneEnabled ? "Mic ligado" : "Mic mudo"}
         </Text>
       </Pressable>
