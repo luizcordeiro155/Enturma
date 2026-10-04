@@ -315,7 +315,7 @@ export function Motion() {
       if (!motionDisabled()) return;
       cancelMotion();
       document
-        .getAnimations({ subtree: true })
+        .getAnimations()
         .forEach((animation) => animation.cancel());
     }
 
