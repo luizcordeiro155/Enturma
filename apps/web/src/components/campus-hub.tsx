@@ -49,7 +49,7 @@ export function CampusHub(){
   const [focusSeconds,setFocusSeconds]=useState(0);
   const [focusGoal,setFocusGoal]=useState("");
   const [focusSubjectId,setFocusSubjectId]=useState("");
-  const root=useRef<HTMLDivElement>(null);
+  const root=useRef<HTMLDivElement>(null);\n  const initialRevealDone=useRef(false);
 
   async function load(){
     try{
@@ -64,6 +64,8 @@ export function CampusHub(){
   useLiveRefresh("campus_changed",load,12000);
   useLiveRefresh("rooms_changed",load,12000);
   useEffect(()=>{
+    if(!data||initialRevealDone.current)return;
+    initialRevealDone.current=true;
     const cards=root.current?.querySelectorAll<HTMLElement>("[data-campus-card]");
     cards?.forEach((card,index)=>{
       card.animate(
