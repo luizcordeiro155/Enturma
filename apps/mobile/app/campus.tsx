@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Animated, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
@@ -136,33 +136,42 @@ export default function Campus() {
  }
 
  const clock=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");
- const title=profile?"Hoje, "+profile.name.split(" ")[0]:"Hoje no Enturma";
+ const title="Hoje / Agenda";
+ const openTasks=useMemo(()=>data?.tasks.filter(t=>!t.completedAt)??[],[data]);
+ const nextTask=openTasks[0];
+ const firstName=profile?.name.split(" ")[0]??"estudante";
  return (
   <Screen title={title}>
    <ErrorMessage message={error}/>
    {data?(
-    <Animated.View style={{gap:14,opacity:entrance,transform:[{translateY:entrance.interpolate({inputRange:[0,1],outputRange:[18,0]})}]}}>
+    <Animated.View style={{gap:14,opacity:entrance,transform:[{translateY:entrance.interpolate({inputRange:[0,1],outputRange:[14,0]})}]}}>
       <SuiteHero
-       icon="sparkles-outline"
-       title="Seu dia acadêmico"
-       description="Agenda, foco, revisão e colegas disponíveis em um único painel."
+       icon="calendar-outline"
+       title={"Boa jornada, "+firstName}
+       description="Seu dia acadêmico, suas prioridades e seus próximos passos em um único lugar."
       >
+       <View style={[styles.row,{gap:6}]}>
+        <Text style={styles.muted}>Próximo compromisso</Text>
+        <Text style={[styles.label,{marginBottom:0,fontSize:17}]}>{nextTask?.title??"Agenda livre"}</Text>
+        <Text style={styles.muted}>{nextTask?new Date(nextTask.dueAt).toLocaleString("pt-BR"):"Aproveite para focar, revisar ou estudar com alguém."}</Text>
+       </View>
        <SuiteStats items={[
         {label:"Sequência",value:data.study.streak+" dias",icon:"flame-outline"},
-        {label:"Experiência",value:data.study.totalXp+" XP",icon:"trophy-outline"},
-        {label:"Flashcards",value:data.flashcards.dueFlashcards+" revisões",icon:"layers-outline"},
+        {label:"Foco acumulado",value:Math.round(data.focus.focusSeconds/60)+" min",icon:"time-outline"},
+        {label:"Revisões",value:data.flashcards.dueFlashcards+" pendentes",icon:"layers-outline"},
+        {label:"Salas ativas",value:String(data.activeRooms),icon:"people-outline"},
        ]}/>
       </SuiteHero>
 
-      <SuiteSection icon="calendar-outline" title="Próximos compromissos" description="O que merece sua atenção agora.">
-       {data.tasks.filter(t=>!t.completedAt).slice(0,5).map(t=>(
+      <SuiteSection icon="calendar-outline" title="Próximos compromissos" description={openTasks.length+" pendentes na sua rotina."}>
+       {openTasks.slice(0,5).map(t=>(
         <View key={t.id} style={styles.row}>
          <Text style={styles.label}>{t.title}</Text>
          <Text style={styles.muted}>{(t.subjectName??t.kind)+" · "+new Date(t.dueAt).toLocaleString("pt-BR")}</Text>
          <Button title="Concluir" onPress={()=>void complete(t.id)}/>
         </View>
        ))}
-       {data.tasks.filter(t=>!t.completedAt).length===0?<Text style={styles.muted}>Nada urgente por aqui. Use a versão Web para adicionar provas, trabalhos e aulas à agenda.</Text>:null}
+       {openTasks.length===0?<Text style={styles.muted}>Nada urgente por aqui. Adicione compromissos pela versão Web/Desktop ou aproveite para iniciar um foco.</Text>:null}
       </SuiteSection>
 
       <SuiteSection icon="timer-outline" title={focusId?clock:"Modo Foco com Tutor"} description={focusId?"A IA está disponível durante toda a sessão para adaptar o ensino.":"Defina o assunto antes de iniciar os 50 minutos."}>
@@ -179,7 +188,7 @@ export default function Campus() {
        </View>:null}
       </SuiteSection>
 
-      <SuiteSection icon="people-outline" title="Colegas disponíveis" description="Encontre pessoas compatíveis para estudar agora.">
+      <SuiteSection icon="people-outline" title="Colegas disponíveis agora" description="Encontre pessoas compatíveis para estudar sem sair da sua rotina.">
        {data.matches.slice(0,4).map(m=>(
         <View key={m.id} style={styles.row}>
          <Text style={styles.label}>{m.name}</Text>
@@ -204,11 +213,11 @@ export default function Campus() {
        {!groups.length?<Text style={styles.muted}>Nenhum grupo disponível ainda.</Text>:null}
       </SuiteSection>
 
-      <View style={{gap:10}}>
+      <SuiteSection icon="grid-outline" title="Continue estudando" description="Atalhos rápidos para o que você usa durante o semestre.">
        <Button title="Abrir Cadernos IA" onPress={()=>router.push("/notebooks")}/>
        <Button title="Desafios acadêmicos" onPress={()=>router.push("/challenges")}/>
        <Button title="Entrar em uma sala" onPress={()=>router.push("/rooms")}/>
-      </View>
+      </SuiteSection>
     </Animated.View>
    ):<Text style={styles.muted}>Montando seu dia…</Text>}
   </Screen>
