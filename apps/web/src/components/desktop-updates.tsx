@@ -407,12 +407,24 @@ export function DesktopUpdateProvider({
           ) : isMobileApp() && state.status === "downloading" ? (
             <>
               <p>
-                O Android está baixando a atualização. Quando terminar, confirme
-                a instalação mostrada pelo sistema.
+                O Android baixa a atualização em segundo plano. Ao concluir,
+                o instalador é aberto automaticamente. Se você cancelar a
+                confirmação do sistema, toque em “Continuar instalação” nas
+                Configurações para reabrir o mesmo APK sem baixar novamente.
               </p>
-              <button className="secondary" onClick={() => setOpen(false)}>
-                Continuar usando o Enturma
-              </button>
+              <div className="actions">
+                <button
+                  onClick={() => {
+                    if (!state.downloadUrl) return;
+                    window.EnturmaNative?.installUpdate?.(state.downloadUrl);
+                  }}
+                >
+                  Continuar instalação
+                </button>
+                <button className="secondary" onClick={() => setOpen(false)}>
+                  Continuar usando o Enturma
+                </button>
+              </div>
             </>
           ) : legacyWindows ? (
             <>
