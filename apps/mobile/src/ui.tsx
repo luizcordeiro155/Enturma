@@ -6,11 +6,11 @@ import {
   Text,
   TextInput,
   Pressable,
-  ScrollView,
+  FlatList,
   View,
   type TextInputProps,
 } from "react-native";
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { Children, createContext, useContext, useEffect, useMemo, useState } from "react";
 import * as SecureStore from "expo-secure-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ExperiencePreference } from "@enturma/contracts";
@@ -239,18 +239,25 @@ export function Screen({
       behavior={Platform.OS === "ios" ? "padding" : undefined}
       keyboardVerticalOffset={90}
     >
-      <ScrollView
+      <FlatList
+        data={Children.toArray(children)}
+        keyExtractor={(_, index) => String(index)}
+        renderItem={({ item }) => item as React.ReactElement}
         contentContainerStyle={[
           styles.screen,
           { paddingBottom: Math.max(92, insets.bottom + 74) },
         ]}
         keyboardShouldPersistTaps="handled"
-      >
-        <Text style={styles.title} accessibilityRole="header">
-          {title}
-        </Text>
-        {children}
-      </ScrollView>
+        removeClippedSubviews={Platform.OS === "android"}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        windowSize={7}
+        ListHeaderComponent={
+          <Text style={styles.title} accessibilityRole="header">
+            {title}
+          </Text>
+        }
+      />
     </KeyboardAvoidingView>
   );
 }
