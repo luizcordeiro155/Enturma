@@ -201,7 +201,7 @@ export function DesktopUpdateProvider({
     document.documentElement.dataset.enturmaUpdateUi = "web";
     let live = true;
     const currentVersion = mobileVersion();
-    const check = async () => {
+    const check = async (forceRetry = false) => {
       try {
         const response = await fetch(
           androidUpdateOrigin + "/latest-android.json?ts=" + Date.now(),
@@ -229,6 +229,7 @@ export function DesktopUpdateProvider({
           };
           setState((current) => {
             if (
+              !forceRetry &&
               current?.status === "downloading" &&
               current.version === release.version
             )
@@ -253,11 +254,11 @@ export function DesktopUpdateProvider({
         });
       }
     };
-    const onCheck = () => void check();
+    const onCheck = () => void check(true);
     void check();
-    const interval = window.setInterval(check, 15 * 60 * 1000);
+    const interval = window.setInterval(() => void check(false), 15 * 60 * 1000);
     const onVisible = () => {
-      if (document.visibilityState === "visible") void check();
+      if (document.visibilityState === "visible") void check(true);
     };
     window.addEventListener("enturma-mobile-update-check", onCheck);
     document.addEventListener("visibilitychange", onVisible);
