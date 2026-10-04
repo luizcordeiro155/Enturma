@@ -15,6 +15,8 @@ import {
   Car,
   Settings,
   Gamepad2,
+  BriefcaseBusiness,
+  GraduationCap,
 } from "lucide-react";
 import { isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
 const tabs = [
@@ -96,6 +98,8 @@ export function MobileNavigation() {
           {(
             [
               ["/friends", "Amigos", Users],
+              ["/portfolio", "Portfólio acadêmico", BriefcaseBusiness],
+              ["/teacher", "Turmas / Professor", GraduationCap],
               ["/caronas", "Caronas", Car],
               ["/settings", "Configurações", Settings],
               ["/challenges", "Desafios acadêmicos", Gamepad2],
