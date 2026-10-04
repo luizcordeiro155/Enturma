@@ -132,7 +132,6 @@ public class ProfileService {
         preferences);
     db.jdbc.update("DELETE FROM user_subject WHERE user_id=?", a.id());
     for (UUID id : subjects) db.jdbc.update("INSERT INTO user_subject VALUES (?,?)", a.id(), id);
-    events.publishEvent(new AppChanged("campus_changed", Set.of(a.id())));
     events.publishEvent(new AppChanged("profile_changed", Set.of()));
   }
 }

@@ -18,21 +18,17 @@ import {
   ShieldCheck,
   Users,
   UserRound,
-  CalendarDays,
   BriefcaseBusiness,
-  GraduationCap,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
 import { isDesktop, isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
-  { href: "/campus", label: "Hoje / Agenda", icon: CalendarDays },
   { href: "/forum", label: "Fórum", icon: MessageCircle },
   { href: "/notebooks", label: "Cadernos IA", icon: BookOpen },
   { href: "/friends", label: "Amigos", icon: Users },
   { href: "/portfolio", label: "Portfólio", icon: BriefcaseBusiness },
-  { href: "/teacher", label: "Turmas / Professor", icon: GraduationCap },
   { href: "/challenges", label: "Desafios acadêmicos", icon: Gamepad2 },
   { href: "/caronas", label: "Caronas", icon: Car },
   { href: "/settings", label: "Configurações", icon: Settings },

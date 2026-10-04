@@ -11,11 +11,9 @@ export type AppEventType =
   | "room_member_left"
   | "room_expiring"
   | "rooms_changed"
-  | "campus_changed"
-  | "teaching_changed"
   | "friends_changed"
   | "profile_changed"
-  | "groups_changed";
+  | "profile_changed";
 
 let liveConnected = false;
 let liveStarted = false;
@@ -76,11 +74,8 @@ export function useAppConnection() {
                 "room_member_left",
                 "room_expiring",
                 "rooms_changed",
-                "campus_changed",
-                "teaching_changed",
                 "friends_changed",
                 "profile_changed",
-                "groups_changed",
               ].includes(type)
             ) {
               window.dispatchEvent(new Event(`enturma-${type}`));
@@ -141,11 +136,8 @@ export function useLiveRefresh(
       forum_changed: "/forum",
       notifications_changed: "/notifications",
       rooms_changed: "/study-rooms",
-      campus_changed: "/campus",
-      teaching_changed: "/teaching",
       friends_changed: "/friends",
       profile_changed: "/users",
-      groups_changed: "/campus/groups",
     };
 
     async function run() {

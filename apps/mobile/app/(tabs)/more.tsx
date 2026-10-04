@@ -14,7 +14,6 @@ export default function More() {
     <Screen title="Mais no Enturma">
       <View style={[styles.card, { gap: 10 }]}>
         <Ionicons name="grid-outline" size={28} color={styles.text.color} />
-        <Button title="Hoje / Agenda" onPress={() => router.push("/campus")} />
         <Button title="Amigos" onPress={() => router.push("/friends")} />
         <Button title="Caronas" onPress={() => router.push("/rides")} />
         <Button
@@ -26,7 +25,6 @@ export default function More() {
           onPress={() => router.push("/challenges")}
         />
         <Button title="Portfólio acadêmico" onPress={() => router.push("/portfolio")} />
-        <Button title="Turmas / Professor" onPress={() => router.push("/teacher")} />
         <Button
           title="Configurações"
           onPress={() => router.push("/settings")}

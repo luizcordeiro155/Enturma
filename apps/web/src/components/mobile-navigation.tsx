@@ -6,7 +6,6 @@ import { EnturmaAppIcon } from "./enturma-app-icon";
 import {
   Home,
   Users,
-  CalendarDays,
   MessagesSquare,
   BookOpen,
   UserRound,
@@ -16,12 +15,10 @@ import {
   Settings,
   Gamepad2,
   BriefcaseBusiness,
-  GraduationCap,
 } from "lucide-react";
 import { isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
 const tabs = [
   ["/home", "Início", Home],
-  ["/campus", "Hoje", CalendarDays],
   ["/forum", "Comunidade", MessagesSquare],
   ["/notebooks", "Cadernos", BookOpen],
   ["/profile", "Perfil", UserRound],
@@ -99,7 +96,6 @@ export function MobileNavigation() {
             [
               ["/friends", "Amigos", Users],
               ["/portfolio", "Portfólio acadêmico", BriefcaseBusiness],
-              ["/teacher", "Turmas / Professor", GraduationCap],
               ["/caronas", "Caronas", Car],
               ["/settings", "Configurações", Settings],
               ["/challenges", "Desafios acadêmicos", Gamepad2],
