@@ -42,15 +42,8 @@ export function ForumHighlights() {
       }
     }
     void refresh();
-    const visible = () => {
-      if (!document.hidden) void refresh();
-    };
-    const timer = setInterval(visible, 60000);
-    document.addEventListener("visibilitychange", visible);
     return () => {
       active = false;
-      clearInterval(timer);
-      document.removeEventListener("visibilitychange", visible);
     };
   }, [attempt]);
   useLiveRefresh("forum_changed", async () => {
