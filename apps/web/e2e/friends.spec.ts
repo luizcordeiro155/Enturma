@@ -232,20 +232,21 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     page.getByRole("dialog", { name: `Perfil de ${b}` }),
   ).toBeVisible();
-  const anchor = await page
-    .getByRole("button", { name: `Ver perfil de ${b}`, exact: true })
-    .first()
-    .boundingBox();
   const popover = await page
     .getByRole("dialog", { name: `Perfil de ${b}` })
     .boundingBox();
-  expect(popover!.x).toBeGreaterThan(0);
+  const viewport = page.viewportSize()!;
+  expect(popover!.x).toBeGreaterThanOrEqual(0);
+  expect(popover!.y).toBeGreaterThanOrEqual(0);
+  expect(popover!.x + popover!.width).toBeLessThanOrEqual(viewport.width);
+  expect(popover!.y + popover!.height).toBeLessThanOrEqual(viewport.height);
+  // O perfil público atual é um painel centralizado estilo Discord no desktop.
   expect(
-    Math.min(
-      Math.abs(popover!.x - (anchor!.x + anchor!.width)),
-      Math.abs(popover!.x + popover!.width - anchor!.x),
-    ),
-  ).toBeLessThan(30);
+    Math.abs(popover!.x + popover!.width / 2 - viewport.width / 2),
+  ).toBeLessThan(3);
+  expect(
+    Math.abs(popover!.y + popover!.height / 2 - viewport.height / 2),
+  ).toBeLessThan(3);
   await page.screenshot({ path: "../../.local/profile-popover.png" });
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
