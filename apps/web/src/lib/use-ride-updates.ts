@@ -104,17 +104,17 @@ function startTransport() {
   void connect();
 
   fallback = setInterval(() => {
-    if (document.hidden) return;
-    // Safety net for half-open mobile/WebView/Desktop connections. Live events
-    // remain the fast path; this only repairs silent connection loss.
-    void refreshAll();
     if (
-      !socket ||
-      socket.readyState === WebSocket.CLOSED ||
-      socket.readyState === WebSocket.CLOSING
+      document.hidden ||
+      (connected && socket?.readyState === WebSocket.OPEN)
     )
-      void connect();
-  }, 20000);
+      return;
+
+    // WebSocket is the normal transport. Poll only while realtime is unavailable,
+    // so a healthy connection never causes periodic duplicate API refreshes.
+    void refreshAll();
+    void connect();
+  }, 60000);
 
   const visible = () => {
     if (document.hidden) return;
