@@ -161,6 +161,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     "Rascunho preservado",
   );
 
+  const notificationBadge = other.locator(".notification-count");
+  const unreadBeforePrivateMessage = await notificationBadge
+    .textContent()
+    .then((value) => Number(value || 0))
+    .catch(() => 0);
   await page
     .getByLabel("Mensagem privada")
     .fill("Conversa privada ponta a ponta 🔒");
@@ -171,7 +176,15 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     other.getByRole("button", { name: "Nova mensagem · ir para ela" }),
   ).toBeVisible();
-  await expect(other.locator(".notification-count")).toHaveCount(0);
+  // A mensagem privada aberta usa o aviso local "Nova mensagem" e não deve
+  // aumentar o contador global. O contador pode já conter o convite aceito.
+  await expect
+    .poll(async () =>
+      other.locator(".notification-count").count()
+        ? Number((await other.locator(".notification-count").textContent()) || 0)
+        : 0,
+    )
+    .toBe(unreadBeforePrivateMessage);
   await other
     .getByRole("button", { name: "Nova mensagem · ir para ela" })
     .click();
