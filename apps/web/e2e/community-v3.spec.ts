@@ -1,5 +1,5 @@
 import { authenticate } from "./session";
-import { test, expect, chromium, type Page } from "@playwright/test";
+import { test, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
@@ -14,6 +14,7 @@ type E2EUser = {
 };
 test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
   request,
+  browser,
 }) => {
   test.setTimeout(150000);
   const db = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
@@ -82,14 +83,6 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
       })
     ).ok(),
   ).toBe(true);
-  const browser = await chromium.launch({
-    args: [
-      "--use-fake-ui-for-media-stream",
-      "--use-fake-device-for-media-stream",
-      "--auto-select-desktop-capture-source=Entire screen",
-      "--enable-usermedia-screen-capturing",
-    ],
-  });
   const a = await browser.newContext({
       baseURL: "http://localhost:3000",
       permissions: ["microphone", "camera"],
