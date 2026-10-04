@@ -52,3 +52,18 @@ test("updater desktop: erro/cancelamento do lançamento mantém caminho de recup
   has("shell.openPath(installerPath)");
   has('updateStatus("error"');
 });
+
+
+test("updater desktop: atualização pronta sobrevive ao fechamento e reinício", () => {
+  has("function persistPendingUpdate(update)");
+  has("function restorePendingUpdate()");
+  has("persistPendingUpdate(pendingUpdate)");
+  has("A atualização já estava baixada. Use 'Reiniciar e atualizar'");
+  has("void restorePendingUpdate().finally");
+});
+
+test("updater desktop: estado persistido inválido ou de versão atual é descartado com segurança", () => {
+  has("clearPersistedPendingUpdate(true)");
+  has("!newerThan(manifest.version, app.getVersion())");
+  has("Artefato persistido não passou na verificação SHA-256.");
+});

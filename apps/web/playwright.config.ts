@@ -23,13 +23,26 @@ export default defineConfig({
     },
   },
   projects: [
-    {
-      name: "chromium",
-      use: {
+    { name: "chromium-social", testMatch: /(?:forum|friends)\.spec\.ts/, use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },
-      },
-    },
+      } },
+    { name: "chromium-study", testMatch: /(?:catalog-learning|notebooks)\.spec\.ts/, use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1487, height: 1058 },
+      } },
+    { name: "chromium-experience", testMatch: /(?:profile-v3|responsive-shell|study-journey)\.spec\.ts/, use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1487, height: 1058 },
+      } },
+    { name: "chromium-platform", testMatch: /platform\.spec\.ts/, use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1487, height: 1058 },
+      } },
+    { name: "chromium-media", testMatch: /community-v3\.spec\.ts/, use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1487, height: 1058 },
+      } },
   ],
   reporter: "list",
 });

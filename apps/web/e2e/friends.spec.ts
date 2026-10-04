@@ -1,4 +1,4 @@
-import { authenticate } from "./session";
+import { authenticate, authenticateWithPassword } from "./session";
 import { test, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("amizade, perfil público e conversa ponta a ponta entre dois navegadores", async ({
@@ -36,6 +36,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   }
   await register(page, a);
   await page.goto("/profile");
+  await expect(page.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
   await expect(page.locator(".public-profile-card")).toHaveCount(1);
   await expect(page.locator(".profile-details-editor form")).toHaveCount(1);
   const png = await page.evaluate(() => {
@@ -109,6 +110,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   const other = await peer.newPage();
   await register(other, b);
   await initializeConversationKeys(other);
+  await expect(other.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
   await page.getByLabel("Adicionar pelo nome de usuário").fill(b);
   await page.getByRole("button", { name: "Enviar convite" }).click();
   await expect(
@@ -263,13 +265,12 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   );
   const clean = await browser.newContext();
   const fresh = await clean.newPage();
-  await fresh.goto("/login");
-  await fresh.getByLabel("E-mail").fill(`${a}@example.test`);
-  await fresh
-    .getByLabel("Senha", { exact: true })
-    .fill("E2E-password-long-123");
-  await fresh.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(fresh).toHaveURL(/home/);
+  await authenticateWithPassword(
+    clean,
+    request,
+    `${a}@example.test`,
+    "E2E-password-long-123",
+  );
   await fresh.goto("/friends");
   await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(

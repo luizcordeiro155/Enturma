@@ -34,6 +34,7 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
     await db.query("UPDATE app_user SET role='ADMIN' WHERE email=$1", [email]);
     await authenticate(page.context(), credentials);
     await page.goto("/home");
+    await expect(page.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
     const journey = page.getByRole("complementary", {
       name: "Seu espaço de estudo",
     });
@@ -172,6 +173,9 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
     await page.getByRole("button", { name: /^Notificações/ }).click();
     await expect(inbox.locator(".notification-item")).toHaveCount(0);
     await insertNotice();
+    await page.evaluate(() =>
+      window.dispatchEvent(new Event("enturma-notifications_changed")),
+    );
     await expect(inbox.getByText("Aviso de teste da jornada")).toBeVisible({
       timeout: 10000,
     });

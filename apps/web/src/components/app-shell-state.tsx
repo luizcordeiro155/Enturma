@@ -8,7 +8,7 @@ import {
   useMemo,
   useState,
 } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import { api } from "@/lib/api";
 import { isInstalledApp } from "./desktop-updates";
 
@@ -27,21 +27,7 @@ type AppShellState = {
 
 const Context = createContext<AppShellState | null>(null);
 
-const PREFETCH_ROUTES = [
-  "/home",
-  "/campus",
-  "/portfolio",
-  "/teacher",
-  "/forum",
-  "/notebooks",
-  "/friends",
-  "/challenges",
-  "/caronas",
-  "/settings",
-  "/profile",
-  "/learn",
-  "/download",
-] as const;
+
 
 export function AppShellStateProvider({
   children,
@@ -49,7 +35,6 @@ export function AppShellStateProvider({
   children: React.ReactNode;
 }) {
   const path = usePathname();
-  const router = useRouter();
   const [installedApp, setInstalledApp] = useState(false);
   const [learning, setLearning] = useState(false);
   const [profileShortcut, setProfileShortcut] =
@@ -147,22 +132,6 @@ export function AppShellStateProvider({
       active = false;
     };
   }, [path]);
-
-  useEffect(() => {
-    const prefetch = () => {
-      for (const route of PREFETCH_ROUTES) router.prefetch(route);
-    };
-    const idleWindow = window as typeof window & {
-      requestIdleCallback?: (callback: () => void) => number;
-      cancelIdleCallback?: (id: number) => void;
-    };
-    if (idleWindow.requestIdleCallback) {
-      const id = idleWindow.requestIdleCallback(prefetch);
-      return () => idleWindow.cancelIdleCallback?.(id);
-    }
-    const timer = window.setTimeout(prefetch, 400);
-    return () => window.clearTimeout(timer);
-  }, [router]);
 
   const value = useMemo(
     () => ({

@@ -344,6 +344,93 @@ function sha256File(file) {
     input.on("end", () => resolve(hash.digest("hex")));
   });
 }
+function pendingUpdateStatePath() {
+  return path.join(updateDirectory(), "pending-update.json");
+}
+
+function clearPersistedPendingUpdate(removeArtifact = false) {
+  const stateFile = pendingUpdateStatePath();
+  if (!fs.existsSync(stateFile)) return;
+  try {
+    if (removeArtifact) {
+      const saved = JSON.parse(fs.readFileSync(stateFile, "utf8"));
+      const file = typeof saved?.file === "string" ? saved.file : "";
+      if (file && inside(updateDirectory(), file)) fs.rmSync(file, { force: true });
+    }
+  } catch {}
+  fs.rmSync(stateFile, { force: true });
+}
+
+function persistPendingUpdate(update) {
+  const dir = updateDirectory();
+  fs.mkdirSync(dir, { recursive: true });
+  const file = update.mode === "installer" ? update.installerPath : update.zipPath;
+  if (!file || !inside(dir, file))
+    throw Error("Artefato de atualização fora do diretório permitido.");
+  fs.writeFileSync(
+    pendingUpdateStatePath(),
+    JSON.stringify(
+      {
+        version: update.manifest.version,
+        mode: update.mode,
+        file,
+        manifest: update.manifest,
+        downloadedAt: new Date().toISOString(),
+      },
+      null,
+      2,
+    ),
+    "utf8",
+  );
+}
+
+async function restorePendingUpdate() {
+  if (!app.isPackaged || process.platform !== "win32") return false;
+  const stateFile = pendingUpdateStatePath();
+  if (!fs.existsSync(stateFile)) return false;
+  try {
+    const saved = JSON.parse(fs.readFileSync(stateFile, "utf8"));
+    if (
+      !saved ||
+      !["installer", "zip"].includes(saved.mode) ||
+      typeof saved.file !== "string" ||
+      !inside(updateDirectory(), saved.file) ||
+      !fs.existsSync(saved.file)
+    )
+      throw Error("Estado de atualização incompleto.");
+
+    const manifest = validateManifest(saved.manifest, UPDATE_MANIFEST_URL);
+    if (!newerThan(manifest.version, app.getVersion())) {
+      clearPersistedPendingUpdate(true);
+      return false;
+    }
+
+    const expected =
+      saved.mode === "installer"
+        ? String(manifest.installerSha256 || "").toLowerCase()
+        : String(manifest.sha256 || "").toLowerCase();
+    const hash = (await sha256File(saved.file)).toLowerCase();
+    if (!expected || hash !== expected)
+      throw Error("Artefato persistido não passou na verificação SHA-256.");
+
+    pendingUpdate =
+      saved.mode === "installer"
+        ? { manifest, installerPath: saved.file, mode: "installer" }
+        : { manifest, zipPath: saved.file, mode: "zip" };
+    updateStatus("ready", {
+      version: manifest.version,
+      progress: 100,
+      message:
+        "A atualização já estava baixada. Use 'Reiniciar e atualizar' para aplicar agora.",
+    });
+    return true;
+  } catch {
+    clearPersistedPendingUpdate(true);
+    pendingUpdate = null;
+    return false;
+  }
+}
+
 
 async function downloadInstallerUpdate(manifest) {
   const dir = updateDirectory();
@@ -759,6 +846,7 @@ async function checkForUpdates(force = false) {
       const zipPath = await downloadUpdate(manifest);
       pendingUpdate = { manifest, zipPath, mode: "zip" };
     }
+    persistPendingUpdate(pendingUpdate);
     updateStatus("ready", {
       version: manifest.version,
       progress: 100,
@@ -1185,9 +1273,12 @@ if (!hasLock) {
     createMainWindow();
     createTray();
 
-    // Igual ao mobile: verifica sozinho, baixa em segundo plano e avisa quando
-    // estiver pronto. O usuário só escolhe o momento do reinício.
-    setTimeout(() => void checkForUpdates(false), 5000);
+    // Primeiro restaura um instalador/ZIP já verificado. Assim, fechar o app
+    // depois do download ou ficar sem rede no próximo início não perde a
+    // atualização pronta. A checagem online continua depois como reconciliação.
+    void restorePendingUpdate().finally(() => {
+      setTimeout(() => void checkForUpdates(false), 5000);
+    });
     updateTimer = setInterval(
       () => void checkForUpdates(false),
       15 * 60 * 1000,
