@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect, chromium, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
@@ -26,7 +27,8 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
       },
     });
     expect(response.ok()).toBe(true);
-    users.push({ email, token: (await response.json()).accessToken, name });
+    const credentials = await response.json();
+    users.push({ email, token: credentials.accessToken, ...credentials, name });
   }
   const subject = (
     await db.query(
@@ -74,6 +76,7 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
   ).toBe(true);
   const browser = await chromium.launch({
     args: [
+      "--disable-dev-shm-usage",
       "--use-fake-ui-for-media-stream",
       "--use-fake-device-for-media-stream",
       "--auto-select-desktop-capture-source=Entire screen",
@@ -90,17 +93,13 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
     });
   const page = await a.newPage(),
     peer = await b.newPage();
-  async function login(p: Page, email: string) {
-    await p.goto("/login");
-    await p.getByLabel("E-mail").fill(email);
-    await p.getByLabel("Senha", { exact: true }).fill(password);
-    await p.getByRole("button", { name: "Entrar", exact: true }).click();
-    await expect(p).toHaveURL(/home|onboarding/);
+  async function login(p: Page, user: (typeof users)[number]) {
+    await authenticate(p.context(), user);
     await p.goto(`/rooms/${room.id}`);
   }
   try {
-    await login(page, users[0].email);
-    await login(peer, users[1].email);
+    await login(page, users[0]);
+    await login(peer, users[1]);
     await expect(page.getByText(/Sala de vários dias/)).toBeVisible();
     await page
       .getByLabel("Mensagem", { exact: true })

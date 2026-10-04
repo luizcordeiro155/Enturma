@@ -4,7 +4,7 @@ import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import type { Profile } from "@enturma/contracts";
 import { api } from "../src/api";
-import { Screen, Button, ErrorMessage, Field, useStyles } from "../src/ui";
+import { Screen, Button, ErrorMessage, FeedbackMessage, Field, useStyles } from "../src/ui";
 import { SuiteHero, SuiteSection, SuiteStats } from "../src/suite-ui";
 import { useRealtime } from "../src/realtime";
 
@@ -15,6 +15,7 @@ type PracticeSession={id:string;title:string;questions:Question[]};
 type Diagnostic={topics:{topic:string;accuracy:number}[];totals:{attempts:number;correct:number}};
 type PracticeResult={correct:number;total:number;results:{questionId:string;correct:boolean;explanation:string}[]};
 type TutorReply={id:string;text:string;action:string};
+type Flashcard={id:string;front:string;back:string;nextReviewAt:string;reviewCount:number;subjectName?:string|null;notebookTitle?:string|null};
 
 type Today = {
  tasks: Task[];
@@ -23,6 +24,7 @@ type Today = {
  study: { totalXp:number; streak:number };
  activeRooms:number;
  matches: { id:string; name:string; goal:string; subjectName?:string }[];
+ ownMatch: {subjectId?:string|null;goal:string;availableNow:boolean;preferredMode:string};
 };
 
 export default function Campus() {
@@ -31,6 +33,15 @@ export default function Campus() {
  const [profile,setProfile]=useState<Profile>();
  const [data,setData]=useState<Today>();
  const [error,setError]=useState("");
+ const [notice,setNotice]=useState("");
+ const [flashcards,setFlashcards]=useState<Flashcard[]>([]);
+ const [cardFront,setCardFront]=useState("");
+ const [cardBack,setCardBack]=useState("");
+ const [cardSubject,setCardSubject]=useState("");
+ const [planTitle,setPlanTitle]=useState("");
+ const [planAt,setPlanAt]=useState("");
+ const [planTopics,setPlanTopics]=useState("");
+ const [planSubject,setPlanSubject]=useState("");
  const [focusId,setFocusId]=useState<string|null>(null);
  const [seconds,setSeconds]=useState(0);
  const [groups,setGroups]=useState<Group[]>([]);
@@ -50,31 +61,52 @@ export default function Campus() {
  const entrance=useRef(new Animated.Value(0)).current;
  const animatedOnce=useRef(false);
 
- const load=useCallback(()=>{
-   let alive=true;
-   Promise.all([
-     api<Profile>("/users/me"),
-     api<Today>("/campus/today"),
-     api<Group[]>("/campus/groups"),
-     api<Diagnostic>("/practice/diagnostic")
-   ])
-    .then(([p,d,g,diagnostic])=>{
-      if(!alive)return;
-      setProfile(p);setData(d);setGroups(g);setDiag(diagnostic);setError("");
-      if(!animatedOnce.current){
-        animatedOnce.current=true;
-        entrance.setValue(0);
-        Animated.spring(entrance,{toValue:1,useNativeDriver:true,tension:55,friction:8}).start();
-      }else{
-        entrance.setValue(1);
-      }
-    })
-    .catch(e=>{if(alive)setError(e.message)});
-   return()=>{alive=false};
+ const generations=useRef({profile:0,today:0,groups:0,diagnostic:0,cards:0});
+
+ const loadProfile=useCallback(async()=>{
+   const request=++generations.current.profile;
+   try{const value=await api<Profile>("/users/me");if(request===generations.current.profile)setProfile(value)}
+   catch(e){if(request===generations.current.profile)setError((e as Error).message)}
+ },[]);
+ const loadToday=useCallback(async()=>{
+   const request=++generations.current.today;
+   try{
+     const value=await api<Today>("/campus/today");
+     if(request!==generations.current.today)return;
+     setData(value);setError("");
+     if(!animatedOnce.current){
+       animatedOnce.current=true;entrance.setValue(0);
+       Animated.spring(entrance,{toValue:1,useNativeDriver:true,tension:55,friction:8}).start();
+     }else entrance.setValue(1);
+   }catch(e){if(request===generations.current.today)setError((e as Error).message)}
  },[entrance]);
- useFocusEffect(load);
+ const loadGroups=useCallback(async()=>{
+   const request=++generations.current.groups;
+   try{const value=await api<Group[]>("/campus/groups");if(request===generations.current.groups)setGroups(value)}
+   catch(e){if(request===generations.current.groups)setError((e as Error).message)}
+ },[]);
+ const loadDiagnostic=useCallback(async()=>{
+   const request=++generations.current.diagnostic;
+   try{const value=await api<Diagnostic>("/practice/diagnostic");if(request===generations.current.diagnostic)setDiag(value)}
+   catch(e){if(request===generations.current.diagnostic)setError((e as Error).message)}
+ },[]);
+ const loadFlashcards=useCallback(async()=>{
+   const request=++generations.current.cards;
+   try{const value=await api<Flashcard[]>("/campus/flashcards/due");if(request===generations.current.cards)setFlashcards(value)}
+   catch(e){if(request===generations.current.cards)setError((e as Error).message)}
+ },[]);
+
+ useFocusEffect(useCallback(()=>{
+   void Promise.all([loadProfile(),loadToday(),loadGroups(),loadDiagnostic(),loadFlashcards()]);
+   return()=>{
+     generations.current.profile++;generations.current.today++;generations.current.groups++;
+     generations.current.diagnostic++;generations.current.cards++;
+   };
+ },[loadProfile,loadToday,loadGroups,loadDiagnostic,loadFlashcards]));
  useRealtime(event=>{
-   if(event.type==="campus_changed"||event.type==="groups_changed")load();
+   if(event.type==="campus_changed")void Promise.all([loadToday(),loadFlashcards()]);
+   else if(event.type==="groups_changed")void loadGroups();
+   else if(event.type==="profile_changed")void loadProfile();
  });
 
  useEffect(()=>{
@@ -97,11 +129,11 @@ export default function Campus() {
    if(!focusId)return;
    try{
      await api("/campus/focus/"+focusId+"/finish",{method:"POST",body:"{}"});
-     setFocusId(null);started.current=null;setSeconds(0);load();
+     setFocusId(null);started.current=null;setSeconds(0);await loadToday();
    }catch(e){setError((e as Error).message)}
  }
  async function joinGroup(id:string){
-   try{await api("/campus/groups/"+id+"/join",{method:"POST",body:"{}"});setGroups(await api<Group[]>("/campus/groups"))}
+   try{await api("/campus/groups/"+id+"/join",{method:"POST",body:"{}"});await loadGroups()}
    catch(e){setError((e as Error).message)}
  }
  async function generatePractice(){
@@ -113,7 +145,7 @@ export default function Campus() {
    if(!practice)return;setPracticeBusy(true);
    try{
      setPracticeResult(await api<PracticeResult>("/practice/"+practice.id+"/submit",{method:"POST",body:JSON.stringify({answers:practice.questions.map(q=>({questionId:q.id,selectedIndex:answers[q.id]}))})}));
-     setDiag(await api<Diagnostic>("/practice/diagnostic"));
+     await loadDiagnostic();
    }catch(e){setError((e as Error).message)}finally{setPracticeBusy(false)}
  }
  async function askTutor(action="EXPLAIN",fallback?:string){
@@ -131,8 +163,51 @@ export default function Campus() {
    }catch(e){setError((e as Error).message)}finally{setTutorBusy(false)}
  }
  async function complete(id:string){
-   try{await api("/campus/tasks/"+id+"/complete",{method:"POST",body:"{}"});load();}
+   try{await api("/campus/tasks/"+id+"/complete",{method:"POST",body:"{}"});await loadToday();}
    catch(e){setError((e as Error).message)}
+ }
+
+ async function createPlan(){
+   setError("");setNotice("");
+   const date=new Date(planAt);
+   if(!planTitle.trim()||Number.isNaN(date.getTime())){setError("Informe o nome e uma data/hora válida para a prova.");return}
+   try{
+     await api("/campus/exam-plan",{method:"POST",body:JSON.stringify({
+       subjectId:planSubject||null,title:planTitle.trim(),examAt:date.toISOString(),
+       topics:planTopics.split(",").map(v=>v.trim()).filter(Boolean)
+     })});
+     setPlanTitle("");setPlanAt("");setPlanTopics("");setNotice("Plano inteligente criado e adicionado à agenda.");
+     await loadToday();
+   }catch(e){setError((e as Error).message)}
+ }
+ async function createFlashcard(){
+   if(!cardFront.trim()||!cardBack.trim())return;
+   setError("");setNotice("");
+   try{
+     await api("/campus/flashcards",{method:"POST",body:JSON.stringify({
+       subjectId:cardSubject||null,notebookId:null,front:cardFront.trim(),back:cardBack.trim()
+     })});
+     setCardFront("");setCardBack("");setNotice("Flashcard criado para revisão espaçada.");
+     await Promise.all([loadFlashcards(),loadToday()]);
+   }catch(e){setError((e as Error).message)}
+ }
+ async function reviewFlashcard(id:string,rating:number){
+   try{
+     await api("/campus/flashcards/"+id+"/review",{method:"POST",body:JSON.stringify({rating})});
+     await Promise.all([loadFlashcards(),loadToday()]);
+   }catch(e){setError((e as Error).message)}
+ }
+ async function setMatchAvailable(availableNow:boolean){
+   setError("");setNotice("");
+   try{
+     await api("/campus/study-match",{method:"PUT",body:JSON.stringify({
+       subjectId:data?.ownMatch.subjectId??profile?.subjects[0]?.id??null,
+       goal:availableNow?(data?.ownMatch.goal||"Disponível para estudar agora"):"",
+       availableNow,preferredMode:data?.ownMatch.preferredMode||"ANY"
+     })});
+     setNotice(availableNow?"Você está disponível no Match de Estudo.":"Você saiu do Match de Estudo.");
+     await loadToday();
+   }catch(e){setError((e as Error).message)}
  }
 
  const clock=String(Math.floor(seconds/60)).padStart(2,"0")+":"+String(seconds%60).padStart(2,"0");
@@ -143,6 +218,7 @@ export default function Campus() {
  return (
   <Screen title={title}>
    <ErrorMessage message={error}/>
+   <FeedbackMessage message={notice} tone="success"/>
    {data?(
     <Animated.View style={{gap:14,opacity:entrance,transform:[{translateY:entrance.interpolate({inputRange:[0,1],outputRange:[14,0]})}]}}>
       <SuiteHero
@@ -172,6 +248,44 @@ export default function Campus() {
         </View>
        ))}
        {openTasks.length===0?<Text style={styles.muted}>Nada urgente por aqui. Adicione compromissos pela versão Web/Desktop ou aproveite para iniciar um foco.</Text>:null}
+      </SuiteSection>
+
+      <SuiteSection icon="calendar-number-outline" title="Plano inteligente" description="Crie a mesma preparação de prova disponível no Web/Desktop.">
+       <Field label="Prova" value={planTitle} onChangeText={setPlanTitle} placeholder="Ex.: Prova de Banco de Dados"/>
+       <Field label="Data e hora" value={planAt} onChangeText={setPlanAt} placeholder="2026-10-15T19:00"/>
+       <Field label="Tópicos separados por vírgula" value={planTopics} onChangeText={setPlanTopics} placeholder="JOIN, Normalização, Procedures"/>
+       <View style={{gap:8}}>
+        <Button title={(planSubject===""?"✓ ":"")+"Geral"} onPress={()=>setPlanSubject("")}/>
+        {profile?.subjects.slice(0,8).map(subject=><Button key={subject.id} title={(planSubject===subject.id?"✓ ":"")+subject.name} onPress={()=>setPlanSubject(subject.id)}/>)}
+       </View>
+       <Button title="Gerar plano" disabled={!planTitle.trim()||!planAt.trim()} onPress={()=>void createPlan()}/>
+      </SuiteSection>
+
+      <SuiteSection icon="layers-outline" title="Flashcards" description="Crie e revise cartões com repetição espaçada no Android.">
+       <Field label="Pergunta" value={cardFront} onChangeText={setCardFront} placeholder="O que é normalização 3FN?"/>
+       <Field label="Resposta" value={cardBack} onChangeText={setCardBack} multiline placeholder="Resposta objetiva para revisão"/>
+       <View style={{gap:8}}>
+        <Button title={(cardSubject===""?"✓ ":"")+"Geral"} onPress={()=>setCardSubject("")}/>
+        {profile?.subjects.slice(0,8).map(subject=><Button key={subject.id} title={(cardSubject===subject.id?"✓ ":"")+subject.name} onPress={()=>setCardSubject(subject.id)}/>)}
+       </View>
+       <Button title="Criar flashcard" disabled={!cardFront.trim()||!cardBack.trim()} onPress={()=>void createFlashcard()}/>
+       {flashcards.slice(0,12).map(card=><View key={card.id} style={styles.row}>
+        <Text style={styles.muted}>{card.subjectName??card.notebookTitle??"Revisão geral"}</Text>
+        <Text style={styles.label}>{card.front}</Text>
+        <Text style={styles.text}>{card.back}</Text>
+        <View style={{gap:7}}>
+         <Button title="Errei" onPress={()=>void reviewFlashcard(card.id,1)}/>
+         <Button title="Difícil" onPress={()=>void reviewFlashcard(card.id,2)}/>
+         <Button title="Bom" onPress={()=>void reviewFlashcard(card.id,3)}/>
+         <Button title="Fácil" onPress={()=>void reviewFlashcard(card.id,4)}/>
+        </View>
+       </View>)}
+       {!flashcards.length?<Text style={styles.muted}>Nenhum cartão pendente agora.</Text>:null}
+      </SuiteSection>
+
+      <SuiteSection icon="people-outline" title="Match de Estudo" description="Controle sua disponibilidade sem precisar abrir a versão Web.">
+       <Text style={styles.muted}>{data.ownMatch.availableNow?"Seu perfil está visível para colegas compatíveis.":"Seu perfil não está visível no Match agora."}</Text>
+       <Button title={data.ownMatch.availableNow?"Sair do Match":"Ficar disponível agora"} onPress={()=>void setMatchAvailable(!data.ownMatch.availableNow)}/>
       </SuiteSection>
 
       <SuiteSection icon="timer-outline" title={focusId?clock:"Modo Foco com Tutor"} description={focusId?"A IA está disponível durante toda a sessão para adaptar o ensino.":"Defina o assunto antes de iniciar os 50 minutos."}>

@@ -92,6 +92,9 @@ public class CampusController {
         + " AND (p.subject_id IS NULL OR p.subject_id IN (SELECT subject_id FROM user_subject WHERE user_id=?))"
         + " ORDER BY p.updated_at DESC LIMIT 6",
         a.id(), a.id());
+    var ownMatch = db.list(
+        "SELECT subject_id,goal,available_now,preferred_mode FROM study_match_profile WHERE user_id=?",
+        a.id());
     var opportunities = db.list(
         "SELECT * FROM campus_opportunity WHERE expires_at IS NULL OR expires_at>now() ORDER BY created_at DESC LIMIT 6");
     var events = db.list(
@@ -104,6 +107,11 @@ public class CampusController {
     result.put("study", study);
     result.put("activeRooms", activeRooms.get("activeRooms"));
     result.put("matches", matched);
+    result.put(
+        "ownMatch",
+        ownMatch.isEmpty()
+            ? Map.of("availableNow", false, "goal", "", "preferredMode", "ANY")
+            : ownMatch.getFirst());
     result.put("opportunities", opportunities);
     result.put("events", events);
     return result;
