@@ -65,6 +65,6 @@ test("updater Android: app já atualizado limpa estado e relança", () => {
 });
 
 test("updater Android: versão já atual não é oferecida novamente", () => {
-  has("isNewerVersion(release.version");
   has("nativeVersionIsNewer(");
+  has("!nativeVersionIsNewer(");
 });
