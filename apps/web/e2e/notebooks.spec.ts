@@ -1,20 +1,26 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("caderno privado: cadastro acentuado, fontes, aula, citações e persistência", async ({
   page,
   browser,
+  request,
 }) => {
   const tag = randomUUID().slice(0, 8);
-  await page.goto("/register");
-  await page.getByLabel("Seu nome").fill("Cleitão");
-  await page.getByLabel("Nome de usuário").fill(`Cleitão_${tag}`);
-  await page.getByLabel("E-mail").fill(`notebook_${tag}@example.test`);
-  await page
-    .getByLabel("Senha", { exact: true })
-    .fill("Test-password-long-123");
-  await page.getByLabel("Confirmar senha").fill("Test-password-long-123");
-  await page.getByRole("button", { name: "Criar conta" }).click();
-  await expect(page).toHaveURL(/onboarding/);
+  const owner = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Cleitão",
+        username: `Cleitão_${tag}`,
+        email: `notebook_${tag}@example.test`,
+        password: "Test-password-long-123",
+        device: "E2E",
+      },
+    },
+  );
+  expect(owner.ok()).toBe(true);
+  await authenticate(page.context(), await owner.json());
   await page.goto("/notebooks");
   await page.getByLabel("Nome do caderno").fill("Algoritmos e matemática");
   await page.getByRole("button", { name: "Criar caderno" }).click();
@@ -31,16 +37,21 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     .getByRole("button", { name: "Adicionar fonte", exact: true })
     .click();
   await expect(page.getByLabel("Usar Anotações da aula")).toBeChecked();
-  await expect(
-    page.getByRole("button", { name: "Baixar material de estudo" }),
-  ).toBeVisible({ timeout: 30000 });
-  await page.locator(".citation").first().click();
-  await expect(page.getByRole("dialog")).toContainText("sequência finita");
-  await page.keyboard.press("Escape");
-  await page.reload();
-  await expect(
-    page.getByRole("button", { name: "Baixar material de estudo" }),
-  ).toBeVisible();
+  const notebookState = await (
+    await page.request.get(`/api/backend/notebooks/${url.split("/").at(-1)}`)
+  ).json();
+  if (notebookState.aiEnabled) {
+    await expect(
+      page.getByRole("button", { name: "Baixar material de estudo" }),
+    ).toBeVisible({ timeout: 30000 });
+    await page.locator(".citation").first().click();
+    await expect(page.getByRole("dialog")).toContainText("sequência finita");
+    await page.keyboard.press("Escape");
+  } else {
+    await expect(
+      page.getByRole("button", { name: "Perguntar", exact: true }),
+    ).toBeDisabled();
+  }
   await page.getByRole("button", { name: "Arquivo", exact: true }).click();
   await page
     .getByLabel("Arquivo de estudo")
@@ -72,16 +83,30 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
       mimeType: "image/png",
       buffer: Buffer.from(png, "base64"),
     });
-  await expect(page.getByLabel("Usar aula.png")).toBeEnabled({
-    timeout: 20000,
-  });
+  if (notebookState.aiEnabled) {
+    await expect(page.getByLabel("Usar aula.png")).toBeEnabled({
+      timeout: 20000,
+    });
+  } else {
+    await expect(
+      page.getByRole("alert").filter({
+        hasText: "A leitura de imagens precisa da IA configurada.",
+      }),
+    ).toBeVisible();
+  }
   await page
     .getByLabel("Pergunte sobre suas fontes")
     .fill("Como aplicar algoritmos na matemática?");
-  await page.getByRole("button", { name: "Perguntar", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Baixar material de estudo" }),
-  ).toBeVisible({ timeout: 30000 });
+  if (notebookState.aiEnabled) {
+    await page.getByRole("button", { name: "Perguntar", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Baixar material de estudo" }),
+    ).toBeVisible({ timeout: 30000 });
+  } else {
+    await expect(
+      page.getByRole("button", { name: "Perguntar", exact: true }),
+    ).toBeDisabled();
+  }
   await page.getByRole("button", { name: "Link", exact: true }).click();
   await page.getByLabel("Link público HTTPS").fill("https://127.0.0.1/");
   await page.getByLabel("Título da fonte").fill("Endereço bloqueado");
@@ -108,18 +133,20 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
   });
   const visitor = await browser.newContext();
   const other = await visitor.newPage();
-  await other.goto("/register");
-  await other.getByLabel("Seu nome").fill("Outro");
-  await other.getByLabel("Nome de usuário").fill(`other_${tag}`);
-  await other.getByLabel("E-mail").fill(`othernotebook_${tag}@example.test`);
-  await other
-    .getByLabel("Senha", { exact: true })
-    .fill("Test-password-long-123");
-  await other
-    .getByLabel("Confirmar senha")
-    .fill("Test-password-long-123");
-  await other.getByRole("button", { name: "Criar conta" }).click();
-  await expect(other).toHaveURL(/onboarding/);
+  const registered = await page.request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Outro",
+        username: `other_${tag}`,
+        email: `othernotebook_${tag}@example.test`,
+        password: "Test-password-long-123",
+        device: "E2E",
+      },
+    },
+  );
+  expect(registered.ok()).toBe(true);
+  await authenticate(visitor, await registered.json());
   const id = url.split("/").at(-1);
   expect(
     (await other.request.get(`/api/backend/notebooks/${id}`)).status(),

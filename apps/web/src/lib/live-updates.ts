@@ -22,6 +22,8 @@ let liveStarted = false;
 
 function markDisconnected() {
   liveConnected = false;
+  if (typeof document !== "undefined")
+    document.documentElement.dataset.realtime = "disconnected";
 }
 
 export function useAppConnection() {
@@ -54,6 +56,8 @@ export function useAppConnection() {
               liveConnected = true;
               liveStarted = true;
               attempt = 0;
+              document.documentElement.dataset.realtime = "connected";
+              window.dispatchEvent(new Event("enturma-live-ready"));
 
               // A primeira conexão não deve fazer a tela "piscar" nem
               // refazer todas as consultas. Só resincronizamos após uma queda.

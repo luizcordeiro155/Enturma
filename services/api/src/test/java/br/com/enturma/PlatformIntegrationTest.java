@@ -259,6 +259,7 @@ class PlatformIntegrationTest {
   }
 
   @Autowired AuthService auth;
+  @Autowired AccountPrivacyController privacy;
   @Autowired CatalogService catalog;
   @Autowired ProfileService profiles;
   @Autowired StudyService study;
@@ -1489,4 +1490,144 @@ class PlatformIntegrationTest {
                 member.id()))
         .isEqualTo(1);
   }
+
+  @Test
+  void privacyEraseRemovesAdaptiveAiGroupsAndOwnedTeachingDataBeforeAnonymizing() {
+    String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    var credentials =
+        auth.register(
+            "Privacy Fixture",
+            "privacy_" + suffix,
+            "privacy-" + suffix + "@example.test",
+            "privacy-test-password-long",
+            "JUnit");
+    Actor actor = auth.authenticate(credentials.accessToken()).orElseThrow();
+    UUID userId = actor.id();
+
+    UUID interaction = UUID.randomUUID();
+    UUID group = UUID.randomUUID();
+    UUID task = UUID.randomUUID();
+    UUID classroom = UUID.randomUUID();
+    UUID campusTask = UUID.randomUUID();
+    UUID focusSession = UUID.randomUUID();
+    UUID flashcard = UUID.randomUUID();
+    UUID practiceSession = UUID.randomUUID();
+
+    db.jdbc.update(
+        "INSERT INTO campus_task(id,user_id,kind,title,due_at) VALUES (?,?,'STUDY','Privado',now())",
+        campusTask,
+        userId);
+    db.jdbc.update(
+        "INSERT INTO focus_session(id,user_id,label,planned_minutes) VALUES (?,?,?,50)",
+        focusSession,
+        userId,
+        "Foco privado");
+    db.jdbc.update("INSERT INTO study_match_profile(user_id) VALUES (?)", userId);
+    db.jdbc.update(
+        "INSERT INTO study_flashcard(id,user_id,front,back) VALUES (?,?,?,?)",
+        flashcard,
+        userId,
+        "Pergunta privada",
+        "Resposta privada");
+    db.jdbc.update("INSERT INTO portfolio_profile(user_id) VALUES (?)", userId);
+    db.jdbc.update(
+        "INSERT INTO practice_session(id,user_id,title) VALUES (?,?,?)",
+        practiceSession,
+        userId,
+        "Prática privada");
+    db.jdbc.update("INSERT INTO campus_learning_profile(user_id) VALUES (?)", userId);
+    db.jdbc.update(
+        "INSERT INTO campus_tutor_interaction(id,user_id,action,prompt,response)"
+            + " VALUES (?,?,'EXPLAIN','prompt privado','resposta privada')",
+        interaction,
+        userId);
+    db.jdbc.update(
+        "INSERT INTO study_group(id,owner_id,name,description,visibility)"
+            + " VALUES (?,?,?,'','PRIVATE')",
+        group,
+        userId,
+        "Grupo privado");
+    db.jdbc.update(
+        "INSERT INTO study_group_member(group_id,user_id,role) VALUES (?,?,'OWNER')",
+        group,
+        userId);
+    db.jdbc.update(
+        "INSERT INTO study_group_task(id,group_id,created_by,assigned_to,title)"
+            + " VALUES (?,?,?,?,?)",
+        task,
+        group,
+        userId,
+        userId,
+        "Tarefa privada");
+    db.jdbc.update(
+        "INSERT INTO teacher_profile(user_id,institution,title,enabled)"
+            + " VALUES (?,'Enturma','Professor',true)",
+        userId);
+    db.jdbc.update(
+        "INSERT INTO teacher_class(id,owner_id,name,description,join_code)"
+            + " VALUES (?,?,?,'',?)",
+        classroom,
+        userId,
+        "Turma privada",
+        "P" + suffix.substring(0, 7).toUpperCase(Locale.ROOT));
+
+    privacy.now(actor);
+
+    for (String table :
+        List.of(
+            "campus_task",
+            "focus_session",
+            "study_match_profile",
+            "study_flashcard",
+            "portfolio_profile",
+            "practice_session",
+            "campus_learning_profile",
+            "campus_tutor_interaction",
+            "teacher_profile",
+            "teacher_class_member")) {
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM " + table + " WHERE "
+                      + (table.equals("teacher_class_member") ? "user_id" : table.equals("teacher_class") ? "owner_id" : "user_id")
+                      + "=?",
+                  Integer.class,
+                  userId))
+          .as(table)
+          .isZero();
+    }
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM campus_tutor_interaction WHERE user_id=?",
+                Integer.class,
+                userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM campus_learning_profile WHERE user_id=?",
+                Integer.class,
+                userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM study_group WHERE owner_id=?", Integer.class, userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM study_group_member WHERE user_id=?", Integer.class, userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM study_group_task WHERE created_by=? OR assigned_to=?",
+                Integer.class,
+                userId,
+                userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM teacher_class WHERE owner_id=?", Integer.class, userId))
+        .isZero();
+    assertThat(db.one("SELECT status FROM app_user WHERE id=?", userId).get("status"))
+        .isEqualTo("DELETED");
+  }
+
 }

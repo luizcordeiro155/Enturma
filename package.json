@@ -11,7 +11,8 @@
     "dev:mobile": "npm run start -w @enturma/mobile",
     "build": "npm run build -w @enturma/web",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present && npm run test:updaters",
+    "test:updaters": "node --test deploy/android-download/updater-matrix.test.cjs",
     "lint": "npm run lint --workspaces --if-present",
     "dev:desktop": "npm run dev -w @enturma/desktop",
     "dist:desktop:win": "npm run dist:win -w @enturma/desktop"

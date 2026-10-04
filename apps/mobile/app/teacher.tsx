@@ -1,5 +1,5 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Alert, Switch, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Alert, FlatList, Switch, Text, View } from "react-native";
 import type { Profile } from "@enturma/contracts";
 import { api } from "../src/api";
 import { useRealtime } from "../src/realtime";
@@ -13,6 +13,7 @@ type Summary={
 type Dashboard={profile:{institution:string;title:string;enabled:boolean}|null;owned:Summary[];joined:Summary[]};
 type Assignment={id:string;title:string;description:string;dueAt?:string;points:number;submitted:boolean;score?:number|null;feedback?:string};
 type Detail=Summary&{owner:boolean;subjectId?:string|null;members:{id:string;name:string;username:string}[];assignments:Assignment[]};
+type Submission={userId:string;name:string;username:string;status?:string|null;note?:string|null;score?:number|null;feedback?:string|null};
 
 export default function Teacher(){
  const styles=useStyles();
@@ -29,24 +30,49 @@ export default function Teacher(){
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const [busy,setBusy]=useState(false);
+ const dashboardGeneration=useRef(0);
+ const detailGeneration=useRef(0);
+ const [assignmentTitle,setAssignmentTitle]=useState("");
+ const [assignmentDescription,setAssignmentDescription]=useState("");
+ const [assignmentDue,setAssignmentDue]=useState("");
+ const [assignmentPoints,setAssignmentPoints]=useState("10");
+ const [submissions,setSubmissions]=useState<Record<string,Submission[]>>({});
+ const [reviewScore,setReviewScore]=useState<Record<string,string>>({});
+ const [reviewFeedback,setReviewFeedback]=useState<Record<string,string>>({});
 
- const load=useCallback(async()=>{
+ const loadDashboard=useCallback(async()=>{
+   const request=++dashboardGeneration.current;
    try{
-     const [profile,d]=await Promise.all([
-       api<Profile>("/users/me"),
-       api<Dashboard>("/teaching")
-     ]);
+     const [profile,d]=await Promise.all([api<Profile>("/users/me"),api<Dashboard>("/teaching")]);
+     if(request!==dashboardGeneration.current)return;
      setMe(profile);setData(d);
      setInstitution(d.profile?.institution??"");
      setTitle(d.profile?.title??"Professor(a)");
      setEnabled(d.profile?.enabled??false);
-     if(selected?.id)setSelected(await api<Detail>("/teaching/classes/"+selected.id));
      setError("");
-   }catch(e){setError((e as Error).message)}
- },[selected?.id]);
+   }catch(e){if(request===dashboardGeneration.current)setError((e as Error).message)}
+ },[]);
+ const refreshSelected=useCallback(async(id:string)=>{
+   const request=++detailGeneration.current;
+   try{
+     const value=await api<Detail>("/teaching/classes/"+id);
+     if(request===detailGeneration.current)setSelected(value);
+   }catch(e){
+     if(request===detailGeneration.current)setError((e as Error).message);
+   }
+ },[]);
 
- useEffect(()=>{void load()},[load]);
- useRealtime(e=>{if(e.type==="teaching_changed")void load()});
+ useEffect(()=>{
+   void loadDashboard();
+   return()=>{dashboardGeneration.current++;detailGeneration.current++};
+ },[loadDashboard]);
+ useRealtime(e=>{
+   if(e.type!=="teaching_changed")return;
+   // Keep realtime granular: the open classroom refreshes only its detail;
+   // the dashboard refreshes only when no classroom is being inspected.
+   if(selected?.id)void refreshSelected(selected.id);
+   else void loadDashboard();
+ });
 
  const activeOwned=useMemo(()=>data?.owned.filter(item=>!item.archived)??[],[data]);
  const joined=data?.joined??[];
@@ -56,7 +82,7 @@ export default function Teacher(){
    try{
      await api("/teaching/profile",{method:"PUT",body:JSON.stringify({institution,title,enabled})});
      setNotice("Modo professor atualizado.");
-     await load();
+     await loadDashboard();
    }catch(e){setError((e as Error).message)}
    finally{setBusy(false)}
  }
@@ -69,8 +95,8 @@ export default function Teacher(){
      const item=await api<{id:string}>("/teaching/classes/join",{method:"POST",body:JSON.stringify({code:normalized})});
      setCode("");
      setNotice("Você entrou na turma.");
-     await load();
-     setSelected(await api<Detail>("/teaching/classes/"+item.id));
+     await loadDashboard();
+     await refreshSelected(item.id);
    }catch(e){setError((e as Error).message)}
    finally{setBusy(false)}
  }
@@ -90,15 +116,15 @@ export default function Teacher(){
      })});
      setClassName("");setDescription("");setSubjectId("");
      setNotice("Turma criada e pronta para receber estudantes.");
-     await load();
-     setSelected(await api<Detail>("/teaching/classes/"+item.id));
+     await loadDashboard();
+     await refreshSelected(item.id);
    }catch(e){setError((e as Error).message)}
    finally{setBusy(false)}
  }
 
  async function openClass(id:string){
    setBusy(true);setError("");
-   try{setSelected(await api<Detail>("/teaching/classes/"+id))}
+   try{await refreshSelected(id)}
    catch(e){setError((e as Error).message)}
    finally{setBusy(false)}
  }
@@ -108,7 +134,7 @@ export default function Teacher(){
    Alert.alert("Apagar turma","Apagar definitivamente \""+selected.name+"\"? Atividades e entregas também serão removidas.",[
      {text:"Cancelar",style:"cancel"},
      {text:"Apagar",style:"destructive",onPress:()=>void api("/teaching/classes/"+selected.id,{method:"DELETE"})
-       .then(async()=>{setSelected(undefined);setNotice("Turma apagada.");await load()})
+       .then(async()=>{detailGeneration.current++;setSelected(undefined);setNotice("Turma apagada.");await loadDashboard()})
        .catch(e=>setError(e.message))}
    ]);
  }
@@ -118,7 +144,61 @@ export default function Teacher(){
    try{
      await api("/teaching/assignments/"+item.id+"/submit",{method:"POST",body:JSON.stringify({note:"Entrega enviada pelo aplicativo Enturma."})});
      setNotice("Atividade entregue.");
-     if(selected)setSelected(await api<Detail>("/teaching/classes/"+selected.id));
+     if(selected)await refreshSelected(selected.id);
+   }catch(e){setError((e as Error).message)}
+ }
+
+ async function updateClass(archived=selected?.archived??false){
+   if(!selected)return;
+   setBusy(true);setError("");setNotice("");
+   try{
+     await api("/teaching/classes/"+selected.id,{method:"PUT",body:JSON.stringify({
+       subjectId:selected.subjectId??null,name:selected.name,description:selected.description??"",archived
+     })});
+     setNotice(archived?"Turma arquivada.":"Configurações da turma atualizadas.");
+     await refreshSelected(selected.id);
+   }catch(e){setError((e as Error).message)}finally{setBusy(false)}
+ }
+ async function removeMember(userId:string){
+   if(!selected)return;
+   try{
+     await api("/teaching/classes/"+selected.id+"/members/"+userId,{method:"DELETE"});
+     setNotice("Estudante removido da turma.");await refreshSelected(selected.id);
+   }catch(e){setError((e as Error).message)}
+ }
+ async function createAssignment(){
+   if(!selected||!assignmentTitle.trim())return;
+   const due=assignmentDue.trim()?new Date(assignmentDue):null;
+   if(due&&Number.isNaN(due.getTime())){setError("Informe uma data/hora válida para a atividade.");return}
+   setBusy(true);setError("");setNotice("");
+   try{
+     await api("/teaching/classes/"+selected.id+"/assignments",{method:"POST",body:JSON.stringify({
+       title:assignmentTitle.trim(),description:assignmentDescription.trim(),
+       dueAt:due?.toISOString()??null,points:Math.max(0,Math.min(1000,Number(assignmentPoints)||0))
+     })});
+     setAssignmentTitle("");setAssignmentDescription("");setAssignmentDue("");setAssignmentPoints("10");
+     setNotice("Atividade publicada.");await refreshSelected(selected.id);
+   }catch(e){setError((e as Error).message)}finally{setBusy(false)}
+ }
+ async function loadSubmissions(assignmentId:string){
+   try{
+     const values=await api<Submission[]>("/teaching/assignments/"+assignmentId+"/submissions");
+     setSubmissions(v=>({...v,[assignmentId]:values}));
+   }catch(e){setError((e as Error).message)}
+ }
+ async function reviewSubmission(assignmentId:string,userId:string){
+   try{
+     await api("/teaching/assignments/"+assignmentId+"/submissions/"+userId,{method:"PUT",body:JSON.stringify({
+       score:reviewScore[userId]?.trim()===""||reviewScore[userId]==null?null:Number(reviewScore[userId]),
+       feedback:reviewFeedback[userId]??""
+     })});
+     setNotice("Nota e feedback salvos.");await loadSubmissions(assignmentId);if(selected?.id)await refreshSelected(selected.id);
+   }catch(e){setError((e as Error).message)}
+ }
+ async function deleteAssignment(id:string){
+   try{
+     await api("/teaching/assignments/"+id,{method:"DELETE"});
+     setNotice("Atividade removida.");if(selected)await refreshSelected(selected.id);
    }catch(e){setError((e as Error).message)}
  }
 
@@ -195,16 +275,26 @@ export default function Teacher(){
      title="Suas turmas"
      description="Abra uma turma para acompanhar estudantes, atividades, prazos e feedbacks."
    >
-     {[...activeOwned,...joined].map(item=><View style={[styles.row,{gap:7}]} key={item.id}>
-       <Text style={[styles.label,{marginBottom:0,fontSize:16}]}>{item.name}</Text>
-       <Text style={styles.muted}>
-         {item.subjectName??item.teacherName??"Turma Enturma"}
-         {item.joinCode?" · Código "+item.joinCode:""}
-       </Text>
-       {typeof item.members==="number"?<Text style={styles.muted}>{item.members} estudantes · {item.assignments??0} atividades</Text>:null}
-       <Button title="Abrir turma" disabled={busy} onPress={()=>void openClass(item.id)}/>
-     </View>)}
-     {!activeOwned.length&&!joined.length?<Text style={styles.muted}>Nenhuma turma ativa ainda.</Text>:null}
+     <FlatList
+       data={[...activeOwned,...joined]}
+       keyExtractor={item=>item.id}
+       nestedScrollEnabled
+       initialNumToRender={6}
+       maxToRenderPerBatch={6}
+       windowSize={5}
+       style={{maxHeight:520}}
+       contentContainerStyle={{gap:8}}
+       renderItem={({item})=><View style={[styles.row,{gap:7}]}>
+         <Text style={[styles.label,{marginBottom:0,fontSize:16}]}>{item.name}</Text>
+         <Text style={styles.muted}>
+           {item.subjectName??item.teacherName??"Turma Enturma"}
+           {item.joinCode?" · Código "+item.joinCode:""}
+         </Text>
+         {typeof item.members==="number"?<Text style={styles.muted}>{item.members} estudantes · {item.assignments??0} atividades</Text>:null}
+         <Button title="Abrir turma" disabled={busy} onPress={()=>void openClass(item.id)}/>
+       </View>}
+       ListEmptyComponent={<Text style={styles.muted}>Nenhuma turma ativa ainda.</Text>}
+     />
    </SuiteSection>
 
    {selected?<SuiteSection
@@ -214,23 +304,82 @@ export default function Teacher(){
    >
      {selected.joinCode?<View style={[styles.row,{gap:4}]}><Text style={styles.muted}>Código para estudantes</Text><Text style={[styles.title,{fontSize:24,lineHeight:30,letterSpacing:2}]}>{selected.joinCode}</Text></View>:null}
 
+     {selected.owner?<View style={[styles.row,{gap:9}]}>
+       <Text style={styles.label}>Configurar turma</Text>
+       <Field label="Nome da turma" value={selected.name} onChangeText={value=>setSelected(v=>v?{...v,name:value}:v)}/>
+       <Field label="Descrição" value={selected.description??""} multiline onChangeText={value=>setSelected(v=>v?{...v,description:value}:v)}/>
+       <Button title="Salvar configurações" disabled={busy||!selected.name.trim()} onPress={()=>void updateClass(false)}/>
+       <Button title={selected.archived?"Desarquivar turma":"Arquivar turma"} disabled={busy} onPress={()=>void updateClass(!selected.archived)}/>
+      </View>:null}
+
      <Text style={[styles.label,{marginBottom:0}]}>Estudantes · {selected.members.length}</Text>
-     {selected.members.map(member=><View key={member.id} style={[styles.row,{paddingVertical:12}]}>
-       <Text style={[styles.label,{marginBottom:0}]}>{member.name}</Text>
-       <Text style={styles.muted}>@{member.username}</Text>
-     </View>)}
-     {!selected.members.length?<Text style={styles.muted}>Aguardando estudantes entrarem com o código.</Text>:null}
+     <FlatList
+       data={selected.members}
+       keyExtractor={member=>member.id}
+       nestedScrollEnabled
+       initialNumToRender={8}
+       maxToRenderPerBatch={8}
+       windowSize={5}
+       style={{maxHeight:520}}
+       contentContainerStyle={{gap:8}}
+       renderItem={({item:member})=><View style={[styles.row,{paddingVertical:12}]}>
+         <Text style={[styles.label,{marginBottom:0}]}>{member.name}</Text>
+         <Text style={styles.muted}>@{member.username}</Text>
+         {selected.owner?<Button title="Remover estudante" onPress={()=>void removeMember(member.id)}/>:null}
+       </View>}
+       ListEmptyComponent={<Text style={styles.muted}>Aguardando estudantes entrarem com o código.</Text>}
+     />
+
+     {selected.owner?<View style={[styles.row,{gap:9}]}>
+       <Text style={styles.label}>Nova atividade</Text>
+       <Field label="Título" value={assignmentTitle} onChangeText={setAssignmentTitle}/>
+       <Field label="Descrição" value={assignmentDescription} multiline onChangeText={setAssignmentDescription}/>
+       <Field label="Prazo" value={assignmentDue} onChangeText={setAssignmentDue} placeholder="2026-10-20T23:59"/>
+       <Field label="Pontos" value={assignmentPoints} keyboardType="numeric" onChangeText={setAssignmentPoints}/>
+       <Button title="Publicar atividade" disabled={busy||!assignmentTitle.trim()} onPress={()=>void createAssignment()}/>
+      </View>:null}
 
      <Text style={[styles.label,{marginBottom:0}]}>Atividades · {selected.assignments.length}</Text>
-     {selected.assignments.map(item=><View key={item.id} style={styles.row}>
+     <FlatList
+       data={selected.assignments}
+       keyExtractor={item=>item.id}
+       nestedScrollEnabled
+       initialNumToRender={5}
+       maxToRenderPerBatch={5}
+       windowSize={5}
+       style={{maxHeight:760}}
+       contentContainerStyle={{gap:8}}
+       renderItem={({item})=><View style={styles.row}>
        <Text style={[styles.label,{marginBottom:0}]}>{item.title}</Text>
        {item.description?<Text style={styles.text}>{item.description}</Text>:null}
        <Text style={styles.muted}>{item.dueAt?new Date(item.dueAt).toLocaleString("pt-BR"):"Sem prazo"} · {item.points} pontos</Text>
        {!selected.owner?(item.submitted?
          <Text style={styles.muted}>{item.score!=null?"Nota "+item.score+"/"+item.points:"Entregue, aguardando correção"}{item.feedback?" · "+item.feedback:""}</Text>:
          <Button title="Entregar atividade" onPress={()=>void submit(item)}/>):null}
-     </View>)}
-     {!selected.assignments.length?<Text style={styles.muted}>Nenhuma atividade publicada ainda.</Text>:null}
+       {selected.owner?<>
+         <Button title="Ver entregas / corrigir" onPress={()=>void loadSubmissions(item.id)}/>
+         <Button title="Excluir atividade" onPress={()=>void deleteAssignment(item.id)}/>
+         <FlatList
+           data={submissions[item.id]??[]}
+           keyExtractor={student=>student.userId}
+           nestedScrollEnabled
+           initialNumToRender={6}
+           maxToRenderPerBatch={6}
+           windowSize={5}
+           style={{maxHeight:520}}
+           contentContainerStyle={{gap:7}}
+           renderItem={({item:student})=><View style={[styles.row,{gap:7}]}>
+             <Text style={styles.label}>{student.name} · {student.username}</Text>
+             <Text style={styles.muted}>{student.note||"Ainda não entregou"}</Text>
+             {student.status?<><Field label="Nota" value={reviewScore[student.userId]??(student.score==null?"":String(student.score))} keyboardType="numeric" onChangeText={value=>setReviewScore(v=>({...v,[student.userId]:value}))}/>
+             <Field label="Feedback" value={reviewFeedback[student.userId]??student.feedback??""} multiline onChangeText={value=>setReviewFeedback(v=>({...v,[student.userId]:value}))}/>
+             <Button title="Salvar correção" onPress={()=>void reviewSubmission(item.id,student.userId)}/></>:null}
+           </View>}
+         />
+       </>:null}
+     </View>}
+       ListEmptyComponent={<Text style={styles.muted}>Nenhuma atividade publicada ainda.</Text>}
+     />
 
      {selected.owner?<Button title="Apagar turma" onPress={()=>void removeClass()}/>:null}
      <Button title="Fechar turma" onPress={()=>setSelected(undefined)}/>

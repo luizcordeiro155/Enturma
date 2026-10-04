@@ -312,7 +312,11 @@ export function Motion() {
     }
 
     function preferenceChanged() {
-      if (motionDisabled()) cancelMotion();
+      if (!motionDisabled()) return;
+      cancelMotion();
+      document
+        .getAnimations()
+        .forEach((animation) => animation.cancel());
     }
 
     scan();

@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("mural preserva widgets após recarregar e respeita privacidade", async ({
@@ -21,11 +22,7 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
   );
   expect(registered.ok()).toBe(true);
   const user = await registered.json();
-  await page.goto("/login");
-  await page.getByLabel("E-mail").fill(email);
-  await page.getByLabel("Senha", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page).toHaveURL(/home|onboarding/);
+  await authenticate(page.context(), user);
   await page.goto("/profile");
   await page
     .getByRole("textbox", { name: "Objetivo da semana", exact: true })
@@ -38,7 +35,7 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Personalização salva" }),
+    page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   await page.reload();
   await expect(
@@ -55,7 +52,7 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Personalização salva" }),
+    page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   const peer = await request.post(
     `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
@@ -87,7 +84,7 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Personalização salva" }),
+    page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   const hidden = await request.get(endpoint, {
     headers: { Authorization: `Bearer ${credentials.accessToken}` },

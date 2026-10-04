@@ -3,7 +3,14 @@ import { Animated, Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { api, logout } from "../src/api";
-import { Screen, Button, ErrorMessage, Field, useStyles } from "../src/ui";
+import {
+  Screen,
+  Button,
+  ErrorMessage,
+  FeedbackMessage,
+  Field,
+  useStyles,
+} from "../src/ui";
 
 type Deletion = {
   status?: string;
@@ -18,33 +25,40 @@ export default function Privacy() {
   const router = useRouter();
   const [data, setData] = useState<Deletion>();
   const [confirm, setConfirm] = useState("");
-  const [status, setStatus] = useState("");
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [warning, setWarning] = useState("");
   const [busy, setBusy] = useState(false);
+  const generation = useRef(0);
   const entrance = useRef(new Animated.Value(0)).current;
 
-  const load = useCallback(() => {
-    let alive = true;
-    api<Deletion>("/account/privacy/deletion")
-      .then((value) => {
-        if (!alive) return;
-        setData(value);
-        entrance.setValue(0);
-        Animated.spring(entrance, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 55,
-          friction: 8,
-        }).start();
-      })
-      .catch((e) => {
-        if (alive) setStatus(e.message);
-      });
-    return () => {
-      alive = false;
-    };
+  const load = useCallback(async () => {
+    const current = ++generation.current;
+    try {
+      const value = await api<Deletion>("/account/privacy/deletion");
+      if (current !== generation.current) return;
+      setData(value);
+      setError("");
+      entrance.setValue(0);
+      Animated.spring(entrance, {
+        toValue: 1,
+        useNativeDriver: true,
+        tension: 55,
+        friction: 8,
+      }).start();
+    } catch (e) {
+      if (current === generation.current) setError((e as Error).message);
+    }
   }, [entrance]);
 
-  useFocusEffect(load);
+  useFocusEffect(
+    useCallback(() => {
+      void load();
+      return () => {
+        generation.current++;
+      };
+    }, [load]),
+  );
 
   const pending =
     !!data?.executeAt &&
@@ -55,18 +69,21 @@ export default function Privacy() {
   async function schedule() {
     if (confirm !== "EXCLUIR") return;
     setBusy(true);
+    setError("");
+    setNotice("");
+    setWarning("");
     try {
       await api("/account/privacy/deletion/schedule", {
         method: "POST",
         body: "{}",
       });
       setConfirm("");
-      setStatus(
+      setNotice(
         "Exclusão agendada. Você pode cancelar durante os próximos 5 dias.",
       );
-      load();
+      await load();
     } catch (e) {
-      setStatus((e as Error).message);
+      setError((e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -74,15 +91,18 @@ export default function Privacy() {
 
   async function cancel() {
     setBusy(true);
+    setError("");
+    setNotice("");
+    setWarning("");
     try {
       await api("/account/privacy/deletion/cancel", {
         method: "POST",
         body: "{}",
       });
-      setStatus("Exclusão cancelada.");
-      load();
+      setNotice("Exclusão cancelada.");
+      await load();
     } catch (e) {
-      setStatus((e as Error).message);
+      setError((e as Error).message);
     } finally {
       setBusy(false);
     }
@@ -91,19 +111,25 @@ export default function Privacy() {
   async function eraseNow() {
     if (confirm !== "EXCLUIR") return;
     setBusy(true);
+    setError("");
+    setNotice("");
+    setWarning("Apagando seus dados e encerrando a sessão…");
     try {
       await api("/account/privacy/deletion/now", { method: "DELETE" });
       await logout().catch(() => {});
       router.replace("/");
     } catch (e) {
-      setStatus((e as Error).message);
+      setWarning("");
+      setError((e as Error).message);
       setBusy(false);
     }
   }
 
   return (
     <Screen title="Privacidade e dados">
-      <ErrorMessage message={status} />
+      <ErrorMessage message={error} />
+      <FeedbackMessage message={notice} tone="success" />
+      <FeedbackMessage message={warning} tone="warning" />
       <Animated.View
         style={{
           gap: 14,

@@ -51,7 +51,7 @@ export function ProgrammingLab() {
   const [error, setError] = useState("");
   const [eligible, setEligible] = useState<boolean>();
   const load = useCallback(
-    async () => setDaily(await api<Daily>("/learning/missions")),
+    async () => setDaily(await api<Daily>("/learning/missions", { cache: "no-store" })),
     [],
   );
   useEffect(() => {

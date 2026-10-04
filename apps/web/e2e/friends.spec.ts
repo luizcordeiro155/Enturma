@@ -1,22 +1,33 @@
+import { authenticate, authenticateWithPassword } from "./session";
 import { test, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("amizade, perfil público e conversa ponta a ponta entre dois navegadores", async ({
   page,
   browser,
+  request,
 }) => {
   test.setTimeout(90000);
   const tag = randomUUID().slice(0, 8),
     a = `alice_${tag}`,
     b = `bob_${tag}`;
   async function register(p: Page, name: string) {
-    await p.goto("/register");
-    await p.getByLabel("Seu nome").fill(name);
-    await p.getByLabel("Nome de usuário").fill(name);
-    await p.getByLabel("E-mail").fill(`${name}@example.test`);
-    await p.getByLabel("Senha", { exact: true }).fill("E2E-password-long-123");
-    await p.getByLabel("Confirmar senha").fill("E2E-password-long-123");
-    await p.getByRole("button", { name: "Criar conta" }).click();
-    await expect(p).toHaveURL(/onboarding/);
+    const response = await request.post(
+      `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+      {
+        data: {
+          name,
+          username: name,
+          email: `${name}@example.test`,
+          password: "E2E-password-long-123",
+          device: "E2E",
+        },
+      },
+    );
+    expect(response.ok()).toBe(true);
+    await authenticate(p.context(), await response.json());
+  }
+
+  async function initializeConversationKeys(p: Page) {
     await p.goto("/friends");
     await p.getByText("Chaves e backup das conversas").click();
     await expect(
@@ -25,6 +36,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   }
   await register(page, a);
   await page.goto("/profile");
+  await expect(page.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
   await expect(page.locator(".public-profile-card")).toHaveCount(1);
   await expect(page.locator(".profile-details-editor form")).toHaveCount(1);
   const png = await page.evaluate(() => {
@@ -42,11 +54,15 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     ["Foto de perfil", "avatar", 512, 512],
     ["Banner", "banner", 1500, 500],
   ] as const) {
-    await page.getByLabel(label, { exact: true }).setInputFiles({
-      name: "crop.png",
-      mimeType: "image/png",
-      buffer: Buffer.from(png, "base64"),
-    });
+    await page
+      .locator(".profile-media-action")
+      .filter({ hasText: label })
+      .locator('input[type="file"]')
+      .setInputFiles({
+        name: "crop.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(png, "base64"),
+      });
     const crop = page.getByRole("dialog", {
       name: kind === "avatar" ? "Editar foto de perfil" : "Editar banner",
     });
@@ -70,33 +86,41 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     }, kind);
     expect(dimensions).toEqual([width, height]);
   }
-  await page.getByLabel("Cor do perfil", { exact: true }).fill("#b328ac");
-  await expect(page.locator(".public-profile-card")).toHaveCSS(
-    "border-top-color",
-    "rgb(179, 40, 172)",
-  );
+  await page.getByLabel("Cor principal do perfil", { exact: true }).fill("#b328ac");
+  await expect
+    .poll(() =>
+      page.locator(".public-profile-card").evaluate((el) =>
+        getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
+      ),
+    )
+    .toBe("#b328ac");
   await page.getByLabel("Status personalizado").fill("Estudando JavaScript");
   await page
     .getByRole("combobox", { name: "Decoração do avatar" })
     .selectOption("RING");
   await page.getByRole("button", { name: "Salvar perfil" }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Personalização salva" }),
+    page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   await page.reload();
-  await expect(page.locator(".public-profile-card")).toHaveCSS(
-    "border-top-color",
-    "rgb(179, 40, 172)",
-  );
+  await expect
+    .poll(() =>
+      page.locator(".public-profile-card").evaluate((el) =>
+        getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
+      ),
+    )
+    .toBe("#b328ac");
   await page.screenshot({
     path: "../../.local/profile-desktop.png",
     fullPage: true,
   });
-  await page.goto("/friends");
+  await initializeConversationKeys(page);
 
   const peer = await browser.newContext();
   const other = await peer.newPage();
   await register(other, b);
+  await initializeConversationKeys(other);
+  await expect(other.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
   await page.getByLabel("Adicionar pelo nome de usuário").fill(b);
   await page.getByRole("button", { name: "Enviar convite" }).click();
   await expect(
@@ -137,6 +161,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     "Rascunho preservado",
   );
 
+  const notificationBadge = other.locator(".notification-count");
+  const unreadBeforePrivateMessage = await notificationBadge
+    .textContent()
+    .then((value) => Number(value || 0))
+    .catch(() => 0);
   await page
     .getByLabel("Mensagem privada")
     .fill("Conversa privada ponta a ponta 🔒");
@@ -147,7 +176,15 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     other.getByRole("button", { name: "Nova mensagem · ir para ela" }),
   ).toBeVisible();
-  await expect(other.locator(".notification-count")).toHaveCount(0);
+  // A mensagem privada aberta usa o aviso local "Nova mensagem" e não deve
+  // aumentar o contador global. O contador pode já conter o convite aceito.
+  await expect
+    .poll(async () =>
+      (await other.locator(".notification-count").count())
+        ? Number((await other.locator(".notification-count").textContent()) || 0)
+        : 0,
+    )
+    .toBe(unreadBeforePrivateMessage);
   await other
     .getByRole("button", { name: "Nova mensagem · ir para ela" })
     .click();
@@ -195,20 +232,25 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     page.getByRole("dialog", { name: `Perfil de ${b}` }),
   ).toBeVisible();
-  const anchor = await page
-    .getByRole("button", { name: `Ver perfil de ${b}`, exact: true })
-    .first()
-    .boundingBox();
   const popover = await page
     .getByRole("dialog", { name: `Perfil de ${b}` })
     .boundingBox();
-  expect(popover!.x).toBeGreaterThan(0);
+  const viewport = await page.evaluate(() => ({
+    width: innerWidth,
+    height: innerHeight,
+  }));
+  expect(popover!.x).toBeGreaterThanOrEqual(0);
+  expect(popover!.y).toBeGreaterThanOrEqual(0);
+  expect(popover!.x + popover!.width).toBeLessThanOrEqual(viewport.width);
+  expect(popover!.y + popover!.height).toBeLessThanOrEqual(viewport.height);
+  // O perfil público atual é um painel centralizado estilo Discord no desktop.
+  // innerWidth/innerHeight refletem o layout viewport usado pelos 50% do CSS.
   expect(
-    Math.min(
-      Math.abs(popover!.x - (anchor!.x + anchor!.width)),
-      Math.abs(popover!.x + popover!.width - anchor!.x),
-    ),
-  ).toBeLessThan(30);
+    Math.abs(popover!.x + popover!.width / 2 - viewport.width / 2),
+  ).toBeLessThan(16);
+  expect(
+    Math.abs(popover!.y + popover!.height / 2 - viewport.height / 2),
+  ).toBeLessThan(16);
   await page.screenshot({ path: "../../.local/profile-popover.png" });
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
@@ -251,13 +293,12 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   );
   const clean = await browser.newContext();
   const fresh = await clean.newPage();
-  await fresh.goto("/login");
-  await fresh.getByLabel("E-mail").fill(`${a}@example.test`);
-  await fresh
-    .getByLabel("Senha", { exact: true })
-    .fill("E2E-password-long-123");
-  await fresh.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(fresh).toHaveURL(/home/);
+  await authenticateWithPassword(
+    clean,
+    request,
+    `${a}@example.test`,
+    "E2E-password-long-123",
+  );
   await fresh.goto("/friends");
   await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(

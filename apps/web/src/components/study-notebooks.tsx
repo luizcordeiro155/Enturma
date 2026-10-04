@@ -118,7 +118,6 @@ export function StudyNotebooks({ id }: { id?: string }) {
     if (activeGeneration)
       history.replaceState(null, "", `#generation-${activeGeneration}`);
   }, [activeGeneration]);
-  const autoLesson = useRef(false);
   const autoRunning = useRef(false);
   const load = useCallback(async () => {
     if (id) {
@@ -151,18 +150,19 @@ export function StudyNotebooks({ id }: { id?: string }) {
       .slice(0, 10) ?? [];
   useEffect(() => {
     if (
-      !autoLesson.current ||
       autoRunning.current ||
       !data ||
       !id ||
       !data.aiEnabled ||
-      data.sources.some((s) => ["PENDING", "PROCESSING"].includes(s.status))
+      data.generations.length > 0 ||
+      data.sources.some((source) =>
+        ["PENDING", "PROCESSING"].includes(source.status),
+      )
     )
       return;
     const ready = data.sources.filter((s) => s.status === "READY").slice(0, 10);
     if (!ready.length) return;
     autoRunning.current = true;
-    autoLesson.current = false;
     post<{ id: string }>(`/notebooks/${id}/generations`, {
       id: crypto.randomUUID(),
       question: "Explique o conteúdo das fontes e como estudar este assunto.",
@@ -223,7 +223,6 @@ export function StudyNotebooks({ id }: { id?: string }) {
         content: text,
         url,
       });
-      autoLesson.current = !data?.generations.length;
       setText("");
       setUrl("");
       setSourceTitle("");
@@ -256,7 +255,6 @@ export function StudyNotebooks({ id }: { id?: string }) {
           (await r.json().catch(() => ({}))).message ??
             "Não foi possível enviar a fonte.",
         );
-      autoLesson.current = !data?.generations.length;
       await load();
     } catch (e) {
       setError((e as Error).message);

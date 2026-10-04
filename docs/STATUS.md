@@ -34,3 +34,9 @@ Checklist e publicação: [V0_3_IMPLEMENTATION](V0_3_IMPLEMENTATION.md).
 ### Recuperação do Desktop legado
 
 A versão 0.2.0 recebe uma orientação dentro do app para baixar o instalador oficial quando o iniciador antigo falha. A recuperação inicial exige executar o EXE, sem excluir conta/dados. A instalação da bridge nova foi validada; não se afirma que o código antigo foi corrigido remotamente. Produção é publicada via PR #21 e squash, conforme a solicitação de liberação de 02/10/2026.
+
+
+## Enturma Stabilization / Polish — 2026-10-03
+- Ciclo de estabilização sem novos recursos: privacidade, realtime mobile, concorrência, paridade de telas, feedback e E2E.
+- Android de validação: 0.3.24.
+- A publicação final é consolidada em um único commit após as validações de produção.

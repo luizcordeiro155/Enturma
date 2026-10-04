@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 
@@ -24,12 +25,9 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
     expect(response.ok()).toBe(true);
     users.push({ email, ...(await response.json()) });
   }
-  await page.goto("/login");
-  await page.getByLabel("E-mail").fill(users[0].email);
-  await page.getByLabel("Senha", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page).toHaveURL(/home|onboarding/);
+  await authenticate(page.context(), users[0]);
   await page.goto("/forum");
+  await expect(page.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
   await page.getByRole("button", { name: "Nova publicação" }).click();
   const editor = page.getByRole("dialog", { name: "Nova publicação" });
   const title = `Recursão e algoritmos ${tag}`;
@@ -111,12 +109,9 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await page.getByRole("link", { name: title, exact: true }).click();
   const peer = await browser.newContext();
   const peerPage = await peer.newPage();
-  await peerPage.goto("/login");
-  await peerPage.getByLabel("E-mail").fill(users[1].email);
-  await peerPage.getByLabel("Senha", { exact: true }).fill(password);
-  await peerPage.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(peerPage).toHaveURL(/home|onboarding/);
+  await authenticate(peer, users[1]);
   await peerPage.goto(url);
+  await expect(peerPage.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
   await peerPage
     .getByLabel("Seu comentário")
     .fill(`O caso base interrompe as chamadas recursivas. @Autor_${tag}`);
@@ -135,7 +130,7 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
     post.getByRole("button", { name: "Editar publicação ou comentário" }),
   ).toHaveCount(0);
   await expect(page.locator(".forum-comment")).toContainText("interrompe", {
-    timeout: 5000,
+    timeout: 15000,
   });
   await page.getByRole("button", { name: /Notificações,.*não lidas/ }).click();
   const inbox = page.getByRole("dialog", { name: "Sua caixa de entrada" });

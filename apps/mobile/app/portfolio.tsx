@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Share, Switch, Text, View } from "react-native";
 import { api } from "../src/api";
-import { Screen, Button, ErrorMessage, Field, useStyles } from "../src/ui";
+import { Screen, Button, ErrorMessage, FeedbackMessage, Field, useStyles } from "../src/ui";
 import { SuiteHero, SuiteSection, SuiteStats } from "../src/suite-ui";
 
 type Project={name:string;description?:string;url?:string};
@@ -19,7 +19,8 @@ export default function Portfolio(){
  const [skills,setSkills]=useState("");
  const [pub,setPub]=useState(false);
  const [projects,setProjects]=useState<Project[]>([]);
- const [status,setStatus]=useState("");
+ const [error,setError]=useState("");
+ const [notice,setNotice]=useState("");
  const [busy,setBusy]=useState(false);
 
  useEffect(()=>{
@@ -31,12 +32,12 @@ export default function Portfolio(){
        setSkills((v.skills??[]).join(", "));setPub(v.publicProfile);
        setProjects(v.projects??[]);
      })
-     .catch(e=>{if(active)setStatus(e.message)});
+     .catch(e=>{if(active)setError(e.message)});
    return()=>{active=false};
  },[]);
 
  async function save(){
-   setBusy(true);setStatus("");
+   setBusy(true);setError("");setNotice("");
    try{
      await api("/portfolio/me",{method:"PUT",body:JSON.stringify({
        publicProfile:pub,
@@ -45,9 +46,9 @@ export default function Portfolio(){
        skills:skills.split(",").map(v=>v.trim()).filter(Boolean),
        projects
      })});
-     setStatus("Portfólio salvo.");
+     setNotice("Portfólio salvo.");
      setData(await api<Portfolio>("/portfolio/me"));
-   }catch(e){setStatus((e as Error).message)}
+   }catch(e){setError((e as Error).message)}
    finally{setBusy(false)}
  }
 
@@ -62,7 +63,8 @@ export default function Portfolio(){
  }
 
  return <Screen title="Portfólio acadêmico">
-   <ErrorMessage message={status}/>
+   <ErrorMessage message={error}/>
+   <FeedbackMessage message={notice} tone="success"/>
    <SuiteHero
      icon="briefcase-outline"
      title="Sua trajetória, pronta para mostrar"

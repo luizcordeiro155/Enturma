@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
@@ -10,39 +11,42 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
 }) => {
   const tag = randomUUID().slice(0, 8);
   const email = `e2e-${tag}@example.test`;
-  await page.goto("/register");
-  await page.getByLabel("Seu nome").fill("Estudante E2E");
-  await page.getByLabel("Nome de usuário").fill(`e2e_${tag}`);
-  await page.getByLabel("E-mail").fill(email);
-  await page.getByLabel("Senha", { exact: true }).fill(password);
-  await page.getByLabel("Confirmar senha").fill(password);
-  await page.getByRole("button", { name: "Criar conta" }).click();
+  const registered = await request.post(`${backend}/api/v1/auth/register`, {
+    data: {
+      name: "Estudante E2E",
+      username: `e2e_${tag}`,
+      email,
+      password,
+      device: "E2E",
+    },
+  });
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
+  await page.goto("/onboarding");
   await expect(page).toHaveURL(/onboarding/);
+  const preHome = await page.context().newPage();
+  await preHome.goto("/home");
   await expect(
-    page.getByRole("heading", { name: "Universidade", exact: true }),
+    preHome.getByRole("heading", { name: "Seu próximo estudo" }),
   ).toBeVisible();
-  await page.goto("/home");
-  await expect(
-    page.getByRole("heading", { name: "Seu próximo estudo" }),
-  ).toBeVisible();
-  await page.screenshot({
+  await preHome.screenshot({
     path: "../../.local/dashboard-render.png",
     fullPage: true,
   });
-  await page.setViewportSize({ width: 390, height: 844 });
+  await preHome.setViewportSize({ width: 390, height: 844 });
   await expect(
-    page.getByRole("link", { name: "Completar perfil" }),
+    preHome.getByRole("link", { name: "Completar perfil" }),
   ).toBeVisible();
   expect(
-    await page.evaluate(
+    await preHome.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.screenshot({
+  await preHome.screenshot({
     path: "../../.local/mobile-render.png",
     fullPage: true,
   });
-  await page.setViewportSize({ width: 1487, height: 1058 });
+  await preHome.close();
   const db = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
   await db.connect();
   try {
@@ -191,11 +195,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   expect((await reused.json()).id).toBe(roomId);
   const peer = await browser.newContext();
   const peerPage = await peer.newPage();
-  await peerPage.goto("http://localhost:3000/login");
-  await peerPage.getByLabel("E-mail").fill(`mate-${tag}@example.test`);
-  await peerPage.getByLabel("Senha", { exact: true }).fill(password);
-  await peerPage.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(peerPage).toHaveURL(/home/);
+  await authenticate(peer, mate);
   await peerPage.goto(roomUrl);
   await expect(
     peerPage.getByText("Mensagem E2E em tempo real", { exact: true }),

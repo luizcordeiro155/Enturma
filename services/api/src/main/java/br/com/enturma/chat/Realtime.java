@@ -227,7 +227,8 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
   }
 
   @org.springframework.transaction.event.TransactionalEventListener(
-      phase = org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT)
+      phase = org.springframework.transaction.event.TransactionPhase.AFTER_COMMIT,
+      fallbackExecution = true)
   public void appChanged(br.com.enturma.notifications.AppChanged event) {
     for (var c : connections.values()) {
       if (!c.activity

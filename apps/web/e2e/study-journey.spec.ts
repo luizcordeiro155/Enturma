@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
@@ -21,7 +22,8 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
     },
   });
   expect(registration.ok()).toBe(true);
-  const token = (await registration.json()).accessToken,
+  const credentials = await registration.json();
+  const token = credentials.accessToken,
     headers = { Authorization: `Bearer ${token}` };
   const db = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
   await db.connect();
@@ -30,12 +32,9 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
       (await db.query("SELECT current_database() name")).rows[0].name,
     ).toBe("enturma_e2e");
     await db.query("UPDATE app_user SET role='ADMIN' WHERE email=$1", [email]);
-    await page.goto("/login");
-    await page.getByLabel("E-mail").fill(email);
-    await page.getByLabel("Senha", { exact: true }).fill(password);
-    await page.getByRole("button", { name: "Entrar", exact: true }).click();
-    await expect(page).toHaveURL(/home|onboarding/);
+    await authenticate(page.context(), credentials);
     await page.goto("/home");
+    await expect(page.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
     const journey = page.getByRole("complementary", {
       name: "Seu espaço de estudo",
     });
@@ -174,6 +173,9 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
     await page.getByRole("button", { name: /^Notificações/ }).click();
     await expect(inbox.locator(".notification-item")).toHaveCount(0);
     await insertNotice();
+    await page.evaluate(() =>
+      window.dispatchEvent(new Event("enturma-notifications_changed")),
+    );
     await expect(inbox.getByText("Aviso de teste da jornada")).toBeVisible({
       timeout: 10000,
     });
