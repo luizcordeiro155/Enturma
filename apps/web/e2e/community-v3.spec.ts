@@ -176,7 +176,8 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
     await page.getByTitle("Sair da chamada").click();
     await expect(peer.getByText("1 pessoa na chamada")).toBeVisible();
   } finally {
-    await browser.close();
+    await a.close();
+    await b.close();
     await request.post(`${backend}/api/v1/study-rooms/${room.id}/end`, {
       headers: { Authorization: `Bearer ${users[0].token}` },
     });
