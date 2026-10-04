@@ -12,7 +12,13 @@ export default defineConfig({
     actionTimeout: 20000,
     navigationTimeout: 30000,
     launchOptions: {
-      args: ["--disable-dev-shm-usage"],
+      args: [
+        "--disable-dev-shm-usage",
+        "--use-fake-ui-for-media-stream",
+        "--use-fake-device-for-media-stream",
+        "--auto-select-desktop-capture-source=Entire screen",
+        "--enable-usermedia-screen-capturing",
+      ],
     },
   },
   projects: [
