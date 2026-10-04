@@ -235,12 +235,16 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   const popover = await page
     .getByRole("dialog", { name: `Perfil de ${b}` })
     .boundingBox();
-  const viewport = page.viewportSize()!;
+  const viewport = await page.evaluate(() => ({
+    width: innerWidth,
+    height: innerHeight,
+  }));
   expect(popover!.x).toBeGreaterThanOrEqual(0);
   expect(popover!.y).toBeGreaterThanOrEqual(0);
   expect(popover!.x + popover!.width).toBeLessThanOrEqual(viewport.width);
   expect(popover!.y + popover!.height).toBeLessThanOrEqual(viewport.height);
   // O perfil público atual é um painel centralizado estilo Discord no desktop.
+  // innerWidth/innerHeight refletem o layout viewport usado pelos 50% do CSS.
   expect(
     Math.abs(popover!.x + popover!.width / 2 - viewport.width / 2),
   ).toBeLessThan(3);
