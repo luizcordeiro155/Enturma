@@ -1508,7 +1508,33 @@ class PlatformIntegrationTest {
     UUID group = UUID.randomUUID();
     UUID task = UUID.randomUUID();
     UUID classroom = UUID.randomUUID();
+    UUID campusTask = UUID.randomUUID();
+    UUID focusSession = UUID.randomUUID();
+    UUID flashcard = UUID.randomUUID();
+    UUID practiceSession = UUID.randomUUID();
 
+    db.jdbc.update(
+        "INSERT INTO campus_task(id,user_id,kind,title,due_at) VALUES (?,?,'STUDY','Privado',now())",
+        campusTask,
+        userId);
+    db.jdbc.update(
+        "INSERT INTO focus_session(id,user_id,label,planned_minutes) VALUES (?,?,?,50)",
+        focusSession,
+        userId,
+        "Foco privado");
+    db.jdbc.update("INSERT INTO study_match_profile(user_id) VALUES (?)", userId);
+    db.jdbc.update(
+        "INSERT INTO study_flashcard(id,user_id,front,back) VALUES (?,?,?,?)",
+        flashcard,
+        userId,
+        "Pergunta privada",
+        "Resposta privada");
+    db.jdbc.update("INSERT INTO portfolio_profile(user_id) VALUES (?)", userId);
+    db.jdbc.update(
+        "INSERT INTO practice_session(id,user_id,title) VALUES (?,?,?)",
+        practiceSession,
+        userId,
+        "Prática privada");
     db.jdbc.update("INSERT INTO campus_learning_profile(user_id) VALUES (?)", userId);
     db.jdbc.update(
         "INSERT INTO campus_tutor_interaction(id,user_id,action,prompt,response)"
@@ -1547,6 +1573,28 @@ class PlatformIntegrationTest {
 
     privacy.now(actor);
 
+    for (String table :
+        List.of(
+            "campus_task",
+            "focus_session",
+            "study_match_profile",
+            "study_flashcard",
+            "portfolio_profile",
+            "practice_session",
+            "campus_learning_profile",
+            "campus_tutor_interaction",
+            "teacher_profile",
+            "teacher_class_member")) {
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM " + table + " WHERE "
+                      + (table.equals("teacher_class_member") ? "user_id" : table.equals("teacher_class") ? "owner_id" : "user_id")
+                      + "=?",
+                  Integer.class,
+                  userId))
+          .as(table)
+          .isZero();
+    }
     assertThat(
             db.jdbc.queryForObject(
                 "SELECT count(*) FROM campus_tutor_interaction WHERE user_id=?",
