@@ -180,7 +180,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   // aumentar o contador global. O contador pode já conter o convite aceito.
   await expect
     .poll(async () =>
-      other.locator(".notification-count").count()
+      (await other.locator(".notification-count").count())
         ? Number((await other.locator(".notification-count").textContent()) || 0)
         : 0,
     )
