@@ -120,13 +120,8 @@ export function Friends() {
           );
       });
     void refresh().catch((e) => setError(e.message));
-    const timer = setInterval(() => {
-      if (document.visibilityState === "visible")
-        void refresh().catch(() => {});
-    }, 5000);
     return () => {
       alive = false;
-      clearInterval(timer);
     };
   }, [refresh, identityAttempt]);
   const unlock = useCallback(
@@ -179,16 +174,6 @@ export function Friends() {
     const current = ++generation.current;
     let active = true;
     let timer: ReturnType<typeof setTimeout>;
-    async function poll(k: CryptoKey) {
-      if (!active) return;
-      try {
-        if (document.visibilityState === "visible")
-          await load(friend, k, 0, current);
-      } catch (e) {
-        if (active) setError((e as Error).message);
-      }
-      if (active) timer = setTimeout(() => void poll(k), 3000);
-    }
     async function connect() {
       try {
         const peer = await api<{ publicKey: JsonWebKey }>(
@@ -217,7 +202,7 @@ export function Friends() {
           await load(friend, k, 0, current, target);
           if (active) focusMessage(`message-${target}`);
         }
-        if (active) timer = setTimeout(() => void poll(k), 3000);
+
       } catch (e) {
         if (!active) return;
         const failure = e as Error & { status?: number };
