@@ -48,7 +48,7 @@ export function TeachingWorkspace(){
  const [error,setError]=useState("");
  const [success,setSuccess]=useState("");
  const [busy,setBusy]=useState(false);
- const root=useRef<HTMLDivElement>(null);
+ const root=useRef<HTMLDivElement>(null);\n const initialRevealDone=useRef(false);
 
  async function load(){
    try{
@@ -66,13 +66,15 @@ export function TeachingWorkspace(){
  useEffect(()=>{const timer=window.setTimeout(()=>void load(),0);return()=>window.clearTimeout(timer)},[]);
  useLiveRefresh("teaching_changed",load,10000);
  useEffect(()=>{
+   if(!data||initialRevealDone.current)return;
+   initialRevealDone.current=true;
    root.current?.querySelectorAll<HTMLElement>("[data-teaching-reveal]").forEach((el,i)=>{
      el.animate(
        [{opacity:.7,transform:"translateY(8px)"},{opacity:1,transform:"none"}],
        {duration:220+i*28,easing:"cubic-bezier(.16,1,.3,1)"}
      );
    });
- },[data,selected,reviewing]);
+ },[data]);
 
  async function saveProfile(e:FormEvent<HTMLFormElement>){
    e.preventDefault();setBusy(true);setError("");
