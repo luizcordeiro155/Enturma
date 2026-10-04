@@ -12,7 +12,6 @@ export type AppEventType =
   | "room_expiring"
   | "rooms_changed"
   | "friends_changed"
-  | "profile_changed"
   | "profile_changed";
 
 let liveConnected = false;
