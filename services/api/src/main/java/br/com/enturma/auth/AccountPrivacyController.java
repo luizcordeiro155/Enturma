@@ -65,6 +65,7 @@ public class AccountPrivacyController {
     db.jdbc.update("UPDATE user_session SET revoked_at=coalesce(revoked_at,now()) WHERE user_id=?",userId);
     // A conta é anonimizada, não apagada fisicamente. Portanto, dados que dependem
     // somente de ON DELETE CASCADE precisam ser removidos explicitamente aqui.
+    db.jdbc.update("DELETE FROM ai_message WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM campus_tutor_interaction WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM campus_learning_profile WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM study_flashcard WHERE user_id=?",userId);
@@ -127,6 +128,8 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM friendship WHERE requester=? OR recipient=?",userId,userId);
     db.jdbc.update("DELETE FROM user_block WHERE user_id=? OR blocked_id=?",userId,userId);
     db.jdbc.update("DELETE FROM private_identity WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM academic_catalog_request WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM academic_enrollment_history WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM user_subject WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM academic_enrollment WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM email_outbox WHERE user_id=? OR recipient=(SELECT email FROM app_user WHERE id=?)",userId,userId);
