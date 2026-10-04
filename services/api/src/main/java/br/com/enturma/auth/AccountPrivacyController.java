@@ -85,7 +85,6 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM study_group WHERE owner_id=?",userId);
     db.jdbc.update("DELETE FROM notification_desktop_push_event WHERE user_id=? OR actor_id=?",userId,userId);
     db.jdbc.update("DELETE FROM room_reaction WHERE user_id=?",userId);
-    db.jdbc.update("DELETE FROM chat_reaction WHERE user_id=?",userId);
     db.jdbc.update("UPDATE room_session_artifact SET user_id=NULL WHERE user_id=?",userId);
     db.jdbc.update("UPDATE room_system_event SET user_id=NULL WHERE user_id=?",userId);
 
