@@ -5,6 +5,7 @@ import { Ionicons } from "@expo/vector-icons";
 import type { Profile } from "@enturma/contracts";
 import { api } from "../src/api";
 import { Screen, Button, ErrorMessage, Field, useStyles } from "../src/ui";
+import { SuiteHero, SuiteSection, SuiteStats } from "../src/suite-ui";
 import { useRealtime } from "../src/realtime";
 
 type Task = { id:string; title:string; kind:string; dueAt:string; subjectName?:string; completedAt?:string|null };
@@ -47,6 +48,7 @@ export default function Campus() {
  const [tutorBusy,setTutorBusy]=useState(false);
  const started=useRef<number|null>(null);
  const entrance=useRef(new Animated.Value(0)).current;
+ const animatedOnce=useRef(false);
 
  const load=useCallback(()=>{
    let alive=true;
@@ -59,8 +61,13 @@ export default function Campus() {
     .then(([p,d,g,diagnostic])=>{
       if(!alive)return;
       setProfile(p);setData(d);setGroups(g);setDiag(diagnostic);setError("");
-      entrance.setValue(0);
-      Animated.spring(entrance,{toValue:1,useNativeDriver:true,tension:55,friction:8}).start();
+      if(!animatedOnce.current){
+        animatedOnce.current=true;
+        entrance.setValue(0);
+        Animated.spring(entrance,{toValue:1,useNativeDriver:true,tension:55,friction:8}).start();
+      }else{
+        entrance.setValue(1);
+      }
     })
     .catch(e=>{if(alive)setError(e.message)});
    return()=>{alive=false};
@@ -135,21 +142,19 @@ export default function Campus() {
    <ErrorMessage message={error}/>
    {data?(
     <Animated.View style={{gap:14,opacity:entrance,transform:[{translateY:entrance.interpolate({inputRange:[0,1],outputRange:[18,0]})}]}}>
-      <View style={[styles.card,{gap:10}]}>
-       <View style={{flexDirection:"row",alignItems:"center",gap:10}}>
-        <Ionicons name="sparkles-outline" size={24} color={styles.text.color}/>
-        <Text style={styles.label}>Seu dia acadêmico</Text>
-       </View>
-       <Text style={styles.muted}>Agenda, foco, revisão e colegas disponíveis em um único painel.</Text>
-       <View style={{flexDirection:"row",flexWrap:"wrap",gap:8}}>
-        <Text style={styles.text}>🔥 {data.study.streak} dias</Text>
-        <Text style={styles.text}>🏆 {data.study.totalXp} XP</Text>
-        <Text style={styles.text}>🧠 {data.flashcards.dueFlashcards} revisões</Text>
-       </View>
-      </View>
+      <SuiteHero
+       icon="sparkles-outline"
+       title="Seu dia acadêmico"
+       description="Agenda, foco, revisão e colegas disponíveis em um único painel."
+      >
+       <SuiteStats items={[
+        {label:"Sequência",value:data.study.streak+" dias",icon:"flame-outline"},
+        {label:"Experiência",value:data.study.totalXp+" XP",icon:"trophy-outline"},
+        {label:"Flashcards",value:data.flashcards.dueFlashcards+" revisões",icon:"layers-outline"},
+       ]}/>
+      </SuiteHero>
 
-      <View style={[styles.card,{gap:10}]}>
-       <Text style={styles.label}>Próximos compromissos</Text>
+      <SuiteSection icon="calendar-outline" title="Próximos compromissos" description="O que merece sua atenção agora.">
        {data.tasks.filter(t=>!t.completedAt).slice(0,5).map(t=>(
         <View key={t.id} style={styles.row}>
          <Text style={styles.label}>{t.title}</Text>
@@ -158,14 +163,9 @@ export default function Campus() {
         </View>
        ))}
        {data.tasks.filter(t=>!t.completedAt).length===0?<Text style={styles.muted}>Nada urgente por aqui. Use a versão Web para adicionar provas, trabalhos e aulas à agenda.</Text>:null}
-      </View>
+      </SuiteSection>
 
-      <View style={[styles.card,{gap:12}]}>
-       <View style={{alignItems:"center",gap:8}}>
-        <Ionicons name="timer-outline" size={34} color={styles.text.color}/>
-        <Text style={[styles.title,{fontSize:focusId?46:23,lineHeight:52}]}>{focusId?clock:"Modo Foco com Tutor"}</Text>
-        <Text style={styles.muted}>{focusId?"A IA está disponível durante toda a sessão para explicar, testar e adaptar o ensino.":"Defina o assunto antes de iniciar os 50 minutos."}</Text>
-       </View>
+      <SuiteSection icon="timer-outline" title={focusId?clock:"Modo Foco com Tutor"} description={focusId?"A IA está disponível durante toda a sessão para adaptar o ensino.":"Defina o assunto antes de iniciar os 50 minutos."}>
        {!focusId?<><Field label="O que você vai estudar?" value={focusGoal} onChangeText={setFocusGoal} placeholder="Ex.: JOINs e normalização"/>{profile?.subjects.slice(0,5).map(s=><Button key={s.id} title={(focusSubject===s.id?"✓ ":"")+s.name} onPress={()=>setFocusSubject(focusSubject===s.id?undefined:s.id)}/>)}</>:null}
        <Button title={focusId?"Concluir sessão":"Iniciar 50 min com tutor"} onPress={()=>void(focusId?finishFocus():startFocus())}/>
        {focusId?<View style={[styles.row,{gap:9}]}>
@@ -177,10 +177,9 @@ export default function Campus() {
          <Button title="Explicar mais simples" disabled={tutorBusy} onPress={()=>void askTutor("SIMPLIFY","Explique o que estou estudando em passos menores e com linguagem mais simples.")}/>
          <Button title="Me testar" disabled={tutorBusy} onPress={()=>void askTutor("TEST","Faça uma pergunta curta para conferir meu entendimento e espere minha tentativa.")}/>
        </View>:null}
-      </View>
+      </SuiteSection>
 
-      <View style={[styles.card,{gap:10}]}>
-       <Text style={styles.label}>Colegas disponíveis</Text>
+      <SuiteSection icon="people-outline" title="Colegas disponíveis" description="Encontre pessoas compatíveis para estudar agora.">
        {data.matches.slice(0,4).map(m=>(
         <View key={m.id} style={styles.row}>
          <Text style={styles.label}>{m.name}</Text>
@@ -189,23 +188,21 @@ export default function Campus() {
        ))}
        {data.matches.length===0?<Text style={styles.muted}>Nenhum match compatível disponível agora.</Text>:null}
        <Button title="Ver amigos" onPress={()=>router.push("/friends")}/>
-      </View>
+      </SuiteSection>
 
-      <View style={[styles.card,{gap:10}]}>
-       <View style={{flexDirection:"row",alignItems:"center",gap:9}}><Ionicons name="bulb-outline" size={24} color={styles.text.color}/><Text style={styles.label}>Prática adaptativa</Text></View>
+      <SuiteSection icon="bulb-outline" title="Prática adaptativa" description="Questões ajustadas ao seu desempenho e ao assunto que você quer dominar.">
        <Text style={styles.muted}>{diag?.totals.attempts??0} questões respondidas{diag?.topics[0]?" · próximo foco: "+diag.topics[0].topic:""}</Text>
        <Field label="Assunto" value={practiceTopic} onChangeText={setPracticeTopic} placeholder="Ex.: JOIN ou recursividade"/>
        {profile?.subjects.slice(0,6).map(s=><Button key={s.id} title={(practiceSubject===s.id?"✓ ":"")+s.name} onPress={()=>setPracticeSubject(practiceSubject===s.id?undefined:s.id)}/>)}
        <Button title={practiceBusy?"Preparando…":"Gerar 5 questões"} disabled={practiceBusy} onPress={()=>void generatePractice()}/>
        {practice?<View style={{gap:10}}>{practice.questions.map((q,n)=><View key={q.id} style={[styles.row,{gap:8}]}><Text style={styles.muted}>Questão {n+1} · {q.topic}</Text><Text style={styles.label}>{q.prompt}</Text>{q.options.map((o,i)=><Button key={i} title={(answers[q.id]===i?"✓ ":"")+o} disabled={!!practiceResult} onPress={()=>setAnswers(v=>({...v,[q.id]:i}))}/>) }{practiceResult?.results.find(x=>x.questionId===q.id)?<Text style={styles.muted}>{practiceResult.results.find(x=>x.questionId===q.id)!.explanation}</Text>:null}</View>)}{!practiceResult?<Button title="Corrigir prática" disabled={practiceBusy||Object.keys(answers).length!==practice.questions.length} onPress={()=>void submitPractice()}/>:<Text style={styles.label}>Resultado: {practiceResult.correct} de {practiceResult.total}</Text>}</View>:null}
-      </View>
+      </SuiteSection>
 
-      <View style={[styles.card,{gap:10}]}>
-       <View style={{flexDirection:"row",alignItems:"center",gap:9}}><Ionicons name="people-outline" size={24} color={styles.text.color}/><Text style={styles.label}>Grupos de estudo</Text></View>
+      <SuiteSection icon="people-circle-outline" title="Grupos de estudo" description="Comunidades permanentes para matérias, provas e projetos.">
        <Text style={styles.muted}>Grupos permanentes ficam juntos da sua agenda, sem uma página separada.</Text>
        {groups.slice(0,8).map(g=><View key={g.id} style={styles.row}><Text style={styles.label}>{g.name}</Text><Text style={styles.muted}>{g.subjectName??"Comunidade acadêmica"} · {g.members} membros</Text><Text style={styles.text}>{g.description||"Grupo de estudo do Enturma."}</Text>{g.joined?<Text style={styles.muted}>✓ Você participa</Text>:g.visibility!=="PRIVATE"?<Button title="Entrar no grupo" onPress={()=>void joinGroup(g.id)}/>:null}</View>)}
        {!groups.length?<Text style={styles.muted}>Nenhum grupo disponível ainda.</Text>:null}
-      </View>
+      </SuiteSection>
 
       <View style={{gap:10}}>
        <Button title="Abrir Cadernos IA" onPress={()=>router.push("/notebooks")}/>

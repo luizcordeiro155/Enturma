@@ -48,7 +48,8 @@ export function TeachingWorkspace(){
  const [error,setError]=useState("");
  const [success,setSuccess]=useState("");
  const [busy,setBusy]=useState(false);
- const root=useRef<HTMLDivElement>(null);\n const initialRevealDone=useRef(false);
+ const root=useRef<HTMLDivElement>(null);
+ const initialRevealDone=useRef(false);
 
  async function load(){
    try{
@@ -199,7 +200,7 @@ export function TeachingWorkspace(){
  const archivedOwned=data?.owned.filter(c=>c.archived)??[];
 
  return <Shell><div className="teaching-page" ref={root}>
-   <header className="suite-heading teaching-heading">
+   <header className="suite-heading suite-hero teaching-heading">
      <div><GraduationCap size={32}/><h1>Turmas e modo professor</h1></div>
      <p>Um espaço contínuo entre professor e aluno: organize a turma, publique atividades, acompanhe entregas, dê feedback individual e mantenha o desenvolvimento acadêmico visível para todos.</p>
    </header>

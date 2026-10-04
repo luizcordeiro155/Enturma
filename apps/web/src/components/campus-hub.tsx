@@ -49,7 +49,8 @@ export function CampusHub(){
   const [focusSeconds,setFocusSeconds]=useState(0);
   const [focusGoal,setFocusGoal]=useState("");
   const [focusSubjectId,setFocusSubjectId]=useState("");
-  const root=useRef<HTMLDivElement>(null);\n  const initialRevealDone=useRef(false);
+  const root=useRef<HTMLDivElement>(null);
+  const initialRevealDone=useRef(false);
 
   async function load(){
     try{

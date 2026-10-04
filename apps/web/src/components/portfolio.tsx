@@ -21,8 +21,18 @@ export function PortfolioEditor(){
  const [success,setSuccess]=useState("");
  const [busy,setBusy]=useState(false);
  const root=useRef<HTMLDivElement>(null);
+ const initialRevealDone=useRef(false);
  useEffect(()=>{void api<Portfolio>("/portfolio/me",{cache:"no-store"}).then(v=>{setData(v);setProjects(v.projects??[])}).catch(e=>setError(e.message))},[]);
- useEffect(()=>{root.current?.querySelectorAll<HTMLElement>("[data-portfolio-reveal]").forEach((el,i)=>el.animate([{opacity:.4,transform:"translateY(10px)"},{opacity:1,transform:"none"}],{duration:180+i*30,easing:"cubic-bezier(.16,1,.3,1)"}))},[data]);
+ useEffect(()=>{
+   if(!data||initialRevealDone.current)return;
+   initialRevealDone.current=true;
+   root.current?.querySelectorAll<HTMLElement>("[data-portfolio-reveal]").forEach((el,i)=>
+     el.animate(
+       [{opacity:.72,transform:"translateY(8px)"},{opacity:1,transform:"none"}],
+       {duration:220+i*28,easing:"cubic-bezier(.16,1,.3,1)"}
+     )
+   );
+ },[data]);
 
  async function save(e:FormEvent<HTMLFormElement>){
    e.preventDefault();setBusy(true);setError("");setSuccess("");
@@ -41,8 +51,13 @@ export function PortfolioEditor(){
  }
  if(!data)return <Shell><p role="status">Montando seu portfólio…</p></Shell>;
  return <Shell><div className="portfolio-editor-page" ref={root}>
-   <header className="suite-heading"><div><BriefcaseBusiness size={32}/><h1>Portfólio acadêmico</h1></div><p>Transforme sua trajetória no Enturma em uma apresentação profissional que você controla e pode deixar pública quando quiser.</p></header>
+   <header className="suite-heading suite-hero portfolio-hero"><div><BriefcaseBusiness size={32}/><h1>Portfólio acadêmico</h1></div><p>Transforme sua trajetória no Enturma em uma apresentação profissional que você controla e pode deixar pública quando quiser.</p></header>
    <Feedback error={error} success={success}/>
+   <section className="portfolio-metrics" aria-label="Resumo do portfólio">
+     <div><span>Experiência</span><strong>{data.stats.totalXp} XP</strong></div>
+     <div><span>Tempo de estudo</span><strong>{data.studyMinutes} min</strong></div>
+     <div><span>Sequência atual</span><strong>{data.stats.currentStreak} dias</strong></div>
+   </section>
    <form onSubmit={save}>
      <section className="portfolio-settings" data-portfolio-reveal>
        <label className="portfolio-public-toggle"><input type="checkbox" name="publicProfile" defaultChecked={data.publicProfile}/><span><strong>Portfólio público</strong><small>Disponível em /p/{data.username}</small></span></label>

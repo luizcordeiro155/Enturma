@@ -113,7 +113,13 @@ public class TeachingController {
   public Object create(@AuthenticationPrincipal Actor a, @Valid @RequestBody ClassRequest r) {
     if (!db.exists(
         "SELECT EXISTS(SELECT 1 FROM teacher_profile WHERE user_id=? AND enabled)", a.id()))
-      throw ApiException.invalid("Ative o modo professor primeiro.");
+      throw ApiException.invalid("Ative o modo professor antes de criar uma turma.");
+    if (r.subjectId() != null
+        && !db.exists(
+            "SELECT EXISTS(SELECT 1 FROM user_subject WHERE user_id=? AND subject_id=?)",
+            a.id(),
+            r.subjectId()))
+      throw ApiException.invalid("Essa matéria não faz parte do seu semestre atual.");
     String code;
     do {
       code = randomCode();
@@ -159,21 +165,43 @@ public class TeachingController {
 
   @PostMapping("/classes/join")
   public Object join(@AuthenticationPrincipal Actor a, @Valid @RequestBody Join r) {
-    var c =
-        db.one(
-            "SELECT id,name FROM teacher_class WHERE upper(join_code)=upper(?) AND NOT archived",
-            r.code().strip());
-    db.jdbc.update(
-        "INSERT INTO teacher_class_member(class_id,user_id) VALUES (?,?) ON CONFLICT DO NOTHING",
-        c.get("id"),
-        a.id());
+    String code = r.code().replaceAll("[^A-Za-z0-9]", "").toUpperCase(Locale.ROOT);
+    if (code.isBlank()) throw ApiException.invalid("Informe o código da turma.");
+
+    var matches =
+        db.list(
+            "SELECT id,name,owner_id FROM teacher_class"
+                + " WHERE upper(join_code)=? AND NOT archived LIMIT 1",
+            code);
+    if (matches.isEmpty())
+      throw ApiException.invalid("Código de turma inválido ou turma arquivada.");
+
+    var classroom = matches.getFirst();
+    UUID classId = (UUID) classroom.get("id");
+    UUID ownerId = (UUID) classroom.get("ownerId");
+
+    if (!a.id().equals(ownerId)) {
+      db.jdbc.update(
+          "INSERT INTO teacher_class_member(class_id,user_id)"
+              + " VALUES (?,?) ON CONFLICT DO NOTHING",
+          classId,
+          a.id());
+    }
     changed();
-    return c;
+
+    Map<String, Object> out = new LinkedHashMap<>();
+    out.put("id", classId);
+    out.put("name", classroom.get("name"));
+    return out;
   }
 
   @GetMapping("/classes/{id}")
   public Object detail(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
-    var c = db.one("SELECT * FROM teacher_class WHERE id=?", id);
+    var c =
+        db.one(
+            "SELECT id,owner_id,subject_id,name,description,join_code,archived,created_at,updated_at"
+                + " FROM teacher_class WHERE id=?",
+            id);
     boolean owner = a.id().equals(c.get("ownerId"));
     boolean member =
         db.exists(
