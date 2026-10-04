@@ -180,7 +180,9 @@ function NativeCallBar() {
         right: 10,
         borderRadius: 14,
         padding: 10,
-        backgroundColor: "#183f36",
+        backgroundColor: styles.elevated.backgroundColor,
+        borderWidth: 1,
+        borderColor: styles.border.borderColor,
         flexDirection: "row",
         alignItems: "center",
         gap: 12,
@@ -197,8 +199,17 @@ function NativeCallBar() {
         }
         style={{ flex: 1, padding: 8 }}
       >
-        <Text style={{ color: "#fff" }}>● Chamada em andamento</Text>
-        <Text style={{ color: "#d8ef79", fontSize: 12 }}>Voltar à sala</Text>
+        <Text style={[styles.text, { textAlign: "left" }]}>
+          ● Chamada em andamento
+        </Text>
+        <Text
+          style={[
+            styles.label,
+            { marginBottom: 0, color: styles.accent.color, textAlign: "left" },
+          ]}
+        >
+          Voltar à sala
+        </Text>
       </Pressable>
       <Pressable
         accessibilityRole="button"
@@ -216,7 +227,7 @@ function NativeCallBar() {
         }}
         style={{ padding: 10 }}
       >
-        <Text style={{ color: "#fff" }}>
+        <Text style={styles.text}>
           {isMicrophoneEnabled ? "Mic ligado" : "Mic mudo"}
         </Text>
       </Pressable>
@@ -225,7 +236,7 @@ function NativeCallBar() {
         onPress={() => void leave()}
         style={{ padding: 10 }}
       >
-        <Text style={{ color: "#ffbdbd" }}>Sair</Text>
+        <Text style={styles.error}>Sair</Text>
       </Pressable>
     </View>
   );
