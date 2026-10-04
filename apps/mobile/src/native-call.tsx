@@ -8,9 +8,11 @@ import {
   useState,
 } from "react";
 import { View, Text, Pressable, Alert } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRouter } from "expo-router";
 import type { Room } from "livekit-client";
 import { api } from "./api";
+import { useStyles } from "./ui";
 
 type Call = {
   room: Room | null;
@@ -160,6 +162,7 @@ export function useNativeCall() {
 function NativeCallBar() {
   const { roomId, leave, room } = useNativeCall();
   const router = useRouter();
+  const insets = useSafeAreaInsets();
   const [isMicrophoneEnabled, setIsMicrophoneEnabled] = useState(false);
 
   useEffect(() => {
@@ -172,7 +175,7 @@ function NativeCallBar() {
     <View
       style={{
         position: "absolute",
-        bottom: 82,
+        bottom: 74 + insets.bottom,
         left: 10,
         right: 10,
         borderRadius: 14,
@@ -230,10 +233,15 @@ function NativeCallBar() {
 
 export function NativeCallStage() {
   const { room, roomId, error } = useNativeCall();
+  const styles = useStyles();
 
   if (!roomId || !room) {
     return error ? (
-      <Text accessibilityRole="alert" style={{ color: "#b42318" }}>
+      <Text
+        accessibilityRole="alert"
+        accessibilityLiveRegion="assertive"
+        style={styles.error}
+      >
         {error}
       </Text>
     ) : null;
@@ -243,7 +251,7 @@ export function NativeCallStage() {
     <Suspense
       fallback={
         <View style={{ paddingVertical: 18 }}>
-          <Text>Preparando chamada…</Text>
+          <Text style={styles.muted}>Preparando chamada…</Text>
         </View>
       }
     >

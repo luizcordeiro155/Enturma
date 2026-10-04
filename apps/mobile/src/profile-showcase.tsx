@@ -1,7 +1,13 @@
 import { useEffect, useState } from "react";
 import { View, Text, Switch } from "react-native";
 import { api } from "./api";
-import { Field, Button, ErrorMessage, useStyles } from "./ui";
+import {
+  Field,
+  Button,
+  ErrorMessage,
+  FeedbackMessage,
+  useStyles,
+} from "./ui";
 type Widget = { kind: string; visible: boolean; favorite: boolean };
 type Achievement = {
   code: string;
@@ -52,7 +58,8 @@ const privacy: Record<string, string> = {
 export function NativeShowcaseEditor() {
   const styles = useStyles();
   const [value, setValue] = useState<Showcase>(),
-    [status, setStatus] = useState(""),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false);
   useEffect(() => {
     let live = true;
@@ -61,14 +68,18 @@ export function NativeShowcaseEditor() {
         if (live) setValue(s);
       })
       .catch((e) => {
-        if (live) setStatus(e.message);
+        if (live) setError(e.message);
       });
     return () => {
       live = false;
     };
   }, []);
   if (!value)
-    return <ErrorMessage message={status || "Carregando personalização…"} />;
+    return error ? (
+      <ErrorMessage message={error} />
+    ) : (
+      <Text style={styles.muted}>Carregando personalização…</Text>
+    );
   const appearance = (key: string, v: string) =>
     setValue({ ...value, appearance: { ...value.appearance, [key]: v } });
   const update = (index: number, patch: Partial<Widget>) =>
@@ -86,7 +97,8 @@ export function NativeShowcaseEditor() {
   return (
     <View style={{ gap: 18 }}>
       <Text style={styles.title}>Seu mural acadêmico</Text>
-      <ErrorMessage message={status} />
+      <ErrorMessage message={error} />
+      <FeedbackMessage message={notice} tone="success" />
       {value.stats && (
         <Text style={styles.text}>
           Nível {value.stats.level} · {value.stats.totalXp} XP ·{" "}
@@ -245,6 +257,8 @@ export function NativeShowcaseEditor() {
         }
         onPress={() => {
           setBusy(true);
+          setError("");
+          setNotice("");
           void api("/users/me/showcase", {
             method: "PUT",
             body: JSON.stringify({
@@ -258,8 +272,8 @@ export function NativeShowcaseEditor() {
               badges: value.badges?.map((b) => b.code) ?? [],
             }),
           })
-            .then(() => setStatus("Mural e privacidade atualizados."))
-            .catch((e) => setStatus(e.message))
+            .then(() => setNotice("Mural e privacidade atualizados."))
+            .catch((e) => setError(e.message))
             .finally(() => setBusy(false));
         }}
       />

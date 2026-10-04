@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Animated, Text, View } from "react-native";
+import { Text, View } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import type { Profile } from "@enturma/contracts";
@@ -58,8 +58,6 @@ export default function Campus() {
  const [tutorReply,setTutorReply]=useState<TutorReply>();
  const [tutorBusy,setTutorBusy]=useState(false);
  const started=useRef<number|null>(null);
- const entrance=useRef(new Animated.Value(0)).current;
- const animatedOnce=useRef(false);
 
  const generations=useRef({profile:0,today:0,groups:0,diagnostic:0,cards:0});
 
@@ -74,12 +72,8 @@ export default function Campus() {
      const value=await api<Today>("/campus/today");
      if(request!==generations.current.today)return;
      setData(value);setError("");
-     if(!animatedOnce.current){
-       animatedOnce.current=true;entrance.setValue(0);
-       Animated.spring(entrance,{toValue:1,useNativeDriver:true,tension:55,friction:8}).start();
-     }else entrance.setValue(1);
    }catch(e){if(request===generations.current.today)setError((e as Error).message)}
- },[entrance]);
+ },[]);
  const loadGroups=useCallback(async()=>{
    const request=++generations.current.groups;
    try{const value=await api<Group[]>("/campus/groups");if(request===generations.current.groups)setGroups(value)}
@@ -220,7 +214,7 @@ export default function Campus() {
    <ErrorMessage message={error}/>
    <FeedbackMessage message={notice} tone="success"/>
    {data?(
-    <Animated.View style={{gap:14,opacity:entrance,transform:[{translateY:entrance.interpolate({inputRange:[0,1],outputRange:[14,0]})}]}}>
+    <>
       <SuiteHero
        icon="calendar-outline"
        title={"Boa jornada, "+firstName}
@@ -332,7 +326,7 @@ export default function Campus() {
        <Button title="Desafios acadêmicos" onPress={()=>router.push("/challenges")}/>
        <Button title="Entrar em uma sala" onPress={()=>router.push("/rooms")}/>
       </SuiteSection>
-    </Animated.View>
+    </>
    ):<Text style={styles.muted}>Montando seu dia…</Text>}
   </Screen>
  );

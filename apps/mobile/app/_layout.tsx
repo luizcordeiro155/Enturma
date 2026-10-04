@@ -2,14 +2,13 @@ import { Stack } from "expo-router";
 import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NativeCallProvider } from "../src/native-call";
-import { MobileThemeProvider, useStyles } from "../src/ui";
+import { MobileThemeProvider, useResolvedDark, useStyles } from "../src/ui";
 function Navigation() {
   const styles = useStyles();
+  const dark = useResolvedDark();
   return (
     <NativeCallProvider>
-      <StatusBar
-        style={styles.screen.backgroundColor === "#101819" ? "light" : "dark"}
-      />
+      <StatusBar style={dark ? "light" : "dark"} />
       <Stack
         screenOptions={{
           headerTitle: "enturma.",

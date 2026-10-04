@@ -1,11 +1,18 @@
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { Text, View, Image } from "react-native";
 import { useFocusEffect } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
 import type { Profile } from "@enturma/contracts";
 import { api, base, session } from "../../src/api";
 import { NativeShowcaseEditor } from "../../src/profile-showcase";
-import { Screen, Field, Button, ErrorMessage, useStyles } from "../../src/ui";
+import {
+  Screen,
+  Field,
+  Button,
+  ErrorMessage,
+  FeedbackMessage,
+  useStyles,
+} from "../../src/ui";
 export default function ProfilePage() {
   const styles = useStyles();
   const [details, setDetails] = useState<
@@ -17,27 +24,35 @@ export default function ProfilePage() {
     [bio, setBio] = useState(""),
     [color, setColor] = useState("#183f36"),
     [token, setToken] = useState(""),
-    [status, setStatus] = useState(""),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState(""),
     [version, setVersion] = useState(0);
+  const generation = useRef(0);
   const load = useCallback(async () => {
+    const request = ++generation.current;
     try {
       const [user, c] = await Promise.all([
         api<Profile>("/users/me"),
         session(),
       ]);
+      if (request !== generation.current) return;
       setP(user);
       setName(user.name);
       setBio(user.bio ?? "");
       setColor(user.accentColor ?? "#183f36");
       setDetails(user.profileDetails ?? {});
       setToken(c?.accessToken ?? "");
+      setError("");
     } catch (e) {
-      setStatus((e as Error).message);
+      if (request === generation.current) setError((e as Error).message);
     }
   }, []);
   useFocusEffect(
     useCallback(() => {
       void load();
+      return () => {
+        generation.current++;
+      };
     }, [load]),
   );
   async function image(kind: "avatar" | "banner") {
@@ -49,6 +64,8 @@ export default function ProfilePage() {
         quality: 0.8,
       });
       if (result.canceled) return;
+      setError("");
+      setNotice("");
       const asset = result.assets[0];
       const form = new FormData();
       form.append("file", {
@@ -59,14 +76,15 @@ export default function ProfilePage() {
       await api(`/users/me/${kind}`, { method: "POST", body: form });
       setVersion(Date.now());
       await load();
-      setStatus("Imagem atualizada.");
+      setNotice("Imagem atualizada.");
     } catch (e) {
-      setStatus((e as Error).message);
+      setError((e as Error).message);
     }
   }
   return (
     <Screen title="Seu perfil">
-      <ErrorMessage message={status} />
+      <ErrorMessage message={error} />
+      <FeedbackMessage message={notice} tone="success" />
       {p && (
         <View style={[styles.row, { borderColor: color }]}>
           {p.hasBanner && (
@@ -175,7 +193,8 @@ export default function ProfilePage() {
         }
         onPress={async () => {
           setSaving(true);
-          setStatus("");
+          setError("");
+          setNotice("");
           try {
             await api("/users/me/appearance", {
               method: "PUT",
@@ -185,9 +204,9 @@ export default function ProfilePage() {
               method: "PUT",
               body: JSON.stringify(details),
             });
-            setStatus("Perfil salvo para suas conversas.");
+            setNotice("Perfil salvo para suas conversas.");
           } catch (e) {
-            setStatus((e as Error).message);
+            setError((e as Error).message);
           } finally {
             setSaving(false);
           }

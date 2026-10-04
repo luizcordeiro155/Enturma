@@ -1,22 +1,26 @@
 import { Tabs } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
-import { useStyles } from "../../src/ui";
+import { useExperience, useStyles } from "../../src/ui";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function TabLayout() {
   const styles = useStyles();
+  const { preference } = useExperience();
   const insets = useSafeAreaInsets();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: "#d8ef79",
+        tabBarActiveTintColor: styles.accent.color,
         tabBarInactiveTintColor: styles.muted.color,
-        tabBarLabelStyle: { fontSize: 11, fontWeight: "700" },
+        tabBarLabelStyle: {
+          fontSize: 11 * preference.fontScale,
+          fontWeight: "700",
+        },
         tabBarStyle: {
-          backgroundColor: "#0f1917",
-          borderTopColor: "#2c433c",
+          backgroundColor: styles.surface.backgroundColor,
+          borderTopColor: styles.border.borderColor,
           borderTopWidth: 1,
           height: 64 + insets.bottom,
           paddingTop: 6,
@@ -37,7 +41,13 @@ export default function TabLayout() {
             >
               enturma
             </Text>
-            <Text style={{ color: "#9bc24b", fontSize: 21, fontWeight: "900" }}>
+            <Text
+              style={{
+                color: styles.accent.color,
+                fontSize: 21,
+                fontWeight: "900",
+              }}
+            >
               .
             </Text>
           </View>
@@ -71,7 +81,9 @@ export default function TabLayout() {
                   borderRadius: 10,
                   alignItems: "center",
                   justifyContent: "center",
-                  backgroundColor: focused ? "#233a33" : "transparent",
+                  backgroundColor: focused
+                    ? styles.elevated.backgroundColor
+                    : "transparent",
                 }}
               >
                 <Ionicons name={icon} color={color} size={size} />

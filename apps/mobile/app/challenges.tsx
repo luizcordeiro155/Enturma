@@ -1,7 +1,14 @@
 import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { api } from "../src/api";
-import { Screen, Button, Field, ErrorMessage, useStyles } from "../src/ui";
+import {
+  Screen,
+  Button,
+  Field,
+  ErrorMessage,
+  FeedbackMessage,
+  useStyles,
+} from "../src/ui";
 type Game = { subjectId: string; subject: string; code: string; title: string };
 type Challenge = {
   id: string;
@@ -20,16 +27,19 @@ export default function Challenges() {
     [slot, setSlot] = useState(1),
     [daily, setDaily] = useState(true),
     [hint, setHint] = useState(false),
-    [status, setStatus] = useState(""),
+    [error, setError] = useState(""),
+    [notice, setNotice] = useState(""),
+    [noticeTone, setNoticeTone] = useState<"success" | "warning">("success"),
     [busy, setBusy] = useState(false);
   useEffect(() => {
     api<Game[]>("/learning/academic")
       .then(setGames)
-      .catch((e) => setStatus(e.message));
+      .catch((e) => setError(e.message));
   }, []);
   return (
     <Screen title="Desafios acadêmicos">
-      <ErrorMessage message={status} />
+      <ErrorMessage message={error} />
+      <FeedbackMessage message={notice} tone={noticeTone} />
       {!game ? (
         games.map((g) => (
           <Button
@@ -91,9 +101,10 @@ export default function Challenges() {
                   setChallenge(c);
                   setHint(false);
                   setAnswer("");
-                  setStatus("");
+                  setError("");
+                  setNotice("");
                 })
-                .catch((e) => setStatus(e.message))
+                .catch((e) => setError(e.message))
                 .finally(() => setBusy(false));
             }}
           />
@@ -128,10 +139,16 @@ export default function Challenges() {
                         body: JSON.stringify({ answer }),
                       })
                         .then((r) => {
-                          setStatus(r.message + ` +${r.xpAwarded} XP`);
+                          setError("");
+                          setNoticeTone(r.correct ? "success" : "warning");
+                          setNotice(
+                            r.correct
+                              ? r.message + ` +${r.xpAwarded} XP`
+                              : r.message,
+                          );
                           setChallenge({ ...challenge, completed: r.correct });
                         })
-                        .catch((e) => setStatus(e.message))
+                        .catch((e) => setError(e.message))
                         .finally(() => setBusy(false));
                     }}
                   />

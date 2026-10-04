@@ -10,7 +10,18 @@ import {
   View,
   type TextInputProps,
 } from "react-native";
-import { Children, createContext, useContext, useEffect, useMemo, useState } from "react";
+import {
+  Children,
+  Fragment,
+  createContext,
+  isValidElement,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import * as SecureStore from "expo-secure-store";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { ExperiencePreference } from "@enturma/contracts";
@@ -48,6 +59,7 @@ const createStyles = (
 ) => {
   const palette = dark ? darkPalette : lightPalette;
   const border = highContrast ? palette.text : palette.border;
+  const muted = highContrast ? palette.text : palette.muted;
   return StyleSheet.create({
     screen: {
       paddingHorizontal: 18,
@@ -58,21 +70,21 @@ const createStyles = (
       flexGrow: 1,
     },
     title: {
-      fontSize: 30,
-      lineHeight: 36,
+      fontSize: 30 * fontScale,
+      lineHeight: 36 * fontScale,
       fontWeight: "800",
       letterSpacing: -0.8,
       color: palette.text,
     },
     text: {
       fontSize: 16 * fontScale,
-      lineHeight: 24,
+      lineHeight: 24 * fontScale,
       color: palette.text,
     },
     muted: {
       fontSize: 14 * fontScale,
-      lineHeight: 20,
-      color: palette.muted,
+      lineHeight: 20 * fontScale,
+      color: muted,
     },
     input: {
       minHeight: 48,
@@ -97,7 +109,8 @@ const createStyles = (
     buttonText: {
       color: palette.accentInk,
       fontWeight: "800",
-      fontSize: 15,
+      fontSize: 15 * fontScale,
+      lineHeight: 20 * fontScale,
     },
     row: {
       padding: 16,
@@ -107,22 +120,27 @@ const createStyles = (
       borderRadius: 14,
       backgroundColor: palette.surface,
     },
-    error: { color: palette.danger, fontSize: 14, lineHeight: 20 },
+    error: {
+      color: palette.danger,
+      fontSize: 14 * fontScale,
+      lineHeight: 20 * fontScale,
+    },
     success: {
       color: dark ? "#b8f5c8" : "#176b35",
-      fontSize: 14,
-      lineHeight: 20,
+      fontSize: 14 * fontScale,
+      lineHeight: 20 * fontScale,
     },
     warning: {
       color: dark ? "#ffe08a" : "#8a5a00",
-      fontSize: 14,
-      lineHeight: 20,
+      fontSize: 14 * fontScale,
+      lineHeight: 20 * fontScale,
     },
     label: {
       fontWeight: "700",
       color: palette.text,
       marginBottom: 8,
-      fontSize: 14,
+      fontSize: 14 * fontScale,
+      lineHeight: 20 * fontScale,
     },
     card: {
       padding: 16,
@@ -158,39 +176,45 @@ export function MobileThemeProvider({
 }) {
   const [preference, setPreference] = useState(defaults);
   const pathname = usePathname();
+  const syncGeneration = useRef(0);
 
   useEffect(() => {
     let live = true;
-    void session()
-      .then(async (credentials) => {
+    const request = ++syncGeneration.current;
+    void (async () => {
+      try {
+        const cached = await SecureStore.getItemAsync("enturma_experience");
+        if (live && request === syncGeneration.current && cached) {
+          try {
+            setPreference({ ...defaults, ...JSON.parse(cached) });
+          } catch {
+            await SecureStore.deleteItemAsync("enturma_experience").catch(
+              () => {},
+            );
+          }
+        }
+        const credentials = await session();
         if (!credentials) {
-          if (live) setPreference(defaults);
+          if (live && request === syncGeneration.current) setPreference(defaults);
           return;
         }
-        const p = await api<ExperiencePreference>("/users/me/experience");
-        if (live) {
-          setPreference({ ...defaults, ...p });
-          await SecureStore.setItemAsync(
-            "enturma_experience",
-            JSON.stringify(p),
-          );
-        }
-      })
-      .catch(() => {});
+        const remote = await api<ExperiencePreference>("/users/me/experience");
+        if (!live || request !== syncGeneration.current) return;
+        const resolved = { ...defaults, ...remote };
+        setPreference(resolved);
+        await SecureStore.setItemAsync(
+          "enturma_experience",
+          JSON.stringify(resolved),
+        );
+      } catch {}
+    })();
     return () => {
       live = false;
     };
   }, [pathname]);
 
-  useEffect(() => {
-    SecureStore.getItemAsync("enturma_experience")
-      .then((v) => {
-        if (v) setPreference({ ...defaults, ...JSON.parse(v) });
-      })
-      .catch(() => {});
-  }, []);
-
   async function save(p: ExperiencePreference) {
+    syncGeneration.current++;
     await api("/users/me/experience", {
       method: "PUT",
       body: JSON.stringify(p),
@@ -210,18 +234,30 @@ export function useExperience() {
   return useContext(ThemeContext);
 }
 
-export function useStyles() {
+export function useResolvedDark() {
   const { preference: p } = useExperience();
   const native = useColorScheme();
+  return p.theme === "DARK" || (p.theme === "SYSTEM" && native === "dark");
+}
+
+export function useStyles() {
+  const { preference: p } = useExperience();
+  const dark = useResolvedDark();
   return useMemo(
-    () =>
-      createStyles(
-        p.theme === "DARK" || (p.theme === "SYSTEM" && native === "dark"),
-        p.fontScale,
-        p.highContrast,
-      ),
-    [p.theme, p.fontScale, p.highContrast, native],
+    () => createStyles(dark, p.fontScale, p.highContrast),
+    [dark, p.fontScale, p.highContrast],
   );
+}
+
+function flattenScreenChildren(children: ReactNode): ReactNode[] {
+  return Children.toArray(children).flatMap((child) => {
+    if (isValidElement(child) && child.type === Fragment) {
+      return flattenScreenChildren(
+        (child.props as { children?: ReactNode }).children,
+      );
+    }
+    return [child];
+  });
 }
 
 export function Screen({
@@ -240,7 +276,7 @@ export function Screen({
       keyboardVerticalOffset={90}
     >
       <FlatList
-        data={Children.toArray(children)}
+        data={flattenScreenChildren(children)}
         keyExtractor={(_, index) => String(index)}
         renderItem={({ item }) => item as React.ReactElement}
         contentContainerStyle={[
@@ -272,6 +308,7 @@ export function Button({
   disabled?: boolean;
 }) {
   const styles = useStyles();
+  const { preference } = useExperience();
   return (
     <Pressable
       accessibilityRole="button"
@@ -281,7 +318,14 @@ export function Button({
       style={({ pressed }) => [
         styles.button,
         disabled ? { opacity: 0.5 } : {},
-        pressed && !disabled ? { opacity: 0.86, transform: [{ scale: 0.99 }] } : {},
+        pressed && !disabled
+          ? {
+              opacity: 0.86,
+              ...(preference.reducedMotion
+                ? {}
+                : { transform: [{ scale: 0.99 }] }),
+            }
+          : {},
       ]}
     >
       <Text style={styles.buttonText}>{title}</Text>
@@ -323,6 +367,7 @@ export function FeedbackMessage({
     <View style={[styles.card, { borderColor: textStyle.color }]}>
       <Text
         accessibilityRole={tone === "error" ? "alert" : "text"}
+        accessibilityLiveRegion={tone === "error" ? "assertive" : "polite"}
         style={textStyle}
       >
         {message}

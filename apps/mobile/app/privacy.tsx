@@ -9,6 +9,7 @@ import {
   ErrorMessage,
   FeedbackMessage,
   Field,
+  useExperience,
   useStyles,
 } from "../src/ui";
 
@@ -22,6 +23,7 @@ type Deletion = {
 
 export default function Privacy() {
   const styles = useStyles();
+  const { preference } = useExperience();
   const router = useRouter();
   const [data, setData] = useState<Deletion>();
   const [confirm, setConfirm] = useState("");
@@ -39,17 +41,22 @@ export default function Privacy() {
       if (current !== generation.current) return;
       setData(value);
       setError("");
-      entrance.setValue(0);
-      Animated.spring(entrance, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 55,
-        friction: 8,
-      }).start();
+      if (preference.reducedMotion) {
+        entrance.stopAnimation();
+        entrance.setValue(1);
+      } else {
+        entrance.setValue(0);
+        Animated.spring(entrance, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 55,
+          friction: 8,
+        }).start();
+      }
     } catch (e) {
       if (current === generation.current) setError((e as Error).message);
     }
-  }, [entrance]);
+  }, [entrance, preference.reducedMotion]);
 
   useFocusEffect(
     useCallback(() => {
@@ -198,7 +205,7 @@ export default function Privacy() {
         </View>
 
         <View style={[styles.card, { gap: 10 }]}>
-          <Text style={[styles.label, { color: "#ff8f8f" }]}>
+          <Text style={[styles.label, { color: styles.error.color }]}>
             Apagar tudo agora
           </Text>
           <Text style={styles.muted}>

@@ -4,6 +4,10 @@ export const base =
   process.env.EXPO_PUBLIC_API_URL ?? "http://localhost:8080/api/v1";
 let rotating: Promise<Credentials> | null = null;
 export async function save(c: Credentials) {
+  const previous = await session().catch(() => null);
+  if (previous?.userId && previous.userId !== c.userId) {
+    await SecureStore.deleteItemAsync("enturma_experience").catch(() => {});
+  }
   await SecureStore.setItemAsync("enturma_session", JSON.stringify(c));
 }
 export async function session(): Promise<Credentials | null> {
@@ -14,7 +18,10 @@ export async function logout() {
   try {
     await api("/auth/logout", { method: "POST" });
   } finally {
-    await SecureStore.deleteItemAsync("enturma_session");
+    await Promise.all([
+      SecureStore.deleteItemAsync("enturma_session").catch(() => {}),
+      SecureStore.deleteItemAsync("enturma_experience").catch(() => {}),
+    ]);
   }
 }
 export async function api<T>(
