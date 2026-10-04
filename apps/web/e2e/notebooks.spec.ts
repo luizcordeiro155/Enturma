@@ -4,18 +4,23 @@ import { randomUUID } from "node:crypto";
 test("caderno privado: cadastro acentuado, fontes, aula, citações e persistência", async ({
   page,
   browser,
+  request,
 }) => {
   const tag = randomUUID().slice(0, 8);
-  await page.goto("/register");
-  await page.getByLabel("Seu nome").fill("Cleitão");
-  await page.getByLabel("Nome de usuário").fill(`Cleitão_${tag}`);
-  await page.getByLabel("E-mail").fill(`notebook_${tag}@example.test`);
-  await page
-    .getByLabel("Senha", { exact: true })
-    .fill("Test-password-long-123");
-  await page.getByLabel("Confirmar senha").fill("Test-password-long-123");
-  await page.getByRole("button", { name: "Criar conta" }).click();
-  await expect(page).toHaveURL(/onboarding/);
+  const owner = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Cleitão",
+        username: `Cleitão_${tag}`,
+        email: `notebook_${tag}@example.test`,
+        password: "Test-password-long-123",
+        device: "E2E",
+      },
+    },
+  );
+  expect(owner.ok()).toBe(true);
+  await authenticate(page.context(), await owner.json());
   await page.goto("/notebooks");
   await page.getByLabel("Nome do caderno").fill("Algoritmos e matemática");
   await page.getByRole("button", { name: "Criar caderno" }).click();

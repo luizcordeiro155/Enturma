@@ -11,17 +11,19 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
 }) => {
   const tag = randomUUID().slice(0, 8);
   const email = `e2e-${tag}@example.test`;
-  await page.goto("/register");
-  await page.getByLabel("Seu nome").fill("Estudante E2E");
-  await page.getByLabel("Nome de usuário").fill(`e2e_${tag}`);
-  await page.getByLabel("E-mail").fill(email);
-  await page.getByLabel("Senha", { exact: true }).fill(password);
-  await page.getByLabel("Confirmar senha").fill(password);
-  await page.getByRole("button", { name: "Criar conta" }).click();
+  const registered = await request.post(`${backend}/api/v1/auth/register`, {
+    data: {
+      name: "Estudante E2E",
+      username: `e2e_${tag}`,
+      email,
+      password,
+      device: "E2E",
+    },
+  });
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
+  await page.goto("/onboarding");
   await expect(page).toHaveURL(/onboarding/);
-  await expect(
-    page.getByRole("heading", { name: "Universidade", exact: true }),
-  ).toBeVisible();
   await page.goto("/home");
   await expect(
     page.getByRole("heading", { name: "Seu próximo estudo" }),

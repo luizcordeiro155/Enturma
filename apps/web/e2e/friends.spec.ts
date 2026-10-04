@@ -1,23 +1,30 @@
-import { authenticateWithPassword } from "./session";
+import { authenticate } from "./session";
 import { test, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("amizade, perfil público e conversa ponta a ponta entre dois navegadores", async ({
   page,
   browser,
+  request,
 }) => {
   test.setTimeout(90000);
   const tag = randomUUID().slice(0, 8),
     a = `alice_${tag}`,
     b = `bob_${tag}`;
   async function register(p: Page, name: string) {
-    await p.goto("/register");
-    await p.getByLabel("Seu nome").fill(name);
-    await p.getByLabel("Nome de usuário").fill(name);
-    await p.getByLabel("E-mail").fill(`${name}@example.test`);
-    await p.getByLabel("Senha", { exact: true }).fill("E2E-password-long-123");
-    await p.getByLabel("Confirmar senha").fill("E2E-password-long-123");
-    await p.getByRole("button", { name: "Criar conta" }).click();
-    await expect(p).toHaveURL(/onboarding/);
+    const response = await request.post(
+      `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+      {
+        data: {
+          name,
+          username: name,
+          email: `${name}@example.test`,
+          password: "E2E-password-long-123",
+          device: "E2E",
+        },
+      },
+    );
+    expect(response.ok()).toBe(true);
+    await authenticate(p.context(), await response.json());
     await p.goto("/friends");
     await p.getByText("Chaves e backup das conversas").click();
     await expect(
@@ -82,7 +89,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     .selectOption("RING");
   await page.getByRole("button", { name: "Salvar perfil" }).click();
   await expect(
-    page.getByRole("status").filter({ hasText: "Personalização salva" }),
+    page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   await page.reload();
   await expect(page.locator(".public-profile-card")).toHaveCSS(

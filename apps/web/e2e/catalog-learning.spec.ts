@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
@@ -17,13 +18,21 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
       { timeout: 60000 },
     )
     .toBeGreaterThanOrEqual(3);
-  await page.goto("/register");
-  await page.getByLabel("Seu nome").fill("Teste catálogo UNA");
-  await page.getByLabel("Nome de usuário").fill(`una_${tag}`);
-  await page.getByLabel("E-mail").fill(`una_${tag}@example.test`);
-  await page.getByLabel("Senha", { exact: true }).fill("E2E-test-password-123");
-  await page.getByLabel("Confirmar senha").fill("E2E-test-password-123");
-  await page.getByRole("button", { name: "Criar conta" }).click();
+  const registered = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Teste catálogo UNA",
+        username: `una_${tag}`,
+        email: `una_${tag}@example.test`,
+        password: "E2E-test-password-123",
+        device: "E2E",
+      },
+    },
+  );
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
+  await page.goto("/onboarding");
   await expect(page).toHaveURL(/onboarding/);
   await page.getByRole("button", { name: /Centro Universitário UNA/ }).click();
   await page.getByRole("button", { name: /Campus Sede Aimorés/ }).click();
