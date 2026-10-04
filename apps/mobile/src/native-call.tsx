@@ -160,17 +160,13 @@ export function useNativeCall() {
 function NativeCallBar() {
   const { roomId, leave, room } = useNativeCall();
   const router = useRouter();
-  const [, refresh] = useState(0);
+  const [isMicrophoneEnabled, setIsMicrophoneEnabled] = useState(false);
 
   useEffect(() => {
-    if (!room) return;
-    const timer = setInterval(() => refresh((v) => v + 1), 500);
-    return () => clearInterval(timer);
+    setIsMicrophoneEnabled(room?.localParticipant.isMicrophoneEnabled ?? false);
   }, [room]);
 
   if (!roomId || !room) return null;
-
-  const isMicrophoneEnabled = room.localParticipant.isMicrophoneEnabled;
 
   return (
     <View
@@ -204,11 +200,17 @@ function NativeCallBar() {
       <Pressable
         accessibilityRole="button"
         accessibilityLabel="Alternar microfone"
-        onPress={() =>
+        onPress={() => {
+          const next = !isMicrophoneEnabled;
           void room.localParticipant
-            .setMicrophoneEnabled(!isMicrophoneEnabled)
-            .catch((e: Error) => Alert.alert("Microfone", e.message))
-        }
+            .setMicrophoneEnabled(next)
+            .then(() =>
+              setIsMicrophoneEnabled(
+                room.localParticipant.isMicrophoneEnabled,
+              ),
+            )
+            .catch((e: Error) => Alert.alert("Microfone", e.message));
+        }}
         style={{ padding: 10 }}
       >
         <Text style={{ color: "#fff" }}>

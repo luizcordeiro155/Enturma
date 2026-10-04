@@ -1028,48 +1028,6 @@ class MainActivity : Activity() {
         openDownloadedInstaller(uri, downloadId)
     }
 
-    private fun watchUpdateDownload(downloadId: Long) {
-        Thread {
-            val manager = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            repeat(1800) {
-                val prefs = getSharedPreferences(UPDATE_PREFS, Context.MODE_PRIVATE)
-                if (
-                    prefs.getLong(PREF_DOWNLOAD_ID, -1L) != downloadId ||
-                    prefs.getString(PREF_DOWNLOAD_BASE_VERSION, null) != APP_VERSION
-                ) return@Thread
-
-                val cursor = manager.query(DownloadManager.Query().setFilterById(downloadId))
-                var status = -1
-                cursor.use {
-                    if (it.moveToFirst()) {
-                        status = it.getInt(
-                            it.getColumnIndexOrThrow(DownloadManager.COLUMN_STATUS),
-                        )
-                    }
-                }
-
-                when (status) {
-                    DownloadManager.STATUS_SUCCESSFUL -> {
-                        val uri = manager.getUriForDownloadedFile(downloadId) ?: return@Thread
-                        runOnUiThread {
-                            if (!isFinishing && !isDestroyed) {
-                                openDownloadedInstaller(uri, downloadId)
-                            }
-                        }
-                        return@Thread
-                    }
-                    DownloadManager.STATUS_FAILED -> return@Thread
-                }
-
-                try {
-                    Thread.sleep(1000)
-                } catch (_: InterruptedException) {
-                    return@Thread
-                }
-            }
-        }.start()
-    }
-
     private fun startUpdateInstall(downloadUrl: String) {
         val uri = runCatching { Uri.parse(downloadUrl) }.getOrNull() ?: return
         val expected = Uri.parse(ANDROID_UPDATE_ORIGIN)
@@ -1119,7 +1077,8 @@ class MainActivity : Activity() {
                         DownloadManager.STATUS_PENDING,
                         DownloadManager.STATUS_RUNNING,
                         DownloadManager.STATUS_PAUSED -> {
-                            watchUpdateDownload(previousId)
+                            // DownloadManager continua o trabalho mesmo se o app for para
+                            // segundo plano. O BroadcastReceiver abre o instalador ao concluir.
                             return
                         }
                         DownloadManager.STATUS_SUCCESSFUL -> {
@@ -1150,7 +1109,7 @@ class MainActivity : Activity() {
             .apply()
         (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager)
             .cancel(UPDATE_NOTIFICATION_ID)
-        updateDownloadId?.let { watchUpdateDownload(it) }
+        // Conclusão é dirigida pelo BroadcastReceiver; sem polling permanente.
     }
 
     private fun applySystemBarTheme(light: Boolean) {

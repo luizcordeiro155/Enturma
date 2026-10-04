@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("caderno privado: cadastro acentuado, fontes, aula, citações e persistência", async ({
@@ -5,16 +6,20 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
   browser,
 }) => {
   const tag = randomUUID().slice(0, 8);
-  await page.goto("/register");
-  await page.getByLabel("Seu nome").fill("Cleitão");
-  await page.getByLabel("Nome de usuário").fill(`Cleitão_${tag}`);
-  await page.getByLabel("E-mail").fill(`notebook_${tag}@example.test`);
-  await page
-    .getByLabel("Senha", { exact: true })
-    .fill("Test-password-long-123");
-  await page.getByLabel("Confirmar senha").fill("Test-password-long-123");
-  await page.getByRole("button", { name: "Criar conta" }).click();
-  await expect(page).toHaveURL(/onboarding/);
+  const registered = await page.request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Cleitão",
+        username: `Cleitão_${tag}`,
+        email: `notebook_${tag}@example.test`,
+        password: "Test-password-long-123",
+        device: "E2E notebooks",
+      },
+    },
+  );
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
   await page.goto("/notebooks");
   await page.getByLabel("Nome do caderno").fill("Algoritmos e matemática");
   await page.getByRole("button", { name: "Criar caderno" }).click();
@@ -108,18 +113,20 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
   });
   const visitor = await browser.newContext();
   const other = await visitor.newPage();
-  await other.goto("/register");
-  await other.getByLabel("Seu nome").fill("Outro");
-  await other.getByLabel("Nome de usuário").fill(`other_${tag}`);
-  await other.getByLabel("E-mail").fill(`othernotebook_${tag}@example.test`);
-  await other
-    .getByLabel("Senha", { exact: true })
-    .fill("Test-password-long-123");
-  await other
-    .getByLabel("Confirmar senha")
-    .fill("Test-password-long-123");
-  await other.getByRole("button", { name: "Criar conta" }).click();
-  await expect(other).toHaveURL(/onboarding/);
+  const visitorRegistration = await page.request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Outro",
+        username: `other_${tag}`,
+        email: `othernotebook_${tag}@example.test`,
+        password: "Test-password-long-123",
+        device: "E2E notebooks visitor",
+      },
+    },
+  );
+  expect(visitorRegistration.ok()).toBe(true);
+  await authenticate(visitor, await visitorRegistration.json());
   const id = url.split("/").at(-1);
   expect(
     (await other.request.get(`/api/backend/notebooks/${id}`)).status(),

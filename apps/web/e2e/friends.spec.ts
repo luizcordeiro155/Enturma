@@ -1,3 +1,4 @@
+import { authenticateWithPassword } from "./session";
 import { test, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("amizade, perfil público e conversa ponta a ponta entre dois navegadores", async ({
@@ -251,13 +252,12 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   );
   const clean = await browser.newContext();
   const fresh = await clean.newPage();
-  await fresh.goto("/login");
-  await fresh.getByLabel("E-mail").fill(`${a}@example.test`);
-  await fresh
-    .getByLabel("Senha", { exact: true })
-    .fill("E2E-password-long-123");
-  await fresh.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(fresh).toHaveURL(/home/);
+  await authenticateWithPassword(
+    clean,
+    page.request,
+    `${a}@example.test`,
+    "E2E-password-long-123",
+  );
   await fresh.goto("/friends");
   await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(

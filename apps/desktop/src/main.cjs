@@ -335,6 +335,85 @@ function updateDirectory() {
   return path.join(app.getPath("userData"), "updates");
 }
 
+function pendingUpdateStateFile() {
+  return path.join(updateDirectory(), "pending-update.json");
+}
+
+function persistPendingUpdate(value) {
+  const file =
+    value.mode === "installer" ? value.installerPath : value.zipPath;
+  fs.mkdirSync(updateDirectory(), { recursive: true });
+  fs.writeFileSync(
+    pendingUpdateStateFile(),
+    JSON.stringify(
+      {
+        mode: value.mode,
+        manifest: value.manifest,
+        file,
+        downloadedAt: new Date().toISOString(),
+      },
+      null,
+      2,
+    ),
+  );
+}
+
+function clearPendingUpdateState(removeArtifact = false) {
+  const stateFile = pendingUpdateStateFile();
+  if (removeArtifact && fs.existsSync(stateFile)) {
+    try {
+      const saved = JSON.parse(fs.readFileSync(stateFile, "utf8"));
+      if (saved.file && inside(updateDirectory(), saved.file))
+        fs.rmSync(saved.file, { force: true });
+    } catch {}
+  }
+  fs.rmSync(stateFile, { force: true });
+}
+
+async function restorePendingUpdate() {
+  const stateFile = pendingUpdateStateFile();
+  if (!fs.existsSync(stateFile)) return false;
+  try {
+    const saved = JSON.parse(fs.readFileSync(stateFile, "utf8"));
+    const manifest = validateManifest(saved.manifest, UPDATE_MANIFEST_URL);
+    const file = path.resolve(String(saved.file || ""));
+    if (
+      !["installer", "zip"].includes(saved.mode) ||
+      !inside(updateDirectory(), file) ||
+      !fs.existsSync(file)
+    )
+      throw Error("Estado de atualização inválido.");
+
+    if (!newerThan(manifest.version, app.getVersion())) {
+      clearPendingUpdateState(true);
+      return false;
+    }
+
+    const expected =
+      saved.mode === "installer"
+        ? String(manifest.installerSha256 || "").toLowerCase()
+        : String(manifest.sha256 || "").toLowerCase();
+    if (!expected || (await sha256File(file)).toLowerCase() !== expected)
+      throw Error("Integridade da atualização pendente inválida.");
+
+    pendingUpdate =
+      saved.mode === "installer"
+        ? { manifest, installerPath: file, mode: "installer" }
+        : { manifest, zipPath: file, mode: "zip" };
+    updateStatus("ready", {
+      version: manifest.version,
+      progress: 100,
+      message:
+        "Atualização já baixada. Use 'Reiniciar e atualizar' para aplicar.",
+    });
+    return true;
+  } catch {
+    clearPendingUpdateState(true);
+    pendingUpdate = null;
+    return false;
+  }
+}
+
 function sha256File(file) {
   return new Promise((resolve, reject) => {
     const hash = crypto.createHash("sha256");
@@ -553,19 +632,6 @@ async function downloadUpdate(manifest) {
   }
 
   fs.renameSync(partialPath, finalPath);
-  fs.writeFileSync(
-    path.join(dir, "pending-update.json"),
-    JSON.stringify(
-      {
-        version: manifest.version,
-        sha256: manifest.sha256,
-        file: finalPath,
-        downloadedAt: new Date().toISOString(),
-      },
-      null,
-      2,
-    ),
-  );
   return finalPath;
 }
 
@@ -759,6 +825,7 @@ async function checkForUpdates(force = false) {
       const zipPath = await downloadUpdate(manifest);
       pendingUpdate = { manifest, zipPath, mode: "zip" };
     }
+    persistPendingUpdate(pendingUpdate);
     updateStatus("ready", {
       version: manifest.version,
       progress: 100,
@@ -1176,11 +1243,12 @@ if (!hasLock) {
     handleDeepLink(url);
   });
 
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     if (process.platform === "win32")
       app.setAppUserModelId("br.com.enturma.desktop");
     const appSession = session.fromPartition(APP_PARTITION);
     configureSession(appSession);
+    await restorePendingUpdate();
     createMenu();
     createMainWindow();
     createTray();

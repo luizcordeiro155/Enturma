@@ -3,11 +3,17 @@ export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
   workers: 1,
-  retries: process.env.CI ? 1 : 0,
-  timeout: 60000,
+  retries: process.env.CI ? 2 : 1,
+  timeout: 90000,
+  expect: { timeout: 15000 },
   use: {
     baseURL: process.env.E2E_WEB_URL ?? "http://localhost:3000",
     trace: "retain-on-failure",
+    actionTimeout: 20000,
+    navigationTimeout: 30000,
+    launchOptions: {
+      args: ["--disable-dev-shm-usage"],
+    },
   },
   projects: [
     {

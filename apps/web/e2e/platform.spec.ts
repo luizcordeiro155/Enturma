@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
@@ -191,11 +192,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   expect((await reused.json()).id).toBe(roomId);
   const peer = await browser.newContext();
   const peerPage = await peer.newPage();
-  await peerPage.goto("http://localhost:3000/login");
-  await peerPage.getByLabel("E-mail").fill(`mate-${tag}@example.test`);
-  await peerPage.getByLabel("Senha", { exact: true }).fill(password);
-  await peerPage.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(peerPage).toHaveURL(/home/);
+  await authenticate(peer, mate);
   await peerPage.goto(roomUrl);
   await expect(
     peerPage.getByText("Mensagem E2E em tempo real", { exact: true }),
