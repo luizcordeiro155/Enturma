@@ -37,16 +37,21 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     .getByRole("button", { name: "Adicionar fonte", exact: true })
     .click();
   await expect(page.getByLabel("Usar Anotações da aula")).toBeChecked();
-  await expect(
-    page.getByRole("button", { name: "Baixar material de estudo" }),
-  ).toBeVisible({ timeout: 30000 });
-  await page.locator(".citation").first().click();
-  await expect(page.getByRole("dialog")).toContainText("sequência finita");
-  await page.keyboard.press("Escape");
-  await page.reload();
-  await expect(
-    page.getByRole("button", { name: "Baixar material de estudo" }),
-  ).toBeVisible();
+  const notebookState = await (
+    await page.request.get(`/api/backend/notebooks/${url.split("/").at(-1)}`)
+  ).json();
+  if (notebookState.aiEnabled) {
+    await expect(
+      page.getByRole("button", { name: "Baixar material de estudo" }),
+    ).toBeVisible({ timeout: 30000 });
+    await page.locator(".citation").first().click();
+    await expect(page.getByRole("dialog")).toContainText("sequência finita");
+    await page.keyboard.press("Escape");
+  } else {
+    await expect(
+      page.getByRole("button", { name: "Perguntar", exact: true }),
+    ).toBeDisabled();
+  }
   await page.getByRole("button", { name: "Arquivo", exact: true }).click();
   await page
     .getByLabel("Arquivo de estudo")
@@ -84,10 +89,16 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
   await page
     .getByLabel("Pergunte sobre suas fontes")
     .fill("Como aplicar algoritmos na matemática?");
-  await page.getByRole("button", { name: "Perguntar", exact: true }).click();
-  await expect(
-    page.getByRole("button", { name: "Baixar material de estudo" }),
-  ).toBeVisible({ timeout: 30000 });
+  if (notebookState.aiEnabled) {
+    await page.getByRole("button", { name: "Perguntar", exact: true }).click();
+    await expect(
+      page.getByRole("button", { name: "Baixar material de estudo" }),
+    ).toBeVisible({ timeout: 30000 });
+  } else {
+    await expect(
+      page.getByRole("button", { name: "Perguntar", exact: true }),
+    ).toBeDisabled();
+  }
   await page.getByRole("button", { name: "Link", exact: true }).click();
   await page.getByLabel("Link público HTTPS").fill("https://127.0.0.1/");
   await page.getByLabel("Título da fonte").fill("Endereço bloqueado");

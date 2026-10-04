@@ -25,6 +25,9 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     );
     expect(response.ok()).toBe(true);
     await authenticate(p.context(), await response.json());
+  }
+
+  async function initializeConversationKeys(p: Page) {
     await p.goto("/friends");
     await p.getByText("Chaves e backup das conversas").click();
     await expect(
@@ -100,11 +103,12 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     path: "../../.local/profile-desktop.png",
     fullPage: true,
   });
-  await page.goto("/friends");
+  await initializeConversationKeys(page);
 
   const peer = await browser.newContext();
   const other = await peer.newPage();
   await register(other, b);
+  await initializeConversationKeys(other);
   await page.getByLabel("Adicionar pelo nome de usuário").fill(b);
   await page.getByRole("button", { name: "Enviar convite" }).click();
   await expect(

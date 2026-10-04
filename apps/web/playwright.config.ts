@@ -11,8 +11,15 @@ export default defineConfig({
     trace: "on-first-retry",
     actionTimeout: 20000,
     navigationTimeout: 30000,
+    serviceWorkers: "block",
     launchOptions: {
-      args: ["--disable-dev-shm-usage"],
+      args: [
+        "--disable-dev-shm-usage",
+        "--disable-gpu",
+        "--disable-background-networking",
+        "--disable-renderer-backgrounding",
+        "--disable-features=BackForwardCache",
+      ],
     },
   },
   projects: [

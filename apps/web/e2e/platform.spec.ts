@@ -24,28 +24,29 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await authenticate(page.context(), await registered.json());
   await page.goto("/onboarding");
   await expect(page).toHaveURL(/onboarding/);
-  await page.goto("/home");
+  const preHome = await page.context().newPage();
+  await preHome.goto("/home");
   await expect(
-    page.getByRole("heading", { name: "Seu próximo estudo" }),
+    preHome.getByRole("heading", { name: "Seu próximo estudo" }),
   ).toBeVisible();
-  await page.screenshot({
+  await preHome.screenshot({
     path: "../../.local/dashboard-render.png",
     fullPage: true,
   });
-  await page.setViewportSize({ width: 390, height: 844 });
+  await preHome.setViewportSize({ width: 390, height: 844 });
   await expect(
-    page.getByRole("link", { name: "Completar perfil" }),
+    preHome.getByRole("link", { name: "Completar perfil" }),
   ).toBeVisible();
   expect(
-    await page.evaluate(
+    await preHome.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
-  await page.screenshot({
+  await preHome.screenshot({
     path: "../../.local/mobile-render.png",
     fullPage: true,
   });
-  await page.setViewportSize({ width: 1487, height: 1058 });
+  await preHome.close();
   const db = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
   await db.connect();
   try {

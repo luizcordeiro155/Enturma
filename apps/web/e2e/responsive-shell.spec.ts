@@ -51,7 +51,6 @@ test("login contrast and navigation remain accessible at every viewport", async 
   await page.route("**/api/backend/learning/access", (route) =>
     route.fulfill({ json: { eligible: true } }),
   );
-  await page.goto("/home");
   for (const [width, height] of [
     [1376, 766],
     [1376, 768],
@@ -61,15 +60,17 @@ test("login contrast and navigation remain accessible at every viewport", async 
     [390, 844],
     [320, 568],
   ]) {
-    await page.setViewportSize({ width, height });
+    const view = await page.context().newPage();
+    await view.setViewportSize({ width, height });
+    await view.goto("/home");
     if (width <= 760)
-      await page
+      await view
         .getByRole("button", { name: "Mais opções", exact: true })
         .click();
     const nav =
       width <= 760
-        ? page.getByRole("dialog", { name: "Mais opções do Enturma" })
-        : page.getByRole("navigation", { name: "Principal" });
+        ? view.getByRole("dialog", { name: "Mais opções do Enturma" })
+        : view.getByRole("navigation", { name: "Principal" });
     const settings = nav.getByRole("link", {
       name: "Configurações",
       exact: true,
@@ -82,33 +83,33 @@ test("login contrast and navigation remain accessible at every viewport", async 
     expect(box!.x).toBeGreaterThanOrEqual(0);
     expect(box!.x + box!.width).toBeLessThanOrEqual(width);
     expect(
-      await page.evaluate(
+      await view.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
       ),
     ).toBe(true);
     if (width === 1376 || width === 3440 || width === 320)
-      await page.screenshot({
+      await view.screenshot({
         path: `../../.local/shell-${width}-${height}.png`,
         animations: "disabled",
       });
-    if (width <= 760)
-      await page
-        .getByRole("button", { name: "Fechar menu", exact: true })
-        .click();
+    await view.close();
   }
-  await page.setViewportSize({ width: 1376, height: 766 });
-  await page.evaluate(() =>
+  const settingsPage = await page.context().newPage();
+  await settingsPage.setViewportSize({ width: 1376, height: 766 });
+  await settingsPage.goto("/home");
+  await settingsPage.evaluate(() =>
     document.documentElement.style.setProperty("--font-scale", "1.35"),
   );
-  const settings = page
+  const settings = settingsPage
     .getByRole("navigation", { name: "Principal" })
     .getByRole("link", { name: "Configurações" });
   await settings.focus();
   await settings.click();
-  await expect(page).toHaveURL(/settings/);
+  await expect(settingsPage).toHaveURL(/settings/);
   expect(
-    await page.evaluate(
+    await settingsPage.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await settingsPage.close();
 });

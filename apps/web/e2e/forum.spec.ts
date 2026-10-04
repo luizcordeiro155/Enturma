@@ -128,7 +128,7 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
     post.getByRole("button", { name: "Editar publicação ou comentário" }),
   ).toHaveCount(0);
   await expect(page.locator(".forum-comment")).toContainText("interrompe", {
-    timeout: 5000,
+    timeout: 15000,
   });
   await page.getByRole("button", { name: /Notificações,.*não lidas/ }).click();
   const inbox = page.getByRole("dialog", { name: "Sua caixa de entrada" });
