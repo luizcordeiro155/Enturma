@@ -63,14 +63,25 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM notification_push_device WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM notification_web_push_subscription WHERE user_id=?",userId);
     db.jdbc.update("UPDATE user_session SET revoked_at=coalesce(revoked_at,now()) WHERE user_id=?",userId);
+    // A conta é anonimizada, não apagada fisicamente. Portanto, dados que dependem
+    // somente de ON DELETE CASCADE precisam ser removidos explicitamente aqui.
+    db.jdbc.update("DELETE FROM campus_tutor_interaction WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM campus_learning_profile WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM study_flashcard WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM portfolio_profile WHERE user_id=?",userId);
+
     db.jdbc.update("DELETE FROM teacher_submission WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM teacher_class_member WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM teacher_class WHERE owner_id=?",userId);
     db.jdbc.update("DELETE FROM teacher_profile WHERE user_id=?",userId);
+
     db.jdbc.update("DELETE FROM practice_attempt WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM practice_session WHERE user_id=?",userId);
+
     db.jdbc.update("UPDATE study_group_task SET assigned_to=NULL WHERE assigned_to=?",userId);
+    db.jdbc.update("DELETE FROM study_group_task WHERE created_by=?",userId);
+    db.jdbc.update("DELETE FROM study_group_member WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM study_group WHERE owner_id=?",userId);
     db.jdbc.update("DELETE FROM notification_desktop_push_event WHERE user_id=? OR actor_id=?",userId,userId);
     db.jdbc.update("DELETE FROM room_reaction WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM chat_reaction WHERE user_id=?",userId);

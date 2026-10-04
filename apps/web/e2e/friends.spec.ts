@@ -1,3 +1,4 @@
+import { authenticateWithPassword } from "./session";
 import { test, expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("amizade, perfil público e conversa ponta a ponta entre dois navegadores", async ({

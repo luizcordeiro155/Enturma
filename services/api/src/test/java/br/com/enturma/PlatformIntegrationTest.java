@@ -259,6 +259,7 @@ class PlatformIntegrationTest {
   }
 
   @Autowired AuthService auth;
+  @Autowired AccountPrivacyController privacy;
   @Autowired CatalogService catalog;
   @Autowired ProfileService profiles;
   @Autowired StudyService study;
@@ -1489,4 +1490,96 @@ class PlatformIntegrationTest {
                 member.id()))
         .isEqualTo(1);
   }
+
+  @Test
+  void privacyEraseRemovesAdaptiveAiGroupsAndOwnedTeachingDataBeforeAnonymizing() {
+    String suffix = UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+    var credentials =
+        auth.register(
+            "Privacy Fixture",
+            "privacy_" + suffix,
+            "privacy-" + suffix + "@example.test",
+            "privacy-test-password-long",
+            "JUnit");
+    Actor actor = auth.authenticate(credentials.accessToken()).orElseThrow();
+    UUID userId = actor.id();
+
+    UUID interaction = UUID.randomUUID();
+    UUID group = UUID.randomUUID();
+    UUID task = UUID.randomUUID();
+    UUID classroom = UUID.randomUUID();
+
+    db.jdbc.update("INSERT INTO campus_learning_profile(user_id) VALUES (?)", userId);
+    db.jdbc.update(
+        "INSERT INTO campus_tutor_interaction(id,user_id,action,prompt,response)"
+            + " VALUES (?,?,'EXPLAIN','prompt privado','resposta privada')",
+        interaction,
+        userId);
+    db.jdbc.update(
+        "INSERT INTO study_group(id,owner_id,name,description,visibility)"
+            + " VALUES (?,?,?,'','PRIVATE')",
+        group,
+        userId,
+        "Grupo privado");
+    db.jdbc.update(
+        "INSERT INTO study_group_member(group_id,user_id,role) VALUES (?,?,'OWNER')",
+        group,
+        userId);
+    db.jdbc.update(
+        "INSERT INTO study_group_task(id,group_id,created_by,assigned_to,title)"
+            + " VALUES (?,?,?,?,?)",
+        task,
+        group,
+        userId,
+        userId,
+        "Tarefa privada");
+    db.jdbc.update(
+        "INSERT INTO teacher_profile(user_id,institution,title,enabled)"
+            + " VALUES (?,'Enturma','Professor',true)",
+        userId);
+    db.jdbc.update(
+        "INSERT INTO teacher_class(id,owner_id,name,description,join_code)"
+            + " VALUES (?,?,?,'',?)",
+        classroom,
+        userId,
+        "Turma privada",
+        "P" + suffix.substring(0, 7).toUpperCase(Locale.ROOT));
+
+    privacy.now(actor);
+
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM campus_tutor_interaction WHERE user_id=?",
+                Integer.class,
+                userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM campus_learning_profile WHERE user_id=?",
+                Integer.class,
+                userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM study_group WHERE owner_id=?", Integer.class, userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM study_group_member WHERE user_id=?", Integer.class, userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM study_group_task WHERE created_by=? OR assigned_to=?",
+                Integer.class,
+                userId,
+                userId))
+        .isZero();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM teacher_class WHERE owner_id=?", Integer.class, userId))
+        .isZero();
+    assertThat(db.one("SELECT status FROM app_user WHERE id=?", userId).get("status"))
+        .isEqualTo("DELETED");
+  }
+
 }

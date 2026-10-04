@@ -108,6 +108,16 @@ const createStyles = (
       backgroundColor: palette.surface,
     },
     error: { color: palette.danger, fontSize: 14, lineHeight: 20 },
+    success: {
+      color: dark ? "#b8f5c8" : "#176b35",
+      fontSize: 14,
+      lineHeight: 20,
+    },
+    warning: {
+      color: dark ? "#ffe08a" : "#8a5a00",
+      fontSize: 14,
+      lineHeight: 20,
+    },
     label: {
       fontWeight: "700",
       color: palette.text,
@@ -287,13 +297,33 @@ export function Field({ label, ...props }: TextInputProps & { label: string }) {
   );
 }
 
-export function ErrorMessage({ message }: { message: string }) {
+export function FeedbackMessage({
+  message,
+  tone = "error",
+}: {
+  message: string;
+  tone?: "error" | "success" | "warning";
+}) {
   const styles = useStyles();
-  return message ? (
-    <View style={[styles.card, { borderColor: styles.error.color }]}>
-      <Text accessibilityRole="alert" style={styles.error}>
+  if (!message) return null;
+  const textStyle =
+    tone === "success"
+      ? styles.success
+      : tone === "warning"
+        ? styles.warning
+        : styles.error;
+  return (
+    <View style={[styles.card, { borderColor: textStyle.color }]}>
+      <Text
+        accessibilityRole={tone === "error" ? "alert" : "text"}
+        style={textStyle}
+      >
         {message}
       </Text>
     </View>
-  ) : null;
+  );
+}
+
+export function ErrorMessage({ message }: { message: string }) {
+  return <FeedbackMessage message={message} tone="error" />;
 }

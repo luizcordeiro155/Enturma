@@ -1,3 +1,4 @@
+import { authenticate } from "./session";
 import { test, expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 
@@ -45,10 +46,7 @@ test("login contrast and navigation remain accessible at every viewport", async 
     },
   );
   expect(registered.ok()).toBe(true);
-  await page.getByLabel("E-mail").fill(email);
-  await page.getByLabel("Senha", { exact: true }).fill(password);
-  await page.getByRole("button", { name: "Entrar", exact: true }).click();
-  await expect(page).toHaveURL(/home|onboarding/);
+  await authenticate(page.context(), await registered.json());
   // Include the longest sidebar variant, with the programming entry visible.
   await page.route("**/api/backend/learning/access", (route) =>
     route.fulfill({ json: { eligible: true } }),

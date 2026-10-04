@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Alert, Switch, Text, View } from "react-native";
 import type { Profile } from "@enturma/contracts";
 import { api } from "../src/api";
@@ -13,6 +13,7 @@ type Summary={
 type Dashboard={profile:{institution:string;title:string;enabled:boolean}|null;owned:Summary[];joined:Summary[]};
 type Assignment={id:string;title:string;description:string;dueAt?:string;points:number;submitted:boolean;score?:number|null;feedback?:string};
 type Detail=Summary&{owner:boolean;subjectId?:string|null;members:{id:string;name:string;username:string}[];assignments:Assignment[]};
+type Submission={userId:string;name:string;username:string;status?:string|null;note?:string|null;score?:number|null;feedback?:string|null};
 
 export default function Teacher(){
  const styles=useStyles();
@@ -29,24 +30,41 @@ export default function Teacher(){
  const [error,setError]=useState("");
  const [notice,setNotice]=useState("");
  const [busy,setBusy]=useState(false);
+ const generation=useRef(0);
+ const [assignmentTitle,setAssignmentTitle]=useState("");
+ const [assignmentDescription,setAssignmentDescription]=useState("");
+ const [assignmentDue,setAssignmentDue]=useState("");
+ const [assignmentPoints,setAssignmentPoints]=useState("10");
+ const [submissions,setSubmissions]=useState<Record<string,Submission[]>>({});
+ const [reviewScore,setReviewScore]=useState<Record<string,string>>({});
+ const [reviewFeedback,setReviewFeedback]=useState<Record<string,string>>({});
 
- const load=useCallback(async()=>{
+ const loadDashboard=useCallback(async()=>{
+   const request=++generation.current;
    try{
-     const [profile,d]=await Promise.all([
-       api<Profile>("/users/me"),
-       api<Dashboard>("/teaching")
-     ]);
+     const [profile,d]=await Promise.all([api<Profile>("/users/me"),api<Dashboard>("/teaching")]);
+     if(request!==generation.current)return;
      setMe(profile);setData(d);
      setInstitution(d.profile?.institution??"");
      setTitle(d.profile?.title??"Professor(a)");
      setEnabled(d.profile?.enabled??false);
-     if(selected?.id)setSelected(await api<Detail>("/teaching/classes/"+selected.id));
      setError("");
-   }catch(e){setError((e as Error).message)}
+   }catch(e){if(request===generation.current)setError((e as Error).message)}
+ },[]);
+ const refreshSelected=useCallback(async(id?:string)=>{
+   const target=id??selected?.id;if(!target)return;
+   try{setSelected(await api<Detail>("/teaching/classes/"+target))}
+   catch(e){setError((e as Error).message)}
  },[selected?.id]);
+ const load=useCallback(async()=>{await loadDashboard();if(selected?.id)await refreshSelected(selected.id)},[loadDashboard,refreshSelected,selected?.id]);
 
- useEffect(()=>{void load()},[load]);
- useRealtime(e=>{if(e.type==="teaching_changed")void load()});
+ useEffect(()=>{void loadDashboard();return()=>{generation.current++}},[loadDashboard]);
+ useRealtime(e=>{
+   if(e.type==="teaching_changed"){
+     void loadDashboard();
+     if(selected?.id)void refreshSelected(selected.id);
+   }
+ });
 
  const activeOwned=useMemo(()=>data?.owned.filter(item=>!item.archived)??[],[data]);
  const joined=data?.joined??[];
@@ -56,7 +74,7 @@ export default function Teacher(){
    try{
      await api("/teaching/profile",{method:"PUT",body:JSON.stringify({institution,title,enabled})});
      setNotice("Modo professor atualizado.");
-     await load();
+     await loadDashboard();
    }catch(e){setError((e as Error).message)}
    finally{setBusy(false)}
  }
@@ -69,7 +87,7 @@ export default function Teacher(){
      const item=await api<{id:string}>("/teaching/classes/join",{method:"POST",body:JSON.stringify({code:normalized})});
      setCode("");
      setNotice("Você entrou na turma.");
-     await load();
+     await loadDashboard();
      setSelected(await api<Detail>("/teaching/classes/"+item.id));
    }catch(e){setError((e as Error).message)}
    finally{setBusy(false)}
@@ -90,7 +108,7 @@ export default function Teacher(){
      })});
      setClassName("");setDescription("");setSubjectId("");
      setNotice("Turma criada e pronta para receber estudantes.");
-     await load();
+     await loadDashboard();
      setSelected(await api<Detail>("/teaching/classes/"+item.id));
    }catch(e){setError((e as Error).message)}
    finally{setBusy(false)}
@@ -119,6 +137,60 @@ export default function Teacher(){
      await api("/teaching/assignments/"+item.id+"/submit",{method:"POST",body:JSON.stringify({note:"Entrega enviada pelo aplicativo Enturma."})});
      setNotice("Atividade entregue.");
      if(selected)setSelected(await api<Detail>("/teaching/classes/"+selected.id));
+   }catch(e){setError((e as Error).message)}
+ }
+
+ async function updateClass(archived=selected?.archived??false){
+   if(!selected)return;
+   setBusy(true);setError("");setNotice("");
+   try{
+     await api("/teaching/classes/"+selected.id,{method:"PUT",body:JSON.stringify({
+       subjectId:selected.subjectId??null,name:selected.name,description:selected.description??"",archived
+     })});
+     setNotice(archived?"Turma arquivada.":"Configurações da turma atualizadas.");
+     await Promise.all([loadDashboard(),refreshSelected(selected.id)]);
+   }catch(e){setError((e as Error).message)}finally{setBusy(false)}
+ }
+ async function removeMember(userId:string){
+   if(!selected)return;
+   try{
+     await api("/teaching/classes/"+selected.id+"/members/"+userId,{method:"DELETE"});
+     setNotice("Estudante removido da turma.");await refreshSelected(selected.id);
+   }catch(e){setError((e as Error).message)}
+ }
+ async function createAssignment(){
+   if(!selected||!assignmentTitle.trim())return;
+   const due=assignmentDue.trim()?new Date(assignmentDue):null;
+   if(due&&Number.isNaN(due.getTime())){setError("Informe uma data/hora válida para a atividade.");return}
+   setBusy(true);setError("");setNotice("");
+   try{
+     await api("/teaching/classes/"+selected.id+"/assignments",{method:"POST",body:JSON.stringify({
+       title:assignmentTitle.trim(),description:assignmentDescription.trim(),
+       dueAt:due?.toISOString()??null,points:Math.max(0,Math.min(1000,Number(assignmentPoints)||0))
+     })});
+     setAssignmentTitle("");setAssignmentDescription("");setAssignmentDue("");setAssignmentPoints("10");
+     setNotice("Atividade publicada.");await refreshSelected(selected.id);
+   }catch(e){setError((e as Error).message)}finally{setBusy(false)}
+ }
+ async function loadSubmissions(assignmentId:string){
+   try{
+     const values=await api<Submission[]>("/teaching/assignments/"+assignmentId+"/submissions");
+     setSubmissions(v=>({...v,[assignmentId]:values}));
+   }catch(e){setError((e as Error).message)}
+ }
+ async function reviewSubmission(assignmentId:string,userId:string){
+   try{
+     await api("/teaching/assignments/"+assignmentId+"/submissions/"+userId,{method:"PUT",body:JSON.stringify({
+       score:reviewScore[userId]?.trim()===""||reviewScore[userId]==null?null:Number(reviewScore[userId]),
+       feedback:reviewFeedback[userId]??""
+     })});
+     setNotice("Nota e feedback salvos.");await loadSubmissions(assignmentId);await refreshSelected(selected?.id);
+   }catch(e){setError((e as Error).message)}
+ }
+ async function deleteAssignment(id:string){
+   try{
+     await api("/teaching/assignments/"+id,{method:"DELETE"});
+     setNotice("Atividade removida.");if(selected)await refreshSelected(selected.id);
    }catch(e){setError((e as Error).message)}
  }
 
@@ -214,12 +286,30 @@ export default function Teacher(){
    >
      {selected.joinCode?<View style={[styles.row,{gap:4}]}><Text style={styles.muted}>Código para estudantes</Text><Text style={[styles.title,{fontSize:24,lineHeight:30,letterSpacing:2}]}>{selected.joinCode}</Text></View>:null}
 
+     {selected.owner?<View style={[styles.row,{gap:9}]}>
+       <Text style={styles.label}>Configurar turma</Text>
+       <Field label="Nome da turma" value={selected.name} onChangeText={value=>setSelected(v=>v?{...v,name:value}:v)}/>
+       <Field label="Descrição" value={selected.description??""} multiline onChangeText={value=>setSelected(v=>v?{...v,description:value}:v)}/>
+       <Button title="Salvar configurações" disabled={busy||!selected.name.trim()} onPress={()=>void updateClass(false)}/>
+       <Button title={selected.archived?"Desarquivar turma":"Arquivar turma"} disabled={busy} onPress={()=>void updateClass(!selected.archived)}/>
+      </View>:null}
+
      <Text style={[styles.label,{marginBottom:0}]}>Estudantes · {selected.members.length}</Text>
      {selected.members.map(member=><View key={member.id} style={[styles.row,{paddingVertical:12}]}>
        <Text style={[styles.label,{marginBottom:0}]}>{member.name}</Text>
        <Text style={styles.muted}>@{member.username}</Text>
+       {selected.owner?<Button title="Remover estudante" onPress={()=>void removeMember(member.id)}/>:null}
      </View>)}
      {!selected.members.length?<Text style={styles.muted}>Aguardando estudantes entrarem com o código.</Text>:null}
+
+     {selected.owner?<View style={[styles.row,{gap:9}]}>
+       <Text style={styles.label}>Nova atividade</Text>
+       <Field label="Título" value={assignmentTitle} onChangeText={setAssignmentTitle}/>
+       <Field label="Descrição" value={assignmentDescription} multiline onChangeText={setAssignmentDescription}/>
+       <Field label="Prazo" value={assignmentDue} onChangeText={setAssignmentDue} placeholder="2026-10-20T23:59"/>
+       <Field label="Pontos" value={assignmentPoints} keyboardType="numeric" onChangeText={setAssignmentPoints}/>
+       <Button title="Publicar atividade" disabled={busy||!assignmentTitle.trim()} onPress={()=>void createAssignment()}/>
+      </View>:null}
 
      <Text style={[styles.label,{marginBottom:0}]}>Atividades · {selected.assignments.length}</Text>
      {selected.assignments.map(item=><View key={item.id} style={styles.row}>
@@ -229,6 +319,17 @@ export default function Teacher(){
        {!selected.owner?(item.submitted?
          <Text style={styles.muted}>{item.score!=null?"Nota "+item.score+"/"+item.points:"Entregue, aguardando correção"}{item.feedback?" · "+item.feedback:""}</Text>:
          <Button title="Entregar atividade" onPress={()=>void submit(item)}/>):null}
+       {selected.owner?<>
+         <Button title="Ver entregas / corrigir" onPress={()=>void loadSubmissions(item.id)}/>
+         <Button title="Excluir atividade" onPress={()=>void deleteAssignment(item.id)}/>
+         {(submissions[item.id]??[]).map(student=><View key={student.userId} style={[styles.row,{gap:7}]}>
+           <Text style={styles.label}>{student.name} · @{student.username}</Text>
+           <Text style={styles.muted}>{student.note||"Ainda não entregou"}</Text>
+           {student.status?<><Field label="Nota" value={reviewScore[student.userId]??(student.score==null?"":String(student.score))} keyboardType="numeric" onChangeText={value=>setReviewScore(v=>({...v,[student.userId]:value}))}/>
+           <Field label="Feedback" value={reviewFeedback[student.userId]??student.feedback??""} multiline onChangeText={value=>setReviewFeedback(v=>({...v,[student.userId]:value}))}/>
+           <Button title="Salvar correção" onPress={()=>void reviewSubmission(item.id,student.userId)}/></>:null}
+         </View>)}
+       </>:null}
      </View>)}
      {!selected.assignments.length?<Text style={styles.muted}>Nenhuma atividade publicada ainda.</Text>:null}
 
