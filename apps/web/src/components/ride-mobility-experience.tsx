@@ -170,6 +170,9 @@ type PeerLocation = {
   lat?: number;
   lng?: number;
   accuracyM?: number;
+  heading?: number | null;
+  speedMps?: number | null;
+  capturedAt?: string | null;
   updatedAt?: string;
   distanceKm?: number;
   etaMinutes?: number;
@@ -494,7 +497,6 @@ export function RideMobilityExperience() {
   const [selected, setSelected] = useState<LocationResult>();
   const [route, setRoute] = useState<RouteResult>();
   const [location, setLocation] = useState<MapPoint>();
-  const [accuracy, setAccuracy] = useState(0);
   const [locationLabel, setLocationLabel] = useState("Sua localização");
   const [selectOnMap, setSelectOnMap] = useState(false);
   const [driverRequests, setDriverRequests] = useState<DriverRequest[]>([]);
@@ -596,7 +598,6 @@ export function RideMobilityExperience() {
     try {
       const geo = await currentPosition();
       setLocation(geo.point);
-      setAccuracy(geo.accuracy);
       const reverse = await api<LocationResult>(
         `/rides/map/reverse?lat=${geo.point.lat}&lng=${geo.point.lng}`,
         { cache: "no-store" },
@@ -949,7 +950,6 @@ export function RideMobilityExperience() {
         };
         if (!Number.isFinite(next.lat) || !Number.isFinite(next.lng)) return;
         setLocation(next);
-        setAccuracy(Math.round(position.coords.accuracy || 0));
         const now = Date.now();
         const previous = lastSent.current;
         if (
@@ -966,6 +966,9 @@ export function RideMobilityExperience() {
               lat: next.lat,
               lng: next.lng,
               accuracyMeters: Math.round(position.coords.accuracy || 0),
+              speedMps: position.coords.speed,
+              heading: position.coords.heading,
+              capturedAt: new Date(position.timestamp).toISOString(),
             }),
           }).catch(() => {});
         } else if (availability?.enabled) {
@@ -1122,6 +1125,8 @@ export function RideMobilityExperience() {
         id: "peer",
         point: { lat: peer.lat, lng: peer.lng },
         kind: activeMatch.driverId === me ? "passenger" : "driver",
+        heading:
+          activeMatch.driverId === me ? undefined : peer.heading,
         label:
           activeMatch.driverId === me
             ? activeMatch.passengerName
