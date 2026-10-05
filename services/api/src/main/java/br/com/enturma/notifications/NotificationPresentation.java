@@ -16,8 +16,15 @@ final class NotificationPresentation {
       case "FRIEND_REQUEST" -> who + " enviou uma solicitação de amizade";
       case "FRIEND_ACCEPTED" -> who + " aceitou sua amizade";
       case "RIDE_ACCEPTED" -> "Sua carona foi aceita";
+      case "RIDE_REQUESTED" -> "Novo interesse na carona";
       case "RIDE_CANCELLED" -> "Atualização da carona";
       case "RIDE_MESSAGE" -> who + " enviou uma mensagem na carona";
+      case "RIDE_MATCH_SUGGESTION" -> "Nova combinação de carona";
+      case "RIDE_WAITLIST" -> "Lista de espera da carona";
+      case "RIDE_WAITLIST_AVAILABLE" -> "Uma vaga foi liberada";
+      case "RIDE_STATUS" -> "Andamento da carona";
+      case "RIDE_NO_SHOW" -> "Atualização de comparecimento";
+      case "RIDE_REMINDER_30" -> "Sua carona está chegando";
       case "ACHIEVEMENT" -> "Nova conquista no Enturma";
       default -> "Enturma";
     };

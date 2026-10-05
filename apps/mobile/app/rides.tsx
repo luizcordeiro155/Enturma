@@ -1,103 +1,188 @@
-import { useCallback, useState } from "react";
-import { Text, View, Alert } from "react-native";
+import { useCallback, useState, type ReactNode } from "react";
+import { Animated, Text, View, Alert } from "react-native";
 import { useFocusEffect, useRouter } from "expo-router";
 import { api } from "../src/api";
 import { useRealtime } from "../src/realtime";
-import { Screen, Field, Button, ErrorMessage, useStyles } from "../src/ui";
+import {
+  Screen,
+  Field,
+  Button,
+  ErrorMessage,
+  useStyles,
+} from "../src/ui";
+import { useRideActionMotion, useRideEntrance } from "../src/ride-motion";
 import type { AcademicEntry } from "@enturma/contracts";
+
 type Ride = {
   id: string;
   ownerId: string;
-  name: string;
+  name?: string;
   originArea: string;
   campusName: string;
   departureAt: string;
-  type: string;
+  type: "OFFER" | "REQUEST";
   status: string;
+  seats: number;
+  acceptedSeats?: number;
+  waitlistedSeats?: number;
 };
 type Match = {
   id: string;
   ownerId: string;
-  ownerName: string;
+  driverId: string;
+  passengerId: string;
+  requestedBy: string;
+  driverName: string;
   passengerName: string;
   status: string;
   closedAt?: string;
   originArea: string;
+  campusName: string;
+  tripStatus: string;
 };
+type Suggestion = {
+  id: string;
+  ownerName: string;
+  originArea: string;
+  campusName: string;
+  departureAt: string;
+  matchLevel: string;
+  reasons: string[];
+  distanceKm?: number | null;
+  estimatedDetourMinutes?: number | null;
+  full: boolean;
+  availableSeats: number;
+  rating: number;
+};
+
+function AnimatedRideCard({
+  index,
+  children,
+}: {
+  index: number;
+  children: ReactNode;
+}) {
+  const styles = useStyles();
+  const motion = useRideEntrance(index);
+  return (
+    <Animated.View style={[styles.row, motion]}>{children}</Animated.View>
+  );
+}
+
 export default function Rides() {
-  const styles = useStyles(),
-    router = useRouter();
-  const [rides, setRides] = useState<Ride[]>([]),
-    [mine, setMine] = useState<Ride[]>([]),
-    [matches, setMatches] = useState<Match[]>([]),
-    [campuses, setCampuses] = useState<AcademicEntry[]>([]),
-    [campus, setCampus] = useState(""),
-    [me, setMe] = useState(""),
-    [type, setType] = useState("OFFER"),
-    [direction, setDirection] = useState("TO_CAMPUS"),
-    [area, setArea] = useState(""),
-    [departure, setDeparture] = useState(""),
-    [seats, setSeats] = useState("1"),
-    [error, setError] = useState(""),
-    [busy, setBusy] = useState(false),
-    [create, setCreate] = useState(false);
+  const styles = useStyles();
+  const router = useRouter();
+  const actionMotion = useRideActionMotion();
+  const [rides, setRides] = useState<Ride[]>([]);
+  const [mine, setMine] = useState<Ride[]>([]);
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [campuses, setCampuses] = useState<AcademicEntry[]>([]);
+  const [campus, setCampus] = useState("");
+  const [me, setMe] = useState("");
+  const [type, setType] = useState("OFFER");
+  const [direction, setDirection] = useState("TO_CAMPUS");
+  const [area, setArea] = useState("");
+  const [departure, setDeparture] = useState("");
+  const [seats, setSeats] = useState("1");
+  const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [create, setCreate] = useState(false);
+  const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [suggestRide, setSuggestRide] = useState<Ride>();
+
   const load = useCallback(async () => {
     try {
-      const [r, m, c, u] = await Promise.all([
+      const [r, owned, m, c, u] = await Promise.all([
         api<Ride[]>("/rides"),
         api<Ride[]>("/rides/mine"),
         api<Match[]>("/matches"),
+        api<AcademicEntry[]>("/academics?kind=CAMPUS"),
         api<{ id: string }>("/users/me"),
       ]);
       setRides(r);
-      setMine(m);
-      setMatches(c);
+      setMine(owned);
+      setMatches(m);
+      setCampuses(c);
       setMe(u.id);
+      setError("");
     } catch (e) {
       setError((e as Error).message);
     }
   }, []);
+
   useFocusEffect(
     useCallback(() => {
       void load();
-      void api<AcademicEntry[]>("/academics?kind=CAMPUS")
-        .then(setCampuses)
-        .catch((e) => setError(e.message));
     }, [load]),
   );
+
   useRealtime(
-    (e) => {
-      if (e.type === "rides_changed" || e.type === "rides_ready") void load();
+    (event) => {
+      if (event.type === "rides_changed" || event.type === "rides_ready")
+        void load();
     },
     undefined,
     "rides",
   );
+
   async function act(path: string, body?: object) {
     setBusy(true);
     try {
-      await api(path, {
+      const result = await api<unknown>(path, {
         method: "POST",
         ...(body ? { body: JSON.stringify(body) } : {}),
       });
       setError("");
+      actionMotion.pulse();
       await load();
-      return true;
+      return result;
     } catch (e) {
       setError((e as Error).message);
-      return false;
+      return undefined;
     } finally {
       setBusy(false);
     }
   }
+
+  async function findSuggestions(ride: Ride) {
+    setSuggestRide(ride);
+    setBusy(true);
+    try {
+      setSuggestions(
+        await api<Suggestion[]>(`/rides/${ride.id}/suggestions`, {
+          cache: "no-store",
+        }),
+      );
+      actionMotion.pulse();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
-    <Screen title="Caminhe em companhia">
+    <Screen title="Enturma Caronas">
       <ErrorMessage message={error} />
-      <Button
-        title={create ? "Fechar formulário" : "Oferecer ou pedir carona"}
-        onPress={() => setCreate(!create)}
-      />
-      {create && (
+      {message ? <Text style={styles.success}>{message}</Text> : null}
+      <Animated.View style={actionMotion.style}>
+        <Button
+          title={create ? "Fechar formulário" : "Oferecer ou pedir carona"}
+          onPress={() => {
+            setCreate(!create);
+            actionMotion.pulse();
+          }}
+        />
+      </Animated.View>
+
+      {create ? (
         <View style={styles.row}>
+          <Text style={styles.label}>
+            Sua localização exata não é publicada. No APK oficial, o matching
+            por proximidade e o compartilhamento temporário usam a tela Web
+            integrada do Enturma com permissão nativa.
+          </Text>
           <Button
             title={
               type === "OFFER" ? "Oferecendo vagas" : "Procurando motorista"
@@ -115,21 +200,21 @@ export default function Rides() {
             }
           />
           <Text style={styles.label}>Selecione o campus</Text>
-          {campuses.map((c) => (
+          {campuses.map((entry) => (
             <Button
-              key={c.id}
-              title={`${campus === c.id ? "✓ " : ""}${c.name}`}
-              onPress={() => setCampus(c.id)}
+              key={entry.id}
+              title={`${campus === entry.id ? "✓ " : ""}${entry.name}`}
+              onPress={() => setCampus(entry.id)}
             />
           ))}
           <Field
-            label="Bairro de origem"
+            label="Bairro ou região"
             value={area}
             onChangeText={setArea}
             maxLength={120}
           />
           <Field
-            label="Saída (AAAA-MM-DD HH:mm, horário local)"
+            label="Saída (AAAA-MM-DD HH:mm)"
             value={departure}
             onChangeText={setDeparture}
           />
@@ -155,101 +240,190 @@ export default function Rides() {
                 originArea: area,
                 departureAt: date.toISOString(),
                 seats: Number(seats),
-              }).then((ok) => {
-                if (ok) setCreate(false);
+              }).then(() => {
+                setCreate(false);
+                setMessage(
+                  "Carona publicada. Agora procure combinações automáticas.",
+                );
               });
             }}
           />
         </View>
-      )}
+      ) : null}
+
       <Text style={styles.title}>Meus encontros</Text>
-      {matches.map((m) => (
-        <View style={styles.row} key={m.id}>
-          <Text style={styles.label}>
-            {m.ownerId === me ? m.passengerName : m.ownerName}
+      {matches.map((match, index) => {
+        const peer =
+          match.driverId === me ? match.passengerName : match.driverName;
+        return (
+          <AnimatedRideCard key={match.id} index={index}>
+            <Text style={styles.label}>{peer}</Text>
+            <Text style={styles.muted}>
+              {match.originArea} · {match.campusName} ·{" "}
+              {match.status === "ACCEPTED"
+                ? "Confirmado"
+                : match.status === "WAITLISTED"
+                  ? "Lista de espera"
+                  : match.status === "PENDING"
+                    ? "Aguardando confirmação"
+                    : match.status}
+            </Text>
+            {match.status === "PENDING" && match.requestedBy !== me ? (
+              <Button
+                title="Aceitar combinação"
+                disabled={busy}
+                onPress={() =>
+                  void act(`/matches/${match.id}/accept`).then(() =>
+                    setMessage("Match confirmado."),
+                  )
+                }
+              />
+            ) : null}
+            {match.status === "ACCEPTED" ? (
+              <Button
+                title="Abrir carona"
+                onPress={() =>
+                  router.push({
+                    pathname: "/ride/[id]",
+                    params: { id: match.id },
+                  })
+                }
+              />
+            ) : null}
+            {["PENDING", "WAITLISTED", "ACCEPTED"].includes(match.status) &&
+            !match.closedAt ? (
+              <Button
+                title="Cancelar encontro"
+                disabled={busy}
+                onPress={() =>
+                  Alert.alert(
+                    "Cancelar encontro",
+                    "A outra pessoa será avisada e uma vaga pode ser liberada para a lista de espera.",
+                    [
+                      { text: "Voltar", style: "cancel" },
+                      {
+                        text: "Cancelar",
+                        style: "destructive",
+                        onPress: () =>
+                          void act(`/matches/${match.id}/cancel`),
+                      },
+                    ],
+                  )
+                }
+              />
+            ) : null}
+          </AnimatedRideCard>
+        );
+      })}
+
+      <Text style={styles.title}>Minhas publicações</Text>
+      {mine.map((ride, index) => (
+        <AnimatedRideCard key={ride.id} index={index}>
+          <Text style={styles.text}>
+            {ride.originArea} · {new Date(ride.departureAt).toLocaleString("pt-BR")}
           </Text>
           <Text style={styles.muted}>
-            {m.originArea} ·{" "}
-            {m.status === "ACCEPTED"
-              ? "Match confirmado"
-              : m.status === "PENDING"
-                ? "Aguardando aceite"
-                : "Encerrado"}
+            {ride.type === "OFFER" ? "Oferecendo carona" : "Procurando carona"} ·{" "}
+            {ride.acceptedSeats ?? 0} confirmado(s)
+            {(ride.waitlistedSeats ?? 0) > 0
+              ? ` · ${ride.waitlistedSeats} em espera`
+              : ""}
           </Text>
-          {m.status === "PENDING" && m.ownerId === me && (
-            <Button
-              title="Aceitar passageiro"
-              disabled={busy}
-              onPress={() => void act(`/matches/${m.id}/accept`)}
-            />
-          )}{" "}
-          {m.status === "ACCEPTED" && (
-            <Button
-              title="Abrir conversa"
-              onPress={() =>
-                router.push({ pathname: "/ride/[id]", params: { id: m.id } })
-              }
-            />
-          )}{" "}
-          {!m.closedAt && (
-            <Button
-              title="Cancelar encontro"
-              disabled={busy}
-              onPress={() =>
-                Alert.alert(
-                  "Cancelar encontro",
-                  "Os dois participantes serão informados.",
-                  [
-                    { text: "Voltar", style: "cancel" },
-                    {
-                      text: "Cancelar encontro",
-                      style: "destructive",
-                      onPress: () => void act(`/matches/${m.id}/cancel`),
-                    },
-                  ],
-                )
-              }
-            />
-          )}
-        </View>
+          {ride.status === "OPEN" ? (
+            <>
+              <Button
+                title="Encontrar combinações"
+                disabled={busy}
+                onPress={() => void findSuggestions(ride)}
+              />
+              <Button
+                title="Cancelar publicação"
+                disabled={busy}
+                onPress={() => void act(`/rides/${ride.id}/cancel`)}
+              />
+            </>
+          ) : null}
+        </AnimatedRideCard>
       ))}
-      <Text style={styles.title}>Minhas publicações</Text>
-      {mine
-        .filter((r) => r.status === "OPEN")
-        .map((r) => (
-          <View key={r.id} style={styles.row}>
-            <Text style={styles.text}>
-              {r.originArea} · {new Date(r.departureAt).toLocaleString("pt-BR")}
-            </Text>
+
+      {suggestRide ? (
+        <>
+          <Text style={styles.title}>Combinações para {suggestRide.originArea}</Text>
+          {suggestions.length === 0 ? (
             <Text style={styles.muted}>
-              {r.type === "OFFER"
-                ? "Procurando passageiros"
-                : "Procurando carona"}
+              Nenhuma combinação compatível por enquanto.
             </Text>
-            <Button
-              title="Cancelar publicação"
-              disabled={busy}
-              onPress={() => void act(`/rides/${r.id}/cancel`)}
-            />
-          </View>
-        ))}
+          ) : (
+            suggestions.map((item, index) => (
+              <AnimatedRideCard key={item.id} index={index}>
+                <Text style={styles.label}>
+                  {item.ownerName} · {item.matchLevel === "COMPATIVEL" ? "COMPATÍVEL" : item.matchLevel}
+                </Text>
+                <Text style={styles.text}>
+                  {item.originArea} → {item.campusName}
+                </Text>
+                <Text style={styles.muted}>
+                  {item.reasons.join(" · ")}
+                  {item.distanceKm != null ? ` · ${item.distanceKm} km` : ""}
+                  {item.estimatedDetourMinutes != null
+                    ? ` · ~${item.estimatedDetourMinutes} min`
+                    : ""}
+                  {item.rating > 0 ? ` · ★ ${item.rating.toFixed(1)}` : ""}
+                </Text>
+                <Button
+                  title={
+                    item.full
+                      ? "Entrar na lista de espera"
+                      : "Solicitar esta carona"
+                  }
+                  disabled={busy}
+                  onPress={() =>
+                    void act(
+                      `/rides/${suggestRide.id}/suggestions/${item.id}/connect`,
+                    ).then((result) => {
+                      const match = result as
+                        | { id?: string; status?: string }
+                        | undefined;
+                      if (match?.id)
+                        router.push({
+                          pathname: "/ride/[id]",
+                          params: { id: match.id },
+                        });
+                    })
+                  }
+                />
+              </AnimatedRideCard>
+            ))
+          )}
+        </>
+      ) : null}
+
       <Text style={styles.title}>Caronas disponíveis</Text>
       {rides
-        .filter((r) => r.ownerId !== me)
-        .map((r) => (
-          <View key={r.id} style={styles.row}>
+        .filter((ride) => ride.ownerId !== me)
+        .map((ride, index) => (
+          <AnimatedRideCard key={ride.id} index={index}>
             <Text style={styles.label}>
-              {r.originArea} · {r.campusName}
+              {ride.originArea} · {ride.campusName}
             </Text>
             <Text style={styles.text}>
-              {r.name} · {new Date(r.departureAt).toLocaleString("pt-BR")}
+              {ride.name ?? "Estudante"} ·{" "}
+              {new Date(ride.departureAt).toLocaleString("pt-BR")}
             </Text>
             <Button
               title="Tenho interesse"
               disabled={busy}
-              onPress={() => void act(`/rides/${r.id}/interest`)}
+              onPress={() =>
+                void act(`/rides/${ride.id}/interest`).then((result) => {
+                  const match = result as
+                    | { id?: string; status?: string }
+                    | undefined;
+                  if (match?.status === "WAITLISTED")
+                    setMessage("Você entrou na lista de espera.");
+                })
+              }
             />
-          </View>
+          </AnimatedRideCard>
         ))}
     </Screen>
   );

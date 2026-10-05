@@ -91,3 +91,23 @@ Os exemplos de testes não representam nenhuma universidade real. Não use as fi
 | POST /admin/moderation/actions                         | userId, roomId opcional, kind, minutes, rule, evidence, requestId                                                              |
 | POST /admin/moderation/{id}/review                     | {revoke,note}; revisão humana                                                                                                  |
 | POST /admin/moderation/blocked-hosts                   | {host,reason}                                                                                                                  |
+
+
+### Mobilidade universitária
+
+- `GET /rides/{id}/suggestions`: sugestões automáticas de matching.
+- `POST /rides/{source}/suggestions/{candidate}/connect`: cria pedido de combinação.
+- `POST /rides/{id}/status`: atualiza o ciclo da viagem.
+- `GET|PUT /rides/vehicle`: perfil opcional do veículo.
+- `GET /rides/users/{id}/reputation`: reputação agregada.
+- `GET|POST /rides/recurrences` e `DELETE /rides/recurrences/{id}`: rotina recorrente.
+- `GET /rides/campuses/{campus}/pickup-zones`: pontos oficiais do campus.
+- `POST /admin/rides/campuses/{campus}/pickup-zones`: cadastro administrativo de ponto.
+- `POST /matches/{id}/confirm`: confirmação do participante.
+- `GET /matches/{id}/boarding-code` e `POST /matches/{id}/board`: PIN de embarque.
+- `GET|PUT|DELETE /matches/{id}/location`: localização temporária entre o par.
+- `POST /matches/{id}/safety-share`: cria link temporário de acompanhamento.
+- `GET /public/rides/safety/{token}`: acompanhamento do link compartilhado.
+- `POST /matches/{id}/no-show`: registra não comparecimento após tolerância.
+- `POST /rides/{id}/stops`: ordena paradas dos passageiros aceitos.
+- `PUT /matches/{id}/meeting-zone`: seleciona ponto oficial do campus.

@@ -107,10 +107,18 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM achievement_progress WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM achievement_sync_queue WHERE user_id=?",userId);
 
-    db.jdbc.update("DELETE FROM ride_voice WHERE match_id IN (SELECT m.id FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE m.user_id=? OR r.owner_id=?)",userId,userId);
-    db.jdbc.update("DELETE FROM ride_review WHERE match_id IN (SELECT m.id FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE m.user_id=? OR r.owner_id=?) OR reviewer_id=?",userId,userId,userId);
-    db.jdbc.update("DELETE FROM ride_message WHERE match_id IN (SELECT m.id FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE m.user_id=? OR r.owner_id=?)",userId,userId);
-    db.jdbc.update("DELETE FROM ride_match WHERE user_id=? OR ride_id IN (SELECT id FROM ride WHERE owner_id=?)",userId,userId);
+    String rideMatches =
+        "SELECT m.id FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE"
+            + " m.driver_id=? OR m.passenger_id=? OR r.owner_id=?";
+    db.jdbc.update("DELETE FROM ride_live_location WHERE match_id IN (" + rideMatches + ")",userId,userId,userId);
+    db.jdbc.update("DELETE FROM ride_safety_share WHERE match_id IN (" + rideMatches + ") OR shared_by=?",userId,userId,userId,userId);
+    db.jdbc.update("DELETE FROM ride_safety_event WHERE match_id IN (" + rideMatches + ") OR actor_id=?",userId,userId,userId,userId);
+    db.jdbc.update("DELETE FROM ride_voice WHERE match_id IN (" + rideMatches + ")",userId,userId,userId);
+    db.jdbc.update("DELETE FROM ride_review WHERE match_id IN (" + rideMatches + ") OR reviewer_id=?",userId,userId,userId,userId);
+    db.jdbc.update("DELETE FROM ride_message WHERE match_id IN (" + rideMatches + ")",userId,userId,userId);
+    db.jdbc.update("DELETE FROM ride_match WHERE driver_id=? OR passenger_id=? OR ride_id IN (SELECT id FROM ride WHERE owner_id=?)",userId,userId,userId);
+    db.jdbc.update("DELETE FROM ride_recurrence WHERE owner_id=?",userId);
+    db.jdbc.update("DELETE FROM ride_vehicle_profile WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM ride WHERE owner_id=?",userId);
     db.jdbc.update("DELETE FROM focus_session WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM campus_task WHERE user_id=?",userId);

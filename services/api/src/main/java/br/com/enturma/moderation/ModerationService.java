@@ -19,6 +19,21 @@ public class ModerationService {
     if (a.id().equals(target))
       throw ApiException.invalid("Não é possível bloquear sua própria conta.");
     db.jdbc.update("INSERT INTO user_block VALUES (?,?) ON CONFLICT DO NOTHING", a.id(), target);
+    db.jdbc.update(
+        "DELETE FROM ride_live_location WHERE match_id IN (SELECT id FROM ride_match WHERE"
+            + " (driver_id=? AND passenger_id=?) OR (driver_id=? AND passenger_id=?))",
+        a.id(),
+        target,
+        target,
+        a.id());
+    db.jdbc.update(
+        "UPDATE ride_safety_share SET revoked_at=coalesce(revoked_at,now()) WHERE match_id IN"
+            + " (SELECT id FROM ride_match WHERE (driver_id=? AND passenger_id=?) OR"
+            + " (driver_id=? AND passenger_id=?)) AND revoked_at IS NULL",
+        a.id(),
+        target,
+        target,
+        a.id());
   }
 
   public void unblock(Actor a, UUID target) {

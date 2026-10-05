@@ -15,3 +15,18 @@ Os dois participantes podem cancelar um pedido (inclusive antes do aceite), ence
 Concluir ou cancelar a carona encerra suas conversas. Conversas ainda abertas também encerram 24 horas após a saída. A limpeza roda a cada minuto e apaga o conteúdo 24 horas após o encerramento; chamadas encerradas são removidas pelo reconciliador de voz. A interface atualiza o estado do outro participante a cada três segundos. A migração V17 concede uma janela de 24 horas aos históricos já encerrados.
 
 Após o aceite, os participantes veem uma confirmação animada em JavaScript com foto, nome e personalização do perfil. O botão “Combinar encontro” abre a conversa. A confirmação é lembrada por usuário neste navegador para não reaparecer a cada navegação; “Reduzir animações” mantém a confirmação estática e acessível por teclado.
+
+
+## Mobilidade universitária — implementação atual
+
+O módulo evoluiu de publicação + interesse para um fluxo de mobilidade universitária com matching automático entre `OFFER` e `REQUEST`.
+
+O matching cruza campus, direção, janela de até 90 minutos, bloqueios, vagas, reputação e proximidade quando os dois usuários autorizam localização aproximada. A interface explica os motivos da combinação; ela não exibe porcentagem fictícia de segurança.
+
+A viagem possui estados próprios: `SCHEDULED`, `MATCHING`, `DRIVER_ON_THE_WAY`, `ARRIVING`, `WAITING_PASSENGER`, `IN_PROGRESS`, `ARRIVED`, `COMPLETED` e `CANCELLED`. O backend valida as transições.
+
+Depois do aceite existem confirmação independente de motorista/passageiro, PIN de embarque, lista de espera, ordenação de paradas para múltiplos passageiros, perfil opcional do veículo, reputação detalhada, caronas recorrentes e pontos oficiais de embarque por campus.
+
+Localização aproximada da origem não é devolvida na descoberta. Localização ao vivo só funciona durante estados ativos da viagem, entre participantes aceitos, mantém apenas a última posição e é apagada ao parar, cancelar, encerrar, bloquear ou registrar no-show. O link de segurança usa token temporário e revogável para um contato de confiança.
+
+As animações novas de carona são controladas por JavaScript. Web/Desktop usam Web Animations API; React Native usa `Animated`. A preferência de reduzir movimento continua sendo respeitada.

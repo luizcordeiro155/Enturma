@@ -63,6 +63,7 @@ import android.widget.FrameLayout
 import android.webkit.CookieManager
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
+import android.webkit.GeolocationPermissions
 import android.webkit.ValueCallback
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
@@ -512,6 +513,7 @@ class MainActivity : Activity() {
         private const val FILE_CHOOSER_REQUEST = 4101
         private const val MEDIA_PERMISSION_REQUEST = 4102
         private const val NOTIFICATION_PERMISSION_REQUEST = 4103
+        private const val LOCATION_PERMISSION_REQUEST = 4104
         private const val WEB_ORIGIN = "${webOrigin}"
         private const val APP_VERSION = "${version}"
     }
@@ -520,6 +522,8 @@ class MainActivity : Activity() {
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
     private var pendingPermissionRequest: PermissionRequest? = null
+    private var pendingGeolocationOrigin: String? = null
+    private var pendingGeolocationCallback: GeolocationPermissions.Callback? = null
     private var safeTopCssPx = 0
     private var safeRightCssPx = 0
     private var safeBottomCssPx = 0
@@ -677,6 +681,7 @@ class MainActivity : Activity() {
             domStorageEnabled = true
             databaseEnabled = true
             mediaPlaybackRequiresUserGesture = false
+            setGeolocationEnabled(true)
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
             allowFileAccess = false
             allowContentAccess = true
@@ -720,6 +725,58 @@ class MainActivity : Activity() {
         }
 
         webView.webChromeClient = object : WebChromeClient() {
+            override fun onGeolocationPermissionsShowPrompt(
+                origin: String?,
+                callback: GeolocationPermissions.Callback?,
+            ) {
+                if (callback == null) return
+                if (origin.isNullOrBlank()) {
+                    callback.invoke(origin ?: "", false, false)
+                    return
+                }
+                runOnUiThread {
+                    val trusted = runCatching {
+                        val uri = Uri.parse(origin)
+                        val expected = Uri.parse(WEB_ORIGIN)
+                        uri.scheme == "https" &&
+                            uri.host.equals(expected.host, ignoreCase = true)
+                    }.getOrDefault(false)
+                    if (!trusted) {
+                        callback.invoke(origin, false, false)
+                        return@runOnUiThread
+                    }
+
+                    val coarseGranted =
+                        checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                            PackageManager.PERMISSION_GRANTED
+                    val fineGranted =
+                        checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
+                            PackageManager.PERMISSION_GRANTED
+                    if (coarseGranted || fineGranted) {
+                        callback.invoke(origin, true, false)
+                        return@runOnUiThread
+                    }
+
+                    val previousOrigin = pendingGeolocationOrigin
+                    if (previousOrigin != null) {
+                        pendingGeolocationCallback?.invoke(
+                            previousOrigin,
+                            false,
+                            false,
+                        )
+                    }
+                    pendingGeolocationOrigin = origin
+                    pendingGeolocationCallback = callback
+                    requestPermissions(
+                        arrayOf(
+                            Manifest.permission.ACCESS_COARSE_LOCATION,
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                        ),
+                        LOCATION_PERMISSION_REQUEST,
+                    )
+                }
+            }
+
             override fun onPermissionRequest(request: PermissionRequest?) {
                 if (request == null) return
                 runOnUiThread {
@@ -1483,6 +1540,16 @@ class MainActivity : Activity() {
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST) {
             refreshNativePushToken()
         }
+        if (requestCode == LOCATION_PERMISSION_REQUEST) {
+            val callback = pendingGeolocationCallback
+            val origin = pendingGeolocationOrigin
+            pendingGeolocationCallback = null
+            pendingGeolocationOrigin = null
+            if (callback != null && origin != null) {
+                val granted = grantResults.any { it == PackageManager.PERMISSION_GRANTED }
+                callback.invoke(origin, granted, false)
+            }
+        }
     }
 
     @Deprecated("Deprecated in Java")
@@ -1516,6 +1583,16 @@ class MainActivity : Activity() {
     override fun onDestroy() {
         pendingPermissionRequest?.deny()
         pendingPermissionRequest = null
+        val pendingOrigin = pendingGeolocationOrigin
+        if (pendingOrigin != null) {
+            pendingGeolocationCallback?.invoke(
+                pendingOrigin,
+                false,
+                false,
+            )
+        }
+        pendingGeolocationCallback = null
+        pendingGeolocationOrigin = null
         fileChooserCallback?.onReceiveValue(null)
         fileChooserCallback = null
 
