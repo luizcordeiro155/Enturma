@@ -292,14 +292,11 @@ public class RideDispatchService {
         db.one(
             "SELECT start_lat,start_lng,end_lat,end_lng FROM ride WHERE id=?",
             requestRows.getFirst().get("id"));
-    double focusLat =
-        "TO_CAMPUS".equals(direction)
-            ? number(request.get("startLat"))
-            : number(request.get("endLat"));
-    double focusLng =
-        "TO_CAMPUS".equals(direction)
-            ? number(request.get("startLng"))
-            : number(request.get("endLng"));
+    double focusLat = number(request.get("startLat"));
+    double focusLng = number(request.get("startLng"));
+    double latDelta = radius / 111.0;
+    double lngDelta =
+        radius / Math.max(1.0, 111.0 * Math.cos(Math.toRadians(focusLat)));
 
     var rows =
         db.list(
@@ -308,6 +305,7 @@ public class RideDispatchService {
                 + " WHERE a.campus_id=? AND a.direction=? AND a.enabled=true AND a.status='ONLINE'"
                 + " AND a.updated_at>now()-interval '90 seconds'"
                 + " AND a.user_id<>?"
+                + " AND a.lat BETWEEN ? AND ? AND a.lng BETWEEN ? AND ?"
                 + " AND NOT EXISTS(SELECT 1 FROM user_block b WHERE"
                 + " (b.user_id=? AND b.blocked_id=a.user_id) OR"
                 + " (b.blocked_id=? AND b.user_id=a.user_id))"
@@ -315,6 +313,10 @@ public class RideDispatchService {
             campusId,
             direction,
             actor.id(),
+            focusLat - latDelta,
+            focusLat + latDelta,
+            focusLng - lngDelta,
+            focusLng + lngDelta,
             actor.id(),
             actor.id());
     var out = new ArrayList<Map<String, Object>>();
