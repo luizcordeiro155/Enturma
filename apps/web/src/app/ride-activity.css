@@ -600,3 +600,77 @@ body:has(.ride-mobility-app) .workspace footer { display:none; }
 @media (min-width:1050px){.ride-bottom-sheet{left:auto;top:18px;bottom:18px;right:18px;width:min(420px,36vw);max-height:none;transform:none!important;border-radius:22px}.ride-sheet-handle{display:none}.ride-sheet-content{max-height:100%;height:100%;padding:22px}.ride-map-top{right:calc(min(420px,36vw) + 36px)}.ride-recenter{right:calc(min(420px,36vw) + 36px);bottom:24px}.ride-map-picker-actions{left:calc((100% - min(420px,36vw))/2)}}
 @media (max-width:760px){body:has(.ride-mobility-app) .sidebar,body:has(.ride-mobility-app) .topbar{display:none}body:has(.ride-mobility-app) .workspace main{min-height:100dvh}.ride-mobility-app,.ride-mobility-boot{min-height:100dvh;height:100dvh}.ride-map-top{top:max(10px,env(safe-area-inset-top));left:10px;right:10px;grid-template-columns:44px minmax(0,1fr) 44px;gap:7px}.ride-circle-button{width:43px;height:43px;border-radius:14px}.ride-mode-switch{border-radius:14px}.ride-mode-switch button{padding:7px 8px;font-size:12px}.ride-map-controls{top:78px;right:10px}.ride-bottom-sheet{left:8px;right:8px;bottom:calc(70px + env(safe-area-inset-bottom));max-height:min(68dvh,650px);border-radius:23px}.ride-sheet-content{padding:0 15px 20px;max-height:calc(min(68dvh,650px) - 28px)}.ride-direction-grid{grid-template-columns:1fr}.ride-direction-grid>button{min-height:64px}.ride-campus-mini{max-width:135px}.ride-recenter{right:10px;bottom:calc(43% + 70px)}.ride-map-picker-actions{bottom:calc(76px + env(safe-area-inset-bottom))}.ride-seat-control{grid-template-columns:1fr 84px}}
 @media (max-width:420px){.ride-mode-switch button svg{display:none}.ride-sheet-heading{align-items:flex-start}.ride-campus-mini{max-width:118px}.ride-active-actions{display:grid;grid-template-columns:1fr 1fr}.ride-active-actions>*{min-width:0}}
+
+.ride-map-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 10px;
+  padding: 24px;
+  background:
+    radial-gradient(circle at 50% 38%, rgba(109, 145, 126, .18), transparent 34%),
+    var(--soft);
+  color: var(--muted);
+  text-align: center;
+}
+.ride-map-empty strong {
+  color: var(--ink);
+}
+.ride-save-home {
+  margin-top: 10px;
+  justify-content: flex-start;
+}
+.ride-completed-sheet {
+  position: relative;
+  display: grid;
+  gap: 12px;
+  text-align: center;
+  padding: 12px 0 4px;
+}
+.ride-completed-sheet > h2 {
+  font-size: clamp(1.7rem, 4vw, 2.4rem);
+}
+.ride-completed-sheet > p {
+  color: var(--muted);
+}
+.ride-arrival-celebration {
+  position: relative;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  color: #6b8d65;
+  pointer-events: none;
+}
+.ride-arrival-celebration span {
+  position: absolute;
+  font-size: 22px;
+  will-change: transform, opacity;
+}
+.ride-review-stars {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 7px;
+}
+.ride-review-stars button {
+  min-height: 52px;
+  padding: 8px 5px;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  border-color: #d8e0d7;
+  background: #f7faf4;
+  color: #b08a22;
+}
+.ride-review-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 7px;
+}
+.ride-review-tags button[aria-pressed="true"] {
+  border-color: #5d7d71;
+  background: #e7efe6;
+  color: #173f36;
+}
