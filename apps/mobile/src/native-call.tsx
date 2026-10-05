@@ -161,6 +161,7 @@ export function useNativeCall() {
 
 function NativeCallBar() {
   const { roomId, leave, room } = useNativeCall();
+  const styles = useStyles();
   const router = useRouter();
   const insets = useSafeAreaInsets();
   const [isMicrophoneEnabled, setIsMicrophoneEnabled] = useState(false);
