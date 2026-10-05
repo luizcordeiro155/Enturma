@@ -225,6 +225,14 @@ public class RideController {
     dispatch.stopDriverAvailability(a);
   }
 
+  @GetMapping("/rides/dispatch/nearby-drivers")
+  public Object nearbyDrivers(
+      @AuthenticationPrincipal Actor a,
+      @RequestParam UUID campusId,
+      @RequestParam String direction) {
+    return dispatch.nearbyDrivers(a, campusId, direction);
+  }
+
   @GetMapping("/rides/driver/requests")
   public Object driverRequests(@AuthenticationPrincipal Actor a) {
     return dispatch.driverRequests(a);
