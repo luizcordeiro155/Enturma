@@ -156,6 +156,8 @@ export function RideMobilityMap({
   const [size, setSize] = useState({ width: 900, height: 620 });
   const [currentZoom, setCurrentZoom] = useState(zoom);
   const [displayCenter, setDisplayCenter] = useState(center);
+  const cameraCenter = useRef(center);
+  const cameraFrame = useRef(0);
   const drag = useRef<{
     id: number;
     x: number;
@@ -165,8 +167,42 @@ export function RideMobilityMap({
 
   useEffect(() => {
     if (!follow || drag.current) return;
-    setDisplayCenter(center);
+    cancelAnimationFrame(cameraFrame.current);
+    const from = cameraCenter.current;
+    const to = center;
+    const reduced =
+      document.documentElement.dataset.reducedMotion === "true" ||
+      matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      cameraCenter.current = to;
+      const timer = window.setTimeout(() => setDisplayCenter(to), 0);
+      return () => window.clearTimeout(timer);
+    }
+    const started = performance.now();
+    const duration = 520;
+    const step = (now: number) => {
+      const t = Math.min(1, (now - started) / duration);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const value = {
+        lat: from.lat + (to.lat - from.lat) * eased,
+        lng: from.lng + (to.lng - from.lng) * eased,
+      };
+      cameraCenter.current = value;
+      setDisplayCenter(value);
+      if (t < 1) cameraFrame.current = requestAnimationFrame(step);
+    };
+    cameraFrame.current = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(cameraFrame.current);
   }, [center.lat, center.lng, follow]);
+
+  useEffect(() => {
+    if (drag.current) return;
+    const timer = window.setTimeout(
+      () => setCurrentZoom(Math.max(4, Math.min(19, zoom))),
+      0,
+    );
+    return () => window.clearTimeout(timer);
+  }, [zoom]);
 
   useEffect(() => {
     const node = root.current;
@@ -281,7 +317,9 @@ export function RideMobilityMap({
     if (!active || active.id !== event.pointerId) return;
     const x = active.origin.x - (event.clientX - active.x);
     const y = active.origin.y - (event.clientY - active.y);
-    setDisplayCenter(geographic(x, y, currentZoom));
+    const nextCenter = geographic(x, y, currentZoom);
+    cameraCenter.current = nextCenter;
+    setDisplayCenter(nextCenter);
   }
 
   function pointerUp(event: ReactPointerEvent<HTMLDivElement>) {
@@ -289,7 +327,7 @@ export function RideMobilityMap({
     if (!active || active.id !== event.pointerId) return;
     drag.current = null;
     if (selecting) liftPin(false);
-    onCenterChange?.(displayCenter);
+    onCenterChange?.(cameraCenter.current);
   }
 
   function zoomBy(delta: number) {
