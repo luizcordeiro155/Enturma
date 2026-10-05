@@ -278,9 +278,32 @@ public class RideMobilityService {
   @Transactional
   public void liveLocation(
       Actor actor, UUID matchId, double lat, double lng, int accuracyMeters) {
+    liveLocation(actor, matchId, lat, lng, accuracyMeters, null, null, null);
+  }
+
+  @Transactional
+  public void liveLocation(
+      Actor actor,
+      UUID matchId,
+      double lat,
+      double lng,
+      int accuracyMeters,
+      Double speedMps,
+      Double heading,
+      Instant capturedAt) {
     validCoordinate(lat, lng);
     if (accuracyMeters < 0 || accuracyMeters > 50000)
       throw ApiException.invalid("A precisão da localização é inválida.");
+    if (accuracyMeters > 1500)
+      throw ApiException.invalid("A precisão atual do GPS é insuficiente para a carona.");
+    if (speedMps != null && (speedMps < 0 || speedMps > 100))
+      throw ApiException.invalid("A velocidade informada pelo GPS é inválida.");
+    if (heading != null && (heading < 0 || heading > 360))
+      throw ApiException.invalid("A direção informada pelo GPS é inválida.");
+    Instant captured = capturedAt == null ? Instant.now() : capturedAt;
+    if (captured.isBefore(Instant.now().minus(Duration.ofMinutes(2)))
+        || captured.isAfter(Instant.now().plusSeconds(30)))
+      throw ApiException.invalid("A posição recebida está desatualizada.");
     var match = acceptedMatch(actor, matchId, true);
     requireActive(match);
     String trip = String.valueOf(match.get("tripStatus"));
@@ -288,14 +311,19 @@ public class RideMobilityService {
       throw ApiException.invalid(
           "A localização em tempo real só fica disponível durante o deslocamento.");
     db.jdbc.update(
-        "INSERT INTO ride_live_location(match_id,user_id,lat,lng,accuracy_m)"
-            + " VALUES (?,?,?,?,?) ON CONFLICT(match_id,user_id) DO UPDATE SET"
-            + " lat=EXCLUDED.lat,lng=EXCLUDED.lng,accuracy_m=EXCLUDED.accuracy_m,updated_at=now()",
+        "INSERT INTO ride_live_location(match_id,user_id,lat,lng,accuracy_m,heading,speed_mps,captured_at)"
+            + " VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(match_id,user_id) DO UPDATE SET"
+            + " lat=EXCLUDED.lat,lng=EXCLUDED.lng,accuracy_m=EXCLUDED.accuracy_m,"
+            + " heading=EXCLUDED.heading,speed_mps=EXCLUDED.speed_mps,"
+            + " captured_at=EXCLUDED.captured_at,updated_at=now()",
         matchId,
         actor.id(),
         lat,
         lng,
-        accuracyMeters);
+        accuracyMeters,
+        heading,
+        speedMps,
+        java.sql.Timestamp.from(captured));
     changedMatch(match);
   }
 
@@ -309,7 +337,7 @@ public class RideMobilityService {
             : (UUID) match.get("driverId");
     var rows =
         db.list(
-            "SELECT lat,lng,accuracy_m,updated_at FROM ride_live_location"
+            "SELECT lat,lng,accuracy_m,heading,speed_mps,captured_at,updated_at FROM ride_live_location"
                 + " WHERE match_id=? AND user_id=? AND updated_at>now()-interval '2 minutes'",
             matchId,
             peer);
