@@ -6,6 +6,8 @@ import br.com.enturma.common.*;
 import br.com.enturma.notifications.NotificationService;
 import java.time.*;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RideMobilityService {
+  private static final Logger log = LoggerFactory.getLogger(RideMobilityService.class);
   private static final Set<String> LIVE_STATUSES =
       Set.of("DRIVER_ON_THE_WAY", "ARRIVING", "WAITING_PASSENGER", "IN_PROGRESS");
   private static final Map<String, Set<String>> NEXT =
@@ -222,6 +225,12 @@ public class RideMobilityService {
           "UPDATE ride_driver_availability SET enabled=false,status='OFFLINE',offer_ride_id=NULL,"
               + " pending_match_id=NULL,updated_at=now() WHERE offer_ride_id=?",
           rideId);
+    log.info(
+        "ride_status ride={} actor={} from={} to={}",
+        rideId,
+        actor.id(),
+        current,
+        next);
     notifyRide(actor.id(), rideId, "RIDE_STATUS", message);
     changedRide(rideId, true);
   }
@@ -272,6 +281,7 @@ public class RideMobilityService {
         UUID.randomUUID(),
         matchId,
         actor.id());
+    log.info("ride_boarded match={} driver={}", matchId, actor.id());
     changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
   }
 
