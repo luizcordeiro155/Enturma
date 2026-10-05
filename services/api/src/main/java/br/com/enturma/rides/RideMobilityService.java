@@ -169,11 +169,18 @@ public class RideMobilityService {
     String current = String.valueOf(ride.get("tripStatus"));
     if (!NEXT.getOrDefault(current, Set.of()).contains(next))
       throw ApiException.invalid("Esta mudança de status da carona não é permitida agora.");
-    if (next.equals("IN_PROGRESS")
-        && !db.exists(
-            "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED')",
-            rideId))
-      throw ApiException.invalid("Confirme pelo menos um passageiro antes de iniciar a viagem.");
+    if (next.equals("IN_PROGRESS")) {
+      if (!db.exists(
+          "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED')",
+          rideId))
+        throw ApiException.invalid("Confirme pelo menos um passageiro antes de iniciar a viagem.");
+      if (db.exists(
+          "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED'"
+              + " AND boarded_at IS NULL)",
+          rideId))
+        throw ApiException.invalid(
+            "Confirme o embarque de todos os passageiros com o PIN antes de iniciar a viagem.");
+    }
 
     Instant now = Instant.now();
     if (next.equals("COMPLETED")) {
@@ -251,6 +258,8 @@ public class RideMobilityService {
     var match = acceptedMatch(actor, matchId, true);
     requireActive(match);
     if (!actor.id().equals(match.get("driverId"))) throw ApiException.forbidden();
+    if (!"WAITING_PASSENGER".equals(match.get("tripStatus")))
+      throw ApiException.invalid("Confirme o embarque somente depois de chegar ao ponto de encontro.");
     String expected = match.get("boardingCode") == null ? "" : String.valueOf(match.get("boardingCode"));
     if (!expected.equals(code))
       throw new ApiException(409, "BOARDING_CODE_INVALID", "O código de embarque está incorreto.");
