@@ -418,45 +418,72 @@ function BottomSheet({
 }) {
   const ref = useRef<HTMLElement>(null);
   const drag = useRef<{ y: number; base: number } | null>(null);
+  const springFrame = useRef(0);
+  const position = useRef(expanded ? 0 : 34);
   const [snap, setSnap] = useState<"compact" | "medium" | "expanded">(
     expanded ? "expanded" : "medium",
   );
-  useEffect(() => {
-    if (expanded) setSnap("expanded");
-  }, [expanded]);
   function translateFor(value: typeof snap) {
     if (value === "expanded") return 0;
     if (value === "medium") return 34;
     return 68;
   }
   function move(to: typeof snap) {
-    setSnap(to);
     const node = ref.current;
     if (!node) return;
-    node.animate(
-      [
-        {
-          transform:
-            node.style.transform || `translateY(${translateFor(snap)}%)`,
-        },
-        { transform: `translateY(${translateFor(to)}%)` },
-      ],
-      {
-        duration:
-          document.documentElement.dataset.reducedMotion === "true" ? 1 : 320,
-        easing: "cubic-bezier(.2,.8,.2,1)",
-        fill: "forwards",
-      },
-    );
+    cancelAnimationFrame(springFrame.current);
+    const target = translateFor(to);
+    const reduced =
+      document.documentElement.dataset.reducedMotion === "true" ||
+      matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) {
+      position.current = target;
+      node.style.transform = `translateY(${target}%)`;
+      setSnap(to);
+      return;
+    }
+    let x = position.current;
+    let velocity = 0;
+    let last = performance.now();
+    const stiffness = 210;
+    const damping = 26;
+    const step = (now: number) => {
+      const dt = Math.min(0.032, Math.max(0.001, (now - last) / 1000));
+      last = now;
+      const force = (target - x) * stiffness;
+      const resistance = velocity * damping;
+      velocity += (force - resistance) * dt;
+      x += velocity * dt;
+      position.current = x;
+      node.style.transform = `translateY(${x}%)`;
+      if (Math.abs(target - x) < 0.08 && Math.abs(velocity) < 0.12) {
+        position.current = target;
+        node.style.transform = `translateY(${target}%)`;
+        setSnap(to);
+        return;
+      }
+      springFrame.current = requestAnimationFrame(step);
+    };
+    springFrame.current = requestAnimationFrame(step);
   }
+  useEffect(() => {
+    if (!expanded) return;
+    const timer = window.setTimeout(() => move("expanded"), 0);
+    return () => {
+      window.clearTimeout(timer);
+      cancelAnimationFrame(springFrame.current);
+    };
+  }, [expanded]);
   function down(event: ReactPointerEvent<HTMLButtonElement>) {
+    cancelAnimationFrame(springFrame.current);
     event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current = { y: event.clientY, base: translateFor(snap) };
+    drag.current = { y: event.clientY, base: position.current };
   }
   function dragMove(event: ReactPointerEvent<HTMLButtonElement>) {
     if (!drag.current || !ref.current) return;
     const delta = ((event.clientY - drag.current.y) / window.innerHeight) * 100;
     const value = Math.max(0, Math.min(72, drag.current.base + delta));
+    position.current = value;
     ref.current.style.transform = `translateY(${value}%)`;
   }
   function up(event: ReactPointerEvent<HTMLButtonElement>) {
