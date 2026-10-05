@@ -108,6 +108,17 @@ public class RequestSecurity extends OncePerRequestFilter {
         prefix = "auth:";
         limit = 20;
         windowSeconds = 60;
+      } else if (uri.equals("/api/v1/rides/driver/availability/location")
+          || uri.matches("/api/v1/matches/[^/]+/location")) {
+        prefix = "ride-location:";
+        limit = 90;
+        windowSeconds = 60;
+      } else if (uri.startsWith("/api/v1/rides/dispatch/")
+          || uri.contains("/driver/requests/")
+          || uri.matches("/api/v1/matches/[^/]+/(accept|cancel|cancel-reason|board|review)")) {
+        prefix = "ride-action:";
+        limit = 30;
+        windowSeconds = 60;
       } else if (importRoute) {
         prefix = "catalog:";
         limit = 20;

@@ -1,4 +1,10 @@
-import { Rides } from "@/components/rides";
+import { Shell } from "@/components/shell";
+import { RideMobilityExperience } from "@/components/ride-mobility-experience";
+
 export default function Page() {
-  return <Rides />;
+  return (
+    <Shell>
+      <RideMobilityExperience />
+    </Shell>
+  );
 }

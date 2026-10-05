@@ -210,6 +210,11 @@ public class RideMobilityService {
           case "CANCELLED" -> "A carona foi cancelada.";
           default -> "O status da sua carona foi atualizado.";
         };
+    if (Set.of("COMPLETED", "CANCELLED").contains(next))
+      db.jdbc.update(
+          "UPDATE ride_driver_availability SET enabled=false,status='OFFLINE',offer_ride_id=NULL,"
+              + " pending_match_id=NULL,updated_at=now() WHERE offer_ride_id=?",
+          rideId);
     notifyRide(actor.id(), rideId, "RIDE_STATUS", message);
     changedRide(rideId, true);
   }

@@ -384,7 +384,7 @@ public class RideService {
       if (m.get("requestRideId") != null
           && Instant.parse((String) m.get("departureAt")).isAfter(Instant.now()))
         db.jdbc.update(
-            "UPDATE ride SET status='OPEN' WHERE id=? AND status='COMPLETED'",
+            "UPDATE ride SET status='OPEN',trip_status='MATCHING' WHERE id=? AND status='COMPLETED'",
             m.get("requestRideId"));
       close(id);
       UUID peer =
@@ -397,6 +397,11 @@ public class RideService {
           id,
           "/caronas/matches?match=" + id,
           "O pedido de carona foi cancelado. A conversa e a chamada foram encerradas.");
+      if (a.id().equals(m.get("driverId")))
+        db.jdbc.update(
+            "UPDATE ride_driver_availability SET status='ONLINE',offer_ride_id=NULL,"
+                + " pending_match_id=NULL,updated_at=now() WHERE user_id=? AND enabled=true",
+            a.id());
       if (released) promoteWaitlist((UUID) m.get("rideId"));
       changed((UUID) m.get("rideId"), true);
     }
@@ -567,6 +572,10 @@ public class RideService {
               ? "A carona foi cancelada."
               : "A carona foi concluída. Você já pode avaliar a experiência.");
     }
+    db.jdbc.update(
+        "UPDATE ride_driver_availability SET enabled=false,status='OFFLINE',offer_ride_id=NULL,"
+            + " pending_match_id=NULL,updated_at=now() WHERE offer_ride_id=?",
+        id);
     changed(id, true);
   }
 

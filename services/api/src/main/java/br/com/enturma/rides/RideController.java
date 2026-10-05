@@ -14,12 +14,20 @@ public class RideController {
   private final RideService rides;
   private final RideMatchingService matching;
   private final RideMobilityService mobility;
+  private final RideDispatchService dispatch;
+  private final RideMapService maps;
 
   public RideController(
-      RideService rides, RideMatchingService matching, RideMobilityService mobility) {
+      RideService rides,
+      RideMatchingService matching,
+      RideMobilityService mobility,
+      RideDispatchService dispatch,
+      RideMapService maps) {
     this.rides = rides;
     this.matching = matching;
     this.mobility = mobility;
+    this.dispatch = dispatch;
+    this.maps = maps;
   }
 
   public record Create(
@@ -84,6 +92,155 @@ public class RideController {
       @DecimalMin("-180") @DecimalMax("180") double lng) {}
 
   public record MeetingZone(@NotNull UUID zoneId) {}
+
+  public record MobilityPreference(
+      @NotNull UUID campusId,
+      @Size(max = 240) String homeLabel,
+      Double homeLat,
+      Double homeLng,
+      boolean onboardingDone) {}
+
+  public record DispatchSearch(
+      @NotNull UUID campusId,
+      @NotBlank String direction,
+      @NotBlank @Size(max = 240) String startLabel,
+      double startLat,
+      double startLng,
+      @NotBlank @Size(max = 240) String endLabel,
+      double endLat,
+      double endLng,
+      @Min(0) int routeDistanceMeters,
+      @Min(0) int routeDurationSeconds) {}
+
+  public record DriverAvailability(
+      @NotNull UUID campusId,
+      @NotBlank String direction,
+      @Min(1) @Max(8) int seats,
+      @NotBlank @Size(max = 240) String startLabel,
+      double startLat,
+      double startLng,
+      @NotBlank @Size(max = 240) String endLabel,
+      double endLat,
+      double endLng,
+      double lat,
+      double lng,
+      @Min(0) @Max(50000) int accuracyMeters) {}
+
+  public record DriverLocation(
+      double lat,
+      double lng,
+      @Min(0) @Max(50000) int accuracyMeters,
+      Double speedMps,
+      Double heading) {}
+
+  public record DispatchCancel(
+      @NotBlank @Size(max = 40) String reason,
+      @Size(max = 300) String note) {}
+
+  public record RoutePoint(double lat, double lng) {}
+  public record RouteRequest(@NotEmpty @Size(max = 8) java.util.List<@Valid RoutePoint> points) {}
+
+  @GetMapping("/rides/mobility/state")
+  public Object mobilityState(@AuthenticationPrincipal Actor a) {
+    return dispatch.state(a);
+  }
+
+  @PutMapping("/rides/mobility/preferences")
+  public Object mobilityPreference(
+      @AuthenticationPrincipal Actor a, @Valid @RequestBody MobilityPreference r) {
+    return dispatch.savePreference(
+        a, r.campusId(), r.homeLabel(), r.homeLat(), r.homeLng(), r.onboardingDone());
+  }
+
+  @GetMapping("/rides/map/search")
+  public Object mapSearch(
+      @RequestParam String q,
+      @RequestParam(required = false) Double lat,
+      @RequestParam(required = false) Double lng) {
+    return maps.search(q, lat, lng);
+  }
+
+  @GetMapping("/rides/map/reverse")
+  public Object mapReverse(@RequestParam double lat, @RequestParam double lng) {
+    return maps.reverse(lat, lng);
+  }
+
+  @PostMapping("/rides/map/route")
+  public Object mapRoute(@Valid @RequestBody RouteRequest r) {
+    return maps.route(
+        r.points().stream().map(p -> new RideMapService.Point(p.lat(), p.lng())).toList());
+  }
+
+  @PostMapping("/rides/dispatch/search")
+  public Object dispatchSearch(
+      @AuthenticationPrincipal Actor a, @Valid @RequestBody DispatchSearch r) {
+    return dispatch.startPassengerSearch(
+        a,
+        r.campusId(),
+        r.direction(),
+        r.startLabel(),
+        r.startLat(),
+        r.startLng(),
+        r.endLabel(),
+        r.endLat(),
+        r.endLng(),
+        r.routeDistanceMeters(),
+        r.routeDurationSeconds());
+  }
+
+  @PostMapping("/rides/dispatch/cancel")
+  public void dispatchCancel(
+      @AuthenticationPrincipal Actor a, @Valid @RequestBody DispatchCancel r) {
+    dispatch.cancelPassengerSearch(a, r.reason(), r.note());
+  }
+
+  @PutMapping("/rides/driver/availability")
+  public Object driverAvailability(
+      @AuthenticationPrincipal Actor a, @Valid @RequestBody DriverAvailability r) {
+    return dispatch.setDriverAvailability(
+        a,
+        r.campusId(),
+        r.direction(),
+        r.seats(),
+        r.startLabel(),
+        r.startLat(),
+        r.startLng(),
+        r.endLabel(),
+        r.endLat(),
+        r.endLng(),
+        r.lat(),
+        r.lng(),
+        r.accuracyMeters());
+  }
+
+  @PutMapping("/rides/driver/availability/location")
+  public void driverAvailabilityLocation(
+      @AuthenticationPrincipal Actor a, @Valid @RequestBody DriverLocation r) {
+    dispatch.updateDriverLocation(
+        a, r.lat(), r.lng(), r.accuracyMeters(), r.speedMps(), r.heading());
+  }
+
+  @DeleteMapping("/rides/driver/availability")
+  public void stopDriverAvailability(@AuthenticationPrincipal Actor a) {
+    dispatch.stopDriverAvailability(a);
+  }
+
+  @GetMapping("/rides/driver/requests")
+  public Object driverRequests(@AuthenticationPrincipal Actor a) {
+    return dispatch.driverRequests(a);
+  }
+
+  @PostMapping("/rides/driver/requests/{id}/accept")
+  public Object acceptDriverRequest(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    return dispatch.acceptRequest(a, id);
+  }
+
+  @PostMapping("/rides/driver/requests/{id}/reject")
+  public void rejectDriverRequest(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    dispatch.rejectRequest(a, id);
+  }
 
   @GetMapping("/rides")
   public Object list(
@@ -283,6 +440,15 @@ public class RideController {
 
   @PostMapping("/matches/{id}/cancel")
   public void cancelMatch(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    rides.cancelMatch(a, id);
+  }
+
+  @PostMapping("/matches/{id}/cancel-reason")
+  public void cancelMatchWithReason(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID id,
+      @Valid @RequestBody DispatchCancel r) {
+    dispatch.recordMatchCancellation(a, id, r.reason(), r.note());
     rides.cancelMatch(a, id);
   }
 
