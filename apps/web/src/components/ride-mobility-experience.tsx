@@ -542,6 +542,8 @@ export function RideMobilityExperience() {
   const [cancelNote, setCancelNote] = useState("");
   const [driverSeats, setDriverSeats] = useState(1);
   const [reviewTags, setReviewTags] = useState<string[]>([]);
+  const mobilityRoot = useRef<HTMLDivElement>(null);
+  const modeSwitchRef = useRef<HTMLDivElement>(null);
   const locationWatch = useRef<number | undefined>(undefined);
   const lastSent = useRef<{ at: number; point: MapPoint } | null>(null);
   const activeRouteAt = useRef(0);
@@ -621,6 +623,42 @@ export function RideMobilityExperience() {
   const availability = state?.driverAvailability ?? undefined;
   const recentCompleted = state?.recentCompleted ?? undefined;
   const activeLocked = !!activeMatch;
+
+  function changeMode(nextMode: Mode) {
+    if (activeLocked || nextMode === mode) return;
+    setMode(nextMode);
+    const direction = nextMode === "DRIVER" ? 1 : -1;
+    requestAnimationFrame(() => {
+      const switcher = modeSwitchRef.current;
+      const panel = mobilityRoot.current?.querySelector<HTMLElement>(".ride-sheet-content");
+      const reduced =
+        document.documentElement.dataset.reducedMotion === "true" ||
+        matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (switcher && !reduced)
+        switcher.animate(
+          [
+            { transform: "scale(.985)" },
+            { transform: "scale(1.018)", offset: 0.55 },
+            { transform: "scale(1)" },
+          ],
+          { duration: 280, easing: "cubic-bezier(.2,.8,.2,1)" },
+        );
+      if (panel && !reduced)
+        panel.animate(
+          [
+            {
+              opacity: 0.35,
+              transform: `translate3d(${direction * 18}px,0,0)`,
+            },
+            { opacity: 1, transform: "translate3d(0,0,0)" },
+          ],
+          {
+            duration: 330,
+            easing: "cubic-bezier(.16,1,.3,1)",
+          },
+        );
+    });
+  }
 
   const acquire = useCallback(async () => {
     setBusy(true);
@@ -1196,10 +1234,40 @@ export function RideMobilityExperience() {
     nearbyDrivers,
     activeRequest?.id,
   ]);
+  const trackingPair =
+    activeMatch &&
+    location &&
+    peer?.available &&
+    peer.lat != null &&
+    peer.lng != null
+      ? {
+          mine: location,
+          peer: { lat: peer.lat, lng: peer.lng },
+        }
+      : undefined;
+  const pairDistance = trackingPair
+    ? distance(trackingPair.mine, trackingPair.peer)
+    : 0;
   const mapCenter =
-    follow && peer?.available && peer.lat != null && peer.lng != null
-      ? { lat: peer.lat, lng: peer.lng }
+    follow && trackingPair
+      ? {
+          lat: (trackingPair.mine.lat + trackingPair.peer.lat) / 2,
+          lng: (trackingPair.mine.lng + trackingPair.peer.lng) / 2,
+        }
       : location ?? campusPoint;
+  const mapZoom = trackingPair
+    ? pairDistance > 12
+      ? 10
+      : pairDistance > 6
+        ? 11
+        : pairDistance > 3
+          ? 12
+          : pairDistance > 1.5
+            ? 13
+            : pairDistance > 0.6
+              ? 14
+              : 15
+    : 15;
 
   async function advanceTrip(status: string) {
     if (!activeMatch) return;
@@ -1221,6 +1289,26 @@ export function RideMobilityExperience() {
     ARRIVED: ["COMPLETED", "Finalizar carona"],
   };
 
+  useEffect(() => {
+    if (!activeMatch) return;
+    const timer = window.setTimeout(() => {
+      const panel = mobilityRoot.current?.querySelector<HTMLElement>(".ride-bottom-sheet");
+      if (!panel) return;
+      const reduced =
+        document.documentElement.dataset.reducedMotion === "true" ||
+        matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (reduced) return;
+      panel.animate(
+        [
+          { opacity: 0.7, transform: "translateY(8px) scale(.99)" },
+          { opacity: 1, transform: "translateY(0) scale(1)" },
+        ],
+        { duration: 420, easing: "cubic-bezier(.16,1,.3,1)" },
+      );
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [activeMatch?.id]);
+
   if (!state)
     return (
       <div className="ride-mobility-boot">
@@ -1229,10 +1317,11 @@ export function RideMobilityExperience() {
     );
 
   return (
-    <div className="ride-mobility-app">
+    <div className="ride-mobility-app" ref={mobilityRoot}>
       {mapCenter ? (
         <RideMobilityMap
           center={mapCenter}
+          zoom={mapZoom}
           markers={markers}
           route={routeGeometry}
           selecting={selectOnMap}
@@ -1253,12 +1342,16 @@ export function RideMobilityExperience() {
         <Link href="/home" className="ride-circle-button" aria-label="Voltar">
           <ArrowLeft size={20} />
         </Link>
-        <div className="ride-mode-switch" aria-label="Modo da carona">
+        <div
+          className="ride-mode-switch"
+          aria-label="Modo da carona"
+          ref={modeSwitchRef}
+        >
           <button
             type="button"
             aria-pressed={mode === "PASSENGER"}
             disabled={activeLocked}
-            onClick={() => setMode("PASSENGER")}
+            onClick={() => changeMode("PASSENGER")}
           >
             <Users size={16} /> Passageiro
           </button>
@@ -1266,7 +1359,7 @@ export function RideMobilityExperience() {
             type="button"
             aria-pressed={mode === "DRIVER"}
             disabled={activeLocked}
-            onClick={() => setMode("DRIVER")}
+            onClick={() => changeMode("DRIVER")}
           >
             <Car size={16} /> Motorista
           </button>
