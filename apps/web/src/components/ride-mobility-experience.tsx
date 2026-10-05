@@ -150,6 +150,17 @@ type DriverRequest = {
   approxLat: number;
   approxLng: number;
 };
+type NearbyDriver = {
+  id: string;
+  lat: number;
+  lng: number;
+  heading?: number | null;
+  distanceKm?: number;
+};
+type NearbyDriversPayload = {
+  radiusKm: number;
+  drivers: NearbyDriver[];
+};
 type PeerLocation = {
   available: boolean;
   lat?: number;
@@ -443,6 +454,8 @@ export function RideMobilityExperience() {
   const [locationLabel, setLocationLabel] = useState("Sua localização");
   const [selectOnMap, setSelectOnMap] = useState(false);
   const [driverRequests, setDriverRequests] = useState<DriverRequest[]>([]);
+  const [nearbyDrivers, setNearbyDrivers] = useState<NearbyDriver[]>([]);
+  const [searchRadiusKm, setSearchRadiusKm] = useState(5);
   const [peer, setPeer] = useState<PeerLocation>();
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -479,11 +492,17 @@ export function RideMobilityExperience() {
   }, []);
 
   useEffect(() => {
-    void load().catch((e) => setError(e.message));
+    const timer = window.setTimeout(() => {
+      void load().catch((e) => setError(e.message));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
   useEffect(() => {
-    const saved = localStorage.getItem("enturma-ride-mode");
-    if (saved === "PASSENGER" || saved === "DRIVER") setMode(saved);
+    const timer = window.setTimeout(() => {
+      const saved = localStorage.getItem("enturma-ride-mode");
+      if (saved === "PASSENGER" || saved === "DRIVER") setMode(saved);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, []);
   useEffect(() => {
     localStorage.setItem("enturma-ride-mode", mode);
@@ -491,7 +510,14 @@ export function RideMobilityExperience() {
 
   const live = useRideUpdates(async () => {
     try {
-      await load();
+      const { next } = await load();
+      if (next.activeRequest)
+        await refreshNearbyDrivers(next.activeRequest).catch(() => {});
+      else setNearbyDrivers([]);
+      if (next.activeMatch)
+        await refreshPeerLocation(next.activeMatch.id).catch(() => {});
+      if (next.driverAvailability?.enabled && !next.activeMatch)
+        await loadDriverRequests();
     } catch (e) {
       setError((e as Error).message);
     }
@@ -617,6 +643,26 @@ export function RideMobilityExperience() {
     }
   }
 
+  async function refreshNearbyDrivers(request: ActiveRequest) {
+    const params = new URLSearchParams({
+      campusId: request.campusId,
+      direction: request.direction,
+    });
+    const payload = await api<NearbyDriversPayload>(
+      `/rides/dispatch/nearby-drivers?${params}`,
+      { cache: "no-store" },
+    );
+    setNearbyDrivers(payload.drivers);
+    setSearchRadiusKm(payload.radiusKm);
+  }
+
+  async function refreshPeerLocation(matchId: string) {
+    const next = await api<PeerLocation>(`/matches/${matchId}/location`, {
+      cache: "no-store",
+    });
+    setPeer(next);
+  }
+
   async function startPassenger() {
     if (!pref?.campusId || !campusPoint || !selected || !route) return;
     const start =
@@ -650,7 +696,8 @@ export function RideMobilityExperience() {
         routeDurationSeconds: route.durationSeconds,
       });
       setNotice("Buscando motoristas compatíveis com sua rota.");
-      await load();
+      const { next } = await load();
+      if (next.activeRequest) await refreshNearbyDrivers(next.activeRequest);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -671,12 +718,15 @@ export function RideMobilityExperience() {
   }
 
   useEffect(() => {
-    if (mode !== "DRIVER" || !availability?.enabled || activeMatch) {
-      setDriverRequests([]);
-      return;
-    }
-    void loadDriverRequests();
-  }, [mode, availability?.enabled, activeMatch?.id, live]);
+    const timer = window.setTimeout(() => {
+      if (mode !== "DRIVER" || !availability?.enabled || activeMatch) {
+        setDriverRequests([]);
+        return;
+      }
+      void loadDriverRequests();
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [mode, availability?.enabled, activeMatch?.id]);
 
   async function startDriver() {
     if (!pref?.campusId || !campusPoint) return;
@@ -865,26 +915,50 @@ export function RideMobilityExperience() {
 
   useEffect(() => {
     if (!activeMatch) {
-      setPeer(undefined);
-      return;
+      const timer = window.setTimeout(() => setPeer(undefined), 0);
+      return () => window.clearTimeout(timer);
     }
-    let alive = true;
-    const refresh = async () => {
-      try {
-        const next = await api<PeerLocation>(
-          `/matches/${activeMatch.id}/location`,
-          { cache: "no-store" },
-        );
-        if (alive) setPeer(next);
-      } catch {}
-    };
-    void refresh();
-    const timer = window.setInterval(refresh, 8000);
+    const first = window.setTimeout(
+      () => void refreshPeerLocation(activeMatch.id).catch(() => {}),
+      0,
+    );
+    if (live) return () => window.clearTimeout(first);
+    const fallback = window.setInterval(
+      () => void refreshPeerLocation(activeMatch.id).catch(() => {}),
+      15000,
+    );
     return () => {
-      alive = false;
-      window.clearInterval(timer);
+      window.clearTimeout(first);
+      window.clearInterval(fallback);
     };
   }, [activeMatch?.id, live]);
+
+  useEffect(() => {
+    if (!activeRequest) {
+      const timer = window.setTimeout(() => setNearbyDrivers([]), 0);
+      return () => window.clearTimeout(timer);
+    }
+    const first = window.setTimeout(
+      () => void refreshNearbyDrivers(activeRequest).catch(() => {}),
+      0,
+    );
+    if (live) return () => window.clearTimeout(first);
+    const fallback = window.setInterval(
+      () => void refreshNearbyDrivers(activeRequest).catch(() => {}),
+      15000,
+    );
+    return () => {
+      window.clearTimeout(first);
+      window.clearInterval(fallback);
+    };
+  }, [activeRequest?.id, live]);
+
+  useEffect(() => {
+    if (!activeMatch || mode !== "PASSENGER") return;
+    if (!["ARRIVING", "WAITING_PASSENGER"].includes(activeMatch.tripStatus)) return;
+    if (!("vibrate" in navigator)) return;
+    navigator.vibrate(activeMatch.tripStatus === "WAITING_PASSENGER" ? [180, 100, 180] : 120);
+  }, [activeMatch?.tripStatus, activeMatch?.id, mode]);
 
   useEffect(() => {
     if (
@@ -981,6 +1055,16 @@ export function RideMobilityExperience() {
           label: request.area,
         }),
       );
+    if (mode === "PASSENGER" && activeRequest && !activeMatch)
+      nearbyDrivers.forEach((driver) =>
+        rows.push({
+          id: driver.id,
+          point: { lat: driver.lat, lng: driver.lng },
+          kind: "driver",
+          heading: driver.heading,
+          label: "Motorista disponível",
+        }),
+      );
     return rows;
   }, [
     location,
@@ -993,6 +1077,8 @@ export function RideMobilityExperience() {
     activeMatch?.id,
     mode,
     driverRequests,
+    nearbyDrivers,
+    activeRequest?.id,
   ]);
   const mapCenter =
     follow && peer?.available && peer.lat != null && peer.lng != null
@@ -1287,8 +1373,9 @@ export function RideMobilityExperience() {
                 <>
                   <Radar label="Procurando motoristas próximos…" />
                   <p className="ride-search-copy">
-                    Priorizando estudantes no mesmo campus, sentido e rota, com
-                    menor desvio.
+                    Priorizando motoristas no mesmo campus, sentido e rota.
+                    Busca atual em até {searchRadiusKm} km, ampliada
+                    progressivamente sem relaxar a direção da viagem.
                   </p>
                   <button
                     type="button"
