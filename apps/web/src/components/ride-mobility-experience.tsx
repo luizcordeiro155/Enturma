@@ -11,6 +11,7 @@ import {
   Navigation,
   Route,
   ShieldCheck,
+  Star,
   Users,
   X,
 } from "lucide-react";
@@ -86,6 +87,7 @@ type ActiveMatch = {
   status: string;
   tripStatus: string;
   rideStatus: string;
+  boardedAt?: string | null;
   direction: Direction;
   campusId: string;
   campusName: string;
@@ -117,11 +119,13 @@ type Vehicle = {
   seats?: number;
   plateHint?: string;
 };
+type CompletedMatch = ActiveMatch & { reviewed?: boolean };
 type MobilityState = {
   preference: MobilityPreference;
   driverAvailability?: DriverAvailability | null;
   activeRequest?: ActiveRequest | null;
   activeMatch?: ActiveMatch | null;
+  recentCompleted?: CompletedMatch | null;
   vehicle?: Vehicle | null;
 };
 type LocationResult = {
@@ -356,6 +360,49 @@ function Radar({ label }: { label: string }) {
   );
 }
 
+function ArrivalCelebration() {
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const node = root.current;
+    if (!node) return;
+    const reduced =
+      document.documentElement.dataset.reducedMotion === "true" ||
+      matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduced) return;
+    const pieces = [...node.querySelectorAll<HTMLElement>("span")];
+    const animations = pieces.map((piece, index) =>
+      piece.animate(
+        [
+          { opacity: 0, transform: "translate3d(0,18px,0) scale(.7)" },
+          {
+            opacity: 1,
+            transform: `translate3d(${(index - 2) * 14}px,-10px,0) scale(1)`,
+            offset: 0.45,
+          },
+          {
+            opacity: 0,
+            transform: `translate3d(${(index - 2) * 23}px,-42px,0) scale(.85)`,
+          },
+        ],
+        {
+          duration: 850 + index * 70,
+          delay: index * 45,
+          easing: "cubic-bezier(.2,.8,.2,1)",
+          fill: "both",
+        },
+      ),
+    );
+    return () => animations.forEach((animation) => animation.cancel());
+  }, []);
+  return (
+    <div className="ride-arrival-celebration" ref={root} aria-hidden="true">
+      {[0, 1, 2, 3, 4].map((value) => (
+        <span key={value}>✦</span>
+      ))}
+    </div>
+  );
+}
+
 function BottomSheet({
   children,
   expanded = false,
@@ -446,10 +493,7 @@ export function RideMobilityExperience() {
   const [direction, setDirection] = useState<Direction>("TO_CAMPUS");
   const [selected, setSelected] = useState<LocationResult>();
   const [route, setRoute] = useState<RouteResult>();
-  const [location, setLocation] = useState<MapPoint>({
-    lat: -19.92,
-    lng: -43.94,
-  });
+  const [location, setLocation] = useState<MapPoint>();
   const [accuracy, setAccuracy] = useState(0);
   const [locationLabel, setLocationLabel] = useState("Sua localização");
   const [selectOnMap, setSelectOnMap] = useState(false);
@@ -465,6 +509,7 @@ export function RideMobilityExperience() {
   const [cancelReason, setCancelReason] = useState("CHANGE_OF_PLANS");
   const [cancelNote, setCancelNote] = useState("");
   const [driverSeats, setDriverSeats] = useState(1);
+  const [reviewTags, setReviewTags] = useState<string[]>([]);
   const locationWatch = useRef<number | undefined>(undefined);
   const lastSent = useRef<{ at: number; point: MapPoint } | null>(null);
   const activeRouteAt = useRef(0);
@@ -488,6 +533,20 @@ export function RideMobilityExperience() {
       setMode("PASSENGER");
       setDirection(next.activeRequest.direction);
     }
+    const actualCenter =
+      next.driverAvailability?.enabled
+        ? point(next.driverAvailability.lat, next.driverAvailability.lng)
+        : next.activeMatch
+          ? next.activeMatch.driverId === user.id
+            ? point(next.activeMatch.startLat, next.activeMatch.startLng)
+            : point(
+                next.activeMatch.passengerStartLat,
+                next.activeMatch.passengerStartLng,
+              )
+          : next.activeRequest
+            ? point(next.activeRequest.startLat, next.activeRequest.startLng)
+            : point(next.preference?.campusLat, next.preference?.campusLng);
+    if (actualCenter) setLocation(actualCenter);
     return { next, user: user.id };
   }, []);
 
@@ -528,6 +587,7 @@ export function RideMobilityExperience() {
   const activeMatch = state?.activeMatch ?? undefined;
   const activeRequest = state?.activeRequest ?? undefined;
   const availability = state?.driverAvailability ?? undefined;
+  const recentCompleted = state?.recentCompleted ?? undefined;
   const activeLocked = !!activeMatch;
 
   const acquire = useCallback(async () => {
@@ -556,31 +616,6 @@ export function RideMobilityExperience() {
       setBusy(false);
     }
   }, []);
-
-  useEffect(() => {
-    if (!state) return;
-    if (activeMatch) {
-      const own =
-        activeMatch.driverId === me
-          ? point(activeMatch.startLat, activeMatch.startLng)
-          : point(
-              activeMatch.passengerStartLat,
-              activeMatch.passengerStartLng,
-            );
-      if (own) setLocation(own);
-      return;
-    }
-    if (activeRequest) {
-      setLocation({
-        lat: activeRequest.startLat,
-        lng: activeRequest.startLng,
-      });
-      return;
-    }
-    if (availability?.enabled) {
-      setLocation({ lat: availability.lat, lng: availability.lng });
-    }
-  }, [state, me]);
 
   const calculateRoute = useCallback(
     async (chosen: LocationResult, currentDirection = direction) => {
@@ -628,6 +663,7 @@ export function RideMobilityExperience() {
   }
 
   async function confirmMapPoint() {
+    if (!location) return;
     setBusy(true);
     try {
       const value = await api<LocationResult>(
@@ -727,6 +763,49 @@ export function RideMobilityExperience() {
     }, 0);
     return () => window.clearTimeout(timer);
   }, [mode, availability?.enabled, activeMatch?.id]);
+
+  async function saveHome() {
+    if (!pref?.campusId || !selected) return;
+    try {
+      await api("/rides/mobility/preferences", {
+        method: "PUT",
+        body: JSON.stringify({
+          campusId: pref.campusId,
+          homeLabel: selected.label,
+          homeLat: selected.lat,
+          homeLng: selected.lng,
+          onboardingDone: true,
+        }),
+      });
+      setNotice("Casa salva para as próximas caronas.");
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    }
+  }
+
+  async function submitCompletedReview(rating: number) {
+    const completed = state?.recentCompleted;
+    if (!completed) return;
+    setBusy(true);
+    try {
+      await post(`/matches/${completed.id}/review`, {
+        rating,
+        punctuality: rating,
+        communication: rating,
+        respect: rating,
+        responsible: completed.passengerId === me ? rating >= 4 : null,
+        comment: reviewTags.join(" · "),
+      });
+      setNotice("Avaliação registrada. Obrigado por ajudar a comunidade.");
+      setReviewTags([]);
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
 
   async function startDriver() {
     if (!pref?.campusId || !campusPoint) return;
@@ -963,6 +1042,7 @@ export function RideMobilityExperience() {
   useEffect(() => {
     if (
       !activeMatch ||
+      !location ||
       !peer?.available ||
       peer.lat == null ||
       peer.lng == null
@@ -1006,8 +1086,8 @@ export function RideMobilityExperience() {
     peer?.lat,
     peer?.lng,
     me,
-    location.lat,
-    location.lng,
+    location?.lat,
+    location?.lng,
   ]);
 
   const routeGeometry = useMemo(
@@ -1016,7 +1096,8 @@ export function RideMobilityExperience() {
   );
   const markers = useMemo<MapMarker[]>(() => {
     const rows: MapMarker[] = [];
-    rows.push({ id: "me", point: location, kind: "me", label: "Você" });
+    if (location)
+      rows.push({ id: "me", point: location, kind: "me", label: "Você" });
     if (campusPoint)
       rows.push({
         id: "campus",
@@ -1083,7 +1164,7 @@ export function RideMobilityExperience() {
   const mapCenter =
     follow && peer?.available && peer.lat != null && peer.lng != null
       ? { lat: peer.lat, lng: peer.lng }
-      : location;
+      : location ?? campusPoint;
 
   async function advanceTrip(status: string) {
     if (!activeMatch) return;
@@ -1114,17 +1195,24 @@ export function RideMobilityExperience() {
 
   return (
     <div className="ride-mobility-app">
-      <RideMobilityMap
-        center={mapCenter}
-        markers={markers}
-        route={routeGeometry}
-        selecting={selectOnMap}
-        follow={follow}
-        onInteraction={() => setFollow(false)}
-        onCenterChange={(value) => {
-          if (selectOnMap) setLocation(value);
-        }}
-      />
+      {mapCenter ? (
+        <RideMobilityMap
+          center={mapCenter}
+          markers={markers}
+          route={routeGeometry}
+          selecting={selectOnMap}
+          follow={follow}
+          onInteraction={() => setFollow(false)}
+          onCenterChange={(value) => {
+            if (selectOnMap) setLocation(value);
+          }}
+        />
+      ) : (
+        <div className="ride-map-empty">
+          <LocateFixed size={34} />
+          <strong>Selecione seu campus para preparar o mapa</strong>
+        </div>
+      )}
 
       <div className="ride-map-top">
         <Link href="/home" className="ride-circle-button" aria-label="Voltar">
@@ -1343,7 +1431,16 @@ export function RideMobilityExperience() {
                 </button>
               </div>
 
-              {mode === "DRIVER" && nextStatus[activeMatch.tripStatus] ? (
+              {mode === "DRIVER" &&
+              activeMatch.tripStatus === "WAITING_PASSENGER" &&
+              !activeMatch.boardedAt ? (
+                <Link
+                  href={`/caronas/matches?match=${activeMatch.id}`}
+                  className="button ride-primary-action"
+                >
+                  Confirmar embarque com PIN
+                </Link>
+              ) : mode === "DRIVER" && nextStatus[activeMatch.tripStatus] ? (
                 <button
                   type="button"
                   className="ride-primary-action"
@@ -1365,6 +1462,51 @@ export function RideMobilityExperience() {
                 <Link href={`/caronas/matches?match=${activeMatch.id}`}>
                   Abrir
                 </Link>
+              </div>
+            </div>
+          ) : recentCompleted && !recentCompleted.reviewed ? (
+            <div className="ride-completed-sheet">
+              <ArrivalCelebration />
+              <small>Carona concluída</small>
+              <h2>Você chegou 🎉</h2>
+              <p>
+                Avalie {recentCompleted.driverId === me
+                  ? recentCompleted.passengerName
+                  : recentCompleted.driverName} para manter a comunidade útil.
+              </p>
+              <div className="ride-review-stars" aria-label="Avaliação">
+                {[1, 2, 3, 4, 5].map((rating) => (
+                  <button
+                    type="button"
+                    key={rating}
+                    disabled={busy}
+                    aria-label={`${rating} estrela${rating > 1 ? "s" : ""}`}
+                    onClick={() => void submitCompletedReview(rating)}
+                  >
+                    <Star size={24} fill="currentColor" /> {rating}
+                  </button>
+                ))}
+              </div>
+              <div className="ride-review-tags">
+                {["Pontual", "Educado", "Boa direção", "Comunicação boa"].map(
+                  (tag) => (
+                    <button
+                      type="button"
+                      className="secondary"
+                      aria-pressed={reviewTags.includes(tag)}
+                      key={tag}
+                      onClick={() =>
+                        setReviewTags((current) =>
+                          current.includes(tag)
+                            ? current.filter((item) => item !== tag)
+                            : [...current, tag],
+                        )
+                      }
+                    >
+                      {tag}
+                    </button>
+                  ),
+                )}
               </div>
             </div>
           ) : mode === "PASSENGER" ? (
@@ -1508,6 +1650,15 @@ export function RideMobilityExperience() {
                           </div>
                         ) : null}
                       </div>
+                      {direction === "FROM_CAMPUS" ? (
+                        <button
+                          type="button"
+                          className="text-button ride-save-home"
+                          onClick={() => void saveHome()}
+                        >
+                          <Home size={16} /> Salvar este destino como casa
+                        </button>
+                      ) : null}
                       <div className="ride-route-buttons">
                         <button
                           type="button"
