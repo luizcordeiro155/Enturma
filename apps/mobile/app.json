@@ -3,28 +3,31 @@
     "name": "Enturma",
     "slug": "enturma",
     "scheme": "enturma",
-    "version": "0.3.25",
+    "version": "0.3.26",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "br.com.enturma.app",
-      "buildNumber": "26",
+      "buildNumber": "27",
       "infoPlist": {
         "NSCameraUsageDescription": "Use sua câmera nas chamadas de estudo.",
         "NSMicrophoneUsageDescription": "Converse por voz com sua turma.",
-        "NSPhotoLibraryUsageDescription": "Escolha imagens para compartilhar ou personalizar seu perfil."
+        "NSPhotoLibraryUsageDescription": "Escolha imagens para compartilhar ou personalizar seu perfil.",
+        "NSLocationWhenInUseUsageDescription": "Use sua localização durante a carona para matching por proximidade e acompanhamento temporário quando você escolher compartilhar."
       }
     },
     "android": {
       "package": "br.com.enturma.app",
-      "versionCode": 28,
+      "versionCode": 29,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
         "FOREGROUND_SERVICE",
         "FOREGROUND_SERVICE_MEDIA_PROJECTION",
         "POST_NOTIFICATIONS",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
         "REQUEST_INSTALL_PACKAGES",
         "RECEIVE_BOOT_COMPLETED"
       ]

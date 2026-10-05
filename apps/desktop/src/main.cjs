@@ -56,6 +56,7 @@ const RELEASES_URL = "https://github.com/luizcordeiro155/Enturma/releases";
 const ALLOWED_PERMISSIONS = new Set([
   "media",
   "notifications",
+  "geolocation",
   "fullscreen",
   "pointerLock",
 ]);

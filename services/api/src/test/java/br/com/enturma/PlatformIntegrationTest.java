@@ -265,6 +265,8 @@ class PlatformIntegrationTest {
   @Autowired StudyService study;
   @Autowired ChatService chat;
   @Autowired RideService rides;
+  @Autowired RideMatchingService rideMatching;
+  @Autowired RideMobilityService rideMobility;
   @Autowired Db db;
   @Autowired MockMvc mvc;
   @Autowired CatalogImports imports;
@@ -1126,6 +1128,155 @@ class PlatformIntegrationTest {
     rides.cleanupConversations();
     assertThat(rides.access(host, second).get("closedAt")).isNotNull();
     assertThatThrownBy(() -> rides.message(outsider, second, "Muito tarde"))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void rideMobilityMatchesConfirmsBoardsTracksAndReviews() {
+    Instant departure = Instant.now().plusSeconds(3600);
+    UUID offer =
+        (UUID)
+            ((Map<?, ?>)
+                    rides.create(
+                        host,
+                        campus,
+                        "OFFER",
+                        "Caiçara",
+                        "TO_CAMPUS",
+                        departure,
+                        1,
+                        -19.911,
+                        -43.961,
+                        120))
+                .get("id");
+    var publicRide =
+        ((List<Map<String, Object>>) rides.list(member, campus, 0)).stream()
+            .filter(row -> row.get("id").equals(offer))
+            .findFirst()
+            .orElseThrow();
+    assertThat(publicRide).doesNotContainKeys("areaLat", "areaLng", "areaAccuracyM");
+    UUID request =
+        (UUID)
+            ((Map<?, ?>)
+                    rides.create(
+                        member,
+                        campus,
+                        "REQUEST",
+                        "Padre Eustáquio",
+                        "TO_CAMPUS",
+                        departure.plusSeconds(600),
+                        1,
+                        -19.918,
+                        -43.952,
+                        150))
+                .get("id");
+
+    var suggestions = rideMatching.suggestions(member, request);
+    assertThat(suggestions)
+        .anyMatch(row -> row.get("id").equals(offer) && ((Number) row.get("rank")).intValue() > 0);
+
+    var connected = (Map<?, ?>) rideMatching.connect(member, request, offer);
+    UUID match = (UUID) connected.get("id");
+    assertThat(connected.get("status")).isEqualTo("PENDING");
+
+    rides.accept(host, match);
+    assertThat(db.one("SELECT status FROM ride_match WHERE id=?", match).get("status"))
+        .isEqualTo("ACCEPTED");
+
+    rideMobility.confirm(member, match);
+    rideMobility.confirm(host, match);
+    String code =
+        String.valueOf(((Map<?, ?>) rideMobility.boardingCode(member, match)).get("code"));
+    assertThat(code).matches("[0-9]{4}");
+    rideMobility.board(host, match, code);
+    assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
+        .isNotNull();
+
+    rideMobility.tripStatus(host, offer, "DRIVER_ON_THE_WAY");
+    rideMobility.liveLocation(host, match, -19.912, -43.960, 15);
+    rideMobility.liveLocation(member, match, -19.918, -43.952, 20);
+    var peer = (Map<?, ?>) rideMobility.peerLocation(member, match);
+    assertThat(peer.get("available")).isEqualTo(true);
+    assertThat(((Number) peer.get("distanceKm")).doubleValue()).isGreaterThanOrEqualTo(0);
+
+    var share = (Map<?, ?>) rideMobility.createSafetyShare(member, match);
+    var publicView = (Map<?, ?>) rideMobility.publicSafety((UUID) share.get("token"));
+    assertThat(publicView.get("driverName")).isNotNull();
+    assertThat(publicView.get("passengerName")).isNotNull();
+
+    rideMobility.tripStatus(host, offer, "ARRIVING");
+    rideMobility.tripStatus(host, offer, "WAITING_PASSENGER");
+    rideMobility.tripStatus(host, offer, "IN_PROGRESS");
+    rideMobility.tripStatus(host, offer, "ARRIVED");
+    rideMobility.tripStatus(host, offer, "COMPLETED");
+
+    rides.review(member, match, 5, 5, 5, 5, true, "Viagem tranquila");
+    var reputation = (Map<?, ?>) rideMobility.reputation(host.id());
+    assertThat(((Number) reputation.get("rating")).doubleValue()).isEqualTo(5.0);
+    assertThat(((Number) reputation.get("completedTrips")).intValue()).isGreaterThanOrEqualTo(1);
+  }
+
+  @Test
+  void rideWaitlistPromotesAfterAcceptedPassengerCancels() {
+    UUID ride =
+        (UUID)
+            ((Map<?, ?>)
+                    rides.create(
+                        host,
+                        campus,
+                        "OFFER",
+                        "Caiçara",
+                        "TO_CAMPUS",
+                        Instant.now().plusSeconds(3600),
+                        1))
+                .get("id");
+    UUID accepted = (UUID) ((Map<?, ?>) rides.interest(member, ride)).get("id");
+    rides.accept(host, accepted);
+
+    var waitingResult = (Map<?, ?>) rides.interest(outsider, ride);
+    UUID waiting = (UUID) waitingResult.get("id");
+    assertThat(waitingResult.get("status")).isEqualTo("WAITLISTED");
+
+    rides.cancelMatch(member, accepted);
+    assertThat(db.one("SELECT status FROM ride_match WHERE id=?", waiting).get("status"))
+        .isEqualTo("PENDING");
+  }
+
+  @Test
+  void recurringRidesAndVehicleProfileStayOwnedAndGenerateUpcomingTrips() {
+    var vehicle =
+        (Map<?, ?>)
+            rideMobility.saveVehicle(host, "Honda", "Fit", "Prata", 2020, 3, "••1A23");
+    assertThat(vehicle.get("model")).isEqualTo("Fit");
+
+    int weekday = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Sao_Paulo"))
+        .plusDays(1)
+        .getDayOfWeek()
+        .getValue();
+    UUID recurrence =
+        (UUID)
+            ((Map<?, ?>)
+                    rideMobility.createRecurrence(
+                        host,
+                        campus,
+                        "OFFER",
+                        "Caiçara",
+                        "TO_CAMPUS",
+                        java.time.LocalTime.now().plusHours(2).withSecond(0).withNano(0),
+                        "America/Sao_Paulo",
+                        List.of(weekday),
+                        2,
+                        -19.911,
+                        -43.961,
+                        150))
+                .get("id");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM ride_recurrence_instance WHERE recurrence_id=?",
+                Integer.class,
+                recurrence))
+        .isGreaterThanOrEqualTo(1);
+    assertThatThrownBy(() -> rideMobility.deleteRecurrence(member, recurrence))
         .isInstanceOf(ApiException.class);
   }
 

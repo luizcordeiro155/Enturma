@@ -68,9 +68,9 @@ public class RideVoiceController {
                 db.exists(
                     "SELECT EXISTS(SELECT 1 FROM ride_match m JOIN ride r ON r.id=m.ride_id JOIN"
                         + " app_user u ON u.id=? WHERE m.id=? AND u.status='ACTIVE' AND"
-                        + " (u.id=m.user_id OR u.id=r.owner_id) AND NOT EXISTS(SELECT 1 FROM"
-                        + " user_block b WHERE (b.user_id=m.user_id AND b.blocked_id=r.owner_id) OR"
-                        + " (b.blocked_id=m.user_id AND b.user_id=r.owner_id)))",
+                        + " (u.id=m.driver_id OR u.id=m.passenger_id) AND NOT EXISTS(SELECT 1 FROM"
+                        + " user_block b WHERE (b.user_id=m.driver_id AND b.blocked_id=m.passenger_id) OR"
+                        + " (b.blocked_id=m.driver_id AND b.user_id=m.passenger_id)))",
                     UUID.fromString(identity),
                     id);
             if (!allowed) voice.remove(room, identity);

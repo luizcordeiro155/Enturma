@@ -189,3 +189,327 @@ body:has(.ride-search-dock) .workspace {
     gap: 12px;
   }
 }
+
+.ride-page {
+  padding-bottom: 40px;
+}
+.ride-create-form,
+.ride-mobility-section,
+.ride-trip-panel {
+  margin-top: 28px;
+}
+.ride-mobility-section,
+.ride-trip-panel {
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  padding: clamp(18px, 3vw, 28px);
+}
+.ride-section-heading,
+.ride-trip-hero {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-items: flex-start;
+  margin-bottom: 20px;
+}
+.ride-section-heading h2,
+.ride-trip-hero h2 {
+  margin: 0 0 7px;
+}
+.ride-section-heading p,
+.ride-trip-hero p {
+  margin: 0;
+  color: var(--muted);
+}
+.ride-suggestions {
+  display: grid;
+  gap: 12px;
+}
+.ride-suggestion {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, auto) auto;
+  gap: 18px;
+  align-items: center;
+  padding: 18px 0;
+  border-top: 1px solid var(--border);
+}
+.ride-suggestion:first-child {
+  border-top: 0;
+}
+.ride-suggestion h3 {
+  margin: 5px 0;
+}
+.ride-suggestion p {
+  margin: 0 0 3px;
+}
+.ride-match-level {
+  width: fit-content;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  color: var(--accent-ink, var(--ink));
+  background: color-mix(in srgb, var(--accent) 24%, var(--surface));
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+.ride-reasons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.ride-reasons span {
+  font-size: 0.76rem;
+  padding: 4px 8px;
+  border-radius: 8px;
+  background: var(--surface-raised);
+  color: var(--muted);
+}
+.ride-suggestion-facts {
+  display: grid;
+  gap: 7px;
+  font-size: 0.84rem;
+}
+.ride-suggestion-facts span,
+.ride-vehicle-line {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+}
+.ride-preferences-grid,
+.ride-trip-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 18px;
+}
+.ride-preferences-grid > form,
+.ride-trip-grid > div,
+.ride-review {
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--surface-raised);
+}
+.ride-preferences-grid h3,
+.ride-trip-grid h3,
+.ride-review h3 {
+  margin-top: 0;
+}
+.ride-weekdays {
+  border: 0;
+  margin: 14px 0;
+  padding: 0;
+}
+.ride-weekdays legend {
+  font-size: 0.85rem;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+.ride-weekdays label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin: 0 10px 8px 0;
+}
+.ride-weekdays input {
+  width: auto;
+}
+.ride-recurrence-list {
+  margin-top: 16px;
+  display: grid;
+  gap: 8px;
+}
+.ride-recurrence-list article {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+}
+.ride-recurrence-list p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+.ride-trip-status {
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.ride-live-map {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(180px, 260px);
+  align-items: center;
+  gap: 18px;
+  min-height: 180px;
+  margin-bottom: 18px;
+  padding: 18px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 8%, var(--surface-raised));
+  color: var(--accent);
+}
+.ride-live-map svg {
+  width: 100%;
+  max-height: 160px;
+}
+.ride-live-map-copy {
+  display: grid;
+  gap: 5px;
+  color: var(--ink);
+}
+.ride-live-map-copy small {
+  color: var(--muted);
+}
+.ride-zone-list {
+  display: grid;
+  gap: 7px;
+}
+.ride-zone-list button {
+  justify-content: flex-start;
+}
+.ride-boarding-code {
+  margin-top: 12px;
+  display: grid;
+  gap: 3px;
+}
+.ride-boarding-code strong {
+  font-size: clamp(2rem, 7vw, 3.4rem);
+  letter-spacing: 0.16em;
+  font-variant-numeric: tabular-nums;
+}
+.ride-safety-share {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ride-safety-share input {
+  min-width: 0;
+}
+.ride-driver-controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+.ride-review {
+  margin-top: 18px;
+}
+.ride-review-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.ride-match-row {
+  align-items: center;
+}
+.ride-match-row small {
+  display: block;
+  margin-top: 4px;
+}
+.ride-trip-panel .feedback {
+  margin: 10px 0;
+}
+.ride-public-safety {
+  width: min(760px, calc(100% - 32px));
+  margin: 40px auto;
+  padding: 24px;
+}
+.ride-public-safety > header {
+  margin-bottom: 22px;
+}
+.ride-public-safety-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.ride-public-safety-grid > div {
+  border-top: 1px solid var(--border);
+  padding: 14px 0;
+}
+.ride-public-safety-grid small,
+.ride-public-location small {
+  display: block;
+  color: var(--muted);
+  margin-bottom: 3px;
+}
+.ride-public-location {
+  margin-top: 20px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--surface-raised);
+}
+@media (max-width: 760px) {
+  .ride-suggestion {
+    grid-template-columns: 1fr;
+  }
+  .ride-preferences-grid,
+  .ride-trip-grid,
+  .ride-live-map,
+  .ride-review-grid,
+  .ride-public-safety-grid {
+    grid-template-columns: 1fr;
+  }
+  .ride-section-heading,
+  .ride-trip-hero {
+    align-items: flex-start;
+  }
+  .ride-suggestion > button,
+  .ride-driver-controls > button {
+    width: 100%;
+  }
+  .ride-driver-controls {
+    display: block;
+  }
+}
+@media (max-width: 520px) {
+  .ride-mobility-section,
+  .ride-trip-panel {
+    padding: 16px;
+  }
+  .ride-section-heading {
+    gap: 12px;
+  }
+  .ride-preferences-grid > form,
+  .ride-trip-grid > div,
+  .ride-review,
+  .ride-live-map {
+    padding: 14px;
+  }
+  .ride-safety-share {
+    grid-template-columns: 1fr;
+  }
+}
+
+.ride-stops {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 14px;
+  background: var(--surface-raised);
+}
+.ride-stops h3 { margin: 0 0 6px; }
+.ride-stops > p { color: var(--muted); margin: 0 0 12px; }
+.ride-stop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+.ride-stop-row > span:first-child { display: grid; gap: 3px; }
+.ride-stop-row small { color: var(--muted); }
+.ride-stop-row .actions { flex: none; }
+.ride-stop-row .secondary {
+  min-width: 44px;
+  min-height: 44px;
+  padding-inline: 12px;
+}
+@media (max-width: 520px) {
+  .ride-stop-row { align-items: flex-start; }
+}

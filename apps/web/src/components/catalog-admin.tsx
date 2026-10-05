@@ -89,6 +89,7 @@ export function CatalogAdmin({ section = "summary" }: { section?: string }) {
             {label}
           </Link>
         ))}
+        <Link href="/admin/rides">Pontos de carona</Link>
       </nav>
       <Feedback error={error} success={success} />
       <button
