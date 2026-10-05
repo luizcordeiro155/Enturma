@@ -83,7 +83,9 @@ type ActiveMatch = {
   driverId: string;
   passengerId: string;
   driverName: string;
+  driverHasAvatar?: boolean;
   passengerName: string;
+  passengerHasAvatar?: boolean;
   status: string;
   tripStatus: string;
   rideStatus: string;
@@ -144,6 +146,7 @@ type DriverRequest = {
   id: string;
   ownerId: string;
   passengerName: string;
+  passengerHasAvatar?: boolean;
   area: string;
   passengerRating: number;
   passengerReviews: number;
@@ -1363,7 +1366,22 @@ export function RideMobilityExperience() {
 
               <div className="ride-person-summary">
                 <div className="ride-person-avatar">
-                  {mode === "PASSENGER" ? <Car /> : <Users />}
+                  {(mode === "PASSENGER"
+                    ? activeMatch.driverHasAvatar
+                    : activeMatch.passengerHasAvatar) ? (
+                    <img
+                      src={`/api/backend/users/${
+                        mode === "PASSENGER"
+                          ? activeMatch.driverId
+                          : activeMatch.passengerId
+                      }/avatar`}
+                      alt=""
+                    />
+                  ) : mode === "PASSENGER" ? (
+                    <Car />
+                  ) : (
+                    <Users />
+                  )}
                 </div>
                 <div>
                   <strong>
@@ -1713,7 +1731,14 @@ export function RideMobilityExperience() {
                         <article className="ride-driver-request" key={request.id}>
                           <div className="ride-request-person">
                             <span className="ride-person-avatar">
-                              <Users size={20} />
+                              {request.passengerHasAvatar ? (
+                                <img
+                                  src={`/api/backend/users/${request.ownerId}/avatar`}
+                                  alt=""
+                                />
+                              ) : (
+                                <Users size={20} />
+                              )}
                             </span>
                             <span>
                               <strong>{request.passengerName}</strong>
