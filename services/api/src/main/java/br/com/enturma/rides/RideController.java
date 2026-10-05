@@ -60,7 +60,10 @@ public class RideController {
   public record Location(
       @DecimalMin("-90") @DecimalMax("90") double lat,
       @DecimalMin("-180") @DecimalMax("180") double lng,
-      @Min(0) @Max(50000) int accuracyMeters) {}
+      @Min(0) @Max(50000) int accuracyMeters,
+      Double speedMps,
+      Double heading,
+      Instant capturedAt) {}
 
   public record Vehicle(
       @NotBlank @Size(max = 60) String brand,
@@ -413,7 +416,15 @@ public class RideController {
       @AuthenticationPrincipal Actor a,
       @PathVariable UUID id,
       @Valid @RequestBody Location r) {
-    mobility.liveLocation(a, id, r.lat(), r.lng(), r.accuracyMeters());
+    mobility.liveLocation(
+        a,
+        id,
+        r.lat(),
+        r.lng(),
+        r.accuracyMeters(),
+        r.speedMps(),
+        r.heading(),
+        r.capturedAt());
   }
 
   @GetMapping("/matches/{id}/location")
