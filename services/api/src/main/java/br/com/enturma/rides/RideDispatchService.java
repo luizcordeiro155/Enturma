@@ -37,6 +37,7 @@ public class RideDispatchService {
     out.put("driverAvailability", availability(actor.id()));
     out.put("activeRequest", activeRequest(actor.id()));
     out.put("activeMatch", activeMatch(actor.id()));
+    out.put("recentCompleted", recentCompleted(actor.id()));
     out.put("vehicle", vehicle(actor.id()));
     return out;
   }
@@ -629,6 +630,34 @@ public class RideDispatchService {
                 + " LEFT JOIN ride_vehicle_profile v ON v.user_id=m.driver_id"
                 + " WHERE (m.driver_id=? OR m.passenger_id=?) AND m.status='ACCEPTED'"
                 + " AND r.status='OPEN' AND m.deleted_at IS NULL ORDER BY m.created_at DESC LIMIT 1",
+            user,
+            user);
+    return rows.isEmpty() ? null : rows.getFirst();
+  }
+
+  private Map<String, Object> recentCompleted(UUID user) {
+    var rows =
+        db.list(
+            "SELECT m.id,m.ride_id,m.request_ride_id,m.driver_id,m.passenger_id,m.status,"
+                + " r.trip_status,r.status ride_status,r.direction,r.completed_at,"
+                + " r.start_label,r.start_lat,r.start_lng,r.end_label,r.end_lat,r.end_lng,"
+                + " r.campus_id,c.name campus_name,"
+                + " pr.start_label passenger_start_label,pr.start_lat passenger_start_lat,"
+                + " pr.start_lng passenger_start_lng,pr.end_label passenger_end_label,"
+                + " pr.end_lat passenger_end_lat,pr.end_lng passenger_end_lng,"
+                + " d.name driver_name,p.name passenger_name,v.brand vehicle_brand,"
+                + " v.model vehicle_model,v.color vehicle_color,v.plate_hint,"
+                + " EXISTS(SELECT 1 FROM ride_review rr WHERE rr.match_id=m.id"
+                + " AND rr.reviewer_id=?) reviewed"
+                + " FROM ride_match m JOIN ride r ON r.id=m.ride_id"
+                + " LEFT JOIN ride pr ON pr.id=m.request_ride_id"
+                + " JOIN academic_entry c ON c.id=r.campus_id"
+                + " JOIN app_user d ON d.id=m.driver_id JOIN app_user p ON p.id=m.passenger_id"
+                + " LEFT JOIN ride_vehicle_profile v ON v.user_id=m.driver_id"
+                + " WHERE (m.driver_id=? OR m.passenger_id=?) AND m.status='ACCEPTED'"
+                + " AND r.status='COMPLETED' AND r.completed_at>now()-interval '6 hours'"
+                + " ORDER BY r.completed_at DESC,m.id DESC LIMIT 1",
+            user,
             user,
             user);
     return rows.isEmpty() ? null : rows.getFirst();
