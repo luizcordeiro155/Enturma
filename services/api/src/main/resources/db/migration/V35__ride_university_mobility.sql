@@ -10,6 +10,14 @@ ALTER TABLE ride
   ADD COLUMN completed_at timestamptz,
   ADD COLUMN recurrence_id uuid;
 
+UPDATE ride
+SET trip_status = CASE
+  WHEN status='COMPLETED' THEN 'COMPLETED'
+  WHEN status='CANCELLED' THEN 'CANCELLED'
+  ELSE 'MATCHING'
+END,
+completed_at = CASE WHEN status='COMPLETED' THEN departure_at ELSE completed_at END;
+
 ALTER TABLE ride
   ADD CONSTRAINT ride_area_lat_check CHECK(area_lat IS NULL OR area_lat BETWEEN -90 AND 90),
   ADD CONSTRAINT ride_area_lng_check CHECK(area_lng IS NULL OR area_lng BETWEEN -180 AND 180),
@@ -121,7 +129,7 @@ CREATE TABLE campus_pickup_zone (
   lat double precision NOT NULL CHECK(lat BETWEEN -90 AND 90),
   lng double precision NOT NULL CHECK(lng BETWEEN -180 AND 180),
   active boolean NOT NULL DEFAULT true,
-  created_by uuid NOT NULL REFERENCES app_user(id),
+  created_by uuid REFERENCES app_user(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX campus_pickup_zone_campus ON campus_pickup_zone(campus_id,active,name);
