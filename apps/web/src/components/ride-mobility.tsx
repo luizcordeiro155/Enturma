@@ -629,7 +629,7 @@ export function RideTripPanel({
   const [share, setShare] = useState<SafetyShare>();
   const [watching, setWatching] = useState(false);
   const [reviewed, setReviewed] = useState(false);
-  const watchId = useRef<number>();
+  const watchId = useRef<number | undefined>(undefined);
   const lastLocationSent = useRef(0);
   const root = useRef<HTMLElement>(null);
   const statusRef = useRef<HTMLDivElement>(null);
