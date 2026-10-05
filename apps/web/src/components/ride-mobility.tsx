@@ -277,7 +277,10 @@ export function RidePreferences({
   }, []);
 
   useEffect(() => {
-    void load().catch((e) => setError(e.message));
+    const timer = window.setTimeout(() => {
+      void load().catch((e) => setError(e.message));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   return (
@@ -660,13 +663,16 @@ export function RideTripPanel({
   }, [match.id]);
 
   useEffect(() => {
-    void Promise.all([
-      api<PickupZone[]>(
-        `/rides/campuses/${match.campusId}/pickup-zones`,
-        { cache: "no-store" },
-      ).then(setZones),
-      refreshLocation(),
-    ]);
+    const timer = window.setTimeout(() => {
+      void Promise.all([
+        api<PickupZone[]>(
+          `/rides/campuses/${match.campusId}/pickup-zones`,
+          { cache: "no-store" },
+        ).then(setZones),
+        refreshLocation(),
+      ]);
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [match.campusId, refreshLocation]);
 
   useEffect(() => {
