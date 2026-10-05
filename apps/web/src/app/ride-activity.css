@@ -674,3 +674,13 @@ body:has(.ride-mobility-app) .workspace footer { display:none; }
   background: #e7efe6;
   color: #173f36;
 }
+
+.ride-person-avatar {
+  overflow: hidden;
+}
+.ride-person-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
