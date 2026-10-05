@@ -345,7 +345,8 @@ public class RideDispatchService {
     double driverLng = number(availability.get("lng"));
     var rows =
         db.list(
-            "SELECT r.id,r.owner_id,u.name passenger_name,r.origin_area,"
+            "SELECT r.id,r.owner_id,u.name passenger_name,"
+                + " u.avatar_bytes IS NOT NULL passenger_has_avatar,r.origin_area,"
                 + " r.start_label,r.start_lat,r.start_lng,r.end_label,r.end_lat,r.end_lng,"
                 + " r.route_distance_m,r.route_duration_s,"
                 + " r.search_started_at,coalesce(rep.rating,0) passenger_rating,"
@@ -436,6 +437,7 @@ public class RideDispatchService {
               safe.put("id", item.get("id"));
               safe.put("ownerId", item.get("ownerId"));
               safe.put("passengerName", item.get("passengerName"));
+              safe.put("passengerHasAvatar", item.get("passengerHasAvatar"));
               safe.put("area", item.get("originArea"));
               safe.put("passengerRating", item.get("passengerRating"));
               safe.put("passengerReviews", item.get("passengerReviews"));
@@ -621,7 +623,9 @@ public class RideDispatchService {
                 + " pr.start_label passenger_start_label,pr.start_lat passenger_start_lat,"
                 + " pr.start_lng passenger_start_lng,pr.end_label passenger_end_label,"
                 + " pr.end_lat passenger_end_lat,pr.end_lng passenger_end_lng,"
-                + " d.name driver_name,p.name passenger_name,v.brand vehicle_brand,v.model vehicle_model,"
+                + " d.name driver_name,d.avatar_bytes IS NOT NULL driver_has_avatar,"
+                + " p.name passenger_name,p.avatar_bytes IS NOT NULL passenger_has_avatar,"
+                + " v.brand vehicle_brand,v.model vehicle_model,"
                 + " v.color vehicle_color,v.plate_hint"
                 + " FROM ride_match m JOIN ride r ON r.id=m.ride_id"
                 + " LEFT JOIN ride pr ON pr.id=m.request_ride_id"
@@ -645,8 +649,9 @@ public class RideDispatchService {
                 + " pr.start_label passenger_start_label,pr.start_lat passenger_start_lat,"
                 + " pr.start_lng passenger_start_lng,pr.end_label passenger_end_label,"
                 + " pr.end_lat passenger_end_lat,pr.end_lng passenger_end_lng,"
-                + " d.name driver_name,p.name passenger_name,v.brand vehicle_brand,"
-                + " v.model vehicle_model,v.color vehicle_color,v.plate_hint,"
+                + " d.name driver_name,d.avatar_bytes IS NOT NULL driver_has_avatar,"
+                + " p.name passenger_name,p.avatar_bytes IS NOT NULL passenger_has_avatar,"
+                + " v.brand vehicle_brand,v.model vehicle_model,v.color vehicle_color,v.plate_hint,"
                 + " EXISTS(SELECT 1 FROM ride_review rr WHERE rr.match_id=m.id"
                 + " AND rr.reviewer_id=?) reviewed"
                 + " FROM ride_match m JOIN ride r ON r.id=m.ride_id"
