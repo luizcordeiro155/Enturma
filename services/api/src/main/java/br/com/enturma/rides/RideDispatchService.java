@@ -254,6 +254,12 @@ public class RideDispatchService {
             heading,
             actor.id());
     if (changed == 0) throw ApiException.invalid("Ative sua disponibilidade antes de compartilhar localização.");
+    var availability =
+        db.one(
+            "SELECT campus_id,direction FROM ride_driver_availability WHERE user_id=?",
+            actor.id());
+    notifySearchingPassengers(
+        (UUID) availability.get("campusId"), String.valueOf(availability.get("direction")));
   }
 
   @Transactional
@@ -263,6 +269,69 @@ public class RideDispatchService {
             + " pending_match_id=NULL,updated_at=now() WHERE user_id=?",
         actor.id());
     notifyPublic();
+  }
+
+  public Object nearbyDrivers(Actor actor, UUID campusId, String direction) {
+    if (!DIRECTIONS.contains(direction)) throw ApiException.invalid("Direção de carona inválida.");
+    var requestRows =
+        db.list(
+            "SELECT id,search_started_at FROM ride WHERE owner_id=? AND campus_id=? AND direction=?"
+                + " AND dispatch_mode='ON_DEMAND' AND type='REQUEST' AND status='OPEN'"
+                + " ORDER BY created_at DESC LIMIT 1",
+            actor.id(),
+            campusId,
+            direction);
+    if (requestRows.isEmpty()) throw ApiException.forbidden();
+
+    Instant started = Instant.parse(String.valueOf(requestRows.getFirst().get("searchStartedAt")));
+    long age = Math.max(0, Duration.between(started, Instant.now()).toSeconds());
+    double radius = age < 20 ? 5.0 : age < 50 ? 12.0 : 35.0;
+
+    var request =
+        db.one(
+            "SELECT start_lat,start_lng,end_lat,end_lng FROM ride WHERE id=?",
+            requestRows.getFirst().get("id"));
+    double focusLat =
+        "TO_CAMPUS".equals(direction)
+            ? number(request.get("startLat"))
+            : number(request.get("endLat"));
+    double focusLng =
+        "TO_CAMPUS".equals(direction)
+            ? number(request.get("startLng"))
+            : number(request.get("endLng"));
+
+    var rows =
+        db.list(
+            "SELECT a.user_id,a.lat,a.lng,a.heading,a.updated_at"
+                + " FROM ride_driver_availability a"
+                + " WHERE a.campus_id=? AND a.direction=? AND a.enabled=true AND a.status='ONLINE'"
+                + " AND a.updated_at>now()-interval '90 seconds'"
+                + " AND a.user_id<>?"
+                + " AND NOT EXISTS(SELECT 1 FROM user_block b WHERE"
+                + " (b.user_id=? AND b.blocked_id=a.user_id) OR"
+                + " (b.blocked_id=? AND b.user_id=a.user_id))"
+                + " ORDER BY a.updated_at DESC LIMIT 50",
+            campusId,
+            direction,
+            actor.id(),
+            actor.id(),
+            actor.id());
+    var out = new ArrayList<Map<String, Object>>();
+    for (var row : rows) {
+      double km =
+          RideMatchingService.haversine(
+              focusLat, focusLng, number(row.get("lat")), number(row.get("lng")));
+      if (km > radius) continue;
+      var item = new LinkedHashMap<String, Object>();
+      item.put("id", "driver-" + row.get("userId"));
+      item.put("lat", snap(number(row.get("lat"))));
+      item.put("lng", snap(number(row.get("lng"))));
+      item.put("heading", row.get("heading"));
+      item.put("distanceKm", round1(km));
+      out.add(item);
+      if (out.size() >= 12) break;
+    }
+    return Map.of("radiusKm", radius, "drivers", out);
   }
 
   public Object driverRequests(Actor actor) {
@@ -304,7 +373,13 @@ public class RideDispatchService {
       double pickupLat = number(row.get("startLat"));
       double pickupLng = number(row.get("startLng"));
       double proximity = RideMatchingService.haversine(driverLat, driverLng, pickupLat, pickupLng);
-      if (proximity > 35) continue;
+      Instant searchStarted =
+          row.get("searchStartedAt") == null
+              ? Instant.now().minusSeconds(60)
+              : Instant.parse(String.valueOf(row.get("searchStartedAt")));
+      long searchAge = Math.max(0, Duration.between(searchStarted, Instant.now()).toSeconds());
+      double searchRadius = searchAge < 20 ? 5.0 : searchAge < 50 ? 12.0 : 35.0;
+      if (proximity > searchRadius) continue;
       var item = new LinkedHashMap<String, Object>(row);
       item.put("pickupDistanceKm", round1(proximity));
       item.put("etaMinutes", Math.max(1, (int) Math.ceil(proximity / 28.0 * 60.0)));
@@ -668,6 +743,18 @@ public class RideDispatchService {
             ride))
       if (row.get("userId") != null) users.add((UUID) row.get("userId"));
     events.publishEvent(new RideChanged(Set.copyOf(users), publicListing));
+  }
+
+  private void notifySearchingPassengers(UUID campusId, String direction) {
+    Set<UUID> users = new HashSet<>();
+    for (var row :
+        db.list(
+            "SELECT owner_id user_id FROM ride WHERE campus_id=? AND direction=?"
+                + " AND dispatch_mode='ON_DEMAND' AND type='REQUEST' AND status='OPEN'",
+            campusId,
+            direction))
+      if (row.get("userId") != null) users.add((UUID) row.get("userId"));
+    if (!users.isEmpty()) events.publishEvent(new RideChanged(Set.copyOf(users), false));
   }
 
   private void notifyPublic() {
