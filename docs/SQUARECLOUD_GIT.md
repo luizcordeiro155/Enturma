@@ -37,3 +37,7 @@ PostgreSQL 18 não era uma falha de conexão.
 
 Referências: [START e runtime](https://docs.squarecloud.app/en/getting-started/config-file),
 [integração automática](https://help.squarecloud.app/en-us/article/how-to-connect-your-github-repository-and-deploy-automatically-mr6srt/).
+
+## Deploy trigger
+
+A integração automática deve iniciar um deploy a cada novo push na branch `main`.
