@@ -81,7 +81,6 @@ function nextDriverStatus(status: string) {
       status: "WAITING_PASSENGER",
       label: "Cheguei ao ponto",
     },
-    WAITING_PASSENGER: { status: "IN_PROGRESS", label: "Iniciar viagem" },
     IN_PROGRESS: { status: "ARRIVED", label: "Chegamos ao destino" },
     ARRIVED: { status: "COMPLETED", label: "Concluir carona" },
   };
@@ -241,19 +240,29 @@ export default function RideChat() {
           <Field
             label="Código do passageiro"
             value={driverCode}
-            onChangeText={setDriverCode}
+            onChangeText={(value) => {
+              const code = value.replace(/\D/g, "").slice(0, 4);
+              setDriverCode(code);
+              if (code.length === 4 && !busy) {
+                void action(`/matches/${id}/board`, "POST", {
+                  code,
+                }).then((result) => {
+                  if (result !== undefined) {
+                    setDriverCode("");
+                    setMessage(
+                      "Código confirmado. A corrida foi iniciada automaticamente.",
+                    );
+                  }
+                });
+              }
+            }}
             keyboardType="number-pad"
             maxLength={4}
           />
-          <Button
-            title="Confirmar embarque"
-            disabled={busy || !/^[0-9]{4}$/.test(driverCode)}
-            onPress={() =>
-              void action(`/matches/${id}/board`, "POST", {
-                code: driverCode,
-              }).then(() => setMessage("Embarque confirmado."))
-            }
-          />
+          <Text style={styles.muted}>
+            Ao digitar os 4 números corretos, o Enturma confirma o embarque e
+            inicia a corrida automaticamente.
+          </Text>
         </View>
       ) : null}
 

@@ -55,6 +55,20 @@ export type Match = {
   boardedAt?: string | null;
   pickupOrder?: number | null;
   meetingPoint: string | null;
+  pickupLat?: number | null;
+  pickupLng?: number | null;
+  startLabel?: string | null;
+  startLat?: number | null;
+  startLng?: number | null;
+  endLabel?: string | null;
+  endLat?: number | null;
+  endLng?: number | null;
+  passengerStartLabel?: string | null;
+  passengerStartLat?: number | null;
+  passengerStartLng?: number | null;
+  passengerEndLabel?: string | null;
+  passengerEndLat?: number | null;
+  passengerEndLng?: number | null;
   closedAt: string | null;
   deletedAt: string | null;
   purgeAt: string | null;
@@ -68,6 +82,7 @@ export type Match = {
   vehicleBrand?: string | null;
   vehicleModel?: string | null;
   vehicleColor?: string | null;
+  plateHint?: string | null;
   peerRating?: number;
   peerReviews?: number;
 };
@@ -132,6 +147,9 @@ export type PeerLocation = {
   lat?: number;
   lng?: number;
   accuracyM?: number;
+  heading?: number | null;
+  speedMps?: number | null;
+  capturedAt?: string | null;
   updatedAt?: string;
   distanceKm?: number;
   etaMinutes?: number;

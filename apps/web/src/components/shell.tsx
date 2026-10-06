@@ -23,6 +23,7 @@ import {
 import { CommunityFeedback } from "./community-feedback";
 import { isDesktop, isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
+import { useKeyboardViewport } from "@/lib/use-keyboard-viewport";
 const links = [
   { href: "/home", label: "Início", icon: Home },
   { href: "/forum", label: "Fórum", icon: MessageCircle },
@@ -35,6 +36,7 @@ const links = [
   { href: "/download", label: "Baixar o Enturma", icon: EnturmaAppIcon },
 ];
 export function Shell({ children }: { children: React.ReactNode }) {
+  useKeyboardViewport();
   const path = usePathname();
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
   const updateState = useAppUpdateState();

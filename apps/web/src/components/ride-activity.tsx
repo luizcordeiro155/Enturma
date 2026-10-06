@@ -82,6 +82,7 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
     .filter(
       (r) =>
         r.status === "OPEN" &&
+        !["COMPLETED", "CANCELLED"].includes(r.tripStatus) &&
         Date.parse(r.departureAt) > now &&
         data.matches.filter((m) => m.rideId === r.id && m.status === "ACCEPTED")
           .length < r.seats,
@@ -118,6 +119,10 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
     (m) =>
       m.status === "ACCEPTED" &&
       m.rideStatus === "OPEN" &&
+      ["DRIVER_ON_THE_WAY", "ARRIVING", "WAITING_PASSENGER", "IN_PROGRESS"].includes(
+        m.tripStatus,
+      ) &&
+      Date.parse(m.departureAt) > now - 24 * 60 * 60 * 1000 &&
       !m.closedAt &&
       !m.deletedAt &&
       !data.seen.includes(m.id),

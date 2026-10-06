@@ -282,7 +282,33 @@ public class RideMobilityService {
         matchId,
         actor.id());
     log.info("ride_boarded match={} driver={}", matchId, actor.id());
-    changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
+
+    UUID rideId = (UUID) match.get("rideId");
+    boolean allBoarded =
+        !db.exists(
+            "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED'"
+                + " AND boarded_at IS NULL AND deleted_at IS NULL)",
+            rideId);
+    if (allBoarded) {
+      int started =
+          db.jdbc.update(
+              "UPDATE ride SET trip_status='IN_PROGRESS',started_at=coalesce(started_at,now())"
+                  + " WHERE id=? AND status='OPEN' AND trip_status IN ('WAITING_PASSENGER','ARRIVING')",
+              rideId);
+      if (started > 0) {
+        log.info("ride_auto_started ride={} by_boarding_match={}", rideId, matchId);
+        notifyRide(
+            actor.id(),
+            rideId,
+            "RIDE_STATUS",
+            "Código confirmado. A carona começou automaticamente. Boa viagem!");
+        changedRide(rideId, true);
+      } else {
+        changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
+      }
+    } else {
+      changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
+    }
   }
 
   @Transactional
