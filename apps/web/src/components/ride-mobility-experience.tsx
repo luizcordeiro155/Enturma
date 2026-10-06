@@ -528,6 +528,9 @@ export function RideMobilityExperience() {
   const [locationLabel, setLocationLabel] = useState("Sua localização");
   const [selectOnMap, setSelectOnMap] = useState(false);
   const [mapPickPurpose, setMapPickPurpose] = useState<"ROUTE" | "CAMPUS">("ROUTE");
+  const [campusOverride, setCampusOverride] = useState<LocationResult>();
+  const [campusSetupOpen, setCampusSetupOpen] = useState(false);
+  const [pendingRouteChoice, setPendingRouteChoice] = useState<LocationResult>();
   const [driverRequests, setDriverRequests] = useState<DriverRequest[]>([]);
   const [nearbyDrivers, setNearbyDrivers] = useState<NearbyDriver[]>([]);
   const [searchRadiusKm, setSearchRadiusKm] = useState(5);
@@ -616,12 +619,40 @@ export function RideMobilityExperience() {
   });
 
   const pref = state?.preference;
-  const campusPoint = point(pref?.campusLat, pref?.campusLng);
+  const catalogCampusPoint = point(pref?.campusLat, pref?.campusLng);
+  const campusPoint =
+    catalogCampusPoint ??
+    (campusOverride
+      ? { lat: campusOverride.lat, lng: campusOverride.lng }
+      : undefined);
+  const campusLabel =
+    campusOverride?.label || pref?.campusAddress || pref?.campusName || "Campus";
   const activeMatch = state?.activeMatch ?? undefined;
   const activeRequest = state?.activeRequest ?? undefined;
   const availability = state?.driverAvailability ?? undefined;
   const recentCompleted = state?.recentCompleted ?? undefined;
   const activeLocked = !!activeMatch;
+
+  useEffect(() => {
+    if (!pref?.campusId) {
+      setCampusOverride(undefined);
+      return;
+    }
+    try {
+      const raw = localStorage.getItem(`enturma-ride-campus:${pref.campusId}`);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as LocationResult;
+      if (
+        Number.isFinite(saved?.lat) &&
+        Number.isFinite(saved?.lng) &&
+        typeof saved?.label === "string"
+      ) {
+        setCampusOverride(saved);
+      }
+    } catch {
+      localStorage.removeItem(`enturma-ride-campus:${pref.campusId}`);
+    }
+  }, [pref?.campusId]);
 
   async function changeMode(nextMode: Mode) {
     if (activeLocked || nextMode === mode || busy) return;
@@ -706,19 +737,19 @@ export function RideMobilityExperience() {
     }
   }, []);
 
-  const calculateRoute = useCallback(
-    async (chosen: LocationResult, currentDirection = direction) => {
-      if (!campusPoint) {
-        setError("Seu campus ainda não possui localização configurada.");
-        return;
-      }
+  const routeWithCampus = useCallback(
+    async (
+      chosen: LocationResult,
+      campus: MapPoint,
+      currentDirection = direction,
+    ) => {
       const start =
         currentDirection === "TO_CAMPUS"
           ? { lat: chosen.lat, lng: chosen.lng }
-          : campusPoint;
+          : campus;
       const end =
         currentDirection === "TO_CAMPUS"
-          ? campusPoint
+          ? campus
           : { lat: chosen.lat, lng: chosen.lng };
       setBusy(true);
       setError("");
@@ -736,7 +767,24 @@ export function RideMobilityExperience() {
         setBusy(false);
       }
     },
-    [campusPoint?.lat, campusPoint?.lng, direction],
+    [direction],
+  );
+
+  const calculateRoute = useCallback(
+    async (chosen: LocationResult, currentDirection = direction) => {
+      if (!campusPoint) {
+        setPendingRouteChoice(chosen);
+        setCampusSetupOpen(true);
+        setRoute(undefined);
+        setError("");
+        setNotice(
+          "Confirme onde fica sua faculdade uma vez para continuar esta rota.",
+        );
+        return;
+      }
+      await routeWithCampus(chosen, campusPoint, currentDirection);
+    },
+    [campusPoint?.lat, campusPoint?.lng, direction, routeWithCampus],
   );
 
   async function chooseCurrentPlace() {
@@ -755,6 +803,13 @@ export function RideMobilityExperience() {
     if (!pref?.campusId) return;
     setBusy(true);
     setError("");
+    setCampusOverride(value);
+    try {
+      localStorage.setItem(
+        `enturma-ride-campus:${pref.campusId}`,
+        JSON.stringify(value),
+      );
+    } catch {}
     try {
       await api("/rides/mobility/preferences", {
         method: "PUT",
@@ -769,12 +824,26 @@ export function RideMobilityExperience() {
           onboardingDone: pref.onboardingDone ?? false,
         }),
       });
-      setNotice("Localização da sua faculdade confirmada.");
+      setCampusSetupOpen(false);
+      setNotice("Faculdade confirmada. Sua rota já pode ser calculada.");
       setLocation({ lat: value.lat, lng: value.lng });
       setFollow(true);
       await load();
+      if (pendingRouteChoice) {
+        const choice = pendingRouteChoice;
+        setPendingRouteChoice(undefined);
+        await routeWithCampus(
+          choice,
+          { lat: value.lat, lng: value.lng },
+          direction,
+        );
+      }
     } catch (e) {
-      setError((e as Error).message);
+      setCampusSetupOpen(true);
+      setError(
+        (e as Error).message ||
+          "Não foi possível salvar a faculdade agora. Tente novamente.",
+      );
     } finally {
       setBusy(false);
     }
@@ -819,7 +888,10 @@ export function RideMobilityExperience() {
   }
 
   async function startPassenger() {
-    if (!pref?.campusId || !campusPoint || !selected || !route) return;
+    if (!pref?.campusId || !campusPoint || !selected || !route) {
+      if (!campusPoint) setCampusSetupOpen(true);
+      return;
+    }
     const start =
       direction === "TO_CAMPUS"
         ? { label: selected.label, lat: selected.lat, lng: selected.lng }
@@ -950,7 +1022,10 @@ export function RideMobilityExperience() {
   }
 
   async function startDriver() {
-    if (!pref?.campusId || !campusPoint) return;
+    if (!pref?.campusId || !campusPoint) {
+      setCampusSetupOpen(true);
+      return;
+    }
     if (!state?.vehicle?.brand) {
       setError(
         "Cadastre seu veículo no painel de caronas antes de ficar disponível.",
@@ -1539,7 +1614,7 @@ export function RideMobilityExperience() {
                 ))}
               </select>
             </div>
-          ) : !campusPoint &&
+          ) : (!campusPoint || campusSetupOpen) &&
             !activeMatch &&
             !activeRequest &&
             !availability?.enabled ? (
@@ -1824,6 +1899,7 @@ export function RideMobilityExperience() {
                       aria-pressed={direction === "TO_CAMPUS"}
                       onClick={() => {
                         setDirection("TO_CAMPUS");
+                        setCampusSetupOpen(false);
                         setSelected(undefined);
                         setRoute(undefined);
                       }}
@@ -1839,6 +1915,7 @@ export function RideMobilityExperience() {
                       aria-pressed={direction === "FROM_CAMPUS"}
                       onClick={() => {
                         setDirection("FROM_CAMPUS");
+                        setCampusSetupOpen(false);
                         setSelected(undefined);
                         setRoute(undefined);
                       }}
@@ -1910,7 +1987,7 @@ export function RideMobilityExperience() {
                             <strong>
                               {direction === "TO_CAMPUS"
                                 ? selected.label
-                                : pref.campusName}
+                                : campusLabel}
                             </strong>
                           </span>
                         </div>
@@ -1921,7 +1998,7 @@ export function RideMobilityExperience() {
                             <small>Destino</small>
                             <strong>
                               {direction === "TO_CAMPUS"
-                                ? pref.campusName
+                                ? campusLabel
                                 : selected.label}
                             </strong>
                           </span>
