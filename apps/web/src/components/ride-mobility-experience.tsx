@@ -721,24 +721,35 @@ export function RideMobilityExperience() {
       );
     } catch {}
     try {
-      await api("/rides/mobility/preferences", {
-        method: "PUT",
-        body: JSON.stringify({
-          campusId: pref.campusId,
-          campusLabel: value.label,
-          campusLat: value.lat,
-          campusLng: value.lng,
-          homeLabel: pref.homeLabel ?? null,
-          homeLat: pref.homeLat ?? null,
-          homeLng: pref.homeLng ?? null,
-          onboardingDone: pref.onboardingDone ?? false,
-        }),
-      });
+      let persisted = true;
+      try {
+        await api("/rides/mobility/preferences", {
+          method: "PUT",
+          body: JSON.stringify({
+            campusId: pref.campusId,
+            campusLabel: value.label,
+            campusLat: value.lat,
+            campusLng: value.lng,
+            homeLabel: pref.homeLabel ?? null,
+            homeLat: pref.homeLat ?? null,
+            homeLng: pref.homeLng ?? null,
+            onboardingDone: pref.onboardingDone ?? false,
+          }),
+        });
+      } catch {
+        persisted = false;
+      }
+
       setCampusSetupOpen(false);
-      setNotice("Faculdade confirmada. Sua rota já pode ser calculada.");
+      setError("");
+      setNotice(
+        persisted
+          ? "Faculdade confirmada. Sua rota já pode ser calculada."
+          : "Faculdade confirmada neste dispositivo. A rota pode continuar normalmente.",
+      );
       setLocation({ lat: value.lat, lng: value.lng });
       setFollow(true);
-      await load();
+      if (persisted) await load();
       if (pendingRouteChoice) {
         const choice = pendingRouteChoice;
         setPendingRouteChoice(undefined);
@@ -752,7 +763,7 @@ export function RideMobilityExperience() {
       setCampusSetupOpen(true);
       setError(
         (e as Error).message ||
-          "Não foi possível salvar a faculdade agora. Tente novamente.",
+          "Não foi possível usar a localização da faculdade. Tente novamente.",
       );
     } finally {
       setBusy(false);
