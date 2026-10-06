@@ -347,6 +347,13 @@ class PlatformIntegrationTest {
         -43.954,
         20);
 
+    var nearby = (Map<String, Object>) rideDispatch.nearbyDrivers(host, campus, "TO_CAMPUS");
+    var nearbyDrivers = (List<Map<String, Object>>) nearby.get("drivers");
+    assertThat(nearbyDrivers).isNotEmpty();
+    assertThat(nearbyDrivers.getFirst()).doesNotContainKeys("userId", "name", "email");
+    assertThat(String.valueOf(nearbyDrivers.getFirst().get("id")))
+        .doesNotContain(member.id().toString());
+
     var requests = (List<Map<String, Object>>) rideDispatch.driverRequests(member);
     assertThat(requests).anyMatch(row -> row.get("id").equals(first.get("id")));
     assertThat(requests.getFirst()).doesNotContainKeys("startLat", "startLng", "endLat", "endLng");
@@ -369,6 +376,57 @@ class PlatformIntegrationTest {
             db.one("SELECT status,trip_status FROM ride WHERE id=?", requestRide)
                 .get("tripStatus"))
         .isEqualTo("MATCHING");
+  }
+
+  @Test
+  void passengerCancellationEndsOnDemandRequestAndReleasesDriver() {
+    db.jdbc.update(
+        "UPDATE academic_campus SET address_label='Campus Teste',latitude=-19.9321000,"
+            + " longitude=-43.9387000 WHERE id=?",
+        campus);
+    var request =
+        (Map<?, ?>)
+            rideDispatch.startPassengerSearch(
+                host,
+                campus,
+                "TO_CAMPUS",
+                "Caiçara",
+                -19.918,
+                -43.963,
+                "Campus Teste",
+                -19.9321,
+                -43.9387,
+                4200,
+                900);
+    rideDispatch.setDriverAvailability(
+        member,
+        campus,
+        "TO_CAMPUS",
+        2,
+        "Padre Eustáquio",
+        -19.916,
+        -43.957,
+        "Campus Teste",
+        -19.9321,
+        -43.9387,
+        -19.916,
+        -43.957,
+        20);
+    var accepted = (Map<?, ?>) rideDispatch.acceptRequest(member, (UUID) request.get("id"));
+    UUID match = (UUID) accepted.get("matchId");
+
+    rides.cancelMatch(host, match);
+
+    assertThat(
+            db.one("SELECT status,trip_status FROM ride WHERE id=?", request.get("id"))
+                .get("status"))
+        .isEqualTo("CANCELLED");
+    assertThat(
+            db.one(
+                    "SELECT status,enabled FROM ride_driver_availability WHERE user_id=?",
+                    member.id())
+                .get("status"))
+        .isEqualTo("ONLINE");
   }
 
   @Test
