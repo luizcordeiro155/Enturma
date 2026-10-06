@@ -81,7 +81,8 @@ export default function Rides() {
   const [me, setMe] = useState("");
   const [type, setType] = useState("OFFER");
   const [direction, setDirection] = useState("TO_CAMPUS");
-  const [area, setArea] = useState("");
+  const [street, setStreet] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
   const [departure, setDeparture] = useState("");
   const [seats, setSeats] = useState("1");
   const [error, setError] = useState("");
@@ -208,11 +209,26 @@ export default function Rides() {
             />
           ))}
           <Field
-            label="Bairro ou região"
-            value={area}
-            onChangeText={setArea}
-            maxLength={120}
+            label="Rua ou avenida"
+            value={street}
+            onChangeText={setStreet}
+            maxLength={100}
+            placeholder="Ex.: Rua dos Tupinambás"
           />
+          <Field
+            label="Número"
+            value={houseNumber}
+            onChangeText={(value) =>
+              setHouseNumber(
+                value.replace(/[^0-9A-Za-zÀ-ÿ/ -]/g, "").slice(0, 16),
+              )
+            }
+            maxLength={16}
+            placeholder="Ex.: 230"
+          />
+          <Text style={styles.muted}>
+            Rua e número são usados para localizar o ponto com mais precisão.
+          </Text>
           <Field
             label="Saída (AAAA-MM-DD HH:mm)"
             value={departure}
@@ -226,26 +242,54 @@ export default function Rides() {
           />
           <Button
             title="Publicar carona"
-            disabled={busy || !campus || !area.trim()}
+            disabled={
+              busy ||
+              !campus ||
+              street.trim().length < 3 ||
+              !houseNumber.trim()
+            }
             onPress={() => {
               const date = new Date(departure.replace(" ", "T"));
               if (!Number.isFinite(date.getTime())) {
                 setError("Confira a data e hora de saída.");
                 return;
               }
-              void act("/rides", {
-                campusId: campus,
-                type,
-                direction,
-                originArea: area,
-                departureAt: date.toISOString(),
-                seats: Number(seats),
-              }).then(() => {
-                setCreate(false);
-                setMessage(
-                  "Carona publicada. Agora procure combinações automáticas.",
-                );
-              });
+              const exactAddress = `${street.trim()}, ${houseNumber.trim()}`;
+              setBusy(true);
+              void api<
+                { label: string; lat: number; lng: number }[]
+              >(
+                `/rides/map/search?q=${encodeURIComponent(exactAddress)}`,
+                { cache: "no-store" },
+              )
+                .then(async (locations) => {
+                  const location = locations[0];
+                  if (!location)
+                    throw new Error(
+                      "Não encontramos esse endereço. Confira o nome da rua e o número.",
+                    );
+                  await api("/rides", {
+                    method: "POST",
+                    body: JSON.stringify({
+                      campusId: campus,
+                      type,
+                      direction,
+                      originArea: location.label.slice(0, 120),
+                      departureAt: date.toISOString(),
+                      seats: Number(seats),
+                      areaLat: location.lat,
+                      areaLng: location.lng,
+                    }),
+                  });
+                  setError("");
+                  setCreate(false);
+                  setMessage(
+                    "Carona publicada com o endereço localizado no mapa.",
+                  );
+                  await load();
+                })
+                .catch((e) => setError((e as Error).message))
+                .finally(() => setBusy(false));
             }}
           />
         </View>

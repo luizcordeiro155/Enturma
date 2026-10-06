@@ -262,17 +262,26 @@ function AddressFinder({
   onChoose: (value: LocationResult) => void;
   onPickMap: () => void;
 }) {
-  const [query, setQuery] = useState("");
+  const [street, setStreet] = useState("");
+  const [houseNumber, setHouseNumber] = useState("");
   const [items, setItems] = useState<LocationResult[]>([]);
   const [busy, setBusy] = useState(false);
   const request = useRef(0);
+  const query = useMemo(
+    () =>
+      [street.trim(), houseNumber.trim()]
+        .filter((part) => part.length > 0)
+        .join(", "),
+    [street, houseNumber],
+  );
+
   useEffect(() => {
-    if (query.trim().length < 3) return;
+    if (street.trim().length < 3) return;
     const id = ++request.current;
     const timer = window.setTimeout(async () => {
       setBusy(true);
       try {
-        const params = new URLSearchParams({ q: query.trim() });
+        const params = new URLSearchParams({ q: query });
         if (current) {
           params.set("lat", String(current.lat));
           params.set("lng", String(current.lng));
@@ -287,26 +296,49 @@ function AddressFinder({
       } finally {
         if (id === request.current) setBusy(false);
       }
-    }, 360);
+    }, houseNumber.trim() ? 240 : 380);
     return () => window.clearTimeout(timer);
-  }, [query, current?.lat, current?.lng]);
+  }, [query, street, houseNumber, current?.lat, current?.lng]);
 
   return (
     <div className="ride-address-finder">
-      <label>
-        {title}
-        <input
-          value={query}
-          onChange={(event) => setQuery(event.target.value)}
-          placeholder="Pesquisar endereço, rua ou bairro"
-          autoComplete="off"
-        />
-      </label>
+      <div className="ride-address-fields">
+        <label className="ride-address-street">
+          {title}
+          <input
+            value={street}
+            onChange={(event) => setStreet(event.target.value)}
+            placeholder="Nome da rua ou avenida"
+            autoComplete="street-address"
+            enterKeyHint="next"
+          />
+        </label>
+        <label className="ride-address-number">
+          Número
+          <input
+            value={houseNumber}
+            onChange={(event) =>
+              setHouseNumber(
+                event.target.value
+                  .replace(/[^0-9A-Za-zÀ-ÿ/ -]/g, "")
+                  .slice(0, 16),
+              )
+            }
+            placeholder="Ex.: 230"
+            autoComplete="address-line2"
+            enterKeyHint="search"
+          />
+        </label>
+      </div>
+      <small className="ride-address-hint">
+        Informe rua e número para localizar o ponto de embarque com mais
+        precisão.
+      </small>
       <button type="button" className="secondary" onClick={onPickMap}>
         <MapPin size={17} /> Escolher no mapa
       </button>
-      {busy ? <small>Pesquisando endereços…</small> : null}
-      {query.trim().length >= 3 && items.length ? (
+      {busy ? <small>Localizando esse endereço…</small> : null}
+      {street.trim().length >= 3 && items.length ? (
         <div className="ride-address-results">
           {items.map((item, index) => (
             <button
