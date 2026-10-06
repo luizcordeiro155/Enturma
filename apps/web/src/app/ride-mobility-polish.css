@@ -1094,6 +1094,18 @@ html .ride-mobility-app .danger-action {
   background: transparent;
   box-shadow: none;
 }
+.ride-unified-search-box input:focus,
+.ride-unified-search-box input:focus-visible,
+html[data-enhanced-focus="true"] .ride-unified-search-box input:focus-visible {
+  border: 0 !important;
+  outline: 0 !important;
+  outline-offset: 0 !important;
+  box-shadow: none !important;
+}
+html[data-enhanced-focus="true"] .ride-unified-search-box:focus-within {
+  border-color: color-mix(in srgb, var(--ride-accent) 70%, var(--ride-border)) !important;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ride-accent) 18%, transparent) !important;
+}
 .ride-address-result > span em {
   color: var(--ride-muted);
   font-size: .72rem;
