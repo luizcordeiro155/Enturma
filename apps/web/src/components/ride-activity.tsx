@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Car, Users, MapPin, Minus, ChevronUp, ArrowRight } from "lucide-react";
 import { api } from "@/lib/api";
 import { useRideUpdates } from "@/lib/use-ride-updates";
-import type { Ride, Match } from "@/lib/ride-types";
+import type { Match } from "@/lib/ride-types";
 import { NotificationsProvider } from "./notifications";
 import { RideMatchCelebration } from "./ride-match-celebration";
 
@@ -13,9 +13,29 @@ type Search = {
   id: string;
   title: string;
   area: string;
-  departure: string;
+  departure?: string;
   incoming: boolean;
   offer: boolean;
+};
+
+type MobilityActivityState = {
+  driverAvailability?: {
+    userId?: string;
+    enabled: boolean;
+    status: "OFFLINE" | "ONLINE" | "REQUESTED" | "BUSY";
+    startLabel?: string;
+    endLabel?: string;
+    direction?: "TO_CAMPUS" | "FROM_CAMPUS";
+  } | null;
+  activeRequest?: {
+    id: string;
+    startLabel?: string;
+    endLabel?: string;
+    direction?: "TO_CAMPUS" | "FROM_CAMPUS";
+  } | null;
+  activeMatch?: {
+    id: string;
+  } | null;
 };
 const SearchContext = createContext<{ searches: Search[]; live: boolean }>({
   searches: [],
@@ -39,18 +59,18 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const router = useRouter();
   const [data, setData] = useState<{
-    rides: Ride[];
+    mobility: MobilityActivityState;
     matches: Match[];
     me: string;
     seen: string[];
-  }>({ rides: [], matches: [], me: "", seen: [] });
+  }>({ mobility: {}, matches: [], me: "", seen: [] });
   const [minimized, setMinimized] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const live = useRideUpdates(async () => {
-    const [rides, matches, me] = await Promise.all([
-      api<Ride[]>("/rides/mine"),
-      api<Match[]>("/matches"),
-      api<{ id: string }>("/users/me"),
+    const [mobility, matches, me] = await Promise.all([
+      api<MobilityActivityState>("/rides/mobility/state", { cache: "no-store" }),
+      api<Match[]>("/matches", { cache: "no-store" }),
+      api<{ id: string }>("/users/me", { cache: "no-store" }),
     ]);
     let seen: string[] = [];
     try {
@@ -60,7 +80,7 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
       if (Array.isArray(saved))
         seen = saved.filter((x) => typeof x === "string");
     } catch {}
-    setData({ rides, matches, me: me.id, seen });
+    setData({ mobility, matches, me: me.id, seen });
   });
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 30000);
@@ -78,49 +98,48 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener("storage", sync);
     };
   }, []);
-  const searches: Search[] = data.rides
-    .filter(
-      (r) => {
-        const accepted = data.matches.some(
-          (m) => m.rideId === r.id && m.status === "ACCEPTED" && !m.deletedAt,
-        );
-        return (
-          r.status === "OPEN" &&
-          ["SCHEDULED", "MATCHING"].includes(r.tripStatus) &&
-          Date.parse(r.departureAt) > now &&
-          !accepted
-        );
-      },
-    )
-    .map((r) => ({
-      id: r.id,
-      title: r.type === "OFFER" ? "Procurando passageiro" : "Procurando carona",
-      area: r.originArea,
-      departure: r.departureAt,
-      offer: r.type === "OFFER",
-      incoming: data.matches.some(
-        (m) => m.rideId === r.id && m.status === "PENDING",
-      ),
-    }));
-  searches.push(
-    ...data.matches
-      .filter(
-        (m) =>
-          m.userId === data.me &&
-          m.status === "PENDING" &&
-          m.rideStatus === "OPEN" &&
-          ["SCHEDULED", "MATCHING"].includes(m.tripStatus) &&
-          Date.parse(m.departureAt) > now,
-      )
-      .map((m) => ({
-        id: m.id,
-        title: "Aguardando aceite",
-        area: m.originArea,
-        departure: m.departureAt,
-        incoming: false,
-        offer: false,
-      })),
-  );
+  const searches: Search[] = [];
+  const activeMatch = data.mobility.activeMatch;
+  const activeRequest = data.mobility.activeRequest;
+  const availability = data.mobility.driverAvailability;
+
+  // The floating dock represents only a real, currently active on-demand search.
+  // Historical/open ride rows are intentionally ignored so stale records can never
+  // leave "Procurando passageiro" stuck on Desktop/Web after the user stopped.
+  if (!activeMatch && activeRequest) {
+    searches.push({
+      id: activeRequest.id,
+      title: "Procurando carona",
+      area:
+        activeRequest.direction === "FROM_CAMPUS"
+          ? activeRequest.endLabel || "Seu destino"
+          : activeRequest.startLabel || "Seu ponto de embarque",
+      incoming: false,
+      offer: false,
+    });
+  } else if (
+    !activeMatch &&
+    availability?.enabled &&
+    ["ONLINE", "REQUESTED"].includes(availability.status)
+  ) {
+    const incoming = data.matches.some(
+      (m) =>
+        m.driverId === data.me &&
+        m.status === "PENDING" &&
+        m.rideStatus === "OPEN" &&
+        !m.deletedAt,
+    );
+    searches.push({
+      id: availability.userId || `driver-${data.me}`,
+      title: "Procurando passageiro",
+      area:
+        availability.direction === "FROM_CAMPUS"
+          ? availability.startLabel || "Sua rota"
+          : availability.startLabel || "Seu ponto de partida",
+      incoming,
+      offer: true,
+    });
+  }
   const celebration = data.matches.find(
     (m) =>
       m.status === "ACCEPTED" &&
@@ -234,13 +253,18 @@ export function RideSearchPanel() {
             </h2>
             <p>
               <MapPin size={16} />
-              {search.area} ·{" "}
-              {new Date(search.departure).toLocaleString("pt-BR", {
-                day: "2-digit",
-                month: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
+              {search.area}
+              {search.departure ? (
+                <>
+                  {" · "}
+                  {new Date(search.departure).toLocaleString("pt-BR", {
+                    day: "2-digit",
+                    month: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </>
+              ) : null}
             </p>
             <p>
               {search.incoming
