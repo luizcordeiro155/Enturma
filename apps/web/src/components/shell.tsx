@@ -23,6 +23,10 @@ import {
 import { CommunityFeedback } from "./community-feedback";
 import { isDesktop, isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
+import {
+  RideDesktopNavigation,
+  RideMobileNavigation,
+} from "./ride-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
   { href: "/forum", label: "Fórum", icon: MessageCircle },
@@ -37,6 +41,7 @@ const links = [
 export function Shell({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
+  const inRideHub = path.startsWith("/caronas");
   const updateState = useAppUpdateState();
   const updatePending =
     (isMobileApp() || isDesktop()) &&
@@ -116,10 +121,19 @@ export function Shell({ children }: { children: React.ReactNode }) {
     };
   }, [emailCelebration]);
   return (
-    <div className={inStudyRoom ? "app-shell room-active-shell" : "app-shell"}>
+    <div
+      className={
+        inStudyRoom
+          ? "app-shell room-active-shell"
+          : inRideHub
+            ? "app-shell ride-active-shell"
+            : "app-shell"
+      }
+    >
       <a className="skip" href="#content">
         Pular para o conteúdo
       </a>
+      {inRideHub ? <RideDesktopNavigation /> : (
       <aside className="sidebar">
         <Link href="/home" className="brand">
           <BookOpen size={40} />
@@ -157,7 +171,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
             ))}
         </nav>
       </aside>
+      )}
       <div className="workspace">
+        {!inRideHub ? (
         <header className="topbar">
           <span>
             {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
@@ -186,17 +202,24 @@ export function Shell({ children }: { children: React.ReactNode }) {
             </Link>
           </div>
         </header>
+        ) : null}
         <main id="content">
           <CommunityFeedback />
           {children}
         </main>
-        <footer>
-          <ShieldCheck size={20} /> Catálogo acadêmico com fontes verificadas.
-          <span>Enturma Web v0.3.0</span>
-        </footer>
+        {!inRideHub ? (
+          <footer>
+            <ShieldCheck size={20} /> Catálogo acadêmico com fontes verificadas.
+            <span>Enturma Web v0.3.0</span>
+          </footer>
+        ) : null}
       </div>
 
-      {!inStudyRoom ? <MobileNavigation /> : null}
+      {inRideHub ? (
+        <RideMobileNavigation />
+      ) : !inStudyRoom ? (
+        <MobileNavigation />
+      ) : null}
       {emailCelebration ? (
         <div
           className="account-celebration-backdrop"
