@@ -429,6 +429,9 @@ public class RideDispatchService {
                 ((Number) detour.get("durationSeconds")).intValue()
                     - ((Number) base.get("durationSeconds")).intValue());
         item.put("detourMinutes", Math.max(0, (int) Math.ceil(seconds / 60.0)));
+        Object legsValue = detour.get("legDurationsSeconds");
+        if (legsValue instanceof List<?> legs && !legs.isEmpty() && legs.getFirst() instanceof Number firstLeg)
+          item.put("etaMinutes", Math.max(1, (int) Math.ceil(firstLeg.doubleValue() / 60.0)));
         item.put("score", score(item));
       } catch (RuntimeException ignored) {
         // Geometric fallback above keeps matching functional if routing is temporarily unavailable.
