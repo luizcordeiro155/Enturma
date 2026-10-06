@@ -270,16 +270,11 @@ function AddressFinder({
   const [items, setItems] = useState<LocationResult[]>([]);
   const [busy, setBusy] = useState(false);
   const request = useRef(0);
-  const query = useMemo(
-    () =>
-      [street.trim(), houseNumber.trim()]
-        .filter((part) => part.length > 0)
-        .join(", "),
-    [street, houseNumber],
-  );
-
   useEffect(() => {
-    if (street.trim().length < 3) return;
+    if (street.trim().length < 3 || !houseNumber.trim()) {
+      const timer = window.setTimeout(() => setItems([]), 0);
+      return () => window.clearTimeout(timer);
+    }
     const id = ++request.current;
     const timer = window.setTimeout(async () => {
       setBusy(true);
@@ -302,9 +297,9 @@ function AddressFinder({
       } finally {
         if (id === request.current) setBusy(false);
       }
-    }, houseNumber.trim() ? 240 : 380);
+    }, 650);
     return () => window.clearTimeout(timer);
-  }, [query, street, houseNumber, current?.lat, current?.lng]);
+  }, [street, houseNumber, current?.lat, current?.lng]);
 
   return (
     <div className="ride-address-finder">

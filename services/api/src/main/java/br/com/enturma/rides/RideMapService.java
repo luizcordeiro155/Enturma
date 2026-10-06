@@ -19,6 +19,7 @@ public class RideMapService {
   private final ObjectMapper json;
   private final HttpClient http;
   private final String geocoder;
+  private final String addressGeocoder;
   private final String router;
   private final String userAgent;
 
@@ -33,6 +34,11 @@ public class RideMapService {
         trimBase(
             env.getProperty(
                 "RIDE_GEOCODER_URL", "https://nominatim.openstreetmap.org"));
+    this.addressGeocoder =
+        trimBase(
+            env.getProperty(
+                "RIDE_ADDRESS_GEOCODER_URL",
+                "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer"));
     this.router =
         trimBase(
             env.getProperty(
@@ -86,80 +92,68 @@ public class RideMapService {
     if (house.isBlank() || house.length() > 24)
       throw ApiException.invalid("Informe o número do endereço.");
 
-    String city = null;
-    String state = null;
+    String singleLine = road + " " + house + ", Brasil";
+    StringBuilder url =
+        new StringBuilder(addressGeocoder)
+            .append("/findAddressCandidates?f=json")
+            .append("&SingleLine=")
+            .append(enc(singleLine))
+            .append("&countryCode=BRA&maxLocations=8")
+            .append("&outFields=Match_addr,Addr_type,StAddr,City,Region,Postal");
+
     if (valid(lat, lng)) {
-      try {
-        JsonNode near =
-            getJson(
-                geocoder
-                    + "/reverse?format=jsonv2&zoom=10&addressdetails=1&accept-language=pt-BR&lat="
-                    + lat
-                    + "&lon="
-                    + lng);
-        JsonNode address = near.path("address");
-        city =
-            firstText(
-                address,
-                "city",
-                "town",
-                "municipality",
-                "village",
-                "city_district");
-        state = firstText(address, "state");
-      } catch (ApiException ignored) {
-        // The location context only improves ranking. Exact address search can continue without it.
-      }
+      url.append("&location=").append(lng).append(",").append(lat);
     }
 
-    var roots = new ArrayList<JsonNode>();
-    StringBuilder structured =
-        new StringBuilder(geocoder)
-            .append("/search?format=jsonv2&addressdetails=1&limit=10&countrycodes=br")
-            .append("&accept-language=pt-BR&street=")
-            .append(enc(house + " " + road));
-    if (city != null && !city.isBlank()) structured.append("&city=").append(enc(city));
-    if (state != null && !state.isBlank()) structured.append("&state=").append(enc(state));
-    addViewbox(structured, lat, lng);
-    roots.add(getJson(structured.toString()));
-
-    StringBuilder free =
-        new StringBuilder(geocoder)
-            .append("/search?format=jsonv2&addressdetails=1&limit=10&countrycodes=br")
-            .append("&accept-language=pt-BR&q=")
-            .append(enc(road + ", " + house
-                + (city == null ? "" : ", " + city)
-                + (state == null ? "" : ", " + state)));
-    addViewbox(free, lat, lng);
-    roots.add(getJson(free.toString()));
-
+    JsonNode root = getJson(url.toString());
     var exact = new ArrayList<Map<String, Object>>();
-    var fallback = new ArrayList<Map<String, Object>>();
-    var seen = new HashSet<String>();
+    var approximate = new ArrayList<Map<String, Object>>();
     String wanted = normalizeHouseNumber(house);
 
-    for (JsonNode root : roots) {
-      if (!root.isArray()) continue;
-      for (JsonNode node : root) {
-        Double y = decimal(node.path("lat").asText(null));
-        Double x = decimal(node.path("lon").asText(null));
-        if (!valid(y, x)) continue;
-        String key = String.format(Locale.ROOT, "%.6f,%.6f", y, x);
-        if (!seen.add(key)) continue;
-        JsonNode address = node.path("address");
-        String foundHouse = address.path("house_number").asText("");
-        boolean houseMatch =
-            !foundHouse.isBlank() && normalizeHouseNumber(foundHouse).equals(wanted);
-        var item = mapResult(node, y, x);
-        item.put("precision", houseMatch ? "HOUSE" : "STREET");
-        item.put("requestedNumber", house);
-        if (houseMatch) exact.add(item);
-        else fallback.add(item);
-      }
+    for (JsonNode candidate : root.path("candidates")) {
+      JsonNode location = candidate.path("location");
+      Double y = location.has("y") ? location.path("y").asDouble() : null;
+      Double x = location.has("x") ? location.path("x").asDouble() : null;
+      if (!valid(y, x)) continue;
+
+      int score = candidate.path("score").asInt(0);
+      JsonNode attributes = candidate.path("attributes");
+      String address = candidate.path("address").asText("Local");
+      String streetAddress = attributes.path("StAddr").asText("");
+      String addressType = attributes.path("Addr_type").asText("");
+
+      String combined = normalizeHouseNumber(streetAddress + " " + address);
+      boolean numberMatch = !wanted.isBlank() && combined.contains(wanted);
+      boolean housePrecision =
+          numberMatch
+              && score >= 90
+              && ("PointAddress".equalsIgnoreCase(addressType)
+                  || "Subaddress".equalsIgnoreCase(addressType)
+                  || "StreetAddress".equalsIgnoreCase(addressType));
+
+      var item = new LinkedHashMap<String, Object>();
+      item.put(
+          "id",
+          "arcgis-"
+              + Integer.toHexString(
+                  Objects.hash(address, y, x, score)));
+      item.put("label", address);
+      item.put("lat", y);
+      item.put("lng", x);
+      item.put("type", addressType);
+      item.put("score", score);
+      item.put("precision", housePrecision ? "HOUSE" : "STREET");
+      item.put("requestedNumber", house);
+      if (!streetAddress.isBlank()) item.put("streetAddress", streetAddress);
+      String postal = attributes.path("Postal").asText("");
+      if (!postal.isBlank()) item.put("postalCode", postal);
+
+      if (housePrecision) exact.add(item);
+      else if (score >= 75) approximate.add(item);
     }
 
     if (!exact.isEmpty()) return exact.stream().limit(6).toList();
-    return fallback.stream().limit(4).toList();
+    return approximate.stream().limit(4).toList();
   }
 
   public Object reverse(double lat, double lng) {
