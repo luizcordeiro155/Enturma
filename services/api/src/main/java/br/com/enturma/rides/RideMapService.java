@@ -120,7 +120,7 @@ public class RideMapService {
 
     out.sort(
         Comparator
-            .comparingInt(
+            .<Map<String, Object>>comparingInt(
                 item ->
                     item.get("distanceMeters") instanceof Number number
                         ? number.intValue()
