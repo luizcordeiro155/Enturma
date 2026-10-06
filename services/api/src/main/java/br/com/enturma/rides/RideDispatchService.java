@@ -101,9 +101,15 @@ public class RideDispatchService {
             + " home_label,home_lat,home_lng,onboarding_done,updated_at)"
             + " VALUES (?,?,?,?,?,?,?,?,?,now()) ON CONFLICT(user_id) DO UPDATE SET"
             + " campus_id=EXCLUDED.campus_id,"
-            + " campus_label_override=COALESCE(EXCLUDED.campus_label_override,ride_user_mobility_pref.campus_label_override),"
-            + " campus_lat_override=COALESCE(EXCLUDED.campus_lat_override,ride_user_mobility_pref.campus_lat_override),"
-            + " campus_lng_override=COALESCE(EXCLUDED.campus_lng_override,ride_user_mobility_pref.campus_lng_override),"
+            + " campus_label_override=CASE WHEN ride_user_mobility_pref.campus_id=EXCLUDED.campus_id"
+            + " THEN COALESCE(EXCLUDED.campus_label_override,ride_user_mobility_pref.campus_label_override)"
+            + " ELSE EXCLUDED.campus_label_override END,"
+            + " campus_lat_override=CASE WHEN ride_user_mobility_pref.campus_id=EXCLUDED.campus_id"
+            + " THEN COALESCE(EXCLUDED.campus_lat_override,ride_user_mobility_pref.campus_lat_override)"
+            + " ELSE EXCLUDED.campus_lat_override END,"
+            + " campus_lng_override=CASE WHEN ride_user_mobility_pref.campus_id=EXCLUDED.campus_id"
+            + " THEN COALESCE(EXCLUDED.campus_lng_override,ride_user_mobility_pref.campus_lng_override)"
+            + " ELSE EXCLUDED.campus_lng_override END,"
             + " home_label=EXCLUDED.home_label,home_lat=EXCLUDED.home_lat,home_lng=EXCLUDED.home_lng,"
             + " onboarding_done=EXCLUDED.onboarding_done,updated_at=now()",
         actor.id(),
