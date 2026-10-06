@@ -456,13 +456,26 @@ export function RideMobilityExperience() {
   const locationWatch = useRef<number | undefined>(undefined);
   const lastSent = useRef<{ at: number; point: MapPoint } | null>(null);
   const activeRouteAt = useRef(0);
+  const currentLocationRef = useRef<MapPoint>();
+  const userRef = useRef("");
+  const campusesRef = useRef<AcademicEntry[]>([]);
+
+  useEffect(() => {
+    currentLocationRef.current = location;
+  }, [location]);
 
   const load = useCallback(async () => {
     const [next, user, campusList] = await Promise.all([
       api<MobilityState>("/rides/mobility/state", { cache: "no-store" }),
-      api<{ id: string }>("/users/me", { cache: "no-store" }),
-      api<AcademicEntry[]>("/academics?kind=CAMPUS"),
+      userRef.current
+        ? Promise.resolve({ id: userRef.current })
+        : api<{ id: string }>("/users/me", { cache: "no-store" }),
+      campusesRef.current.length
+        ? Promise.resolve(campusesRef.current)
+        : api<AcademicEntry[]>("/academics?kind=CAMPUS"),
     ]);
+    userRef.current = user.id;
+    campusesRef.current = campusList;
     if (
       next.preference?.campusId &&
       (next.preference.campusLat == null || next.preference.campusLng == null)
@@ -513,7 +526,10 @@ export function RideMobilityExperience() {
           : next.activeRequest
             ? point(next.activeRequest.startLat, next.activeRequest.startLng)
             : point(next.preference?.campusLat, next.preference?.campusLng);
-    if (actualCenter) setLocation(actualCenter);
+    if (actualCenter && !currentLocationRef.current) {
+      currentLocationRef.current = actualCenter;
+      setLocation(actualCenter);
+    }
     return { next, user: user.id };
   }, []);
 
@@ -532,6 +548,9 @@ export function RideMobilityExperience() {
   }, []);
   useEffect(() => {
     localStorage.setItem("enturma-ride-mode", mode);
+    window.dispatchEvent(
+      new CustomEvent<Mode>("enturma-ride-mode-change", { detail: mode }),
+    );
   }, [mode]);
 
   const live = useRideUpdates(async () => {
