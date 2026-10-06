@@ -1364,13 +1364,6 @@ class PlatformIntegrationTest {
 
     rideMobility.confirm(member, match);
     rideMobility.confirm(host, match);
-    String code =
-        String.valueOf(((Map<?, ?>) rideMobility.boardingCode(member, match)).get("code"));
-    assertThat(code).matches("[0-9]{4}");
-    rideMobility.board(host, match, code);
-    assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
-        .isNotNull();
-
     rideMobility.tripStatus(host, offer, "DRIVER_ON_THE_WAY");
     rideMobility.liveLocation(host, match, -19.912, -43.960, 15);
     rideMobility.liveLocation(member, match, -19.918, -43.952, 20);
@@ -1385,6 +1378,12 @@ class PlatformIntegrationTest {
 
     rideMobility.tripStatus(host, offer, "ARRIVING");
     rideMobility.tripStatus(host, offer, "WAITING_PASSENGER");
+    String code =
+        String.valueOf(((Map<?, ?>) rideMobility.boardingCode(member, match)).get("code"));
+    assertThat(code).matches("[0-9]{4}");
+    rideMobility.board(host, match, code);
+    assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
+        .isNotNull();
     rideMobility.tripStatus(host, offer, "IN_PROGRESS");
     rideMobility.tripStatus(host, offer, "ARRIVED");
     rideMobility.tripStatus(host, offer, "COMPLETED");

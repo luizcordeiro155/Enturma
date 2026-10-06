@@ -233,9 +233,10 @@ async function currentPosition(): Promise<{
   };
 }
 function useOnline() {
-  const [online, setOnline] = useState(true);
+  const [online, setOnline] = useState(() =>
+    typeof navigator === "undefined" ? true : navigator.onLine,
+  );
   useEffect(() => {
-    setOnline(navigator.onLine);
     const yes = () => setOnline(true);
     const no = () => setOnline(false);
     window.addEventListener("online", yes);
@@ -264,10 +265,7 @@ function AddressFinder({
   const [busy, setBusy] = useState(false);
   const request = useRef(0);
   useEffect(() => {
-    if (query.trim().length < 3) {
-      setItems([]);
-      return;
-    }
+    if (query.trim().length < 3) return;
     const id = ++request.current;
     const timer = window.setTimeout(async () => {
       setBusy(true);
@@ -306,7 +304,7 @@ function AddressFinder({
         <MapPin size={17} /> Escolher no mapa
       </button>
       {busy ? <small>Pesquisando endereços…</small> : null}
-      {items.length ? (
+      {query.trim().length >= 3 && items.length ? (
         <div className="ride-address-results">
           {items.map((item, index) => (
             <button
@@ -624,40 +622,61 @@ export function RideMobilityExperience() {
   const recentCompleted = state?.recentCompleted ?? undefined;
   const activeLocked = !!activeMatch;
 
-  function changeMode(nextMode: Mode) {
-    if (activeLocked || nextMode === mode) return;
-    setMode(nextMode);
-    const direction = nextMode === "DRIVER" ? 1 : -1;
-    requestAnimationFrame(() => {
-      const switcher = modeSwitchRef.current;
-      const panel = mobilityRoot.current?.querySelector<HTMLElement>(".ride-sheet-content");
-      const reduced =
-        document.documentElement.dataset.reducedMotion === "true" ||
-        matchMedia("(prefers-reduced-motion: reduce)").matches;
-      if (switcher && !reduced)
-        switcher.animate(
-          [
-            { transform: "scale(.985)" },
-            { transform: "scale(1.018)", offset: 0.55 },
-            { transform: "scale(1)" },
-          ],
-          { duration: 280, easing: "cubic-bezier(.2,.8,.2,1)" },
-        );
-      if (panel && !reduced)
-        panel.animate(
-          [
+  async function changeMode(nextMode: Mode) {
+    if (activeLocked || nextMode === mode || busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      if (nextMode === "DRIVER" && activeRequest) {
+        await post("/rides/dispatch/cancel", {
+          reason: "MODE_SWITCH",
+          note: "Busca encerrada ao trocar para o modo motorista.",
+        });
+        setNearbyDrivers([]);
+      } else if (nextMode === "PASSENGER" && availability?.enabled) {
+        await api("/rides/driver/availability", { method: "DELETE" });
+        setDriverRequests([]);
+      }
+
+      setMode(nextMode);
+      const animationDirection = nextMode === "DRIVER" ? 1 : -1;
+      requestAnimationFrame(() => {
+        const switcher = modeSwitchRef.current;
+        const panel =
+          mobilityRoot.current?.querySelector<HTMLElement>(".ride-sheet-content");
+        const reduced =
+          document.documentElement.dataset.reducedMotion === "true" ||
+          matchMedia("(prefers-reduced-motion: reduce)").matches;
+        if (switcher && !reduced)
+          switcher.animate(
+            [
+              { transform: "scale(.985)" },
+              { transform: "scale(1.018)", offset: 0.55 },
+              { transform: "scale(1)" },
+            ],
+            { duration: 280, easing: "cubic-bezier(.2,.8,.2,1)" },
+          );
+        if (panel && !reduced)
+          panel.animate(
+            [
+              {
+                opacity: 0.35,
+                transform: `translate3d(${animationDirection * 18}px,0,0)`,
+              },
+              { opacity: 1, transform: "translate3d(0,0,0)" },
+            ],
             {
-              opacity: 0.35,
-              transform: `translate3d(${direction * 18}px,0,0)`,
+              duration: 330,
+              easing: "cubic-bezier(.16,1,.3,1)",
             },
-            { opacity: 1, transform: "translate3d(0,0,0)" },
-          ],
-          {
-            duration: 330,
-            easing: "cubic-bezier(.16,1,.3,1)",
-          },
-        );
-    });
+          );
+      });
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   const acquire = useCallback(async () => {
@@ -1373,16 +1392,16 @@ export function RideMobilityExperience() {
           <button
             type="button"
             aria-pressed={mode === "PASSENGER"}
-            disabled={activeLocked}
-            onClick={() => changeMode("PASSENGER")}
+            disabled={activeLocked || busy}
+            onClick={() => void changeMode("PASSENGER")}
           >
             <Users size={16} /> Passageiro
           </button>
           <button
             type="button"
             aria-pressed={mode === "DRIVER"}
-            disabled={activeLocked}
-            onClick={() => changeMode("DRIVER")}
+            disabled={activeLocked || busy}
+            onClick={() => void changeMode("DRIVER")}
           >
             <Car size={16} /> Motorista
           </button>

@@ -284,19 +284,8 @@ public class RideService {
             "SELECT count(*) FROM ride_match WHERE ride_id=? AND status='ACCEPTED'",
             Long.class,
             ride.get("id"));
-    if (count >= ((Number) ride.get("seats")).intValue()) {
-      db.jdbc.update("UPDATE ride_match SET status='WAITLISTED' WHERE id=?", id);
-      notices.send(
-          a.id(),
-          (UUID) match.get("requestedBy"),
-          "RIDE_WAITLIST",
-          "ride:" + ride.get("id"),
-          id,
-          "/caronas/matches?match=" + id,
-          "A carona lotou antes do aceite. Seu pedido entrou na lista de espera.");
-      changed((UUID) ride.get("id"), true);
-      return;
-    }
+    if (count >= ((Number) ride.get("seats")).intValue())
+      throw ApiException.invalid("Esta carona já está lotada. O pedido continua na lista de espera.");
 
     db.jdbc.update(
         "UPDATE ride_match SET status='ACCEPTED',"
@@ -306,6 +295,12 @@ public class RideService {
         a.id(),
         a.id(),
         id);
+    if (count + 1 >= ((Number) ride.get("seats")).intValue())
+      db.jdbc.update(
+          "UPDATE ride_match SET status='WAITLISTED' WHERE ride_id=? AND id<>?"
+              + " AND status='PENDING' AND deleted_at IS NULL",
+          ride.get("id"),
+          id);
     if (match.get("requestRideId") != null)
       db.jdbc.update(
           "UPDATE ride SET status='COMPLETED' WHERE id=? AND status='OPEN'",
