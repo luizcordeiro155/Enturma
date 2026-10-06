@@ -1,42 +1,95 @@
-# Enturma 0.3.0
+# Estado atual do Enturma — 06/10/2026
 
-Implementação em `codex/enturma-v0.3.0`, baseada em `937a3be`. Publicação prevista em um PR e squash único, pelas integrações Git existentes. Nenhum GitHub Actions foi acrescentado.
+Este documento resume o estado observado atualmente na branch `main`. Ele substitui descrições antigas baseadas em branches intermediárias de implementação.
 
-## Funcionalidades
+## Visão geral
 
-- Perfil com identidade e recorte preservados, tema secundário, efeitos, privacidade, até oito widgets ordenáveis e quatro insígnias conquistadas em destaque.
-- Conquistas server-side sobre salas, fórum, cadernos e jogos; concessão única e XP no ledger existente.
-- UFMG ampliada de 35 para 78 disciplinas: 43 optativas da mesma fonte oficial, em grupo sem semestre. UNA e PUC preservados.
-- Dezoito templates de desafios acadêmicos associados às matérias verificadas selecionadas; cinco missões por jogo/dia, prática, tentativas e dificuldade progressiva. Os quatro jogos de programação existentes permanecem disponíveis.
-- Salas rápidas com grace period, salas de 1–5 dias, presença, reservas, controle do anfitrião e avisos de prazo.
-- Chamada global Web/nativa, chat persistente de salas, typing efêmero, mensagens enriquecidas e cards do Monitor Enturma.
-- Moderação determinística, fila opcional de classificação para revisão humana, evidências, medidas auditadas e recurso. Conversas privadas E2EE excluídas do processamento.
-- Preferências in-app/e-mail por categoria, verificadas novamente antes de enviar a outbox; segurança e autenticação não entram no opt-out.
-- Desktop com bridge isolada, download verificado, atualização integrada à UI, instalador NSIS por usuário e ZIP com formato compatível com o manifesto 0.2.0 (gate de execução abaixo).
-- Mobile com navegação inferior, temas, salas/chat/imagens/chamadas, fórum, cadernos, desafios, perfil, amigos e caronas. APK/AAB configurados; nenhuma publicação em loja realizada.
+O Enturma está em **desenvolvimento ativo e estabilização**. Os principais módulos acadêmicos, sociais e de comunicação já existem no repositório, e o trabalho atual está concentrado em confiabilidade, paridade entre plataformas, UX e integração real entre os fluxos.
 
-## Evidências locais
+As mudanças mais recentes de `main` em 06/10/2026 refinam **Enturma Caronas**, especialmente pesquisa de endereços e locais, ordenação de resultados e detalhes da experiência de mobilidade.
 
-64 testes Java aprovados no PostgreSQL isolado; migrations V1–V25 aplicadas do zero, catálogo importado sem falhas. Playwright: nove fluxos aprovados no conjunto e reexecuções dirigidas. Dois usuários com mídia LiveKit local real, compartilhamento de tela e navegação preservando conexão; câmera/microfone sintéticos do Chromium.
+## Plataformas
 
-Responsividade: 320×568, 390×844, 1024×600, 1376×766/768, 1920×1080 e 3440×1440, com acesso por foco/scroll a Configurações e sem overflow horizontal. TypeScript Web/Mobile, bundles Android/iOS Hermes, prebuild Android, NSIS/ZIP Windows validados. Teste de caderno usa fornecedor de IA controlado, sem homologar resposta paga real.
+| Plataforma | Estado |
+| --- | --- |
+| Web | Aplicação principal Next.js/React, com os fluxos mais completos do produto |
+| Android | Expo/React Native, pacote 0.3.26; funcional e em evolução de paridade/validação |
+| Desktop | Electron, pacote 0.3.15; utiliza a experiência Web oficial com integrações nativas |
+| iOS | Estrutura técnica existe no projeto mobile, mas não há distribuição/homologação oficial declarada |
 
-## Limites operacionais
+O pacote Web continua declarado como 0.3.0. As versões de pacote são independentes e não significam que todas as plataformas tenham o mesmo ciclo de release.
 
-- iOS requer macOS/Linux para gerar o projeto e assinatura real para distribuir. A página informa “em preparação”; nenhum certificado Apple inventado.
-- EAS exige `EXPO_PUBLIC_API_URL` HTTPS real. Configurar `ANDROID_DOWNLOAD_URL` apenas depois de publicar um APK. Exportação JS não equivale a teste em aparelho físico.
-- Não houve homologação em Android/iOS físico. Push nativo não é substituído por notificações in-app/WS.
-- Mídia usa criptografia de transporte WebRTC; não se anuncia E2EE de mídia. Privado entre amigos mantém E2EE/cofre no Web; salas e caronas têm autorização/retenção próprias.
-- Snapshots WS permanecem por instância; escala horizontal exige barramento. Teste de carga não realizado.
+## Funcionalidades presentes
 
-Checklist e publicação: [V0_3_IMPLEMENTATION](V0_3_IMPLEMENTATION.md).
+### Acadêmico e aprendizagem
 
-### Recuperação do Desktop legado
+- catálogo acadêmico controlado;
+- matrícula e matérias;
+- agenda e organização;
+- salas e turmas;
+- materiais e notebooks;
+- desafios, missões, XP e conquistas;
+- portfólio acadêmico;
+- Enturma IA com contexto autorizado.
 
-A versão 0.2.0 recebe uma orientação dentro do app para baixar o instalador oficial quando o iniciador antigo falha. A recuperação inicial exige executar o EXE, sem excluir conta/dados. A instalação da bridge nova foi validada; não se afirma que o código antigo foi corrigido remotamente. Produção é publicada via PR #21 e squash, conforme a solicitação de liberação de 02/10/2026.
+### Comunicação e comunidade
 
+- chat e presença;
+- WebSocket autenticado;
+- chamadas via LiveKit;
+- microfone, câmera e compartilhamento de tela;
+- fórum;
+- amigos;
+- perfil e personalização;
+- notificações.
 
-## Enturma Stabilization / Polish — 2026-10-03
-- Ciclo de estabilização sem novos recursos: privacidade, realtime mobile, concorrência, paridade de telas, feedback e E2E.
-- Android de validação: 0.3.24.
-- A publicação final é consolidada em um único commit após as validações de produção.
+### Caronas
+
+O módulo de caronas já possui uma camada de mobilidade universitária mais avançada que o fluxo antigo de publicação/interesse.
+
+A implementação atual inclui modo passageiro/motorista, campus e direção da viagem, busca de locais, rotas, matching sob demanda, disponibilidade de motoristas, estados da viagem, localização temporária autorizada, PIN de embarque, cancelamentos, reputação, veículo e recursos de segurança.
+
+O módulo continua em refinamento ativo de UX, ranking, busca de locais e paridade entre plataformas.
+
+## Arquitetura observada
+
+- Java 21;
+- Spring Boot 3.5.16;
+- PostgreSQL + Flyway;
+- Next.js 16.3.6;
+- React 19.2.x;
+- Expo 55;
+- React Native 0.83.x;
+- Electron 44.5.1;
+- WebSocket;
+- LiveKit;
+- armazenamento S3 compatível;
+- OpenAI;
+- Firebase Cloud Messaging.
+
+## Validação
+
+O repositório mantém testes Java, testes Web, typecheck, lint, build e fluxos E2E. Mudanças relevantes devem ser validadas no escopo afetado antes de serem consideradas concluídas.
+
+A existência de builds e deploys não deve ser confundida com homologação completa. Ainda é necessário tratar validação real por dispositivo, combinações de ambiente, escala horizontal e comportamento sob falhas externas.
+
+## Limites e pontos ainda abertos
+
+- Android requer validação contínua em dispositivos físicos;
+- iOS não possui distribuição oficial declarada;
+- escala horizontal do realtime exige coordenação/pub-sub adequada entre instâncias;
+- testes de carga e cenários extensos de produção continuam sendo trabalho separado;
+- integrações externas dependem de configuração real e podem exigir validação específica;
+- recursos de localização dependem de permissão do usuário e devem manter privacidade por padrão;
+- o projeto segue em ciclo de QA e polimento, portanto documentação e versões podem evoluir rapidamente.
+
+## Regra de comunicação
+
+Ao apresentar o Enturma publicamente:
+
+- pode ser descrito como uma plataforma acadêmica multiplataforma funcional em desenvolvimento ativo;
+- não deve ser anunciado como totalmente homologado para todos os dispositivos ou cenários;
+- dados acadêmicos só devem ser tratados como oficiais quando tiverem fonte verificada;
+- funcionalidades em refinamento devem ser apresentadas como tal.
+
+Para detalhes técnicos, consulte [ARCHITECTURE.md](ARCHITECTURE.md), [CARPOOL.md](CARPOOL.md), [DEPLOYMENT.md](DEPLOYMENT.md) e [SECURITY.md](SECURITY.md).

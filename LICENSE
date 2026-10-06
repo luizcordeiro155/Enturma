@@ -1,5 +1,26 @@
-All rights reserved.
+Enturma — Proprietary Source Notice
 
-No open-source license has been granted for this repository. Distribution and use
-outside permissions explicitly granted by the repository owner require authorization.
-The owner may choose a different license in a future revision.
+Copyright (c) 2026. All rights reserved.
+
+This repository is publicly visible, but no open-source license is granted for
+the Enturma source code, documentation, assets, designs, or other original
+materials contained in this repository.
+
+You may view the repository through the features provided by GitHub. Except
+where required by applicable law or by GitHub's platform terms, no permission
+is granted to copy, modify, redistribute, sublicense, sell, publish, deploy,
+commercialize, or create and distribute derivative versions of substantial
+parts of this project without prior authorization from the repository owner.
+
+Public visibility of the source code does not place the project in the public
+domain and does not constitute permission for commercial or non-commercial
+reuse.
+
+Third-party libraries and dependencies remain subject to their own respective
+licenses.
+
+Contributions accepted into this repository do not change the licensing status
+of the project unless an explicit written license change is published by the
+repository owner.
+
+The repository owner may adopt a different license in a future revision.
