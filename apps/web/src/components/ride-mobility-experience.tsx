@@ -316,8 +316,18 @@ function AddressFinder({
             value={query}
             onChange={(event) => setQuery(event.target.value)}
             placeholder="Pesquisar endereço ou local"
+            aria-label="Pesquisar endereço ou local"
             autoComplete="street-address"
             enterKeyHint="search"
+            style={{
+              width: "100%",
+              minWidth: 0,
+              margin: 0,
+              border: 0,
+              outline: "none",
+              boxShadow: "none",
+              background: "transparent",
+            }}
           />
         </div>
       </label>
