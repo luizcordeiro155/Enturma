@@ -719,7 +719,7 @@ export function RideMobilityExperience() {
     [campusPoint?.lat, campusPoint?.lng, direction],
   );
 
-  async function useCurrentPlace() {
+  async function chooseCurrentPlace() {
     const current = await acquire();
     await calculateRoute(
       {
@@ -1771,7 +1771,7 @@ export function RideMobilityExperience() {
                         type="button"
                         className="ride-location-current"
                         disabled={busy}
-                        onClick={() => void useCurrentPlace()}
+                        onClick={() => void chooseCurrentPlace()}
                       >
                         <LocateFixed size={20} />
                         <span>
