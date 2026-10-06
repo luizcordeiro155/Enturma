@@ -1384,7 +1384,8 @@ class PlatformIntegrationTest {
     rideMobility.board(host, match, code);
     assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
         .isNotNull();
-    rideMobility.tripStatus(host, offer, "IN_PROGRESS");
+    assertThat(db.one("SELECT trip_status FROM ride WHERE id=?", offer).get("tripStatus"))
+        .isEqualTo("IN_PROGRESS");
     rideMobility.tripStatus(host, offer, "ARRIVED");
     rideMobility.tripStatus(host, offer, "COMPLETED");
 

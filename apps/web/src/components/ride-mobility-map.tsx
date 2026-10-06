@@ -379,6 +379,7 @@ export function RideMobilityMap({
       <svg className="ride-map-route" width={size.width} height={size.height} aria-hidden="true">
         <polyline className="ride-map-route-halo" points={routePoints} />
         <polyline ref={routePath} className="ride-map-route-line" points={routePoints} />
+        <polyline className="ride-map-route-flow" points={routePoints} />
       </svg>
 
       {markers.map((marker) => (

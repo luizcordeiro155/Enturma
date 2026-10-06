@@ -976,7 +976,7 @@ export function RideMobilityExperience() {
     try {
       const current = await acquire();
       let target = selected;
-      if (direction === "TO_CAMPUS") {
+      if (!target && direction === "TO_CAMPUS") {
         target = {
           label: current.label,
           lat: current.point.lat,
@@ -2111,20 +2111,93 @@ export function RideMobilityExperience() {
                       ))}
                     </select>
                   </label>
-                  {direction === "FROM_CAMPUS" && !selected ? (
-                    <AddressFinder
-                      title="Para onde você está indo?"
-                      current={location}
-                      onChoose={(value) => {
-                        setSelected(value);
-                        void calculateRoute(value, "FROM_CAMPUS");
-                      }}
-                      onPickMap={() => {
-                        setMapPickPurpose("ROUTE");
-                        setSelectOnMap(true);
-                      }}
-                    />
-                  ) : null}
+                  {!selected ? (
+                    <div className="ride-driver-location-choice">
+                      <button
+                        type="button"
+                        className="ride-location-current"
+                        disabled={busy}
+                        onClick={() => void chooseCurrentPlace()}
+                      >
+                        <LocateFixed size={20} />
+                        <span>
+                          <strong>Usar minha localização atual</strong>
+                          <small>
+                            {direction === "TO_CAMPUS"
+                              ? "Usar como ponto de partida"
+                              : "Usar como destino desta rota"}
+                          </small>
+                        </span>
+                      </button>
+                      {pref.homeLat != null && pref.homeLng != null ? (
+                        <button
+                          type="button"
+                          className="ride-location-current"
+                          onClick={() =>
+                            void calculateRoute(
+                              {
+                                label: pref.homeLabel || "Casa",
+                                lat: pref.homeLat!,
+                                lng: pref.homeLng!,
+                              },
+                              direction,
+                            )
+                          }
+                        >
+                          <Home size={20} />
+                          <span>
+                            <strong>Casa</strong>
+                            <small>{pref.homeLabel || "Local salvo"}</small>
+                          </span>
+                        </button>
+                      ) : null}
+                      <AddressFinder
+                        title={
+                          direction === "TO_CAMPUS"
+                            ? "De onde você está saindo?"
+                            : "Para onde você está indo?"
+                        }
+                        current={location}
+                        onChoose={(value) =>
+                          void calculateRoute(value, direction)
+                        }
+                        onPickMap={() => {
+                          setMapPickPurpose("ROUTE");
+                          setSelectOnMap(true);
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="ride-driver-selected-location">
+                      <div>
+                        <MapPin size={18} />
+                        <span>
+                          <small>
+                            {direction === "TO_CAMPUS"
+                              ? "Ponto de partida"
+                              : "Destino"}
+                          </small>
+                          <strong>{selected.label}</strong>
+                        </span>
+                      </div>
+                      {route ? (
+                        <div className="ride-route-metrics">
+                          <span>{meters(route.distanceMeters)}</span>
+                          <span>{minutes(route.durationSeconds)}</span>
+                        </div>
+                      ) : null}
+                      <button
+                        type="button"
+                        className="text-button"
+                        onClick={() => {
+                          setSelected(undefined);
+                          setRoute(undefined);
+                        }}
+                      >
+                        Trocar localização
+                      </button>
+                    </div>
+                  )}
                   {!state.vehicle?.brand ? (
                     <div className="ride-vehicle-needed">
                       <Car size={20} />

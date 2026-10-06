@@ -272,7 +272,7 @@ export function Screen({
   return (
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: styles.screen.backgroundColor }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={90}
     >
       <FlatList
