@@ -49,8 +49,10 @@ function AuthThemeControl() {
         cachedTheme = cached.theme;
       }
     } catch {}
-    setTheme(cachedTheme);
-    setReady(true);
+    queueMicrotask(() => {
+      setTheme(cachedTheme);
+      setReady(true);
+    });
   }, []);
 
   useEffect(() => {
