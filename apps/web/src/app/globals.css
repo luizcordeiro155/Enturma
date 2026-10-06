@@ -704,9 +704,20 @@ label small {
       24px
       calc(24px + var(--enturma-safe-left));
   }
-  .auth-story > div,
+  .auth-story > div:not(.auth-theme-control),
   .auth-story > span {
     display: none;
+  }
+  .auth-story-top {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .auth-theme-control {
+    width: 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  html .auth-story .auth-theme-option {
+    width: 100%;
   }
   .auth-main {
     padding:
@@ -2993,6 +3004,61 @@ html[data-theme="dark"] .ai-web-sources a {
 .auth-story-footer a:hover,
 .auth-story-footer a:focus-visible {
   text-decoration: underline;
+}
+
+/* Auth appearance controls share the same theme preference used inside Enturma. */
+.auth-story,
+html[data-theme="dark"] .auth-story {
+  color: #183f36;
+}
+.auth-story-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+.auth-theme-control {
+  display: inline-grid;
+  grid-template-columns: repeat(3, minmax(0, auto));
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid color-mix(in srgb, #183f36 28%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, #ffffff 30%, transparent);
+  backdrop-filter: blur(10px);
+}
+html .auth-story .auth-theme-option {
+  min-height: 38px;
+  padding: 8px 10px;
+  border: 0 !important;
+  border-radius: 10px;
+  background: transparent !important;
+  color: #183f36 !important;
+  box-shadow: none !important;
+  filter: none !important;
+  font-size: 12px;
+  font-weight: 700;
+  gap: 6px;
+}
+html .auth-story .auth-theme-option[aria-pressed="true"] {
+  background: #183f36 !important;
+  color: #ffffff !important;
+}
+html .auth-story .auth-theme-option:hover {
+  background: color-mix(in srgb, #183f36 10%, transparent) !important;
+}
+html .auth-story .auth-theme-option[aria-pressed="true"]:hover {
+  background: #183f36 !important;
+}
+html[data-theme="dark"] .auth-story-footer,
+html[data-theme="dark"] .auth-story footer.auth-story-footer {
+  background: transparent !important;
+  color: color-mix(in srgb, #183f36 78%, transparent) !important;
+}
+html[data-theme="dark"] .auth-story-footer a,
+html[data-theme="dark"] .auth-story-footer span {
+  color: inherit !important;
 }
 
 .legal-page-shell {
