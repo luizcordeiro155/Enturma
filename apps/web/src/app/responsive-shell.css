@@ -3,11 +3,13 @@
 }
 .topbar {
   height: auto;
-  min-height: calc(68px + var(--native-safe-top, 0px));
+  min-height: calc(68px + var(--enturma-safe-top, 0px));
   gap: 12px;
   flex-wrap: wrap;
-  padding-top: calc(10px + var(--native-safe-top, 0px));
+  padding-top: calc(10px + var(--enturma-safe-top, 0px));
+  padding-right: calc(32px + var(--enturma-safe-right, 0px));
   padding-bottom: 10px;
+  padding-left: calc(32px + var(--enturma-safe-left, 0px));
 }
 .topbar-actions {
   flex-wrap: wrap;
@@ -66,7 +68,9 @@
 }
 @media (max-width: 760px) {
   .topbar {
-    min-height: calc(58px + var(--native-safe-top, 0px));
+    min-height: calc(58px + var(--enturma-safe-top, 0px));
+    padding-right: calc(20px + var(--enturma-safe-right, 0px));
+    padding-left: calc(20px + var(--enturma-safe-left, 0px));
   }
   .sidebar nav {
     scroll-padding-inline: 10px;

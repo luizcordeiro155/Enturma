@@ -416,8 +416,14 @@ body:has(.ride-search-dock) .workspace {
   margin: 10px 0;
 }
 .ride-public-safety {
-  width: min(760px, calc(100% - 32px));
-  margin: 40px auto;
+  width: min(
+    760px,
+    calc(100% - 32px - var(--enturma-safe-left, 0px) - var(--enturma-safe-right, 0px))
+  );
+  margin:
+    calc(40px + var(--enturma-safe-top, 0px))
+    auto
+    calc(40px + var(--enturma-safe-bottom, 0px));
   padding: 24px;
 }
 .ride-public-safety > header {

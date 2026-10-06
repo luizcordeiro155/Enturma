@@ -551,7 +551,11 @@
   width: 100%;
   max-width: none;
   max-height: 80dvh;
-  padding: 22px 22px calc(22px + env(safe-area-inset-bottom));
+  padding:
+    22px
+    calc(22px + var(--enturma-safe-right, 0px))
+    calc(22px + var(--enturma-safe-bottom, 0px))
+    calc(22px + var(--enturma-safe-left, 0px));
 }
 .mobile-more-sheet::backdrop {
   background: #0007;
@@ -599,7 +603,11 @@
     bottom: 0;
     z-index: 100;
     min-height: calc(64px + var(--enturma-bottom-inset));
-    padding: 8px 4px calc(8px + var(--enturma-bottom-inset));
+    padding:
+      8px
+      calc(4px + var(--enturma-safe-right, 0px))
+      calc(8px + var(--enturma-bottom-inset))
+      calc(4px + var(--enturma-safe-left, 0px));
     border-top: 1px solid var(--border);
     background: var(--bg);
     contain: layout paint;

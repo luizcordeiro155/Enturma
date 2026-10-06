@@ -393,17 +393,19 @@ html .ride-mobility-app .danger-action {
 @media (max-width: 760px) {
   .ride-mobility-app,
   .ride-mobility-boot {
-    --ride-safe-bottom: max(
-      env(safe-area-inset-bottom, 0px),
-      var(--native-safe-bottom, 0px)
-    );
+    --ride-safe-top: var(--enturma-safe-top, 0px);
+    --ride-safe-right: var(--enturma-safe-right, 0px);
+    --ride-safe-bottom: var(--enturma-safe-bottom, 0px);
+    --ride-safe-left: var(--enturma-safe-left, 0px);
   }
   .ride-map-top {
-    top: max(10px, env(safe-area-inset-top, 0px)) !important;
+    top: calc(10px + var(--ride-safe-top)) !important;
+    left: calc(10px + var(--ride-safe-left)) !important;
+    right: calc(10px + var(--ride-safe-right)) !important;
   }
   .ride-bottom-sheet {
-    left: 8px !important;
-    right: 8px !important;
+    left: calc(8px + var(--ride-safe-left)) !important;
+    right: calc(8px + var(--ride-safe-right)) !important;
     top: clamp(280px, 38dvh, 560px) !important;
     bottom: calc(76px + var(--ride-safe-bottom)) !important;
     height: auto !important;
@@ -427,8 +429,8 @@ html .ride-mobility-app .danger-action {
     bottom: calc(88px + var(--ride-safe-bottom)) !important;
   }
   .ride-map-controls {
-    top: calc(max(10px, env(safe-area-inset-top, 0px)) + 58px) !important;
-    right: 10px !important;
+    top: calc(68px + var(--ride-safe-top)) !important;
+    right: calc(10px + var(--ride-safe-right)) !important;
   }
   .ride-mode-switch > button {
     min-width: 0;
@@ -873,7 +875,11 @@ html .ride-mobility-app .danger-action {
     grid-template-columns: repeat(4, minmax(0,1fr));
     gap: 4px;
     min-height: calc(68px + var(--ride-mobile-safe));
-    padding: 7px 7px calc(7px + var(--ride-mobile-safe));
+    padding:
+      7px
+      calc(7px + var(--enturma-safe-right, 0px))
+      calc(7px + var(--ride-mobile-safe))
+      calc(7px + var(--enturma-safe-left, 0px));
     border-block-start: 1px solid #2c3d42;
     background: rgba(14,22,25,.98);
     backdrop-filter: blur(18px);
@@ -900,8 +906,14 @@ html .ride-mobility-app .danger-action {
   }
   .ride-profile-page,
   .ride-active-shell .ride-page {
-    width: min(100% - 24px, 720px);
-    padding: 24px 0 28px;
+    width: min(
+      calc(100% - 24px - var(--enturma-safe-left, 0px) - var(--enturma-safe-right, 0px)),
+      720px
+    );
+    padding:
+      calc(24px + var(--enturma-safe-top, 0px))
+      0
+      calc(28px + var(--enturma-safe-bottom, 0px));
   }
   .ride-profile-page-header h1,
   .ride-active-shell .ride-page > h1 {

@@ -2,7 +2,11 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding:
+    calc(24px + var(--enturma-safe-top, 0px))
+    calc(24px + var(--enturma-safe-right, 0px))
+    calc(24px + var(--enturma-safe-bottom, 0px))
+    calc(24px + var(--enturma-safe-left, 0px));
   background: var(--bg);
   color: var(--ink);
 }

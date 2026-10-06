@@ -6,6 +6,10 @@
   --accent: #d8ef79;
   --border: #e5e8e4;
   --soft: #f1f5f2;
+  --enturma-safe-top: max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px));
+  --enturma-safe-right: max(env(safe-area-inset-right, 0px), var(--native-safe-right, 0px));
+  --enturma-safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px));
+  --enturma-safe-left: max(env(safe-area-inset-left, 0px), var(--native-safe-left, 0px));
   color-scheme: light;
 }
 * {
@@ -448,7 +452,7 @@ label small {
   overflow-wrap: anywhere;
 }
 .auth-layout {
-  min-height: 100vh;
+  min-height: 100dvh;
   display: grid;
   grid-template-columns: 1fr 1fr;
 }
@@ -635,7 +639,11 @@ label small {
     padding: 0 20px;
   }
   .workspace main {
-    padding: 30px 20px;
+    padding:
+      30px
+      calc(20px + var(--enturma-safe-right))
+      30px
+      calc(20px + var(--enturma-safe-left));
   }
   .workspace footer {
     padding: 24px 20px;
@@ -690,14 +698,22 @@ label small {
     grid-template-columns: 1fr;
   }
   .auth-story {
-    padding: 24px;
+    padding:
+      calc(24px + var(--enturma-safe-top))
+      calc(24px + var(--enturma-safe-right))
+      24px
+      calc(24px + var(--enturma-safe-left));
   }
   .auth-story > div,
   .auth-story > span {
     display: none;
   }
   .auth-main {
-    padding: 36px 24px;
+    padding:
+      36px
+      calc(24px + var(--enturma-safe-right))
+      calc(36px + var(--enturma-safe-bottom))
+      calc(24px + var(--enturma-safe-left));
   }
   .auth-main h1 {
     font-size: 32px;
@@ -2985,12 +3001,16 @@ html[data-theme="dark"] .ai-web-sources a {
   color: var(--ink);
 }
 .legal-page-header {
-  min-height: 72px;
+  min-height: calc(72px + var(--enturma-safe-top));
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 14px clamp(18px, 4vw, 56px);
+  padding:
+    calc(14px + var(--enturma-safe-top))
+    calc(clamp(18px, 4vw, 56px) + var(--enturma-safe-right))
+    14px
+    calc(clamp(18px, 4vw, 56px) + var(--enturma-safe-left));
   border-bottom: 1px solid var(--border);
 }
 .legal-page-brand {
@@ -3022,7 +3042,7 @@ html[data-theme="dark"] .ai-web-sources a {
 .legal-document {
   width: min(100% - 36px, 820px);
   margin: 0 auto;
-  padding: clamp(42px, 7vw, 86px) 0 72px;
+  padding: clamp(42px, 7vw, 86px) 0 calc(72px + var(--enturma-safe-bottom));
 }
 .legal-document > header {
   padding-bottom: 34px;
@@ -3103,15 +3123,21 @@ html[data-theme="dark"] .ai-web-sources a {
 }
 @media (max-width: 760px) {
   .app-legal-footer {
-    padding: 20px 18px calc(20px + var(--native-safe-bottom, 0px));
+    padding:
+      20px
+      calc(18px + var(--enturma-safe-right))
+      calc(20px + var(--enturma-safe-bottom))
+      calc(18px + var(--enturma-safe-left));
   }
   .app-legal-footer nav {
     width: 100%;
     margin-left: 0;
   }
   .legal-page-header {
-    min-height: 64px;
-    padding-inline: 18px;
+    min-height: calc(64px + var(--enturma-safe-top));
+    padding-top: calc(14px + var(--enturma-safe-top));
+    padding-right: calc(18px + var(--enturma-safe-right));
+    padding-left: calc(18px + var(--enturma-safe-left));
   }
   .legal-page-brand {
     font-size: 21px;
@@ -3122,7 +3148,7 @@ html[data-theme="dark"] .ai-web-sources a {
   .legal-document {
     width: min(100% - 32px, 820px);
     padding-top: 42px;
-    padding-bottom: calc(42px + env(safe-area-inset-bottom));
+    padding-bottom: calc(42px + var(--enturma-safe-bottom));
   }
   .legal-document h1 {
     font-size: 38px;
