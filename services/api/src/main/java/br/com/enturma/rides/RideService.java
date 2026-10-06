@@ -397,11 +397,18 @@ public class RideService {
                   + " WHERE id=? AND status='COMPLETED'",
               m.get("requestRideId"));
       }
-      if (onDemand)
+      if (onDemand) {
         db.jdbc.update(
             "UPDATE ride SET status='CANCELLED',trip_status='CANCELLED'"
                 + " WHERE id=? AND status='OPEN'",
             m.get("rideId"));
+        db.jdbc.update(
+            "UPDATE ride_dispatch_attempt SET outcome='CANCELLED',updated_at=now()"
+                + " WHERE match_id=? OR (request_ride_id=? AND driver_id=?)",
+            id,
+            m.get("requestRideId"),
+            m.get("driverId"));
+      }
       close(id);
       UUID peer =
           (UUID) (a.id().equals(m.get("driverId")) ? m.get("passengerId") : m.get("driverId"));
