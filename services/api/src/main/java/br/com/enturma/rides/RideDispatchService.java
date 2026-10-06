@@ -727,10 +727,44 @@ public class RideDispatchService {
                 + " WHERE e.id=? AND e.kind='CAMPUS' AND e.status='VERIFIED'",
             campusId);
     if (rows.isEmpty()) throw ApiException.invalid("Selecione um campus acadêmico válido.");
-    if (rows.getFirst().get("latitude") == null || rows.getFirst().get("longitude") == null)
+
+    var campus = new LinkedHashMap<String, Object>(rows.getFirst());
+    if (campus.get("latitude") == null || campus.get("longitude") == null) {
+      String query =
+          clean(
+              campus.get("addressLabel") == null
+                  ? String.valueOf(campus.get("name"))
+                  : String.valueOf(campus.get("addressLabel")) + ", "
+                      + String.valueOf(campus.get("name")),
+              240);
+      try {
+        Object result = maps.search(query, null, null);
+        if (result instanceof List<?> list && !list.isEmpty() && list.getFirst() instanceof Map<?, ?> first) {
+          Object lat = first.get("lat");
+          Object lng = first.get("lng");
+          if (lat instanceof Number latitude && lng instanceof Number longitude) {
+            campus.put("latitude", latitude.doubleValue());
+            campus.put("longitude", longitude.doubleValue());
+            Object label = first.get("label");
+            if (label != null) campus.put("addressLabel", String.valueOf(label));
+            db.jdbc.update(
+                "UPDATE academic_campus SET latitude=?,longitude=?,"
+                    + " address_label=COALESCE(NULLIF(address_label,''),?) WHERE id=?",
+                latitude.doubleValue(),
+                longitude.doubleValue(),
+                label == null ? query : String.valueOf(label),
+                campusId);
+          }
+        }
+      } catch (RuntimeException ignored) {
+        log.warn("ride_campus_geocode_failed campus={}", campusId);
+      }
+    }
+
+    if (campus.get("latitude") == null || campus.get("longitude") == null)
       throw ApiException.invalid(
-          "Este campus ainda não possui localização verificada. Selecione outro campus ou peça a atualização do catálogo.");
-    return rows.getFirst();
+          "Não foi possível localizar este campus automaticamente. Tente outro campus ou aguarde a atualização do catálogo.");
+    return campus;
   }
 
   private void ensureCampusEndpoint(
