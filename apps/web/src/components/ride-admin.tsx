@@ -31,10 +31,7 @@ export function RideAdmin() {
   }, []);
 
   useEffect(() => {
-    if (!campus) {
-      setZones([]);
-      return;
-    }
+    if (!campus) return;
     api<PickupZone[]>(`/rides/campuses/${campus}/pickup-zones`, {
       cache: "no-store",
     })
@@ -61,7 +58,10 @@ export function RideAdmin() {
           Campus
           <select
             value={campus}
-            onChange={(event) => setCampus(event.target.value)}
+            onChange={(event) => {
+              setCampus(event.target.value);
+              if (!event.target.value) setZones([]);
+            }}
           >
             <option value="">Selecione</option>
             {campuses.map((entry) => (

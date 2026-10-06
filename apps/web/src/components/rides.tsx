@@ -57,7 +57,10 @@ export function Rides({ create = false }: { create?: boolean }) {
   }, []);
 
   useEffect(() => {
-    void load().catch((e) => setError(e.message));
+    const timer = window.setTimeout(() => {
+      void load().catch((e) => setError(e.message));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   const live = useRideUpdates(async () => {
@@ -69,10 +72,7 @@ export function Rides({ create = false }: { create?: boolean }) {
   });
 
   useEffect(() => {
-    if (!institution) {
-      setCampuses([]);
-      return;
-    }
+    if (!institution) return;
     let active = true;
     api<AcademicEntry[]>(`/academics?kind=CAMPUS&parentId=${institution}`)
       .then((rows) => {
@@ -171,7 +171,10 @@ export function Rides({ create = false }: { create?: boolean }) {
               <select
                 required
                 value={institution}
-                onChange={(event) => setInstitution(event.target.value)}
+                onChange={(event) => {
+                  setInstitution(event.target.value);
+                  setCampuses([]);
+                }}
               >
                 <option value="">Selecione</option>
                 {entries.map((entry) => (
@@ -431,7 +434,10 @@ export function Matches() {
   }, []);
 
   useEffect(() => {
-    void load().catch((e) => setError(e.message));
+    const timer = window.setTimeout(() => {
+      void load().catch((e) => setError(e.message));
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   useEffect(() => {
@@ -483,7 +489,9 @@ export function Matches() {
   useEffect(() => {
     if (!requestedMatch || !matches.length) return;
     const match = matches.find((item) => item.id === requestedMatch);
-    if (match) void open(match);
+    if (!match) return;
+    const timer = window.setTimeout(() => void open(match), 0);
+    return () => window.clearTimeout(timer);
   }, [requestedMatch, matches, open]);
 
   async function change(

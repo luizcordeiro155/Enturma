@@ -29,6 +29,9 @@ class PlatformIntegrationTest {
   @org.springframework.test.context.bean.override.mockito.MockitoBean
   br.com.enturma.materials.ObjectStorageService storage;
 
+  @org.springframework.test.context.bean.override.mockito.MockitoBean
+  RideMapService rideMapService;
+
   @Autowired br.com.enturma.materials.MaterialService materials;
   @Autowired br.com.enturma.ai.AiService ai;
 
@@ -267,6 +270,7 @@ class PlatformIntegrationTest {
   @Autowired RideService rides;
   @Autowired RideMatchingService rideMatching;
   @Autowired RideMobilityService rideMobility;
+  @Autowired RideDispatchService rideDispatch;
   @Autowired Db db;
   @Autowired MockMvc mvc;
   @Autowired CatalogImports imports;
@@ -274,6 +278,181 @@ class PlatformIntegrationTest {
   @Autowired br.com.enturma.learning.LearningController learning;
 
   @Autowired br.com.enturma.learning.AdvancedLearningController advanced;
+
+  @Test
+  void onDemandRideDispatchIsIdempotentAtomicAndRestoresPassengerAfterDriverCancel() {
+    db.jdbc.update(
+        "UPDATE academic_campus SET address_label='Campus Teste',latitude=-19.9321000,"
+            + " longitude=-43.9387000 WHERE id=?",
+        campus);
+    rideMobility.saveVehicle(member, "Honda", "Fit", "Prata", 2020, 3, "••1A23");
+    rideMobility.saveVehicle(outsider, "Fiat", "Argo", "Preto", 2021, 3, "••9Z99");
+
+    var first =
+        (Map<?, ?>)
+            rideDispatch.startPassengerSearch(
+                host,
+                campus,
+                "TO_CAMPUS",
+                "Caiçara",
+                -19.918,
+                -43.963,
+                "Campus Teste",
+                -19.9321,
+                -43.9387,
+                4200,
+                900);
+    var duplicate =
+        (Map<?, ?>)
+            rideDispatch.startPassengerSearch(
+                host,
+                campus,
+                "TO_CAMPUS",
+                "Caiçara",
+                -19.918,
+                -43.963,
+                "Campus Teste",
+                -19.9321,
+                -43.9387,
+                4200,
+                900);
+    assertThat(duplicate.get("id")).isEqualTo(first.get("id"));
+
+    rideDispatch.setDriverAvailability(
+        member,
+        campus,
+        "TO_CAMPUS",
+        3,
+        "Padre Eustáquio",
+        -19.916,
+        -43.957,
+        "Campus Teste",
+        -19.9321,
+        -43.9387,
+        -19.916,
+        -43.957,
+        20);
+    rideDispatch.setDriverAvailability(
+        outsider,
+        campus,
+        "TO_CAMPUS",
+        3,
+        "Carlos Prates",
+        -19.921,
+        -43.954,
+        "Campus Teste",
+        -19.9321,
+        -43.9387,
+        -19.921,
+        -43.954,
+        20);
+
+    var nearby = (Map<String, Object>) rideDispatch.nearbyDrivers(host, campus, "TO_CAMPUS");
+    var nearbyDrivers = (List<Map<String, Object>>) nearby.get("drivers");
+    assertThat(nearbyDrivers).isNotEmpty();
+    assertThat(nearbyDrivers.getFirst()).doesNotContainKeys("userId", "name", "email");
+    assertThat(String.valueOf(nearbyDrivers.getFirst().get("id")))
+        .doesNotContain(member.id().toString());
+
+    var requests = (List<Map<String, Object>>) rideDispatch.driverRequests(member);
+    assertThat(requests).anyMatch(row -> row.get("id").equals(first.get("id")));
+    assertThat(requests.getFirst()).doesNotContainKeys("startLat", "startLng", "endLat", "endLng");
+
+    UUID requestRide = (UUID) first.get("id");
+    var accepted = (Map<?, ?>) rideDispatch.acceptRequest(member, requestRide);
+    UUID match = (UUID) accepted.get("matchId");
+    assertThat(
+            ((Map<?, ?>) rideDispatch.state(host)).get("activeMatch"))
+        .isNotNull();
+    assertThatThrownBy(() -> rideDispatch.acceptRequest(outsider, requestRide))
+        .isInstanceOf(ApiException.class);
+
+    rides.cancelMatch(member, match);
+    assertThat(
+            db.one("SELECT status,trip_status FROM ride WHERE id=?", requestRide)
+                .get("status"))
+        .isEqualTo("OPEN");
+    assertThat(
+            db.one("SELECT status,trip_status FROM ride WHERE id=?", requestRide)
+                .get("tripStatus"))
+        .isEqualTo("MATCHING");
+  }
+
+  @Test
+  void passengerCancellationEndsOnDemandRequestAndReleasesDriver() {
+    db.jdbc.update(
+        "UPDATE academic_campus SET address_label='Campus Teste',latitude=-19.9321000,"
+            + " longitude=-43.9387000 WHERE id=?",
+        campus);
+    var request =
+        (Map<?, ?>)
+            rideDispatch.startPassengerSearch(
+                host,
+                campus,
+                "TO_CAMPUS",
+                "Caiçara",
+                -19.918,
+                -43.963,
+                "Campus Teste",
+                -19.9321,
+                -43.9387,
+                4200,
+                900);
+    rideDispatch.setDriverAvailability(
+        member,
+        campus,
+        "TO_CAMPUS",
+        2,
+        "Padre Eustáquio",
+        -19.916,
+        -43.957,
+        "Campus Teste",
+        -19.9321,
+        -43.9387,
+        -19.916,
+        -43.957,
+        20);
+    var accepted = (Map<?, ?>) rideDispatch.acceptRequest(member, (UUID) request.get("id"));
+    UUID match = (UUID) accepted.get("matchId");
+
+    rides.cancelMatch(host, match);
+
+    assertThat(
+            db.one("SELECT status,trip_status FROM ride WHERE id=?", request.get("id"))
+                .get("status"))
+        .isEqualTo("CANCELLED");
+    assertThat(
+            db.one(
+                    "SELECT status,enabled FROM ride_driver_availability WHERE user_id=?",
+                    member.id())
+                .get("status"))
+        .isEqualTo("ONLINE");
+  }
+
+  @Test
+  void driverAvailabilityRejectsWrongCampusDirectionAndStaleDuplicateRide() {
+    db.jdbc.update(
+        "UPDATE academic_campus SET address_label='Campus Teste',latitude=-19.9321000,"
+            + " longitude=-43.9387000 WHERE id=?",
+        campus);
+    assertThatThrownBy(
+            () ->
+                rideDispatch.setDriverAvailability(
+                    member,
+                    campus,
+                    "TO_CAMPUS",
+                    2,
+                    "Origem",
+                    -19.90,
+                    -43.90,
+                    "Destino incorreto",
+                    -20.50,
+                    -44.50,
+                    -19.90,
+                    -43.90,
+                    30))
+        .isInstanceOf(ApiException.class);
+  }
 
   @Test
   void wordModesHavePlayablePoolsAndAttemptsAreAuthoritative() {
@@ -1185,13 +1364,6 @@ class PlatformIntegrationTest {
 
     rideMobility.confirm(member, match);
     rideMobility.confirm(host, match);
-    String code =
-        String.valueOf(((Map<?, ?>) rideMobility.boardingCode(member, match)).get("code"));
-    assertThat(code).matches("[0-9]{4}");
-    rideMobility.board(host, match, code);
-    assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
-        .isNotNull();
-
     rideMobility.tripStatus(host, offer, "DRIVER_ON_THE_WAY");
     rideMobility.liveLocation(host, match, -19.912, -43.960, 15);
     rideMobility.liveLocation(member, match, -19.918, -43.952, 20);
@@ -1206,6 +1378,12 @@ class PlatformIntegrationTest {
 
     rideMobility.tripStatus(host, offer, "ARRIVING");
     rideMobility.tripStatus(host, offer, "WAITING_PASSENGER");
+    String code =
+        String.valueOf(((Map<?, ?>) rideMobility.boardingCode(member, match)).get("code"));
+    assertThat(code).matches("[0-9]{4}");
+    rideMobility.board(host, match, code);
+    assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
+        .isNotNull();
     rideMobility.tripStatus(host, offer, "IN_PROGRESS");
     rideMobility.tripStatus(host, offer, "ARRIVED");
     rideMobility.tripStatus(host, offer, "COMPLETED");

@@ -75,6 +75,7 @@ public class RideService {
             + " LEFT JOIN ride_reputation_summary rep ON rep.reviewee_id=r.owner_id"
             + " LEFT JOIN ride_vehicle_profile v ON v.user_id=r.owner_id"
             + " WHERE r.status='OPEN' AND r.departure_at>now()"
+            + " AND coalesce(r.dispatch_mode,'SCHEDULED')='SCHEDULED'"
             + " AND NOT (r.type='REQUEST' AND EXISTS(SELECT 1 FROM ride_match mx"
             + " WHERE (mx.ride_id=r.id OR mx.request_ride_id=r.id)"
             + " AND mx.status='ACCEPTED'))"
@@ -283,19 +284,8 @@ public class RideService {
             "SELECT count(*) FROM ride_match WHERE ride_id=? AND status='ACCEPTED'",
             Long.class,
             ride.get("id"));
-    if (count >= ((Number) ride.get("seats")).intValue()) {
-      db.jdbc.update("UPDATE ride_match SET status='WAITLISTED' WHERE id=?", id);
-      notices.send(
-          a.id(),
-          (UUID) match.get("requestedBy"),
-          "RIDE_WAITLIST",
-          "ride:" + ride.get("id"),
-          id,
-          "/caronas/matches?match=" + id,
-          "A carona lotou antes do aceite. Seu pedido entrou na lista de espera.");
-      changed((UUID) ride.get("id"), true);
-      return;
-    }
+    if (count >= ((Number) ride.get("seats")).intValue())
+      throw ApiException.invalid("Esta carona já está lotada. O pedido continua na lista de espera.");
 
     db.jdbc.update(
         "UPDATE ride_match SET status='ACCEPTED',"
@@ -305,6 +295,12 @@ public class RideService {
         a.id(),
         a.id(),
         id);
+    if (count + 1 >= ((Number) ride.get("seats")).intValue())
+      db.jdbc.update(
+          "UPDATE ride_match SET status='WAITLISTED' WHERE ride_id=? AND id<>?"
+              + " AND status='PENDING' AND deleted_at IS NULL",
+          ride.get("id"),
+          id);
     if (match.get("requestRideId") != null)
       db.jdbc.update(
           "UPDATE ride SET status='COMPLETED' WHERE id=? AND status='OPEN'",
@@ -325,7 +321,8 @@ public class RideService {
     db.one("SELECT id FROM ride WHERE id=? FOR UPDATE", initial.get("rideId"));
     var m =
         db.one(
-            "SELECT m.*,r.owner_id,r.status ride_status,r.trip_status,r.departure_at,r.type"
+            "SELECT m.*,r.owner_id,r.status ride_status,r.trip_status,r.departure_at,r.type,"
+                + " r.dispatch_mode"
                 + " FROM ride_match m JOIN ride r ON r.id=m.ride_id WHERE m.id=? FOR UPDATE OF m",
             id);
     if (!m.get("driverId").equals(a.id()) && !m.get("passengerId").equals(a.id()))
@@ -381,11 +378,32 @@ public class RideService {
     if (Set.of("PENDING", "WAITLISTED", "ACCEPTED").contains(m.get("status"))) {
       boolean released = m.get("status").equals("ACCEPTED");
       db.jdbc.update("UPDATE ride_match SET status='CANCELLED' WHERE id=?", id);
+      boolean onDemand = "ON_DEMAND".equals(m.get("dispatchMode"));
       if (m.get("requestRideId") != null
-          && Instant.parse((String) m.get("departureAt")).isAfter(Instant.now()))
+          && Instant.parse((String) m.get("departureAt")).isAfter(Instant.now())) {
+        if (onDemand && a.id().equals(m.get("passengerId")))
+          db.jdbc.update(
+              "UPDATE ride SET status='CANCELLED',trip_status='CANCELLED'"
+                  + " WHERE id=? AND status='COMPLETED'",
+              m.get("requestRideId"));
+        else
+          db.jdbc.update(
+              "UPDATE ride SET status='OPEN',trip_status='MATCHING'"
+                  + " WHERE id=? AND status='COMPLETED'",
+              m.get("requestRideId"));
+      }
+      if (onDemand) {
         db.jdbc.update(
-            "UPDATE ride SET status='OPEN' WHERE id=? AND status='COMPLETED'",
-            m.get("requestRideId"));
+            "UPDATE ride SET status='CANCELLED',trip_status='CANCELLED'"
+                + " WHERE id=? AND status='OPEN'",
+            m.get("rideId"));
+        db.jdbc.update(
+            "UPDATE ride_dispatch_attempt SET outcome='CANCELLED',updated_at=now()"
+                + " WHERE match_id=? OR (request_ride_id=? AND driver_id=?)",
+            id,
+            m.get("requestRideId"),
+            m.get("driverId"));
+      }
       close(id);
       UUID peer =
           (UUID) (a.id().equals(m.get("driverId")) ? m.get("passengerId") : m.get("driverId"));
@@ -397,6 +415,16 @@ public class RideService {
           id,
           "/caronas/matches?match=" + id,
           "O pedido de carona foi cancelado. A conversa e a chamada foram encerradas.");
+      if (onDemand)
+        db.jdbc.update(
+            "UPDATE ride_driver_availability SET status='ONLINE',offer_ride_id=NULL,"
+                + " pending_match_id=NULL,updated_at=now() WHERE user_id=? AND enabled=true",
+            m.get("driverId"));
+      else if (a.id().equals(m.get("driverId")))
+        db.jdbc.update(
+            "UPDATE ride_driver_availability SET status='ONLINE',offer_ride_id=NULL,"
+                + " pending_match_id=NULL,updated_at=now() WHERE user_id=? AND enabled=true",
+            a.id());
       if (released) promoteWaitlist((UUID) m.get("rideId"));
       changed((UUID) m.get("rideId"), true);
     }
@@ -567,6 +595,10 @@ public class RideService {
               ? "A carona foi cancelada."
               : "A carona foi concluída. Você já pode avaliar a experiência.");
     }
+    db.jdbc.update(
+        "UPDATE ride_driver_availability SET enabled=false,status='OFFLINE',offer_ride_id=NULL,"
+            + " pending_match_id=NULL,updated_at=now() WHERE offer_ride_id=?",
+        id);
     changed(id, true);
   }
 

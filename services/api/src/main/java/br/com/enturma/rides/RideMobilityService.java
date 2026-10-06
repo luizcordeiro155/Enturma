@@ -6,6 +6,8 @@ import br.com.enturma.common.*;
 import br.com.enturma.notifications.NotificationService;
 import java.time.*;
 import java.util.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class RideMobilityService {
+  private static final Logger log = LoggerFactory.getLogger(RideMobilityService.class);
   private static final Set<String> LIVE_STATUSES =
       Set.of("DRIVER_ON_THE_WAY", "ARRIVING", "WAITING_PASSENGER", "IN_PROGRESS");
   private static final Map<String, Set<String>> NEXT =
@@ -63,7 +66,7 @@ public class RideMobilityService {
       String plateHint) {
     if (seats < 1 || seats > 8)
       throw ApiException.invalid("Informe entre 1 e 8 vagas no veículo.");
-    String hint = clean(plateHint, 8);
+    String hint = maskPlate(plateHint);
     db.jdbc.update(
         "INSERT INTO ride_vehicle_profile(user_id,brand,model,color,model_year,seats,plate_hint)"
             + " VALUES (?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET"
@@ -169,11 +172,18 @@ public class RideMobilityService {
     String current = String.valueOf(ride.get("tripStatus"));
     if (!NEXT.getOrDefault(current, Set.of()).contains(next))
       throw ApiException.invalid("Esta mudança de status da carona não é permitida agora.");
-    if (next.equals("IN_PROGRESS")
-        && !db.exists(
-            "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED')",
-            rideId))
-      throw ApiException.invalid("Confirme pelo menos um passageiro antes de iniciar a viagem.");
+    if (next.equals("IN_PROGRESS")) {
+      if (!db.exists(
+          "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED')",
+          rideId))
+        throw ApiException.invalid("Confirme pelo menos um passageiro antes de iniciar a viagem.");
+      if (db.exists(
+          "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED'"
+              + " AND boarded_at IS NULL)",
+          rideId))
+        throw ApiException.invalid(
+            "Confirme o embarque de todos os passageiros com o PIN antes de iniciar a viagem.");
+    }
 
     Instant now = Instant.now();
     if (next.equals("COMPLETED")) {
@@ -210,6 +220,17 @@ public class RideMobilityService {
           case "CANCELLED" -> "A carona foi cancelada.";
           default -> "O status da sua carona foi atualizado.";
         };
+    if (Set.of("COMPLETED", "CANCELLED").contains(next))
+      db.jdbc.update(
+          "UPDATE ride_driver_availability SET enabled=false,status='OFFLINE',offer_ride_id=NULL,"
+              + " pending_match_id=NULL,updated_at=now() WHERE offer_ride_id=?",
+          rideId);
+    log.info(
+        "ride_status ride={} actor={} from={} to={}",
+        rideId,
+        actor.id(),
+        current,
+        next);
     notifyRide(actor.id(), rideId, "RIDE_STATUS", message);
     changedRide(rideId, true);
   }
@@ -246,6 +267,8 @@ public class RideMobilityService {
     var match = acceptedMatch(actor, matchId, true);
     requireActive(match);
     if (!actor.id().equals(match.get("driverId"))) throw ApiException.forbidden();
+    if (!"WAITING_PASSENGER".equals(match.get("tripStatus")))
+      throw ApiException.invalid("Confirme o embarque somente depois de chegar ao ponto de encontro.");
     String expected = match.get("boardingCode") == null ? "" : String.valueOf(match.get("boardingCode"));
     if (!expected.equals(code))
       throw new ApiException(409, "BOARDING_CODE_INVALID", "O código de embarque está incorreto.");
@@ -258,15 +281,39 @@ public class RideMobilityService {
         UUID.randomUUID(),
         matchId,
         actor.id());
+    log.info("ride_boarded match={} driver={}", matchId, actor.id());
     changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
   }
 
   @Transactional
   public void liveLocation(
       Actor actor, UUID matchId, double lat, double lng, int accuracyMeters) {
+    liveLocation(actor, matchId, lat, lng, accuracyMeters, null, null, null);
+  }
+
+  @Transactional
+  public void liveLocation(
+      Actor actor,
+      UUID matchId,
+      double lat,
+      double lng,
+      int accuracyMeters,
+      Double speedMps,
+      Double heading,
+      Instant capturedAt) {
     validCoordinate(lat, lng);
     if (accuracyMeters < 0 || accuracyMeters > 50000)
       throw ApiException.invalid("A precisão da localização é inválida.");
+    if (accuracyMeters > 1500)
+      throw ApiException.invalid("A precisão atual do GPS é insuficiente para a carona.");
+    if (speedMps != null && (speedMps < 0 || speedMps > 100))
+      throw ApiException.invalid("A velocidade informada pelo GPS é inválida.");
+    if (heading != null && (heading < 0 || heading > 360))
+      throw ApiException.invalid("A direção informada pelo GPS é inválida.");
+    Instant captured = capturedAt == null ? Instant.now() : capturedAt;
+    if (captured.isBefore(Instant.now().minus(Duration.ofMinutes(2)))
+        || captured.isAfter(Instant.now().plusSeconds(30)))
+      throw ApiException.invalid("A posição recebida está desatualizada.");
     var match = acceptedMatch(actor, matchId, true);
     requireActive(match);
     String trip = String.valueOf(match.get("tripStatus"));
@@ -274,14 +321,19 @@ public class RideMobilityService {
       throw ApiException.invalid(
           "A localização em tempo real só fica disponível durante o deslocamento.");
     db.jdbc.update(
-        "INSERT INTO ride_live_location(match_id,user_id,lat,lng,accuracy_m)"
-            + " VALUES (?,?,?,?,?) ON CONFLICT(match_id,user_id) DO UPDATE SET"
-            + " lat=EXCLUDED.lat,lng=EXCLUDED.lng,accuracy_m=EXCLUDED.accuracy_m,updated_at=now()",
+        "INSERT INTO ride_live_location(match_id,user_id,lat,lng,accuracy_m,heading,speed_mps,captured_at)"
+            + " VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(match_id,user_id) DO UPDATE SET"
+            + " lat=EXCLUDED.lat,lng=EXCLUDED.lng,accuracy_m=EXCLUDED.accuracy_m,"
+            + " heading=EXCLUDED.heading,speed_mps=EXCLUDED.speed_mps,"
+            + " captured_at=EXCLUDED.captured_at,updated_at=now()",
         matchId,
         actor.id(),
         lat,
         lng,
-        accuracyMeters);
+        accuracyMeters,
+        heading,
+        speedMps,
+        java.sql.Timestamp.from(captured));
     changedMatch(match);
   }
 
@@ -295,7 +347,7 @@ public class RideMobilityService {
             : (UUID) match.get("driverId");
     var rows =
         db.list(
-            "SELECT lat,lng,accuracy_m,updated_at FROM ride_live_location"
+            "SELECT lat,lng,accuracy_m,heading,speed_mps,captured_at,updated_at FROM ride_live_location"
                 + " WHERE match_id=? AND user_id=? AND updated_at>now()-interval '2 minutes'",
             matchId,
             peer);
@@ -734,6 +786,15 @@ public class RideMobilityService {
 
   private static String boardingCode() {
     return String.format(Locale.ROOT, "%04d", java.util.concurrent.ThreadLocalRandom.current().nextInt(10000));
+  }
+
+  private static String maskPlate(String value) {
+    if (value == null || value.isBlank()) return null;
+    String normalized = value.toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9]", "");
+    if (normalized.isBlank()) return null;
+    String suffix =
+        normalized.substring(Math.max(0, normalized.length() - Math.min(4, normalized.length())));
+    return "•••" + suffix;
   }
 
   private static String cleanRequired(String value, int max) {
