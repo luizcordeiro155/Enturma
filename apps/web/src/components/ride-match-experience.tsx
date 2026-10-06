@@ -182,13 +182,8 @@ export function RideMatchExperience({
   }, [liveAllowed, match.id]);
 
   useEffect(() => {
-    setMeetingPoint(match.meetingPoint ?? "");
-    if (match.boardingCode) setBoardingCode(match.boardingCode);
-  }, [match.id, match.meetingPoint, match.boardingCode]);
-
-  useEffect(() => {
-    void refreshPeer();
-    if (!liveAllowed) return;
+    const initial = window.setTimeout(() => void refreshPeer(), 0);
+    if (!liveAllowed) return () => window.clearTimeout(initial);
     const timer = window.setInterval(() => {
       if (!document.hidden) void refreshPeer();
     }, 4500);
@@ -197,6 +192,7 @@ export function RideMatchExperience({
     };
     document.addEventListener("visibilitychange", visible);
     return () => {
+      window.clearTimeout(initial);
       window.clearInterval(timer);
       document.removeEventListener("visibilitychange", visible);
     };
@@ -266,8 +262,11 @@ export function RideMatchExperience({
   );
 
   useEffect(() => {
-    if (isDriver && liveAllowed && watchId.current == null) startSharing(true);
-    if (!liveAllowed) stopWatchOnly();
+    const timer = window.setTimeout(() => {
+      if (isDriver && liveAllowed && watchId.current == null) startSharing(true);
+      if (!liveAllowed) stopWatchOnly();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [isDriver, liveAllowed, startSharing, stopWatchOnly]);
 
   useEffect(
@@ -316,17 +315,17 @@ export function RideMatchExperience({
   const routeSource = driverPoint;
 
   useEffect(() => {
-    if (!routeSource || !routeTarget) {
-      setRoute(undefined);
-      return;
-    }
     const timer = window.setTimeout(() => {
+      if (!routeSource || !routeTarget) {
+        setRoute(undefined);
+        return;
+      }
       void post<RouteResult>("/rides/map/route", {
         points: [routeSource, routeTarget],
       })
         .then(setRoute)
         .catch(() => setRoute(undefined));
-    }, 220);
+    }, routeSource && routeTarget ? 220 : 0);
     return () => window.clearTimeout(timer);
   }, [
     match.id,
