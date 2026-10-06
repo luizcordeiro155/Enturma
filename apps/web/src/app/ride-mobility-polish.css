@@ -1,0 +1,508 @@
+/* Carona: high-contrast responsive surface aligned with the Enturma visual system. */
+.ride-mobility-app,
+.ride-mobility-boot {
+  --ride-canvas: #e8efeb;
+  --ride-surface: #ffffff;
+  --ride-surface-2: #f2f6f3;
+  --ride-surface-3: #e4ece7;
+  --ride-text: #10251f;
+  --ride-muted: #50645c;
+  --ride-border: #c9d6d0;
+  --ride-accent: #d9f56d;
+  --ride-accent-ink: #14231e;
+  --ride-selected: #e8f4bd;
+  --ride-primary: #173f36;
+  --ride-on-primary: #ffffff;
+  --ride-danger-bg: #fff1f2;
+  --ride-danger-border: #e3b7bb;
+  --ride-danger-text: #8b2932;
+  --ride-shadow: 0 22px 64px rgba(13, 42, 35, 0.22);
+  background: var(--ride-canvas);
+  color: var(--ride-text);
+}
+
+html[data-theme="dark"] .ride-mobility-app,
+html[data-theme="dark"] .ride-mobility-boot {
+  --ride-canvas: #0d1416;
+  --ride-surface: #162124;
+  --ride-surface-2: #1d2a2e;
+  --ride-surface-3: #26363b;
+  --ride-text: #f5f8f6;
+  --ride-muted: #b6c3be;
+  --ride-border: #3a4c52;
+  --ride-accent: #d9f56d;
+  --ride-accent-ink: #101d19;
+  --ride-selected: #2b3b32;
+  --ride-primary: #d9f56d;
+  --ride-on-primary: #101d19;
+  --ride-danger-bg: #382326;
+  --ride-danger-border: #754248;
+  --ride-danger-text: #ffbec3;
+  --ride-shadow: 0 24px 72px rgba(0, 0, 0, 0.46);
+}
+
+.ride-mobility-app :is(h1, h2, h3, strong) {
+  color: var(--ride-text);
+}
+.ride-mobility-app :is(p, small, label) {
+  color: var(--ride-muted);
+}
+.ride-mobility-app :is(input, select, textarea) {
+  background: var(--ride-surface-2);
+  color: var(--ride-text);
+  border-color: var(--ride-border);
+}
+.ride-mobility-app :is(input, textarea)::placeholder {
+  color: var(--ride-muted);
+  opacity: 1;
+}
+
+.ride-bottom-sheet {
+  background: var(--ride-surface) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+  box-shadow: var(--ride-shadow) !important;
+  backdrop-filter: none !important;
+}
+
+html .ride-mobility-app button.ride-sheet-handle {
+  width: 100%;
+  height: 30px;
+  min-height: 30px;
+  padding: 9px !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  color: var(--ride-muted) !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+.ride-sheet-handle span {
+  width: 48px;
+  height: 4px;
+  background: color-mix(in srgb, var(--ride-muted) 66%, transparent);
+}
+.ride-sheet-content {
+  color: var(--ride-text);
+  scrollbar-color: var(--ride-border) transparent;
+}
+.ride-sheet-content::-webkit-scrollbar {
+  width: 8px;
+}
+.ride-sheet-content::-webkit-scrollbar-thumb {
+  background: var(--ride-border);
+  border-radius: 999px;
+}
+
+.ride-mode-switch {
+  background: var(--ride-surface) !important;
+  border-color: var(--ride-border) !important;
+  box-shadow: 0 10px 30px rgba(8, 24, 20, 0.18) !important;
+  backdrop-filter: none !important;
+}
+html .ride-mobility-app .ride-mode-switch > button {
+  min-height: 42px;
+  background: transparent !important;
+  color: var(--ride-muted) !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  filter: none !important;
+}
+html .ride-mobility-app .ride-mode-switch > button[aria-pressed="true"] {
+  background: var(--ride-accent) !important;
+  color: var(--ride-accent-ink) !important;
+  border: 0 !important;
+}
+
+.ride-circle-button,
+html .ride-mobility-app button.ride-circle-button,
+.ride-map-controls {
+  background: var(--ride-surface) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+}
+html .ride-mobility-app .ride-map-controls > button {
+  background: var(--ride-surface) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+  filter: none !important;
+}
+html .ride-mobility-app .ride-map-controls > button:hover,
+html .ride-mobility-app .ride-circle-button:hover {
+  background: var(--ride-surface-2) !important;
+}
+.ride-connection-state {
+  background: var(--ride-surface) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+}
+.ride-recenter {
+  background: var(--ride-surface) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+}
+
+html[data-theme="dark"] .ride-map-tiles {
+  filter: brightness(.58) saturate(.72) contrast(1.16);
+}
+.ride-map-route-halo {
+  stroke: rgba(255, 255, 255, .96);
+  stroke-width: 11;
+}
+.ride-map-route-line {
+  stroke: #306f60;
+  stroke-width: 6;
+}
+html[data-theme="dark"] .ride-map-route-halo {
+  stroke: rgba(9, 16, 18, .94);
+  stroke-width: 12;
+}
+html[data-theme="dark"] .ride-map-route-line {
+  stroke: var(--ride-accent);
+}
+.ride-map-marker > span {
+  background: var(--ride-primary);
+  color: var(--ride-on-primary);
+  border-color: var(--ride-surface);
+}
+html[data-theme="dark"] .ride-map-marker > span {
+  background: #25373b;
+  color: var(--ride-text);
+}
+.ride-map-marker.marker-campus > span {
+  background: var(--ride-accent);
+  color: var(--ride-accent-ink);
+}
+.ride-map-marker.marker-me > span {
+  background: #268773;
+  color: #fff;
+}
+.ride-map-marker.marker-passenger > span,
+.ride-map-marker.marker-pickup > span,
+.ride-map-marker.marker-destination > span {
+  background: var(--ride-surface);
+  color: var(--ride-text);
+}
+.ride-map-marker small {
+  background: var(--ride-surface);
+  color: var(--ride-text);
+  border: 1px solid var(--ride-border);
+  box-shadow: 0 6px 20px rgba(0,0,0,.2);
+}
+
+html .ride-mobility-app .ride-direction-grid > button {
+  min-height: 72px;
+  background: var(--ride-surface-2) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+  filter: none !important;
+}
+html .ride-mobility-app .ride-direction-grid > button[aria-pressed="true"] {
+  background: var(--ride-selected) !important;
+  color: var(--ride-text) !important;
+  border-color: color-mix(in srgb, var(--ride-accent) 70%, var(--ride-border)) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ride-accent) 50%, transparent) !important;
+}
+.ride-direction-grid small {
+  color: var(--ride-muted) !important;
+}
+
+html .ride-mobility-app button.ride-location-current,
+.ride-address-results,
+html .ride-mobility-app button.ride-address-result,
+.ride-route-summary,
+.ride-driver-request,
+.ride-vehicle-needed,
+.ride-vehicle-ready,
+.ride-safety-strip,
+.ride-dispatch-radar {
+  background: var(--ride-surface-2) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+}
+html .ride-mobility-app button.ride-location-current {
+  min-height: 56px;
+}
+html .ride-mobility-app button.ride-address-result {
+  border-bottom-color: var(--ride-border) !important;
+}
+.ride-route-metrics span,
+.ride-trip-facts span,
+.ride-request-facts span {
+  background: var(--ride-surface-3);
+  color: var(--ride-text);
+}
+.ride-route-line-mini {
+  background: var(--ride-border);
+}
+.ride-person-avatar {
+  background: var(--ride-surface-3);
+  color: var(--ride-text);
+}
+.ride-campus-mini {
+  background: var(--ride-surface-3);
+  color: var(--ride-text);
+  border: 1px solid var(--ride-border);
+}
+.ride-online-dot {
+  background: #55d38a;
+  box-shadow: 0 0 0 5px rgba(85, 211, 138, .14);
+}
+.ride-eta {
+  color: var(--ride-text);
+}
+
+html .ride-mobility-app .ride-primary-action,
+html .ride-mobility-app button.ride-primary-action {
+  min-height: 50px;
+  background: var(--ride-primary) !important;
+  color: var(--ride-on-primary) !important;
+  border-color: var(--ride-primary) !important;
+  font-weight: 800;
+  filter: none !important;
+}
+html[data-theme="dark"] .ride-mobility-app .ride-primary-action,
+html[data-theme="dark"] .ride-mobility-app button.ride-primary-action {
+  background: var(--ride-accent) !important;
+  color: var(--ride-accent-ink) !important;
+  border-color: var(--ride-accent) !important;
+}
+html .ride-mobility-app .secondary {
+  background: var(--ride-surface-2) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+}
+html .ride-mobility-app .danger-action {
+  background: var(--ride-danger-bg) !important;
+  color: var(--ride-danger-text) !important;
+  border-color: var(--ride-danger-border) !important;
+}
+
+.ride-mobility-app .feedback {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--ride-border);
+  font-size: 14px;
+  line-height: 1.45;
+}
+.ride-mobility-app .feedback.error {
+  background: var(--ride-danger-bg);
+  color: var(--ride-danger-text);
+  border-color: var(--ride-danger-border);
+}
+.ride-mobility-app .feedback.success {
+  background: color-mix(in srgb, #2e9d66 15%, var(--ride-surface));
+  color: var(--ride-text);
+  border-color: color-mix(in srgb, #55d38a 48%, var(--ride-border));
+}
+
+.ride-campus-onboarding {
+  gap: 14px;
+  max-width: 620px;
+  margin: 0 auto;
+  padding: 18px 4px 8px;
+}
+.ride-campus-onboarding h2 {
+  font-size: clamp(1.55rem, 3vw, 2.15rem);
+  color: var(--ride-text);
+}
+.ride-campus-onboarding p {
+  max-width: 52ch;
+  margin: 0 auto 4px;
+  color: var(--ride-muted);
+  line-height: 1.55;
+}
+.ride-campus-onboarding select,
+.ride-campus-onboarding input {
+  width: 100%;
+  min-height: 50px;
+}
+.ride-campus-location-fix {
+  display: grid;
+  gap: 12px;
+}
+.ride-campus-location-fix .ride-address-finder {
+  text-align: left;
+}
+.ride-campus-location-fix > small {
+  color: var(--ride-muted);
+}
+
+.ride-map-picker-actions {
+  background: var(--ride-surface) !important;
+  color: var(--ride-text);
+  border-color: var(--ride-border) !important;
+  box-shadow: var(--ride-shadow) !important;
+}
+
+@media (min-width: 1050px) {
+  .ride-bottom-sheet {
+    left: 18px !important;
+    right: 18px !important;
+    top: auto !important;
+    bottom: 18px !important;
+    width: auto !important;
+    max-height: min(46vh, 500px) !important;
+    border-radius: 22px !important;
+    transform: none !important;
+  }
+  .ride-sheet-content {
+    height: auto !important;
+    max-height: calc(min(46vh, 500px) - 18px) !important;
+    padding: 18px 22px 22px !important;
+  }
+  .ride-sheet-handle {
+    display: none !important;
+  }
+  .ride-map-top {
+    right: 18px !important;
+  }
+  .ride-recenter {
+    right: 18px !important;
+    bottom: calc(min(46vh, 500px) + 32px) !important;
+  }
+  .ride-map-picker-actions {
+    left: 50% !important;
+  }
+  .ride-passenger-flow,
+  .ride-driver-flow,
+  .ride-active-sheet {
+    max-width: 1120px;
+    margin: 0 auto;
+  }
+  .ride-passenger-flow .ride-direction-grid,
+  .ride-driver-flow .ride-direction-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .ride-mobility-app,
+  .ride-mobility-boot {
+    --ride-safe-bottom: max(
+      env(safe-area-inset-bottom, 0px),
+      var(--native-safe-bottom, 0px)
+    );
+  }
+  .ride-map-top {
+    top: max(10px, env(safe-area-inset-top, 0px)) !important;
+  }
+  .ride-bottom-sheet {
+    left: 8px !important;
+    right: 8px !important;
+    bottom: calc(84px + var(--ride-safe-bottom)) !important;
+    max-height: calc(100dvh - 158px - var(--ride-safe-bottom)) !important;
+    border-radius: 20px !important;
+  }
+  .ride-sheet-content {
+    max-height: calc(100dvh - 188px - var(--ride-safe-bottom)) !important;
+    padding: 0 14px 28px !important;
+    scroll-padding-bottom: 32px;
+  }
+  .ride-map-picker-actions {
+    bottom: calc(88px + var(--ride-safe-bottom)) !important;
+  }
+  .ride-map-controls {
+    top: calc(max(10px, env(safe-area-inset-top, 0px)) + 58px) !important;
+    right: 10px !important;
+  }
+  .ride-mode-switch > button {
+    min-width: 0;
+    min-height: 44px !important;
+    padding: 7px 8px !important;
+    font-size: 13px !important;
+  }
+  .ride-circle-button {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .ride-direction-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 8px;
+  }
+  html .ride-mobility-app .ride-direction-grid > button {
+    min-width: 0;
+    min-height: 68px;
+    padding: 11px 10px !important;
+    gap: 8px;
+  }
+  .ride-direction-grid strong {
+    font-size: 13px;
+    line-height: 1.25;
+  }
+  .ride-direction-grid small {
+    font-size: 11px;
+    line-height: 1.25;
+  }
+  .ride-sheet-heading {
+    margin-bottom: 12px;
+  }
+  .ride-sheet-heading h2 {
+    font-size: 1.32rem;
+    letter-spacing: -0.02em;
+  }
+  .ride-campus-mini {
+    max-width: 120px;
+  }
+  .ride-route-buttons,
+  .ride-request-actions {
+    position: sticky;
+    bottom: -1px;
+    z-index: 3;
+    padding-top: 10px;
+    padding-bottom: 2px;
+    background: var(--ride-surface);
+  }
+  .ride-primary-action,
+  .ride-route-buttons > *,
+  .ride-request-actions > * {
+    min-height: 50px;
+  }
+  .ride-campus-onboarding {
+    min-height: 0;
+    padding-top: 8px;
+  }
+  .ride-campus-onboarding h2 {
+    font-size: 1.72rem;
+  }
+  .ride-campus-onboarding p {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .ride-address-finder input {
+    min-height: 48px;
+  }
+  .ride-recenter {
+    right: 10px !important;
+    bottom: calc(54% + 84px + var(--ride-safe-bottom)) !important;
+  }
+}
+
+@media (max-width: 390px) {
+  .ride-mode-switch > button svg {
+    display: none;
+  }
+  .ride-direction-grid small {
+    display: none;
+  }
+  .ride-direction-grid > button {
+    min-height: 56px !important;
+  }
+  .ride-sheet-heading {
+    gap: 10px;
+  }
+  .ride-campus-mini {
+    max-width: 108px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ride-bottom-sheet,
+  .ride-map-marker,
+  .ride-dispatch-ring,
+  .ride-dispatch-dot {
+    animation: none !important;
+    transition: none !important;
+  }
+}

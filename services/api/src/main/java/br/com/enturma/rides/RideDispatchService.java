@@ -722,15 +722,62 @@ public class RideDispatchService {
   private Map<String, Object> campus(UUID campusId) {
     var rows =
         db.list(
-            "SELECT e.id,e.name,c.address_label,c.latitude,c.longitude"
+            "SELECT e.id,e.name,c.address_label,c.latitude,c.longitude,c.city,c.state,"
+                + " i.name institution_name"
                 + " FROM academic_entry e LEFT JOIN academic_campus c ON c.id=e.id"
+                + " LEFT JOIN academic_institution i ON i.id=c.institution_id"
                 + " WHERE e.id=? AND e.kind='CAMPUS' AND e.status='VERIFIED'",
             campusId);
     if (rows.isEmpty()) throw ApiException.invalid("Selecione um campus acadêmico válido.");
-    if (rows.getFirst().get("latitude") == null || rows.getFirst().get("longitude") == null)
+
+    var campus = new LinkedHashMap<String, Object>(rows.getFirst());
+    if (campus.get("latitude") == null || campus.get("longitude") == null) {
+      String query =
+          clean(
+              String.join(
+                  ", ",
+                  java.util.stream.Stream.of(
+                          campus.get("addressLabel"),
+                          campus.get("name"),
+                          campus.get("institutionName"),
+                          campus.get("city"),
+                          campus.get("state"),
+                          "Brasil")
+                      .filter(Objects::nonNull)
+                      .map(String::valueOf)
+                      .map(String::strip)
+                      .filter(value -> !value.isBlank())
+                      .distinct()
+                      .toList()),
+              240);
+      try {
+        Object result = maps.search(query, null, null);
+        if (result instanceof List<?> list && !list.isEmpty() && list.getFirst() instanceof Map<?, ?> first) {
+          Object lat = first.get("lat");
+          Object lng = first.get("lng");
+          if (lat instanceof Number latitude && lng instanceof Number longitude) {
+            campus.put("latitude", latitude.doubleValue());
+            campus.put("longitude", longitude.doubleValue());
+            Object label = first.get("label");
+            if (label != null) campus.put("addressLabel", String.valueOf(label));
+            db.jdbc.update(
+                "UPDATE academic_campus SET latitude=?,longitude=?,"
+                    + " address_label=COALESCE(NULLIF(address_label,''),?) WHERE id=?",
+                latitude.doubleValue(),
+                longitude.doubleValue(),
+                label == null ? query : String.valueOf(label),
+                campusId);
+          }
+        }
+      } catch (RuntimeException ignored) {
+        log.warn("ride_campus_geocode_failed campus={}", campusId);
+      }
+    }
+
+    if (campus.get("latitude") == null || campus.get("longitude") == null)
       throw ApiException.invalid(
-          "Este campus ainda não possui localização verificada. Selecione outro campus ou peça a atualização do catálogo.");
-    return rows.getFirst();
+          "Não foi possível localizar este campus automaticamente. Tente outro campus ou aguarde a atualização do catálogo.");
+    return campus;
   }
 
   private void ensureCampusEndpoint(
