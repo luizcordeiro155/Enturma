@@ -140,7 +140,9 @@ public class RideDispatchService {
     if (!DIRECTIONS.contains(direction)) throw ApiException.invalid("Escolha a direção da carona.");
     coordinate(startLat, startLng);
     coordinate(endLat, endLng);
-    var campus = campusForActor(actor, campusId);
+    var campus =
+        campusForActorOrEndpoint(
+            actor, campusId, direction, startLabel, startLat, startLng, endLabel, endLat, endLng);
     ensureCampusEndpoint(direction, campus, startLat, startLng, endLat, endLng);
 
     var existing =
@@ -225,7 +227,9 @@ public class RideDispatchService {
     coordinate(lat, lng);
     if (accuracyMeters < 0 || accuracyMeters > 50000)
       throw ApiException.invalid("A precisão da localização é inválida.");
-    var campus = campusForActor(actor, campusId);
+    var campus =
+        campusForActorOrEndpoint(
+            actor, campusId, direction, startLabel, startLat, startLng, endLabel, endLat, endLng);
     ensureCampusEndpoint(direction, campus, startLat, startLng, endLat, endLng);
     if (activeAcceptedMatch(actor.id()) != null)
       throw ApiException.invalid("Conclua ou cancele a carona ativa antes de ficar disponível.");
@@ -823,6 +827,46 @@ public class RideDispatchService {
       throw ApiException.invalid(
           "Confirme a localização do seu campus no mapa antes de buscar uma carona.");
     return campus;
+  }
+
+  private Map<String, Object> campusForActorOrEndpoint(
+      Actor actor,
+      UUID campusId,
+      String direction,
+      String startLabel,
+      double startLat,
+      double startLng,
+      String endLabel,
+      double endLat,
+      double endLng) {
+    try {
+      return campusForActor(actor, campusId);
+    } catch (ApiException missingCampusLocation) {
+      var campus = new LinkedHashMap<String, Object>(campus(campusId));
+      double latitude = "TO_CAMPUS".equals(direction) ? endLat : startLat;
+      double longitude = "TO_CAMPUS".equals(direction) ? endLng : startLng;
+      String label = clean("TO_CAMPUS".equals(direction) ? endLabel : startLabel, 240);
+      coordinate(latitude, longitude);
+      campus.put("latitude", latitude);
+      campus.put("longitude", longitude);
+      if (label != null) campus.put("addressLabel", label);
+
+      db.jdbc.update(
+          "UPDATE ride_user_mobility_pref SET campus_label_override=?,"
+              + " campus_lat_override=?,campus_lng_override=?,updated_at=now()"
+              + " WHERE user_id=? AND campus_id=?",
+          label,
+          latitude,
+          longitude,
+          actor.id(),
+          campusId);
+      log.info(
+          "ride_campus_endpoint_confirmed user={} campus={} direction={}",
+          actor.id(),
+          campusId,
+          direction);
+      return campus;
+    }
   }
 
   private void ensureCampusEndpoint(
