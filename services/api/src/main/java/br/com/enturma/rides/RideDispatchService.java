@@ -47,8 +47,11 @@ public class RideDispatchService {
     var saved =
         db.list(
             "SELECT p.campus_id,p.home_label,p.home_lat,p.home_lng,p.onboarding_done,"
-                + " e.name campus_name,c.address_label campus_address,c.latitude campus_lat,"
-                + " c.longitude campus_lng FROM ride_user_mobility_pref p"
+                + " e.name campus_name,"
+                + " COALESCE(p.campus_label_override,c.address_label) campus_address,"
+                + " COALESCE(p.campus_lat_override,c.latitude) campus_lat,"
+                + " COALESCE(p.campus_lng_override,c.longitude) campus_lng"
+                + " FROM ride_user_mobility_pref p"
                 + " LEFT JOIN academic_entry e ON e.id=p.campus_id"
                 + " LEFT JOIN academic_campus c ON c.id=p.campus_id WHERE p.user_id=?",
             actor.id());
@@ -76,24 +79,38 @@ public class RideDispatchService {
   public Object savePreference(
       Actor actor,
       UUID campusId,
+      String campusLabel,
+      Double campusLat,
+      Double campusLng,
       String homeLabel,
       Double homeLat,
       Double homeLng,
       boolean onboardingDone) {
     campus(campusId);
+    if ((campusLat == null) != (campusLng == null))
+      throw ApiException.invalid("A localização do campus está incompleta.");
+    if (campusLat != null) coordinate(campusLat, campusLng);
     if ((homeLat == null) != (homeLng == null))
       throw ApiException.invalid("A localização de casa está incompleta.");
     if (homeLat != null) coordinate(homeLat, homeLng);
+    String savedCampusLabel = clean(campusLabel, 240);
     String label = clean(homeLabel, 240);
     db.jdbc.update(
         "INSERT INTO ride_user_mobility_pref"
-            + "(user_id,campus_id,home_label,home_lat,home_lng,onboarding_done,updated_at)"
-            + " VALUES (?,?,?,?,?,?,now()) ON CONFLICT(user_id) DO UPDATE SET"
-            + " campus_id=EXCLUDED.campus_id,home_label=EXCLUDED.home_label,"
-            + " home_lat=EXCLUDED.home_lat,home_lng=EXCLUDED.home_lng,"
+            + "(user_id,campus_id,campus_label_override,campus_lat_override,campus_lng_override,"
+            + " home_label,home_lat,home_lng,onboarding_done,updated_at)"
+            + " VALUES (?,?,?,?,?,?,?,?,?,now()) ON CONFLICT(user_id) DO UPDATE SET"
+            + " campus_id=EXCLUDED.campus_id,"
+            + " campus_label_override=COALESCE(EXCLUDED.campus_label_override,ride_user_mobility_pref.campus_label_override),"
+            + " campus_lat_override=COALESCE(EXCLUDED.campus_lat_override,ride_user_mobility_pref.campus_lat_override),"
+            + " campus_lng_override=COALESCE(EXCLUDED.campus_lng_override,ride_user_mobility_pref.campus_lng_override),"
+            + " home_label=EXCLUDED.home_label,home_lat=EXCLUDED.home_lat,home_lng=EXCLUDED.home_lng,"
             + " onboarding_done=EXCLUDED.onboarding_done,updated_at=now()",
         actor.id(),
         campusId,
+        savedCampusLabel,
+        campusLat,
+        campusLng,
         label,
         homeLat,
         homeLng,
@@ -117,7 +134,7 @@ public class RideDispatchService {
     if (!DIRECTIONS.contains(direction)) throw ApiException.invalid("Escolha a direção da carona.");
     coordinate(startLat, startLng);
     coordinate(endLat, endLng);
-    var campus = campus(campusId);
+    var campus = campusForActor(actor, campusId);
     ensureCampusEndpoint(direction, campus, startLat, startLng, endLat, endLng);
 
     var existing =
@@ -202,7 +219,7 @@ public class RideDispatchService {
     coordinate(lat, lng);
     if (accuracyMeters < 0 || accuracyMeters > 50000)
       throw ApiException.invalid("A precisão da localização é inválida.");
-    var campus = campus(campusId);
+    var campus = campusForActor(actor, campusId);
     ensureCampusEndpoint(direction, campus, startLat, startLng, endLat, endLng);
     if (activeAcceptedMatch(actor.id()) != null)
       throw ApiException.invalid("Conclua ou cancele a carona ativa antes de ficar disponível.");
@@ -774,9 +791,31 @@ public class RideDispatchService {
       }
     }
 
+    return campus;
+  }
+
+  private Map<String, Object> campusForActor(Actor actor, UUID campusId) {
+    var campus = new LinkedHashMap<String, Object>(campus(campusId));
+    if (campus.get("latitude") == null || campus.get("longitude") == null) {
+      var saved =
+          db.list(
+              "SELECT campus_label_override,campus_lat_override,campus_lng_override"
+                  + " FROM ride_user_mobility_pref WHERE user_id=? AND campus_id=?",
+              actor.id(),
+              campusId);
+      if (!saved.isEmpty()) {
+        var row = saved.getFirst();
+        if (row.get("campusLatOverride") != null && row.get("campusLngOverride") != null) {
+          campus.put("latitude", row.get("campusLatOverride"));
+          campus.put("longitude", row.get("campusLngOverride"));
+          if (row.get("campusLabelOverride") != null)
+            campus.put("addressLabel", row.get("campusLabelOverride"));
+        }
+      }
+    }
     if (campus.get("latitude") == null || campus.get("longitude") == null)
       throw ApiException.invalid(
-          "Não foi possível localizar este campus automaticamente. Tente outro campus ou aguarde a atualização do catálogo.");
+          "Confirme a localização do seu campus no mapa antes de buscar uma carona.");
     return campus;
   }
 
