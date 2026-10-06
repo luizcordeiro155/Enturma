@@ -200,6 +200,12 @@ function meters(value?: number) {
     ? `${(value / 1000).toFixed(1)} km`
     : `${Math.round(value)} m`;
 }
+function locationDisplayLabel(value: LocationResult) {
+  const label = value.label?.trim() || "Local selecionado";
+  const address = value.address?.trim();
+  if (!address || address === label) return label;
+  return value.poi ? `${label} · ${address}` : address;
+}
 function minutes(seconds?: number) {
   if (seconds == null) return "";
   return `${Math.max(1, Math.round(seconds / 60))} min`;
@@ -706,8 +712,9 @@ export function RideMobilityExperience() {
         `/rides/map/reverse?lat=${geo.point.lat}&lng=${geo.point.lng}`,
         { cache: "no-store" },
       );
-      setLocationLabel(reverse.label);
-      return { ...geo, label: reverse.label };
+      const displayLabel = locationDisplayLabel(reverse);
+      setLocationLabel(displayLabel);
+      return { ...geo, label: displayLabel };
     } catch (e) {
       const ge = e as GeolocationPositionError;
       setError(

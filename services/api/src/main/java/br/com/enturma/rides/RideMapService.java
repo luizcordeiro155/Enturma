@@ -313,17 +313,130 @@ public class RideMapService {
 
   public Object reverse(double lat, double lng) {
     coordinate(lat, lng);
+
+    try {
+      JsonNode root =
+          getJson(
+              addressGeocoder
+                  + "/reverseGeocode?f=json&langCode=pt-BR&location="
+                  + lng
+                  + ","
+                  + lat);
+      JsonNode address = root.path("address");
+      if (address.isObject() && !address.isEmpty()) {
+        return arcGisReverseResult(address, lat, lng);
+      }
+    } catch (ApiException ignored) {
+      // Fall back to Nominatim so current-location lookup still works.
+    }
+
     JsonNode node =
         getJson(
             geocoder
-                + "/reverse?format=jsonv2&zoom=18&addressdetails=1&lat="
+                + "/reverse?format=jsonv2&zoom=18&addressdetails=1&accept-language=pt-BR&lat="
                 + lat
                 + "&lon="
                 + lng);
-    return Map.of(
-        "label", node.path("display_name").asText("Local selecionado"),
-        "lat", lat,
-        "lng", lng);
+    return nominatimReverseResult(node, lat, lng);
+  }
+
+  private static Map<String, Object> arcGisReverseResult(
+      JsonNode address, double lat, double lng) {
+    String addressType = address.path("Addr_type").asText("").strip();
+    String category = address.path("Type").asText("").strip();
+    String placeName = address.path("PlaceName").asText("").strip();
+    String shortLabel = address.path("ShortLabel").asText("").strip();
+    String matchAddress = address.path("Match_addr").asText("").strip();
+    String longLabel = address.path("LongLabel").asText("").strip();
+    String streetLine = address.path("Address").asText("").strip();
+    String houseNumber = address.path("AddNum").asText("").strip();
+
+    if (!houseNumber.isBlank()
+        && !normalizeHouseNumber(streetLine).contains(normalizeHouseNumber(houseNumber))) {
+      streetLine = streetLine.isBlank() ? houseNumber : streetLine + ", " + houseNumber;
+    }
+
+    String city = firstText(address, "City", "District", "Neighborhood");
+    String region = firstText(address, "RegionAbbr", "Region");
+    String formattedAddress = joinAddressParts(streetLine, city, region);
+    if (formattedAddress.isBlank()) {
+      formattedAddress = !matchAddress.isBlank() ? matchAddress : longLabel;
+    }
+
+    boolean poi = "POI".equalsIgnoreCase(addressType);
+    String label =
+        poi && !placeName.isBlank()
+            ? placeName
+            : (!shortLabel.isBlank()
+                ? shortLabel
+                : (!matchAddress.isBlank() ? matchAddress : formattedAddress));
+    if (label == null || label.isBlank()) label = "Local selecionado";
+
+    var out = new LinkedHashMap<String, Object>();
+    out.put("label", label);
+    if (formattedAddress != null && !formattedAddress.isBlank()) {
+      out.put("address", formattedAddress);
+    }
+    out.put("lat", lat);
+    out.put("lng", lng);
+    out.put("type", addressType);
+    if (!category.isBlank()) out.put("category", category);
+    out.put("poi", poi);
+    if (!houseNumber.isBlank()) out.put("houseNumber", houseNumber);
+    return out;
+  }
+
+  private static Map<String, Object> nominatimReverseResult(
+      JsonNode node, double lat, double lng) {
+    JsonNode address = node.path("address");
+    String houseNumber = firstText(address, "house_number");
+    String road = firstText(address, "road", "pedestrian", "residential", "street", "path");
+    String city =
+        firstText(address, "city", "town", "municipality", "village", "city_district");
+    String state = firstText(address, "state");
+
+    String streetLine =
+        road == null
+            ? (houseNumber == null ? "" : houseNumber)
+            : (houseNumber == null || houseNumber.isBlank()
+                ? road
+                : road + ", " + houseNumber);
+    String formattedAddress = joinAddressParts(streetLine, city, state);
+    if (formattedAddress.isBlank()) {
+      formattedAddress = node.path("display_name").asText("Local selecionado");
+    }
+
+    String category = node.path("category").asText("").strip();
+    String type = node.path("type").asText("").strip();
+    String name = node.path("name").asText("").strip();
+    boolean poi =
+        !name.isBlank()
+            && Set.of("amenity", "shop", "tourism", "leisure", "office", "healthcare", "craft")
+                .contains(category.toLowerCase(Locale.ROOT));
+
+    var out = new LinkedHashMap<String, Object>();
+    out.put("label", poi ? name : (!streetLine.isBlank() ? streetLine : formattedAddress));
+    out.put("address", formattedAddress);
+    out.put("lat", lat);
+    out.put("lng", lng);
+    out.put("type", type);
+    if (!category.isBlank()) out.put("category", category);
+    out.put("poi", poi);
+    if (houseNumber != null && !houseNumber.isBlank()) out.put("houseNumber", houseNumber);
+    return out;
+  }
+
+  private static String joinAddressParts(String... parts) {
+    var joiner = new StringJoiner(", ");
+    var seen = new LinkedHashSet<String>();
+    for (String part : parts) {
+      if (part == null) continue;
+      String clean = part.strip();
+      if (clean.isBlank()) continue;
+      String key = normalizeSearch(clean);
+      if (seen.add(key)) joiner.add(clean);
+    }
+    return joiner.toString();
   }
 
   public Object route(List<Point> points) {
