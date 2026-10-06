@@ -666,15 +666,17 @@ public class RideDispatchService {
   private Map<String, Object> activeMatch(UUID user) {
     var rows =
         db.list(
-            "SELECT m.id,m.ride_id,m.request_ride_id,m.driver_id,m.passenger_id,m.status,m.boarded_at,"
-                + " m.meeting_point,m.pickup_lat,m.pickup_lng,"
+            "SELECT m.id,m.ride_id,m.request_ride_id,m.driver_id,m.passenger_id,m.status,"
+                + " m.boarding_verified_at,m.boarded_at,m.meeting_point,m.pickup_lat,m.pickup_lng,"
                 + " r.trip_status,r.status ride_status,r.direction,r.start_label,r.start_lat,r.start_lng,"
                 + " r.end_label,r.end_lat,r.end_lng,r.campus_id,c.name campus_name,"
                 + " pr.start_label passenger_start_label,pr.start_lat passenger_start_lat,"
                 + " pr.start_lng passenger_start_lng,pr.end_label passenger_end_label,"
                 + " pr.end_lat passenger_end_lat,pr.end_lng passenger_end_lng,"
                 + " d.name driver_name,d.avatar_bytes IS NOT NULL driver_has_avatar,"
+                + " d.banner_bytes IS NOT NULL driver_has_banner,"
                 + " p.name passenger_name,p.avatar_bytes IS NOT NULL passenger_has_avatar,"
+                + " p.banner_bytes IS NOT NULL passenger_has_banner,"
                 + " v.brand vehicle_brand,v.model vehicle_model,"
                 + " v.color vehicle_color,v.plate_hint"
                 + " FROM ride_match m JOIN ride r ON r.id=m.ride_id"

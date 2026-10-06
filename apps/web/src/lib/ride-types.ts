@@ -52,6 +52,7 @@ export type Match = {
   driverConfirmed: boolean;
   passengerConfirmed: boolean;
   boardingCode?: string | null;
+  boardingVerifiedAt?: string | null;
   boardedAt?: string | null;
   pickupOrder?: number | null;
   meetingPoint: string | null;
@@ -76,7 +77,11 @@ export type Match = {
   campusId: string;
   campusName: string;
   passengerName: string;
+  passengerHasAvatar?: boolean;
+  passengerHasBanner?: boolean;
   driverName: string;
+  driverHasAvatar?: boolean;
+  driverHasBanner?: boolean;
   ownerName: string;
   departureAt: string;
   vehicleBrand?: string | null;

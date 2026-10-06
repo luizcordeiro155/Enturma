@@ -487,12 +487,23 @@ export function Matches() {
   }, []);
 
   useEffect(() => {
-    if (!requestedMatch || !matches.length) return;
-    const match = matches.find((item) => item.id === requestedMatch);
-    if (!match) return;
-    const timer = window.setTimeout(() => void open(match), 0);
+    if (!matches.length) return;
+    const requested = requestedMatch
+      ? matches.find((item) => item.id === requestedMatch)
+      : undefined;
+    const active =
+      requested ??
+      matches.find(
+        (item) =>
+          item.status === "ACCEPTED" &&
+          item.rideStatus === "OPEN" &&
+          !["COMPLETED", "CANCELLED"].includes(item.tripStatus) &&
+          !item.deletedAt,
+      );
+    if (!active || selected?.id === active.id) return;
+    const timer = window.setTimeout(() => void open(active), 0);
     return () => window.clearTimeout(timer);
-  }, [requestedMatch, matches, open]);
+  }, [requestedMatch, matches, open, selected?.id]);
 
   async function change(
     match: Match,
@@ -562,117 +573,6 @@ export function Matches() {
           <Link href="/caronas/create">Publicar outra carona</Link>
         </div>
         <Feedback error={error} success={success} />
-
-        {matches.length === 0 ? (
-          <div className="empty">
-            <h2>Nenhum match ainda.</h2>
-            <p>
-              Publique sua rota para o Enturma procurar combinações
-              automaticamente.
-            </p>
-          </div>
-        ) : (
-          matches.map((match) => {
-            const peer =
-              match.driverId === me
-                ? match.passengerName
-                : match.driverName;
-            return (
-              <article
-                className="room-row ride-match-row"
-                key={match.id}
-              >
-                <div>
-                  <h3>{peer}</h3>
-                  <p>
-                    {match.originArea} → {match.campusName}
-                  </p>
-                  <small>
-                    {labels[match.status] ?? match.status} ·{" "}
-                    {new Date(match.departureAt).toLocaleString("pt-BR")}
-                    {match.peerRating
-                      ? ` · ★ ${Number(match.peerRating).toFixed(1)}`
-                      : ""}
-                  </small>
-                  {match.vehicleBrand ? (
-                    <small className="ride-vehicle-line">
-                      {match.vehicleBrand} {match.vehicleModel} ·{" "}
-                      {match.vehicleColor}
-                    </small>
-                  ) : null}
-                </div>
-                <div className="actions ride-match-actions">
-                  {match.status === "PENDING" &&
-                  match.requestedBy !== me ? (
-                    <button
-                      disabled={busy}
-                      onClick={async (event) => {
-                        const card = event.currentTarget.closest(".ride-match-row");
-                        setBusy(true);
-                        try {
-                          await post(`/matches/${match.id}/accept`);
-                          rideAccept(card);
-                          await load();
-                          const updated = (
-                            await api<Match[]>("/matches", {
-                              cache: "no-store",
-                            })
-                          ).find((item) => item.id === match.id);
-                          if (updated?.status === "ACCEPTED") {
-                            const [driver, passenger] = await Promise.all([
-                              api<PublicProfile>(
-                                `/users/${updated.driverId}/profile`,
-                              ).catch(() => ({
-                                id: updated.driverId,
-                                name: updated.driverName,
-                              })),
-                              api<PublicProfile>(
-                                `/users/${updated.passengerId}/profile`,
-                              ).catch(() => ({
-                                id: updated.passengerId,
-                                name: updated.passengerName,
-                              })),
-                            ]);
-                            setCelebration({
-                              driver,
-                              passenger,
-                              area: updated.originArea,
-                            });
-                            await open(updated);
-                          }
-                        } catch (e) {
-                          setError((e as Error).message);
-                        } finally {
-                          setBusy(false);
-                        }
-                      }}
-                    >
-                      Aceitar combinação
-                    </button>
-                  ) : match.status === "ACCEPTED" && !match.deletedAt ? (
-                    <button onClick={() => void open(match)}>
-                      {match.closedAt ? "Ver histórico" : "Abrir carona"}
-                    </button>
-                  ) : match.status === "WAITLISTED" ? (
-                    <small>A vaga será oferecida se alguém cancelar.</small>
-                  ) : null}
-                  {match.rideStatus === "OPEN" &&
-                  ["PENDING", "WAITLISTED", "ACCEPTED"].includes(
-                    match.status,
-                  ) ? (
-                    <button
-                      className="secondary"
-                      disabled={busy}
-                      onClick={() => void change(match, "cancel")}
-                    >
-                      Cancelar match
-                    </button>
-                  ) : null}
-                </div>
-              </article>
-            );
-          })
-        )}
 
         {selected?.status === "ACCEPTED" ? (
           <>
@@ -820,6 +720,123 @@ export function Matches() {
             </section>
           </>
         ) : null}
+
+        <div className="ride-match-history-heading">
+          <div>
+            <h2>Outros encontros</h2>
+            <p>Histórico e combinações que não estão em andamento ficam abaixo da corrida atual.</p>
+          </div>
+        </div>
+        {matches.length === 0 ? (
+          <div className="empty">
+            <h2>Nenhum match ainda.</h2>
+            <p>
+              Publique sua rota para o Enturma procurar combinações
+              automaticamente.
+            </p>
+          </div>
+        ) : (
+          matches.map((match) => {
+            const peer =
+              match.driverId === me
+                ? match.passengerName
+                : match.driverName;
+            return (
+              <article
+                className="room-row ride-match-row"
+                key={match.id}
+              >
+                <div>
+                  <h3>{peer}</h3>
+                  <p>
+                    {match.originArea} → {match.campusName}
+                  </p>
+                  <small>
+                    {labels[match.status] ?? match.status} ·{" "}
+                    {new Date(match.departureAt).toLocaleString("pt-BR")}
+                    {match.peerRating
+                      ? ` · ★ ${Number(match.peerRating).toFixed(1)}`
+                      : ""}
+                  </small>
+                  {match.vehicleBrand ? (
+                    <small className="ride-vehicle-line">
+                      {match.vehicleBrand} {match.vehicleModel} ·{" "}
+                      {match.vehicleColor}
+                    </small>
+                  ) : null}
+                </div>
+                <div className="actions ride-match-actions">
+                  {match.status === "PENDING" &&
+                  match.requestedBy !== me ? (
+                    <button
+                      disabled={busy}
+                      onClick={async (event) => {
+                        const card = event.currentTarget.closest(".ride-match-row");
+                        setBusy(true);
+                        try {
+                          await post(`/matches/${match.id}/accept`);
+                          rideAccept(card);
+                          await load();
+                          const updated = (
+                            await api<Match[]>("/matches", {
+                              cache: "no-store",
+                            })
+                          ).find((item) => item.id === match.id);
+                          if (updated?.status === "ACCEPTED") {
+                            const [driver, passenger] = await Promise.all([
+                              api<PublicProfile>(
+                                `/users/${updated.driverId}/profile`,
+                              ).catch(() => ({
+                                id: updated.driverId,
+                                name: updated.driverName,
+                              })),
+                              api<PublicProfile>(
+                                `/users/${updated.passengerId}/profile`,
+                              ).catch(() => ({
+                                id: updated.passengerId,
+                                name: updated.passengerName,
+                              })),
+                            ]);
+                            setCelebration({
+                              driver,
+                              passenger,
+                              area: updated.originArea,
+                            });
+                            await open(updated);
+                          }
+                        } catch (e) {
+                          setError((e as Error).message);
+                        } finally {
+                          setBusy(false);
+                        }
+                      }}
+                    >
+                      Aceitar combinação
+                    </button>
+                  ) : match.status === "ACCEPTED" && !match.deletedAt ? (
+                    <button onClick={() => void open(match)}>
+                      {match.closedAt ? "Ver histórico" : "Abrir carona"}
+                    </button>
+                  ) : match.status === "WAITLISTED" ? (
+                    <small>A vaga será oferecida se alguém cancelar.</small>
+                  ) : null}
+                  {match.rideStatus === "OPEN" &&
+                  ["PENDING", "WAITLISTED", "ACCEPTED"].includes(
+                    match.status,
+                  ) ? (
+                    <button
+                      className="secondary"
+                      disabled={busy}
+                      onClick={() => void change(match, "cancel")}
+                    >
+                      Cancelar match
+                    </button>
+                  ) : null}
+                </div>
+              </article>
+            );
+          })
+        )}
 
         {celebration ? (
           <RideMatchCelebration

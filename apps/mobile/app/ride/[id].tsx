@@ -26,6 +26,7 @@ type Match = {
   driverConfirmed: boolean;
   passengerConfirmed: boolean;
   boardingCode?: string;
+  boardingVerifiedAt?: string;
   boardedAt?: string;
   meetingPoint?: string;
   closedAt?: string;
@@ -235,6 +236,27 @@ export default function RideChat() {
         </>
       ) : null}
 
+      {isPassenger &&
+      match.boardingVerifiedAt &&
+      !match.boardedAt ? (
+        <View style={styles.row}>
+          <Text style={styles.label}>Código validado pelo motorista</Text>
+          <Text style={styles.muted}>
+            Confirme somente quando você já estiver dentro do carro.
+          </Text>
+          <Button
+            title="Já estou no carro"
+            disabled={busy}
+            onPress={() =>
+              void action(`/matches/${id}/board/confirm`).then((result) => {
+                if (result !== undefined)
+                  setMessage("Embarque confirmado. A corrida começou.");
+              })
+            }
+          />
+        </View>
+      ) : null}
+
       {isDriver && !match.boardedAt ? (
         <View style={styles.row}>
           <Field
@@ -250,7 +272,7 @@ export default function RideChat() {
                   if (result !== undefined) {
                     setDriverCode("");
                     setMessage(
-                      "Código confirmado. A corrida foi iniciada automaticamente.",
+                      "Código correto. Aguardando o passageiro confirmar o embarque.",
                     );
                   }
                 });

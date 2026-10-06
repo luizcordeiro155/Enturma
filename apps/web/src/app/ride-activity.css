@@ -1137,3 +1137,123 @@ body:has(.ride-mobility-app) .workspace footer { display:none; }
     height: 49px;
   }
 }
+
+
+/* Caronas: identidade do perfil e confirmação física de embarque. */
+.ride-match-experience-header {
+  display: block;
+}
+.ride-match-profile {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface-raised);
+}
+.ride-match-banner {
+  height: clamp(76px, 11vw, 126px);
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--accent) 26%, var(--surface-raised)),
+      color-mix(in srgb, var(--ink) 10%, var(--surface-raised)));
+}
+.ride-match-banner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ride-match-profile-body {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 13px;
+  padding: 0 16px 15px;
+}
+.ride-match-profile-body .ride-match-avatar {
+  width: 64px;
+  height: 64px;
+  margin-top: -26px;
+  overflow: hidden;
+  border: 4px solid var(--surface-raised);
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--accent) 26%, var(--surface-raised));
+}
+.ride-match-profile-body .ride-match-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.ride-match-person-copy {
+  min-width: 0;
+  padding-top: 10px;
+}
+.ride-match-person-copy h2 {
+  margin: 0;
+}
+.ride-match-person-copy p,
+.ride-match-person-copy small {
+  display: block;
+  overflow: hidden;
+  color: var(--muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ride-match-passenger-confirm {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 11px;
+  padding: 13px;
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 18%, var(--surface));
+}
+.ride-match-passenger-confirm > div {
+  display: grid;
+  gap: 2px;
+}
+.ride-match-passenger-confirm small {
+  color: var(--muted);
+}
+.ride-match-history-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.ride-match-history-heading h2 {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+}
+.ride-match-history-heading p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .84rem;
+}
+
+@media (max-width: 760px) {
+  .ride-match-profile-body {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+    padding-inline: 12px;
+  }
+  .ride-match-profile-body .ride-match-status-chip {
+    grid-column: 1 / -1;
+    justify-self: stretch;
+    justify-content: center;
+    max-width: none;
+    text-align: center;
+  }
+  .ride-match-profile-body .ride-match-avatar {
+    width: 58px;
+    height: 58px;
+  }
+  .ride-match-passenger-confirm {
+    grid-template-columns: auto 1fr;
+  }
+  .ride-match-passenger-confirm button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}

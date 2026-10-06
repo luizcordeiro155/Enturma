@@ -963,3 +963,62 @@ html .ride-mobility-app .danger-action {
     bottom: calc(62dvh + 12px) !important;
   }
 }
+
+
+/* Endereço exato e perfil visual durante a corrida. */
+.ride-address-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 112px;
+  gap: 10px;
+  align-items: end;
+}
+.ride-address-number input {
+  font-variant-numeric: tabular-nums;
+}
+.ride-address-hint {
+  display: block;
+  margin-top: -2px;
+  color: var(--ride-muted);
+}
+.ride-active-profile {
+  overflow: hidden;
+  border: 1px solid var(--ride-border);
+  border-radius: 16px;
+  background: var(--ride-surface-2);
+}
+.ride-active-profile-banner {
+  height: 74px;
+  background:
+    linear-gradient(135deg,
+      color-mix(in srgb, var(--ride-accent) 26%, var(--ride-surface-2)),
+      color-mix(in srgb, var(--ride-text) 8%, var(--ride-surface-2)));
+}
+.ride-active-profile-banner img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+}
+.ride-active-profile .ride-person-summary {
+  margin-top: 0;
+  padding: 0 13px 13px;
+}
+.ride-active-profile .ride-person-avatar {
+  width: 54px;
+  height: 54px;
+  margin-top: -20px;
+  overflow: hidden;
+  border: 3px solid var(--ride-surface-2);
+  border-radius: 15px;
+}
+.ride-active-profile .ride-person-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 520px) {
+  .ride-address-fields {
+    grid-template-columns: minmax(0, 1fr) 92px;
+  }
+}

@@ -83,11 +83,14 @@ type ActiveMatch = {
   passengerId: string;
   driverName: string;
   driverHasAvatar?: boolean;
+  driverHasBanner?: boolean;
   passengerName: string;
   passengerHasAvatar?: boolean;
+  passengerHasBanner?: boolean;
   status: string;
   tripStatus: string;
   rideStatus: string;
+  boardingVerifiedAt?: string | null;
   boardedAt?: string | null;
   direction: Direction;
   campusId: string;
@@ -1357,6 +1360,21 @@ export function RideMobilityExperience() {
               : 15
     : 15;
 
+  async function confirmPassengerBoarding() {
+    if (!activeMatch || mode !== "PASSENGER") return;
+    setBusy(true);
+    setError("");
+    try {
+      await post(`/matches/${activeMatch.id}/board/confirm`);
+      setNotice("Embarque confirmado. A corrida começou.");
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function advanceTrip(status: string) {
     if (!activeMatch) return;
     setBusy(true);
@@ -1636,40 +1654,56 @@ export function RideMobilityExperience() {
                 ) : null}
               </div>
 
-              <div className="ride-person-summary">
-                <div className="ride-person-avatar">
+              <div className="ride-active-profile">
+                <div className="ride-active-profile-banner" aria-hidden="true">
                   {(mode === "PASSENGER"
-                    ? activeMatch.driverHasAvatar
-                    : activeMatch.passengerHasAvatar) ? (
+                    ? activeMatch.driverHasBanner
+                    : activeMatch.passengerHasBanner) ? (
                     <img
                       src={`/api/backend/users/${
                         mode === "PASSENGER"
                           ? activeMatch.driverId
                           : activeMatch.passengerId
-                      }/avatar`}
+                      }/banner`}
                       alt=""
                     />
-                  ) : mode === "PASSENGER" ? (
-                    <Car />
-                  ) : (
-                    <Users />
-                  )}
-                </div>
-                <div>
-                  <strong>
-                    {mode === "PASSENGER"
-                      ? activeMatch.driverName
-                      : activeMatch.passengerName}
-                  </strong>
-                  {mode === "PASSENGER" && activeMatch.vehicleModel ? (
-                    <small>
-                      {activeMatch.vehicleBrand} {activeMatch.vehicleModel} ·{" "}
-                      {activeMatch.vehicleColor}
-                      {activeMatch.plateHint
-                        ? ` · ${activeMatch.plateHint}`
-                        : ""}
-                    </small>
                   ) : null}
+                </div>
+                <div className="ride-person-summary">
+                  <div className="ride-person-avatar">
+                    {(mode === "PASSENGER"
+                      ? activeMatch.driverHasAvatar
+                      : activeMatch.passengerHasAvatar) ? (
+                      <img
+                        src={`/api/backend/users/${
+                          mode === "PASSENGER"
+                            ? activeMatch.driverId
+                            : activeMatch.passengerId
+                        }/avatar`}
+                        alt=""
+                      />
+                    ) : mode === "PASSENGER" ? (
+                      <Car />
+                    ) : (
+                      <Users />
+                    )}
+                  </div>
+                  <div>
+                    <strong>
+                      {mode === "PASSENGER"
+                        ? activeMatch.driverName
+                        : activeMatch.passengerName}
+                    </strong>
+                    {mode === "PASSENGER" && activeMatch.vehicleModel ? (
+                      <small>
+                        {activeMatch.vehicleBrand} {activeMatch.vehicleModel} ·{" "}
+                        {activeMatch.vehicleColor}
+                        {activeMatch.plateHint
+                          ? ` · ${activeMatch.plateHint}`
+                          : ""}
+                      </small>
+                    ) : null}
+                  </div>
                 </div>
               </div>
 
@@ -1726,14 +1760,26 @@ export function RideMobilityExperience() {
                 </button>
               </div>
 
-              {mode === "DRIVER" &&
+              {mode === "PASSENGER" &&
               activeMatch.tripStatus === "WAITING_PASSENGER" &&
+              activeMatch.boardingVerifiedAt &&
               !activeMatch.boardedAt ? (
+                <button
+                  type="button"
+                  className="ride-primary-action"
+                  disabled={busy}
+                  onClick={() => void confirmPassengerBoarding()}
+                >
+                  Já estou no carro
+                </button>
+              ) : mode === "DRIVER" &&
+                activeMatch.tripStatus === "WAITING_PASSENGER" &&
+                !activeMatch.boardedAt ? (
                 <Link
                   href={`/caronas/matches?match=${activeMatch.id}`}
                   className="button ride-primary-action"
                 >
-                  Confirmar embarque com PIN
+                  Validar código de embarque
                 </Link>
               ) : mode === "DRIVER" && nextStatus[activeMatch.tripStatus] ? (
                 <button

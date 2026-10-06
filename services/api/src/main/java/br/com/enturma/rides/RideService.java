@@ -231,7 +231,7 @@ public class RideService {
   public Object matches(Actor a) {
     return db.list(
         "SELECT m.id,m.ride_id,m.user_id,m.driver_id,m.passenger_id,m.requested_by,m.request_ride_id,"
-            + " m.status,m.driver_confirmed,m.passenger_confirmed,m.boarded_at,m.pickup_order,"
+            + " m.status,m.driver_confirmed,m.passenger_confirmed,m.boarding_verified_at,m.boarded_at,m.pickup_order,"
             + " m.pickup_lat,m.pickup_lng,m.closed_at,m.purge_at,m.deleted_at,"
             + " CASE WHEN m.status='ACCEPTED' THEN m.meeting_point ELSE NULL END meeting_point,"
             + " CASE WHEN m.status='ACCEPTED' AND m.passenger_id=? THEN m.boarding_code ELSE NULL END"
@@ -241,7 +241,10 @@ public class RideService {
             + " pr.start_label passenger_start_label,pr.start_lat passenger_start_lat,"
             + " pr.start_lng passenger_start_lng,pr.end_label passenger_end_label,"
             + " pr.end_lat passenger_end_lat,pr.end_lng passenger_end_lng,"
-            + " p.name passenger_name,d.name driver_name,o.name owner_name,"
+            + " p.name passenger_name,p.avatar_bytes IS NOT NULL passenger_has_avatar,"
+            + " p.banner_bytes IS NOT NULL passenger_has_banner,"
+            + " d.name driver_name,d.avatar_bytes IS NOT NULL driver_has_avatar,"
+            + " d.banner_bytes IS NOT NULL driver_has_banner,o.name owner_name,"
             + " v.brand vehicle_brand,v.model vehicle_model,v.color vehicle_color,v.plate_hint,"
             + " coalesce(rep.rating,0) peer_rating,coalesce(rep.reviews,0) peer_reviews"
             + " FROM ride_match m"

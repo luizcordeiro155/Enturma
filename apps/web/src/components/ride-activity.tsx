@@ -80,12 +80,17 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
   }, []);
   const searches: Search[] = data.rides
     .filter(
-      (r) =>
-        r.status === "OPEN" &&
-        !["COMPLETED", "CANCELLED"].includes(r.tripStatus) &&
-        Date.parse(r.departureAt) > now &&
-        data.matches.filter((m) => m.rideId === r.id && m.status === "ACCEPTED")
-          .length < r.seats,
+      (r) => {
+        const accepted = data.matches.some(
+          (m) => m.rideId === r.id && m.status === "ACCEPTED" && !m.deletedAt,
+        );
+        return (
+          r.status === "OPEN" &&
+          ["SCHEDULED", "MATCHING"].includes(r.tripStatus) &&
+          Date.parse(r.departureAt) > now &&
+          !accepted
+        );
+      },
     )
     .map((r) => ({
       id: r.id,
@@ -104,6 +109,7 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
           m.userId === data.me &&
           m.status === "PENDING" &&
           m.rideStatus === "OPEN" &&
+          ["SCHEDULED", "MATCHING"].includes(m.tripStatus) &&
           Date.parse(m.departureAt) > now,
       )
       .map((m) => ({

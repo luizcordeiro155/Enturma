@@ -1382,6 +1382,15 @@ class PlatformIntegrationTest {
         String.valueOf(((Map<?, ?>) rideMobility.boardingCode(member, match)).get("code"));
     assertThat(code).matches("[0-9]{4}");
     rideMobility.board(host, match, code);
+    assertThat(
+            db.one("SELECT boarding_verified_at FROM ride_match WHERE id=?", match)
+                .get("boardingVerifiedAt"))
+        .isNotNull();
+    assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
+        .isNull();
+    assertThat(db.one("SELECT trip_status FROM ride WHERE id=?", offer).get("tripStatus"))
+        .isEqualTo("WAITING_PASSENGER");
+    rideMobility.confirmBoarding(member, match);
     assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
         .isNotNull();
     assertThat(db.one("SELECT trip_status FROM ride WHERE id=?", offer).get("tripStatus"))

@@ -415,11 +415,16 @@ public class RideController {
   }
 
   @PostMapping("/matches/{id}/board")
-  public void board(
+  public Object board(
       @AuthenticationPrincipal Actor a,
       @PathVariable UUID id,
       @Valid @RequestBody Boarding r) {
-    mobility.board(a, id, r.code());
+    return mobility.board(a, id, r.code());
+  }
+
+  @PostMapping("/matches/{id}/board/confirm")
+  public void confirmBoarding(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    mobility.confirmBoarding(a, id);
   }
 
   @PutMapping("/matches/{id}/location")

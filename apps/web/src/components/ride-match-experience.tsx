@@ -145,6 +145,12 @@ export function RideMatchExperience({
   const isDriver = match.driverId === me;
   const peerName = isDriver ? match.passengerName : match.driverName;
   const peerId = isDriver ? match.passengerId : match.driverId;
+  const peerHasAvatar = isDriver
+    ? match.passengerHasAvatar
+    : match.driverHasAvatar;
+  const peerHasBanner = isDriver
+    ? match.passengerHasBanner
+    : match.driverHasBanner;
   const [peerLocation, setPeerLocation] = useState<PeerLocation>();
   const [selfLocation, setSelfLocation] = useState<MapPoint>();
   const [route, setRoute] = useState<RouteResult>();
@@ -433,7 +439,9 @@ export function RideMatchExperience({
     setMessage("Validando código e iniciando a corrida…");
     try {
       await post(`/matches/${match.id}/board`, { code });
-      setMessage("Código confirmado. A corrida foi iniciada automaticamente.");
+      setMessage(
+        "Código correto. Aguardando o passageiro confirmar que já entrou no carro.",
+      );
       setBoardingInput("");
       await onRefresh();
     } catch (failure) {
@@ -441,6 +449,21 @@ export function RideMatchExperience({
       setError((failure as Error).message);
     } finally {
       boardingRequest.current = false;
+      setBusy(false);
+    }
+  }
+
+  async function confirmBoarding() {
+    if (isDriver || !match.boardingVerifiedAt || match.boardedAt) return;
+    setBusy(true);
+    setError("");
+    try {
+      await post(`/matches/${match.id}/board/confirm`);
+      setMessage("Embarque confirmado. A corrida começou.");
+      await onRefresh();
+    } catch (failure) {
+      setError((failure as Error).message);
+    } finally {
       setBusy(false);
     }
   }
@@ -481,29 +504,40 @@ export function RideMatchExperience({
   return (
     <section className="ride-match-experience">
       <header className="ride-match-experience-header">
-        <div className="ride-match-person">
-          <div className="ride-match-avatar" aria-hidden="true">
-            {peerName.trim().slice(0, 1).toUpperCase()}
-          </div>
-          <div>
-            <h2>{peerName}</h2>
-            <p>
-              {isDriver ? "Passageiro" : "Motorista"}
-              {match.peerRating
-                ? ` · ★ ${Number(match.peerRating).toFixed(1)}`
-                : ""}
-            </p>
-            {!isDriver && match.vehicleBrand ? (
-              <small>
-                {match.vehicleBrand} {match.vehicleModel} · {match.vehicleColor}
-                {match.plateHint ? ` · ${match.plateHint}` : ""}
-              </small>
+        <div className="ride-match-profile">
+          <div className="ride-match-banner" aria-hidden="true">
+            {peerHasBanner ? (
+              <img src={`/api/backend/users/${peerId}/banner`} alt="" />
             ) : null}
           </div>
-        </div>
-        <div className="ride-match-status-chip">
-          <span />
-          {tripStatusLabel(match.tripStatus)}
+          <div className="ride-match-profile-body">
+            <div className="ride-match-avatar" aria-hidden="true">
+              {peerHasAvatar ? (
+                <img src={`/api/backend/users/${peerId}/avatar`} alt="" />
+              ) : (
+                peerName.trim().slice(0, 1).toUpperCase()
+              )}
+            </div>
+            <div className="ride-match-person-copy">
+              <h2>{peerName}</h2>
+              <p>
+                {isDriver ? "Passageiro" : "Motorista"}
+                {match.peerRating
+                  ? ` · ★ ${Number(match.peerRating).toFixed(1)}`
+                  : ""}
+              </p>
+              {!isDriver && match.vehicleBrand ? (
+                <small>
+                  {match.vehicleBrand} {match.vehicleModel} · {match.vehicleColor}
+                  {match.plateHint ? ` · ${match.plateHint}` : ""}
+                </small>
+              ) : null}
+            </div>
+            <div className="ride-match-status-chip">
+              <span />
+              {tripStatusLabel(match.tripStatus)}
+            </div>
+          </div>
         </div>
       </header>
 
@@ -638,6 +672,23 @@ export function RideMatchExperience({
                   </div>
                 </div>
               )}
+              {match.boardingVerifiedAt && !match.boardedAt ? (
+                <div className="ride-match-passenger-confirm">
+                  <CheckCircle2 size={20} />
+                  <div>
+                    <strong>Código validado pelo motorista</strong>
+                    <small>
+                      Confirme somente depois que você estiver dentro do carro.
+                    </small>
+                  </div>
+                  <button
+                    disabled={busy}
+                    onClick={() => void confirmBoarding()}
+                  >
+                    Já estou no carro
+                  </button>
+                </div>
+              ) : null}
             </>
           ) : null}
 

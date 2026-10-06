@@ -263,25 +263,46 @@ public class RideMobilityService {
   }
 
   @Transactional
-  public void board(Actor actor, UUID matchId, String code) {
+  public Object board(Actor actor, UUID matchId, String code) {
     var match = acceptedMatch(actor, matchId, true);
     requireActive(match);
     if (!actor.id().equals(match.get("driverId"))) throw ApiException.forbidden();
     if (!"WAITING_PASSENGER".equals(match.get("tripStatus")))
-      throw ApiException.invalid("Confirme o embarque somente depois de chegar ao ponto de encontro.");
+      throw ApiException.invalid("Valide o embarque somente depois de chegar ao ponto de encontro.");
     String expected = match.get("boardingCode") == null ? "" : String.valueOf(match.get("boardingCode"));
     if (!expected.equals(code))
       throw new ApiException(409, "BOARDING_CODE_INVALID", "O código de embarque está incorreto.");
+
     db.jdbc.update(
-        "UPDATE ride_match SET boarded_at=coalesce(boarded_at,now()),driver_confirmed=true,"
-            + " passenger_confirmed=true WHERE id=?",
+        "UPDATE ride_match SET boarding_verified_at=coalesce(boarding_verified_at,now()),"
+            + " driver_confirmed=true WHERE id=?",
         matchId);
-    db.jdbc.update(
-        "INSERT INTO ride_safety_event(id,match_id,actor_id,kind) VALUES (?,?,?,'BOARDING_CONFIRMED')",
-        UUID.randomUUID(),
-        matchId,
-        actor.id());
-    log.info("ride_boarded match={} driver={}", matchId, actor.id());
+    log.info("ride_boarding_code_verified match={} driver={}", matchId, actor.id());
+    changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
+    return Map.of("verified", true, "awaitingPassenger", true);
+  }
+
+  @Transactional
+  public void confirmBoarding(Actor actor, UUID matchId) {
+    var match = acceptedMatch(actor, matchId, true);
+    requireActive(match);
+    if (!actor.id().equals(match.get("passengerId"))) throw ApiException.forbidden();
+    if (!"WAITING_PASSENGER".equals(match.get("tripStatus")))
+      throw ApiException.invalid("Confirme o embarque somente quando o motorista estiver no ponto.");
+    if (match.get("boardingVerifiedAt") == null)
+      throw ApiException.invalid("O motorista ainda precisa validar o código de embarque.");
+
+    if (match.get("boardedAt") == null) {
+      db.jdbc.update(
+          "UPDATE ride_match SET boarded_at=now(),passenger_confirmed=true WHERE id=?",
+          matchId);
+      db.jdbc.update(
+          "INSERT INTO ride_safety_event(id,match_id,actor_id,kind) VALUES (?,?,?,'BOARDING_CONFIRMED')",
+          UUID.randomUUID(),
+          matchId,
+          actor.id());
+      log.info("ride_boarded match={} passenger={}", matchId, actor.id());
+    }
 
     UUID rideId = (UUID) match.get("rideId");
     boolean allBoarded =
@@ -293,22 +314,20 @@ public class RideMobilityService {
       int started =
           db.jdbc.update(
               "UPDATE ride SET trip_status='IN_PROGRESS',started_at=coalesce(started_at,now())"
-                  + " WHERE id=? AND status='OPEN' AND trip_status IN ('WAITING_PASSENGER','ARRIVING')",
+                  + " WHERE id=? AND status='OPEN' AND trip_status='WAITING_PASSENGER'",
               rideId);
       if (started > 0) {
-        log.info("ride_auto_started ride={} by_boarding_match={}", rideId, matchId);
+        log.info("ride_auto_started ride={} confirmed_by_passenger_match={}", rideId, matchId);
         notifyRide(
             actor.id(),
             rideId,
             "RIDE_STATUS",
-            "Código confirmado. A carona começou automaticamente. Boa viagem!");
+            "Passageiro confirmou o embarque. A carona começou. Boa viagem!");
         changedRide(rideId, true);
-      } else {
-        changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
+        return;
       }
-    } else {
-      changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
     }
+    changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
   }
 
   @Transactional
@@ -360,7 +379,6 @@ public class RideMobilityService {
         heading,
         speedMps,
         java.sql.Timestamp.from(captured));
-    changedMatch(match);
   }
 
   public Object peerLocation(Actor actor, UUID matchId) {
