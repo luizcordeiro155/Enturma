@@ -477,7 +477,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 : "Este e-mail ainda não possui uma conta no Enturma."}
             </p>
           </div>
+          <footer className="auth-story-footer">
           <span>Seu espaço de estudo e conexão.</span>
+          <nav aria-label="Informações legais">
+            <Link href="/privacidade">Política de Privacidade</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/termos">Termos de Uso</Link>
+          </nav>
+        </footer>
         </section>
         <main className="auth-main auth-success-main">
           <section
@@ -639,7 +646,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 : "Sua nova senha já está ativa e você pode entrar novamente com segurança."}
             </p>
           </div>
+          <footer className="auth-story-footer">
           <span>Seu espaço de estudo e conexão.</span>
+          <nav aria-label="Informações legais">
+            <Link href="/privacidade">Política de Privacidade</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/termos">Termos de Uso</Link>
+          </nav>
+        </footer>
         </section>
         <main className="auth-main auth-success-main">
           <section
@@ -725,7 +739,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
             Uma turma para chamar de sua.
           </p>
         </div>
-        <span>Seu espaço de estudo e conexão.</span>
+        <footer className="auth-story-footer">
+          <span>Seu espaço de estudo e conexão.</span>
+          <nav aria-label="Informações legais">
+            <Link href="/privacidade">Política de Privacidade</Link>
+            <span aria-hidden="true">•</span>
+            <Link href="/termos">Termos de Uso</Link>
+          </nav>
+        </footer>
       </section>
       <main className="auth-main">
         {busy && mode === "login" ? (

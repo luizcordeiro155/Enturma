@@ -210,9 +210,17 @@ export function Shell({ children }: { children: React.ReactNode }) {
           {children}
         </main>
         {!inRideHub ? (
-          <footer>
-            <ShieldCheck size={20} /> Catálogo acadêmico com fontes verificadas.
-            <span>Enturma Web v0.3.0</span>
+          <footer className="app-legal-footer">
+            <div className="app-legal-footer-status">
+              <ShieldCheck size={20} />
+              <span>Catálogo acadêmico com fontes verificadas.</span>
+              <span>Enturma Web v0.3.0</span>
+            </div>
+            <nav aria-label="Informações legais">
+              <Link href="/privacidade">Política de Privacidade</Link>
+              <span aria-hidden="true">•</span>
+              <Link href="/termos">Termos de Uso</Link>
+            </nav>
           </footer>
         ) : null}
       </div>
