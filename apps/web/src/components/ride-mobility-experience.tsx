@@ -833,6 +833,29 @@ export function RideMobilityExperience() {
     return () => window.clearTimeout(timer);
   }, [mode, availability?.enabled, activeMatch?.id]);
 
+  async function completeOnboarding(requestLocation: boolean) {
+    if (!pref?.campusId) return;
+    setBusy(true);
+    try {
+      if (requestLocation) await acquire();
+      await api("/rides/mobility/preferences", {
+        method: "PUT",
+        body: JSON.stringify({
+          campusId: pref.campusId,
+          homeLabel: pref.homeLabel ?? null,
+          homeLat: pref.homeLat ?? null,
+          homeLng: pref.homeLng ?? null,
+          onboardingDone: true,
+        }),
+      });
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function saveHome() {
     if (!pref?.campusId || !selected) return;
     try {
@@ -1441,7 +1464,7 @@ export function RideMobilityExperience() {
                       method: "PUT",
                       body: JSON.stringify({
                         campusId: event.target.value,
-                        onboardingDone: true,
+                        onboardingDone: false,
                       }),
                     });
                     await load();
@@ -1457,6 +1480,34 @@ export function RideMobilityExperience() {
                   </option>
                 ))}
               </select>
+            </div>
+          ) : !pref.onboardingDone &&
+            !activeMatch &&
+            !activeRequest &&
+            !availability?.enabled ? (
+            <div className="ride-campus-onboarding">
+              <LocateFixed size={30} />
+              <h2>Ative sua localização</h2>
+              <p>
+                O Enturma usa sua posição somente durante a busca ou uma carona
+                ativa. Você pode escolher endereços manualmente quando quiser.
+              </p>
+              <button
+                type="button"
+                className="ride-primary-action"
+                disabled={busy}
+                onClick={() => void completeOnboarding(true)}
+              >
+                <LocateFixed size={18} /> Permitir localização
+              </button>
+              <button
+                type="button"
+                className="secondary"
+                disabled={busy}
+                onClick={() => void completeOnboarding(false)}
+              >
+                Agora não
+              </button>
             </div>
           ) : activeMatch ? (
             <div className="ride-active-sheet">
