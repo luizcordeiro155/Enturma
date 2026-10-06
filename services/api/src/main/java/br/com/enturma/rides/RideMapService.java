@@ -118,6 +118,10 @@ public class RideMapService {
     var out = new LinkedHashMap<String, Object>();
     out.put("distanceMeters", Math.max(0, route.path("distance").asInt()));
     out.put("durationSeconds", Math.max(0, route.path("duration").asInt()));
+    var legDurations = new ArrayList<Integer>();
+    for (JsonNode leg : route.path("legs"))
+      legDurations.add(Math.max(0, leg.path("duration").asInt()));
+    out.put("legDurationsSeconds", legDurations);
     out.put("geometry", geometry);
     return out;
   }
