@@ -15,14 +15,18 @@ import {
 type RideMode = "PASSENGER" | "DRIVER";
 
 function useRideMode() {
-  const [mode, setMode] = useState<RideMode>("PASSENGER");
+  const [mode, setMode] = useState<RideMode>(() => {
+    if (typeof window === "undefined") return "PASSENGER";
+    return localStorage.getItem("enturma-ride-mode") === "DRIVER"
+      ? "DRIVER"
+      : "PASSENGER";
+  });
 
   useEffect(() => {
     const read = () => {
       const saved = localStorage.getItem("enturma-ride-mode");
       setMode(saved === "DRIVER" ? "DRIVER" : "PASSENGER");
     };
-    read();
     const custom = (event: Event) => {
       const next = (event as CustomEvent<RideMode>).detail;
       if (next === "PASSENGER" || next === "DRIVER") setMode(next);
