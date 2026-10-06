@@ -16,6 +16,7 @@ import "./study-workspace.css";
 import "./responsive-shell.css";
 import { CallSessionProvider } from "@/components/call-session-provider";
 import "./community-v3.css";
+import "./ride-mobility-polish.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { MobilePushRegistration } from "@/components/mobile-push-registration";
