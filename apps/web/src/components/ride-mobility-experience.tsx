@@ -456,7 +456,7 @@ export function RideMobilityExperience() {
   const locationWatch = useRef<number | undefined>(undefined);
   const lastSent = useRef<{ at: number; point: MapPoint } | null>(null);
   const activeRouteAt = useRef(0);
-  const currentLocationRef = useRef<MapPoint>();
+  const currentLocationRef = useRef<MapPoint | undefined>(undefined);
   const userRef = useRef("");
   const campusesRef = useRef<AcademicEntry[]>([]);
 
