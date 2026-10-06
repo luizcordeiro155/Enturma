@@ -52,20 +52,88 @@ public class RideMapService {
     if (q.length() < 2 || q.length() > 160)
       throw ApiException.invalid("Digite pelo menos 2 caracteres para pesquisar um local.");
 
+    var unique = new LinkedHashMap<String, Map<String, Object>>();
+    ApiException primaryFailure = null;
+    boolean providerAnswered = false;
+
+    try {
+      JsonNode direct = getJson(candidateUrl(q, null, lat, lng, 14));
+      appendCandidates(direct, unique, q, lat, lng);
+      providerAnswered = true;
+    } catch (ApiException failure) {
+      primaryFailure = failure;
+    }
+
+    // ArcGIS Suggest is stronger for establishments and partially typed business names.
+    // Resolve only a few top suggestions to keep requests bounded.
+    try {
+      StringBuilder suggestUrl =
+          new StringBuilder(addressGeocoder)
+              .append("/suggest?f=json&countryCode=BRA&maxSuggestions=8&text=")
+              .append(enc(q));
+      if (valid(lat, lng))
+        suggestUrl.append("&location=").append(lng).append(",").append(lat);
+
+      JsonNode suggestions = getJson(suggestUrl.toString());
+      int resolved = 0;
+      for (JsonNode suggestion : suggestions.path("suggestions")) {
+        if (resolved >= 4) break;
+        String text = suggestion.path("text").asText("").strip();
+        String magicKey = suggestion.path("magicKey").asText("").strip();
+        if (text.isBlank() || magicKey.isBlank()) continue;
+        try {
+          JsonNode exact =
+              getJson(candidateUrl(text, magicKey, lat, lng, 2));
+          appendCandidates(exact, unique, q, lat, lng);
+          resolved++;
+          providerAnswered = true;
+        } catch (ApiException ignored) {
+          // A single stale suggestion must never break the entire search.
+        }
+      }
+    } catch (ApiException ignored) {
+      // Direct candidates remain usable if autocomplete is temporarily unavailable.
+    }
+
+    if (!providerAnswered && primaryFailure != null) throw primaryFailure;
+
+    var out = new ArrayList<>(unique.values());
+    out.sort(
+        Comparator
+            .<Map<String, Object>>comparingDouble(item -> -searchRank(item, q))
+            .thenComparingInt(
+                item ->
+                    item.get("distanceMeters") instanceof Number number
+                        ? number.intValue()
+                        : Integer.MAX_VALUE));
+
+    return out.stream().limit(10).toList();
+  }
+
+  private String candidateUrl(
+      String text, String magicKey, Double lat, Double lng, int maxLocations) {
     StringBuilder url =
         new StringBuilder(addressGeocoder)
             .append("/findAddressCandidates?f=json")
             .append("&SingleLine=")
-            .append(enc(q))
-            .append("&countryCode=BRA&maxLocations=10")
-            .append("&outFields=Match_addr,LongLabel,ShortLabel,Addr_type,Type,PlaceName,Place_addr,StAddr,City,Region,Postal,Distance");
-
-    if (valid(lat, lng)) {
+            .append(enc(text))
+            .append("&countryCode=BRA&maxLocations=")
+            .append(maxLocations)
+            .append(
+                "&outFields=Match_addr,LongLabel,ShortLabel,Addr_type,Type,PlaceName,Place_addr,StAddr,City,Region,Postal,Distance");
+    if (magicKey != null && !magicKey.isBlank())
+      url.append("&magicKey=").append(enc(magicKey));
+    if (valid(lat, lng))
       url.append("&location=").append(lng).append(",").append(lat);
-    }
+    return url.toString();
+  }
 
-    JsonNode root = getJson(url.toString());
-    var out = new ArrayList<Map<String, Object>>();
+  private void appendCandidates(
+      JsonNode root,
+      Map<String, Map<String, Object>> unique,
+      String query,
+      Double lat,
+      Double lng) {
     for (JsonNode candidate : root.path("candidates")) {
       JsonNode location = candidate.path("location");
       Double y = location.has("y") ? location.path("y").asDouble() : null;
@@ -73,14 +141,15 @@ public class RideMapService {
       if (!valid(y, x)) continue;
 
       int score = candidate.path("score").asInt(0);
-      if (score < 70) continue;
+      if (score < 68) continue;
 
       JsonNode attributes = candidate.path("attributes");
       String addrType = attributes.path("Addr_type").asText("");
       String category = attributes.path("Type").asText("");
       String placeName = attributes.path("PlaceName").asText("");
       String shortLabel = attributes.path("ShortLabel").asText("");
-      String matchAddress = attributes.path("Match_addr").asText(candidate.path("address").asText("Local"));
+      String matchAddress =
+          attributes.path("Match_addr").asText(candidate.path("address").asText("Local"));
       String placeAddress = attributes.path("Place_addr").asText("");
       String longLabel = attributes.path("LongLabel").asText("");
 
@@ -97,8 +166,7 @@ public class RideMapService {
       var item = new LinkedHashMap<String, Object>();
       item.put(
           "id",
-          "arcgis-"
-              + Integer.toHexString(Objects.hash(label, address, y, x, score)));
+          "arcgis-" + Integer.toHexString(Objects.hash(label, address, y, x)));
       item.put("label", label);
       item.put("address", address);
       item.put("lat", y);
@@ -115,23 +183,59 @@ public class RideMapService {
                 : (int) Math.round(haversineMeters(lat, lng, y, x));
         item.put("distanceMeters", distanceMeters);
       }
-      out.add(item);
+
+      String key =
+          normalizeSearch(label)
+              + "|"
+              + normalizeSearch(address)
+              + "|"
+              + String.format(Locale.ROOT, "%.5f,%.5f", y, x);
+      unique.putIfAbsent(key, item);
+    }
+  }
+
+  private static double searchRank(Map<String, Object> item, String query) {
+    String label = String.valueOf(item.getOrDefault("label", ""));
+    String address = String.valueOf(item.getOrDefault("address", ""));
+    String category = String.valueOf(item.getOrDefault("category", ""));
+    String searchable = normalizeSearch(label + " " + address + " " + category);
+    String compactSearchable = searchable.replace(" ", "");
+    String normalizedQuery = normalizeSearch(query);
+    String compactQuery = normalizedQuery.replace(" ", "");
+
+    var tokens =
+        Arrays.stream(normalizedQuery.split("\\s+"))
+            .filter(token -> token.length() >= 2)
+            .distinct()
+            .toList();
+
+    double matched =
+        tokens.isEmpty()
+            ? 0
+            : tokens.stream().filter(searchable::contains).count() / (double) tokens.size();
+    double compactBonus =
+        !compactQuery.isBlank() && compactSearchable.contains(compactQuery) ? 1.3 : 0;
+    double poiBonus = Boolean.TRUE.equals(item.get("poi")) ? 0.8 : 0;
+    double providerScore =
+        item.get("score") instanceof Number number ? number.doubleValue() / 100d : 0;
+
+    double distancePenalty = 0;
+    if (item.get("distanceMeters") instanceof Number number) {
+      distancePenalty = Math.min(0.65, number.doubleValue() / 30_000d);
     }
 
-    out.sort(
-        Comparator
-            .<Map<String, Object>>comparingInt(
-                item ->
-                    item.get("distanceMeters") instanceof Number number
-                        ? number.intValue()
-                        : Integer.MAX_VALUE)
-            .thenComparing(
-                item ->
-                    item.get("score") instanceof Number number
-                        ? -number.intValue()
-                        : 0));
+    return matched * 4.0 + compactBonus + poiBonus + providerScore - distancePenalty;
+  }
 
-    return out.stream().limit(8).toList();
+  private static String normalizeSearch(String value) {
+    if (value == null) return "";
+    String normalized =
+        java.text.Normalizer.normalize(value, java.text.Normalizer.Form.NFD)
+            .replaceAll("\\p{M}+", "")
+            .toLowerCase(Locale.ROOT)
+            .replaceAll("[^a-z0-9]+", " ")
+            .trim();
+    return normalized.replaceAll("\\s+", " ");
   }
 
   public Object addressSearch(
