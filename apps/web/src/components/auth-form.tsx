@@ -11,6 +11,9 @@ import {
   ShieldCheck,
   UserRoundX,
   LogIn,
+  MonitorCog,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
@@ -29,6 +32,110 @@ const titles: Record<Mode, string> = {
   "reset-password": "Uma nova senha, um novo começo.",
   "verify-email": "Confirme seu e-mail.",
 };
+
+type AuthTheme = "LIGHT" | "DARK" | "SYSTEM";
+
+function AuthThemeControl() {
+  const [theme, setTheme] = useState<AuthTheme>("SYSTEM");
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    let cachedTheme: AuthTheme = "SYSTEM";
+    try {
+      const cached = JSON.parse(
+        localStorage.getItem("enturma-experience") || "{}",
+      ) as { theme?: string };
+      if (cached.theme === "LIGHT" || cached.theme === "DARK") {
+        cachedTheme = cached.theme;
+      }
+    } catch {}
+    queueMicrotask(() => {
+      setTheme(cachedTheme);
+      setReady(true);
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
+    const system = window.matchMedia("(prefers-color-scheme: dark)");
+    const apply = () => {
+      document.documentElement.dataset.theme =
+        theme === "SYSTEM"
+          ? system.matches
+            ? "dark"
+            : "light"
+          : theme.toLowerCase();
+    };
+    apply();
+    if (theme !== "SYSTEM") return;
+    system.addEventListener("change", apply);
+    return () => system.removeEventListener("change", apply);
+  }, [ready, theme]);
+
+  function choose(nextTheme: AuthTheme) {
+    setTheme(nextTheme);
+    try {
+      const cached = JSON.parse(
+        localStorage.getItem("enturma-experience") || "{}",
+      ) as Record<string, unknown>;
+      const next = { ...cached, theme: nextTheme };
+      const serialized = JSON.stringify(next);
+      localStorage.setItem("enturma-experience", serialized);
+      localStorage.setItem("enturma-experience-pending", serialized);
+    } catch {}
+  }
+
+  return (
+    <div
+      className="auth-theme-control"
+      role="group"
+      aria-label="Tema da interface"
+    >
+      <button
+        type="button"
+        className="auth-theme-option"
+        aria-pressed={theme === "LIGHT"}
+        onClick={() => choose("LIGHT")}
+        title="Usar tema claro"
+      >
+        <Sun size={16} />
+        <span>Claro</span>
+      </button>
+      <button
+        type="button"
+        className="auth-theme-option"
+        aria-pressed={theme === "DARK"}
+        onClick={() => choose("DARK")}
+        title="Usar tema escuro"
+      >
+        <Moon size={16} />
+        <span>Escuro</span>
+      </button>
+      <button
+        type="button"
+        className="auth-theme-option"
+        aria-pressed={theme === "SYSTEM"}
+        onClick={() => choose("SYSTEM")}
+        title="Seguir o tema do sistema"
+      >
+        <MonitorCog size={16} />
+        <span>Sistema</span>
+      </button>
+    </div>
+  );
+}
+
+function AuthStoryHeader() {
+  return (
+    <header className="auth-story-top">
+      <Link href="/" className="brand">
+        <BookOpen size={40} />
+        enturma.
+      </Link>
+      <AuthThemeControl />
+    </header>
+  );
+}
 export function AuthForm({ mode }: { mode: Mode }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -463,10 +570,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     return (
       <div className="auth-layout">
         <section className="auth-story">
-          <Link href="/" className="brand">
-            <BookOpen size={40} />
-            enturma.
-          </Link>
+          <AuthStoryHeader />
           <div>
             <h1>
               {existing ? "Você já faz parte." : "Vamos criar sua conta."}
@@ -568,10 +672,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     return (
       <div className="auth-layout">
         <section className="auth-story">
-          <Link href="/" className="brand">
-            <BookOpen size={40} />
-            enturma.
-          </Link>
+          <AuthStoryHeader />
           <div>
             <h1>Verifique seu e-mail.</h1>
             <p>Enviamos um link seguro para redefinir sua senha.</p>
@@ -634,10 +735,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     return (
       <div className="auth-layout">
         <section className="auth-story">
-          <Link href="/" className="brand">
-            <BookOpen size={40} />
-            enturma.
-          </Link>
+          <AuthStoryHeader />
           <div>
             <h1>{verified ? "E-mail confirmado." : "Senha alterada."}</h1>
             <p>
@@ -721,10 +819,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   return (
     <div className="auth-layout">
       <section className="auth-story">
-        <Link href="/" className="brand">
-          <BookOpen size={40} />
-          enturma.
-        </Link>
+        <AuthStoryHeader />
         <div>
           <h1>
             Aprender fica
