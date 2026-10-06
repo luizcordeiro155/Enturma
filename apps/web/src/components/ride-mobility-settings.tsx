@@ -11,7 +11,12 @@ import { Shell } from "./shell";
 export function RideMobilitySettings() {
   const [campuses, setCampuses] = useState<AcademicEntry[]>([]);
   const [error, setError] = useState("");
-  const [mode, setMode] = useState<"PASSENGER" | "DRIVER">("PASSENGER");
+  const [mode, setMode] = useState<"PASSENGER" | "DRIVER">(() => {
+    if (typeof window === "undefined") return "PASSENGER";
+    return localStorage.getItem("enturma-ride-mode") === "DRIVER"
+      ? "DRIVER"
+      : "PASSENGER";
+  });
 
   useEffect(() => {
     api<AcademicEntry[]>("/academics?kind=CAMPUS")
@@ -22,7 +27,6 @@ export function RideMobilitySettings() {
       const saved = localStorage.getItem("enturma-ride-mode");
       setMode(saved === "DRIVER" ? "DRIVER" : "PASSENGER");
     };
-    syncMode();
     const custom = (event: Event) => {
       const next = (event as CustomEvent<"PASSENGER" | "DRIVER">).detail;
       if (next === "PASSENGER" || next === "DRIVER") setMode(next);
