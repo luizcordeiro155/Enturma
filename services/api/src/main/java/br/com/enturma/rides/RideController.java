@@ -98,6 +98,9 @@ public class RideController {
 
   public record MobilityPreference(
       @NotNull UUID campusId,
+      @Size(max = 240) String campusLabel,
+      Double campusLat,
+      Double campusLng,
       @Size(max = 240) String homeLabel,
       Double homeLat,
       Double homeLng,
@@ -152,7 +155,15 @@ public class RideController {
   public Object mobilityPreference(
       @AuthenticationPrincipal Actor a, @Valid @RequestBody MobilityPreference r) {
     return dispatch.savePreference(
-        a, r.campusId(), r.homeLabel(), r.homeLat(), r.homeLng(), r.onboardingDone());
+        a,
+        r.campusId(),
+        r.campusLabel(),
+        r.campusLat(),
+        r.campusLng(),
+        r.homeLabel(),
+        r.homeLat(),
+        r.homeLng(),
+        r.onboardingDone());
   }
 
   @GetMapping("/rides/map/search")
