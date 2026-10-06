@@ -77,9 +77,22 @@ html .ride-mobility-app button.ride-sheet-handle {
   box-shadow: none !important;
   filter: none !important;
 }
+.ride-sheet-handle,
+html .ride-mobility-app .ride-sheet-handle {
+  width: 100%;
+  height: 26px;
+  min-height: 26px;
+  display: grid;
+  place-items: center;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
 .ride-sheet-handle span {
+  display: block;
   width: 48px;
   height: 4px;
+  border-radius: 999px;
   background: color-mix(in srgb, var(--ride-muted) 66%, transparent);
 }
 .ride-sheet-content {
@@ -391,14 +404,24 @@ html .ride-mobility-app .danger-action {
   .ride-bottom-sheet {
     left: 8px !important;
     right: 8px !important;
-    bottom: calc(84px + var(--ride-safe-bottom)) !important;
-    max-height: calc(100dvh - 158px - var(--ride-safe-bottom)) !important;
-    border-radius: 20px !important;
+    top: clamp(280px, 38dvh, 560px) !important;
+    bottom: calc(76px + var(--ride-safe-bottom)) !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    transform: none !important;
+    overflow: hidden !important;
   }
   .ride-sheet-content {
-    max-height: calc(100dvh - 188px - var(--ride-safe-bottom)) !important;
-    padding: 0 14px 28px !important;
-    scroll-padding-bottom: 32px;
+    height: calc(100% - 26px) !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 14px calc(28px + var(--ride-safe-bottom)) !important;
+    scroll-padding-bottom: calc(92px + var(--ride-safe-bottom));
   }
   .ride-map-picker-actions {
     bottom: calc(88px + var(--ride-safe-bottom)) !important;
@@ -475,7 +498,7 @@ html .ride-mobility-app .danger-action {
   }
   .ride-recenter {
     right: 10px !important;
-    bottom: calc(54% + 84px + var(--ride-safe-bottom)) !important;
+    bottom: calc(62dvh + 12px) !important;
   }
 }
 
@@ -504,5 +527,33 @@ html .ride-mobility-app .danger-action {
   .ride-dispatch-dot {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+
+@media (max-width: 760px) and (max-height: 760px) {
+  .ride-bottom-sheet {
+    top: 30dvh !important;
+  }
+  .ride-map-top {
+    gap: 6px;
+  }
+  .ride-campus-onboarding {
+    padding-top: 2px;
+  }
+}
+
+@media (max-width: 420px) {
+  .ride-sheet-content {
+    padding-inline: 12px !important;
+  }
+  .ride-sheet-heading {
+    align-items: flex-start;
+  }
+  .ride-campus-mini {
+    max-width: 116px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
