@@ -722,8 +722,10 @@ public class RideDispatchService {
   private Map<String, Object> campus(UUID campusId) {
     var rows =
         db.list(
-            "SELECT e.id,e.name,c.address_label,c.latitude,c.longitude"
+            "SELECT e.id,e.name,c.address_label,c.latitude,c.longitude,c.city,c.state,"
+                + " i.name institution_name"
                 + " FROM academic_entry e LEFT JOIN academic_campus c ON c.id=e.id"
+                + " LEFT JOIN academic_institution i ON i.id=c.institution_id"
                 + " WHERE e.id=? AND e.kind='CAMPUS' AND e.status='VERIFIED'",
             campusId);
     if (rows.isEmpty()) throw ApiException.invalid("Selecione um campus acadêmico válido.");
@@ -732,10 +734,21 @@ public class RideDispatchService {
     if (campus.get("latitude") == null || campus.get("longitude") == null) {
       String query =
           clean(
-              campus.get("addressLabel") == null
-                  ? String.valueOf(campus.get("name"))
-                  : String.valueOf(campus.get("addressLabel")) + ", "
-                      + String.valueOf(campus.get("name")),
+              String.join(
+                  ", ",
+                  java.util.stream.Stream.of(
+                          campus.get("addressLabel"),
+                          campus.get("name"),
+                          campus.get("institutionName"),
+                          campus.get("city"),
+                          campus.get("state"),
+                          "Brasil")
+                      .filter(Objects::nonNull)
+                      .map(String::valueOf)
+                      .map(String::strip)
+                      .filter(value -> !value.isBlank())
+                      .distinct()
+                      .toList()),
               240);
       try {
         Object result = maps.search(query, null, null);
