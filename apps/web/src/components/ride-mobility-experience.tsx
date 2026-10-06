@@ -1457,7 +1457,15 @@ export function RideMobilityExperience() {
           </button>
         </div>
       ) : (
-        <BottomSheet expanded={!!route || !!driverRequests.length || !!activeMatch}>
+        <BottomSheet
+          expanded={
+            !pref?.campusId ||
+            !pref?.onboardingDone ||
+            !!route ||
+            !!driverRequests.length ||
+            !!activeMatch
+          }
+        >
           {error ? (
             <div className="feedback error" role="alert">
               {error}
