@@ -138,6 +138,9 @@ type LocationResult = {
   lat: number;
   lng: number;
   type?: string;
+  precision?: "HOUSE" | "STREET";
+  houseNumber?: string;
+  requestedNumber?: string;
 };
 type RouteResult = {
   distanceMeters: number;
@@ -281,13 +284,16 @@ function AddressFinder({
     const timer = window.setTimeout(async () => {
       setBusy(true);
       try {
-        const params = new URLSearchParams({ q: query });
+        const params = new URLSearchParams({
+          street: street.trim(),
+          number: houseNumber.trim(),
+        });
         if (current) {
           params.set("lat", String(current.lat));
           params.set("lng", String(current.lng));
         }
         const rows = await api<LocationResult[]>(
-          `/rides/map/search?${params}`,
+          `/rides/map/address-search?${params}`,
           { cache: "no-store" },
         );
         if (id === request.current) setItems(rows);
@@ -338,20 +344,39 @@ function AddressFinder({
         <MapPin size={17} /> Escolher no mapa
       </button>
       {busy ? <small>Localizando esse endereço…</small> : null}
-      {street.trim().length >= 3 && items.length ? (
+      {street.trim().length >= 3 && houseNumber.trim() && items.length ? (
         <div className="ride-address-results">
-          {items.map((item, index) => (
-            <button
-              type="button"
-              className="ride-address-result"
-              key={item.id ?? `${item.lat}-${item.lng}-${index}`}
-              onClick={() => onChoose(item)}
-            >
-              <MapPin size={17} />
-              <span>{item.label}</span>
-            </button>
-          ))}
+          {items.map((item, index) => {
+            const exact = item.precision === "HOUSE";
+            return (
+              <button
+                type="button"
+                className={`ride-address-result ${exact ? "is-exact" : "is-approximate"}`}
+                key={item.id ?? `${item.lat}-${item.lng}-${index}`}
+                disabled={!exact}
+                onClick={() => {
+                  if (exact) onChoose(item);
+                }}
+              >
+                <MapPin size={17} />
+                <span>
+                  <strong>{exact ? "Endereço exato" : "Somente a rua encontrada"}</strong>
+                  <small>{item.label}</small>
+                </span>
+              </button>
+            );
+          })}
         </div>
+      ) : null}
+      {!busy &&
+      street.trim().length >= 3 &&
+      houseNumber.trim() &&
+      items.length > 0 &&
+      !items.some((item) => item.precision === "HOUSE") ? (
+        <small className="ride-address-warning">
+          Não encontramos o número {houseNumber.trim()} nessa rua. Confira o número
+          ou escolha o ponto manualmente no mapa.
+        </small>
       ) : null}
     </div>
   );

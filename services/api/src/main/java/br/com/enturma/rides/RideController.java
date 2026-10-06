@@ -174,6 +174,15 @@ public class RideController {
     return maps.search(q, lat, lng);
   }
 
+  @GetMapping("/rides/map/address-search")
+  public Object mapAddressSearch(
+      @RequestParam String street,
+      @RequestParam String number,
+      @RequestParam(required = false) Double lat,
+      @RequestParam(required = false) Double lng) {
+    return maps.addressSearch(street, number, lat, lng);
+  }
+
   @GetMapping("/rides/map/reverse")
   public Object mapReverse(@RequestParam double lat, @RequestParam double lng) {
     return maps.reverse(lat, lng);

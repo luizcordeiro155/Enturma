@@ -257,16 +257,25 @@ export default function Rides() {
               const exactAddress = `${street.trim()}, ${houseNumber.trim()}`;
               setBusy(true);
               void api<
-                { label: string; lat: number; lng: number }[]
+                {
+                  label: string;
+                  lat: number;
+                  lng: number;
+                  precision?: "HOUSE" | "STREET";
+                }[]
               >(
-                `/rides/map/search?q=${encodeURIComponent(exactAddress)}`,
+                `/rides/map/address-search?street=${encodeURIComponent(
+                  street.trim(),
+                )}&number=${encodeURIComponent(houseNumber.trim())}`,
                 { cache: "no-store" },
               )
                 .then(async (locations) => {
-                  const location = locations[0];
+                  const location = locations.find(
+                    (candidate) => candidate.precision === "HOUSE",
+                  );
                   if (!location)
                     throw new Error(
-                      "Não encontramos esse endereço. Confira o nome da rua e o número.",
+                      "Não encontramos esse número nessa rua. Confira o endereço ou selecione o ponto pelo mapa na versão completa do Caronas.",
                     );
                   await api("/rides", {
                     method: "POST",

@@ -1022,3 +1022,35 @@ html .ride-mobility-app .danger-action {
     grid-template-columns: minmax(0, 1fr) 92px;
   }
 }
+
+
+.ride-address-result > span {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+  text-align: left;
+}
+.ride-address-result > span strong {
+  font-size: .78rem;
+}
+.ride-address-result > span small {
+  overflow: hidden;
+  color: var(--ride-muted);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ride-address-result.is-exact {
+  border-color: color-mix(in srgb, var(--ride-accent) 45%, var(--ride-border));
+}
+.ride-address-result.is-approximate {
+  cursor: not-allowed;
+  opacity: .58;
+}
+.ride-address-warning {
+  display: block;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, #d89b2b 14%, var(--ride-surface-2));
+  color: var(--ride-text);
+  line-height: 1.4;
+}

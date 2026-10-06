@@ -77,6 +77,91 @@ public class RideMapService {
     return out;
   }
 
+  public Object addressSearch(
+      String street, String number, Double lat, Double lng) {
+    String road = street == null ? "" : street.strip();
+    String house = number == null ? "" : number.strip();
+    if (road.length() < 3 || road.length() > 120)
+      throw ApiException.invalid("Informe o nome da rua com pelo menos 3 caracteres.");
+    if (house.isBlank() || house.length() > 24)
+      throw ApiException.invalid("Informe o número do endereço.");
+
+    String city = null;
+    String state = null;
+    if (valid(lat, lng)) {
+      try {
+        JsonNode near =
+            getJson(
+                geocoder
+                    + "/reverse?format=jsonv2&zoom=10&addressdetails=1&accept-language=pt-BR&lat="
+                    + lat
+                    + "&lon="
+                    + lng);
+        JsonNode address = near.path("address");
+        city =
+            firstText(
+                address,
+                "city",
+                "town",
+                "municipality",
+                "village",
+                "city_district");
+        state = firstText(address, "state");
+      } catch (ApiException ignored) {
+        // The location context only improves ranking. Exact address search can continue without it.
+      }
+    }
+
+    var roots = new ArrayList<JsonNode>();
+    StringBuilder structured =
+        new StringBuilder(geocoder)
+            .append("/search?format=jsonv2&addressdetails=1&limit=10&countrycodes=br")
+            .append("&accept-language=pt-BR&street=")
+            .append(enc(house + " " + road));
+    if (city != null && !city.isBlank()) structured.append("&city=").append(enc(city));
+    if (state != null && !state.isBlank()) structured.append("&state=").append(enc(state));
+    addViewbox(structured, lat, lng);
+    roots.add(getJson(structured.toString()));
+
+    StringBuilder free =
+        new StringBuilder(geocoder)
+            .append("/search?format=jsonv2&addressdetails=1&limit=10&countrycodes=br")
+            .append("&accept-language=pt-BR&q=")
+            .append(enc(road + ", " + house
+                + (city == null ? "" : ", " + city)
+                + (state == null ? "" : ", " + state)));
+    addViewbox(free, lat, lng);
+    roots.add(getJson(free.toString()));
+
+    var exact = new ArrayList<Map<String, Object>>();
+    var fallback = new ArrayList<Map<String, Object>>();
+    var seen = new HashSet<String>();
+    String wanted = normalizeHouseNumber(house);
+
+    for (JsonNode root : roots) {
+      if (!root.isArray()) continue;
+      for (JsonNode node : root) {
+        Double y = decimal(node.path("lat").asText(null));
+        Double x = decimal(node.path("lon").asText(null));
+        if (!valid(y, x)) continue;
+        String key = String.format(Locale.ROOT, "%.6f,%.6f", y, x);
+        if (!seen.add(key)) continue;
+        JsonNode address = node.path("address");
+        String foundHouse = address.path("house_number").asText("");
+        boolean houseMatch =
+            !foundHouse.isBlank() && normalizeHouseNumber(foundHouse).equals(wanted);
+        var item = mapResult(node, y, x);
+        item.put("precision", houseMatch ? "HOUSE" : "STREET");
+        item.put("requestedNumber", house);
+        if (houseMatch) exact.add(item);
+        else fallback.add(item);
+      }
+    }
+
+    if (!exact.isEmpty()) return exact.stream().limit(6).toList();
+    return fallback.stream().limit(4).toList();
+  }
+
   public Object reverse(double lat, double lng) {
     coordinate(lat, lng);
     JsonNode node =
@@ -124,6 +209,46 @@ public class RideMapService {
     out.put("legDurationsSeconds", legDurations);
     out.put("geometry", geometry);
     return out;
+  }
+
+  private static Map<String, Object> mapResult(JsonNode node, double lat, double lng) {
+    var item = new LinkedHashMap<String, Object>();
+    item.put("id", node.path("place_id").asText(UUID.randomUUID().toString()));
+    item.put("label", node.path("display_name").asText("Local"));
+    item.put("lat", lat);
+    item.put("lng", lng);
+    item.put("type", node.path("type").asText(""));
+    JsonNode address = node.path("address");
+    String houseNumber = address.path("house_number").asText("");
+    if (!houseNumber.isBlank()) item.put("houseNumber", houseNumber);
+    return item;
+  }
+
+  private static String firstText(JsonNode node, String... keys) {
+    for (String key : keys) {
+      String value = node.path(key).asText("");
+      if (!value.isBlank()) return value;
+    }
+    return null;
+  }
+
+  private static void addViewbox(StringBuilder url, Double lat, Double lng) {
+    if (!valid(lat, lng)) return;
+    url.append("&viewbox=")
+        .append(lng - 0.35)
+        .append(",")
+        .append(lat + 0.35)
+        .append(",")
+        .append(lng + 0.35)
+        .append(",")
+        .append(lat - 0.35)
+        .append("&bounded=0");
+  }
+
+  private static String normalizeHouseNumber(String value) {
+    return value == null
+        ? ""
+        : value.toUpperCase(Locale.ROOT).replaceAll("[^0-9A-Z]", "");
   }
 
   private JsonNode getJson(String url) {
