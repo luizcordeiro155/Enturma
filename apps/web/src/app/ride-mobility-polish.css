@@ -939,3 +939,27 @@ html .ride-mobility-app .danger-action {
     transition-duration: 1ms !important;
   }
 }
+
+
+/* Final shell sizing: the dedicated hub already accounts for its own navigation. */
+.ride-active-shell .ride-mobility-app,
+.ride-active-shell .ride-mobility-boot {
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
+@media (max-width: 760px) {
+  .ride-active-shell .ride-mobility-app,
+  .ride-active-shell .ride-mobility-boot {
+    height: calc(100dvh - 74px - max(env(safe-area-inset-bottom,0px), var(--native-safe-bottom,0px))) !important;
+  }
+  .ride-active-shell .ride-bottom-sheet {
+    bottom: 8px !important;
+  }
+  .ride-active-shell .ride-map-picker-actions {
+    bottom: 12px !important;
+  }
+  .ride-active-shell .ride-recenter {
+    bottom: calc(62dvh + 12px) !important;
+  }
+}
