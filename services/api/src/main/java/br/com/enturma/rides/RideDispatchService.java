@@ -3,6 +3,7 @@ package br.com.enturma.rides;
 import br.com.enturma.auth.Actor;
 import br.com.enturma.common.*;
 import br.com.enturma.notifications.NotificationService;
+import java.nio.charset.StandardCharsets;
 import java.time.*;
 import java.util.*;
 import org.slf4j.Logger;
@@ -326,7 +327,12 @@ public class RideDispatchService {
               focusLat, focusLng, number(row.get("lat")), number(row.get("lng")));
       if (km > radius) continue;
       var item = new LinkedHashMap<String, Object>();
-      item.put("id", "driver-" + row.get("userId"));
+      item.put(
+          "id",
+          "nearby-"
+              + UUID.nameUUIDFromBytes(
+                  ("ride-nearby:" + row.get("userId"))
+                      .getBytes(StandardCharsets.UTF_8)));
       item.put("lat", snap(number(row.get("lat"))));
       item.put("lng", snap(number(row.get("lng"))));
       item.put("heading", row.get("heading"));
