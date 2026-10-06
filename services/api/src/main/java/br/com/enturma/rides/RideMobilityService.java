@@ -66,7 +66,7 @@ public class RideMobilityService {
       String plateHint) {
     if (seats < 1 || seats > 8)
       throw ApiException.invalid("Informe entre 1 e 8 vagas no veículo.");
-    String hint = clean(plateHint, 8);
+    String hint = maskPlate(plateHint);
     db.jdbc.update(
         "INSERT INTO ride_vehicle_profile(user_id,brand,model,color,model_year,seats,plate_hint)"
             + " VALUES (?,?,?,?,?,?,?) ON CONFLICT(user_id) DO UPDATE SET"
@@ -786,6 +786,15 @@ public class RideMobilityService {
 
   private static String boardingCode() {
     return String.format(Locale.ROOT, "%04d", java.util.concurrent.ThreadLocalRandom.current().nextInt(10000));
+  }
+
+  private static String maskPlate(String value) {
+    if (value == null || value.isBlank()) return null;
+    String normalized = value.toUpperCase(Locale.ROOT).replaceAll("[^A-Z0-9]", "");
+    if (normalized.isBlank()) return null;
+    String suffix =
+        normalized.substring(Math.max(0, normalized.length() - Math.min(4, normalized.length())));
+    return "•••" + suffix;
   }
 
   private static String cleanRequired(String value, int max) {
