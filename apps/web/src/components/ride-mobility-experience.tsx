@@ -315,7 +315,7 @@ function AddressFinder({
           <input
             value={query}
             onChange={(event) => setQuery(event.target.value)}
-            placeholder="Endereço, número ou local — ex.: Rua Lunardi 218, hospital, supermercado"
+            placeholder="Pesquisar endereço ou local"
             autoComplete="street-address"
             enterKeyHint="search"
           />
@@ -323,9 +323,8 @@ function AddressFinder({
       </label>
 
       <small className="ride-address-hint">
-        Você pode pesquisar uma residência, loja, comércio, hospital, faculdade,
-        shopping ou outro estabelecimento. Com localização ativa, os resultados
-        mais próximos aparecem primeiro.
+        Pesquise por endereço completo, nome de empresa ou estabelecimento. Com
+        localização ativa, os resultados mais próximos aparecem primeiro.
       </small>
 
       <button type="button" className="secondary" onClick={onPickMap}>
