@@ -154,6 +154,7 @@ public class RideDispatchService {
         Math.max(0, routeDistanceMeters),
         Math.max(0, routeDurationSeconds));
     changed(id, true);
+    offerRequestToDrivers(id);
     log.info("ride_created mode=on_demand role=passenger ride={} campus={} direction={}", id, campusId, direction);
     return Map.of("id", id, "status", "OPEN", "tripStatus", "MATCHING");
   }
@@ -598,6 +599,17 @@ public class RideDispatchService {
     cancellation((UUID) row.get("rideId"), matchId, actor.id(), reason, note);
   }
 
+  @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 15000, initialDelay = 12000)
+  @Transactional
+  public void dispatchSearchWaves() {
+    for (var row :
+        db.list(
+            "SELECT id FROM ride WHERE dispatch_mode='ON_DEMAND' AND type='REQUEST'"
+                + " AND status='OPEN' AND search_started_at>now()-interval '2 hours'"
+                + " ORDER BY search_started_at LIMIT 100"))
+      offerRequestToDrivers((UUID) row.get("id"));
+  }
+
   @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 30000, initialDelay = 30000)
   @Transactional
   public void expireDriverAvailability() {
@@ -760,6 +772,78 @@ public class RideDispatchService {
     double detour = number(item.get("detourMinutes"));
     double rating = number(item.get("passengerRating"));
     return Math.max(0, 100 - proximity * 3.2 - detour * 2.2 + rating * 2.0);
+  }
+
+  private void offerRequestToDrivers(UUID requestRideId) {
+    var requests =
+        db.list(
+            "SELECT r.id,r.owner_id,r.campus_id,r.direction,r.start_lat,r.start_lng,"
+                + " r.search_started_at FROM ride r WHERE r.id=? AND r.type='REQUEST'"
+                + " AND r.dispatch_mode='ON_DEMAND' AND r.status='OPEN'",
+            requestRideId);
+    if (requests.isEmpty()) return;
+    var request = requests.getFirst();
+    Instant started =
+        request.get("searchStartedAt") == null
+            ? Instant.now()
+            : Instant.parse(String.valueOf(request.get("searchStartedAt")));
+    long age = Math.max(0, Duration.between(started, Instant.now()).toSeconds());
+    double radius = age < 20 ? 5.0 : age < 50 ? 12.0 : 35.0;
+    double pickupLat = number(request.get("startLat"));
+    double pickupLng = number(request.get("startLng"));
+    double latDelta = radius / 111.0;
+    double lngDelta =
+        radius / Math.max(1.0, 111.0 * Math.cos(Math.toRadians(pickupLat)));
+
+    var drivers =
+        db.list(
+            "SELECT a.user_id,a.lat,a.lng FROM ride_driver_availability a"
+                + " WHERE a.campus_id=? AND a.direction=? AND a.enabled=true AND a.status='ONLINE'"
+                + " AND a.updated_at>now()-interval '90 seconds'"
+                + " AND a.lat BETWEEN ? AND ? AND a.lng BETWEEN ? AND ?"
+                + " AND NOT EXISTS(SELECT 1 FROM user_block b WHERE"
+                + " (b.user_id=? AND b.blocked_id=a.user_id) OR"
+                + " (b.blocked_id=? AND b.user_id=a.user_id))"
+                + " ORDER BY a.updated_at DESC LIMIT 50",
+            request.get("campusId"),
+            request.get("direction"),
+            pickupLat - latDelta,
+            pickupLat + latDelta,
+            pickupLng - lngDelta,
+            pickupLng + lngDelta,
+            request.get("ownerId"),
+            request.get("ownerId"));
+
+    int offered = 0;
+    for (var driver : drivers) {
+      double km =
+          RideMatchingService.haversine(
+              pickupLat,
+              pickupLng,
+              number(driver.get("lat")),
+              number(driver.get("lng")));
+      if (km > radius) continue;
+      UUID driverId = (UUID) driver.get("userId");
+      int inserted =
+          db.jdbc.update(
+              "INSERT INTO ride_dispatch_attempt(request_ride_id,driver_id,outcome)"
+                  + " VALUES (?,?,'OFFERED') ON CONFLICT(request_ride_id,driver_id) DO NOTHING",
+              requestRideId,
+              driverId);
+      if (inserted == 0) continue;
+      notices.send(
+          (UUID) request.get("ownerId"),
+          driverId,
+          "RIDE_REQUESTED",
+          "ride-dispatch:" + requestRideId,
+          requestRideId,
+          "/caronas",
+          "Há um estudante procurando carona no seu caminho.");
+      offered++;
+      if (offered >= 12) break;
+    }
+    if (offered > 0)
+      log.info("driver_matched ride={} candidates={} radius_km={}", requestRideId, offered, radius);
   }
 
   private void cancellation(UUID ride, UUID match, UUID actor, String reason, String note) {
