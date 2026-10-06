@@ -17,7 +17,6 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import {
-  type PointerEvent as ReactPointerEvent,
   useCallback,
   useEffect,
   useMemo,
@@ -409,107 +408,15 @@ function ArrivalCelebration() {
 
 function BottomSheet({
   children,
-  expanded = false,
 }: {
   children: React.ReactNode;
   expanded?: boolean;
 }) {
-  const ref = useRef<HTMLElement>(null);
-  const drag = useRef<{ y: number; base: number } | null>(null);
-  const springFrame = useRef(0);
-  const position = useRef(expanded ? 0 : 34);
-  const [snap, setSnap] = useState<"compact" | "medium" | "expanded">(
-    expanded ? "expanded" : "medium",
-  );
-  function translateFor(value: typeof snap) {
-    if (value === "expanded") return 0;
-    if (value === "medium") return 34;
-    return 68;
-  }
-  function move(to: typeof snap) {
-    const node = ref.current;
-    if (!node) return;
-    cancelAnimationFrame(springFrame.current);
-    const target = translateFor(to);
-    const reduced =
-      document.documentElement.dataset.reducedMotion === "true" ||
-      matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) {
-      position.current = target;
-      node.style.transform = `translateY(${target}%)`;
-      setSnap(to);
-      return;
-    }
-    let x = position.current;
-    let velocity = 0;
-    let last = performance.now();
-    const stiffness = 210;
-    const damping = 26;
-    const step = (now: number) => {
-      const dt = Math.min(0.032, Math.max(0.001, (now - last) / 1000));
-      last = now;
-      const force = (target - x) * stiffness;
-      const resistance = velocity * damping;
-      velocity += (force - resistance) * dt;
-      x += velocity * dt;
-      position.current = x;
-      node.style.transform = `translateY(${x}%)`;
-      if (Math.abs(target - x) < 0.08 && Math.abs(velocity) < 0.12) {
-        position.current = target;
-        node.style.transform = `translateY(${target}%)`;
-        setSnap(to);
-        return;
-      }
-      springFrame.current = requestAnimationFrame(step);
-    };
-    springFrame.current = requestAnimationFrame(step);
-  }
-  useEffect(() => {
-    if (!expanded) return;
-    const timer = window.setTimeout(() => move("expanded"), 0);
-    return () => {
-      window.clearTimeout(timer);
-      cancelAnimationFrame(springFrame.current);
-    };
-  }, [expanded]);
-  function down(event: ReactPointerEvent<HTMLButtonElement>) {
-    cancelAnimationFrame(springFrame.current);
-    event.currentTarget.setPointerCapture(event.pointerId);
-    drag.current = { y: event.clientY, base: position.current };
-  }
-  function dragMove(event: ReactPointerEvent<HTMLButtonElement>) {
-    if (!drag.current || !ref.current) return;
-    const delta = ((event.clientY - drag.current.y) / window.innerHeight) * 100;
-    const value = Math.max(0, Math.min(72, drag.current.base + delta));
-    position.current = value;
-    ref.current.style.transform = `translateY(${value}%)`;
-  }
-  function up(event: ReactPointerEvent<HTMLButtonElement>) {
-    if (!drag.current) return;
-    const delta = event.clientY - drag.current.y;
-    drag.current = null;
-    if (delta < -70) move(snap === "compact" ? "medium" : "expanded");
-    else if (delta > 70)
-      move(snap === "expanded" ? "medium" : "compact");
-    else move(snap);
-  }
   return (
-    <section
-      ref={ref}
-      className={`ride-bottom-sheet sheet-${snap}`}
-      style={{ transform: `translateY(${translateFor(snap)}%)` }}
-    >
-      <button
-        type="button"
-        className="ride-sheet-handle"
-        aria-label="Arrastar painel da carona"
-        onPointerDown={down}
-        onPointerMove={dragMove}
-        onPointerUp={up}
-        onPointerCancel={up}
-      >
+    <section className="ride-bottom-sheet sheet-expanded">
+      <div className="ride-sheet-handle" aria-hidden="true">
         <span />
-      </button>
+      </div>
       <div className="ride-sheet-content">{children}</div>
     </section>
   );
@@ -528,6 +435,9 @@ export function RideMobilityExperience() {
   const [locationLabel, setLocationLabel] = useState("Sua localização");
   const [selectOnMap, setSelectOnMap] = useState(false);
   const [mapPickPurpose, setMapPickPurpose] = useState<"ROUTE" | "CAMPUS">("ROUTE");
+  const [campusOverride, setCampusOverride] = useState<LocationResult>();
+  const [campusSetupOpen, setCampusSetupOpen] = useState(false);
+  const [pendingRouteChoice, setPendingRouteChoice] = useState<LocationResult>();
   const [driverRequests, setDriverRequests] = useState<DriverRequest[]>([]);
   const [nearbyDrivers, setNearbyDrivers] = useState<NearbyDriver[]>([]);
   const [searchRadiusKm, setSearchRadiusKm] = useState(5);
@@ -546,13 +456,50 @@ export function RideMobilityExperience() {
   const locationWatch = useRef<number | undefined>(undefined);
   const lastSent = useRef<{ at: number; point: MapPoint } | null>(null);
   const activeRouteAt = useRef(0);
+  const currentLocationRef = useRef<MapPoint | undefined>(undefined);
+  const userRef = useRef("");
+  const campusesRef = useRef<AcademicEntry[]>([]);
+
+  useEffect(() => {
+    currentLocationRef.current = location;
+  }, [location]);
 
   const load = useCallback(async () => {
     const [next, user, campusList] = await Promise.all([
       api<MobilityState>("/rides/mobility/state", { cache: "no-store" }),
-      api<{ id: string }>("/users/me", { cache: "no-store" }),
-      api<AcademicEntry[]>("/academics?kind=CAMPUS"),
+      userRef.current
+        ? Promise.resolve({ id: userRef.current })
+        : api<{ id: string }>("/users/me", { cache: "no-store" }),
+      campusesRef.current.length
+        ? Promise.resolve(campusesRef.current)
+        : api<AcademicEntry[]>("/academics?kind=CAMPUS"),
     ]);
+    userRef.current = user.id;
+    campusesRef.current = campusList;
+    if (
+      next.preference?.campusId &&
+      (next.preference.campusLat == null || next.preference.campusLng == null)
+    ) {
+      try {
+        const raw = localStorage.getItem(
+          `enturma-ride-campus:${next.preference.campusId}`,
+        );
+        const saved = raw ? (JSON.parse(raw) as LocationResult) : undefined;
+        if (
+          Number.isFinite(saved?.lat) &&
+          Number.isFinite(saved?.lng) &&
+          typeof saved?.label === "string"
+        ) {
+          setCampusOverride(saved);
+        }
+      } catch {
+        localStorage.removeItem(
+          `enturma-ride-campus:${next.preference.campusId}`,
+        );
+      }
+    } else {
+      setCampusOverride(undefined);
+    }
     setState(next);
     setMe(user.id);
     setCampuses(campusList);
@@ -579,7 +526,10 @@ export function RideMobilityExperience() {
           : next.activeRequest
             ? point(next.activeRequest.startLat, next.activeRequest.startLng)
             : point(next.preference?.campusLat, next.preference?.campusLng);
-    if (actualCenter) setLocation(actualCenter);
+    if (actualCenter && !currentLocationRef.current) {
+      currentLocationRef.current = actualCenter;
+      setLocation(actualCenter);
+    }
     return { next, user: user.id };
   }, []);
 
@@ -598,6 +548,9 @@ export function RideMobilityExperience() {
   }, []);
   useEffect(() => {
     localStorage.setItem("enturma-ride-mode", mode);
+    window.dispatchEvent(
+      new CustomEvent<Mode>("enturma-ride-mode-change", { detail: mode }),
+    );
   }, [mode]);
 
   const live = useRideUpdates(async () => {
@@ -616,7 +569,14 @@ export function RideMobilityExperience() {
   });
 
   const pref = state?.preference;
-  const campusPoint = point(pref?.campusLat, pref?.campusLng);
+  const catalogCampusPoint = point(pref?.campusLat, pref?.campusLng);
+  const campusPoint =
+    catalogCampusPoint ??
+    (campusOverride
+      ? { lat: campusOverride.lat, lng: campusOverride.lng }
+      : undefined);
+  const campusLabel =
+    campusOverride?.label || pref?.campusAddress || pref?.campusName || "Campus";
   const activeMatch = state?.activeMatch ?? undefined;
   const activeRequest = state?.activeRequest ?? undefined;
   const availability = state?.driverAvailability ?? undefined;
@@ -706,19 +666,19 @@ export function RideMobilityExperience() {
     }
   }, []);
 
-  const calculateRoute = useCallback(
-    async (chosen: LocationResult, currentDirection = direction) => {
-      if (!campusPoint) {
-        setError("Seu campus ainda não possui localização configurada.");
-        return;
-      }
+  const routeWithCampus = useCallback(
+    async (
+      chosen: LocationResult,
+      campus: MapPoint,
+      currentDirection = direction,
+    ) => {
       const start =
         currentDirection === "TO_CAMPUS"
           ? { lat: chosen.lat, lng: chosen.lng }
-          : campusPoint;
+          : campus;
       const end =
         currentDirection === "TO_CAMPUS"
-          ? campusPoint
+          ? campus
           : { lat: chosen.lat, lng: chosen.lng };
       setBusy(true);
       setError("");
@@ -736,7 +696,24 @@ export function RideMobilityExperience() {
         setBusy(false);
       }
     },
-    [campusPoint?.lat, campusPoint?.lng, direction],
+    [direction],
+  );
+
+  const calculateRoute = useCallback(
+    async (chosen: LocationResult, currentDirection = direction) => {
+      if (!campusPoint) {
+        setPendingRouteChoice(chosen);
+        setCampusSetupOpen(true);
+        setRoute(undefined);
+        setError("");
+        setNotice(
+          "Confirme onde fica sua faculdade uma vez para continuar esta rota.",
+        );
+        return;
+      }
+      await routeWithCampus(chosen, campusPoint, currentDirection);
+    },
+    [campusPoint?.lat, campusPoint?.lng, direction, routeWithCampus],
   );
 
   async function chooseCurrentPlace() {
@@ -755,26 +732,58 @@ export function RideMobilityExperience() {
     if (!pref?.campusId) return;
     setBusy(true);
     setError("");
+    setCampusOverride(value);
     try {
-      await api("/rides/mobility/preferences", {
-        method: "PUT",
-        body: JSON.stringify({
-          campusId: pref.campusId,
-          campusLabel: value.label,
-          campusLat: value.lat,
-          campusLng: value.lng,
-          homeLabel: pref.homeLabel ?? null,
-          homeLat: pref.homeLat ?? null,
-          homeLng: pref.homeLng ?? null,
-          onboardingDone: pref.onboardingDone ?? false,
-        }),
-      });
-      setNotice("Localização da sua faculdade confirmada.");
+      localStorage.setItem(
+        `enturma-ride-campus:${pref.campusId}`,
+        JSON.stringify(value),
+      );
+    } catch {}
+    try {
+      let persisted = true;
+      try {
+        await api("/rides/mobility/preferences", {
+          method: "PUT",
+          body: JSON.stringify({
+            campusId: pref.campusId,
+            campusLabel: value.label,
+            campusLat: value.lat,
+            campusLng: value.lng,
+            homeLabel: pref.homeLabel ?? null,
+            homeLat: pref.homeLat ?? null,
+            homeLng: pref.homeLng ?? null,
+            onboardingDone: pref.onboardingDone ?? false,
+          }),
+        });
+      } catch {
+        persisted = false;
+      }
+
+      setCampusSetupOpen(false);
+      setError("");
+      setNotice(
+        persisted
+          ? "Faculdade confirmada. Sua rota já pode ser calculada."
+          : "Faculdade confirmada neste dispositivo. A rota pode continuar normalmente.",
+      );
       setLocation({ lat: value.lat, lng: value.lng });
       setFollow(true);
-      await load();
+      if (persisted) await load();
+      if (pendingRouteChoice) {
+        const choice = pendingRouteChoice;
+        setPendingRouteChoice(undefined);
+        await routeWithCampus(
+          choice,
+          { lat: value.lat, lng: value.lng },
+          direction,
+        );
+      }
     } catch (e) {
-      setError((e as Error).message);
+      setCampusSetupOpen(true);
+      setError(
+        (e as Error).message ||
+          "Não foi possível usar a localização da faculdade. Tente novamente.",
+      );
     } finally {
       setBusy(false);
     }
@@ -819,7 +828,10 @@ export function RideMobilityExperience() {
   }
 
   async function startPassenger() {
-    if (!pref?.campusId || !campusPoint || !selected || !route) return;
+    if (!pref?.campusId || !campusPoint || !selected || !route) {
+      if (!campusPoint) setCampusSetupOpen(true);
+      return;
+    }
     const start =
       direction === "TO_CAMPUS"
         ? { label: selected.label, lat: selected.lat, lng: selected.lng }
@@ -950,7 +962,10 @@ export function RideMobilityExperience() {
   }
 
   async function startDriver() {
-    if (!pref?.campusId || !campusPoint) return;
+    if (!pref?.campusId || !campusPoint) {
+      setCampusSetupOpen(true);
+      return;
+    }
     if (!state?.vehicle?.brand) {
       setError(
         "Cadastre seu veículo no painel de caronas antes de ficar disponível.",
@@ -1539,7 +1554,7 @@ export function RideMobilityExperience() {
                 ))}
               </select>
             </div>
-          ) : !campusPoint &&
+          ) : (!campusPoint || campusSetupOpen) &&
             !activeMatch &&
             !activeRequest &&
             !availability?.enabled ? (
@@ -1824,6 +1839,7 @@ export function RideMobilityExperience() {
                       aria-pressed={direction === "TO_CAMPUS"}
                       onClick={() => {
                         setDirection("TO_CAMPUS");
+                        setCampusSetupOpen(false);
                         setSelected(undefined);
                         setRoute(undefined);
                       }}
@@ -1839,6 +1855,7 @@ export function RideMobilityExperience() {
                       aria-pressed={direction === "FROM_CAMPUS"}
                       onClick={() => {
                         setDirection("FROM_CAMPUS");
+                        setCampusSetupOpen(false);
                         setSelected(undefined);
                         setRoute(undefined);
                       }}
@@ -1910,7 +1927,7 @@ export function RideMobilityExperience() {
                             <strong>
                               {direction === "TO_CAMPUS"
                                 ? selected.label
-                                : pref.campusName}
+                                : campusLabel}
                             </strong>
                           </span>
                         </div>
@@ -1921,7 +1938,7 @@ export function RideMobilityExperience() {
                             <small>Destino</small>
                             <strong>
                               {direction === "TO_CAMPUS"
-                                ? pref.campusName
+                                ? campusLabel
                                 : selected.label}
                             </strong>
                           </span>

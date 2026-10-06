@@ -253,9 +253,11 @@ export function RideSuggestions({
 export function RidePreferences({
   campuses,
   onChanged,
+  mode = "DRIVER",
 }: {
   campuses: AcademicEntry[];
   onChanged?: () => void;
+  mode?: "PASSENGER" | "DRIVER";
 }) {
   const [vehicle, setVehicle] = useState<RideVehicle>({});
   const [recurrences, setRecurrences] = useState<RideRecurrence[]>([]);
@@ -285,20 +287,30 @@ export function RidePreferences({
 
   return (
     <section className="ride-mobility-section">
-      <div className="ride-section-heading">
+      <div className="ride-section-heading ride-profile-heading">
         <div>
-          <h2>Minha mobilidade</h2>
+          <span className="ride-profile-kicker">
+            {mode === "DRIVER" ? "Perfil do motorista" : "Perfil do passageiro"}
+          </span>
+          <h2>
+            {mode === "DRIVER"
+              ? "Seu carro e suas rotas"
+              : "Seus trajetos universitários"}
+          </h2>
           <p>
-            Veículo e rotina ficam salvos para facilitar caronas recorrentes.
-            Placa completa nunca é exibida na descoberta.
+            {mode === "DRIVER"
+              ? "Cadastre o veículo que aparece após o match e deixe suas rotinas prontas para ficar disponível com poucos toques."
+              : "Salve rotinas para encontrar motoristas mais rápido. Endereço residencial e ponto de campus continuam privados até a corrida exigir a rota."}
           </p>
         </div>
-        <Car size={24} aria-hidden="true" />
+        {mode === "DRIVER" ? <Car size={26} aria-hidden="true" /> : null}
       </div>
       {error ? <p className="feedback error">{error}</p> : null}
       {message ? <p className="feedback success">{message}</p> : null}
       <div className="ride-preferences-grid">
+        {mode === "DRIVER" ? (
         <form
+          className="ride-vehicle-profile-card"
           onSubmit={async (event) => {
             event.preventDefault();
             const formElement = event.currentTarget;
@@ -394,10 +406,23 @@ export function RidePreferences({
               />
             </label>
           </div>
-          <button>Salvar veículo</button>
+          <button className="ride-profile-save">Salvar veículo</button>
         </form>
+        ) : (
+          <div className="ride-passenger-profile-card">
+            <div className="ride-passenger-profile-icon" aria-hidden="true">✦</div>
+            <div>
+              <h3>Perfil pronto para pedir carona</h3>
+              <p>
+                O Enturma usa seu campus e o ponto escolhido no mapa somente para
+                calcular e combinar sua rota com motoristas compatíveis.
+              </p>
+            </div>
+          </div>
+        )}
 
         <form
+          className="ride-routine-profile-card"
           onSubmit={async (event) => {
             event.preventDefault();
             const formElement = event.currentTarget;
@@ -432,7 +457,7 @@ export function RidePreferences({
             }
           }}
         >
-          <h3>Rotina universitária</h3>
+          <h3>{mode === "DRIVER" ? "Rotina como motorista" : "Rotina como passageiro"}</h3>
           <label>
             Campus
             <select name="campus" required defaultValue="">
@@ -447,9 +472,12 @@ export function RidePreferences({
           <div className="form-row">
             <label>
               Tipo
-              <select name="type">
-                <option value="OFFER">Ofereço carona</option>
-                <option value="REQUEST">Procuro carona</option>
+              <select name="type" defaultValue={mode === "DRIVER" ? "OFFER" : "REQUEST"}>
+                {mode === "DRIVER" ? (
+                  <option value="OFFER">Ofereço carona</option>
+                ) : (
+                  <option value="REQUEST">Procuro carona</option>
+                )}
               </select>
             </label>
             <label>

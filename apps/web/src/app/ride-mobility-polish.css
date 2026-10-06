@@ -77,9 +77,22 @@ html .ride-mobility-app button.ride-sheet-handle {
   box-shadow: none !important;
   filter: none !important;
 }
+.ride-sheet-handle,
+html .ride-mobility-app .ride-sheet-handle {
+  width: 100%;
+  height: 26px;
+  min-height: 26px;
+  display: grid;
+  place-items: center;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
 .ride-sheet-handle span {
+  display: block;
   width: 48px;
   height: 4px;
+  border-radius: 999px;
   background: color-mix(in srgb, var(--ride-muted) 66%, transparent);
 }
 .ride-sheet-content {
@@ -391,14 +404,24 @@ html .ride-mobility-app .danger-action {
   .ride-bottom-sheet {
     left: 8px !important;
     right: 8px !important;
-    bottom: calc(84px + var(--ride-safe-bottom)) !important;
-    max-height: calc(100dvh - 158px - var(--ride-safe-bottom)) !important;
-    border-radius: 20px !important;
+    top: clamp(280px, 38dvh, 560px) !important;
+    bottom: calc(76px + var(--ride-safe-bottom)) !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    border-radius: 20px 20px 0 0 !important;
+    transform: none !important;
+    overflow: hidden !important;
   }
   .ride-sheet-content {
-    max-height: calc(100dvh - 188px - var(--ride-safe-bottom)) !important;
-    padding: 0 14px 28px !important;
-    scroll-padding-bottom: 32px;
+    height: calc(100% - 26px) !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 0 14px calc(28px + var(--ride-safe-bottom)) !important;
+    scroll-padding-bottom: calc(92px + var(--ride-safe-bottom));
   }
   .ride-map-picker-actions {
     bottom: calc(88px + var(--ride-safe-bottom)) !important;
@@ -475,7 +498,7 @@ html .ride-mobility-app .danger-action {
   }
   .ride-recenter {
     right: 10px !important;
-    bottom: calc(54% + 84px + var(--ride-safe-bottom)) !important;
+    bottom: calc(62dvh + 12px) !important;
   }
 }
 
@@ -504,5 +527,439 @@ html .ride-mobility-app .danger-action {
   .ride-dispatch-dot {
     animation: none !important;
     transition: none !important;
+  }
+}
+
+
+@media (max-width: 760px) and (max-height: 760px) {
+  .ride-bottom-sheet {
+    top: 30dvh !important;
+  }
+  .ride-map-top {
+    gap: 6px;
+  }
+  .ride-campus-onboarding {
+    padding-top: 2px;
+  }
+}
+
+@media (max-width: 420px) {
+  .ride-sheet-content {
+    padding-inline: 12px !important;
+  }
+  .ride-sheet-heading {
+    align-items: flex-start;
+  }
+  .ride-campus-mini {
+    max-width: 116px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+}
+
+
+/* Dedicated Caronas shell: the ride area behaves like a focused app inside Enturma. */
+.ride-active-shell {
+  --ride-nav-width: 228px;
+  grid-template-columns: var(--ride-nav-width) minmax(0, 1fr) !important;
+  min-height: 100dvh;
+  background: var(--ride-canvas, var(--bg));
+}
+.ride-active-shell > .workspace {
+  min-width: 0;
+  min-height: 100dvh;
+  background: var(--ride-canvas, var(--bg));
+}
+.ride-active-shell > .workspace > main {
+  min-height: 100dvh;
+  padding: 0 !important;
+}
+.ride-hub-sidebar {
+  position: sticky;
+  inset-block-start: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  padding: 18px 14px;
+  border-inline-end: 1px solid #26363b;
+  background: #10191c;
+  color: #f5f8f6;
+}
+.ride-hub-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 62px;
+  padding: 8px 9px 18px;
+}
+.ride-hub-brand-mark {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 14px;
+  background: var(--ride-accent, #d9f56d);
+  color: #101d19;
+  box-shadow: 0 10px 28px rgba(217,245,109,.15);
+}
+.ride-hub-brand > span:last-child,
+.ride-hub-safety > span {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+}
+.ride-hub-brand strong {
+  font-size: 17px;
+  letter-spacing: -.02em;
+}
+.ride-hub-brand small,
+.ride-hub-safety small {
+  color: #93a49d;
+  font-size: 11px;
+}
+.ride-hub-sidebar nav {
+  display: grid;
+  gap: 6px;
+}
+.ride-hub-sidebar nav a,
+.ride-hub-safety,
+.ride-hub-back {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 13px;
+  border-radius: 13px;
+  color: #aebcb7;
+  text-decoration: none;
+  transition:
+    background-color 180ms cubic-bezier(.16,1,.3,1),
+    color 180ms cubic-bezier(.16,1,.3,1),
+    transform 180ms cubic-bezier(.16,1,.3,1);
+}
+.ride-hub-sidebar nav a[aria-current="page"] {
+  background: #223129;
+  color: #f8fbf9;
+}
+.ride-hub-sidebar nav a[aria-current="page"]::before {
+  content: "";
+  position: absolute;
+  inset-block: 10px;
+  inset-inline-start: 0;
+  width: 3px;
+  border-radius: 999px;
+  background: var(--ride-accent, #d9f56d);
+}
+@media (hover:hover) {
+  .ride-hub-sidebar nav a:hover,
+  .ride-hub-safety:hover,
+  .ride-hub-back:hover {
+    background: #1a272b;
+    color: #fff;
+    transform: translateX(2px);
+  }
+}
+.ride-hub-spacer {
+  flex: 1;
+}
+.ride-hub-safety {
+  margin-block-end: 6px;
+}
+.ride-hub-back {
+  color: #8da09a;
+}
+.ride-hub-mobile-nav {
+  display: none;
+}
+
+/* Profile/settings pages in the ride hub. */
+.ride-profile-page,
+.ride-active-shell .ride-page {
+  width: min(1180px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 38px 0 56px;
+}
+.ride-profile-page-header {
+  display: grid;
+  gap: 8px;
+  margin-block-end: 24px;
+}
+.ride-profile-back {
+  width: fit-content;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 13px;
+}
+.ride-profile-eyebrow,
+.ride-profile-kicker {
+  width: fit-content;
+  color: #75938a;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.ride-profile-page-header h1 {
+  margin: 0;
+  max-width: 820px;
+  font-size: clamp(2rem, 5vw, 4rem);
+  letter-spacing: -.045em;
+}
+.ride-profile-page-header p {
+  max-width: 68ch;
+  margin: 0;
+  color: var(--muted);
+}
+.ride-active-shell .ride-mobility-section {
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  background: var(--surface);
+  box-shadow: 0 18px 50px rgba(0,0,0,.07);
+}
+.ride-profile-heading {
+  padding-block-end: 18px;
+  border-block-end: 1px solid var(--border);
+}
+.ride-preferences-grid {
+  align-items: start;
+}
+.ride-preferences-grid > form,
+.ride-passenger-profile-card {
+  border: 1px solid var(--border) !important;
+  border-radius: 20px !important;
+  background: var(--surface-raised) !important;
+  box-shadow: none !important;
+}
+.ride-vehicle-profile-card,
+.ride-routine-profile-card {
+  position: relative;
+  overflow: hidden;
+}
+.ride-vehicle-profile-card::before,
+.ride-routine-profile-card::before {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  inset-block-start: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--ride-accent, #d9f56d), transparent 70%);
+}
+.ride-passenger-profile-card {
+  min-height: 220px;
+  display: grid;
+  place-content: center;
+  gap: 14px;
+  padding: 28px;
+  text-align: center;
+}
+.ride-passenger-profile-icon {
+  width: 54px;
+  height: 54px;
+  display: grid;
+  place-items: center;
+  margin: 0 auto;
+  border-radius: 18px;
+  background: color-mix(in srgb, var(--ride-accent, #d9f56d) 22%, var(--surface));
+  color: var(--ink);
+  font-size: 24px;
+}
+.ride-passenger-profile-card p {
+  max-width: 45ch;
+  margin: 8px auto 0;
+  color: var(--muted);
+}
+.ride-profile-save {
+  width: 100%;
+}
+
+/* Older ride pages now inherit the same visual hierarchy. */
+.ride-active-shell .ride-page > h1 {
+  margin-block-end: 8px;
+  font-size: clamp(2rem, 4.5vw, 3.5rem);
+  letter-spacing: -.04em;
+}
+.ride-active-shell .ride-page > .lead {
+  max-width: 68ch;
+}
+.ride-active-shell .room-row.ride-list-item,
+.ride-active-shell .room-row.ride-match-row {
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: 0 12px 34px rgba(0,0,0,.06);
+  transition:
+    transform 180ms cubic-bezier(.16,1,.3,1),
+    box-shadow 180ms cubic-bezier(.16,1,.3,1),
+    border-color 180ms cubic-bezier(.16,1,.3,1);
+}
+@media (hover:hover) {
+  .ride-active-shell .room-row.ride-list-item:hover,
+  .ride-active-shell .room-row.ride-match-row:hover {
+    transform: translateY(-2px);
+    border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+    box-shadow: 0 18px 42px rgba(0,0,0,.09);
+  }
+}
+
+/* Operate-mode motion: continuity without page-wide flashes. */
+.ride-mode-switch > button,
+.ride-direction-grid > button,
+.ride-primary-action,
+.ride-location-current,
+.ride-address-result,
+.ride-hub-mobile-nav a {
+  transition:
+    background-color 160ms cubic-bezier(.16,1,.3,1),
+    border-color 160ms cubic-bezier(.16,1,.3,1),
+    color 160ms cubic-bezier(.16,1,.3,1),
+    transform 160ms cubic-bezier(.16,1,.3,1),
+    box-shadow 160ms cubic-bezier(.16,1,.3,1);
+}
+@media (hover:hover) {
+  .ride-direction-grid > button:hover,
+  .ride-location-current:hover,
+  .ride-address-result:hover {
+    transform: translateY(-1px);
+  }
+}
+.ride-primary-action:active,
+.ride-direction-grid > button:active,
+.ride-hub-mobile-nav a:active {
+  transform: scale(.985);
+}
+.ride-dispatch-dot {
+  animation: rideHeartbeat 1.8s ease-in-out infinite;
+}
+@keyframes rideHeartbeat {
+  0%, 100% { box-shadow: 0 7px 24px rgba(23,63,54,.22), 0 0 0 0 rgba(217,245,109,.22); }
+  50% { box-shadow: 0 9px 30px rgba(23,63,54,.28), 0 0 0 13px rgba(217,245,109,0); }
+}
+
+/* Mobile becomes a dedicated Caronas app surface instead of mixing nav systems. */
+@media (max-width: 760px) {
+  .ride-active-shell {
+    display: block !important;
+    min-height: 100dvh;
+  }
+  .ride-hub-sidebar {
+    display: none !important;
+  }
+  .ride-active-shell > .workspace {
+    min-height: 100dvh;
+    padding-bottom: 0 !important;
+  }
+  .ride-active-shell > .workspace > main {
+    min-height: 100dvh;
+    padding-bottom: calc(74px + max(env(safe-area-inset-bottom,0px), var(--native-safe-bottom,0px))) !important;
+  }
+  .ride-active-shell .ride-mobility-app,
+  .ride-active-shell .ride-mobility-boot {
+    height: calc(100dvh - 74px - max(env(safe-area-inset-bottom,0px), var(--native-safe-bottom,0px))) !important;
+    min-height: 0 !important;
+  }
+  .ride-hub-mobile-nav {
+    --ride-mobile-safe: max(env(safe-area-inset-bottom,0px), var(--native-safe-bottom,0px));
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 140;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0,1fr));
+    gap: 4px;
+    min-height: calc(68px + var(--ride-mobile-safe));
+    padding: 7px 7px calc(7px + var(--ride-mobile-safe));
+    border-block-start: 1px solid #2c3d42;
+    background: rgba(14,22,25,.98);
+    backdrop-filter: blur(18px);
+  }
+  .ride-hub-mobile-nav a {
+    min-width: 0;
+    min-height: 54px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    padding: 5px 3px;
+    border-radius: 13px;
+    color: #9faeaa;
+    text-decoration: none;
+    font-size: 10px;
+    line-height: 1.05;
+  }
+  .ride-hub-mobile-nav a[aria-current="page"] {
+    background: var(--ride-accent, #d9f56d);
+    color: #101d19;
+    font-weight: 800;
+  }
+  .ride-profile-page,
+  .ride-active-shell .ride-page {
+    width: min(100% - 24px, 720px);
+    padding: 24px 0 28px;
+  }
+  .ride-profile-page-header h1,
+  .ride-active-shell .ride-page > h1 {
+    font-size: clamp(1.9rem, 10vw, 2.7rem);
+  }
+  .ride-active-shell .ride-mobility-section {
+    padding: 15px !important;
+    border-radius: 20px;
+  }
+  .ride-preferences-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .ride-preferences-grid > form,
+  .ride-passenger-profile-card {
+    padding: 16px !important;
+    border-radius: 17px !important;
+  }
+  .ride-profile-heading {
+    align-items: flex-start;
+  }
+  .ride-active-shell .ride-page .actions {
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ride-dispatch-dot {
+    animation: none !important;
+  }
+  .ride-hub-sidebar nav a,
+  .ride-hub-mobile-nav a,
+  .ride-direction-grid > button,
+  .ride-primary-action {
+    transition-duration: 1ms !important;
+  }
+}
+
+
+/* Final shell sizing: the dedicated hub already accounts for its own navigation. */
+.ride-active-shell .ride-mobility-app,
+.ride-active-shell .ride-mobility-boot {
+  min-height: 100dvh;
+  height: 100dvh;
+}
+
+@media (max-width: 760px) {
+  .ride-active-shell .ride-mobility-app,
+  .ride-active-shell .ride-mobility-boot {
+    height: calc(100dvh - 74px - max(env(safe-area-inset-bottom,0px), var(--native-safe-bottom,0px))) !important;
+  }
+  .ride-active-shell .ride-bottom-sheet {
+    bottom: 8px !important;
+  }
+  .ride-active-shell .ride-map-picker-actions {
+    bottom: 12px !important;
+  }
+  .ride-active-shell .ride-recenter {
+    bottom: calc(62dvh + 12px) !important;
   }
 }
