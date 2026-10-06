@@ -527,6 +527,7 @@ export function RideMobilityExperience() {
   const [location, setLocation] = useState<MapPoint>();
   const [locationLabel, setLocationLabel] = useState("Sua localização");
   const [selectOnMap, setSelectOnMap] = useState(false);
+  const [mapPickPurpose, setMapPickPurpose] = useState<"ROUTE" | "CAMPUS">("ROUTE");
   const [driverRequests, setDriverRequests] = useState<DriverRequest[]>([]);
   const [nearbyDrivers, setNearbyDrivers] = useState<NearbyDriver[]>([]);
   const [searchRadiusKm, setSearchRadiusKm] = useState(5);
@@ -750,6 +751,35 @@ export function RideMobilityExperience() {
     );
   }
 
+  async function saveCampusLocation(value: LocationResult) {
+    if (!pref?.campusId) return;
+    setBusy(true);
+    setError("");
+    try {
+      await api("/rides/mobility/preferences", {
+        method: "PUT",
+        body: JSON.stringify({
+          campusId: pref.campusId,
+          campusLabel: value.label,
+          campusLat: value.lat,
+          campusLng: value.lng,
+          homeLabel: pref.homeLabel ?? null,
+          homeLat: pref.homeLat ?? null,
+          homeLng: pref.homeLng ?? null,
+          onboardingDone: pref.onboardingDone ?? false,
+        }),
+      });
+      setNotice("Localização da sua faculdade confirmada.");
+      setLocation({ lat: value.lat, lng: value.lng });
+      setFollow(true);
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function confirmMapPoint() {
     if (!location) return;
     setBusy(true);
@@ -759,7 +789,8 @@ export function RideMobilityExperience() {
         { cache: "no-store" },
       );
       setSelectOnMap(false);
-      await calculateRoute(value);
+      if (mapPickPurpose === "CAMPUS") await saveCampusLocation(value);
+      else await calculateRoute(value);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -1508,6 +1539,34 @@ export function RideMobilityExperience() {
                 ))}
               </select>
             </div>
+          ) : !campusPoint &&
+            !activeMatch &&
+            !activeRequest &&
+            !availability?.enabled ? (
+            <div className="ride-campus-onboarding ride-campus-location-fix">
+              <GraduationCap size={30} />
+              <h2>Confirme onde fica sua faculdade</h2>
+              <p>
+                O catálogo ainda não tem a posição exata deste campus. Pesquise o
+                endereço da faculdade ou marque o ponto no mapa. Isso é feito uma
+                vez e depois você poderá pedir carona de casa para a faculdade e
+                da faculdade para casa normalmente.
+              </p>
+              <AddressFinder
+                title="Endereço do campus"
+                current={location}
+                onChoose={(value) => void saveCampusLocation(value)}
+                onPickMap={() => {
+                  setMapPickPurpose("CAMPUS");
+                  setSelectOnMap(true);
+                  if (!location) void acquire().catch(() => {});
+                }}
+              />
+              <small>
+                Este ponto é usado como origem ou destino fixo da sua rota de
+                Carona. Seu endereço residencial continua separado.
+              </small>
+            </div>
           ) : !pref.onboardingDone &&
             !activeMatch &&
             !activeRequest &&
@@ -1835,7 +1894,10 @@ export function RideMobilityExperience() {
                         }
                         current={location}
                         onChoose={(value) => void calculateRoute(value)}
-                        onPickMap={() => setSelectOnMap(true)}
+                        onPickMap={() => {
+                          setMapPickPurpose("ROUTE");
+                          setSelectOnMap(true);
+                        }}
                       />
                     </>
                   ) : (
@@ -2040,7 +2102,10 @@ export function RideMobilityExperience() {
                         setSelected(value);
                         void calculateRoute(value, "FROM_CAMPUS");
                       }}
-                      onPickMap={() => setSelectOnMap(true)}
+                      onPickMap={() => {
+                        setMapPickPurpose("ROUTE");
+                        setSelectOnMap(true);
+                      }}
                     />
                   ) : null}
                   {!state.vehicle?.brand ? (
