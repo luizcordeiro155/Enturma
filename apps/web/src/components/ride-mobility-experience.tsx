@@ -463,6 +463,30 @@ export function RideMobilityExperience() {
       api<{ id: string }>("/users/me", { cache: "no-store" }),
       api<AcademicEntry[]>("/academics?kind=CAMPUS"),
     ]);
+    if (
+      next.preference?.campusId &&
+      (next.preference.campusLat == null || next.preference.campusLng == null)
+    ) {
+      try {
+        const raw = localStorage.getItem(
+          `enturma-ride-campus:${next.preference.campusId}`,
+        );
+        const saved = raw ? (JSON.parse(raw) as LocationResult) : undefined;
+        if (
+          Number.isFinite(saved?.lat) &&
+          Number.isFinite(saved?.lng) &&
+          typeof saved?.label === "string"
+        ) {
+          setCampusOverride(saved);
+        }
+      } catch {
+        localStorage.removeItem(
+          `enturma-ride-campus:${next.preference.campusId}`,
+        );
+      }
+    } else {
+      setCampusOverride(undefined);
+    }
     setState(next);
     setMe(user.id);
     setCampuses(campusList);
@@ -539,27 +563,6 @@ export function RideMobilityExperience() {
   const availability = state?.driverAvailability ?? undefined;
   const recentCompleted = state?.recentCompleted ?? undefined;
   const activeLocked = !!activeMatch;
-
-  useEffect(() => {
-    if (!pref?.campusId) {
-      setCampusOverride(undefined);
-      return;
-    }
-    try {
-      const raw = localStorage.getItem(`enturma-ride-campus:${pref.campusId}`);
-      if (!raw) return;
-      const saved = JSON.parse(raw) as LocationResult;
-      if (
-        Number.isFinite(saved?.lat) &&
-        Number.isFinite(saved?.lng) &&
-        typeof saved?.label === "string"
-      ) {
-        setCampusOverride(saved);
-      }
-    } catch {
-      localStorage.removeItem(`enturma-ride-campus:${pref.campusId}`);
-    }
-  }, [pref?.campusId]);
 
   async function changeMode(nextMode: Mode) {
     if (activeLocked || nextMode === mode || busy) return;
