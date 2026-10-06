@@ -81,8 +81,7 @@ export default function Rides() {
   const [me, setMe] = useState("");
   const [type, setType] = useState("OFFER");
   const [direction, setDirection] = useState("TO_CAMPUS");
-  const [street, setStreet] = useState("");
-  const [houseNumber, setHouseNumber] = useState("");
+  const [placeQuery, setPlaceQuery] = useState("");
   const [departure, setDeparture] = useState("");
   const [seats, setSeats] = useState("1");
   const [error, setError] = useState("");
@@ -209,25 +208,15 @@ export default function Rides() {
             />
           ))}
           <Field
-            label="Rua ou avenida"
-            value={street}
-            onChangeText={setStreet}
-            maxLength={100}
-            placeholder="Ex.: Rua dos Tupinambás"
-          />
-          <Field
-            label="Número"
-            value={houseNumber}
-            onChangeText={(value) =>
-              setHouseNumber(
-                value.replace(/[^0-9A-Za-zÀ-ÿ/ -]/g, "").slice(0, 16),
-              )
-            }
-            maxLength={16}
-            placeholder="Ex.: 230"
+            label="Endereço ou local"
+            value={placeQuery}
+            onChangeText={setPlaceQuery}
+            maxLength={160}
+            placeholder="Ex.: Rua Lunardi 218, hospital, supermercado"
           />
           <Text style={styles.muted}>
-            Rua e número são usados para localizar o ponto com mais precisão.
+            Pesquise endereço com número ou um estabelecimento. O resultado mais
+            próximo da sua localização é priorizado quando disponível.
           </Text>
           <Field
             label="Saída (AAAA-MM-DD HH:mm)"
@@ -243,10 +232,7 @@ export default function Rides() {
           <Button
             title="Publicar carona"
             disabled={
-              busy ||
-              !campus ||
-              street.trim().length < 3 ||
-              !houseNumber.trim()
+              busy || !campus || placeQuery.trim().length < 2
             }
             onPress={() => {
               const date = new Date(departure.replace(" ", "T"));
@@ -254,28 +240,24 @@ export default function Rides() {
                 setError("Confira a data e hora de saída.");
                 return;
               }
-              const exactAddress = `${street.trim()}, ${houseNumber.trim()}`;
               setBusy(true);
               void api<
                 {
                   label: string;
+                  address?: string;
                   lat: number;
                   lng: number;
-                  precision?: "HOUSE" | "STREET";
+                  distanceMeters?: number;
                 }[]
               >(
-                `/rides/map/address-search?street=${encodeURIComponent(
-                  street.trim(),
-                )}&number=${encodeURIComponent(houseNumber.trim())}`,
+                `/rides/map/search?q=${encodeURIComponent(placeQuery.trim())}`,
                 { cache: "no-store" },
               )
                 .then(async (locations) => {
-                  const location = locations.find(
-                    (candidate) => candidate.precision === "HOUSE",
-                  );
+                  const location = locations[0];
                   if (!location)
                     throw new Error(
-                      "Não encontramos esse número nessa rua. Confira o endereço ou selecione o ponto pelo mapa na versão completa do Caronas.",
+                      "Não encontramos esse endereço ou local. Confira a pesquisa.",
                     );
                   await api("/rides", {
                     method: "POST",
@@ -283,7 +265,7 @@ export default function Rides() {
                       campusId: campus,
                       type,
                       direction,
-                      originArea: location.label.slice(0, 120),
+                      originArea: (location.address || location.label).slice(0, 120),
                       departureAt: date.toISOString(),
                       seats: Number(seats),
                       areaLat: location.lat,
@@ -293,7 +275,7 @@ export default function Rides() {
                   setError("");
                   setCreate(false);
                   setMessage(
-                    "Carona publicada com o endereço localizado no mapa.",
+                    "Carona publicada com o local encontrado no mapa.",
                   );
                   await load();
                 })

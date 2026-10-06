@@ -49,38 +49,89 @@ public class RideMapService {
 
   public Object search(String query, Double lat, Double lng) {
     String q = query == null ? "" : query.strip();
-    if (q.length() < 3 || q.length() > 160)
-      throw ApiException.invalid("Digite pelo menos 3 caracteres para pesquisar um local.");
+    if (q.length() < 2 || q.length() > 160)
+      throw ApiException.invalid("Digite pelo menos 2 caracteres para pesquisar um local.");
+
     StringBuilder url =
-        new StringBuilder(geocoder)
-            .append("/search?format=jsonv2&addressdetails=1&limit=6&countrycodes=br&q=")
-            .append(enc(q));
-    if (valid(lat, lng))
-      url.append("&viewbox=")
-          .append(lng - 0.45)
-          .append(",")
-          .append(lat + 0.45)
-          .append(",")
-          .append(lng + 0.45)
-          .append(",")
-          .append(lat - 0.45)
-          .append("&bounded=0");
+        new StringBuilder(addressGeocoder)
+            .append("/findAddressCandidates?f=json")
+            .append("&SingleLine=")
+            .append(enc(q))
+            .append("&countryCode=BRA&maxLocations=10")
+            .append("&outFields=Match_addr,LongLabel,ShortLabel,Addr_type,Type,PlaceName,Place_addr,StAddr,City,Region,Postal,Distance");
+
+    if (valid(lat, lng)) {
+      url.append("&location=").append(lng).append(",").append(lat);
+    }
+
     JsonNode root = getJson(url.toString());
     var out = new ArrayList<Map<String, Object>>();
-    if (root.isArray())
-      for (JsonNode node : root) {
-        Double y = decimal(node.path("lat").asText(null));
-        Double x = decimal(node.path("lon").asText(null));
-        if (!valid(y, x)) continue;
-        var item = new LinkedHashMap<String, Object>();
-        item.put("id", node.path("place_id").asText(UUID.randomUUID().toString()));
-        item.put("label", node.path("display_name").asText("Local"));
-        item.put("lat", y);
-        item.put("lng", x);
-        item.put("type", node.path("type").asText(""));
-        out.add(item);
+    for (JsonNode candidate : root.path("candidates")) {
+      JsonNode location = candidate.path("location");
+      Double y = location.has("y") ? location.path("y").asDouble() : null;
+      Double x = location.has("x") ? location.path("x").asDouble() : null;
+      if (!valid(y, x)) continue;
+
+      int score = candidate.path("score").asInt(0);
+      if (score < 70) continue;
+
+      JsonNode attributes = candidate.path("attributes");
+      String addrType = attributes.path("Addr_type").asText("");
+      String category = attributes.path("Type").asText("");
+      String placeName = attributes.path("PlaceName").asText("");
+      String shortLabel = attributes.path("ShortLabel").asText("");
+      String matchAddress = attributes.path("Match_addr").asText(candidate.path("address").asText("Local"));
+      String placeAddress = attributes.path("Place_addr").asText("");
+      String longLabel = attributes.path("LongLabel").asText("");
+
+      boolean poi = "POI".equalsIgnoreCase(addrType);
+      String label =
+          !placeName.isBlank()
+              ? placeName
+              : (!shortLabel.isBlank() ? shortLabel : matchAddress);
+      String address =
+          !placeAddress.isBlank()
+              ? placeAddress
+              : (!longLabel.isBlank() ? longLabel : matchAddress);
+
+      var item = new LinkedHashMap<String, Object>();
+      item.put(
+          "id",
+          "arcgis-"
+              + Integer.toHexString(Objects.hash(label, address, y, x, score)));
+      item.put("label", label);
+      item.put("address", address);
+      item.put("lat", y);
+      item.put("lng", x);
+      item.put("type", addrType);
+      item.put("category", category);
+      item.put("poi", poi);
+      item.put("score", score);
+
+      if (valid(lat, lng)) {
+        int distanceMeters =
+            attributes.has("Distance")
+                ? Math.max(0, (int) Math.round(attributes.path("Distance").asDouble()))
+                : (int) Math.round(haversineMeters(lat, lng, y, x));
+        item.put("distanceMeters", distanceMeters);
       }
-    return out;
+      out.add(item);
+    }
+
+    out.sort(
+        Comparator
+            .comparingInt(
+                item ->
+                    item.get("distanceMeters") instanceof Number number
+                        ? number.intValue()
+                        : Integer.MAX_VALUE)
+            .thenComparing(
+                item ->
+                    item.get("score") instanceof Number number
+                        ? -number.intValue()
+                        : 0));
+
+    return out.stream().limit(8).toList();
   }
 
   public Object addressSearch(
@@ -237,6 +288,22 @@ public class RideMapService {
         .append(",")
         .append(lat - 0.35)
         .append("&bounded=0");
+  }
+
+  private static double haversineMeters(
+      double lat1, double lng1, double lat2, double lng2) {
+    double earth = 6_371_000d;
+    double p1 = Math.toRadians(lat1);
+    double p2 = Math.toRadians(lat2);
+    double dLat = Math.toRadians(lat2 - lat1);
+    double dLng = Math.toRadians(lng2 - lng1);
+    double a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2)
+            + Math.cos(p1)
+                * Math.cos(p2)
+                * Math.sin(dLng / 2)
+                * Math.sin(dLng / 2);
+    return earth * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
   }
 
   private static String normalizeHouseNumber(String value) {

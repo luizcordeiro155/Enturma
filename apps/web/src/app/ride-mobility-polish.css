@@ -1054,3 +1054,36 @@ html .ride-mobility-app .danger-action {
   color: var(--ride-text);
   line-height: 1.4;
 }
+
+
+.ride-unified-search {
+  display: grid;
+  gap: 7px;
+}
+.ride-unified-search-box {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 9px;
+  padding-inline: 12px;
+  border: 1px solid var(--ride-border);
+  border-radius: 13px;
+  background: var(--ride-surface-2);
+}
+.ride-unified-search-box:focus-within {
+  border-color: color-mix(in srgb, var(--ride-accent) 70%, var(--ride-border));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ride-accent) 18%, transparent);
+}
+.ride-unified-search-box input {
+  min-width: 0;
+  padding-inline: 0;
+  border: 0;
+  outline: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.ride-address-result > span em {
+  color: var(--ride-muted);
+  font-size: .72rem;
+  font-style: normal;
+}

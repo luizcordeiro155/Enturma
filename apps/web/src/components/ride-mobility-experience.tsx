@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   Car,
+  Search,
   GraduationCap,
   Home,
   LocateFixed,
@@ -135,9 +136,14 @@ type MobilityState = {
 type LocationResult = {
   id?: string;
   label: string;
+  address?: string;
   lat: number;
   lng: number;
   type?: string;
+  category?: string;
+  poi?: boolean;
+  score?: number;
+  distanceMeters?: number;
   precision?: "HOUSE" | "STREET";
   houseNumber?: string;
   requestedNumber?: string;
@@ -265,30 +271,28 @@ function AddressFinder({
   onChoose: (value: LocationResult) => void;
   onPickMap: () => void;
 }) {
-  const [street, setStreet] = useState("");
-  const [houseNumber, setHouseNumber] = useState("");
+  const [query, setQuery] = useState("");
   const [items, setItems] = useState<LocationResult[]>([]);
   const [busy, setBusy] = useState(false);
   const request = useRef(0);
+
   useEffect(() => {
-    if (street.trim().length < 3 || !houseNumber.trim()) {
+    if (query.trim().length < 2) {
       const timer = window.setTimeout(() => setItems([]), 0);
       return () => window.clearTimeout(timer);
     }
+
     const id = ++request.current;
     const timer = window.setTimeout(async () => {
       setBusy(true);
       try {
-        const params = new URLSearchParams({
-          street: street.trim(),
-          number: houseNumber.trim(),
-        });
+        const params = new URLSearchParams({ q: query.trim() });
         if (current) {
           params.set("lat", String(current.lat));
           params.set("lng", String(current.lng));
         }
         const rows = await api<LocationResult[]>(
-          `/rides/map/address-search?${params}`,
+          `/rides/map/search?${params}`,
           { cache: "no-store" },
         );
         if (id === request.current) setItems(rows);
@@ -297,81 +301,69 @@ function AddressFinder({
       } finally {
         if (id === request.current) setBusy(false);
       }
-    }, 650);
+    }, 520);
+
     return () => window.clearTimeout(timer);
-  }, [street, houseNumber, current?.lat, current?.lng]);
+  }, [query, current?.lat, current?.lng]);
 
   return (
     <div className="ride-address-finder">
-      <div className="ride-address-fields">
-        <label className="ride-address-street">
-          {title}
+      <label className="ride-unified-search">
+        {title}
+        <div className="ride-unified-search-box">
+          <Search size={18} aria-hidden="true" />
           <input
-            value={street}
-            onChange={(event) => setStreet(event.target.value)}
-            placeholder="Nome da rua ou avenida"
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Endereço, número ou local — ex.: Rua Lunardi 218, hospital, supermercado"
             autoComplete="street-address"
-            enterKeyHint="next"
-          />
-        </label>
-        <label className="ride-address-number">
-          Número
-          <input
-            value={houseNumber}
-            onChange={(event) =>
-              setHouseNumber(
-                event.target.value
-                  .replace(/[^0-9A-Za-zÀ-ÿ/ -]/g, "")
-                  .slice(0, 16),
-              )
-            }
-            placeholder="Ex.: 230"
-            autoComplete="address-line2"
             enterKeyHint="search"
           />
-        </label>
-      </div>
+        </div>
+      </label>
+
       <small className="ride-address-hint">
-        Informe rua e número para localizar o ponto de embarque com mais
-        precisão.
+        Você pode pesquisar uma residência, loja, comércio, hospital, faculdade,
+        shopping ou outro estabelecimento. Com localização ativa, os resultados
+        mais próximos aparecem primeiro.
       </small>
+
       <button type="button" className="secondary" onClick={onPickMap}>
         <MapPin size={17} /> Escolher no mapa
       </button>
-      {busy ? <small>Localizando esse endereço…</small> : null}
-      {street.trim().length >= 3 && houseNumber.trim() && items.length ? (
-        <div className="ride-address-results">
-          {items.map((item, index) => {
-            const exact = item.precision === "HOUSE";
-            return (
-              <button
-                type="button"
-                className={`ride-address-result ${exact ? "is-exact" : "is-approximate"}`}
-                key={item.id ?? `${item.lat}-${item.lng}-${index}`}
-                disabled={!exact}
-                onClick={() => {
-                  if (exact) onChoose(item);
-                }}
-              >
-                <MapPin size={17} />
-                <span>
-                  <strong>{exact ? "Endereço exato" : "Somente a rua encontrada"}</strong>
-                  <small>{item.label}</small>
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      ) : null}
-      {!busy &&
-      street.trim().length >= 3 &&
-      houseNumber.trim() &&
-      items.length > 0 &&
-      !items.some((item) => item.precision === "HOUSE") ? (
+
+      {busy ? <small>Buscando locais próximos…</small> : null}
+
+      {!busy && query.trim().length >= 2 && items.length === 0 ? (
         <small className="ride-address-warning">
-          Não encontramos o número {houseNumber.trim()} nessa rua. Confira o número
-          ou escolha o ponto manualmente no mapa.
+          Nenhum local encontrado. Tente informar o nome completo, o número do
+          endereço ou escolha o ponto diretamente no mapa.
         </small>
+      ) : null}
+
+      {items.length ? (
+        <div className="ride-address-results">
+          {items.map((item, index) => (
+            <button
+              type="button"
+              className="ride-address-result is-exact"
+              key={item.id ?? `${item.lat}-${item.lng}-${index}`}
+              onClick={() => onChoose(item)}
+            >
+              <MapPin size={17} />
+              <span>
+                <strong>{item.label}</strong>
+                <small>{item.address || item.label}</small>
+                <em>
+                  {index === 0 && current ? "Mais perto de você" : item.poi ? item.category || "Estabelecimento" : "Endereço"}
+                  {item.distanceMeters != null
+                    ? ` · ${meters(item.distanceMeters)}`
+                    : ""}
+                </em>
+              </span>
+            </button>
+          ))}
+        </div>
       ) : null}
     </div>
   );
