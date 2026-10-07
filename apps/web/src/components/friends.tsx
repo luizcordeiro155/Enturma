@@ -942,7 +942,7 @@ export function Friends() {
                     <article
                       key={m.id}
                       id={`message-${m.id}`}
-                      className={m.senderId === me?.id ? "mine" : ""}
+                      className={`${m.senderId === me?.id ? "mine" : ""} ${privateActionMessage?.id === m.id ? "message-action-selected" : ""}`}
                       onPointerDown={(event) => startPrivateLongPress(event, m)}
                       onPointerMove={movePrivateLongPress}
                       onPointerUp={cancelPrivateLongPress}
