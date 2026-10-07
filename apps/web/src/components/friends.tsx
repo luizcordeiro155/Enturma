@@ -445,6 +445,87 @@ export function Friends() {
   useLiveRefresh("friends_changed", refreshFriendData, 8000);
 
   useEffect(() => {
+    return () => {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    };
+  }, []);
+
+  function cancelPrivateLongPress() {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = null;
+    longPressOrigin.current = null;
+  }
+
+  function startPrivateLongPress(
+    event: React.PointerEvent<HTMLElement>,
+    message: PrivateMessage,
+  ) {
+    if (message.senderId !== me?.id || !isMobileTextEntryContext()) return;
+    cancelPrivateLongPress();
+    longPressOrigin.current = { x: event.clientX, y: event.clientY };
+    longPressTimer.current = setTimeout(() => {
+      setPrivateActionMessage(message);
+      longPressTimer.current = null;
+      longPressOrigin.current = null;
+    }, 430);
+  }
+
+  function movePrivateLongPress(event: React.PointerEvent<HTMLElement>) {
+    const origin = longPressOrigin.current;
+    if (!origin) return;
+    if (
+      Math.abs(event.clientX - origin.x) > 10 ||
+      Math.abs(event.clientY - origin.y) > 10
+    )
+      cancelPrivateLongPress();
+  }
+
+  async function deletePrivateMessage(message: PrivateMessage) {
+    if (!selected || message.senderId !== me?.id) return;
+    try {
+      await api(`/friends/${selected.id}/messages/${message.id}`, {
+        method: "DELETE",
+      });
+      setMessages((old) => old.filter((item) => item.id !== message.id));
+      setPrivateActionMessage(null);
+      setEditingPrivate(null);
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  }
+
+  async function savePrivateEdit(message: PrivateMessage) {
+    if (!selected || !me || !key.current || message.senderId !== me.id) return;
+    try {
+      const payload = await encryptMessage(
+        key.current,
+        editPrivateText.trim(),
+        selected.id,
+        me.id,
+        message.clientId,
+      );
+      await api(`/friends/${selected.id}/messages/${message.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          ciphertext: payload.ciphertext,
+          iv: payload.iv,
+        }),
+      });
+      setMessages((old) =>
+        old.map((item) =>
+          item.id === message.id
+            ? { ...item, text: editPrivateText.trim() }
+            : item,
+        ),
+      );
+      setEditingPrivate(null);
+      setPrivateActionMessage(null);
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  }
+
+  useEffect(() => {
     resizeMessageComposerTextarea(composer.current);
   }, [draft]);
   function selectImage(file: File | null) {
@@ -721,6 +802,7 @@ export function Friends() {
             data-notification-context={
               selected ? `friend:${selected.id}` : undefined
             }
+            data-notification-at-latest={atLatest ? "true" : "false"}
           >
             {selected ? (
               <>
@@ -813,6 +895,7 @@ export function Friends() {
                         viewport.scrollTop -
                         viewport.clientHeight <
                       96;
+                    setAtLatest(nearLatest.current);
                   }}
                 >
                   {older ? (
