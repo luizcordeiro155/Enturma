@@ -81,6 +81,9 @@ export function RoomChat(props: Props) {
   const [unseen, setUnseen] = useState(0);
   const [firstUnread, setFirstUnread] = useState<string | null>(null);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [roomActionMessage, setRoomActionMessage] = useState<Message | null>(
+    null,
+  );
   const newestRef = useRef<string | undefined>(undefined);
   const countRef = useRef(messages.length);
   useNotificationTarget();
@@ -89,6 +92,10 @@ export function RoomChat(props: Props) {
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const nearBottom = useRef(true);
   const forceFollowLatest = useRef(false);
+  const roomLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const roomLongPressOrigin = useRef<{ x: number; y: number } | null>(null);
   const messageMap = useMemo(
     () => new Map(messages.map((message) => [message.id, message])),
     [messages],
@@ -149,8 +156,58 @@ export function RoomChat(props: Props) {
   }
 
   useEffect(() => {
-    return () => setNativeChatComposerFocused(false);
+    return () => {
+      setNativeChatComposerFocused(false);
+      if (roomLongPressTimer.current) clearTimeout(roomLongPressTimer.current);
+    };
   }, []);
+
+  function cancelRoomLongPress() {
+    if (roomLongPressTimer.current) clearTimeout(roomLongPressTimer.current);
+    roomLongPressTimer.current = null;
+    roomLongPressOrigin.current = null;
+  }
+
+  function startRoomLongPress(
+    event: React.PointerEvent<HTMLElement>,
+    message: Message,
+  ) {
+    if (
+      message.userId !== me?.id ||
+      message.deletedAt ||
+      !isMobileTextEntryContext()
+    )
+      return;
+    cancelRoomLongPress();
+    roomLongPressOrigin.current = { x: event.clientX, y: event.clientY };
+    roomLongPressTimer.current = setTimeout(() => {
+      setRoomActionMessage(message);
+      roomLongPressTimer.current = null;
+      roomLongPressOrigin.current = null;
+    }, 430);
+  }
+
+  function moveRoomLongPress(event: React.PointerEvent<HTMLElement>) {
+    const origin = roomLongPressOrigin.current;
+    if (!origin) return;
+    if (
+      Math.abs(event.clientX - origin.x) > 10 ||
+      Math.abs(event.clientY - origin.y) > 10
+    )
+      cancelRoomLongPress();
+  }
+
+  async function deleteRoomMessage(message: Message) {
+    try {
+      await api(`/study-rooms/${roomId}/messages/${message.id}`, {
+        method: "DELETE",
+      });
+      setRoomActionMessage(null);
+      await onReloadMessages();
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  }
 
   useEffect(() => {
     resizeMessageComposerTextarea(composerRef.current);
@@ -273,6 +330,20 @@ export function RoomChat(props: Props) {
               <article
                 className={`message persistent-message ${message.userId === me?.id ? "mine" : ""}`}
                 key={message.id}
+                onPointerDown={(event) => startRoomLongPress(event, message)}
+                onPointerMove={moveRoomLongPress}
+                onPointerUp={cancelRoomLongPress}
+                onPointerCancel={cancelRoomLongPress}
+                onContextMenu={(event) => {
+                  if (
+                    message.userId === me?.id &&
+                    !message.deletedAt &&
+                    isMobileTextEntryContext()
+                  ) {
+                    event.preventDefault();
+                    setRoomActionMessage(message);
+                  }
+                }}
               >
                 {message.id === firstUnread && (
                   <div
@@ -456,7 +527,7 @@ export function RoomChat(props: Props) {
                       {message.userId === me?.id && message.body && !ended && (
                         <button
                           type="button"
-                          className="text-button"
+                          className="text-button desktop-message-edit"
                           onClick={() => {
                             setEditing(message.id);
                             setEditBody(message.body ?? "");
@@ -467,7 +538,7 @@ export function RoomChat(props: Props) {
                       )}
                       {message.userId === me?.id ? (
                         <button
-                          className="text-button"
+                          className="text-button desktop-message-delete"
                           type="button"
                           onClick={async () => {
                             try {
@@ -510,6 +581,45 @@ export function RoomChat(props: Props) {
           {unseen} nova(s) mensagem(ns) ↓
         </button>
       )}
+      {roomActionMessage ? (
+        <div
+          className="mobile-message-actions-sheet"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Ações da mensagem"
+        >
+          {roomActionMessage.body && !ended ? (
+            <button
+              type="button"
+              onClick={() => {
+                setEditing(roomActionMessage.id);
+                setEditBody(roomActionMessage.body ?? "");
+                setRoomActionMessage(null);
+              }}
+            >
+              <Pencil size={19} />
+              Editar mensagem
+            </button>
+          ) : null}
+          <button
+            type="button"
+            className="danger"
+            onClick={() => void deleteRoomMessage(roomActionMessage)}
+          >
+            <Trash2 size={19} />
+            Excluir mensagem
+          </button>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => setRoomActionMessage(null)}
+          >
+            <X size={19} />
+            Cancelar
+          </button>
+        </div>
+      ) : null}
+
       <div className="typing-status" role="status">
         {props.typing?.length
           ? `${props.typing.map((p) => p.name).join(", ")} ${props.typing.length === 1 ? "está digitando" : "estão digitando"}…`
