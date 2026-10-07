@@ -328,3 +328,29 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
+
+
+/* Short room conversations stay attached to the composer, like private chat.
+   The flexible leading spacer collapses to zero once the history overflows,
+   so long conversations keep normal scrolling. */
+@media (max-width: 760px) {
+  .room-active-shell .room-section-chat .persistent-messages {
+    display: flex !important;
+    flex-direction: column !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-messages::before {
+    content: "";
+    flex: 1 1 auto;
+    min-height: 0;
+    pointer-events: none;
+  }
+
+  .room-active-shell .room-section-chat .persistent-messages > * {
+    flex: 0 0 auto;
+  }
+
+  .room-active-shell .room-section-chat .chat-empty {
+    margin-block: auto 0 !important;
+  }
+}
