@@ -297,26 +297,26 @@
    Android IME resize and the room bottom navigation transition. */
 .chat-bottom-spacer {
   width: 100%;
-  height: 36px;
-  flex: 0 0 36px;
+  height: 12px;
+  flex: 0 0 12px;
   pointer-events: none;
 }
 
 @media (max-width: 760px) {
   .chat-bottom-spacer {
-    height: 76px;
-    flex-basis: 76px;
+    height: 10px;
+    flex-basis: 10px;
   }
 
   .room-active-shell .room-section-chat .persistent-messages {
-    padding-bottom: 18px !important;
-    scroll-padding-bottom: 86px !important;
+    padding-bottom: 8px !important;
+    scroll-padding-bottom: 14px !important;
   }
 
   .room-active-shell .room-section-chat
     .persistent-messages
     .persistent-message:last-of-type {
-    margin-bottom: 20px !important;
+    margin-bottom: 8px !important;
   }
 
   .message-action-popover {
