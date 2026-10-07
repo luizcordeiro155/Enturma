@@ -644,11 +644,7 @@ export function RoomChat(props: Props) {
                 rows={1}
                 enterKeyHint="send"
                 inputMode="text"
-                placeholder={
-                  compact
-                    ? "Mensagem"
-                    : "Compartilhe uma ideia ou uma dúvida…"
-                }
+                placeholder="Mensagem"
               />
             </label>
 
