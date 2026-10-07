@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ImagePlus, Send, Smile, X } from "lucide-react";
+import { ArrowLeft, ImagePlus, Pencil, Send, Smile, Trash2, X } from "lucide-react";
 import { preparePrivateChatImage } from "@/lib/chat-image";
 import {
   isMobileTextEntryContext,
@@ -86,6 +86,13 @@ export function Friends() {
   const [messages, setMessages] = useState<PrivateMessage[]>([]);
   const [page, setPage] = useState(0);
   const [older, setOlder] = useState(false);
+  const [atLatest, setAtLatest] = useState(true);
+  const [privateActionMessage, setPrivateActionMessage] =
+    useState<PrivateMessage | null>(null);
+  const [editingPrivate, setEditingPrivate] = useState<PrivateMessage | null>(
+    null,
+  );
+  const [editPrivateText, setEditPrivateText] = useState("");
   const key = useRef<CryptoKey | null>(null);
   const generation = useRef(0);
   const messagesViewport = useRef<HTMLDivElement>(null);
@@ -96,6 +103,8 @@ export function Friends() {
   const previousMessageCount = useRef(0);
   const attachmentUrls = useRef(new Set<string>());
   const mobileConversationHistory = useRef(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
   const identity = useRef<Awaited<ReturnType<typeof createIdentity>> | null>(
     null,
   );
@@ -218,6 +227,7 @@ export function Friends() {
     if (!viewport) return;
     viewport.scrollTo({ top: viewport.scrollHeight, behavior });
     nearLatest.current = true;
+    setAtLatest(true);
   }, []);
 
   useEffect(() => {
