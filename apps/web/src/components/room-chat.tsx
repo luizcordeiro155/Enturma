@@ -143,6 +143,10 @@ export function RoomChat(props: Props) {
     setError("");
   }
 
+  useEffect(() => {
+    return () => setNativeChatComposerFocused(false);
+  }, []);
+
   return (
     <section
       data-notification-context={`room:${roomId}`}
@@ -615,6 +619,14 @@ export function RoomChat(props: Props) {
                 onFocus={() => {
                   forceFollowLatest.current = true;
                   nearBottom.current = true;
+                  setNativeChatComposerFocused(true);
+                  requestAnimationFrame(() => {
+                    const viewport = scrollRef.current;
+                    if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                  });
+                }}
+                onBlur={() => {
+                  setNativeChatComposerFocused(false);
                 }}
                 onChange={(e) => setDraft(e.target.value)}
                 onKeyDown={(e) => {

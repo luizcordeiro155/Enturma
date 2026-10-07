@@ -532,6 +532,7 @@ class MainActivity : Activity() {
     private var safeLeftCssPx = 0
     private var keyboardBottomCssPx = 0
     private var keyboardVisible = false
+    private var chatComposerFocused = false
     private var updateDownloadId: Long? = null
     private var updateReceiverRegistered = false
     private var pendingUpdateUrl: String? = null
@@ -606,6 +607,14 @@ class MainActivity : Activity() {
                 clearNativePushToken()
             }
         }
+
+        @JavascriptInterface
+        fun setChatComposerFocused(focused: Boolean) {
+            runOnUiThread {
+                chatComposerFocused = focused
+                ViewCompat.requestApplyInsets(rootLayout)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -664,17 +673,25 @@ class MainActivity : Activity() {
             safeLeftCssPx = (safeInsets.left / density).toInt()
             keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
 
-            // Keep the WebView full-height. Resizing the whole WebView made the
-            // footer/navigation jump above the keyboard. The page receives the
-            // IME height as a CSS variable and only the focused composer moves.
+            // Chat surfaces behave like native messengers: when a message
+            // composer owns focus, shrink only the WebView's usable height to
+            // the top of the IME. The message list then flexes above the
+            // composer without scrolling the whole app or floating controls.
             val params = webView.layoutParams as FrameLayout.LayoutParams
-            if (params.bottomMargin != 0) {
-                params.bottomMargin = 0
+            val resizeChatForIme = keyboardVisible && chatComposerFocused
+            val targetBottomMargin = if (resizeChatForIme) imeInsets.bottom else 0
+            if (params.bottomMargin != targetBottomMargin) {
+                params.bottomMargin = targetBottomMargin
                 webView.layoutParams = params
             }
 
+            // Once the native WebView is resized, CSS must not subtract the
+            // keyboard a second time. Other focused fields still receive the
+            // raw IME inset for their normal visibility handling.
             keyboardBottomCssPx =
-                if (keyboardVisible) (imeInsets.bottom / density).toInt() else 0
+                if (keyboardVisible && !resizeChatForIme)
+                    (imeInsets.bottom / density).toInt()
+                else 0
             syncSafeAreaCss()
             insets
         }
