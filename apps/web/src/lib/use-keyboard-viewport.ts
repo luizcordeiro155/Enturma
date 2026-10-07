@@ -1,6 +1,10 @@
 "use client";
 
 import { useEffect } from "react";
+import {
+  isTextEntryControl,
+  setNativeTextInputFocused,
+} from "@/lib/native-chat-ime";
 
 /**
  * Keeps a stable visual-viewport inset for mobile surfaces without repeatedly
@@ -13,13 +17,12 @@ import { useEffect } from "react";
 export function useKeyboardViewport() {
   useEffect(() => {
     const viewport = window.visualViewport;
-    if (!viewport) return;
-
     const root = document.documentElement;
     let frame = 0;
     let focusTimer: ReturnType<typeof setTimeout> | undefined;
 
     const syncInset = () => {
+      if (!viewport) return;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
         const inset = Math.max(
@@ -52,6 +55,7 @@ export function useKeyboardViewport() {
       )
         return;
 
+      if (!viewport) return;
       const rect = active.getBoundingClientRect();
       const visibleTop = viewport.offsetTop + 12;
       const visibleBottom = viewport.offsetTop + viewport.height - 16;
@@ -65,24 +69,40 @@ export function useKeyboardViewport() {
       }
     };
 
-    const onFocusIn = () => {
+    const onFocusIn = (event: FocusEvent) => {
+      const textEntry = isTextEntryControl(event.target);
+      setNativeTextInputFocused(textEntry);
+      root.dataset.enturmaTextInput = textEntry ? "true" : "false";
       syncInset();
       if (focusTimer) clearTimeout(focusTimer);
       // Wait for the keyboard to reach its final geometry, then correct once.
-      focusTimer = setTimeout(ensureFocusedControlVisible, 260);
+      if (textEntry)
+        focusTimer = setTimeout(ensureFocusedControlVisible, 260);
+    };
+
+    const onFocusOut = () => {
+      window.setTimeout(() => {
+        const textEntry = isTextEntryControl(document.activeElement);
+        setNativeTextInputFocused(textEntry);
+        root.dataset.enturmaTextInput = textEntry ? "true" : "false";
+      }, 0);
     };
 
     syncInset();
-    viewport.addEventListener("resize", syncInset);
-    viewport.addEventListener("scroll", syncInset);
+    viewport?.addEventListener("resize", syncInset);
+    viewport?.addEventListener("scroll", syncInset);
     window.addEventListener("focusin", onFocusIn);
+    window.addEventListener("focusout", onFocusOut);
 
     return () => {
       cancelAnimationFrame(frame);
       if (focusTimer) clearTimeout(focusTimer);
-      viewport.removeEventListener("resize", syncInset);
-      viewport.removeEventListener("scroll", syncInset);
+      viewport?.removeEventListener("resize", syncInset);
+      viewport?.removeEventListener("scroll", syncInset);
       window.removeEventListener("focusin", onFocusIn);
+      window.removeEventListener("focusout", onFocusOut);
+      setNativeTextInputFocused(false);
+      delete root.dataset.enturmaTextInput;
       root.style.removeProperty("--ride-keyboard-inset");
       root.style.removeProperty("--enturma-visual-viewport-height");
     };
