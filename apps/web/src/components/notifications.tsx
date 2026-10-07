@@ -52,6 +52,17 @@ function activeContexts() {
         .filter((e) => e.getClientRects().length > 0)
         .map((e) => e.dataset.notificationContext!);
 }
+
+function contextsAlreadyAtLatest() {
+  return new Set(
+    [...document.querySelectorAll<HTMLElement>(
+      '[data-notification-context][data-notification-at-latest="true"]',
+    )]
+      .filter((e) => e.getClientRects().length > 0)
+      .map((e) => e.dataset.notificationContext!)
+      .filter(Boolean),
+  );
+}
 export function NotificationsProvider({
   children,
 }: {
@@ -138,22 +149,27 @@ export function NotificationsProvider({
       const data = await api<Inbox>("/notifications/inbox");
       if (requested !== revision.current) return;
       const contexts = activeContexts();
+      const latestContexts = contextsAlreadyAtLatest();
       const viewed = data.items.filter(
         (n) =>
           !n.readAt &&
           contexts.includes(n.contextKey ?? "") &&
           ["PRIVATE_MESSAGE", "ROOM_MESSAGE", "MENTION"].includes(n.kind),
       );
-      const fresh = viewed.filter((n) => !seen.current.has(n.id));
-      if (fresh.length)
-        setInline((old) =>
-          [...fresh, ...old]
-            .filter(
-              (n, i, a) =>
-                a.findIndex((x) => x.contextKey === n.contextKey) === i,
-            )
-            .slice(0, 10),
-        );
+      const fresh = viewed.filter(
+        (n) =>
+          !seen.current.has(n.id) &&
+          !latestContexts.has(n.contextKey ?? ""),
+      );
+      setInline((old) =>
+        [...fresh, ...old]
+          .filter((n) => !latestContexts.has(n.contextKey ?? ""))
+          .filter(
+            (n, i, a) =>
+              a.findIndex((x) => x.contextKey === n.contextKey) === i,
+          )
+          .slice(0, 10),
+      );
       if (viewed.length) {
         await post("/notifications/read", { ids: viewed.map((n) => n.id) });
         const ids = new Set(viewed.map((n) => n.id));
