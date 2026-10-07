@@ -11,6 +11,7 @@ import {
   useVideoConfig,
 } from "remotion";
 import type { IntroProps } from "./intro-model";
+import { BookShowcaseScene, PresenterClosingScene } from "./intro-book-finale";
 import {
   INTRO_FRAMES,
   INTRO_SCENE_FRAMES,
@@ -981,48 +982,7 @@ export function CallsScene(props: IntroProps) {
   );
 }
 export function FinalScene(props: IntroProps) {
-  const f = useCurrentFrame();
-  return (
-    <Stage {...props} index={8}>
-      <Art focus>
-        <circle cx="450" cy="227" r="185" fill="#214c3e" />
-        <circle
-          cx="450"
-          cy="227"
-          r="213"
-          stroke={palette.line}
-          strokeDasharray="2 10"
-          transform={`rotate(${props.quality === "low" ? 0 : f / 8} 450 227)`}
-        />
-        <Book
-          x={330}
-          y={89}
-          size={240}
-          frame={props.quality === "low" ? 100 : f}
-        />
-        <text
-          x="450"
-          y="388"
-          textAnchor="middle"
-          fill={palette.paper}
-          fontSize="66"
-          fontWeight="750"
-          letterSpacing="-2"
-        >
-          enturma<tspan fill={palette.lime}>.</tspan>
-        </text>
-        <text
-          x="450"
-          y="445"
-          textAnchor="middle"
-          fill={palette.mint}
-          fontSize="22"
-        >
-          Aprenda em boa companhia.
-        </text>
-      </Art>
-    </Stage>
-  );
+  return <PresenterClosingScene {...props} />;
 }
 const scenes = [
   GitHubScannerScene,
@@ -1033,6 +993,7 @@ const scenes = [
   StudyRoomScene,
   RideScene,
   CallsScene,
+  BookShowcaseScene,
   FinalScene,
 ];
 function PageTurn({ quality }: Pick<IntroProps, "quality">) {
@@ -1096,8 +1057,8 @@ export function EnturmaIntroComposition(props: IntroProps) {
           from={frames[i]}
           durationInFrames={frames[i + 1] - frames[i]}
         >
-          {props.quality === "low" ? (
-            <Freeze frame={75}>
+          {props.quality === "low" && i !== 8 ? (
+            <Freeze frame={i === 9 ? 260 : 75}>
               <Scene {...props} />
             </Freeze>
           ) : (

@@ -18,6 +18,8 @@ import {
   INTRO_FEATURES,
   INTRO_STORAGE_KEY,
   INTRO_FRAMES,
+  INTRO_DURATION_LABEL,
+  introTime,
   introNarrationAt,
   type IntroProps,
 } from "./intro-model";
@@ -226,7 +228,7 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
           <span>
             <strong>Conheça o Enturma</strong>
             <small>
-              Seu próximo encontro começa aqui · 30 s · com narração
+              Sua faculdade em companhia · {INTRO_DURATION_LABEL} · com narração
             </small>
           </span>
           <Play size={21} />
@@ -312,7 +314,7 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
         {introNarrationAt(frame)}
       </p>
       <footer className="intro-timeline">
-        <span>{String(Math.floor(frame / 60)).padStart(2, "0")} s</span>
+        <span>{introTime(frame)}</span>
         <input
           type="range"
           min="0"
@@ -325,7 +327,7 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
             setSeekFrame(next);
           }}
         />
-        <span>30 s</span>
+        <span>{introTime(INTRO_FRAMES)}</span>
       </footer>
     </section>
   );

@@ -1,3 +1,5 @@
+import storyboard from "./intro-storyboard.json";
+
 export type IntroQuality = "high" | "optimized" | "low";
 export type IntroPerson = { name: string; avatarUrl?: string };
 export type IntroFeature = {
@@ -56,35 +58,21 @@ export type IntroProps = {
   quality: IntroQuality;
 };
 export const INTRO_STORAGE_KEY = "enturma-intro:v0.3";
-export const INTRO_FRAMES = 1800;
-export const INTRO_SCENE_FRAMES = [
-  0,
-  150,
-  300,
-  510,
-  720,
-  960,
-  1170,
-  1380,
-  1590,
-  INTRO_FRAMES,
-];
-export const INTRO_NARRATION_FILE = "intro/enturma-pt-br-dora-v1.mp3";
-export const INTRO_NARRATION = [
-  "Sua próxima conexão começa aqui.",
-  "Enturma. Aprender nos aproxima.",
-  "Suas matérias, organizadas em um só lugar.",
-  "Encontre quem aprende com você.",
-  "Compartilhe ideias e descubra novas perspectivas.",
-  "Estude com materiais e inteligência artificial.",
-  "Combine caronas e compartilhe o caminho.",
-  "Voz, vídeo e tela. Colabore de perto.",
-  "Enturma. Aprenda em boa companhia.",
-];
+export const INTRO_FRAMES = storyboard.durationInFrames;
+export const INTRO_SCENE_FRAMES = storyboard.sceneFrames;
+export const INTRO_NARRATION_FILE = storyboard.audioFile;
+export const INTRO_CUES = storyboard.cues;
+export const INTRO_BOOK_PAGES = INTRO_CUES.filter((cue) => cue.scene === 8);
+const durationSeconds = INTRO_FRAMES / storyboard.fps;
+export const INTRO_DURATION_LABEL = `${Math.floor(durationSeconds / 60)} min ${String(durationSeconds % 60).padStart(2, "0")} s`;
+export function introTime(frame: number) {
+  const seconds = Math.floor(frame / storyboard.fps);
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
 export function introNarrationAt(frame: number) {
   const position = Math.max(0, Math.min(INTRO_FRAMES - 1, frame));
-  const end = INTRO_SCENE_FRAMES.findIndex((boundary) => boundary > position);
-  return INTRO_NARRATION[end - 1];
+  return [...INTRO_CUES].reverse().find((cue) => cue.fromFrame <= position)!
+    .text;
 }
 export function introQuality(
   reduced: boolean,
