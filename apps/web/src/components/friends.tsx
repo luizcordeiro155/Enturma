@@ -65,6 +65,7 @@ export function Friends() {
   const [draft, setDraft] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [privateImagesEnabled, setPrivateImagesEnabled] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
@@ -143,6 +144,11 @@ export function Friends() {
           );
       });
     void refresh().catch((e) => setError(e.message));
+    void api<{ privateImageAttachments?: boolean }>("/capabilities", {
+      cache: "no-store",
+    })
+      .then((cap) => setPrivateImagesEnabled(cap.privateImageAttachments === true))
+      .catch(() => setPrivateImagesEnabled(false));
     return () => {
       alive = false;
     };
@@ -865,19 +871,21 @@ export function Friends() {
                       <Smile size={22} />
                     </button>
 
-                    <label className="composer-icon-button composer-image-button">
-                      <ImagePlus size={22} />
-                      <span className="sr-only">Adicionar imagem</span>
-                      <input
-                        type="file"
-                        accept="image/jpeg,image/png,image/webp,image/gif"
-                        disabled={busy}
-                        onChange={(event) => {
-                          selectImage(event.target.files?.[0] ?? null);
-                          event.target.value = "";
-                        }}
-                      />
-                    </label>
+                    {privateImagesEnabled ? (
+                      <label className="composer-icon-button composer-image-button">
+                        <ImagePlus size={22} />
+                        <span className="sr-only">Adicionar imagem</span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          disabled={busy}
+                          onChange={(event) => {
+                            selectImage(event.target.files?.[0] ?? null);
+                            event.target.value = "";
+                          }}
+                        />
+                      </label>
+                    ) : null}
 
                     <label className="composer-text-field">
                       <span className="sr-only">Mensagem privada</span>
