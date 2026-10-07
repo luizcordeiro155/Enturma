@@ -343,7 +343,7 @@ export function RoomChat(props: Props) {
               : undefined;
             return (
               <article
-                className={`message persistent-message ${message.userId === me?.id ? "mine" : ""}`}
+                className={`message persistent-message ${message.userId === me?.id ? "mine" : ""} ${roomActionMessage?.id === message.id ? "message-action-selected" : ""}`}
                 key={message.id}
                 onPointerDown={(event) => startRoomLongPress(event, message)}
                 onPointerMove={moveRoomLongPress}
