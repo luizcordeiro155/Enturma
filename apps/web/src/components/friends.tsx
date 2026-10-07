@@ -468,7 +468,8 @@ export function Friends() {
       await load(friend, key.current, 0, generation.current);
       requestAnimationFrame(() => {
         scrollToLatest("auto");
-        composer.current?.focus({ preventScroll: true });
+        if (document.activeElement !== composer.current)
+          composer.current?.focus({ preventScroll: true });
       });
     } catch (e) {
       setError((e as Error).message);
@@ -866,6 +867,7 @@ export function Friends() {
                       className="composer-icon-button"
                       aria-label="Adicionar emoji"
                       aria-expanded={emojiOpen}
+                      onPointerDown={(event) => event.preventDefault()}
                       onClick={() => setEmojiOpen((open) => !open)}
                     >
                       <Smile size={22} />
@@ -900,6 +902,8 @@ export function Friends() {
                         maxLength={4000}
                         disabled={!finger}
                         rows={1}
+                        enterKeyHint="send"
+                        inputMode="text"
                         placeholder="Mensagem"
                         onKeyDown={(e) => {
                           if (
@@ -917,6 +921,7 @@ export function Friends() {
                     <button
                       className="composer-send-button"
                       aria-label="Enviar mensagem"
+                      onPointerDown={(event) => event.preventDefault()}
                       disabled={!finger || busy || (!draft.trim() && !image)}
                     >
                       <Send size={22} />
