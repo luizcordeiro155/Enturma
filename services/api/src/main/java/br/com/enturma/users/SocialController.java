@@ -287,6 +287,10 @@ public class SocialController {
         target);
   }
 
+  public record PrivateMessageEdit(
+      @NotBlank @Size(max = 24000) @Pattern(regexp = "[A-Za-z0-9+/=]+") String ciphertext,
+      @NotBlank @Pattern(regexp = "[A-Za-z0-9+/]{16}") String iv) {}
+
   public record Envelope(
       @NotNull UUID clientId,
       @NotBlank @Size(max = 24000) @Pattern(regexp = "[A-Za-z0-9+/=]+") String ciphertext,
@@ -365,4 +369,58 @@ public class SocialController {
       friendsChanged(a.id(), peer);
     }
   }
+
+  @PutMapping("/friends/{id}/messages/{messageId}")
+  @Transactional
+  public void editPrivateMessage(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID id,
+      @PathVariable UUID messageId,
+      @Valid @RequestBody PrivateMessageEdit body) {
+    var friendship = access(a, id, true);
+    int updated =
+        db.jdbc.update(
+            "UPDATE private_message SET ciphertext=?,iv=? WHERE id=? AND friendship_id=? AND sender_id=?",
+            body.ciphertext(),
+            body.iv(),
+            messageId,
+            id,
+            a.id());
+    if (updated == 0) throw ApiException.missing();
+
+    UUID peer =
+        (UUID)
+            (a.id().equals(friendship.get("requester"))
+                ? friendship.get("recipient")
+                : friendship.get("requester"));
+    friendsChanged(a.id(), peer);
+  }
+
+  @DeleteMapping("/friends/{id}/messages/{messageId}")
+  @Transactional
+  public void deletePrivateMessage(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID id,
+      @PathVariable UUID messageId) {
+    var friendship = access(a, id, true);
+    int deleted =
+        db.jdbc.update(
+            "DELETE FROM private_message WHERE id=? AND friendship_id=? AND sender_id=?",
+            messageId,
+            id,
+            a.id());
+    if (deleted == 0) throw ApiException.missing();
+
+    db.jdbc.update(
+        "DELETE FROM notification WHERE target_id=? AND kind IN ('PRIVATE_MESSAGE','MENTION')",
+        messageId);
+
+    UUID peer =
+        (UUID)
+            (a.id().equals(friendship.get("requester"))
+                ? friendship.get("recipient")
+                : friendship.get("requester"));
+    friendsChanged(a.id(), peer);
+  }
+
 }

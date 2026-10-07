@@ -1,7 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ImagePlus, Send, Smile, X } from "lucide-react";
+import { ArrowLeft, ImagePlus, Pencil, Send, Smile, Trash2, X } from "lucide-react";
 import { preparePrivateChatImage } from "@/lib/chat-image";
 import {
   isMobileTextEntryContext,
@@ -86,6 +86,13 @@ export function Friends() {
   const [messages, setMessages] = useState<PrivateMessage[]>([]);
   const [page, setPage] = useState(0);
   const [older, setOlder] = useState(false);
+  const [atLatest, setAtLatest] = useState(true);
+  const [privateActionMessage, setPrivateActionMessage] =
+    useState<PrivateMessage | null>(null);
+  const [editingPrivate, setEditingPrivate] = useState<PrivateMessage | null>(
+    null,
+  );
+  const [editPrivateText, setEditPrivateText] = useState("");
   const key = useRef<CryptoKey | null>(null);
   const generation = useRef(0);
   const messagesViewport = useRef<HTMLDivElement>(null);
@@ -96,6 +103,8 @@ export function Friends() {
   const previousMessageCount = useRef(0);
   const attachmentUrls = useRef(new Set<string>());
   const mobileConversationHistory = useRef(false);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
   const identity = useRef<Awaited<ReturnType<typeof createIdentity>> | null>(
     null,
   );
@@ -218,6 +227,7 @@ export function Friends() {
     if (!viewport) return;
     viewport.scrollTo({ top: viewport.scrollHeight, behavior });
     nearLatest.current = true;
+    setAtLatest(true);
   }, []);
 
   useEffect(() => {
@@ -433,6 +443,87 @@ export function Friends() {
   };
   useLiveRefresh("notifications_changed", refreshFriendData);
   useLiveRefresh("friends_changed", refreshFriendData, 8000);
+
+  useEffect(() => {
+    return () => {
+      if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    };
+  }, []);
+
+  function cancelPrivateLongPress() {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current);
+    longPressTimer.current = null;
+    longPressOrigin.current = null;
+  }
+
+  function startPrivateLongPress(
+    event: React.PointerEvent<HTMLElement>,
+    message: PrivateMessage,
+  ) {
+    if (message.senderId !== me?.id || !isMobileTextEntryContext()) return;
+    cancelPrivateLongPress();
+    longPressOrigin.current = { x: event.clientX, y: event.clientY };
+    longPressTimer.current = setTimeout(() => {
+      setPrivateActionMessage(message);
+      longPressTimer.current = null;
+      longPressOrigin.current = null;
+    }, 430);
+  }
+
+  function movePrivateLongPress(event: React.PointerEvent<HTMLElement>) {
+    const origin = longPressOrigin.current;
+    if (!origin) return;
+    if (
+      Math.abs(event.clientX - origin.x) > 10 ||
+      Math.abs(event.clientY - origin.y) > 10
+    )
+      cancelPrivateLongPress();
+  }
+
+  async function deletePrivateMessage(message: PrivateMessage) {
+    if (!selected || message.senderId !== me?.id) return;
+    try {
+      await api(`/friends/${selected.id}/messages/${message.id}`, {
+        method: "DELETE",
+      });
+      setMessages((old) => old.filter((item) => item.id !== message.id));
+      setPrivateActionMessage(null);
+      setEditingPrivate(null);
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  }
+
+  async function savePrivateEdit(message: PrivateMessage) {
+    if (!selected || !me || !key.current || message.senderId !== me.id) return;
+    try {
+      const payload = await encryptMessage(
+        key.current,
+        editPrivateText.trim(),
+        selected.id,
+        me.id,
+        message.clientId,
+      );
+      await api(`/friends/${selected.id}/messages/${message.id}`, {
+        method: "PUT",
+        body: JSON.stringify({
+          ciphertext: payload.ciphertext,
+          iv: payload.iv,
+        }),
+      });
+      setMessages((old) =>
+        old.map((item) =>
+          item.id === message.id
+            ? { ...item, text: editPrivateText.trim() }
+            : item,
+        ),
+      );
+      setEditingPrivate(null);
+      setPrivateActionMessage(null);
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
+  }
 
   useEffect(() => {
     resizeMessageComposerTextarea(composer.current);
@@ -711,6 +802,7 @@ export function Friends() {
             data-notification-context={
               selected ? `friend:${selected.id}` : undefined
             }
+            data-notification-at-latest={atLatest ? "true" : "false"}
           >
             {selected ? (
               <>
@@ -803,6 +895,7 @@ export function Friends() {
                         viewport.scrollTop -
                         viewport.clientHeight <
                       96;
+                    setAtLatest(nearLatest.current);
                   }}
                 >
                   {older ? (
@@ -832,6 +925,19 @@ export function Friends() {
                       key={m.id}
                       id={`message-${m.id}`}
                       className={m.senderId === me?.id ? "mine" : ""}
+                      onPointerDown={(event) => startPrivateLongPress(event, m)}
+                      onPointerMove={movePrivateLongPress}
+                      onPointerUp={cancelPrivateLongPress}
+                      onPointerCancel={cancelPrivateLongPress}
+                      onContextMenu={(event) => {
+                        if (
+                          m.senderId === me?.id &&
+                          isMobileTextEntryContext()
+                        ) {
+                          event.preventDefault();
+                          setPrivateActionMessage(m);
+                        }
+                      }}
                     >
                       <UserIdentity
                         compact
@@ -841,7 +947,7 @@ export function Friends() {
                             : { ...selected, id: selected.userId }
                         }
                       />
-                      <div>
+                      <div className="private-message-body">
                         {m.attachmentUrl ? (
                           <a
                             className="private-chat-image-link"
@@ -857,7 +963,36 @@ export function Friends() {
                             />
                           </a>
                         ) : null}
-                        {m.text ? <p>{m.text}</p> : null}
+                        {editingPrivate?.id === m.id ? (
+                          <form
+                            className="private-message-edit"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              void savePrivateEdit(m);
+                            }}
+                          >
+                            <textarea
+                              value={editPrivateText}
+                              autoFocus
+                              maxLength={4000}
+                              onChange={(event) =>
+                                setEditPrivateText(event.target.value)
+                              }
+                            />
+                            <div>
+                              <button type="submit">Salvar</button>
+                              <button
+                                type="button"
+                                className="secondary"
+                                onClick={() => setEditingPrivate(null)}
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </form>
+                        ) : m.text ? (
+                          <p>{m.text}</p>
+                        ) : null}
                         <small>
                           {new Date(m.createdAt).toLocaleString("pt-BR")}
                         </small>
@@ -865,6 +1000,45 @@ export function Friends() {
                     </article>
                   ))}
                 </div>
+                {privateActionMessage ? (
+                  <div
+                    className="mobile-message-actions-sheet"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Ações da mensagem"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditPrivateText(privateActionMessage.text);
+                        setEditingPrivate(privateActionMessage);
+                        setPrivateActionMessage(null);
+                      }}
+                    >
+                      <Pencil size={19} />
+                      Editar mensagem
+                    </button>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() =>
+                        void deletePrivateMessage(privateActionMessage)
+                      }
+                    >
+                      <Trash2 size={19} />
+                      Excluir mensagem
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => setPrivateActionMessage(null)}
+                    >
+                      <X size={19} />
+                      Cancelar
+                    </button>
+                  </div>
+                ) : null}
+
                 <form
                   onSubmit={send}
                   className="private-composer enturma-message-composer"
