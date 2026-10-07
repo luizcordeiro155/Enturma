@@ -188,6 +188,66 @@ export async function decryptMessage(
     ),
   );
 }
+
+export async function encryptAttachment(
+  key: CryptoKey,
+  file: File,
+  thread: string,
+  sender: string,
+  clientId: string,
+) {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const additionalData = enc.encode(
+    `${thread}:${sender}:${clientId}:attachment:${file.type}:${file.name}`,
+  );
+  const ciphertext = await crypto.subtle.encrypt(
+    { name: "AES-GCM", iv, additionalData },
+    key,
+    await file.arrayBuffer(),
+  );
+  return {
+    attachmentCiphertext: base64(ciphertext),
+    attachmentIv: base64(iv),
+    attachmentMime: file.type,
+    attachmentName: file.name,
+    attachmentSize: file.size,
+  };
+}
+
+export async function decryptAttachment(
+  key: CryptoKey,
+  message: {
+    attachmentIv?: string | null;
+    attachmentCiphertext?: string | null;
+    attachmentMime?: string | null;
+    attachmentName?: string | null;
+    senderId: string;
+    clientId: string;
+  },
+  thread: string,
+) {
+  if (
+    !message.attachmentIv ||
+    !message.attachmentCiphertext ||
+    !message.attachmentMime ||
+    !message.attachmentName
+  )
+    return null;
+
+  const additionalData = enc.encode(
+    `${thread}:${message.senderId}:${message.clientId}:attachment:${message.attachmentMime}:${message.attachmentName}`,
+  );
+  const clear = await crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: bytes(message.attachmentIv),
+      additionalData,
+    },
+    key,
+    bytes(message.attachmentCiphertext),
+  );
+  return new Blob([clear], { type: message.attachmentMime });
+}
 async function backupKey(password: string, salt: Uint8Array<ArrayBuffer>) {
   const material = await crypto.subtle.importKey(
     "raw",
