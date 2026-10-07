@@ -24,6 +24,11 @@ import {
 } from "@/lib/native-chat-ime";
 
 import { RichMessage } from "./rich-message";
+import {
+  MessageActionPopover,
+  messageActionAnchor,
+  type MessageActionAnchor,
+} from "./message-action-popover";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
 
@@ -84,6 +89,8 @@ export function RoomChat(props: Props) {
   const [roomActionMessage, setRoomActionMessage] = useState<Message | null>(
     null,
   );
+  const [roomActionAnchor, setRoomActionAnchor] =
+    useState<MessageActionAnchor | null>(null);
   const newestRef = useRef<string | undefined>(undefined);
   const countRef = useRef(messages.length);
   useNotificationTarget();
@@ -180,7 +187,9 @@ export function RoomChat(props: Props) {
       return;
     cancelRoomLongPress();
     roomLongPressOrigin.current = { x: event.clientX, y: event.clientY };
+    const target = event.currentTarget;
     roomLongPressTimer.current = setTimeout(() => {
+      setRoomActionAnchor(messageActionAnchor(target));
       setRoomActionMessage(message);
       roomLongPressTimer.current = null;
       roomLongPressOrigin.current = null;
@@ -203,6 +212,7 @@ export function RoomChat(props: Props) {
         method: "DELETE",
       });
       setRoomActionMessage(null);
+      setRoomActionAnchor(null);
       await onReloadMessages();
     } catch (cause) {
       setError((cause as Error).message);
@@ -246,6 +256,11 @@ export function RoomChat(props: Props) {
           if (nearBottom.current) {
             setUnseen(0);
             setFirstUnread(null);
+            window.dispatchEvent(
+              new CustomEvent("enturma-conversation-latest", {
+                detail: { context: `room:${roomId}` },
+              }),
+            );
           }
         }}
       >
@@ -341,6 +356,9 @@ export function RoomChat(props: Props) {
                     isMobileTextEntryContext()
                   ) {
                     event.preventDefault();
+                    setRoomActionAnchor(
+                      messageActionAnchor(event.currentTarget),
+                    );
                     setRoomActionMessage(message);
                   }
                 }}
@@ -581,12 +599,13 @@ export function RoomChat(props: Props) {
           {unseen} nova(s) mensagem(ns) ↓
         </button>
       )}
-      {roomActionMessage ? (
-        <div
-          className="mobile-message-actions-sheet"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Ações da mensagem"
+      {roomActionMessage && roomActionAnchor ? (
+        <MessageActionPopover
+          anchor={roomActionAnchor}
+          onDismiss={() => {
+            setRoomActionMessage(null);
+            setRoomActionAnchor(null);
+          }}
         >
           {roomActionMessage.body && !ended ? (
             <button
@@ -595,10 +614,11 @@ export function RoomChat(props: Props) {
                 setEditing(roomActionMessage.id);
                 setEditBody(roomActionMessage.body ?? "");
                 setRoomActionMessage(null);
+                setRoomActionAnchor(null);
               }}
             >
-              <Pencil size={19} />
-              Editar mensagem
+              <Pencil size={18} />
+              Editar
             </button>
           ) : null}
           <button
@@ -606,18 +626,21 @@ export function RoomChat(props: Props) {
             className="danger"
             onClick={() => void deleteRoomMessage(roomActionMessage)}
           >
-            <Trash2 size={19} />
-            Excluir mensagem
+            <Trash2 size={18} />
+            Excluir
           </button>
           <button
             type="button"
             className="secondary"
-            onClick={() => setRoomActionMessage(null)}
+            onClick={() => {
+              setRoomActionMessage(null);
+              setRoomActionAnchor(null);
+            }}
           >
-            <X size={19} />
+            <X size={18} />
             Cancelar
           </button>
-        </div>
+        </MessageActionPopover>
       ) : null}
 
       <div className="typing-status" role="status">
