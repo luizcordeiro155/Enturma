@@ -586,6 +586,7 @@ export function RoomChat(props: Props) {
               className="composer-icon-button"
               aria-label="Adicionar emoji"
               aria-expanded={emojiOpen}
+              onPointerDown={(event) => event.preventDefault()}
               onClick={() => setEmojiOpen((open) => !open)}
             >
               <Smile size={22} />
@@ -628,6 +629,8 @@ export function RoomChat(props: Props) {
                 }}
                 maxLength={4000}
                 rows={1}
+                enterKeyHint="send"
+                inputMode="text"
                 placeholder={
                   compact
                     ? "Mensagem"
@@ -639,6 +642,7 @@ export function RoomChat(props: Props) {
             <button
               className="composer-send-button"
               aria-label="Enviar mensagem"
+              onPointerDown={(event) => event.preventDefault()}
               disabled={busy || (!draft.trim() && !image)}
             >
               {busy ? <Loader2 className="spin" size={20} /> : <Send size={22} />}
