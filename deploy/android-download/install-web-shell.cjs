@@ -662,14 +662,17 @@ class MainActivity : Activity() {
             safeLeftCssPx = (safeInsets.left / density).toInt()
             keyboardVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
 
+            // Keep the WebView full-height. Resizing the whole WebView made the
+            // footer/navigation jump above the keyboard. The page receives the
+            // IME height as a CSS variable and only the focused composer moves.
             val params = webView.layoutParams as FrameLayout.LayoutParams
-            val targetBottomMargin = if (keyboardVisible) imeInsets.bottom else 0
-            if (params.bottomMargin != targetBottomMargin) {
-                params.bottomMargin = targetBottomMargin
+            if (params.bottomMargin != 0) {
+                params.bottomMargin = 0
                 webView.layoutParams = params
             }
 
-            keyboardBottomCssPx = 0
+            keyboardBottomCssPx =
+                if (keyboardVisible) (imeInsets.bottom / density).toInt() else 0
             syncSafeAreaCss()
             insets
         }
@@ -1254,8 +1257,30 @@ class MainActivity : Activity() {
                 '  html[data-enturma-mobile="true"] .topbar {',
                 '    min-height: calc(58px + var(--native-safe-top, 0px)) !important;',
                 '  }',
+                '  html[data-enturma-mobile="true"][data-enturma-ime="true"] .mobile-bottom-nav {',
+                '    display: none !important;',
+                '  }',
                 '}'
               ].join("\\n");
+
+              if (!window.__enturmaImeFocusBridge) {
+                window.__enturmaImeFocusBridge = true;
+                document.addEventListener("focusin", function(event) {
+                  var target = event.target;
+                  if (!(target instanceof HTMLElement)) return;
+                  if (!target.matches("input, textarea, select, [contenteditable=true]")) return;
+                  if (target.closest(".persistent-composer, .private-composer")) return;
+                  window.setTimeout(function() {
+                    try {
+                      target.scrollIntoView({
+                        block: "center",
+                        inline: "nearest",
+                        behavior: "smooth"
+                      });
+                    } catch (_) {}
+                  }, 180);
+                });
+              }
 
               function syncNativeTheme() {
                 var theme = root.dataset.theme || "light";
