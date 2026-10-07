@@ -1,0 +1,314 @@
+/* Global dark-theme repair layer.
+   Loaded last so legacy light-only surfaces inherit the Enturma dark tokens
+   without changing accent/semantic colors that are intentionally fixed. */
+
+html[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111719;
+  --ink: #f2f6f4;
+  --muted: #aab8b3;
+  --border: #314045;
+  --soft: #1c2529;
+  --surface: #161e21;
+  --surface-raised: #1b2529;
+  --surface-hover: #223035;
+  --surface-strong: #29373c;
+  --danger: #ff8d95;
+  --success: #7dde98;
+}
+
+/* Base shell and common form surfaces */
+html[data-theme="dark"] body,
+html[data-theme="dark"] .app-shell,
+html[data-theme="dark"] .workspace,
+html[data-theme="dark"] .workspace > main,
+html[data-theme="dark"] .workspace > footer,
+html[data-theme="dark"] .topbar {
+  background: var(--bg);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .app-shell :is(input, textarea, select) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .app-shell :is(input, textarea)::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+
+html[data-theme="dark"] .app-shell :is(fieldset, hr) {
+  border-color: var(--border);
+}
+
+/* Secondary actions must stay visibly separate from cards/panels. */
+html[data-theme="dark"] .app-shell .secondary,
+html[data-theme="dark"] .app-shell button.secondary,
+html[data-theme="dark"] .app-shell .button.secondary {
+  background: var(--surface-hover) !important;
+  color: var(--ink) !important;
+  border-color: color-mix(in srgb, var(--border) 82%, var(--ink)) !important;
+}
+
+html[data-theme="dark"] .app-shell .text-button {
+  background: transparent !important;
+  color: var(--ink) !important;
+}
+
+html[data-theme="dark"] .app-shell .option-list button:not([aria-pressed="true"]),
+html[data-theme="dark"] .app-shell .game-tabs button:not([aria-selected="true"]),
+html[data-theme="dark"] .app-shell .bit-switches button:not([aria-pressed="true"]) {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] .app-shell .option-list button:not([aria-pressed="true"]):hover,
+html[data-theme="dark"] .app-shell .game-tabs button:not([aria-selected="true"]):hover,
+html[data-theme="dark"] .app-shell .bit-switches button:not([aria-pressed="true"]):hover {
+  background: var(--surface-hover) !important;
+}
+
+/* Legacy light cards in learning, games, catalog and study surfaces. */
+html[data-theme="dark"] .app-shell :is(
+  .game-studio,
+  .program-console,
+  .command-track,
+  .catalog-note,
+  .catalog-stats article,
+  .review-json,
+  .learning-stats article,
+  .daily-card.completed,
+  .attachment-preview,
+  .profile-editor,
+  .profile-upload,
+  .advanced-game-card,
+  .word-board,
+  .private-backup,
+  .study-guide,
+  .empty
+) {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] .app-shell :is(
+  .command-track,
+  .program-console,
+  .profile-upload,
+  .review-json
+) {
+  background: var(--soft) !important;
+}
+
+html[data-theme="dark"] .app-shell .robot-piece svg {
+  background: var(--surface-raised);
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .app-shell .catalog-badge,
+html[data-theme="dark"] .app-shell .privacy-pill,
+html[data-theme="dark"] .app-shell .reaction,
+html[data-theme="dark"] .app-shell .ai-web-sources a {
+  background: var(--soft) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+
+/* Semantic feedback must not keep light-only fills. */
+html[data-theme="dark"] .app-shell .error,
+html[data-theme="dark"] .app-shell .feedback.error {
+  background: #351f24 !important;
+  color: #ffb8be !important;
+  border-color: #75434a !important;
+}
+
+html[data-theme="dark"] .app-shell .success,
+html[data-theme="dark"] .app-shell .feedback.success {
+  background: #173326 !important;
+  color: #b9f4cb !important;
+  border-color: #356f50 !important;
+}
+
+html[data-theme="dark"] .app-shell .practice-explanation.correct {
+  background: #173326 !important;
+  color: #d9f8e2;
+  border-color: #356f50;
+}
+
+html[data-theme="dark"] .app-shell .practice-explanation.wrong {
+  background: #351f24 !important;
+  color: #ffd2d6;
+  border-color: #75434a;
+}
+
+html[data-theme="dark"] .app-shell .practice-explanation :is(p, small) {
+  color: inherit;
+  opacity: .88;
+}
+
+/* Tables and data views */
+html[data-theme="dark"] .app-shell table {
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .app-shell :is(th, td) {
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .app-shell th {
+  background: var(--soft);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .app-shell tbody tr:hover {
+  background: color-mix(in srgb, var(--surface-hover) 72%, transparent);
+}
+
+/* Dialogs / popovers rendered outside individual feature styles. */
+html[data-theme="dark"] :is(
+  .accessibility-modal,
+  .verification-wait-card,
+  .account-celebration-card,
+  .auth-success-card,
+  .user-profile-popover,
+  .profile-dialog-card
+) {
+  background: var(--surface-raised);
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] :is(
+  .accessibility-modal,
+  .verification-wait-card,
+  .account-celebration-card,
+  .auth-success-card,
+  .user-profile-popover,
+  .profile-dialog-card
+) :is(p, small, .muted) {
+  color: var(--muted);
+}
+
+/* Portfolio / professor / academic suite */
+html[data-theme="dark"] .app-shell :is(
+  .portfolio-settings,
+  .portfolio-project-editor,
+  .teacher-mode-form,
+  .join-class-form,
+  .create-class-form,
+  .teaching-classes,
+  .class-workspace,
+  .assignment-form,
+  .submission-review-row
+) {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .app-shell :is(
+  .teaching-role-guide,
+  .portfolio-public-toggle,
+  .class-row,
+  .portfolio-project-editor > article
+) {
+  background: var(--soft);
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .app-shell .class-row:hover {
+  background: var(--surface-hover) !important;
+}
+
+/* Public portfolio can also be opened while the user is in dark mode. */
+html[data-theme="dark"] .public-portfolio {
+  background: var(--bg);
+  color: var(--ink) !important;
+}
+
+html[data-theme="dark"] .public-portfolio > section,
+html[data-theme="dark"] .public-portfolio :is(
+  .portfolio-intro strong,
+  .portfolio-tags span,
+  .public-projects article,
+  .public-achievements article
+) {
+  border-color: var(--border) !important;
+}
+
+html[data-theme="dark"] .public-portfolio :is(
+  .public-projects article,
+  .public-achievements article
+) {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+html[data-theme="dark"] .public-portfolio :is(
+  .public-achievements span,
+  .public-achievements p
+) {
+  color: var(--muted);
+}
+
+/* Notifications, forum and journey keep the lime accent but repair neutral surfaces. */
+html[data-theme="dark"] .app-shell :is(
+  .notification-card,
+  .notification-row,
+  .forum-aside section,
+  .forum-post,
+  .forum-card,
+  .journey-card,
+  .journey-step,
+  .mission-card
+) {
+  border-color: var(--border);
+}
+
+html[data-theme="dark"] .app-shell :is(
+  .notification-card,
+  .notification-row,
+  .forum-aside section,
+  .forum-post,
+  .forum-card,
+  .journey-card,
+  .mission-card
+) {
+  background: var(--surface);
+  color: var(--ink);
+}
+
+/* Room chat neutral previews were historically forced to white. */
+html[data-theme="dark"] .app-shell :is(
+  .reply-preview,
+  .composer-reply,
+  .attachment-preview
+) {
+  background: var(--soft) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+
+/* Scrollbars and selection follow the active palette. */
+html[data-theme="dark"] {
+  scrollbar-color: var(--border) var(--bg);
+}
+
+html[data-theme="dark"] ::selection {
+  background: var(--accent);
+  color: #163d35;
+}
+
+/* Keep intentionally branded surfaces intact. */
+html[data-theme="dark"] .auth-story,
+html[data-theme="dark"] .ride-mobility-app,
+html[data-theme="dark"] .ride-mobility-boot {
+  color-scheme: dark;
+}
