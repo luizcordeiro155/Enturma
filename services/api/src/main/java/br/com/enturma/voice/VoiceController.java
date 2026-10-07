@@ -18,4 +18,18 @@ public class VoiceController {
   public Object join(@AuthenticationPrincipal Actor a, @PathVariable UUID room) {
     return voice.join(a, room);
   }
+
+  public record Presence(
+      UUID connectionId,
+      boolean connected,
+      boolean microphone,
+      boolean camera,
+      boolean screen,
+      boolean deafened) {}
+
+  @PostMapping("/state")
+  public void state(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID room, @RequestBody Presence state) {
+    voice.state(a, room, state);
+  }
 }

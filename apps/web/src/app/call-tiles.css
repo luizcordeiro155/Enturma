@@ -1,0 +1,253 @@
+/* Media occupies one chosen stage; participants remain visible as independent tiles. */
+.discord-call .call-members {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(220px, 100%), 1fr));
+  gap: 12px;
+  padding: 16px;
+  max-width: 1440px;
+  width: 100%;
+  margin-inline: auto;
+  max-height: none;
+  overflow: visible;
+}
+.discord-call .call-member {
+  --ink: inherit;
+  --muted: inherit;
+  --surface: inherit;
+  --soft: inherit;
+  --border: inherit;
+}
+.discord-call .call-member {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 180px;
+  min-width: 0;
+  padding: 24px 12px 48px;
+  border: 2px solid transparent;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--surface-raised);
+  color: var(--ink);
+}
+.discord-call .call-member.speaking {
+  border-color: var(--success);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--success) 15%, transparent);
+}
+.discord-call .call-member .member-profile-strip {
+  position: relative;
+  z-index: 1;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.discord-call .call-member .member-profile-strip-banner {
+  display: none;
+}
+.discord-call .call-member .member-profile-strip-media {
+  display: none;
+}
+.discord-call .call-member .member-profile-strip-content {
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+}
+.discord-call .call-member .identity-trigger {
+  display: flex !important;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink) !important;
+  text-align: center;
+}
+.discord-call .call-member .identity-trigger small {
+  color: var(--muted);
+}
+.discord-call .call-member .identity-trigger strong {
+  color: inherit;
+}
+.discord-call .call-member .identity-trigger > span:last-child {
+  text-shadow: none;
+}
+.discord-call .call-member > .member-profile-strip {
+  flex: 0 0 auto;
+  width: 100%;
+}
+.discord-call .call-member .identity-avatar {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+}
+.discord-call .call-member-actions {
+  position: absolute;
+  bottom: 10px;
+  inset-inline: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 2;
+  margin: 0;
+}
+.discord-call .call-member-icons {
+  display: flex;
+  gap: 8px;
+  padding: 6px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+}
+.discord-call .call-camera-slot {
+  position: absolute;
+  inset: 0;
+}
+.discord-call .call-camera-slot .call-media-tile {
+  height: 100%;
+  width: 100%;
+  min-height: 0;
+  border: 0;
+  border-radius: 0;
+}
+.discord-call .call-camera-slot video {
+  height: 100%;
+  width: 100%;
+  object-fit: cover;
+}
+.discord-call .call-camera-slot .call-media-label {
+  display: none;
+}
+.discord-call .call-member[data-camera="true"] .member-profile-strip {
+  align-self: flex-start;
+  margin-top: auto;
+  background: rgb(0 0 0 / 0.65);
+  color: #fff;
+  border-radius: 8px;
+  padding: 4px 8px;
+}
+.discord-call .call-member[data-camera="true"] .member-profile-strip {
+  position: absolute;
+  bottom: 48px;
+  left: 8px;
+  width: auto;
+  min-height: 0;
+}
+.discord-call .call-member[data-camera="true"] .identity-trigger {
+  color: #fff !important;
+  text-align: left;
+  gap: 0;
+}
+.discord-call
+  .call-member[data-camera="true"]
+  .member-profile-strip
+  .identity-avatar {
+  display: none;
+}
+.discord-call.has-screen-stage .call-members {
+  display: flex;
+  overflow-x: auto;
+  justify-content: flex-start;
+  overscroll-behavior-x: contain;
+}
+.discord-call.has-screen-stage .call-member {
+  flex: 0 0 200px;
+  min-height: 140px;
+}
+.discord-call .call-video-stage:empty,
+.discord-call .call-video-stage:not(:has(.screen-share:not([hidden]))) {
+  display: none !important;
+}
+.discord-call.has-screen-stage
+  .call-video-stage:has(.screen-share:not([hidden])) {
+  display: grid !important;
+}
+.discord-call .call-video-stage {
+  width: 100%;
+  padding: 12px;
+}
+.discord-call {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+}
+.discord-call .call-topbar {
+  color: var(--ink);
+  background: var(--soft);
+  border-color: var(--border);
+}
+.discord-call .call-topbar small,
+.discord-call .call-speaking-summary {
+  color: var(--muted);
+}
+.discord-call .call-media-tile[hidden] {
+  display: none !important;
+}
+.discord-call .call-video-stage .screen-share:not([hidden]) {
+  min-height: 0 !important;
+  height: min(58dvh, 650px);
+  width: 100%;
+  background: #0c1012;
+}
+.discord-call .call-video-stage .screen-share video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.discord-call .screen-share-person {
+  min-height: 52px !important;
+  padding: 10px 12px !important;
+}
+.discord-call .call-member-screen {
+  background: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--ink) !important;
+}
+.discord-call .call-member:has(.call-member-screen)::after {
+  color: var(--success);
+}
+.global-call-dock .call-members {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  padding: 8px;
+}
+.global-call-dock .call-member {
+  min-height: 116px;
+  padding: 12px 6px 40px;
+}
+.global-call-dock .call-member .identity-avatar {
+  height: 40px;
+  width: 40px;
+}
+.global-call-dock .discord-call {
+  max-height: 65dvh;
+  overflow-y: auto;
+}
+.global-call-dock .discord-call .call-video-stage .screen-share:not([hidden]) {
+  height: 190px;
+}
+.global-call-dock .call-controls {
+  position: sticky;
+  bottom: 0;
+  z-index: 3;
+  background: var(--surface);
+}
+@media (max-width: 760px) {
+  .discord-call .call-members {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+  .discord-call .call-member {
+    min-height: 158px;
+  }
+  .discord-call .call-member-screen span {
+    display: inline;
+    font-size: 0.7rem;
+  }
+  .discord-call .call-member-screen {
+    width: auto !important;
+    padding: 4px 6px !important;
+  }
+  .discord-call .call-member-icons {
+    gap: 3px;
+  }
+}

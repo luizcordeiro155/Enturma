@@ -1,5 +1,5 @@
 import React from "react";
-import { describe, it, expect, vi, afterEach } from "vitest";
+import { describe, it, expect, vi, afterEach, beforeEach } from "vitest";
 import {
   render,
   screen,
@@ -8,12 +8,29 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { AuthForm } from "./auth-form";
-vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn(), replace: vi.fn() }) }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
+}));
 vi.mock("@/lib/api", () => ({
   api: vi.fn().mockRejectedValue(new Error("E-mail ou senha inválidos.")),
   post: vi.fn().mockRejectedValue(new Error("E-mail ou senha inválidos.")),
 }));
-afterEach(() => { cleanup(); localStorage.clear(); });
+beforeEach(() => {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn((media: string) => ({
+      media,
+      matches: false,
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+    })),
+  );
+});
+afterEach(() => {
+  cleanup();
+  localStorage.clear();
+  vi.unstubAllGlobals();
+});
 describe("autenticação", () => {
   it("apresenta erro de credenciais e libera nova tentativa", async () => {
     render(<AuthForm mode="login" />);
@@ -38,7 +55,9 @@ describe("autenticação", () => {
   });
   it("oferece manter conectado no login", () => {
     render(<AuthForm mode="login" />);
-    const remember = screen.getByLabelText("Manter conectado") as HTMLInputElement;
+    const remember = screen.getByLabelText(
+      "Manter conectado",
+    ) as HTMLInputElement;
     expect(remember.checked).toBe(true);
     fireEvent.click(remember);
     expect(remember.checked).toBe(false);

@@ -626,7 +626,7 @@ export function RoomView({ id }: { id: string }) {
                         id={member.userId}
                         name={member.name}
                         subtitle={
-                          member.role === "HOST"
+                          member.inCall ? (member.screen ? "Transmitindo tela" : member.camera ? "Na chamada · câmera ligada" : "Na chamada") : member.role === "HOST"
                             ? "Anfitrião"
                             : member.leftAt
                               ? "Saiu da sessão"
@@ -734,7 +734,7 @@ export function RoomView({ id }: { id: string }) {
                             id={member.userId}
                             name={member.name}
                             subtitle={
-                              member.role === "HOST"
+                              member.inCall ? (member.screen ? "Transmitindo tela" : member.camera ? "Na chamada · câmera ligada" : "Na chamada") : member.role === "HOST"
                                 ? "Anfitrião"
                                 : member.leftAt
                                   ? "Offline"

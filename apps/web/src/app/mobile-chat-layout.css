@@ -463,8 +463,14 @@
     transform: none !important;
   }
 
-  .room-active-shell .room-section-chat .persistent-composer {
+  .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer {
     flex: 0 0 auto !important;
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
   }
 
   html[data-enturma-ime="true"]

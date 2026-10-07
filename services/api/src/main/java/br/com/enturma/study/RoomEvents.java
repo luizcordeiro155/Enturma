@@ -35,7 +35,9 @@ public class RoomEvents {
             new br.com.enturma.notifications.AppChanged(
                 kind.equals("WELCOME")
                     ? "room_member_joined"
-                    : kind.equals("FAREWELL") ? "room_member_left" : "room_expiring",
+                    : kind.equals("FAREWELL")
+                        ? "room_member_left"
+                        : kind.equals("EXPIRING") ? "room_expiring" : "rooms_changed",
                 recipients));
     }
   }

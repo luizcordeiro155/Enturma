@@ -15,14 +15,19 @@ import { RideActivity } from "@/components/ride-activity";
 import "./study-workspace.css";
 import "./responsive-shell.css";
 import { CallSessionProvider } from "@/components/call-session-provider";
+import { PrivateCallsProvider } from "@/components/private-calls";
 import "./community-v3.css";
 import "./ride-mobility-polish.css";
 import "./dark-theme-polish.css";
 import "./mobile-chat-layout.css";
 import "./profile-call-polish.css";
 import "./chat-message-polish.css";
+import "./intro-experience.css";
+import "./call-tiles.css";
+import "./theme-surfaces.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
+import { ThemeSync } from "@/components/theme-sync";
 import { MobilePushRegistration } from "@/components/mobile-push-registration";
 import { WebPushRegistration } from "@/components/web-push-registration";
 import { AppShellStateProvider } from "@/components/app-shell-state";
@@ -53,15 +58,18 @@ export default function Layout({
       </head>
       <body>
         <Motion />
+        <ThemeSync />
         <MobilePushRegistration />
         <WebPushRegistration />
         <PwaProvider>
           <CallSessionProvider>
-            <DesktopUpdateProvider>
-              <AppShellStateProvider>
-                <RideActivity>{children}</RideActivity>
-              </AppShellStateProvider>
-            </DesktopUpdateProvider>
+            <PrivateCallsProvider>
+              <DesktopUpdateProvider>
+                <AppShellStateProvider>
+                  <RideActivity>{children}</RideActivity>
+                </AppShellStateProvider>
+              </DesktopUpdateProvider>
+            </PrivateCallsProvider>
           </CallSessionProvider>
         </PwaProvider>
       </body>

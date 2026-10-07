@@ -121,6 +121,9 @@ export interface Room {
     name: string;
     role: string;
     online?: boolean;
+    inCall?: boolean;
+    camera?: boolean;
+    screen?: boolean;
     joinedAt?: string;
     leftAt?: string | null;
   })[];

@@ -36,7 +36,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   }
   await register(page, a);
   await page.goto("/profile");
-  await expect(page.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-realtime",
+    "connected",
+    { timeout: 20000 },
+  );
   await expect(page.locator(".public-profile-card")).toHaveCount(1);
   await expect(page.locator(".profile-details-editor form")).toHaveCount(1);
   const png = await page.evaluate(() => {
@@ -64,14 +68,14 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
         buffer: Buffer.from(png, "base64"),
       });
     const crop = page.getByRole("dialog", {
-      name: kind === "avatar" ? "Editar foto de perfil" : "Editar banner",
+      name: kind === "avatar" ? "Ajustar foto de perfil" : "Ajustar banner",
     });
     await expect(crop).toBeVisible();
     await crop.getByLabel("Zoom", { exact: true }).fill("1.5");
-    await crop.getByLabel("Posição horizontal").fill("75");
+    await crop.getByLabel("Horizontal", { exact: true }).fill("75");
     if (kind === "avatar")
       await page.screenshot({ path: "../../.local/profile-crop.png" });
-    await crop.getByRole("button", { name: "Aplicar recorte" }).click();
+    await crop.getByRole("button", { name: "Aplicar", exact: true }).click();
     await expect(crop).not.toBeVisible();
     await expect(
       page.getByRole("status").filter({ hasText: "Imagem atualizada" }),
@@ -86,12 +90,16 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     }, kind);
     expect(dimensions).toEqual([width, height]);
   }
-  await page.getByLabel("Cor principal do perfil", { exact: true }).fill("#b328ac");
+  await page
+    .getByLabel("Cor principal do perfil", { exact: true })
+    .fill("#b328ac");
   await expect
     .poll(() =>
-      page.locator(".public-profile-card").evaluate((el) =>
-        getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
-      ),
+      page
+        .locator(".public-profile-card")
+        .evaluate((el) =>
+          getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
+        ),
     )
     .toBe("#b328ac");
   await page.getByLabel("Status personalizado").fill("Estudando JavaScript");
@@ -105,9 +113,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await page.reload();
   await expect
     .poll(() =>
-      page.locator(".public-profile-card").evaluate((el) =>
-        getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
-      ),
+      page
+        .locator(".public-profile-card")
+        .evaluate((el) =>
+          getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
+        ),
     )
     .toBe("#b328ac");
   await page.screenshot({
@@ -120,7 +130,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   const other = await peer.newPage();
   await register(other, b);
   await initializeConversationKeys(other);
-  await expect(other.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
+  await expect(other.locator("html")).toHaveAttribute(
+    "data-realtime",
+    "connected",
+    { timeout: 20000 },
+  );
   await page.getByLabel("Adicionar pelo nome de usuário").fill(b);
   await page.getByRole("button", { name: "Enviar convite" }).click();
   await expect(
@@ -153,9 +167,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await other.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
-  // Re-selecting the active friend must preserve the established key and draft.
+  // Incoming refreshes must preserve the established key and the typed draft.
   await page.getByLabel("Mensagem privada").fill("Rascunho preservado");
-  await page.getByRole("button", { name: "Conversar", exact: true }).dblclick();
+  await page.evaluate(() =>
+    window.dispatchEvent(new Event("enturma-live-ready")),
+  );
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(page.getByLabel("Mensagem privada")).toHaveValue(
     "Rascunho preservado",
@@ -171,26 +187,24 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     .fill("Conversa privada ponta a ponta 🔒");
   await page.getByLabel("Mensagem privada").press("Enter");
   await expect(
-    other.getByText("Conversa privada ponta a ponta 🔒", { exact: true }),
+    other
+      .locator(".private-messages")
+      .getByText("Conversa privada ponta a ponta 🔒", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
   await expect(
     other.getByRole("button", { name: "Nova mensagem · ir para ela" }),
-  ).toBeVisible();
-  // A mensagem privada aberta usa o aviso local "Nova mensagem" e não deve
-  // aumentar o contador global. O contador pode já conter o convite aceito.
+  ).not.toBeVisible();
+  // A message already visible at the bottom needs neither a local notice nor
+  // an additional global notification. The accepted invitation may be unread.
   await expect
     .poll(async () =>
       (await other.locator(".notification-count").count())
-        ? Number((await other.locator(".notification-count").textContent()) || 0)
+        ? Number(
+            (await other.locator(".notification-count").textContent()) || 0,
+          )
         : 0,
     )
     .toBe(unreadBeforePrivateMessage);
-  await other
-    .getByRole("button", { name: "Nova mensagem · ir para ela" })
-    .click();
-  await expect(other.locator(".notification-target")).toContainText(
-    "Conversa privada ponta a ponta",
-  );
   await other.goto("/home");
   await page
     .getByLabel("Mensagem privada")
@@ -207,12 +221,16 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     .click();
   await expect(other).toHaveURL(/friends\?chat=/);
   await expect(
-    other.getByText(`Olá @${b}, confira a revisão`, { exact: true }),
+    other
+      .locator(".private-messages")
+      .getByText(`Olá @${b}, confira a revisão`, { exact: true }),
   ).toBeVisible();
   await other.getByLabel("Mensagem privada").fill("Resposta protegida");
   await other.getByRole("button", { name: "Enviar mensagem" }).click();
   await expect(
-    page.getByText("Resposta protegida", { exact: true }),
+    page
+      .locator(".private-messages")
+      .getByText("Resposta protegida", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
   await page.getByText("Código de segurança", { exact: true }).click();
   await other.getByText("Código de segurança", { exact: true }).click();
@@ -245,12 +263,22 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   expect(popover!.y + popover!.height).toBeLessThanOrEqual(viewport.height);
   // O perfil público atual é um painel centralizado estilo Discord no desktop.
   // innerWidth/innerHeight refletem o layout viewport usado pelos 50% do CSS.
-  expect(
-    Math.abs(popover!.x + popover!.width / 2 - viewport.width / 2),
-  ).toBeLessThan(16);
-  expect(
-    Math.abs(popover!.y + popover!.height / 2 - viewport.height / 2),
-  ).toBeLessThan(16);
+  await expect
+    .poll(async () => {
+      const bounds = await page
+        .getByRole("dialog", { name: `Perfil de ${b}` })
+        .boundingBox();
+      return Math.abs(bounds!.x + bounds!.width / 2 - viewport.width / 2);
+    })
+    .toBeLessThan(16);
+  await expect
+    .poll(async () => {
+      const bounds = await page
+        .getByRole("dialog", { name: `Perfil de ${b}` })
+        .boundingBox();
+      return Math.abs(bounds!.y + bounds!.height / 2 - viewport.height / 2);
+    })
+    .toBeLessThan(16);
   await page.screenshot({ path: "../../.local/profile-popover.png" });
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
@@ -276,8 +304,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await page.reload();
   await page.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(
-    page.getByText("Resposta protegida", { exact: true }),
+    page
+      .locator(".private-messages")
+      .getByText("Resposta protegida", { exact: true }),
   ).toBeVisible();
+  await page.getByRole("button", { name: "Voltar para conversas" }).click();
   const sync = page.locator("#private-sync");
   await sync
     .getByLabel("Senha das conversas", { exact: true })
@@ -318,16 +349,19 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(unlock.getByRole("alert")).toContainText(
     "Confira a senha das conversas",
   );
-  await expect(fresh.getByLabel("Mensagem privada")).toBeDisabled();
+  await expect(fresh.getByLabel("Mensagem privada")).not.toBeVisible();
   await unlock
     .getByLabel("Senha das conversas", { exact: true })
     .fill("conversation-sync-secret-123");
   await unlock
     .getByRole("button", { name: "Desbloquear conversas", exact: true })
     .click();
+  await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(fresh.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(
-    fresh.getByText("Resposta protegida", { exact: true }),
+    fresh
+      .locator(".private-messages")
+      .getByText("Resposta protegida", { exact: true }),
   ).toBeVisible();
   await fresh.getByText("Código de segurança", { exact: true }).click();
   expect(await fresh.locator(".safety-code").textContent()).toEqual(
@@ -339,13 +373,17 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await fresh.getByLabel("Mensagem privada").press("Enter");
   await other.bringToFront();
   await expect(
-    other.getByText("Enviado pelo novo dispositivo", { exact: true }),
+    other
+      .locator(".private-messages")
+      .getByText("Enviado pelo novo dispositivo", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
   await fresh.reload();
   await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(fresh.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(
-    fresh.getByText("Resposta protegida", { exact: true }),
+    fresh
+      .locator(".private-messages")
+      .getByText("Resposta protegida", { exact: true }),
   ).toBeVisible();
   await clean.close();
   await peer.close();
