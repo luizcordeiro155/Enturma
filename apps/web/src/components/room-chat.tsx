@@ -17,6 +17,7 @@ import {
 import { UserIdentity } from "./user-identity";
 import { ConversationNotice, useNotificationTarget } from "./notifications";
 import { api } from "@/lib/api";
+import { setNativeChatComposerFocused } from "@/lib/native-chat-ime";
 
 import { RichMessage } from "./rich-message";
 
