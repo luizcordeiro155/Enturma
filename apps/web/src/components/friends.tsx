@@ -33,6 +33,11 @@ import {
 import { PrivateKeySync } from "./private-key-sync";
 import { Shell } from "./shell";
 import { UserIdentity, type PublicProfile } from "./user-identity";
+import {
+  MessageActionPopover,
+  messageActionAnchor,
+  type MessageActionAnchor,
+} from "./message-action-popover";
 type Friend = Omit<PublicProfile, "id"> & {
   id: string;
   userId: string;
@@ -89,6 +94,8 @@ export function Friends() {
   const [atLatest, setAtLatest] = useState(true);
   const [privateActionMessage, setPrivateActionMessage] =
     useState<PrivateMessage | null>(null);
+  const [privateActionAnchor, setPrivateActionAnchor] =
+    useState<MessageActionAnchor | null>(null);
   const [editingPrivate, setEditingPrivate] = useState<PrivateMessage | null>(
     null,
   );
@@ -463,7 +470,9 @@ export function Friends() {
     if (message.senderId !== me?.id || !isMobileTextEntryContext()) return;
     cancelPrivateLongPress();
     longPressOrigin.current = { x: event.clientX, y: event.clientY };
+    const target = event.currentTarget;
     longPressTimer.current = setTimeout(() => {
+      setPrivateActionAnchor(messageActionAnchor(target));
       setPrivateActionMessage(message);
       longPressTimer.current = null;
       longPressOrigin.current = null;
@@ -488,6 +497,7 @@ export function Friends() {
       });
       setMessages((old) => old.filter((item) => item.id !== message.id));
       setPrivateActionMessage(null);
+      setPrivateActionAnchor(null);
       setEditingPrivate(null);
     } catch (cause) {
       setError((cause as Error).message);
@@ -520,6 +530,7 @@ export function Friends() {
       );
       setEditingPrivate(null);
       setPrivateActionMessage(null);
+      setPrivateActionAnchor(null);
     } catch (cause) {
       setError((cause as Error).message);
     }
@@ -896,6 +907,13 @@ export function Friends() {
                         viewport.clientHeight <
                       96;
                     setAtLatest(nearLatest.current);
+                    if (nearLatest.current) {
+                      window.dispatchEvent(
+                        new CustomEvent("enturma-conversation-latest", {
+                          detail: { context: `friend:${selected.id}` },
+                        }),
+                      );
+                    }
                   }}
                 >
                   {older ? (
@@ -924,7 +942,7 @@ export function Friends() {
                     <article
                       key={m.id}
                       id={`message-${m.id}`}
-                      className={m.senderId === me?.id ? "mine" : ""}
+                      className={`${m.senderId === me?.id ? "mine" : ""} ${privateActionMessage?.id === m.id ? "message-action-selected" : ""}`}
                       onPointerDown={(event) => startPrivateLongPress(event, m)}
                       onPointerMove={movePrivateLongPress}
                       onPointerUp={cancelPrivateLongPress}
@@ -935,6 +953,9 @@ export function Friends() {
                           isMobileTextEntryContext()
                         ) {
                           event.preventDefault();
+                          setPrivateActionAnchor(
+                            messageActionAnchor(event.currentTarget),
+                          );
                           setPrivateActionMessage(m);
                         }
                       }}
@@ -1000,12 +1021,13 @@ export function Friends() {
                     </article>
                   ))}
                 </div>
-                {privateActionMessage ? (
-                  <div
-                    className="mobile-message-actions-sheet"
-                    role="dialog"
-                    aria-modal="true"
-                    aria-label="Ações da mensagem"
+                {privateActionMessage && privateActionAnchor ? (
+                  <MessageActionPopover
+                    anchor={privateActionAnchor}
+                    onDismiss={() => {
+                      setPrivateActionMessage(null);
+                      setPrivateActionAnchor(null);
+                    }}
                   >
                     <button
                       type="button"
@@ -1013,10 +1035,11 @@ export function Friends() {
                         setEditPrivateText(privateActionMessage.text);
                         setEditingPrivate(privateActionMessage);
                         setPrivateActionMessage(null);
+                        setPrivateActionAnchor(null);
                       }}
                     >
-                      <Pencil size={19} />
-                      Editar mensagem
+                      <Pencil size={18} />
+                      Editar
                     </button>
                     <button
                       type="button"
@@ -1025,18 +1048,21 @@ export function Friends() {
                         void deletePrivateMessage(privateActionMessage)
                       }
                     >
-                      <Trash2 size={19} />
-                      Excluir mensagem
+                      <Trash2 size={18} />
+                      Excluir
                     </button>
                     <button
                       type="button"
                       className="secondary"
-                      onClick={() => setPrivateActionMessage(null)}
+                      onClick={() => {
+                        setPrivateActionMessage(null);
+                        setPrivateActionAnchor(null);
+                      }}
                     >
-                      <X size={19} />
+                      <X size={18} />
                       Cancelar
                     </button>
-                  </div>
+                  </MessageActionPopover>
                 ) : null}
 
                 <form

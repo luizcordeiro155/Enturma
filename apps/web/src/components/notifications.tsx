@@ -438,6 +438,15 @@ export function ConversationNotice({ context }: { context: string }) {
   useEffect(() => {
     window.dispatchEvent(new Event("enturma-notifications_changed"));
   }, [context]);
+  useEffect(() => {
+    const onLatest = (event: Event) => {
+      const detail = (event as CustomEvent<{ context?: string }>).detail;
+      if (detail?.context === context && notice?.id) setDismissed(notice.id);
+    };
+    window.addEventListener("enturma-conversation-latest", onLatest);
+    return () =>
+      window.removeEventListener("enturma-conversation-latest", onLatest);
+  }, [context, notice?.id]);
   return notice ? (
     <button
       className="conversation-notice"

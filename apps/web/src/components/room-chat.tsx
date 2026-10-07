@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Message, Profile, RoomSystemEvent } from "@enturma/contracts";
 import {
   BookOpen,
@@ -24,6 +24,11 @@ import {
 } from "@/lib/native-chat-ime";
 
 import { RichMessage } from "./rich-message";
+import {
+  MessageActionPopover,
+  messageActionAnchor,
+  type MessageActionAnchor,
+} from "./message-action-popover";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
 
@@ -80,10 +85,13 @@ export function RoomChat(props: Props) {
   const [editBody, setEditBody] = useState("");
   const [unseen, setUnseen] = useState(0);
   const [firstUnread, setFirstUnread] = useState<string | null>(null);
+  const [roomAtLatest, setRoomAtLatest] = useState(true);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [roomActionMessage, setRoomActionMessage] = useState<Message | null>(
     null,
   );
+  const [roomActionAnchor, setRoomActionAnchor] =
+    useState<MessageActionAnchor | null>(null);
   const newestRef = useRef<string | undefined>(undefined);
   const countRef = useRef(messages.length);
   useNotificationTarget();
@@ -100,6 +108,28 @@ export function RoomChat(props: Props) {
     () => new Map(messages.map((message) => [message.id, message])),
     [messages],
   );
+
+  const scrollRoomToLatest = useCallback((behavior: ScrollBehavior = "auto") => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior });
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({
+        block: "end",
+        behavior: "auto",
+      });
+      viewport.scrollTop = viewport.scrollHeight;
+    });
+    nearBottom.current = true;
+    setRoomAtLatest(true);
+    setUnseen(0);
+    setFirstUnread(null);
+    window.dispatchEvent(
+      new CustomEvent("enturma-conversation-latest", {
+        detail: { context: `room:${roomId}` },
+      }),
+    );
+  }, [roomId]);
 
   useEffect(() => {
     const latest = messages.at(-1)?.id;
@@ -124,16 +154,11 @@ export function RoomChat(props: Props) {
       scrollRef.current
     ) {
       requestAnimationFrame(() => {
-        const viewport = scrollRef.current;
-        if (!viewport) return;
-        viewport.scrollTop = viewport.scrollHeight;
-        nearBottom.current = true;
+        scrollRoomToLatest("auto");
         forceFollowLatest.current = false;
-        setUnseen(0);
-        setFirstUnread(null);
       });
     }
-  }, [messages, compact]);
+  }, [messages, compact, scrollRoomToLatest]);
 
   function selectImage(file: File | null) {
     if (!file) return;
@@ -180,7 +205,9 @@ export function RoomChat(props: Props) {
       return;
     cancelRoomLongPress();
     roomLongPressOrigin.current = { x: event.clientX, y: event.clientY };
+    const target = event.currentTarget;
     roomLongPressTimer.current = setTimeout(() => {
+      setRoomActionAnchor(messageActionAnchor(target));
       setRoomActionMessage(message);
       roomLongPressTimer.current = null;
       roomLongPressOrigin.current = null;
@@ -203,6 +230,7 @@ export function RoomChat(props: Props) {
         method: "DELETE",
       });
       setRoomActionMessage(null);
+      setRoomActionAnchor(null);
       await onReloadMessages();
     } catch (cause) {
       setError((cause as Error).message);
@@ -216,6 +244,7 @@ export function RoomChat(props: Props) {
   return (
     <section
       data-notification-context={`room:${roomId}`}
+      data-notification-at-latest={roomAtLatest ? "true" : "false"}
       className={compact ? "persistent-chat call-chat-pane" : "persistent-chat"}
     >
       <div className="chat-heading persistent-heading">
@@ -243,9 +272,15 @@ export function RoomChat(props: Props) {
           const el = e.currentTarget;
           nearBottom.current =
             el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+          setRoomAtLatest(nearBottom.current);
           if (nearBottom.current) {
             setUnseen(0);
             setFirstUnread(null);
+            window.dispatchEvent(
+              new CustomEvent("enturma-conversation-latest", {
+                detail: { context: `room:${roomId}` },
+              }),
+            );
           }
         }}
       >
@@ -255,6 +290,7 @@ export function RoomChat(props: Props) {
             disabled={busy}
             onClick={async () => {
               nearBottom.current = false;
+              setRoomAtLatest(false);
               const el = scrollRef.current;
               const height = el?.scrollHeight ?? 0;
               await onLoadOlder();
@@ -328,7 +364,7 @@ export function RoomChat(props: Props) {
               : undefined;
             return (
               <article
-                className={`message persistent-message ${message.userId === me?.id ? "mine" : ""}`}
+                className={`message persistent-message ${message.userId === me?.id ? "mine" : ""} ${roomActionMessage?.id === message.id ? "message-action-selected" : ""}`}
                 key={message.id}
                 onPointerDown={(event) => startRoomLongPress(event, message)}
                 onPointerMove={moveRoomLongPress}
@@ -341,6 +377,9 @@ export function RoomChat(props: Props) {
                     isMobileTextEntryContext()
                   ) {
                     event.preventDefault();
+                    setRoomActionAnchor(
+                      messageActionAnchor(event.currentTarget),
+                    );
                     setRoomActionMessage(message);
                   }
                 }}
@@ -564,7 +603,7 @@ export function RoomChat(props: Props) {
             );
           })
         )}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} className="chat-bottom-spacer" aria-hidden="true" />
       </div>
 
       {unseen > 0 && (
@@ -572,21 +611,19 @@ export function RoomChat(props: Props) {
           type="button"
           className="chat-unread"
           onClick={() => {
-            if (scrollRef.current)
-              scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            nearBottom.current = true;
-            setUnseen(0);
+            scrollRoomToLatest("smooth");
           }}
         >
           {unseen} nova(s) mensagem(ns) ↓
         </button>
       )}
-      {roomActionMessage ? (
-        <div
-          className="mobile-message-actions-sheet"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Ações da mensagem"
+      {roomActionMessage && roomActionAnchor ? (
+        <MessageActionPopover
+          anchor={roomActionAnchor}
+          onDismiss={() => {
+            setRoomActionMessage(null);
+            setRoomActionAnchor(null);
+          }}
         >
           {roomActionMessage.body && !ended ? (
             <button
@@ -595,10 +632,11 @@ export function RoomChat(props: Props) {
                 setEditing(roomActionMessage.id);
                 setEditBody(roomActionMessage.body ?? "");
                 setRoomActionMessage(null);
+                setRoomActionAnchor(null);
               }}
             >
-              <Pencil size={19} />
-              Editar mensagem
+              <Pencil size={18} />
+              Editar
             </button>
           ) : null}
           <button
@@ -606,18 +644,21 @@ export function RoomChat(props: Props) {
             className="danger"
             onClick={() => void deleteRoomMessage(roomActionMessage)}
           >
-            <Trash2 size={19} />
-            Excluir mensagem
+            <Trash2 size={18} />
+            Excluir
           </button>
           <button
             type="button"
             className="secondary"
-            onClick={() => setRoomActionMessage(null)}
+            onClick={() => {
+              setRoomActionMessage(null);
+              setRoomActionAnchor(null);
+            }}
           >
-            <X size={19} />
+            <X size={18} />
             Cancelar
           </button>
-        </div>
+        </MessageActionPopover>
       ) : null}
 
       <div className="typing-status" role="status">
