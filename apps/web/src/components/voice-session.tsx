@@ -64,7 +64,6 @@ export default function VoiceSession({
     audio.current?.replaceChildren();
     videos.current?.replaceChildren();
     activeScreenShareRef.current = null;
-    setActiveScreenShare(null);
   }
 
   function syncScreenStage(identity: string | null) {
@@ -450,6 +449,7 @@ export default function VoiceSession({
   }, [deafened]);
   const speaking = members.filter((member) => member.speaking);
   const screenSharers = members.filter((member) => member.screen);
+  const selectedScreenShare = ended ? null : activeScreenShare;
 
   return (
     <div className="call-panel discord-call">
@@ -484,7 +484,7 @@ export default function VoiceSession({
           {screenSharers.length ? (
             <div className="screen-share-status">
               {screenSharers.map((sharer) => {
-                const selected = activeScreenShare === sharer.identity;
+                const selected = selectedScreenShare === sharer.identity;
                 return (
                   <button
                     type="button"
@@ -538,13 +538,13 @@ export default function VoiceSession({
                     <button
                       type="button"
                       className={
-                        activeScreenShare === member.identity
+                        selectedScreenShare === member.identity
                           ? "call-member-screen active"
                           : "call-member-screen"
                       }
                       onClick={() =>
                         syncScreenStage(
-                          activeScreenShare === member.identity
+                          selectedScreenShare === member.identity
                             ? null
                             : member.identity,
                         )
@@ -552,7 +552,7 @@ export default function VoiceSession({
                     >
                       <MonitorUp size={15} />
                       <span>
-                        {activeScreenShare === member.identity
+                        {selectedScreenShare === member.identity
                           ? "Ocultar tela"
                           : "Ver tela"}
                       </span>
