@@ -1,0 +1,489 @@
+/* Mobile conversation layout v10
+   Private conversations and study-room chat behave as dedicated messaging screens.
+   The message list is the only scrollable surface; the composer stays in the
+   conversation flow and the Android IME only reduces that conversation viewport. */
+
+.private-chat-back {
+  display: none;
+}
+
+@media (max-width: 760px) {
+  /* ---------- shared WhatsApp-style composer ---------- */
+  .enturma-message-composer {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 6px 8px
+      calc(
+        6px +
+          max(
+            env(safe-area-inset-bottom, 0px),
+            var(--native-safe-bottom, 0px)
+          )
+      ) !important;
+    overflow: visible !important;
+    border: 0 !important;
+    border-top: 1px solid var(--room-border, var(--border)) !important;
+    border-radius: 0 !important;
+    background: var(--room-panel, var(--surface)) !important;
+    box-shadow: none !important;
+    position: relative !important;
+    inset: auto !important;
+    transform: none !important;
+    transition: none !important;
+    animation: none !important;
+  }
+
+  .enturma-message-composer .composer-main-row {
+    display: flex !important;
+    align-items: flex-end !important;
+    gap: 5px !important;
+    width: 100%;
+    min-height: 50px;
+    padding: 4px !important;
+    box-sizing: border-box;
+    border: 1px solid var(--room-border, var(--border));
+    border-radius: 25px;
+    background: var(--room-subtle, var(--soft));
+    transition: border-color 120ms ease, box-shadow 120ms ease;
+  }
+
+  .enturma-message-composer .composer-main-row:focus-within {
+    border-color: color-mix(
+      in srgb,
+      var(--room-accent, var(--accent)) 70%,
+      var(--room-border, var(--border))
+    );
+    box-shadow: 0 0 0 2px
+      color-mix(in srgb, var(--room-accent, var(--accent)) 22%, transparent);
+  }
+
+  .enturma-message-composer .composer-text-field {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    margin: 0 !important;
+  }
+
+  .enturma-message-composer .composer-text-field textarea {
+    display: block !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    min-height: 42px !important;
+    height: 42px;
+    max-height: 96px !important;
+    margin: 0 !important;
+    padding: 10px 7px !important;
+    box-sizing: border-box;
+    resize: none !important;
+    overflow-y: auto;
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    background: transparent !important;
+    color: var(--room-ink, var(--ink)) !important;
+    box-shadow: none !important;
+    font-size: 16px !important;
+    line-height: 1.35;
+  }
+
+  .enturma-message-composer .composer-text-field textarea:focus,
+  .enturma-message-composer .composer-text-field textarea:focus-visible {
+    outline: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .enturma-message-composer .composer-icon-button,
+  .enturma-message-composer .composer-send-button {
+    flex: 0 0 42px !important;
+    width: 42px !important;
+    height: 42px !important;
+    min-width: 42px !important;
+    min-height: 42px !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    display: grid !important;
+    place-items: center;
+    border: 0 !important;
+    border-radius: 50% !important;
+    box-shadow: none !important;
+  }
+
+  .enturma-message-composer .composer-icon-button {
+    background: transparent !important;
+    color: var(--room-ink, var(--ink)) !important;
+  }
+
+  .enturma-message-composer .composer-send-button {
+    background: var(--room-accent, var(--accent)) !important;
+    color: var(--room-accent-ink, #173a32) !important;
+  }
+
+  .enturma-message-composer .composer-send-button:disabled {
+    opacity: 0.48;
+  }
+
+  .enturma-message-composer .composer-image-button {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .enturma-message-composer .composer-image-button input {
+    position: absolute !important;
+    width: 1px !important;
+    height: 1px !important;
+    opacity: 0 !important;
+    pointer-events: none;
+  }
+
+  .enturma-message-composer .composer-emoji-tray {
+    display: flex !important;
+    gap: 5px;
+    max-width: 100%;
+    overflow-x: auto;
+    padding: 4px 2px 6px;
+    overscroll-behavior-x: contain;
+  }
+
+  .enturma-message-composer .composer-emoji-tray button {
+    flex: 0 0 40px;
+    width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .enturma-message-composer .attachment-preview,
+  .enturma-message-composer .composer-reply {
+    width: 100%;
+    max-height: 118px;
+    margin: 0 0 6px !important;
+    overflow: hidden;
+    box-sizing: border-box;
+    border-radius: 12px;
+  }
+
+  /* Never float a composer independently from its conversation. */
+  html[data-enturma-ime="true"] .persistent-composer.enturma-message-composer,
+  html[data-enturma-ime="true"] .private-composer.enturma-message-composer {
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    transform: none !important;
+  }
+
+  /* ---------- private conversation becomes its own mobile screen ---------- */
+  html[data-enturma-private-chat="true"],
+  html[data-enturma-private-chat="true"] body {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
+  html[data-enturma-private-chat="true"] .app-shell {
+    display: block !important;
+    width: 100%;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-enturma-private-chat="true"] .sidebar,
+  html[data-enturma-private-chat="true"] .topbar,
+  html[data-enturma-private-chat="true"] .app-legal-footer,
+  html[data-enturma-private-chat="true"] .mobile-bottom-nav,
+  html[data-enturma-private-chat="true"] .community-feedback {
+    display: none !important;
+  }
+
+  html[data-enturma-private-chat="true"] .workspace {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-enturma-private-chat="true"] .workspace > main {
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-enturma-private-chat="true"] .friends-page.mobile-private-chat-open {
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-enturma-private-chat="true"]
+    .friends-page.mobile-private-chat-open
+    > :not(.friends-workspace) {
+    display: none !important;
+  }
+
+  html[data-enturma-private-chat="true"] .friends-workspace {
+    display: block !important;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+  }
+
+  html[data-enturma-private-chat="true"] .friends-workspace > aside {
+    display: none !important;
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: var(--room-bg, var(--bg)) !important;
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat-header {
+    flex: 0 0 auto;
+    min-height: calc(
+      62px +
+        max(
+          env(safe-area-inset-top, 0px),
+          var(--native-safe-top, 0px)
+        )
+    );
+    display: grid !important;
+    grid-template-columns: 46px minmax(0, 1fr);
+    align-items: end;
+    gap: 6px;
+    margin: 0 !important;
+    padding:
+      calc(
+        7px +
+          max(
+            env(safe-area-inset-top, 0px),
+            var(--native-safe-top, 0px)
+          )
+      )
+      10px 7px !important;
+    box-sizing: border-box;
+    border-bottom: 1px solid var(--room-border, var(--border));
+    background: var(--room-panel, var(--surface));
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat-back {
+    display: grid !important;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    min-height: 44px;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 50% !important;
+    background: transparent !important;
+    color: var(--room-ink, var(--ink)) !important;
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat-peer {
+    min-width: 0;
+    align-self: center;
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat-peer .identity-trigger {
+    width: 100%;
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat-header .privacy-pill {
+    display: none !important;
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat > details {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    padding: 7px 12px !important;
+    border-bottom: 1px solid var(--room-border, var(--border));
+    background: var(--room-panel, var(--surface));
+    font-size: 0.78rem;
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat > details > summary {
+    min-height: 30px;
+    display: flex;
+    align-items: center;
+  }
+
+  html[data-enturma-private-chat="true"] .private-connection-status,
+  html[data-enturma-private-chat="true"] .conversation-notice {
+    flex: 0 0 auto;
+    margin: 7px 8px 0 !important;
+  }
+
+  html[data-enturma-private-chat="true"] .private-messages {
+    flex: 1 1 0 !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 10px 8px 12px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: 12px;
+  }
+
+  html[data-enturma-private-chat="true"] .private-messages article {
+    max-width: 86%;
+  }
+
+  html[data-enturma-private-chat="true"] .private-composer {
+    flex: 0 0 auto !important;
+  }
+
+  html[data-enturma-private-chat="true"][data-enturma-ime="true"]
+    .workspace {
+    height: calc(
+      100dvh - var(--native-keyboard-bottom, 0px)
+    ) !important;
+  }
+
+  html[data-enturma-private-chat="true"][data-enturma-ime="true"]
+    .private-composer {
+    padding-bottom: 6px !important;
+  }
+
+  /* ---------- study-room chat is a group-conversation viewport ---------- */
+  .room-active-shell .room-section-chat {
+    display: flex !important;
+    flex-direction: column;
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    margin: 0 !important;
+    padding: 0 0 var(--room-mobile-nav-height, 72px) !important;
+    box-sizing: border-box;
+    overflow: hidden !important;
+  }
+
+  .room-active-shell .room-section-chat .room-mobile-toolbar {
+    flex: 0 0 auto;
+  }
+
+  .room-active-shell .room-section-chat .study-room-header,
+  .room-active-shell .room-section-chat .late-join-banner {
+    display: none !important;
+  }
+
+  .room-active-shell .room-section-chat .study-room-shell {
+    flex: 1 1 0 !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  .room-active-shell .room-section-chat .room-main-panel {
+    display: block !important;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-chat {
+    display: flex !important;
+    flex-direction: column;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-heading,
+  .room-active-shell .room-section-chat .conversation-notice {
+    display: none !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-messages {
+    flex: 1 1 0 !important;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin: 0 !important;
+    padding: 8px 8px 10px !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-bottom: 10px;
+  }
+
+  .room-active-shell .room-section-chat .typing-status {
+    position: static !important;
+    flex: 0 0 auto;
+    min-height: 18px;
+    margin: 0 !important;
+    padding: 1px 10px 2px !important;
+    background: var(--room-panel);
+    transform: none !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-composer {
+    flex: 0 0 auto !important;
+  }
+
+  html[data-enturma-ime="true"]
+    .room-active-shell
+    .room-section-chat {
+    height: calc(
+      100dvh - var(--native-keyboard-bottom, 0px)
+    ) !important;
+    max-height: calc(
+      100dvh - var(--native-keyboard-bottom, 0px)
+    ) !important;
+    padding-bottom: 0 !important;
+  }
+
+  html[data-enturma-ime="true"]
+    .room-active-shell
+    .room-section-chat
+    .room-mobile-nav {
+    display: none !important;
+  }
+
+  html[data-enturma-ime="true"]
+    .room-active-shell
+    .room-section-chat
+    .persistent-composer {
+    padding-bottom: 6px !important;
+  }
+
+  /* Message panes own scrolling. The page itself never follows the caret. */
+  html[data-enturma-private-chat="true"] .workspace,
+  .room-active-shell .room-section-chat {
+    overscroll-behavior: none;
+  }
+}
