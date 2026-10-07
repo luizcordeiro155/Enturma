@@ -1,0 +1,421 @@
+/* Profile image adjustment + Discord-like call screen-share interactions.
+   Loaded last so these focused surfaces are not overridden by legacy styles. */
+
+/* ---------- profile media adjustment ---------- */
+.image-crop-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2400;
+  display: grid;
+  place-items: center;
+  padding:
+    max(12px, env(safe-area-inset-top, 0px))
+    max(12px, env(safe-area-inset-right, 0px))
+    max(12px, env(safe-area-inset-bottom, 0px))
+    max(12px, env(safe-area-inset-left, 0px));
+  box-sizing: border-box;
+  overflow: hidden;
+  background: rgb(0 0 0 / 0.74);
+}
+
+.image-crop-dialog {
+  position: relative !important;
+  inset: auto !important;
+  display: flex;
+  flex-direction: column;
+  width: min(680px, 100%);
+  max-height: min(820px, 100%);
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 22px 72px rgb(0 0 0 / 0.34);
+}
+
+.image-crop-header {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.image-crop-header h2,
+.image-crop-header p {
+  margin: 0;
+}
+
+.image-crop-header h2 {
+  font-size: 1.15rem;
+}
+
+.image-crop-header p {
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.4;
+}
+
+.image-crop-close {
+  width: 42px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  display: grid !important;
+  place-items: center;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  background: var(--soft) !important;
+  color: var(--ink) !important;
+}
+
+.image-crop-workspace {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 18px;
+}
+
+.image-crop-preview {
+  position: relative;
+  width: 100%;
+  max-height: 52dvh;
+  margin: 0 auto 18px !important;
+  overflow: hidden;
+  touch-action: none;
+  cursor: grab;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #090d0c;
+  user-select: none;
+}
+
+.image-crop-preview:active {
+  cursor: grabbing;
+}
+
+.image-crop-preview img {
+  position: absolute;
+  max-width: none !important;
+  max-height: none !important;
+  pointer-events: none;
+  user-select: none;
+}
+
+.image-crop-loading {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+}
+
+.crop-guide {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border: 2px solid rgb(255 255 255 / 0.92);
+  box-shadow: 0 0 0 220px rgb(0 0 0 / 0.46);
+}
+
+.crop-avatar .crop-guide {
+  border-radius: 50%;
+}
+
+.image-crop-controls {
+  display: grid;
+  gap: 13px;
+}
+
+.image-crop-controls label {
+  display: grid !important;
+  gap: 7px !important;
+  margin: 0 !important;
+  font-weight: 700;
+}
+
+.image-crop-controls label > span {
+  font-size: 0.82rem;
+}
+
+.image-crop-controls input[type="range"] {
+  width: 100%;
+  min-height: 30px;
+  margin: 0;
+  padding: 0 !important;
+  accent-color: var(--accent);
+}
+
+.image-crop-position-controls {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.image-crop-gif-note,
+.image-crop-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.image-crop-error {
+  color: var(--danger, #c94450);
+}
+
+.crop-actions {
+  flex: 0 0 auto;
+  display: flex !important;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px !important;
+  margin: 0 !important;
+  padding:
+    12px 18px
+    calc(12px + env(safe-area-inset-bottom, 0px)) !important;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.crop-actions button {
+  min-height: 44px;
+}
+
+.image-crop-reset {
+  margin-right: auto;
+}
+
+.image-crop-apply {
+  display: inline-flex !important;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+}
+
+/* ---------- selectable screen share, Discord-like ---------- */
+.discord-call .call-video-stage {
+  min-height: 0;
+  padding: 12px 16px 0;
+}
+
+.discord-call .call-video-stage:empty {
+  display: none;
+}
+
+.discord-call .call-media-tile[hidden] {
+  display: none !important;
+}
+
+.discord-call .call-media-tile.screen-share:not([hidden]) {
+  width: 100%;
+  min-height: min(62dvh, 680px) !important;
+  max-height: 72dvh;
+  grid-column: 1 / -1;
+  border: 1px solid #31423c;
+  border-radius: 14px;
+  background: #090d0c;
+}
+
+.discord-call .call-media-tile.screen-share:not([hidden]) video {
+  width: 100%;
+  height: 100%;
+  max-height: 72dvh;
+  object-fit: contain;
+}
+
+.screen-share-status {
+  display: flex !important;
+  flex-wrap: wrap;
+  gap: 8px !important;
+  width: auto !important;
+  padding: 10px 16px 0 !important;
+}
+
+.screen-share-person {
+  min-width: min(260px, 100%);
+  min-height: 54px;
+  display: flex !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  gap: 10px;
+  padding: 9px 12px !important;
+  text-align: left;
+  border: 1px solid #365047 !important;
+  border-radius: 12px !important;
+  background: #192520 !important;
+  color: #eef5f2 !important;
+}
+
+.screen-share-person:hover,
+.screen-share-person.active {
+  background: #22342c !important;
+  border-color: #62cf88 !important;
+}
+
+.screen-share-person > div {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.screen-share-person strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.screen-share-person span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: #b9c7c1;
+  font-size: 0.76rem;
+}
+
+.call-member {
+  min-width: 0;
+}
+
+.call-member-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-left: auto;
+}
+
+.call-member-screen {
+  min-height: 34px !important;
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 9px !important;
+  border: 1px solid #365047 !important;
+  border-radius: 9px !important;
+  background: #17231e !important;
+  color: #dce8e3 !important;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 800;
+}
+
+.call-member-screen:hover,
+.call-member-screen.active {
+  border-color: #62cf88 !important;
+  background: #21362b !important;
+}
+
+.call-member:has(.call-member-screen) {
+  border-color: color-mix(in srgb, #62cf88 38%, transparent);
+}
+
+.call-member:has(.call-member-screen)::after {
+  content: "Transmitindo";
+  position: absolute;
+  top: 5px;
+  right: 7px;
+  color: #8fe6ac;
+  font-size: 0.62rem;
+  font-weight: 800;
+  pointer-events: none;
+}
+
+@media (max-width: 760px) {
+  .image-crop-overlay {
+    place-items: stretch;
+    padding: 0;
+    background: var(--bg);
+  }
+
+  .image-crop-dialog {
+    width: 100%;
+    height: 100dvh;
+    max-height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .image-crop-header {
+    padding:
+      calc(10px + max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px)))
+      12px 10px;
+  }
+
+  .image-crop-workspace {
+    padding: 14px 12px;
+  }
+
+  .image-crop-preview {
+    max-height: 50dvh;
+    border-radius: 12px;
+  }
+
+  .image-crop-position-controls {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+
+  .crop-actions {
+    padding:
+      9px 12px
+      calc(
+        9px +
+          max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
+      ) !important;
+  }
+
+  .crop-actions button {
+    min-width: 0;
+    flex: 1;
+    padding-inline: 10px !important;
+  }
+
+  .image-crop-reset {
+    margin-right: 0;
+  }
+
+  .discord-call .call-media-tile.screen-share:not([hidden]) {
+    min-height: 230px !important;
+    max-height: 54dvh;
+  }
+
+  .discord-call .call-media-tile.screen-share:not([hidden]) video {
+    max-height: 54dvh;
+  }
+
+  .screen-share-status {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    padding-inline: 10px !important;
+  }
+
+  .screen-share-person {
+    flex: 0 0 min(270px, 82vw);
+  }
+
+  .call-member-actions {
+    flex-direction: column-reverse;
+    align-items: flex-end;
+  }
+
+  .call-member-screen span {
+    display: none;
+  }
+
+  .call-member-screen {
+    width: 34px !important;
+    min-width: 34px !important;
+    height: 34px !important;
+    padding: 0 !important;
+    justify-content: center;
+  }
+}
