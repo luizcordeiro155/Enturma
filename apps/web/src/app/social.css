@@ -2038,61 +2038,128 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
   .room-mobile-members-list .participant-row{grid-template-columns:minmax(0,1fr)}
 }
 
-/* Mobile private-chat keyboard behavior.
-   The native shell keeps the WebView full-height and exposes the IME height.
-   Only the message composer floats above the keyboard; the page/footer stay put. */
+/* Mobile private chat uses the same compact composer as study rooms.
+   Keyboard placement is handled once by the native IME inset, never by page scrolling. */
 @media (max-width: 760px) {
-  html[data-enturma-ime="true"] .private-chat {
-    --private-composer-height: 92px;
+  .private-chat {
+    --private-composer-height: 64px;
+  }
+
+  .private-composer.enturma-message-composer {
+    display: grid;
+    gap: 8px;
+    padding: 8px 0 0;
+    background: var(--surface);
+  }
+
+  .private-composer .composer-main-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 7px;
+    width: 100%;
+  }
+
+  .private-composer .composer-text-field {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .private-composer .composer-text-field textarea {
+    width: 100%;
+    min-height: 44px;
+    max-height: 96px;
+    margin: 0;
+    padding: 10px 13px;
+    resize: none;
+    overflow-y: auto;
+    border-radius: 18px;
+    box-sizing: border-box;
+    font-size: 16px;
+    line-height: 1.35;
+  }
+
+  .private-composer .composer-icon-button,
+  .private-composer .composer-send-button {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+    display: grid !important;
+    place-items: center;
+    padding: 0 !important;
+    border-radius: 50% !important;
+  }
+
+  .private-composer .composer-image-button {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .private-composer .composer-image-button input {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .private-composer .composer-emoji-tray {
+    display: flex;
+    gap: 5px;
+    overflow-x: auto;
+    padding: 7px 2px;
+    overscroll-behavior-x: contain;
+  }
+
+  .private-composer .composer-emoji-tray button {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0;
+    border-radius: 12px;
+  }
+
+  .private-attachment-preview {
+    margin: 0;
+  }
+
+  .private-chat-image {
+    display: block;
+    width: min(260px, 72vw);
+    max-height: 300px;
+    object-fit: cover;
+    border-radius: 12px;
+  }
+
+  html[data-enturma-ime="true"] .private-composer.enturma-message-composer {
+    position: fixed !important;
+    z-index: 260 !important;
+    left: calc(8px + var(--native-safe-left, 0px));
+    right: calc(8px + var(--native-safe-right, 0px));
+    bottom: calc(var(--native-keyboard-bottom, 0px) + 6px);
+    padding: 7px 8px;
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+    transition: none !important;
+    transform: none !important;
   }
 
   html[data-enturma-ime="true"] .private-messages {
     padding-bottom: calc(
-      var(--private-composer-height) +
       var(--native-keyboard-bottom, 0px) +
-      20px
+      var(--private-composer-height) +
+      24px
     ) !important;
     scroll-padding-bottom: calc(
-      var(--private-composer-height) +
       var(--native-keyboard-bottom, 0px) +
-      12px
+      var(--private-composer-height) +
+      18px
     ) !important;
   }
-
-  html[data-enturma-ime="true"] .private-composer {
-    position: fixed !important;
-    z-index: 220 !important;
-    left: calc(10px + var(--enturma-safe-left, 0px));
-    right: calc(10px + var(--enturma-safe-right, 0px));
-    bottom: calc(var(--native-keyboard-bottom, 0px) + 8px);
-    display: block !important;
-    padding: 0 !important;
-    border: 0 !important;
-    background: transparent !important;
-  }
-
-  html[data-enturma-ime="true"] .private-composer > label {
-    display: block;
-    margin: 0;
-  }
-
-  html[data-enturma-ime="true"] .private-composer textarea {
-    width: 100%;
-    min-height: 66px;
-    max-height: 94px;
-    margin: 0;
-    resize: none;
-    font-size: 16px;
-    border-radius: 18px;
-    background: var(--surface);
-    color: var(--ink);
-    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
-  }
-
-  /* The Android keyboard's Enter action sends the message while typing.
-     Keep secondary actions out of the IME layout so only the text box moves. */
-  html[data-enturma-ime="true"] .private-composer > button,
-  html[data-enturma-ime="true"] .private-composer > small {
-    display: none !important;
-  }
 }
+

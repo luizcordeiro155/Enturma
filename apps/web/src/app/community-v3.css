@@ -2756,7 +2756,6 @@
 
 /* Mobile room keyboard recovery v7: native Android IME */
 @media(max-width:760px){
-  .room-active-shell{--native-keyboard-bottom:0px}
   html[data-enturma-ime="true"] .room-active-shell .room-mobile-nav{display:none!important}
   html[data-enturma-ime="true"] .room-active-shell .study-room-page{padding-bottom:0!important}
   html[data-enturma-ime="true"] .room-active-shell .persistent-composer{bottom:var(--native-keyboard-bottom,0px)!important;z-index:190!important}
@@ -2989,4 +2988,217 @@
       86px + var(--native-keyboard-bottom, 0px)
     ) !important;
   }
+}
+
+
+/* Mobile chat composer v9.
+   One authoritative IME layout for room + private composers. Do not animate
+   bottom/transform while Android is animating the keyboard. */
+@media (max-width: 760px) {
+  .persistent-composer.enturma-message-composer,
+  .private-composer.enturma-message-composer {
+    --composer-row-height: 48px;
+  }
+
+  .persistent-composer .composer-main-row,
+  .private-composer .composer-main-row {
+    display: flex !important;
+    align-items: flex-end;
+    gap: 7px;
+    width: 100%;
+  }
+
+  .persistent-composer .composer-text-field,
+  .private-composer .composer-text-field {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+  }
+
+  .persistent-composer .composer-text-field textarea,
+  .private-composer .composer-text-field textarea {
+    width: 100%;
+    min-height: 44px !important;
+    max-height: 96px !important;
+    margin: 0 !important;
+    padding: 10px 13px !important;
+    box-sizing: border-box;
+    resize: none !important;
+    overflow-y: auto;
+    border-radius: 18px !important;
+    font-size: 16px !important;
+    line-height: 1.35;
+  }
+
+  .persistent-composer .composer-icon-button,
+  .persistent-composer .composer-send-button,
+  .private-composer .composer-icon-button,
+  .private-composer .composer-send-button {
+    flex: 0 0 44px;
+    width: 44px !important;
+    height: 44px !important;
+    min-width: 44px !important;
+    min-height: 44px !important;
+    display: grid !important;
+    place-items: center;
+    padding: 0 !important;
+    border-radius: 50% !important;
+  }
+
+  .persistent-composer .composer-image-button,
+  .private-composer .composer-image-button {
+    position: relative;
+    cursor: pointer;
+  }
+
+  .persistent-composer .composer-image-button input,
+  .private-composer .composer-image-button input {
+    position: absolute;
+    width: 1px !important;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .persistent-composer .composer-emoji-tray,
+  .private-composer .composer-emoji-tray {
+    display: flex !important;
+    gap: 5px;
+    overflow-x: auto;
+    padding: 6px 1px;
+    overscroll-behavior-x: contain;
+  }
+
+  .persistent-composer .composer-emoji-tray button,
+  .private-composer .composer-emoji-tray button {
+    flex: 0 0 40px;
+    width: 40px;
+    height: 40px;
+    min-height: 40px;
+    padding: 0 !important;
+    border-radius: 12px !important;
+  }
+
+  .persistent-composer .attachment-preview,
+  .private-composer .attachment-preview {
+    margin: 0 0 6px;
+    max-height: 116px;
+    overflow: hidden;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .room-mobile-nav,
+  html[data-enturma-ime="true"] .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .persistent-composer,
+  html[data-enturma-ime="true"] .private-composer.enturma-message-composer {
+    position: fixed !important;
+    z-index: 280 !important;
+    left: calc(8px + var(--native-safe-left, 0px)) !important;
+    right: calc(8px + var(--native-safe-right, 0px)) !important;
+    bottom: calc(var(--native-keyboard-bottom, 0px) + 6px) !important;
+    width: auto !important;
+    max-height: min(190px, 38dvh) !important;
+    overflow: visible;
+    padding: 7px 8px !important;
+    border: 1px solid var(--room-border, var(--border)) !important;
+    border-radius: 18px !important;
+    background: var(--room-panel, var(--surface)) !important;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18) !important;
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .persistent-messages {
+    padding-bottom: calc(
+      var(--native-keyboard-bottom, 0px) +
+      82px
+    ) !important;
+    scroll-padding-bottom: calc(
+      var(--native-keyboard-bottom, 0px) +
+      74px
+    ) !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .typing-status {
+    bottom: calc(var(--native-keyboard-bottom, 0px) + 66px) !important;
+    transition: none !important;
+    transform: none !important;
+  }
+
+  /* Older room keyboard rules are intentionally neutralized. Native IME is
+     the only keyboard position source on Android. */
+  html[data-room-keyboard="true"] .room-active-shell .persistent-composer,
+  .room-active-shell .persistent-composer {
+    --room-keyboard-offset: 0px;
+  }
+}
+
+
+/* Shared message composer baseline.
+   Keeps the new single-row composer usable on desktop as well as mobile. */
+.enturma-message-composer .composer-main-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.enturma-message-composer .composer-text-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.enturma-message-composer .composer-text-field textarea {
+  width: 100%;
+  min-height: 46px;
+  max-height: 124px;
+  margin: 0;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.enturma-message-composer .composer-icon-button,
+.enturma-message-composer .composer-send-button {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.enturma-message-composer .composer-image-button {
+  position: relative;
+  cursor: pointer;
+}
+
+.enturma-message-composer .composer-image-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.enturma-message-composer .composer-emoji-tray {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 6px 1px;
+}
+
+.enturma-message-composer .composer-emoji-tray button {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 12px;
 }

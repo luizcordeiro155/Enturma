@@ -268,7 +268,8 @@ public class SocialController {
       @RequestParam(defaultValue = "0") int page) {
     access(a, id, true);
     return db.list(
-        "SELECT id,sender_id,ciphertext,iv,client_id,created_at FROM private_message WHERE"
+        "SELECT id,sender_id,ciphertext,iv,client_id,created_at,attachment_ciphertext,"
+            + " attachment_iv,attachment_mime,attachment_name,attachment_size FROM private_message WHERE"
             + " friendship_id=? ORDER BY created_at DESC,id DESC LIMIT 50 OFFSET ?",
         id,
         Math.clamp(page, 0, 10000) * 50);
@@ -279,7 +280,8 @@ public class SocialController {
       @AuthenticationPrincipal Actor a, @PathVariable UUID id, @PathVariable UUID target) {
     access(a, id, true);
     return db.list(
-        "SELECT id,sender_id,ciphertext,iv,client_id,created_at FROM private_message WHERE"
+        "SELECT id,sender_id,ciphertext,iv,client_id,created_at,attachment_ciphertext,"
+            + " attachment_iv,attachment_mime,attachment_name,attachment_size FROM private_message WHERE"
             + " friendship_id=? AND id=?",
         id,
         target);
@@ -289,9 +291,31 @@ public class SocialController {
       @NotNull UUID clientId,
       @NotBlank @Size(max = 24000) @Pattern(regexp = "[A-Za-z0-9+/=]+") String ciphertext,
       @NotBlank @Pattern(regexp = "[A-Za-z0-9+/]{16}") String iv,
-      Boolean mentioned) {
+      Boolean mentioned,
+      @Size(max = 2000000) @Pattern(regexp = "[A-Za-z0-9+/=]+") String attachmentCiphertext,
+      @Pattern(regexp = "[A-Za-z0-9+/]{16}") String attachmentIv,
+      @Pattern(regexp = "image/(jpeg|png|webp|gif)") String attachmentMime,
+      @Size(max = 200) String attachmentName,
+      @Min(1) @Max(1433600) Integer attachmentSize) {
     public Envelope(UUID clientId, String ciphertext, String iv) {
-      this(clientId, ciphertext, iv, false);
+      this(clientId, ciphertext, iv, false, null, null, null, null, null);
+    }
+
+    boolean hasAttachment() {
+      return attachmentCiphertext != null
+          || attachmentIv != null
+          || attachmentMime != null
+          || attachmentName != null
+          || attachmentSize != null;
+    }
+
+    boolean validAttachment() {
+      return !hasAttachment()
+          || (attachmentCiphertext != null
+              && attachmentIv != null
+              && attachmentMime != null
+              && attachmentName != null
+              && attachmentSize != null);
     }
   }
 
@@ -302,17 +326,26 @@ public class SocialController {
     var friendship = access(a, id, true);
     if (!db.exists("SELECT EXISTS(SELECT 1 FROM private_identity WHERE user_id=?)", a.id()))
       throw ApiException.invalid("Configure a chave privada primeiro.");
+    if (!body.validAttachment())
+      throw ApiException.invalid("Anexo privado incompleto.");
     UUID message = UUID.randomUUID();
     int inserted =
         db.jdbc.update(
-            "INSERT INTO private_message(id,friendship_id,sender_id,ciphertext,iv,client_id) VALUES"
-                + " (?,?,?,?,?,?) ON CONFLICT(sender_id,client_id) DO NOTHING",
+            "INSERT INTO private_message("
+                + "id,friendship_id,sender_id,ciphertext,iv,client_id,"
+                + "attachment_ciphertext,attachment_iv,attachment_mime,attachment_name,attachment_size"
+                + ") VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(sender_id,client_id) DO NOTHING",
             message,
             id,
             a.id(),
             body.ciphertext(),
             body.iv(),
-            body.clientId());
+            body.clientId(),
+            body.attachmentCiphertext(),
+            body.attachmentIv(),
+            body.attachmentMime(),
+            body.attachmentName(),
+            body.attachmentSize());
     if (inserted > 0) {
       UUID peer =
           (UUID)

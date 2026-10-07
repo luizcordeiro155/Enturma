@@ -1,6 +1,8 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { ImagePlus, Send, Smile, X } from "lucide-react";
+import { preparePrivateChatImage } from "@/lib/chat-image";
 import {
   ConversationNotice,
   useNotificationTarget,
@@ -12,7 +14,9 @@ import { api, post } from "@/lib/api";
 import {
   conversationKey,
   createIdentity,
+  decryptAttachment,
   decryptMessage,
+  encryptAttachment,
   encryptMessage,
   exportBackup,
   fingerprint,
@@ -38,6 +42,15 @@ type Envelope = {
   ciphertext: string;
   iv: string;
   createdAt: string;
+  attachmentCiphertext?: string | null;
+  attachmentIv?: string | null;
+  attachmentMime?: string | null;
+  attachmentName?: string | null;
+  attachmentSize?: number | null;
+};
+type PrivateMessage = Envelope & {
+  text: string;
+  attachmentUrl?: string;
 };
 export function Friends() {
   const params = useSearchParams();
@@ -50,6 +63,10 @@ export function Friends() {
   const [notice, setNotice] = useState("");
   const [username, setUsername] = useState("");
   const [draft, setDraft] = useState("");
+  const [image, setImage] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [privateImagesEnabled, setPrivateImagesEnabled] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [identityError, setIdentityError] = useState("");
@@ -61,7 +78,7 @@ export function Friends() {
   const [connectionError, setConnectionError] = useState("");
   const [finger, setFinger] = useState("");
   const [password, setPassword] = useState("");
-  const [messages, setMessages] = useState<(Envelope & { text: string })[]>([]);
+  const [messages, setMessages] = useState<PrivateMessage[]>([]);
   const [page, setPage] = useState(0);
   const [older, setOlder] = useState(false);
   const key = useRef<CryptoKey | null>(null);
@@ -72,6 +89,7 @@ export function Friends() {
   const forceFollowLatest = useRef(false);
   const nearLatest = useRef(true);
   const previousMessageCount = useRef(0);
+  const attachmentUrls = useRef(new Set<string>());
   const identity = useRef<Awaited<ReturnType<typeof createIdentity>> | null>(
     null,
   );
@@ -126,6 +144,11 @@ export function Friends() {
           );
       });
     void refresh().catch((e) => setError(e.message));
+    void api<{ privateImageAttachments?: boolean }>("/capabilities", {
+      cache: "no-store",
+    })
+      .then((cap) => setPrivateImagesEnabled(cap.privateImageAttachments === true))
+      .catch(() => setPrivateImagesEnabled(false));
     return () => {
       alive = false;
     };
@@ -156,12 +179,22 @@ export function Friends() {
         { signal: AbortSignal.timeout(12000) },
       );
       const decoded = await Promise.all(
-        rows.map(async (m) => ({
-          ...m,
-          text: await decryptMessage(cryptoKey, m, friend.id).catch(
+        rows.map(async (m) => {
+          const text = await decryptMessage(cryptoKey, m, friend.id).catch(
             () => "Não foi possível autenticar esta mensagem.",
-          ),
-        })),
+          );
+          let attachmentUrl: string | undefined;
+          if (m.attachmentCiphertext) {
+            const blob = await decryptAttachment(cryptoKey, m, friend.id).catch(
+              () => null,
+            );
+            if (blob) {
+              attachmentUrl = URL.createObjectURL(blob);
+              attachmentUrls.current.add(attachmentUrl);
+            }
+          }
+          return { ...m, text, attachmentUrl };
+        }),
       );
       if (version !== generation.current) return;
       setMessages((old) =>
@@ -182,78 +215,6 @@ export function Friends() {
   }, []);
 
   useEffect(() => {
-    const root = document.documentElement;
-    const viewport = window.visualViewport;
-    let maxViewportHeight = viewport?.height ?? window.innerHeight;
-    let settleTimer: ReturnType<typeof setTimeout> | undefined;
-
-    const syncKeyboard = () => {
-      const currentViewport = window.visualViewport;
-      const focused = document.activeElement === composer.current;
-      const visualHeight = currentViewport?.height ?? window.innerHeight;
-
-      if (!focused) {
-        maxViewportHeight = Math.max(maxViewportHeight, visualHeight);
-      }
-
-      const heightDrop = Math.max(0, maxViewportHeight - visualHeight);
-      const overlayOffset = currentViewport
-        ? Math.max(
-            0,
-            window.innerHeight -
-              currentViewport.height -
-              currentViewport.offsetTop,
-          )
-        : 0;
-      const nativeIme = root.dataset.enturmaIme === "true";
-      const keyboardOpen =
-        focused && (nativeIme || heightDrop > 80 || overlayOffset > 80);
-
-      root.dataset.privateKeyboard = keyboardOpen ? "true" : "false";
-      root.style.setProperty(
-        "--private-keyboard-offset",
-        `${Math.round(keyboardOpen ? overlayOffset : 0)}px`,
-      );
-      root.style.setProperty(
-        "--private-visual-viewport-height",
-        `${Math.round(visualHeight)}px`,
-      );
-
-      if (settleTimer) clearTimeout(settleTimer);
-      if (keyboardOpen) {
-        forceFollowLatest.current = true;
-        requestAnimationFrame(() => scrollToLatest("auto"));
-        settleTimer = setTimeout(() => scrollToLatest("auto"), 220);
-      }
-    };
-
-    const onFocus = () => {
-      requestAnimationFrame(syncKeyboard);
-      setTimeout(syncKeyboard, 180);
-    };
-    const onBlur = () => setTimeout(syncKeyboard, 120);
-
-    syncKeyboard();
-    viewport?.addEventListener("resize", syncKeyboard);
-    viewport?.addEventListener("scroll", syncKeyboard);
-    window.addEventListener("resize", syncKeyboard);
-    document.addEventListener("focusin", onFocus);
-    document.addEventListener("focusout", onBlur);
-
-    return () => {
-      if (settleTimer) clearTimeout(settleTimer);
-      viewport?.removeEventListener("resize", syncKeyboard);
-      viewport?.removeEventListener("scroll", syncKeyboard);
-      window.removeEventListener("resize", syncKeyboard);
-      document.removeEventListener("focusin", onFocus);
-      document.removeEventListener("focusout", onBlur);
-      delete root.dataset.privateKeyboard;
-      root.style.removeProperty("--private-keyboard-offset");
-      root.style.removeProperty("--private-visual-viewport-height");
-    };
-  }, [scrollToLatest]);
-
-  useEffect(() => {
     const count = messages.length;
     if (!count) {
       previousMessageCount.current = 0;
@@ -266,8 +227,7 @@ export function Friends() {
     if (
       !forceFollowLatest.current &&
       !nearLatest.current &&
-      !composerFocused &&
-      document.documentElement.dataset.privateKeyboard !== "true"
+      !composerFocused
     )
       return;
     const behavior =
@@ -278,6 +238,14 @@ export function Friends() {
     requestAnimationFrame(() => scrollToLatest(behavior));
     forceFollowLatest.current = false;
   }, [messages, scrollToLatest]);
+
+  useEffect(() => {
+    const urls = attachmentUrls.current;
+    return () => {
+      for (const url of urls) URL.revokeObjectURL(url);
+      urls.clear();
+    };
+  }, []);
 
   useEffect(() => {
     if (!selected || !ready || !identity.current) return;
@@ -388,6 +356,12 @@ export function Friends() {
       setError("");
       setMessages([]);
       setDraft("");
+      setImage(null);
+      setImagePreview((old) => {
+        if (old) URL.revokeObjectURL(old);
+        return null;
+      });
+      setEmojiOpen(false);
       setPage(0);
       setFinger("");
       key.current = null;
@@ -424,33 +398,76 @@ export function Friends() {
   };
   useLiveRefresh("notifications_changed", refreshFriendData);
   useLiveRefresh("friends_changed", refreshFriendData, 8000);
+  function selectImage(file: File | null) {
+    if (!file) return;
+    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+      setError("Use JPG, PNG, WEBP ou GIF.");
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      setError("A imagem pode ter no máximo 8 MB antes da otimização.");
+      return;
+    }
+    setImage(file);
+    setImagePreview((old) => {
+      if (old) URL.revokeObjectURL(old);
+      return URL.createObjectURL(file);
+    });
+    setEmojiOpen(false);
+    setError("");
+  }
+
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (!selected || !me || !key.current || busy || !draft.trim()) return;
+    if (
+      !selected ||
+      !me ||
+      !key.current ||
+      busy ||
+      (!draft.trim() && !image)
+    )
+      return;
+
     setBusy(true);
     setError("");
     const friend = selected;
+    const clientId = crypto.randomUUID();
     try {
       const payload = await encryptMessage(
         key.current,
         draft.trim(),
         friend.id,
         me.id,
-        crypto.randomUUID(),
+        clientId,
       );
+      const preparedImage = image ? await preparePrivateChatImage(image) : null;
+      const attachment = preparedImage
+        ? await encryptAttachment(
+            key.current,
+            preparedImage,
+            friend.id,
+            me.id,
+            clientId,
+          )
+        : {};
+
       forceFollowLatest.current = true;
       await post(`/friends/${friend.id}/messages`, {
         ...payload,
+        ...attachment,
         mentioned: !!friend.username && mentionsUser(draft, friend.username),
       });
+
       setDraft("");
+      setImage(null);
+      setImagePreview((old) => {
+        if (old) URL.revokeObjectURL(old);
+        return null;
+      });
+      setEmojiOpen(false);
       await load(friend, key.current, 0, generation.current);
       requestAnimationFrame(() => {
-        scrollToLatest(
-          document.documentElement.dataset.reducedMotion === "true"
-            ? "auto"
-            : "smooth",
-        );
+        scrollToLatest("auto");
         composer.current?.focus({ preventScroll: true });
       });
     } catch (e) {
@@ -769,7 +786,22 @@ export function Friends() {
                         }
                       />
                       <div>
-                        <p>{m.text}</p>
+                        {m.attachmentUrl ? (
+                          <a
+                            className="private-chat-image-link"
+                            href={m.attachmentUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img
+                              className="private-chat-image"
+                              src={m.attachmentUrl}
+                              alt={m.attachmentName ?? "Imagem privada"}
+                            />
+                          </a>
+                        ) : null}
+                        {m.text ? <p>{m.text}</p> : null}
                         <small>
                           {new Date(m.createdAt).toLocaleString("pt-BR")}
                         </small>
@@ -777,37 +809,119 @@ export function Friends() {
                     </article>
                   ))}
                 </div>
-                <form onSubmit={send} className="private-composer">
-                  <label>
-                    Mensagem privada
-                    <textarea
-                      ref={composer}
-                      value={draft}
-                      onFocus={() => {
-                        forceFollowLatest.current = true;
-                        nearLatest.current = true;
-                        requestAnimationFrame(() => scrollToLatest("auto"));
-                        setTimeout(() => scrollToLatest("auto"), 220);
-                      }}
-                      onChange={(e) => setDraft(e.target.value)}
-                      maxLength={4000}
-                      disabled={!finger}
-                      onKeyDown={(e) => {
-                        if (
-                          e.key === "Enter" &&
-                          !e.shiftKey &&
-                          !e.nativeEvent.isComposing
-                        ) {
-                          e.preventDefault();
-                          e.currentTarget.form?.requestSubmit();
-                        }
-                      }}
-                    />
-                  </label>
-                  <button disabled={!finger || busy || !draft.trim()}>
-                    {busy ? "Enviando…" : "Enviar mensagem"}
-                  </button>
-                  <small>Enter envia · Shift+Enter quebra a linha</small>
+                <form
+                  onSubmit={send}
+                  className="private-composer enturma-message-composer"
+                >
+                  {imagePreview && image ? (
+                    <div className="attachment-preview private-attachment-preview">
+                      <div className="attachment-preview-media">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={imagePreview} alt={image.name} />
+                        <button
+                          type="button"
+                          className="attachment-remove"
+                          aria-label="Remover imagem selecionada"
+                          onClick={() => {
+                            setImage(null);
+                            setImagePreview((old) => {
+                              if (old) URL.revokeObjectURL(old);
+                              return null;
+                            });
+                          }}
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                      <div>
+                        <strong>{image.name}</strong>
+                        <small>Prévia antes do envio</small>
+                      </div>
+                    </div>
+                  ) : null}
+
+                  {emojiOpen ? (
+                    <div className="composer-emoji-tray" aria-label="Emojis rápidos">
+                      {["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"].map(
+                        (emoji) => (
+                          <button
+                            type="button"
+                            key={emoji}
+                            onClick={() => {
+                              setDraft((value) => value + emoji);
+                              setEmojiOpen(false);
+                              composer.current?.focus({ preventScroll: true });
+                            }}
+                          >
+                            {emoji}
+                          </button>
+                        ),
+                      )}
+                    </div>
+                  ) : null}
+
+                  <div className="composer-main-row">
+                    <button
+                      type="button"
+                      className="composer-icon-button"
+                      aria-label="Adicionar emoji"
+                      aria-expanded={emojiOpen}
+                      onClick={() => setEmojiOpen((open) => !open)}
+                    >
+                      <Smile size={22} />
+                    </button>
+
+                    {privateImagesEnabled ? (
+                      <label className="composer-icon-button composer-image-button">
+                        <ImagePlus size={22} />
+                        <span className="sr-only">Adicionar imagem</span>
+                        <input
+                          type="file"
+                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          disabled={busy}
+                          onChange={(event) => {
+                            selectImage(event.target.files?.[0] ?? null);
+                            event.target.value = "";
+                          }}
+                        />
+                      </label>
+                    ) : null}
+
+                    <label className="composer-text-field">
+                      <span className="sr-only">Mensagem privada</span>
+                      <textarea
+                        ref={composer}
+                        value={draft}
+                        onFocus={() => {
+                          forceFollowLatest.current = true;
+                          nearLatest.current = true;
+                        }}
+                        onChange={(e) => setDraft(e.target.value)}
+                        maxLength={4000}
+                        disabled={!finger}
+                        rows={1}
+                        placeholder="Mensagem"
+                        onKeyDown={(e) => {
+                          if (
+                            e.key === "Enter" &&
+                            !e.shiftKey &&
+                            !e.nativeEvent.isComposing
+                          ) {
+                            e.preventDefault();
+                            e.currentTarget.form?.requestSubmit();
+                          }
+                        }}
+                      />
+                    </label>
+
+                    <button
+                      className="composer-send-button"
+                      aria-label="Enviar mensagem"
+                      disabled={!finger || busy || (!draft.trim() && !image)}
+                    >
+                      <Send size={22} />
+                    </button>
+                  </div>
                 </form>
               </>
             ) : (

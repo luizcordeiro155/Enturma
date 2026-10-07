@@ -514,6 +514,7 @@ class MainActivity : Activity() {
         private const val MEDIA_PERMISSION_REQUEST = 4102
         private const val NOTIFICATION_PERMISSION_REQUEST = 4103
         private const val LOCATION_PERMISSION_REQUEST = 4104
+        private const val GALLERY_PERMISSION_REQUEST = 4105
         private const val WEB_ORIGIN = "${webOrigin}"
         private const val APP_VERSION = "${version}"
     }
@@ -521,6 +522,7 @@ class MainActivity : Activity() {
     private lateinit var rootLayout: FrameLayout
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
+    private var pendingFileChooserParams: WebChromeClient.FileChooserParams? = null
     private var pendingPermissionRequest: PermissionRequest? = null
     private var pendingGeolocationOrigin: String? = null
     private var pendingGeolocationCallback: GeolocationPermissions.Callback? = null
@@ -826,25 +828,28 @@ class MainActivity : Activity() {
             ): Boolean {
                 fileChooserCallback?.onReceiveValue(null)
                 fileChooserCallback = callback
+                pendingFileChooserParams = params
 
-                return try {
-                    val intent = params?.createIntent()
-                        ?: Intent(Intent.ACTION_GET_CONTENT).apply {
-                            type = "*/*"
-                            addCategory(Intent.CATEGORY_OPENABLE)
-                        }
-                    startActivityForResult(intent, FILE_CHOOSER_REQUEST)
-                    true
-                } catch (_: ActivityNotFoundException) {
-                    fileChooserCallback?.onReceiveValue(null)
-                    fileChooserCallback = null
-                    Toast.makeText(
-                        this@MainActivity,
-                        "Nenhum seletor de arquivos foi encontrado.",
-                        Toast.LENGTH_SHORT,
-                    ).show()
-                    false
+                if (acceptsImages(params)) {
+                    val permission =
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+                            Manifest.permission.READ_MEDIA_IMAGES
+                        else Manifest.permission.READ_EXTERNAL_STORAGE
+
+                    if (
+                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
+                        checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        requestPermissions(
+                            arrayOf(permission),
+                            GALLERY_PERMISSION_REQUEST,
+                        )
+                        return true
+                    }
                 }
+
+                launchFileChooser(params)
+                return true
             }
         }
 
@@ -1263,25 +1268,6 @@ class MainActivity : Activity() {
                 '}'
               ].join("\\n");
 
-              if (!window.__enturmaImeFocusBridge) {
-                window.__enturmaImeFocusBridge = true;
-                document.addEventListener("focusin", function(event) {
-                  var target = event.target;
-                  if (!(target instanceof HTMLElement)) return;
-                  if (!target.matches("input, textarea, select, [contenteditable=true]")) return;
-                  if (target.closest(".persistent-composer, .private-composer")) return;
-                  window.setTimeout(function() {
-                    try {
-                      target.scrollIntoView({
-                        block: "center",
-                        inline: "nearest",
-                        behavior: "smooth"
-                      });
-                    } catch (_) {}
-                  }, 180);
-                });
-              }
-
               function syncNativeTheme() {
                 var theme = root.dataset.theme || "light";
                 var light = theme !== "dark";
@@ -1536,6 +1522,57 @@ class MainActivity : Activity() {
         else request.grant(granted.toTypedArray())
     }
 
+    private fun acceptsImages(params: WebChromeClient.FileChooserParams?): Boolean {
+        val accepted = params?.acceptTypes ?: emptyArray()
+        if (accepted.isEmpty()) return false
+        return accepted.any { value ->
+            value.split(",").any { type ->
+                type.trim().startsWith("image/", ignoreCase = true)
+            }
+        }
+    }
+
+    private fun launchFileChooser(params: WebChromeClient.FileChooserParams?) {
+        pendingFileChooserParams = null
+        try {
+            val intent =
+                if (acceptsImages(params)) {
+                    Intent(
+                        Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                    ).apply {
+                        type = "image/*"
+                        if (params?.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE) {
+                            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
+                        }
+                    }
+                } else {
+                    params?.createIntent()
+                        ?: Intent(Intent.ACTION_GET_CONTENT).apply {
+                            type = "*/*"
+                            addCategory(Intent.CATEGORY_OPENABLE)
+                        }
+                }
+            startActivityForResult(intent, FILE_CHOOSER_REQUEST)
+        } catch (_: ActivityNotFoundException) {
+            try {
+                val fallback = Intent(Intent.ACTION_GET_CONTENT).apply {
+                    type = if (acceptsImages(params)) "image/*" else "*/*"
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                }
+                startActivityForResult(fallback, FILE_CHOOSER_REQUEST)
+            } catch (_: ActivityNotFoundException) {
+                fileChooserCallback?.onReceiveValue(null)
+                fileChooserCallback = null
+                Toast.makeText(
+                    this,
+                    "Nenhum seletor de imagens ou arquivos foi encontrado.",
+                    Toast.LENGTH_SHORT,
+                ).show()
+            }
+        }
+    }
+
     private fun openExternal(uri: Uri): Boolean {
         return try {
             startActivity(Intent(Intent.ACTION_VIEW, uri))
@@ -1564,6 +1601,11 @@ class MainActivity : Activity() {
         }
         if (requestCode == NOTIFICATION_PERMISSION_REQUEST) {
             refreshNativePushToken()
+        }
+        if (requestCode == GALLERY_PERMISSION_REQUEST) {
+            val params = pendingFileChooserParams
+            pendingFileChooserParams = null
+            launchFileChooser(params)
         }
         if (requestCode == LOCATION_PERMISSION_REQUEST) {
             val callback = pendingGeolocationCallback
@@ -1620,6 +1662,7 @@ class MainActivity : Activity() {
         pendingGeolocationOrigin = null
         fileChooserCallback?.onReceiveValue(null)
         fileChooserCallback = null
+        pendingFileChooserParams = null
 
         if (updateReceiverRegistered) {
             runCatching { unregisterReceiver(updateDownloadReceiver) }
