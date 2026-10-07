@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef } from "react";
+import { useEffect, type RefObject } from "react";
 import { Player, type PlayerRef } from "@remotion/player";
 import { EnturmaIntroComposition } from "./enturma-intro-composition";
 import type { IntroProps } from "./intro-model";
@@ -13,6 +13,8 @@ export default function IntroPlayer({
   onEnd,
   onFrame,
   seekFrame,
+  playerRef,
+  onMutedChange,
 }: {
   inputProps: IntroProps;
   width: number;
@@ -21,8 +23,10 @@ export default function IntroPlayer({
   onEnd: () => void;
   onFrame: (frame: number) => void;
   seekFrame?: number;
+  playerRef: RefObject<PlayerRef | null>;
+  onMutedChange: (muted: boolean) => void;
 }) {
-  const player = useRef<PlayerRef>(null);
+  const player = playerRef;
   const reduced = inputProps.quality === "low";
   useEffect(() => {
     const instance = player.current;
@@ -31,10 +35,17 @@ export default function IntroPlayer({
     };
     instance?.addEventListener("frameupdate", update);
     return () => instance?.removeEventListener("frameupdate", update);
-  }, [onFrame]);
+  }, [onFrame, player]);
+  useEffect(() => {
+    const instance = player.current;
+    const update = (event: { detail: { isMuted: boolean } }) =>
+      onMutedChange(event.detail.isMuted);
+    instance?.addEventListener("mutechange", update);
+    return () => instance?.removeEventListener("mutechange", update);
+  }, [onMutedChange, player]);
   useEffect(() => {
     if (seekFrame !== undefined) player.current?.seekTo(seekFrame);
-  }, [seekFrame]);
+  }, [seekFrame, player]);
   useEffect(() => {
     const instance = player.current;
     if (!instance) return;
@@ -43,26 +54,28 @@ export default function IntroPlayer({
       instance.pause();
       instance.removeEventListener("ended", onEnd);
     };
-  }, [onEnd]);
+  }, [onEnd, player]);
   useEffect(() => {
     if (reduced) player.current?.seekTo(0);
-  }, [reduced]);
+  }, [reduced, player]);
   useEffect(() => {
     if (playing) void player.current?.play();
     else player.current?.pause();
-  }, [playing, reduced, onEnd]);
+  }, [playing, reduced, onEnd, player]);
   return (
     <Player
       ref={player}
       component={EnturmaIntroComposition}
       inputProps={inputProps}
       fps={60}
-      durationInFrames={inputProps.quality === "low" ? 180 : INTRO_FRAMES}
+      durationInFrames={INTRO_FRAMES}
       compositionWidth={width}
       compositionHeight={height}
       style={{ width: "100%" }}
       controls={false}
       clickToPlay={false}
+      initiallyMuted
+      // One continuous audio track stays mounted for the full timeline.
       numberOfSharedAudioTags={0}
       moveToBeginningWhenEnded={false}
       errorFallback={() => (

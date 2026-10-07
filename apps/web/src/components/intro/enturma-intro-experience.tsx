@@ -2,14 +2,23 @@
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Profile } from "@enturma/contracts";
+import type { PlayerRef } from "@remotion/player";
 import { gsap } from "gsap";
-import { ArrowRight, BookOpen, Pause, Play } from "lucide-react";
+import {
+  ArrowRight,
+  BookOpen,
+  Pause,
+  Play,
+  Volume2,
+  VolumeX,
+} from "lucide-react";
 import {
   introDimensions,
   introQuality,
   INTRO_FEATURES,
   INTRO_STORAGE_KEY,
   INTRO_FRAMES,
+  introNarrationAt,
   type IntroProps,
 } from "./intro-model";
 
@@ -28,11 +37,14 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
   const [visible, setVisible] = useState(false);
   const [paused, setPaused] = useState(false);
   const [frame, setFrame] = useState(0);
+  const [muted, setMuted] = useState(true);
+  const [heard, setHeard] = useState(false);
   const [seekFrame, setSeekFrame] = useState<number>();
   const [dimensions, setDimensions] = useState(introDimensions(900));
   const [theme, setTheme] = useState<IntroProps["theme"]>("light");
   const [quality, setQuality] = useState<IntroProps["quality"]>("optimized");
   const container = useRef<HTMLElement>(null);
+  const player = useRef<PlayerRef>(null);
   const finishing = useRef(false);
   const exit = useRef<gsap.core.Tween | null>(null);
   const seen = useRef(false);
@@ -43,6 +55,8 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
       gsap.set(container.current, { clearProps: "opacity,transform" });
     setPaused(false);
     setFrame(0);
+    setMuted(true);
+    setHeard(false);
     setSeekFrame(undefined);
     setRun((value) => value + 1);
     setOpen(true);
@@ -211,7 +225,9 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
           </span>
           <span>
             <strong>Conheça o Enturma</strong>
-            <small>Seu próximo encontro começa aqui · 30 s</small>
+            <small>
+              Seu próximo encontro começa aqui · 30 s · com narração
+            </small>
           </span>
           <Play size={21} />
         </button>
@@ -229,8 +245,42 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
         <div>
           <button
             type="button"
+            className="intro-control intro-sound"
+            aria-label={muted ? "Ouvir narração" : "Silenciar narração"}
+            aria-pressed={!muted}
+            onClickCapture={(event) => {
+              const instance = player.current;
+              if (!instance) return;
+              if (!muted) {
+                instance.mute();
+                setMuted(true);
+                return;
+              }
+              // Start the mounted audio inside the gesture, including Mobile Safari.
+              if (!heard) {
+                instance.seekTo(0);
+                setSeekFrame(0);
+                setFrame(0);
+              }
+              instance.pause();
+              instance.unmute();
+              instance.play(event);
+              setMuted(false);
+              setHeard(true);
+              setPaused(false);
+            }}
+          >
+            {muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
+            <span>{muted ? "Ouvir narração" : "Som ligado"}</span>
+          </button>
+          <button
+            type="button"
             className="intro-control"
-            onClick={() => setPaused((value) => !value)}
+            onClickCapture={(event) => {
+              if (paused) player.current?.play(event);
+              else player.current?.pause();
+              setPaused((value) => !value);
+            }}
             aria-label={
               paused ? "Reproduzir apresentação" : "Pausar apresentação"
             }
@@ -255,13 +305,18 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
         onEnd={ended}
         onFrame={setFrame}
         seekFrame={seekFrame}
+        playerRef={player}
+        onMutedChange={setMuted}
       />
+      <p className="intro-caption" aria-label="Legenda da narração">
+        {introNarrationAt(frame)}
+      </p>
       <footer className="intro-timeline">
         <span>{String(Math.floor(frame / 60)).padStart(2, "0")} s</span>
         <input
           type="range"
           min="0"
-          max={quality === "low" ? 179 : INTRO_FRAMES - 1}
+          max={INTRO_FRAMES - 1}
           value={frame}
           aria-label="Posição da apresentação"
           onChange={(event) => {
@@ -270,7 +325,7 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
             setSeekFrame(next);
           }}
         />
-        <span>{quality === "low" ? "03" : "30"} s</span>
+        <span>30 s</span>
       </footer>
     </section>
   );

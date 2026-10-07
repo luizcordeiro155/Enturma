@@ -18,10 +18,23 @@
   border-bottom: 1px solid var(--border);
   color: var(--muted);
   font-size: 0.875rem;
+  flex-wrap: wrap;
 }
 .enturma-intro > header > div {
   display: flex;
   gap: 8px;
+  flex-wrap: wrap;
+  margin-left: auto;
+}
+.intro-caption {
+  min-height: 3.5em;
+  margin: 0;
+  padding: 12px 20px 4px;
+  color: var(--ink);
+  font-size: 0.9rem;
+  line-height: 1.5;
+  text-align: center;
+  text-wrap: balance;
 }
 html .enturma-intro button.intro-control {
   display: inline-flex;
@@ -34,6 +47,11 @@ html .enturma-intro button.intro-control {
   color: var(--ink);
   background: var(--bg);
   font-size: 0.875rem;
+}
+html .enturma-intro .intro-sound[aria-pressed="true"] {
+  background: #153f35;
+  color: #fff;
+  border-color: #73dcc4;
 }
 .intro-fallback {
   display: grid;

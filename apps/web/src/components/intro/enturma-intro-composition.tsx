@@ -1,14 +1,21 @@
 import { useEffect, useRef, type ReactNode } from "react";
 import {
   AbsoluteFill,
+  Freeze,
+  Html5Audio,
   Sequence,
   interpolate,
   spring,
+  staticFile,
   useCurrentFrame,
   useVideoConfig,
 } from "remotion";
 import type { IntroProps } from "./intro-model";
-import { INTRO_FRAMES } from "./intro-model";
+import {
+  INTRO_FRAMES,
+  INTRO_SCENE_FRAMES,
+  INTRO_NARRATION_FILE,
+} from "./intro-model";
 
 const clamp = { extrapolateLeft: "clamp", extrapolateRight: "clamp" } as const;
 const palette = {
@@ -43,7 +50,7 @@ const descriptions = [
   "Voz, vídeo e tela compartilhada. Uma conversa muda tudo.",
   "Começa aqui. Explore, converse e aprenda em companhia.",
 ];
-const frames = [0, 150, 300, 510, 720, 960, 1170, 1380, 1590, INTRO_FRAMES];
+const frames = INTRO_SCENE_FRAMES;
 const cut = (s: string, length = 34) =>
   s.length > length ? s.slice(0, length - 1) + "…" : s;
 function progress(frame: number, delay = 0, length = 35) {
@@ -100,6 +107,7 @@ function Atmosphere({ quality }: Pick<IntroProps, "quality">) {
     }
     ctx.globalAlpha = 1;
   }, [f, width, height, quality]);
+  if (quality === "low") return null;
   return (
     <canvas
       ref={canvas}
@@ -1080,20 +1088,23 @@ export function EnturmaIntroComposition(props: IntroProps) {
       }}
     >
       <Atmosphere quality={props.quality} />
-      {props.quality === "low" ? (
-        <FinalScene {...props} />
-      ) : (
-        scenes.map((Scene, i) => (
-          <Sequence
-            key={i}
-            name={Scene.name}
-            from={frames[i]}
-            durationInFrames={frames[i + 1] - frames[i]}
-          >
+      <Html5Audio src={staticFile(INTRO_NARRATION_FILE)} pauseWhenBuffering />
+      {scenes.map((Scene, i) => (
+        <Sequence
+          key={i}
+          name={Scene.name}
+          from={frames[i]}
+          durationInFrames={frames[i + 1] - frames[i]}
+        >
+          {props.quality === "low" ? (
+            <Freeze frame={75}>
+              <Scene {...props} />
+            </Freeze>
+          ) : (
             <Scene {...props} />
-          </Sequence>
-        ))
-      )}
+          )}
+        </Sequence>
+      ))}
       <PageTurn quality={props.quality} />
       <div
         style={{
