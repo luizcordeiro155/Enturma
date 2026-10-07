@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Message, Profile, RoomSystemEvent } from "@enturma/contracts";
 import {
   BookOpen,
@@ -108,7 +108,7 @@ export function RoomChat(props: Props) {
     [messages],
   );
 
-  function scrollRoomToLatest(behavior: ScrollBehavior = "auto") {
+  const scrollRoomToLatest = useCallback((behavior: ScrollBehavior = "auto") => {
     const viewport = scrollRef.current;
     if (!viewport) return;
     viewport.scrollTo({ top: viewport.scrollHeight, behavior });
@@ -127,7 +127,7 @@ export function RoomChat(props: Props) {
         detail: { context: `room:${roomId}` },
       }),
     );
-  }
+  }, [roomId]);
 
   useEffect(() => {
     const latest = messages.at(-1)?.id;
@@ -156,7 +156,7 @@ export function RoomChat(props: Props) {
         forceFollowLatest.current = false;
       });
     }
-  }, [messages, compact]);
+  }, [messages, compact, scrollRoomToLatest]);
 
   function selectImage(file: File | null) {
     if (!file) return;
