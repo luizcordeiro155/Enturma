@@ -5,6 +5,11 @@ import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import pg from "pg";
+import {
+  INTRO_FRAMES,
+  INTRO_SCENE_FRAMES,
+  INTRO_BOOK_PAGES,
+} from "../src/components/intro/intro-model";
 const backend = process.env.E2E_API_URL || "http://localhost:8080";
 const screenshots = join(tmpdir(), "enturma-ux-review");
 mkdirSync(screenshots, { recursive: true });
@@ -59,7 +64,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     )
     .toBeGreaterThan(20);
   await intro.getByRole("button", { name: "Pausar apresentação" }).click();
-  const narration = intro.locator('audio[src*="enturma-pt-br-dora"]');
+  const narration = intro.locator('audio[src*="enturma-pt-br-presenter"]');
   await expect(narration).toHaveCount(1);
   await expect
     .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
@@ -88,16 +93,16 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .toBe(true);
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill("1020");
+    .fill("1620");
   await expect
     .poll(() =>
       narration.evaluate((audio: HTMLAudioElement) =>
-        Math.abs(audio.currentTime - 17),
+        Math.abs(audio.currentTime - 27),
       ),
     )
     .toBeLessThan(0.3);
   await expect(intro.getByLabel("Legenda da narração")).toHaveText(
-    "Estude com materiais e inteligência artificial.",
+    "Entre nas salas! Reúna seus materiais e estude com inteligência artificial.",
   );
   await intro.getByRole("button", { name: "Silenciar narração" }).click();
   await expect
@@ -127,7 +132,10 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     )
     .toBeGreaterThan(20);
   await intro.getByRole("button", { name: "Pausar apresentação" }).click();
-  for (const frame of [100, 230, 410, 630, 850, 1080, 1280, 1480, 1690]) {
+  for (const frame of [
+    ...INTRO_SCENE_FRAMES.slice(0, -1).map((start) => start + 160),
+    ...INTRO_BOOK_PAGES.map((cue) => cue.fromFrame + 100),
+  ]) {
     await intro
       .getByRole("slider", { name: "Posição da apresentação" })
       .fill(String(frame));
@@ -152,11 +160,34 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       expect(bounds.right).toBeLessThanOrEqual(390);
     }
   }
+  for (const [index, cue] of INTRO_BOOK_PAGES.entries()) {
+    await intro
+      .getByRole("slider", { name: "Posição da apresentação" })
+      .fill(String(cue.fromFrame + 100));
+    await expect(intro.locator("[data-book-page]")).toHaveAttribute(
+      "data-book-page",
+      String(index),
+    );
+    await expect(intro.getByLabel("Legenda da narração")).toHaveText(cue.text);
+    await intro.screenshot({
+      path: join(screenshots, `intro-book-mobile-${index}.png`),
+    });
+  }
   await page.screenshot({
     path: join(screenshots, "intro-mobile-refined.png"),
   });
   await page.setViewportSize({ width: 1920, height: 1080 });
   await expect(intro).toHaveAttribute("data-layout", "desktop");
+  await intro
+    .getByRole("slider", { name: "Posição da apresentação" })
+    .fill(String(INTRO_BOOK_PAGES[0].fromFrame + 100));
+  await intro.screenshot({ path: join(screenshots, "intro-book-desktop.png") });
+  await intro
+    .getByRole("slider", { name: "Posição da apresentação" })
+    .fill(String(INTRO_SCENE_FRAMES[9] + 230));
+  await intro.screenshot({
+    path: join(screenshots, "intro-closing-desktop.png"),
+  });
   await page.screenshot({ path: join(screenshots, "intro-desktop-dark.png") });
   await intro.getByRole("button", { name: "Pular" }).click();
   await expect(page.locator("#minhas-materias")).toBeFocused();
@@ -173,16 +204,25 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       ),
     )
     .toBe(true);
+  for (const [index, cue] of INTRO_BOOK_PAGES.entries()) {
+    await intro
+      .getByRole("slider", { name: "Posição da apresentação" })
+      .fill(String(cue.fromFrame + 60));
+    await expect(intro.locator("[data-book-page]")).toHaveAttribute(
+      "data-book-page",
+      String(index),
+    );
+  }
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill("1600");
-  await expect(intro.locator('[data-intro-scene="8"]')).toBeVisible();
+    .fill("3700");
+  await expect(intro.locator('[data-intro-scene="9"]')).toBeVisible();
   await expect(intro.getByLabel("Legenda da narração")).toHaveText(
-    "Enturma. Aprenda em boa companhia.",
+    "Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.",
   );
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill("1790");
+    .fill(String(INTRO_FRAMES - 10));
   await expect(intro).toHaveAttribute("data-minimized", "true", {
     timeout: 10000,
   });

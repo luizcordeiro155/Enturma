@@ -1,0 +1,99 @@
+{
+  "durationInFrames": 3960,
+  "fps": 60,
+  "audioFile": "intro/enturma-pt-br-presenter-v2.mp3",
+  "sceneFrames": [0, 270, 540, 870, 1200, 1560, 1920, 2250, 2580, 3540, 3960],
+  "cues": [
+    {
+      "fromFrame": 0,
+      "scene": 0,
+      "text": "Ei! Que tal viver a faculdade mais conectado?",
+      "voiceStartFrame": 11,
+      "voiceDuration": 3.816
+    },
+    {
+      "fromFrame": 270,
+      "scene": 1,
+      "text": "Esse é o Enturma! Seu ponto de encontro na faculdade.",
+      "voiceStartFrame": 281,
+      "voiceDuration": 3.912
+    },
+    {
+      "fromFrame": 540,
+      "scene": 2,
+      "text": "Organize suas matérias e encontre sua próxima turma de estudos.",
+      "voiceStartFrame": 551,
+      "voiceDuration": 4.584
+    },
+    {
+      "fromFrame": 870,
+      "scene": 3,
+      "text": "Conheça colegas, troque experiências e aprenda em boa companhia.",
+      "voiceStartFrame": 881,
+      "voiceDuration": 4.608
+    },
+    {
+      "fromFrame": 1200,
+      "scene": 4,
+      "text": "No feed, compartilhe novidades, faça perguntas e participe da conversa.",
+      "voiceStartFrame": 1211,
+      "voiceDuration": 5.136
+    },
+    {
+      "fromFrame": 1560,
+      "scene": 5,
+      "text": "Entre nas salas! Reúna seus materiais e estude com inteligência artificial.",
+      "voiceStartFrame": 1571,
+      "voiceDuration": 5.328
+    },
+    {
+      "fromFrame": 1920,
+      "scene": 6,
+      "text": "Vai pra faculdade? Combine uma carona e encontre companhia no caminho.",
+      "voiceStartFrame": 1931,
+      "voiceDuration": 4.968
+    },
+    {
+      "fromFrame": 2250,
+      "scene": 7,
+      "text": "Converse por voz, vídeo ou compartilhe a tela. É só se conectar!",
+      "voiceStartFrame": 2261,
+      "voiceDuration": 5.016
+    },
+    {
+      "fromFrame": 2580,
+      "scene": 8,
+      "text": "As novidades da faculdade, no seu feed.",
+      "voiceStartFrame": 2591,
+      "voiceDuration": 3.192
+    },
+    {
+      "fromFrame": 2820,
+      "scene": 8,
+      "text": "Salas pra aprender em companhia.",
+      "voiceStartFrame": 2831,
+      "voiceDuration": 2.688
+    },
+    {
+      "fromFrame": 3030,
+      "scene": 8,
+      "text": "Caronas pra compartilhar o caminho.",
+      "voiceStartFrame": 3041,
+      "voiceDuration": 2.784
+    },
+    {
+      "fromFrame": 3240,
+      "scene": 8,
+      "text": "E cadernos com inteligência artificial, pra estudar do seu jeito!",
+      "voiceStartFrame": 3251,
+      "voiceDuration": 4.416
+    },
+    {
+      "fromFrame": 3540,
+      "scene": 9,
+      "text": "Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.",
+      "voiceStartFrame": 3551,
+      "voiceDuration": 4.848
+    }
+  ]
+}
