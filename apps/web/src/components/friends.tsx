@@ -66,6 +66,12 @@ export function Friends() {
   const [older, setOlder] = useState(false);
   const key = useRef<CryptoKey | null>(null);
   const generation = useRef(0);
+  const messagesViewport = useRef<HTMLDivElement>(null);
+  const composer = useRef<HTMLTextAreaElement>(null);
+  const privateChat = useRef<HTMLElement>(null);
+  const forceFollowLatest = useRef(false);
+  const nearLatest = useRef(true);
+  const previousMessageCount = useRef(0);
   const identity = useRef<Awaited<ReturnType<typeof createIdentity>> | null>(
     null,
   );
@@ -168,6 +174,32 @@ export function Friends() {
     },
     [],
   );
+  const scrollToLatest = useCallback((behavior: ScrollBehavior = "auto") => {
+    const viewport = messagesViewport.current;
+    if (!viewport) return;
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior });
+    nearLatest.current = true;
+  }, []);
+
+  useEffect(() => {
+    const count = messages.length;
+    if (!count) {
+      previousMessageCount.current = 0;
+      return;
+    }
+    const hasNewMessage = count > previousMessageCount.current;
+    previousMessageCount.current = count;
+    if (!hasNewMessage) return;
+    if (!forceFollowLatest.current && !nearLatest.current) return;
+    const behavior =
+      forceFollowLatest.current &&
+      document.documentElement.dataset.reducedMotion !== "true"
+        ? "smooth"
+        : "auto";
+    requestAnimationFrame(() => scrollToLatest(behavior));
+    forceFollowLatest.current = false;
+  }, [messages, scrollToLatest]);
+
   useEffect(() => {
     if (!selected || !ready || !identity.current) return;
     const friend = selected;
@@ -198,6 +230,13 @@ export function Friends() {
         setConnectionState("ready");
         setConnectionError("");
         const target = location.hash.match(/^#message-([a-f0-9-]+)$/)?.[1];
+        if (!target) {
+          forceFollowLatest.current = true;
+          requestAnimationFrame(() => {
+            scrollToLatest("auto");
+            composer.current?.focus({ preventScroll: true });
+          });
+        }
         if (target) {
           await load(friend, k, 0, current, target);
           if (active) focusMessage(`message-${target}`);
@@ -231,7 +270,7 @@ export function Friends() {
       clearTimeout(timer);
       clearTimeout(start);
     };
-  }, [selected, ready, load, connectionAttempt]);
+  }, [selected, ready, load, connectionAttempt, scrollToLatest]);
   useEffect(() => {
     const jump = () => {
       const target = location.hash.match(/^#message-([a-f0-9-]+)$/)?.[1];
@@ -261,7 +300,19 @@ export function Friends() {
       setPage(0);
       setFinger("");
       key.current = null;
+      nearLatest.current = true;
+      forceFollowLatest.current = true;
+      previousMessageCount.current = 0;
       setSelected(friend);
+      requestAnimationFrame(() => {
+        privateChat.current?.scrollIntoView({
+          block: "start",
+          behavior:
+            document.documentElement.dataset.reducedMotion === "true"
+              ? "auto"
+              : "smooth",
+        });
+      });
     },
     [selected?.id],
   );
@@ -296,12 +347,21 @@ export function Friends() {
         me.id,
         crypto.randomUUID(),
       );
+      forceFollowLatest.current = true;
       await post(`/friends/${friend.id}/messages`, {
         ...payload,
         mentioned: !!friend.username && mentionsUser(draft, friend.username),
       });
       setDraft("");
       await load(friend, key.current, 0, generation.current);
+      requestAnimationFrame(() => {
+        scrollToLatest(
+          document.documentElement.dataset.reducedMotion === "true"
+            ? "auto"
+            : "smooth",
+        );
+        composer.current?.focus({ preventScroll: true });
+      });
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -491,6 +551,7 @@ export function Friends() {
             )}
           </aside>
           <section
+            ref={privateChat}
             className="private-chat"
             aria-label="Conversa privada"
             data-notification-context={
@@ -566,11 +627,26 @@ export function Friends() {
                   </div>
                 )}
                 <ConversationNotice context={`friend:${selected.id}`} />
-                <div className="private-messages" role="log">
+                <div
+                  ref={messagesViewport}
+                  className="private-messages"
+                  role="log"
+                  aria-live="polite"
+                  onScroll={(event) => {
+                    const viewport = event.currentTarget;
+                    nearLatest.current =
+                      viewport.scrollHeight -
+                        viewport.scrollTop -
+                        viewport.clientHeight <
+                      96;
+                  }}
+                >
                   {older ? (
                     <button
                       onClick={async () => {
                         if (!key.current) return;
+                        nearLatest.current = false;
+                        forceFollowLatest.current = false;
                         try {
                           await load(
                             selected,
@@ -614,6 +690,7 @@ export function Friends() {
                   <label>
                     Mensagem privada
                     <textarea
+                      ref={composer}
                       value={draft}
                       onChange={(e) => setDraft(e.target.value)}
                       maxLength={4000}
