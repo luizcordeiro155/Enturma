@@ -2913,3 +2913,80 @@
     padding-left: 14px;
   }
 }
+
+
+/* Mobile room keyboard recovery v8: composer-only IME layout.
+   The native Android shell no longer shrinks the whole WebView. Keep the room
+   stable and float only the active text composer immediately above the IME. */
+@media (max-width: 760px) {
+  html[data-enturma-ime="true"] .room-active-shell {
+    --room-bottom-ui-height: 0px !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .room-mobile-nav {
+    display: none !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .study-room-page {
+    padding-bottom: 0 !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .persistent-composer {
+    position: fixed !important;
+    left: calc(8px + var(--enturma-safe-left, 0px));
+    right: calc(8px + var(--enturma-safe-right, 0px));
+    bottom: calc(var(--native-keyboard-bottom, 0px) + 8px) !important;
+    z-index: 230 !important;
+    display: block !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    max-height: none !important;
+    box-shadow: none !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .persistent-composer > label {
+    display: block;
+    margin: 0;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .persistent-composer textarea {
+    width: 100%;
+    min-height: 58px;
+    max-height: 92px;
+    margin: 0;
+    resize: none;
+    font-size: 16px;
+    border-radius: 18px;
+    background: var(--room-subtle);
+    color: var(--room-ink);
+    border: 1px solid var(--room-border);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell
+    .persistent-composer :is(
+      .composer-tools,
+      .composer-hint,
+      .emoji-picker,
+      .image-picker
+    ) {
+    display: none !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .typing-status {
+    bottom: calc(
+      var(--native-keyboard-bottom, 0px) + 68px
+    ) !important;
+    z-index: 229 !important;
+  }
+
+  html[data-enturma-ime="true"] .room-active-shell .persistent-messages {
+    padding-bottom: calc(
+      94px + var(--native-keyboard-bottom, 0px)
+    ) !important;
+    scroll-padding-bottom: calc(
+      86px + var(--native-keyboard-bottom, 0px)
+    ) !important;
+  }
+}
