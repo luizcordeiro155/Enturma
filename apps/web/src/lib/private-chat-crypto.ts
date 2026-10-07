@@ -1,11 +1,31 @@
 const enc = new TextEncoder();
 const dec = new TextDecoder();
 export type Identity = { publicKey: JsonWebKey; privateKey: JsonWebKey };
-export function base64(bytes: ArrayBuffer | Uint8Array) {
-  return btoa(String.fromCharCode(...new Uint8Array(bytes)));
+export function base64(value: ArrayBuffer | Uint8Array) {
+  const bytes =
+    value instanceof Uint8Array ? value : new Uint8Array(value);
+  const chunks: string[] = [];
+  const chunkSize = 0x8000;
+
+  // Never spread a full encrypted attachment into fromCharCode. Mobile
+  // browsers/WebViews have a finite argument stack and large images otherwise
+  // fail with "Maximum call stack size exceeded".
+  for (let offset = 0; offset < bytes.length; offset += chunkSize) {
+    chunks.push(
+      String.fromCharCode(
+        ...bytes.subarray(offset, Math.min(offset + chunkSize, bytes.length)),
+      ),
+    );
+  }
+  return btoa(chunks.join(""));
 }
+
 function bytes(value: string) {
-  return Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
+  const binary = atob(value);
+  const output = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index += 1)
+    output[index] = binary.charCodeAt(index);
+  return output;
 }
 async function database() {
   return new Promise<IDBDatabase>((resolve, reject) => {

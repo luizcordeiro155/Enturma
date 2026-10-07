@@ -206,6 +206,8 @@
     width: 100% !important;
     height: 100dvh !important;
     min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
     overflow: hidden !important;
   }
 
@@ -355,6 +357,16 @@
 
   html[data-enturma-private-chat="true"] .private-composer {
     flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding-bottom: 6px !important;
+  }
+
+  html[data-enturma-private-chat="true"] .private-chat,
+  html[data-enturma-private-chat="true"] .friends-workspace,
+  html[data-enturma-private-chat="true"] .friends-page.mobile-private-chat-open,
+  html[data-enturma-private-chat="true"] .workspace > main {
+    padding-bottom: 0 !important;
+    margin-bottom: 0 !important;
   }
 
   html[data-enturma-private-chat="true"][data-enturma-ime="true"]
