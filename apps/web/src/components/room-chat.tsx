@@ -108,6 +108,27 @@ export function RoomChat(props: Props) {
     [messages],
   );
 
+  function scrollRoomToLatest(behavior: ScrollBehavior = "auto") {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    viewport.scrollTo({ top: viewport.scrollHeight, behavior });
+    requestAnimationFrame(() => {
+      bottomRef.current?.scrollIntoView({
+        block: "end",
+        behavior: "auto",
+      });
+      viewport.scrollTop = viewport.scrollHeight;
+    });
+    nearBottom.current = true;
+    setUnseen(0);
+    setFirstUnread(null);
+    window.dispatchEvent(
+      new CustomEvent("enturma-conversation-latest", {
+        detail: { context: `room:${roomId}` },
+      }),
+    );
+  }
+
   useEffect(() => {
     const latest = messages.at(-1)?.id;
     const previousIndex = messages.findIndex((m) => m.id === newestRef.current);
@@ -131,13 +152,8 @@ export function RoomChat(props: Props) {
       scrollRef.current
     ) {
       requestAnimationFrame(() => {
-        const viewport = scrollRef.current;
-        if (!viewport) return;
-        viewport.scrollTop = viewport.scrollHeight;
-        nearBottom.current = true;
+        scrollRoomToLatest("auto");
         forceFollowLatest.current = false;
-        setUnseen(0);
-        setFirstUnread(null);
       });
     }
   }, [messages, compact]);
@@ -582,7 +598,7 @@ export function RoomChat(props: Props) {
             );
           })
         )}
-        <div ref={bottomRef} />
+        <div ref={bottomRef} className="chat-bottom-spacer" aria-hidden="true" />
       </div>
 
       {unseen > 0 && (
@@ -590,10 +606,7 @@ export function RoomChat(props: Props) {
           type="button"
           className="chat-unread"
           onClick={() => {
-            if (scrollRef.current)
-              scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-            nearBottom.current = true;
-            setUnseen(0);
+            scrollRoomToLatest("smooth");
           }}
         >
           {unseen} nova(s) mensagem(ns) ↓
