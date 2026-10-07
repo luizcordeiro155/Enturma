@@ -258,6 +258,79 @@
 .private-chat textarea {
   min-height: 90px;
 }
+
+/* Private chat keeps contrast and message hierarchy consistent in dark mode. */
+html[data-theme="dark"] .friends-page {
+  --ink: var(--room-ink);
+  --muted: var(--room-muted);
+  --border: var(--room-border);
+  --soft: var(--room-subtle);
+}
+html[data-theme="dark"] .friends-workspace > aside article,
+html[data-theme="dark"] .private-chat,
+html[data-theme="dark"] .private-backup,
+html[data-theme="dark"] .private-connection-status {
+  background: var(--room-panel);
+  color: var(--room-ink);
+  border-color: var(--room-border);
+}
+html[data-theme="dark"] .private-messages {
+  scrollbar-color: var(--room-border) transparent;
+}
+html[data-theme="dark"] .private-messages article {
+  background: var(--room-subtle);
+  color: var(--room-ink);
+  border: 1px solid color-mix(in srgb, var(--room-border) 82%, transparent);
+}
+html[data-theme="dark"] .private-messages article.mine {
+  background: color-mix(in srgb, var(--room-accent) 16%, var(--room-panel));
+  color: var(--room-ink);
+  border-color: color-mix(in srgb, var(--room-accent) 42%, var(--room-border));
+}
+html[data-theme="dark"] .private-messages small,
+html[data-theme="dark"] .private-chat small,
+html[data-theme="dark"] .private-backup p {
+  color: var(--room-muted);
+}
+html[data-theme="dark"] .private-chat .safety-code {
+  background: var(--room-subtle);
+  color: var(--room-ink);
+  border: 1px solid var(--room-border);
+  border-radius: 10px;
+}
+html[data-theme="dark"] .friends-page button:not(.text-button):not(.identity-trigger),
+html[data-theme="dark"] .friends-page .button {
+  background: var(--room-accent);
+  color: var(--room-accent-ink);
+  border-color: var(--room-accent);
+}
+html[data-theme="dark"] .friends-page button.secondary,
+html[data-theme="dark"] .friends-page .button.secondary {
+  background: var(--room-subtle) !important;
+  color: var(--room-ink) !important;
+  border-color: var(--room-border) !important;
+}
+html[data-theme="dark"] .friends-page .text-button {
+  background: transparent !important;
+  color: var(--room-ink) !important;
+  border-color: transparent !important;
+}
+html[data-theme="dark"] .friends-page input,
+html[data-theme="dark"] .friends-page textarea,
+html[data-theme="dark"] .friends-page select {
+  background: var(--room-subtle);
+  color: var(--room-ink);
+  border-color: var(--room-border);
+}
+html[data-theme="dark"] .friends-page input::placeholder,
+html[data-theme="dark"] .friends-page textarea::placeholder {
+  color: var(--room-muted);
+}
+html[data-theme="dark"] .friends-page .privacy-pill {
+  background: color-mix(in srgb, var(--room-accent) 12%, var(--room-panel));
+  color: var(--room-ink);
+  border-color: color-mix(in srgb, var(--room-accent) 35%, var(--room-border));
+}
 .call-media-tile.screen-share {
   grid-column: 1/-1;
   min-height: 320px;
