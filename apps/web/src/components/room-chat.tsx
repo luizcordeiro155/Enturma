@@ -112,14 +112,15 @@ export function RoomChat(props: Props) {
   const scrollRoomToLatest = useCallback((behavior: ScrollBehavior = "auto") => {
     const viewport = scrollRef.current;
     if (!viewport) return;
+
+    // Scroll only the room message viewport. Using scrollIntoView here also
+    // moved outer ancestors and made the newest message climb too high above
+    // the composer on Android.
     viewport.scrollTo({ top: viewport.scrollHeight, behavior });
     requestAnimationFrame(() => {
-      bottomRef.current?.scrollIntoView({
-        block: "end",
-        behavior: "auto",
-      });
       viewport.scrollTop = viewport.scrollHeight;
     });
+
     nearBottom.current = true;
     setRoomAtLatest(true);
     setUnseen(0);
