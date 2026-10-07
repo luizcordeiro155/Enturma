@@ -1,6 +1,6 @@
 import { Composition, registerRoot } from "remotion";
 import { EnturmaIntroComposition } from "../components/intro/enturma-intro-composition";
-import { INTRO_FEATURES } from "../components/intro/intro-model";
+import { INTRO_FEATURES, INTRO_FRAMES } from "../components/intro/intro-model";
 
 /** Studio/Renderer entry. Marketing defaults contain no invented student profiles. */
 function IntroRoot() {
@@ -10,9 +10,9 @@ function IntroRoot() {
         id="EnturmaDesktop"
         component={EnturmaIntroComposition}
         width={1200}
-        height={620}
+        height={675}
         fps={60}
-        durationInFrames={900}
+        durationInFrames={INTRO_FRAMES}
         defaultProps={{
           user: null,
           students: [],
@@ -26,9 +26,9 @@ function IntroRoot() {
         id="EnturmaPortrait"
         component={EnturmaIntroComposition}
         width={600}
-        height={700}
+        height={860}
         fps={60}
-        durationInFrames={900}
+        durationInFrames={INTRO_FRAMES}
         defaultProps={{
           user: null,
           students: [],
@@ -44,7 +44,7 @@ function IntroRoot() {
         width={960}
         height={600}
         fps={60}
-        durationInFrames={900}
+        durationInFrames={INTRO_FRAMES}
         defaultProps={{
           user: null,
           students: [],
@@ -60,7 +60,7 @@ function IntroRoot() {
         width={1600}
         height={640}
         fps={60}
-        durationInFrames={900}
+        durationInFrames={INTRO_FRAMES}
         defaultProps={{
           user: null,
           students: [],

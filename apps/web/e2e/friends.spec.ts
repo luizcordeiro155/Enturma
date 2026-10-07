@@ -243,6 +243,47 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   ).json();
   expect(JSON.stringify(stored)).not.toContain("Resposta protegida");
   expect(stored[0].ciphertext).toBeTruthy();
+  // Authenticated encrypted attachments use a bounded thumbnail and a Back-aware viewer.
+  await page.locator('.private-composer input[type="file"]').setInputFiles({
+    name: "anotacoes.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(png, "base64"),
+  });
+  await page
+    .getByRole("button", { name: "Enviar mensagem", exact: true })
+    .click();
+  const thumbnail = other
+    .locator(".private-messages .chat-image-thumbnail")
+    .last();
+  await expect(thumbnail).toBeVisible();
+  const imageBounds = await thumbnail.locator("img").boundingBox();
+  expect(imageBounds!.width).toBeLessThanOrEqual(320);
+  expect(imageBounds!.height).toBeLessThanOrEqual(240);
+  await thumbnail.click();
+  const viewer = other.getByRole("dialog", { name: "Visualização de imagem" });
+  await expect(viewer).toBeVisible();
+  await other.keyboard.press("Escape");
+  await expect(viewer).toHaveCount(0);
+  await expect(thumbnail).toBeFocused();
+  await other.setViewportSize({ width: 390, height: 844 });
+  await thumbnail.click();
+  await expect(viewer).toBeVisible();
+  const viewerBounds = await viewer.boundingBox();
+  expect(viewerBounds!.x).toBeGreaterThanOrEqual(0);
+  expect(viewerBounds!.x + viewerBounds!.width).toBeLessThanOrEqual(390);
+  await other.goBack();
+  await expect(viewer).toHaveCount(0);
+  await expect(other).toHaveURL(/friends\?chat=/);
+  await other.getByRole("button", { name: "Voltar para conversas" }).click();
+  await expect(other).toHaveURL(/\/friends$/);
+  await other.getByRole("button", { name: "Conversar", exact: true }).click();
+  await expect(other).toHaveURL(/friends\?chat=/);
+  await other.goBack();
+  await expect(other).toHaveURL(/\/friends$/);
+  await expect(other.getByLabel("Mensagem privada")).not.toBeVisible();
+  await other.getByRole("button", { name: "Conversar", exact: true }).click();
+  await other.setViewportSize({ width: 1487, height: 1058 });
+  await other.getByText("Código de segurança", { exact: true }).click();
   await page
     .getByRole("button", { name: `Ver perfil de ${b}`, exact: true })
     .first()
@@ -302,7 +343,6 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     fullPage: true,
   });
   await page.reload();
-  await page.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(
     page
       .locator(".private-messages")
@@ -378,7 +418,6 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
       .getByText("Enviado pelo novo dispositivo", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
   await fresh.reload();
-  await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(fresh.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(
     fresh

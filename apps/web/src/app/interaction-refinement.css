@@ -1,0 +1,440 @@
+/* Scoped final surfaces for calls and attachments, including routes outside Shell. */
+html[data-theme] .app-shell .onboarding-banner a.button {
+  background: #153f35 !important;
+  color: #fff !important;
+  border: 1px solid #153f35 !important;
+  box-shadow: 0 3px 9px #153f3520;
+}
+html[data-theme] .app-shell .onboarding-banner a.button:hover {
+  background: #235849 !important;
+}
+html .private-chat-header .private-call-buttons {
+  flex-wrap: nowrap;
+  margin-left: auto;
+  gap: 2px;
+  position: relative;
+}
+html .private-chat-header .private-call-buttons button {
+  background: transparent !important;
+  color: var(--ink) !important;
+  border: 0;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  padding: 9px;
+}
+html .private-chat-header .private-call-buttons button:hover {
+  background: var(--soft) !important;
+}
+html .private-chat-header .private-call-buttons button:disabled {
+  opacity: 0.4;
+}
+.private-call-buttons p[role="alert"] {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 5;
+  width: min(280px, 80vw);
+  padding: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+}
+.private-chat-peer {
+  min-width: 0;
+}
+.private-chat-peer .identity-trigger {
+  min-width: 0;
+  max-width: 100%;
+}
+.private-chat-peer .identity-trigger > span:last-child {
+  min-width: 0;
+  overflow: hidden;
+}
+.private-chat-peer strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+html .chat-image-thumbnail {
+  display: block;
+  width: fit-content;
+  max-width: 100%;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--soft) !important;
+  cursor: zoom-in;
+}
+html .chat-image-thumbnail img {
+  display: block;
+  width: auto;
+  max-width: min(320px, 100%);
+  height: auto;
+  max-height: 240px;
+  object-fit: contain;
+}
+.chat-image-viewer {
+  width: min(1060px, calc(100vw - 32px));
+  height: min(820px, calc(100dvh - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--bg);
+  color: var(--ink);
+  overflow: hidden;
+}
+.chat-image-viewer[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.chat-image-viewer::backdrop {
+  background: #060b0ee6;
+}
+.chat-image-viewer header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.chat-image-viewer header span {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.chat-image-viewer header :is(button, a) {
+  display: grid;
+  place-items: center;
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  padding: 8px;
+  background: var(--soft);
+  color: var(--ink);
+  border-radius: 50%;
+}
+.chat-image-canvas {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.chat-image-canvas img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.chat-image-viewer > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.75rem;
+  text-align: center;
+}
+.private-call-page {
+  --call-surface: var(--surface-raised);
+  width: 100%;
+  height: 100dvh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  padding: max(16px, var(--enturma-safe-top)) 24px
+    max(16px, var(--enturma-safe-bottom));
+  background: var(--bg);
+  color: var(--ink);
+}
+.private-call-page > header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex: 0 0 56px;
+  color: var(--muted);
+}
+.private-call-page > header a {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  color: var(--ink);
+  border-radius: 50%;
+  background: var(--soft);
+}
+.private-call-page > .call-mount,
+.private-call-page .call-mount > div,
+.private-call-page .persistent-call-host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+.private-call-page .call-panel {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: 0;
+  background: transparent;
+}
+.private-call-page .call-members {
+  position: relative;
+  flex: 1;
+  min-height: 200px;
+  padding: 0;
+  display: flex;
+}
+.private-call-page .call-member[data-local="false"] {
+  flex: 1;
+  min-height: 200px;
+  background: var(--soft);
+}
+.private-call-page .call-member[data-local="false"] .identity-avatar {
+  width: 112px;
+  height: 112px;
+  flex-basis: 112px;
+}
+.private-call-page .call-member[data-local="false"] .identity-trigger strong {
+  font-size: clamp(1.25rem, 3vw, 2rem);
+}
+.private-call-page .call-member[data-local="true"] {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 140px;
+  height: 150px;
+  min-height: 0;
+  z-index: 3;
+  padding: 8px 4px 26px;
+  box-shadow: 0 8px 24px #0002;
+}
+.private-call-page .call-member[data-local="true"][data-camera="false"] {
+  display: none;
+}
+.private-call-page .call-member[data-local="true"] .identity-avatar {
+  width: 36px;
+  height: 36px;
+  flex-basis: 36px;
+}
+.private-call-page
+  .call-member[data-local="true"]
+  .identity-trigger
+  :is(strong, small) {
+  font-size: 0.65rem;
+}
+.private-call-page .call-controls {
+  flex: 0 0 auto;
+  position: relative;
+  inset: auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: clamp(8px, 2vw, 24px);
+  border: 0;
+  padding: 20px 8px 8px;
+  background: transparent;
+}
+html .private-call-page .call-control {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--ink);
+  padding: 10px;
+  flex-direction: column;
+  gap: 4px;
+}
+html .private-call-page .call-control.hangup,
+html .private-call-page .call-cancel {
+  background: #c93f51 !important;
+  color: #fff !important;
+}
+.private-call-page .call-privacy-note {
+  display: none;
+}
+.private-call-page .call-topbar {
+  border: 0;
+  background: transparent;
+  padding-inline: 4px;
+}
+.private-call-waiting {
+  flex: 1;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  isolation: isolate;
+}
+.private-call-waiting .identity-avatar {
+  width: 112px;
+  height: 112px;
+  flex: 0 0 112px;
+}
+.private-call-waiting h1 {
+  font-size: clamp(1.75rem, 5vw, 3rem);
+  margin: 0;
+}
+.private-call-waiting p {
+  color: var(--muted);
+}
+.private-call-waiting .call-cancel {
+  width: 64px;
+  height: 64px;
+  margin-top: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+.call-orbit {
+  position: absolute;
+  width: 220px;
+  height: 220px;
+  border: 1px solid var(--success);
+  border-radius: 50%;
+  top: calc(50% - 205px);
+  z-index: -1;
+  opacity: 0.25;
+}
+html .enturma-intro .intro-replay-tile {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  text-align: left;
+  padding: 16px;
+  color: var(--ink) !important;
+  background: var(--surface) !important;
+  border: 0;
+  border-radius: 0;
+}
+.intro-replay-tile > span:nth-child(2) {
+  display: grid;
+  gap: 6px;
+  flex: 1;
+}
+.intro-replay-tile strong {
+  font-size: 1.05rem;
+}
+.intro-replay-tile small {
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.intro-poster {
+  position: relative;
+  flex: 0 0 104px;
+  height: 76px;
+  background: #0c2923;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  color: #deef80;
+  overflow: hidden;
+}
+.intro-poster-orbit {
+  position: absolute;
+  width: 67px;
+  height: 67px;
+  border: 1px solid #73dcc455;
+  border-radius: 50%;
+  transform: rotate(-25deg) scaleX(1.45);
+}
+.intro-poster-play {
+  position: absolute;
+  bottom: 7px;
+  right: 7px;
+  background: #deef80;
+  color: #153f35;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+}
+.intro-timeline {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.75rem;
+}
+html .intro-timeline input {
+  accent-color: var(--ink);
+  padding: 0;
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+@media (max-width: 760px) {
+  html .enturma-intro .intro-replay-tile {
+    gap: 12px;
+    padding: 12px;
+  }
+  .intro-poster {
+    flex-basis: 80px;
+    height: 70px;
+  }
+  html[data-enturma-private-chat="true"] .private-chat-header {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    display: grid;
+    gap: 6px;
+    padding-inline: 8px;
+  }
+  html[data-enturma-private-chat="true"] .private-chat-peer .identity-trigger {
+    display: flex;
+    gap: 8px;
+  }
+  html .private-call-buttons small {
+    display: none;
+  }
+  html .private-chat-header .private-call-buttons button {
+    width: 38px;
+    height: 42px;
+    min-width: 38px;
+  }
+  html .chat-image-thumbnail img {
+    max-width: min(260px, 100%);
+    max-height: 220px;
+  }
+  .chat-image-viewer {
+    width: calc(100vw - 20px);
+    height: min(
+      680px,
+      calc(100dvh - 32px - var(--enturma-safe-top) - var(--enturma-safe-bottom))
+    );
+    padding: 10px;
+    border-radius: 14px;
+  }
+  .private-call-page {
+    padding-inline: 12px;
+  }
+  html .private-call-page .call-control {
+    width: 52px;
+    height: 52px;
+    min-width: 48px;
+  }
+  html .private-call-page .call-control span {
+    display: none;
+  }
+  .private-call-page .call-member[data-local="true"] {
+    width: 95px;
+    height: 126px;
+  }
+}

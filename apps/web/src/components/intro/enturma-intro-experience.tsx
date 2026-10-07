@@ -3,12 +3,13 @@ import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Profile } from "@enturma/contracts";
 import { gsap } from "gsap";
-import { ArrowRight, Pause, Play } from "lucide-react";
+import { ArrowRight, BookOpen, Pause, Play } from "lucide-react";
 import {
   introDimensions,
   introQuality,
   INTRO_FEATURES,
   INTRO_STORAGE_KEY,
+  INTRO_FRAMES,
   type IntroProps,
 } from "./intro-model";
 
@@ -26,6 +27,8 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
   const [run, setRun] = useState(0);
   const [visible, setVisible] = useState(false);
   const [paused, setPaused] = useState(false);
+  const [frame, setFrame] = useState(0);
+  const [seekFrame, setSeekFrame] = useState<number>();
   const [dimensions, setDimensions] = useState(introDimensions(900));
   const [theme, setTheme] = useState<IntroProps["theme"]>("light");
   const [quality, setQuality] = useState<IntroProps["quality"]>("optimized");
@@ -33,6 +36,17 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
   const finishing = useRef(false);
   const exit = useRef<gsap.core.Tween | null>(null);
   const seen = useRef(false);
+  const replay = useCallback(() => {
+    finishing.current = false;
+    exit.current?.kill();
+    if (container.current)
+      gsap.set(container.current, { clearProps: "opacity,transform" });
+    setPaused(false);
+    setFrame(0);
+    setSeekFrame(undefined);
+    setRun((value) => value + 1);
+    setOpen(true);
+  }, []);
 
   useEffect(() => {
     try {
@@ -41,19 +55,13 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
       /* Session-only fallback when storage is unavailable. */
     }
     const frame = requestAnimationFrame(() => setOpen(!seen.current));
-    const replay = () => {
-      finishing.current = false;
-      setPaused(false);
-      setRun((value) => value + 1);
-      setOpen(true);
-    };
     window.addEventListener("enturma-intro-replay", replay);
     return () => {
       cancelAnimationFrame(frame);
       exit.current?.kill();
       window.removeEventListener("enturma-intro-replay", replay);
     };
-  }, []);
+  }, [replay]);
 
   useEffect(() => {
     if (!open || !container.current) return;
@@ -134,28 +142,34 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
     };
   }, [open, run]);
 
-  const finish = useCallback(() => {
-    if (finishing.current) return;
-    finishing.current = true;
-    setPaused(true);
-    const complete = () => {
-      setOpen(false);
-      const content = document.getElementById(
-        matchMedia("(max-width: 760px)").matches
-          ? "enturma-study-guide"
-          : "minhas-materias",
-      );
-      content?.focus({ preventScroll: true });
-    };
-    if (quality === "low" || !container.current) complete();
-    else
-      exit.current = gsap.to(container.current, {
-        opacity: 0,
-        scale: 0.99,
-        duration: 0.18,
-        onComplete: complete,
-      });
-  }, [quality]);
+  const finish = useCallback(
+    (restoreFocus = false) => {
+      if (finishing.current) return;
+      finishing.current = true;
+      setPaused(true);
+      const complete = () => {
+        if (container.current)
+          gsap.set(container.current, { clearProps: "opacity,transform" });
+        setOpen(false);
+        const content = document.getElementById(
+          matchMedia("(max-width: 760px)").matches
+            ? "enturma-study-guide"
+            : "minhas-materias",
+        );
+        if (restoreFocus) content?.focus({ preventScroll: true });
+      };
+      if (quality === "low" || !container.current) complete();
+      else
+        exit.current = gsap.to(container.current, {
+          opacity: 0,
+          scale: 0.99,
+          duration: 0.18,
+          onComplete: complete,
+        });
+    },
+    [quality],
+  );
+  const ended = useCallback(() => finish(false), [finish]);
 
   const inputProps = useMemo<IntroProps>(
     () => ({
@@ -174,7 +188,35 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
     }),
     [profile, theme, quality],
   );
-  if (!open) return null;
+  if (!open)
+    return (
+      <section
+        ref={container}
+        className="enturma-intro intro-minimized"
+        aria-label="Apresentação do Enturma"
+        data-minimized="true"
+      >
+        <button
+          type="button"
+          className="intro-replay-tile"
+          onClick={replay}
+          aria-label="Assistir apresentação"
+        >
+          <span className="intro-poster">
+            <span className="intro-poster-orbit" />
+            <BookOpen size={36} />
+            <span className="intro-poster-play">
+              <Play size={16} fill="currentColor" />
+            </span>
+          </span>
+          <span>
+            <strong>Conheça o Enturma</strong>
+            <small>Seu próximo encontro começa aqui · 30 s</small>
+          </span>
+          <Play size={21} />
+        </button>
+      </section>
+    );
   return (
     <section
       ref={container}
@@ -195,7 +237,11 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
           >
             {paused ? <Play size={17} /> : <Pause size={17} />}
           </button>
-          <button type="button" className="intro-control" onClick={finish}>
+          <button
+            type="button"
+            className="intro-control"
+            onClick={() => finish(true)}
+          >
             Pular <ArrowRight size={17} />
           </button>
         </div>
@@ -206,8 +252,26 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
         width={dimensions.width}
         height={dimensions.height}
         playing={visible && !paused}
-        onEnd={finish}
+        onEnd={ended}
+        onFrame={setFrame}
+        seekFrame={seekFrame}
       />
+      <footer className="intro-timeline">
+        <span>{String(Math.floor(frame / 60)).padStart(2, "0")} s</span>
+        <input
+          type="range"
+          min="0"
+          max={quality === "low" ? 179 : INTRO_FRAMES - 1}
+          value={frame}
+          aria-label="Posição da apresentação"
+          onChange={(event) => {
+            const next = Number(event.target.value);
+            setFrame(next);
+            setSeekFrame(next);
+          }}
+        />
+        <span>{quality === "low" ? "03" : "30"} s</span>
+      </footer>
     </section>
   );
 }

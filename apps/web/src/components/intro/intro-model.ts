@@ -56,6 +56,7 @@ export type IntroProps = {
   quality: IntroQuality;
 };
 export const INTRO_STORAGE_KEY = "enturma-intro:v0.3";
+export const INTRO_FRAMES = 1800;
 export function introQuality(
   reduced: boolean,
   memory: number | undefined,
@@ -69,8 +70,8 @@ export function introQuality(
     : "high";
 }
 export function introDimensions(width: number) {
-  if (width < 480) return { width: 600, height: 700, layout: "portrait" };
+  if (width < 480) return { width: 600, height: 860, layout: "portrait" };
   if (width < 760) return { width: 960, height: 600, layout: "landscape" };
   if (width > 1400) return { width: 1600, height: 640, layout: "ultrawide" };
-  return { width: 1200, height: 620, layout: "desktop" };
+  return { width: 1200, height: 675, layout: "desktop" };
 }

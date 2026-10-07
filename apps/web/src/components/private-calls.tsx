@@ -7,8 +7,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { usePathname } from "next/navigation";
-import { Phone, PhoneOff, Video, X } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import Link from "next/link";
+import { ArrowLeft, Phone, PhoneOff, Video } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { useCallSession, CallMount } from "./call-session-provider";
@@ -54,6 +55,11 @@ const labels: Record<string, string> = {
 };
 type Calls = {
   call: PrivateCall | null;
+  me?: string;
+  ready: boolean;
+  busy: boolean;
+  error: string;
+  action: (operation: string) => Promise<void>;
   invite: (friendshipId: string, video: boolean) => Promise<void>;
 };
 const PrivateCallsContext = createContext<Calls | null>(null);
@@ -68,29 +74,54 @@ export function PrivateCallsProvider({
   const [sessionRevision, setSessionRevision] = useState(0);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [ready, setReady] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const ignored = useRef(new Set<string>());
   const latest = useRef<PrivateCall | null>(null);
   const viewer = useRef<string | undefined>(undefined);
   const started = useRef<string | null>(null);
   const { session, start, leave } = useCallSession();
+  const currentMedia = useRef(session);
+  useEffect(() => {
+    currentMedia.current = session;
+  }, [session]);
   const path = usePathname();
+  const router = useRouter();
   const enabled = !["/", "/login", "/register"].includes(path);
 
-  const apply = useCallback((value: PrivateCall | Record<string, never>) => {
-    if (!value.id || ignored.current.has(value.id)) return;
-    if (
-      !viewer.current ||
-      ![value.callerId, value.calleeId].includes(viewer.current)
-    )
-      return;
-    if (latest.current && latest.current.updatedAt > value.updatedAt) return;
-    latest.current = value as PrivateCall;
-    setCall(value as PrivateCall);
-  }, []);
+  const apply = useCallback(
+    (value: PrivateCall | Record<string, never>) => {
+      if (!value.id || ignored.current.has(value.id)) return;
+      if (
+        !viewer.current ||
+        ![value.callerId, value.calleeId].includes(viewer.current)
+      )
+        return;
+      if (latest.current && latest.current.updatedAt > value.updatedAt) return;
+      // Terminal records are history, never a restorable call controller.
+      if (!activeStates.has(value.state)) {
+        ignored.current.add(value.id);
+        if (latest.current?.id === value.id) {
+          latest.current = null;
+          started.current = null;
+          setCall(null);
+          if (currentMedia.current?.roomId === value.id) leave();
+        }
+        return;
+      }
+      latest.current = value as PrivateCall;
+      setCall(value as PrivateCall);
+    },
+    [leave],
+  );
   const refresh = useCallback(async () => {
     if (!enabled || !me) return;
-    apply(await api<PrivateCall>("/calls/private", { cache: "no-store" }));
+    try {
+      apply(await api<PrivateCall>("/calls/private", { cache: "no-store" }));
+      setReady(true);
+    } catch (cause) {
+      setError((cause as Error).message);
+    }
   }, [enabled, me, apply]);
   useLiveRefresh("private_call_changed", refresh, 5000);
   useEffect(() => {
@@ -101,6 +132,7 @@ export function PrivateCallsProvider({
         started.current = null;
         ignored.current.clear();
         setMe(undefined);
+        setReady(false);
         setCall(null);
         setError("");
       });
@@ -138,6 +170,7 @@ export function PrivateCallsProvider({
       ignored.current.clear();
       setCall(null);
       setMe(undefined);
+      setReady(false);
       setSessionRevision((value) => value + 1);
     };
     const channel =
@@ -152,7 +185,9 @@ export function PrivateCallsProvider({
     };
   }, [leave]);
   useEffect(() => {
-    if (me) void refresh().catch(() => {});
+    if (!me) return;
+    const timer = setTimeout(() => void refresh(), 0);
+    return () => clearTimeout(timer);
   }, [me, refresh]);
 
   const action = useCallback(
@@ -221,21 +256,30 @@ export function PrivateCallsProvider({
       start({
         roomId: call.id,
         title: me === call.callerId ? call.calleeName : call.callerName,
-        href: `/friends?chat=${call.friendshipId}`,
+        href: `/calls/${call.id}`,
         endpoint: `/calls/private/${call.id}/voice`,
         initialCamera: call.video,
       });
+      if (path !== `/calls/${call.id}`) router.push(`/calls/${call.id}`);
     }
     if (!activeStates.has(call.state) && session?.roomId === call.id) leave();
-  }, [call, me, session?.roomId, start, leave]);
+  }, [call, me, session?.roomId, start, leave, path, router]);
   useEffect(() => {
     const ended = (event: Event) => {
       const id = (event as CustomEvent).detail?.roomId;
       const current = latest.current;
-      if (id && current && id === current.id && activeStates.has(current.state))
-        void post<PrivateCall>(`/calls/private/${id}/end`)
-          .then(apply)
-          .catch(() => {});
+      if (
+        id &&
+        current &&
+        id === current.id &&
+        activeStates.has(current.state)
+      ) {
+        ignored.current.add(id);
+        latest.current = null;
+        started.current = null;
+        setCall(null);
+        void post<PrivateCall>(`/calls/private/${id}/end`).catch(() => {});
+      }
     };
     window.addEventListener("enturma-call-left", ended);
     return () => window.removeEventListener("enturma-call-left", ended);
@@ -244,15 +288,15 @@ export function PrivateCallsProvider({
     async (friendshipId: string, video: boolean) => {
       if (session || (latest.current && activeStates.has(latest.current.state)))
         throw Error("Encerre sua chamada atual antes de ligar.");
-      apply(
-        await post<PrivateCall>("/calls/private", {
-          friendshipId,
-          video,
-          deviceId: callDevice(),
-        }),
-      );
+      const created = await post<PrivateCall>("/calls/private", {
+        friendshipId,
+        video,
+        deviceId: callDevice(),
+      });
+      apply(created);
+      router.push(`/calls/${created.id}`);
     },
-    [session, apply],
+    [session, apply, router],
   );
   const peer = call
     ? {
@@ -263,16 +307,25 @@ export function PrivateCallsProvider({
       }
     : null;
   return (
-    <PrivateCallsContext.Provider value={{ call, invite }}>
+    <PrivateCallsContext.Provider
+      value={{ call, invite, me, ready, busy, error, action }}
+    >
       {children}
-      {enabled && call && peer && !mediaStates.has(call.state) && !incoming && (
-        <aside className="private-call-status" role="status">
-          <Avatar user={peer} />
-          <div>
-            <strong>{peer.name}</strong>
-            <p>{labels[call.state]}</p>
-          </div>
-          {activeStates.has(call.state) ? (
+      {enabled &&
+        call &&
+        peer &&
+        activeStates.has(call.state) &&
+        !mediaStates.has(call.state) &&
+        !incoming &&
+        path !== `/calls/${call.id}` && (
+          <aside className="private-call-status" role="status">
+            <Avatar user={peer} />
+            <div>
+              <Link href={`/calls/${call.id}`}>
+                <strong>{peer.name}</strong>
+              </Link>
+              <p>{labels[call.state]}</p>
+            </div>
             <button
               disabled={busy}
               onClick={() => void action("cancel")}
@@ -280,21 +333,9 @@ export function PrivateCallsProvider({
             >
               <PhoneOff size={20} />
             </button>
-          ) : (
-            <button
-              aria-label="Fechar aviso de chamada"
-              onClick={() => {
-                ignored.current.add(call.id);
-                latest.current = null;
-                setCall(null);
-              }}
-            >
-              <X size={20} />
-            </button>
-          )}
-          {error && <p role="alert">{error}</p>}
-        </aside>
-      )}
+            {error && <p role="alert">{error}</p>}
+          </aside>
+        )}
       <dialog
         ref={dialog}
         className="incoming-private-call"
@@ -391,23 +432,103 @@ export function PrivateCallButtons({ friendshipId }: { friendshipId: string }) {
     </div>
   );
 }
-export function PrivateCallView({ friendshipId }: { friendshipId: string }) {
+/** A route of its own: Back minimizes the live session; hangup destroys it. */
+export function PrivateCallPage({ id }: { id: string }) {
   const context = useContext(PrivateCallsContext);
   const { session } = useCallSession();
-  const call = context?.call;
-  if (
-    !call ||
-    session?.roomId !== call.id ||
-    call.friendshipId !== friendshipId ||
-    !mediaStates.has(call.state)
-  )
-    return null;
+  const router = useRouter();
+  const root = useRef<HTMLElement>(null);
+  const returnTo = useRef("/friends");
+  const call = context?.call?.id === id ? context.call : null;
+  useEffect(() => {
+    const orbit = root.current?.querySelector<HTMLElement>(".call-orbit");
+    const animation =
+      orbit &&
+      playMotion(
+        orbit,
+        [
+          { transform: "scale(.6)", opacity: 0.45 },
+          { transform: "scale(1.4)", opacity: 0 },
+        ],
+        { duration: 1800, iterations: Infinity, easing: "ease-out" },
+      );
+    return () => animation?.cancel();
+  }, [call?.id, call?.state]);
+  useEffect(() => {
+    if (call) returnTo.current = `/friends?chat=${call.friendshipId}`;
+    else if (context?.ready) router.replace(returnTo.current);
+  }, [call, context?.ready, router]);
+  useEffect(() => {
+    const animation =
+      root.current &&
+      playMotion(
+        root.current,
+        [
+          { opacity: 0, transform: "scale(.96)", filter: "blur(6px)" },
+          { opacity: 1, transform: "scale(1)", filter: "blur(0)" },
+        ],
+        { duration: 320, easing: "cubic-bezier(.16,1,.3,1)" },
+      );
+    return () => animation?.cancel();
+  }, []);
+  const peer = call
+    ? {
+        id: call.callerId === context?.me ? call.calleeId : call.callerId,
+        name: call.callerId === context?.me ? call.calleeName : call.callerName,
+        hasAvatar:
+          call.callerId === context?.me ? call.calleeAvatar : call.callerAvatar,
+        username: "",
+      }
+    : null;
   return (
-    <CallMount
-      roomId={call.id}
-      endpoint={`/calls/private/${call.id}/voice`}
-      title="Conversa privada"
-      ended={false}
-    />
+    <main ref={root} className="private-call-page" aria-label="Ligação privada">
+      <header>
+        <Link
+          href={call ? `/friends?chat=${call.friendshipId}` : "/friends"}
+          aria-label="Voltar à conversa"
+        >
+          <ArrowLeft size={24} />
+        </Link>
+        <span>enturma · chamada {call?.video ? "de vídeo" : "de voz"}</span>
+      </header>
+      {peer && call ? (
+        <>
+          {mediaStates.has(call.state) && session?.roomId === id ? (
+            <CallMount
+              roomId={id}
+              endpoint={`/calls/private/${id}/voice`}
+              ended={false}
+              title={peer.name}
+            />
+          ) : (
+            <div className="private-call-waiting">
+              <div className="call-orbit" aria-hidden="true" />
+              <Avatar user={peer} />
+              <h1>{peer.name}</h1>
+              <p role="status">{labels[call.state]}</p>
+              {mediaStates.has(call.state) ? (
+                <p>Chamada aberta em outro dispositivo.</p>
+              ) : (
+                <button
+                  className="call-cancel"
+                  disabled={context?.busy}
+                  onClick={() =>
+                    void context?.action(
+                      call.callerId === context.me ? "cancel" : "decline",
+                    )
+                  }
+                  aria-label="Cancelar chamada"
+                >
+                  <PhoneOff size={28} />
+                </button>
+              )}
+            </div>
+          )}
+        </>
+      ) : (
+        <p role="status">{context?.error || "Preparando chamada…"}</p>
+      )}
+      {context?.error && call && <p role="alert">{context.error}</p>}
+    </main>
   );
 }
