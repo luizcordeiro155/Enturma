@@ -41,6 +41,8 @@ export default function VoiceSession({
   const [muted, setMuted] = useState(false);
   const [camera, setCamera] = useState(false);
   const [screen, setScreen] = useState(false);
+  const [activeScreenShare, setActiveScreenShare] = useState<string | null>(null);
+  const activeScreenShareRef = useRef<string | null>(null);
   const [screenSupported] = useState(
     () =>
       typeof navigator !== "undefined" &&
@@ -61,6 +63,29 @@ export default function VoiceSession({
   function clearMedia() {
     audio.current?.replaceChildren();
     videos.current?.replaceChildren();
+    activeScreenShareRef.current = null;
+    setActiveScreenShare(null);
+  }
+
+  function syncScreenStage(identity: string | null) {
+    activeScreenShareRef.current = identity;
+    setActiveScreenShare(identity);
+    const stage = videos.current;
+    if (!stage) return;
+    for (const tile of Array.from(
+      stage.querySelectorAll<HTMLElement>("[data-call-key]"),
+    )) {
+      const source = tile.dataset.callSource;
+      const owner = tile.dataset.callIdentity;
+      if (identity) {
+        tile.hidden =
+          source === "screen_share"
+            ? owner !== identity
+            : true;
+      } else {
+        tile.hidden = source === "screen_share";
+      }
+    }
   }
 
   function refreshMembers(call: import("livekit-client").Room) {
@@ -90,6 +115,15 @@ export default function VoiceSession({
       };
     });
     setMembers(next);
+
+    const activeShare = activeScreenShareRef.current;
+    if (
+      activeShare &&
+      !next.some((member) => member.identity === activeShare && member.screen)
+    ) {
+      syncScreenStage(null);
+    }
+
     const local = next.find((member) => member.local);
     if (local) {
       setScreen(local.screen);
@@ -126,6 +160,11 @@ export default function VoiceSession({
         : "call-media-tile";
     tile.dataset.callKey = key;
     tile.dataset.callIdentity = identity;
+    tile.dataset.callSource = source;
+    tile.hidden =
+      source === "screen_share"
+        ? activeScreenShareRef.current !== identity
+        : Boolean(activeScreenShareRef.current);
 
     const media = track.attach();
     media.autoplay = true;
@@ -165,6 +204,13 @@ export default function VoiceSession({
     videos.current
       ?.querySelector(`[data-call-key="${CSS.escape(key)}"]`)
       ?.remove();
+
+    if (
+      source === "screen_share" &&
+      activeScreenShareRef.current === identity
+    ) {
+      syncScreenStage(null);
+    }
   }
 
   useEffect(
@@ -438,22 +484,29 @@ export default function VoiceSession({
           {screenSharers.length ? (
             <div className="screen-share-status">
               {screenSharers.map((sharer) => {
-                const viewers = members.filter(
-                  (member) => member.identity !== sharer.identity,
-                );
+                const selected = activeScreenShare === sharer.identity;
                 return (
-                  <article key={sharer.identity}>
+                  <button
+                    type="button"
+                    className={
+                      selected
+                        ? "screen-share-person active"
+                        : "screen-share-person"
+                    }
+                    key={sharer.identity}
+                    onClick={() =>
+                      syncScreenStage(selected ? null : sharer.identity)
+                    }
+                  >
                     <MonitorUp size={20} />
                     <div>
-                      <strong>{sharer.name} está transmitindo a tela</strong>
+                      <strong>{sharer.name} está transmitindo</strong>
                       <span>
                         <Eye size={14} />
-                        {viewers.length
-                          ? `${viewers.length} ${viewers.length === 1 ? "participante disponível" : "participantes disponíveis"} na chamada`
-                          : "Aguardando participantes"}
+                        {selected ? "Ocultar transmissão" : "Ver tela"}
                       </span>
                     </div>
-                  </article>
+                  </button>
                 );
               })}
             </div>
@@ -480,10 +533,36 @@ export default function VoiceSession({
                           : "Na chamada"
                   }
                 />
-                <div className="call-member-icons">
-                  {member.microphone ? <Mic size={16} /> : <MicOff size={16} />}
-                  {member.camera ? <Video size={16} /> : <VideoOff size={16} />}
-                  {member.screen ? <MonitorUp size={16} /> : null}
+                <div className="call-member-actions">
+                  {member.screen ? (
+                    <button
+                      type="button"
+                      className={
+                        activeScreenShare === member.identity
+                          ? "call-member-screen active"
+                          : "call-member-screen"
+                      }
+                      onClick={() =>
+                        syncScreenStage(
+                          activeScreenShare === member.identity
+                            ? null
+                            : member.identity,
+                        )
+                      }
+                    >
+                      <MonitorUp size={15} />
+                      <span>
+                        {activeScreenShare === member.identity
+                          ? "Ocultar tela"
+                          : "Ver tela"}
+                      </span>
+                    </button>
+                  ) : null}
+                  <div className="call-member-icons">
+                    {member.microphone ? <Mic size={16} /> : <MicOff size={16} />}
+                    {member.camera ? <Video size={16} /> : <VideoOff size={16} />}
+                    {member.screen ? <MonitorUp size={16} /> : null}
+                  </div>
                 </div>
               </article>
             ))}
