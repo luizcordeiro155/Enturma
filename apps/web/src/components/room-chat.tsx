@@ -563,7 +563,7 @@ export function RoomChat(props: Props) {
             <span className="sr-only">Mensagem</span>
             <textarea
               ref={composerRef}
-              disabled={busy}
+              aria-busy={busy}
               value={draft}
               onFocus={() => {
                 forceFollowLatest.current = true;
