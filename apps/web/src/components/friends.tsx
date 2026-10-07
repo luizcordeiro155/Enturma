@@ -290,6 +290,18 @@ export function Friends() {
     (friend: Friend) => {
       if (selected?.id === friend.id) {
         if (!key.current) setConnectionAttempt((n) => n + 1);
+        forceFollowLatest.current = true;
+        requestAnimationFrame(() => {
+          privateChat.current?.scrollIntoView({
+            block: "start",
+            behavior:
+              document.documentElement.dataset.reducedMotion === "true"
+                ? "auto"
+                : "smooth",
+          });
+          scrollToLatest("auto");
+          composer.current?.focus({ preventScroll: true });
+        });
         return;
       }
       setConnectionState("preparing");
@@ -314,7 +326,7 @@ export function Friends() {
         });
       });
     },
-    [selected?.id],
+    [selected?.id, scrollToLatest],
   );
   useEffect(() => {
     if (!requestedChat || selected?.id === requestedChat) return;
