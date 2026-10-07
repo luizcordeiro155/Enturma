@@ -1,14 +1,10 @@
 "use client";
 
-type EnturmaNativeBridge = {
-  setChatComposerFocused?: (focused: boolean) => void;
+type NativeChatWindow = Window & {
+  EnturmaNative?: {
+    setChatComposerFocused?: (focused: boolean) => void;
+  };
 };
-
-declare global {
-  interface Window {
-    EnturmaNative?: EnturmaNativeBridge;
-  }
-}
 
 /**
  * Tells the Android shell that a real message composer owns focus.
@@ -17,7 +13,9 @@ declare global {
  */
 export function setNativeChatComposerFocused(focused: boolean) {
   try {
-    window.EnturmaNative?.setChatComposerFocused?.(focused);
+    (window as NativeChatWindow).EnturmaNative?.setChatComposerFocused?.(
+      focused,
+    );
   } catch {
     // Browser/PWA builds do not expose the Android bridge.
   }
