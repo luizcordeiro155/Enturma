@@ -182,6 +182,78 @@ export function Friends() {
   }, []);
 
   useEffect(() => {
+    const root = document.documentElement;
+    const viewport = window.visualViewport;
+    let maxViewportHeight = viewport?.height ?? window.innerHeight;
+    let settleTimer: ReturnType<typeof setTimeout> | undefined;
+
+    const syncKeyboard = () => {
+      const currentViewport = window.visualViewport;
+      const focused = document.activeElement === composer.current;
+      const visualHeight = currentViewport?.height ?? window.innerHeight;
+
+      if (!focused) {
+        maxViewportHeight = Math.max(maxViewportHeight, visualHeight);
+      }
+
+      const heightDrop = Math.max(0, maxViewportHeight - visualHeight);
+      const overlayOffset = currentViewport
+        ? Math.max(
+            0,
+            window.innerHeight -
+              currentViewport.height -
+              currentViewport.offsetTop,
+          )
+        : 0;
+      const nativeIme = root.dataset.enturmaIme === "true";
+      const keyboardOpen =
+        focused && (nativeIme || heightDrop > 80 || overlayOffset > 80);
+
+      root.dataset.privateKeyboard = keyboardOpen ? "true" : "false";
+      root.style.setProperty(
+        "--private-keyboard-offset",
+        `${Math.round(keyboardOpen ? overlayOffset : 0)}px`,
+      );
+      root.style.setProperty(
+        "--private-visual-viewport-height",
+        `${Math.round(visualHeight)}px`,
+      );
+
+      if (settleTimer) clearTimeout(settleTimer);
+      if (keyboardOpen) {
+        forceFollowLatest.current = true;
+        requestAnimationFrame(() => scrollToLatest("auto"));
+        settleTimer = setTimeout(() => scrollToLatest("auto"), 220);
+      }
+    };
+
+    const onFocus = () => {
+      requestAnimationFrame(syncKeyboard);
+      setTimeout(syncKeyboard, 180);
+    };
+    const onBlur = () => setTimeout(syncKeyboard, 120);
+
+    syncKeyboard();
+    viewport?.addEventListener("resize", syncKeyboard);
+    viewport?.addEventListener("scroll", syncKeyboard);
+    window.addEventListener("resize", syncKeyboard);
+    document.addEventListener("focusin", onFocus);
+    document.addEventListener("focusout", onBlur);
+
+    return () => {
+      if (settleTimer) clearTimeout(settleTimer);
+      viewport?.removeEventListener("resize", syncKeyboard);
+      viewport?.removeEventListener("scroll", syncKeyboard);
+      window.removeEventListener("resize", syncKeyboard);
+      document.removeEventListener("focusin", onFocus);
+      document.removeEventListener("focusout", onBlur);
+      delete root.dataset.privateKeyboard;
+      root.style.removeProperty("--private-keyboard-offset");
+      root.style.removeProperty("--private-visual-viewport-height");
+    };
+  }, [scrollToLatest]);
+
+  useEffect(() => {
     const count = messages.length;
     if (!count) {
       previousMessageCount.current = 0;
@@ -190,7 +262,14 @@ export function Friends() {
     const hasNewMessage = count > previousMessageCount.current;
     previousMessageCount.current = count;
     if (!hasNewMessage) return;
-    if (!forceFollowLatest.current && !nearLatest.current) return;
+    const composerFocused = document.activeElement === composer.current;
+    if (
+      !forceFollowLatest.current &&
+      !nearLatest.current &&
+      !composerFocused &&
+      document.documentElement.dataset.privateKeyboard !== "true"
+    )
+      return;
     const behavior =
       forceFollowLatest.current &&
       document.documentElement.dataset.reducedMotion !== "true"
@@ -698,12 +777,18 @@ export function Friends() {
                     </article>
                   ))}
                 </div>
-                <form onSubmit={send}>
+                <form onSubmit={send} className="private-composer">
                   <label>
                     Mensagem privada
                     <textarea
                       ref={composer}
                       value={draft}
+                      onFocus={() => {
+                        forceFollowLatest.current = true;
+                        nearLatest.current = true;
+                        requestAnimationFrame(() => scrollToLatest("auto"));
+                        setTimeout(() => scrollToLatest("auto"), 220);
+                      }}
                       onChange={(e) => setDraft(e.target.value)}
                       maxLength={4000}
                       disabled={!finger}
