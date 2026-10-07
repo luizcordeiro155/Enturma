@@ -2038,126 +2038,61 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
   .room-mobile-members-list .participant-row{grid-template-columns:minmax(0,1fr)}
 }
 
-
 /* Mobile private-chat keyboard behavior.
-   The Android WebView already exposes IME visibility and shrinks to the visible
-   viewport. When the private composer owns focus, only the conversation becomes
-   a viewport-sized surface; the whole Enturma page no longer jumps upward. */
+   The native shell keeps the WebView full-height and exposes the IME height.
+   Only the message composer floats above the keyboard; the page/footer stay put. */
 @media (max-width: 760px) {
-  html[data-private-keyboard="true"] body:has(.friends-page .private-chat) {
-    overflow: hidden !important;
+  html[data-enturma-ime="true"] .private-chat {
+    --private-composer-height: 92px;
   }
 
-  html[data-private-keyboard="true"] body:has(.friends-page .private-chat)
-    .mobile-bottom-nav {
-    display: none !important;
+  html[data-enturma-ime="true"] .private-messages {
+    padding-bottom: calc(
+      var(--private-composer-height) +
+      var(--native-keyboard-bottom, 0px) +
+      20px
+    ) !important;
+    scroll-padding-bottom: calc(
+      var(--private-composer-height) +
+      var(--native-keyboard-bottom, 0px) +
+      12px
+    ) !important;
   }
 
-  html[data-private-keyboard="true"] body:has(.friends-page .private-chat)
-    .workspace {
-    height: var(--private-visual-viewport-height, 100dvh) !important;
-    min-height: 0 !important;
-    padding-bottom: 0 !important;
-    overflow: hidden !important;
-  }
-
-  html[data-private-keyboard="true"] body:has(.friends-page .private-chat)
-    .workspace > main {
-    height: 100% !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    overflow: hidden !important;
-  }
-
-  html[data-private-keyboard="true"] .friends-page {
-    height: 100%;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  html[data-private-keyboard="true"] .friends-page > :not(.friends-workspace) {
-    display: none !important;
-  }
-
-  html[data-private-keyboard="true"] .friends-workspace {
+  html[data-enturma-ime="true"] .private-composer {
+    position: fixed !important;
+    z-index: 220 !important;
+    left: calc(10px + var(--enturma-safe-left, 0px));
+    right: calc(10px + var(--enturma-safe-right, 0px));
+    bottom: calc(var(--native-keyboard-bottom, 0px) + 8px);
     display: block !important;
-    height: 100%;
-    min-height: 0;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+  }
+
+  html[data-enturma-ime="true"] .private-composer > label {
+    display: block;
     margin: 0;
   }
 
-  html[data-private-keyboard="true"] .friends-workspace > aside {
-    display: none !important;
-  }
-
-  html[data-private-keyboard="true"] .private-chat {
-    box-sizing: border-box;
-    display: flex;
-    flex-direction: column;
+  html[data-enturma-ime="true"] .private-composer textarea {
     width: 100%;
-    height: 100%;
-    min-height: 0;
-    padding:
-      calc(8px + var(--enturma-safe-top, 0px))
-      calc(10px + var(--enturma-safe-right, 0px))
-      8px
-      calc(10px + var(--enturma-safe-left, 0px));
-    border: 0;
-    border-radius: 0;
-    overflow: hidden;
-    background: var(--bg);
-  }
-
-  html[data-private-keyboard="true"] .private-chat > header {
-    flex: none;
-    margin-bottom: 6px;
-  }
-
-  html[data-private-keyboard="true"] .private-chat > details,
-  html[data-private-keyboard="true"] .private-chat > .private-connection-status,
-  html[data-private-keyboard="true"] .private-chat > .conversation-notice {
-    flex: none;
-    max-height: 74px;
-    overflow: auto;
-    margin-bottom: 5px;
-  }
-
-  html[data-private-keyboard="true"] .private-messages {
-    flex: 1 1 auto;
-    width: 100%;
-    height: auto !important;
-    min-height: 0 !important;
-    overflow-y: auto;
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-    padding: 4px 0 12px;
-    scroll-padding-bottom: 18px;
-  }
-
-  html[data-private-keyboard="true"] .private-composer {
-    flex: none;
-    position: sticky;
-    bottom: 0;
-    z-index: 20;
-    gap: 6px;
-    padding: 8px 0 0;
-    border-top: 1px solid var(--border);
-    background: var(--bg);
-  }
-
-  html[data-private-keyboard="true"] .private-composer textarea {
-    min-height: 62px;
-    max-height: 104px;
+    min-height: 66px;
+    max-height: 94px;
+    margin: 0;
     resize: none;
     font-size: 16px;
-    scroll-margin-bottom: 12px;
+    border-radius: 18px;
+    background: var(--surface);
+    color: var(--ink);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.18);
   }
 
-  html[data-private-keyboard="true"] .private-composer > button {
-    min-height: 44px;
-  }
-
-  html[data-private-keyboard="true"] .private-composer > small {
-    display: none;
+  /* The Android keyboard's Enter action sends the message while typing.
+     Keep secondary actions out of the IME layout so only the text box moves. */
+  html[data-enturma-ime="true"] .private-composer > button,
+  html[data-enturma-ime="true"] .private-composer > small {
+    display: none !important;
   }
 }
