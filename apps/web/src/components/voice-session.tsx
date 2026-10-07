@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import {
   Eye,
   Mic,
@@ -15,6 +15,7 @@ import {
 import { LiveMemberIdentityCard } from "./user-identity";
 import { post } from "@/lib/api";
 import { Feedback } from "./feedback";
+import { callDevice } from "@/lib/call-device";
 type CallMember = {
   identity: string;
   name: string;
@@ -29,11 +30,13 @@ export default function VoiceSession({
   roomId,
   ended,
   endpoint,
+  initialCamera = false,
   onLeave,
 }: {
   roomId: string;
   ended: boolean;
   endpoint?: string;
+  initialCamera?: boolean;
   onLeave: () => void;
 }) {
   const [connected, setConnected] = useState(false);
@@ -41,14 +44,16 @@ export default function VoiceSession({
   const [muted, setMuted] = useState(false);
   const [camera, setCamera] = useState(false);
   const [screen, setScreen] = useState(false);
-  const [activeScreenShare, setActiveScreenShare] = useState<string | null>(null);
+  const [activeScreenShare, setActiveScreenShare] = useState<string | null>(
+    null,
+  );
   const activeScreenShareRef = useRef<string | null>(null);
   const [screenSupported] = useState(
     () =>
       typeof navigator !== "undefined" &&
       Boolean(
         navigator.mediaDevices &&
-          typeof navigator.mediaDevices.getDisplayMedia === "function",
+        typeof navigator.mediaDevices.getDisplayMedia === "function",
       ),
   );
   const [error, setError] = useState("");
@@ -57,10 +62,23 @@ export default function VoiceSession({
   const [members, setMembers] = useState<CallMember[]>([]);
   const room = useRef<import("livekit-client").Room | null>(null);
   const generation = useRef(0);
+  const connectionId = useRef<string>("");
   const audio = useRef<HTMLDivElement>(null);
   const videos = useRef<HTMLDivElement>(null);
+  const memberGrid = useRef<HTMLDivElement>(null);
+  const videoTracks = useRef(
+    new Map<
+      string,
+      { tile: HTMLElement; track: import("livekit-client").Track }
+    >(),
+  );
 
   function clearMedia() {
+    for (const { tile, track } of videoTracks.current.values()) {
+      track.detach().forEach((element) => element.remove());
+      tile.remove();
+    }
+    videoTracks.current.clear();
     audio.current?.replaceChildren();
     videos.current?.replaceChildren();
     activeScreenShareRef.current = null;
@@ -69,6 +87,12 @@ export default function VoiceSession({
   function syncScreenStage(identity: string | null) {
     activeScreenShareRef.current = identity;
     setActiveScreenShare(identity);
+    for (const participant of room.current?.remoteParticipants.values() ?? []) {
+      for (const publication of participant.trackPublications.values()) {
+        if (String(publication.source).startsWith("screen_share"))
+          publication.setSubscribed(participant.identity === identity);
+      }
+    }
     const stage = videos.current;
     if (!stage) return;
     for (const tile of Array.from(
@@ -77,10 +101,7 @@ export default function VoiceSession({
       const source = tile.dataset.callSource;
       const owner = tile.dataset.callIdentity;
       if (identity) {
-        tile.hidden =
-          source === "screen_share"
-            ? owner !== identity
-            : true;
+        tile.hidden = source === "screen_share" ? owner !== identity : true;
       } else {
         tile.hidden = source === "screen_share";
       }
@@ -88,6 +109,15 @@ export default function VoiceSession({
   }
 
   function refreshMembers(call: import("livekit-client").Room) {
+    for (const participant of call.remoteParticipants.values()) {
+      for (const publication of participant.trackPublications.values()) {
+        const subscribe =
+          !String(publication.source).startsWith("screen_share") ||
+          activeScreenShareRef.current === participant.identity;
+        if (publication.isSubscribed !== subscribe)
+          publication.setSubscribed(subscribe);
+      }
+    }
     const participants = [
       call.localParticipant,
       ...Array.from(call.remoteParticipants.values()),
@@ -150,7 +180,9 @@ export default function VoiceSession({
     const stage = videos.current;
     if (!stage) return;
     const key = `${identity}:${source}`;
-    stage.querySelector(`[data-call-key="${CSS.escape(key)}"]`)?.remove();
+    const previous = videoTracks.current.get(key);
+    previous?.track.detach().forEach((element) => element.remove());
+    previous?.tile.remove();
 
     const tile = document.createElement("div");
     tile.className =
@@ -163,7 +195,7 @@ export default function VoiceSession({
     tile.hidden =
       source === "screen_share"
         ? activeScreenShareRef.current !== identity
-        : Boolean(activeScreenShareRef.current);
+        : false;
 
     const media = track.attach();
     media.autoplay = true;
@@ -196,13 +228,15 @@ export default function VoiceSession({
       source === "screen_share" ? `${name} está compartilhando a tela` : name;
     tile.appendChild(label);
     stage.appendChild(tile);
+    videoTracks.current.set(key, { tile, track });
   }
 
   function removeTrack(identity: string, source: string) {
     const key = `${identity}:${source}`;
-    videos.current
-      ?.querySelector(`[data-call-key="${CSS.escape(key)}"]`)
-      ?.remove();
+    const media = videoTracks.current.get(key);
+    media?.track.detach().forEach((element) => element.remove());
+    media?.tile.remove();
+    videoTracks.current.delete(key);
 
     if (
       source === "screen_share" &&
@@ -212,9 +246,23 @@ export default function VoiceSession({
     }
   }
 
+  useLayoutEffect(() => {
+    for (const [key, { tile }] of videoTracks.current) {
+      if (!key.endsWith(":camera")) continue;
+      const slot = memberGrid.current?.querySelector(
+        `[data-camera-for="${CSS.escape(tile.dataset.callIdentity || "")}"]`,
+      );
+      if (slot && tile.parentElement !== slot) slot.appendChild(tile);
+    }
+  }, [members]);
+
   useEffect(
     () => () => {
       generation.current++;
+      room.current?.removeAllListeners();
+      for (const participant of room.current?.remoteParticipants.values() ?? [])
+        for (const publication of participant.trackPublications.values())
+          publication.track?.detach().forEach((element) => element.remove());
       void room.current?.disconnect();
       clearMedia();
     },
@@ -230,6 +278,7 @@ export default function VoiceSession({
   }, [ended]);
 
   async function join() {
+    connectionId.current = crypto.randomUUID();
     const attempt = ++generation.current;
     let joining: import("livekit-client").Room | null = null;
     const cancelled = () => attempt !== generation.current;
@@ -240,6 +289,9 @@ export default function VoiceSession({
       const { Room, RoomEvent, Track } = await import("livekit-client");
       const credentials = await post<{ token: string; url: string }>(
         endpoint ?? `/study-rooms/${roomId}/voice`,
+        endpoint?.startsWith("/calls/private/")
+          ? { deviceId: callDevice() }
+          : {},
       );
       if (cancelled()) return;
       const call = (joining = new Room({
@@ -308,16 +360,18 @@ export default function VoiceSession({
       });
 
       call.on(RoomEvent.Disconnected, () => {
+        if (cancelled()) return;
         setConnected(false);
         setMuted(false);
         setCamera(false);
         setScreen(false);
         setMembers([]);
         clearMedia();
+        if (endpoint?.startsWith("/calls/private/")) onLeave();
       });
 
       await call.connect(credentials.url, credentials.token, {
-        autoSubscribe: true,
+        autoSubscribe: false,
       });
 
       if (cancelled()) {
@@ -366,6 +420,14 @@ export default function VoiceSession({
       }
 
       refresh();
+      if (initialCamera && !cancelled()) {
+        try {
+          await call.localParticipant.setCameraEnabled(true);
+          refresh();
+        } catch (cause) {
+          setDeviceNotice(mediaDeviceMessage(cause, "camera"));
+        }
+      }
     } catch (e) {
       await joining?.disconnect();
       if (!cancelled()) setError(callConnectionMessage(e));
@@ -424,18 +486,50 @@ export default function VoiceSession({
     return () => clearTimeout(timer);
   }, []);
   useEffect(() => {
-    if (!connected || endpoint) return;
+    if (!connected || (endpoint && !endpoint.startsWith("/calls/private/")))
+      return;
     const ping = () =>
-      void post(`/study-rooms/${roomId}/heartbeat`).catch(
-        (e: Error & { status?: number }) => {
-          if (e.status === 403 || e.status === 409)
-            void room.current?.disconnect();
-        },
-      );
+      void post(
+        endpoint
+          ? endpoint.replace(/\/voice$/, "/heartbeat")
+          : `/study-rooms/${roomId}/heartbeat`,
+      ).catch((e: Error & { status?: number }) => {
+        if (e.status === 403 || e.status === 404 || e.status === 409)
+          void room.current?.disconnect();
+      });
     ping();
-    const timer = setInterval(ping, 30000);
+    const timer = setInterval(ping, 15000);
     return () => clearInterval(timer);
   }, [connected, endpoint, roomId]);
+  useEffect(() => {
+    if (!connected || endpoint) return;
+    const publish = () =>
+      void post(`/study-rooms/${roomId}/voice/state`, {
+        connectionId: connectionId.current,
+        connected: true,
+        microphone: !muted,
+        camera,
+        screen,
+        deafened,
+      }).catch(() => {});
+    publish();
+    const interval = setInterval(publish, 15000);
+    return () => clearInterval(interval);
+  }, [connected, endpoint, roomId, muted, camera, screen, deafened]);
+  useEffect(
+    () => () => {
+      if (!endpoint && connectionId.current)
+        void post(`/study-rooms/${roomId}/voice/state`, {
+          connectionId: connectionId.current,
+          connected: false,
+          microphone: false,
+          camera: false,
+          screen: false,
+          deafened: false,
+        }).catch(() => {});
+    },
+    [endpoint, roomId],
+  );
   useEffect(() => {
     const container = audio.current;
     const apply = () =>
@@ -452,7 +546,9 @@ export default function VoiceSession({
   const selectedScreenShare = ended ? null : activeScreenShare;
 
   return (
-    <div className="call-panel discord-call">
+    <div
+      className={`call-panel discord-call ${selectedScreenShare ? "has-screen-stage" : ""}`}
+    >
       <Feedback error={error} />
       {deviceNotice ? (
         <div className="call-device-notice" role="status">
@@ -512,14 +608,19 @@ export default function VoiceSession({
             </div>
           ) : null}
 
-          <div className="call-members">
+          <div ref={memberGrid} className="call-members">
             {members.map((member) => (
               <article
                 className={
                   member.speaking ? "call-member speaking" : "call-member"
                 }
                 key={member.identity}
+                data-camera={member.camera}
               >
+                <div
+                  className="call-camera-slot"
+                  data-camera-for={member.identity}
+                />
                 <LiveMemberIdentityCard
                   id={member.identity}
                   name={member.name}
@@ -554,13 +655,21 @@ export default function VoiceSession({
                       <span>
                         {selectedScreenShare === member.identity
                           ? "Ocultar tela"
-                          : "Ver tela"}
+                          : "Ver transmissão"}
                       </span>
                     </button>
                   ) : null}
                   <div className="call-member-icons">
-                    {member.microphone ? <Mic size={16} /> : <MicOff size={16} />}
-                    {member.camera ? <Video size={16} /> : <VideoOff size={16} />}
+                    {member.microphone ? (
+                      <Mic size={16} />
+                    ) : (
+                      <MicOff size={16} />
+                    )}
+                    {member.camera ? (
+                      <Video size={16} />
+                    ) : (
+                      <VideoOff size={16} />
+                    )}
                     {member.screen ? <MonitorUp size={16} /> : null}
                   </div>
                 </div>

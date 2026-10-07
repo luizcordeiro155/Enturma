@@ -14,7 +14,13 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 const VoiceSession = dynamic(() => import("./voice-session"), { ssr: false });
-type Session = { roomId: string; endpoint?: string; title: string };
+type Session = {
+  roomId: string;
+  endpoint?: string;
+  title: string;
+  href?: string;
+  initialCamera?: boolean;
+};
 type Context = {
   session: Session | null;
   host: HTMLDivElement | null;
@@ -42,10 +48,25 @@ export function CallSessionProvider({
       node.remove();
     };
   }, []);
-  const leave = useCallback(() => setSession(null), []);
+  const current = useRef<Session | null>(null);
+  const leave = useCallback(() => {
+    if (current.current)
+      window.dispatchEvent(
+        new CustomEvent("enturma-call-left", {
+          detail: { roomId: current.current.roomId },
+        }),
+      );
+    current.current = null;
+    setSession(null);
+  }, []);
   const start = useCallback(
-    (s: Session) => setSession((old) => (old?.roomId === s.roomId ? old : s)),
-    [],
+    (s: Session) => {
+      if (current.current?.roomId === s.roomId) return;
+      if (current.current) leave();
+      current.current = s;
+      setSession(s);
+    },
+    [leave],
   );
   useEffect(() => {
     if (path === "/login" || path === "/register" || path === "/") {
@@ -68,9 +89,10 @@ export function CallSessionProvider({
           <header>
             <Link
               href={
-                session.endpoint
+                session.href ??
+                (session.endpoint
                   ? "/caronas/matches"
-                  : `/rooms/${session.roomId}?panel=call`
+                  : `/rooms/${session.roomId}?panel=call`)
               }
             >
               Você está em chamada — {session.title}
@@ -88,6 +110,7 @@ export function CallSessionProvider({
               key={session.roomId}
               roomId={session.roomId}
               endpoint={session.endpoint}
+              initialCamera={session.initialCamera}
               ended={false}
               onLeave={leave}
             />,

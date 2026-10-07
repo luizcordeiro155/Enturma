@@ -209,9 +209,14 @@ public class StudyService {
         db.list(
             "SELECT p.user_id,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS"
                 + " NOT NULL has_avatar,p.role,p.joined_at,p.left_at,(p.last_seen_at>now()-interval"
-                + " '90 seconds' AND p.left_at IS NULL) online FROM room_participant p JOIN"
-                + " app_user u ON u.id=p.user_id WHERE p.room_id=? AND NOT p.removed ORDER BY"
-                + " p.joined_at LIMIT 30",
+                + " '90 seconds' AND p.left_at IS NULL) online,COALESCE(v.connected AND"
+                + " v.updated_at>now()-interval '50 seconds',false) in_call,COALESCE(v.camera AND"
+                + " v.connected AND v.updated_at>now()-interval '50 seconds',false)"
+                + " camera,COALESCE(v.screen AND v.connected AND v.updated_at>now()-interval '50"
+                + " seconds',false) screen FROM room_participant p JOIN app_user u ON"
+                + " u.id=p.user_id LEFT JOIN room_voice_presence v ON v.room_id=p.room_id AND"
+                + " v.user_id=p.user_id WHERE p.room_id=? AND NOT p.removed ORDER BY p.joined_at"
+                + " LIMIT 30",
             id));
     var mine =
         db.one(

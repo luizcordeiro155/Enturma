@@ -49,7 +49,10 @@ export function MessageActionPopover({
       margin,
       Math.min(viewportWidth - width - margin, preferredLeft),
     );
-    const top = Math.max(margin, anchor.top - measuredHeight - 10);
+    const above = anchor.top - measuredHeight - 10;
+    const below = above < margin;
+    const top = Math.max(margin, Math.min(window.visualViewport?.height ?? window.innerHeight, below ? anchor.bottom + measuredHeight + 10 : above + measuredHeight) - measuredHeight - margin);
+    element.dataset.side = below ? "below" : "above";
 
     element.style.left = `${Math.round(left)}px`;
     element.style.top = `${Math.round(top)}px`;

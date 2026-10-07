@@ -1,0 +1,184 @@
+/* Shared neutral/semantic tokens also cover dialogs and full-screen routes outside AppShell. */
+:root {
+  --panel: var(--surface);
+  --foreground: var(--ink);
+  --muted-foreground: var(--muted);
+  --background: var(--bg);
+  --success-surface: color-mix(in srgb, var(--success) 12%, var(--surface));
+  --danger-surface: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  --ride-surface: var(--surface);
+  --ride-surface-2: var(--soft);
+  --ride-surface-3: var(--surface-strong);
+  --ride-text: var(--ink);
+  --ride-muted: var(--muted);
+  --ride-border: var(--border);
+}
+html[data-theme="dark"]
+  :is(
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not(
+        [type="color"]
+      ),
+    textarea,
+    select
+  ) {
+  background-color: var(--surface);
+  color: var(--ink);
+  border-color: var(--border);
+}
+html[data-theme="dark"] :is(input, textarea)::placeholder {
+  color: var(--muted);
+  opacity: 1;
+}
+html[data-theme="dark"] :is(.feedback.error, .error:not(.form-field)) {
+  background: var(--danger-surface);
+  color: var(--danger);
+  border-color: var(--danger);
+}
+html[data-theme="dark"] :is(.feedback.success, .success) {
+  background: var(--success-surface);
+  color: var(--success);
+  border-color: var(--success);
+}
+:is(.ride-route-summary, .ride-driver-selected-location) {
+  background: var(--ride-surface-2) !important;
+  color: var(--ride-text) !important;
+  border-color: var(--ride-border) !important;
+}
+:is(.ride-route-summary, .ride-driver-selected-location) :is(strong, svg) {
+  color: var(--ride-text) !important;
+}
+:is(.ride-route-summary, .ride-driver-selected-location) small {
+  color: var(--ride-muted) !important;
+}
+:is(.ride-route-summary, .ride-driver-selected-location)
+  .ride-route-metrics
+  span {
+  background: var(--ride-surface-3);
+  color: var(--ride-text);
+}
+.ride-bottom-sheet {
+  overscroll-behavior: contain;
+  scroll-padding-block: 16px;
+}
+.ride-address-results {
+  scrollbar-color: var(--ride-border) var(--ride-surface-2);
+}
+.ride-route-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ride-route-buttons > button {
+  flex: 1 1 140px;
+}
+html[data-high-contrast="true"] {
+  --muted: #32473e;
+  --border: #68796e;
+  --room-border: var(--ink);
+}
+html[data-theme="dark"][data-high-contrast="true"] {
+  --ink: #fff;
+  --muted: #deeee6;
+  --border: #9cb4a7;
+  --bg: #0a1012;
+  --surface: #111b1e;
+}
+html[data-high-contrast="true"] .ride-mobility-app {
+  --ride-border: var(--ink);
+  --ride-muted: var(--ink);
+}
+.call-member[data-camera="true"] .identity-trigger {
+  color: white !important;
+}
+.call-member[data-camera="true"] .identity-trigger small {
+  color: #e3eee8;
+}
+.friend-conversation-row[data-selected="true"] {
+  border-color: var(--accent);
+  background: var(--surface-hover);
+}
+.friend-conversation-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-block: 6px;
+}
+.friend-conversation-meta time {
+  margin-left: auto;
+}
+.friend-online {
+  color: var(--success);
+}
+.friend-unread {
+  display: grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding-inline: 5px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.friend-message-preview {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+  max-width: 100%;
+  font-size: 0.8rem;
+  margin-block: 8px;
+}
+.private-chat > .call-mount {
+  flex: 0 0 auto;
+  max-height: min(40dvh, 280px);
+  overflow: auto;
+  overflow-anchor: none;
+}
+.private-chat:has(> .call-mount) .private-connection-status {
+  flex: 0 1 auto;
+  max-height: 110px;
+  overflow: auto;
+  padding: 10px 14px;
+}
+@media (min-width: 761px) {
+  .friends-page.mobile-private-chat-open
+    > :not(.friends-workspace):not(.error) {
+    display: none !important;
+  }
+  .friends-page.mobile-private-chat-open .friends-workspace {
+    display: block;
+  }
+  .friends-page.mobile-private-chat-open .friends-workspace > aside {
+    display: none;
+  }
+  .friends-page.mobile-private-chat-open .private-chat {
+    display: flex;
+    flex-direction: column;
+    height: calc(100dvh - 154px);
+    min-height: 380px;
+    max-width: 1440px;
+    margin-inline: auto;
+    overflow: hidden;
+    padding: 16px;
+  }
+  .friends-page.mobile-private-chat-open .private-messages {
+    flex: 1 1 0;
+    min-height: 0;
+    height: auto;
+    overscroll-behavior: contain;
+  }
+  .friends-page.mobile-private-chat-open .private-chat-header {
+    flex: 0 0 auto;
+  }
+  .friends-page.mobile-private-chat-open .private-chat-back {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .friends-page.mobile-private-chat-open .private-composer {
+    flex: 0 0 auto;
+  }
+}

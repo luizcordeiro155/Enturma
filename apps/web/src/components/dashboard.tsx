@@ -11,6 +11,7 @@ import { CatalogSearch } from "./catalog-search";
 import { ForumHighlights } from "./forum-highlights";
 import { StudyJourney } from "./study-journey";
 import { useLiveRefresh } from "@/lib/live-updates";
+import { EnturmaIntroExperience } from "./intro/enturma-intro-experience";
 export function Dashboard() {
   const [profile, setProfile] = useState<Profile>();
   const [rooms, setRooms] = useState<Room[]>([]);
@@ -96,7 +97,10 @@ export function Dashboard() {
             ) : null}
           </div>
           {profile ? (
-            <section id="minhas-materias" className="home-subjects-section">
+            <EnturmaIntroExperience profile={profile} />
+          ) : null}
+          {profile ? (
+            <section id="minhas-materias" tabIndex={-1} className="home-subjects-section">
               <div className="section-heading">
                 <div>
                   <span className="home-section-kicker">

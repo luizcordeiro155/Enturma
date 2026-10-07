@@ -1,353 +1,129 @@
 "use client";
-
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { cancelMotion, playMotion, reducedMotion } from "@/lib/motion";
+import { gsap } from "gsap";
+import { cancelMotion, reducedMotion } from "@/lib/motion";
 
-const REVEAL_SELECTOR = [
-  "main h1",
-  "main h2",
-  "main article",
-  ".card",
-  ".room-row",
-  ".participant-row",
-  ".member-profile-strip",
-  ".showcase-widget",
-  ".profile-editor-section",
-  ".profile-preview-stage",
-  ".notification-item",
-  ".forum-entry",
-  ".friends-workspace article",
-  ".call-member",
-  ".user-profile-dialog",
-  ".room-mobile-details-sheet",
-  ".option-list > button",
-  ".study-journey",
-  ".guide-welcome",
-].join(",");
+const REVEAL =
+  "main h1,.room-row,.home-subject-card,.forum-entry,.profile-editor-section,.study-journey,.guide-welcome,.showcase-widget,.notification-item";
+const EXCLUDED =
+  ".enturma-intro,.persistent-messages,.private-messages,.call-video-stage,.ride-map-container";
 
-const TILT_SELECTOR = [
-  ".public-profile-card",
-  ".member-profile-strip",
-  ".showcase-widget",
-  ".profile-media-action",
-].join(",");
-
-function motionDisabled() {
-  return (
-    reducedMotion() ||
-    document.documentElement.dataset.reducedMotion === "true"
-  );
-}
-
+/** One scoped motion lifecycle per route. Chat history and media never receive layout motion. */
 export function Motion() {
   const path = usePathname();
-
   useEffect(() => {
     const seen = new WeakSet<Element>();
-    const hoverAnimations = new WeakMap<Element, Animation>();
-    const pressAnimations = new WeakMap<Element, Animation>();
-    const media = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const finePointer = window.matchMedia("(hover:hover) and (pointer:fine)");
-
-    function animate(
-      element: Element | null | undefined,
-      frames: Keyframe[],
-      options: KeyframeAnimationOptions,
-    ) {
-      if (!element || motionDisabled()) return;
-      return playMotion(element, frames, options);
-    }
-
-    function animatePage() {
-      if (motionDisabled()) return;
-      const content =
-        document.querySelector(".workspace > main") ??
-        document.querySelector("main") ??
-        document.querySelector("#content");
-      animate(
-        content,
-        [
-          {
-            opacity: 0.68,
-            transform: "scale(.996)",
-          },
-          {
-            opacity: 0.9,
-            transform: "scale(.999)",
-            offset: 0.58,
-          },
-          {
-            opacity: 1,
-            transform: "scale(1)",
-          },
-        ],
-        {
-          duration: 300,
-          easing: "cubic-bezier(.16,1,.3,1)",
-        },
-      );
-
-      const active = document.querySelector(
-        '.mobile-bottom-nav [aria-current="page"],.sidebar [aria-current="page"]',
-      );
-      animate(
-        active,
-        [
-          { opacity: 0.72 },
-          { opacity: 1 },
-        ],
-        { duration: 220, easing: "cubic-bezier(.16,1,.3,1)" },
-      );
-    }
-
+    const media = matchMedia("(prefers-reduced-motion: reduce)");
+    let context = gsap.context(() => {});
+    let pressed: HTMLElement | null = null;
+    let scanFrame = 0;
+    const animate = (el: Element, from: gsap.TweenVars, to: gsap.TweenVars) => {
+      if (reducedMotion() || el.closest(EXCLUDED)) return;
+      context.add(() => {
+        gsap.fromTo(el, from, {
+          duration: 0.28,
+          ease: "power2.out",
+          overwrite: "auto",
+          clearProps: "transform,opacity",
+          ...to,
+        });
+      });
+    };
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           observer.unobserve(entry.target);
-          if (motionDisabled()) continue;
-
-          const index = Number(
-            (entry.target as HTMLElement).dataset.motionIndex ?? "0",
-          );
-          animate(
-            entry.target,
-            [
-              {
-                opacity: 0,
-                transform: "scale(.992)",
-              },
-              {
-                opacity: 1,
-                transform: "scale(1)",
-              },
-            ],
-            {
-              duration: 430,
-              delay: Math.min(index, 6) * 34,
-              easing: "cubic-bezier(.16,1,.3,1)",
-              fill: "both",
-            },
-          );
-
-          const banner = entry.target.querySelector?.(
-            ".public-profile-banner img,.member-profile-strip-banner",
-          );
-          if (banner) {
-            animate(
-              banner,
-              [
-                { transform: "scale(1.055) translate3d(0,-2px,0)" },
-                { transform: "scale(1) translate3d(0,0,0)" },
-              ],
-              {
-                duration: 720,
-                easing: "cubic-bezier(.16,1,.3,1)",
-                fill: "both",
-              },
-            );
-          }
+          animate(entry.target, { opacity: 0.25, y: 8 }, { opacity: 1, y: 0 });
         }
       },
-      { threshold: 0.06, rootMargin: "0px 0px -24px 0px" },
+      { threshold: 0.08 },
     );
-
-    function scan() {
-      let index = 0;
-      document.querySelectorAll(REVEAL_SELECTOR).forEach((element) => {
-        if (seen.has(element)) return;
-        seen.add(element);
-        (element as HTMLElement).dataset.motionIndex = String(index++ % 7);
-        observer.observe(element);
+    const scan = () => {
+      scanFrame = 0;
+      document.querySelectorAll(REVEAL).forEach((el) => {
+        if (seen.has(el) || el.closest(EXCLUDED)) return;
+        seen.add(el);
+        observer.observe(el);
       });
-
-      document
-        .querySelectorAll<HTMLDialogElement>("dialog[open],.mobile-more-sheet")
-        .forEach((dialog) => {
-          if (dialog.dataset.motionOpen === "1") return;
-          dialog.dataset.motionOpen = "1";
-          animate(
-            dialog,
-            [
-              {
-                opacity: 0,
-                transform: "translate3d(0,18px,0) scale(.965)",
-              },
-              {
-                opacity: 1,
-                transform: "translate3d(0,0,0) scale(1)",
-              },
-            ],
-            {
-              duration: 340,
-              easing: "cubic-bezier(.16,1,.3,1)",
-              fill: "both",
-            },
-          );
+    };
+    const mutations = new MutationObserver((records) => {
+      if (
+        scanFrame ||
+        !records.some(
+          (record) =>
+            !(record.target instanceof Element) ||
+            !record.target.closest(EXCLUDED),
+        )
+      )
+        return;
+      scanFrame = requestAnimationFrame(scan);
+    });
+    const release = () => {
+      if (!pressed) return;
+      const el = pressed;
+      pressed = null;
+      context.add(() => {
+        gsap.to(el, {
+          scale: 1,
+          duration: reducedMotion() ? 0 : 0.16,
+          overwrite: true,
+          clearProps: "transform",
         });
-    }
-
-    function pressStart(event: PointerEvent) {
-      if (motionDisabled() || event.button !== 0) return;
-      const target = (event.target as Element).closest<HTMLElement>(
-        "button:not(:disabled),a[href],.identity-trigger,.profile-media-action",
+      });
+    };
+    const press = (event: PointerEvent) => {
+      if (
+        event.button !== 0 ||
+        reducedMotion() ||
+        !(event.target instanceof Element)
+      )
+        return;
+      release();
+      const target = event.target.closest<HTMLElement>(
+        "button:not(:disabled),a.button",
       );
-      if (!target) return;
-      pressAnimations.get(target)?.cancel();
-      const navigationControl = target.closest(".mobile-bottom-nav,.sidebar nav");
-      const animation = navigationControl
-        ? target.animate(
-            [{ opacity: 1 }, { opacity: 0.72 }],
-            {
-              duration: 95,
-              easing: "cubic-bezier(.2,.8,.2,1)",
-              fill: "forwards",
-            },
-          )
-        : target.animate(
-            [
-              { transform: "scale(1)" },
-              { transform: "scale(.965)" },
-            ],
-            {
-              duration: 115,
-              easing: "cubic-bezier(.2,.8,.2,1)",
-              fill: "forwards",
-            },
-          );
-      pressAnimations.set(target, animation);
-    }
-
-    function pressEnd(event: PointerEvent) {
-      const target = (event.target as Element).closest<HTMLElement>(
-        "button,a[href],.identity-trigger,.profile-media-action",
-      );
-      if (!target || motionDisabled()) return;
-      pressAnimations.get(target)?.cancel();
-      const navigationControl = target.closest(".mobile-bottom-nav,.sidebar nav");
-      const animation = navigationControl
-        ? target.animate(
-            [{ opacity: 0.72 }, { opacity: 1 }],
-            {
-              duration: 160,
-              easing: "cubic-bezier(.16,1,.3,1)",
-            },
-          )
-        : target.animate(
-            [
-              { transform: "scale(.965)" },
-              { transform: "scale(1.012)", offset: 0.62 },
-              { transform: "scale(1)" },
-            ],
-            {
-              duration: 240,
-              easing: "cubic-bezier(.16,1,.3,1)",
-            },
-          );
-      pressAnimations.set(target, animation);
-    }
-
-    function tilt(event: PointerEvent) {
-      if (!finePointer.matches || motionDisabled()) return;
-      const target = (event.target as Element).closest<HTMLElement>(TILT_SELECTOR);
-      if (!target || target.closest(".user-profile-popover")) return;
-      const rect = target.getBoundingClientRect();
-      if (!rect.width || !rect.height) return;
-      const px = (event.clientX - rect.left) / rect.width - 0.5;
-      const py = (event.clientY - rect.top) / rect.height - 0.5;
-      const rx = Math.max(-3.2, Math.min(3.2, py * -5.5));
-      const ry = Math.max(-4.2, Math.min(4.2, px * 7));
-      hoverAnimations.get(target)?.cancel();
-      const animation = target.animate(
-        [
-          {
-            transform: `perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translate3d(0,-1px,0)`,
-          },
-        ],
-        {
-          duration: 170,
-          easing: "cubic-bezier(.2,.8,.2,1)",
-          fill: "forwards",
-        },
-      );
-      hoverAnimations.set(target, animation);
-    }
-
-    function untilt(event: PointerEvent) {
-      if (motionDisabled()) return;
-      const target = (event.target as Element).closest<HTMLElement>(TILT_SELECTOR);
-      if (!target || target.closest(".user-profile-popover")) return;
-      hoverAnimations.get(target)?.cancel();
-      const animation = target.animate(
-        [
-          {
-            transform:
-              "perspective(900px) rotateX(0deg) rotateY(0deg) translate3d(0,0,0)",
-          },
-        ],
-        {
-          duration: 360,
-          easing: "cubic-bezier(.16,1,.3,1)",
-          fill: "forwards",
-        },
-      );
-      hoverAnimations.set(target, animation);
-    }
-
-    function focusIn(event: FocusEvent) {
-      if (motionDisabled()) return;
-      const target = (event.target as Element).closest<HTMLElement>(
-        "button,a,input,textarea,select,.identity-trigger",
-      );
-      if (!target) return;
-      animate(
-        target,
-        [
-          { transform: "translate3d(0,0,0)" },
-          { transform: "translate3d(0,-1px,0)" },
-        ],
-        { duration: 180, easing: "cubic-bezier(.16,1,.3,1)" },
-      );
-    }
-
-    function preferenceChanged() {
-      if (!motionDisabled()) return;
+      if (!target || target.closest(".enturma-intro")) return;
+      pressed = target;
+      context.add(() => {
+        gsap.to(target, { scale: 0.97, duration: 0.1, overwrite: true });
+      });
+    };
+    const preference = () => {
+      if (!reducedMotion()) return;
+      pressed = null;
+      context.revert();
+      context = gsap.context(() => {});
       cancelMotion();
-      document
-        .getAnimations()
-        .forEach((animation) => animation.cancel());
-    }
-
+    };
+    const attributes = new MutationObserver(preference);
+    attributes.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["data-reduced-motion"],
+    });
     scan();
-    requestAnimationFrame(animatePage);
-
-    const mutations = new MutationObserver(scan);
     mutations.observe(document.body, { subtree: true, childList: true });
-
-    document.addEventListener("pointerdown", pressStart, { passive: true });
-    document.addEventListener("pointerup", pressEnd, { passive: true });
-    document.addEventListener("pointercancel", pressEnd, { passive: true });
-    document.addEventListener("pointermove", tilt, { passive: true });
-    document.addEventListener("pointerleave", untilt, true);
-    document.addEventListener("focusin", focusIn);
-    media.addEventListener("change", preferenceChanged);
-    window.addEventListener("enturma-motion", preferenceChanged);
-
+    document.addEventListener("pointerdown", press, { passive: true });
+    document.addEventListener("pointerup", release, { passive: true });
+    document.addEventListener("pointercancel", release, { passive: true });
+    window.addEventListener("blur", release);
+    media.addEventListener("change", preference);
+    window.addEventListener("enturma-motion", preference);
     return () => {
+      cancelAnimationFrame(scanFrame);
       observer.disconnect();
       mutations.disconnect();
-      document.removeEventListener("pointerdown", pressStart);
-      document.removeEventListener("pointerup", pressEnd);
-      document.removeEventListener("pointercancel", pressEnd);
-      document.removeEventListener("pointermove", tilt);
-      document.removeEventListener("pointerleave", untilt, true);
-      document.removeEventListener("focusin", focusIn);
-      media.removeEventListener("change", preferenceChanged);
-      window.removeEventListener("enturma-motion", preferenceChanged);
+      attributes.disconnect();
+      document.removeEventListener("pointerdown", press);
+      document.removeEventListener("pointerup", release);
+      document.removeEventListener("pointercancel", release);
+      window.removeEventListener("blur", release);
+      media.removeEventListener("change", preference);
+      window.removeEventListener("enturma-motion", preference);
+      context.revert();
       cancelMotion();
     };
   }, [path]);
-
   return null;
 }

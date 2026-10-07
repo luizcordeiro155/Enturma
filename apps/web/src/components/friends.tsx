@@ -1,7 +1,17 @@
 "use client";
+import { isChatAtLatest } from "@/lib/chat-scroll";
+import { PrivateCallButtons, PrivateCallView } from "./private-calls";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ArrowLeft, ImagePlus, Pencil, Send, Smile, Trash2, X } from "lucide-react";
+import {
+  ArrowLeft,
+  ImagePlus,
+  Pencil,
+  Send,
+  Smile,
+  Trash2,
+  X,
+} from "lucide-react";
 import { preparePrivateChatImage } from "@/lib/chat-image";
 import {
   isMobileTextEntryContext,
@@ -44,6 +54,10 @@ type Friend = Omit<PublicProfile, "id"> & {
   requester: string;
   recipient: string;
   status: string;
+  online?: boolean;
+  lastMessageId?: string;
+  lastMessageAt?: string;
+  unreadCount?: number;
 };
 type Envelope = {
   id: string;
@@ -89,6 +103,9 @@ export function Friends() {
   const [finger, setFinger] = useState("");
   const [password, setPassword] = useState("");
   const [messages, setMessages] = useState<PrivateMessage[]>([]);
+  const [previews, setPreviews] = useState<
+    Record<string, { id: string; text: string }>
+  >({});
   const [page, setPage] = useState(0);
   const [older, setOlder] = useState(false);
   const [atLatest, setAtLatest] = useState(true);
@@ -169,7 +186,9 @@ export function Friends() {
     void api<{ privateImageAttachments?: boolean }>("/capabilities", {
       cache: "no-store",
     })
-      .then((cap) => setPrivateImagesEnabled(cap.privateImageAttachments === true))
+      .then((cap) =>
+        setPrivateImagesEnabled(cap.privateImageAttachments === true),
+      )
       .catch(() => setPrivateImagesEnabled(false));
     return () => {
       alive = false;
@@ -219,6 +238,19 @@ export function Friends() {
         }),
       );
       if (version !== generation.current) return;
+      const newest = [...decoded].sort((a, b) =>
+        b.createdAt.localeCompare(a.createdAt),
+      )[0];
+      if (newest)
+        setPreviews((old) => ({
+          ...old,
+          [friend.id]: {
+            id: newest.id,
+            text:
+              newest.text ||
+              (newest.attachmentUrl ? "Imagem" : "Mensagem privada"),
+          },
+        }));
       setMessages((old) =>
         [...new Map([...old, ...decoded].map((m) => [m.id, m])).values()].sort(
           (a, b) =>
@@ -233,8 +265,8 @@ export function Friends() {
     const viewport = messagesViewport.current;
     if (!viewport) return;
     viewport.scrollTo({ top: viewport.scrollHeight, behavior });
-    nearLatest.current = true;
-    setAtLatest(true);
+    nearLatest.current = isChatAtLatest(viewport);
+    setAtLatest(nearLatest.current);
   }, []);
 
   useEffect(() => {
@@ -246,20 +278,18 @@ export function Friends() {
     const hasNewMessage = count > previousMessageCount.current;
     previousMessageCount.current = count;
     if (!hasNewMessage) return;
-    const composerFocused = document.activeElement === composer.current;
-    if (
-      !forceFollowLatest.current &&
-      !nearLatest.current &&
-      !composerFocused
-    )
-      return;
+    if (!forceFollowLatest.current && !nearLatest.current) return;
     const behavior =
       forceFollowLatest.current &&
       document.documentElement.dataset.reducedMotion !== "true"
         ? "smooth"
         : "auto";
-    requestAnimationFrame(() => scrollToLatest(behavior));
-    forceFollowLatest.current = false;
+    const frame = requestAnimationFrame(() => {
+      if (!nearLatest.current && !forceFollowLatest.current) return;
+      scrollToLatest(behavior);
+      forceFollowLatest.current = false;
+    });
+    return () => cancelAnimationFrame(frame);
   }, [messages, scrollToLatest]);
 
   useEffect(() => {
@@ -312,7 +342,6 @@ export function Friends() {
           await load(friend, k, 0, current, target);
           if (active) focusMessage(`message-${target}`);
         }
-
       } catch (e) {
         if (!active) return;
         const failure = e as Error & { status?: number };
@@ -541,7 +570,11 @@ export function Friends() {
   }, [draft]);
   function selectImage(file: File | null) {
     if (!file) return;
-    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+    if (
+      !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+        file.type,
+      )
+    ) {
       setError("Use JPG, PNG, WEBP ou GIF.");
       return;
     }
@@ -560,13 +593,7 @@ export function Friends() {
 
   async function send(e: React.FormEvent) {
     e.preventDefault();
-    if (
-      !selected ||
-      !me ||
-      !key.current ||
-      busy ||
-      (!draft.trim() && !image)
-    )
+    if (!selected || !me || !key.current || busy || (!draft.trim() && !image))
       return;
 
     setBusy(true);
@@ -622,9 +649,7 @@ export function Friends() {
     <Shell>
       <div
         className={
-          selected
-            ? "friends-page mobile-private-chat-open"
-            : "friends-page"
+          selected ? "friends-page mobile-private-chat-open" : "friends-page"
         }
       >
         <h1>Amigos e conversas</h1>
@@ -754,8 +779,44 @@ export function Friends() {
               <p>Nenhuma amizade ainda. Convide alguém pelo nome de usuário.</p>
             ) : (
               friends.map((f) => (
-                <article key={f.id}>
+                <article
+                  key={f.id}
+                  className="friend-conversation-row"
+                  data-selected={selected?.id === f.id}
+                >
                   <UserIdentity user={{ ...f, id: f.userId }} />
+                  {f.status === "ACCEPTED" && (
+                    <div className="friend-conversation-meta">
+                      <small className={f.online ? "friend-online" : "muted"}>
+                        {f.online ? "Online" : "Offline"}
+                      </small>
+                      {f.lastMessageAt && (
+                        <time dateTime={f.lastMessageAt}>
+                          {new Date(f.lastMessageAt).toLocaleString("pt-BR", {
+                            day: "2-digit",
+                            month: "2-digit",
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </time>
+                      )}
+                      {!!f.unreadCount && (
+                        <span
+                          className="friend-unread"
+                          aria-label={`${f.unreadCount} mensagens não lidas`}
+                        >
+                          {f.unreadCount}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {f.lastMessageId && (
+                    <p className="friend-message-preview">
+                      {previews[f.id]?.id === f.lastMessageId
+                        ? previews[f.id].text
+                        : "Mensagem privada criptografada"}
+                    </p>
+                  )}
                   {f.status === "ACCEPTED" ? (
                     <button
                       className="secondary"
@@ -832,7 +893,9 @@ export function Friends() {
                   <span className="privacy-pill">
                     Ponta a ponta · ECDH + AES-GCM
                   </span>
+                  <PrivateCallButtons friendshipId={selected.id} />
                 </header>
+                <PrivateCallView friendshipId={selected.id} />
                 {finger ? (
                   <details>
                     <summary>Código de segurança</summary>
@@ -859,6 +922,14 @@ export function Friends() {
                     connectionState === "error" ||
                     connectionState === "waiting" ? (
                       <div className="actions">
+                        {identityError && (
+                          <button
+                            className="secondary"
+                            onClick={closeConversation}
+                          >
+                            Voltar à lista para desbloquear
+                          </button>
+                        )}
                         <button
                           className="secondary"
                           onClick={() => {
@@ -878,12 +949,13 @@ export function Friends() {
                           <button
                             className="text-button"
                             onClick={() => {
-                              const backup =
-                                document.getElementById("private-sync");
-                              if (backup) {
-                                backup.scrollIntoView({ block: "center" });
-                                backup.querySelector("input")?.focus();
-                              }
+                              closeConversation();
+                              requestAnimationFrame(() => {
+                                const backup =
+                                  document.getElementById("private-sync");
+                                backup?.scrollIntoView({ block: "center" });
+                                backup?.querySelector("input")?.focus();
+                              });
                             }}
                           >
                             Desbloquear neste dispositivo
@@ -901,11 +973,7 @@ export function Friends() {
                   aria-live="polite"
                   onScroll={(event) => {
                     const viewport = event.currentTarget;
-                    nearLatest.current =
-                      viewport.scrollHeight -
-                        viewport.scrollTop -
-                        viewport.clientHeight <
-                      96;
+                    nearLatest.current = isChatAtLatest(viewport);
                     setAtLatest(nearLatest.current);
                     if (nearLatest.current) {
                       window.dispatchEvent(
@@ -1097,7 +1165,10 @@ export function Friends() {
                   ) : null}
 
                   {emojiOpen ? (
-                    <div className="composer-emoji-tray" aria-label="Emojis rápidos">
+                    <div
+                      className="composer-emoji-tray"
+                      aria-label="Emojis rápidos"
+                    >
                       {["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"].map(
                         (emoji) => (
                           <button
@@ -1150,10 +1221,10 @@ export function Friends() {
                         ref={composer}
                         value={draft}
                         onFocus={() => {
-                          forceFollowLatest.current = true;
-                          nearLatest.current = true;
                           setNativeChatComposerFocused(true);
-                          requestAnimationFrame(() => scrollToLatest("auto"));
+                          requestAnimationFrame(() => {
+                            if (nearLatest.current) scrollToLatest("auto");
+                          });
                         }}
                         onBlur={() => {
                           setNativeChatComposerFocused(false);

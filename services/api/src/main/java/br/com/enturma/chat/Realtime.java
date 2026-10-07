@@ -20,6 +20,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
   private final ChatService chat;
   private final StudyService study;
   private final ObjectMapper json;
+  private final RealtimePresence presence;
   private final String[] origins;
   private final Map<String, Connection> connections = new ConcurrentHashMap<>();
 
@@ -47,12 +48,14 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       ChatService chat,
       StudyService study,
       ObjectMapper json,
+      RealtimePresence presence,
       @Value("${enturma.origins}") String origins) {
     this.db = db;
     this.auth = auth;
     this.chat = chat;
     this.study = study;
     this.json = json;
+    this.presence = presence;
     this.origins = origins.split(",");
   }
 
@@ -78,6 +81,10 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       try {
         var data = json.readTree(message.getPayload());
         Actor actor = auth.authenticate(c.token).orElseThrow();
+        if (c.activity && "presence_ping".equals(data.path("type").asText())) {
+          presence.touch(socket.getId(), actor.id());
+          return;
+        }
         if (c.room == null) return;
         study.member(actor, c.room);
         String type = data.path("type").asText();
@@ -105,6 +112,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       if ("activity".equals(data.path("scope").asText())) {
         c.activity = true;
         c.token = token;
+        presence.touch(socket.getId(), actor.id());
         synchronized (c) {
           socket.sendMessage(new TextMessage("{\"type\":\"app_ready\"}"));
         }
@@ -255,6 +263,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
 
   @Override
   public void afterConnectionClosed(WebSocketSession socket, CloseStatus status) {
+    presence.remove(socket.getId());
     connections.remove(socket.getId());
   }
 }

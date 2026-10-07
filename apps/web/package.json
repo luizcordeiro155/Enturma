@@ -14,11 +14,14 @@
   "dependencies": {
     "@enturma/contracts": "*",
     "@enturma/design-tokens": "*",
+    "@remotion/player": "4.0.530",
+    "gsap": "^3.14.2",
     "livekit-client": "^2.22.3",
     "lucide-react": "^0.577.0",
     "next": "16.3.6",
     "react": "19.2.8",
-    "react-dom": "19.2.8"
+    "react-dom": "19.2.8",
+    "remotion": "4.0.530"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",

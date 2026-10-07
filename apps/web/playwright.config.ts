@@ -23,26 +23,60 @@ export default defineConfig({
     },
   },
   projects: [
-    { name: "chromium-social", testMatch: /(?:forum|friends)\.spec\.ts/, use: {
+    {
+      name: "chromium-ux",
+      testMatch: /ux-refinement\.spec\.ts/,
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1376, height: 768 },
+        launchOptions: {
+          args: [
+            "--use-fake-ui-for-media-stream",
+            "--use-fake-device-for-media-stream",
+          ],
+        },
+      },
+    },
+    {
+      name: "chromium-social",
+      testMatch: /(?:forum|friends)\.spec\.ts/,
+      use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },
-      } },
-    { name: "chromium-study", testMatch: /(?:catalog-learning|notebooks)\.spec\.ts/, use: {
+      },
+    },
+    {
+      name: "chromium-study",
+      testMatch: /(?:catalog-learning|notebooks)\.spec\.ts/,
+      use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },
-      } },
-    { name: "chromium-experience", testMatch: /(?:profile-v3|responsive-shell|study-journey)\.spec\.ts/, use: {
+      },
+    },
+    {
+      name: "chromium-experience",
+      testMatch: /(?:profile-v3|responsive-shell|study-journey)\.spec\.ts/,
+      use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },
-      } },
-    { name: "chromium-platform", testMatch: /platform\.spec\.ts/, use: {
+      },
+    },
+    {
+      name: "chromium-platform",
+      testMatch: /platform\.spec\.ts/,
+      use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },
-      } },
-    { name: "chromium-media", testMatch: /community-v3\.spec\.ts/, use: {
+      },
+    },
+    {
+      name: "chromium-media",
+      testMatch: /community-v3\.spec\.ts/,
+      use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },
-      } },
+      },
+    },
   ],
   reporter: "list",
 });

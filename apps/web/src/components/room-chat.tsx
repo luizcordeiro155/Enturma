@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { Message, Profile, RoomSystemEvent } from "@enturma/contracts";
 import {
   BookOpen,
@@ -24,6 +31,7 @@ import {
 } from "@/lib/native-chat-ime";
 
 import { RichMessage } from "./rich-message";
+import { isChatAtLatest, revealChatMessage } from "@/lib/chat-scroll";
 import {
   MessageActionPopover,
   messageActionAnchor,
@@ -100,40 +108,40 @@ export function RoomChat(props: Props) {
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const nearBottom = useRef(true);
   const forceFollowLatest = useRef(false);
-  const roomLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(
-    null,
-  );
+  const roomLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roomLongPressOrigin = useRef<{ x: number; y: number } | null>(null);
   const messageMap = useMemo(
     () => new Map(messages.map((message) => [message.id, message])),
     [messages],
   );
 
-  const scrollRoomToLatest = useCallback((behavior: ScrollBehavior = "auto") => {
-    const viewport = scrollRef.current;
-    if (!viewport) return;
+  const scrollRoomToLatest = useCallback(
+    (behavior: ScrollBehavior = "auto") => {
+      const viewport = scrollRef.current;
+      if (!viewport) return;
 
-    // Scroll only the room message viewport. Using scrollIntoView here also
-    // moved outer ancestors and made the newest message climb too high above
-    // the composer on Android.
-    viewport.scrollTo({ top: viewport.scrollHeight, behavior });
-    requestAnimationFrame(() => {
-      viewport.scrollTop = viewport.scrollHeight;
-    });
+      // Scroll only the room message viewport. Using scrollIntoView here also
+      // moved outer ancestors and made the newest message climb too high above
+      // the composer on Android.
+      viewport.scrollTo({ top: viewport.scrollHeight, behavior });
+      nearBottom.current = isChatAtLatest(viewport);
+      setRoomAtLatest(nearBottom.current);
+      if (!nearBottom.current) return;
+      setUnseen(0);
+      setFirstUnread(null);
+      window.dispatchEvent(
+        new CustomEvent("enturma-conversation-latest", {
+          detail: { context: `room:${roomId}` },
+        }),
+      );
+    },
+    [roomId],
+  );
 
-    nearBottom.current = true;
-    setRoomAtLatest(true);
-    setUnseen(0);
-    setFirstUnread(null);
-    window.dispatchEvent(
-      new CustomEvent("enturma-conversation-latest", {
-        detail: { context: `room:${roomId}` },
-      }),
-    );
-  }, [roomId]);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     const latest = messages.at(-1)?.id;
+    const firstBatch = !newestRef.current && !!latest;
+    const newMessage = latest !== newestRef.current;
     const previousIndex = messages.findIndex((m) => m.id === newestRef.current);
     if (
       !nearBottom.current &&
@@ -149,15 +157,14 @@ export function RoomChat(props: Props) {
     }
     newestRef.current = latest;
     countRef.current = messages.length;
-    const composerFocused = document.activeElement === composerRef.current;
     if (
-      (nearBottom.current || forceFollowLatest.current || composerFocused) &&
+      (firstBatch ||
+        (newMessage && nearBottom.current) ||
+        forceFollowLatest.current) &&
       scrollRef.current
     ) {
-      requestAnimationFrame(() => {
-        scrollRoomToLatest("auto");
-        forceFollowLatest.current = false;
-      });
+      scrollRoomToLatest("auto");
+      forceFollowLatest.current = false;
     }
   }, [messages, compact, scrollRoomToLatest]);
 
@@ -271,8 +278,7 @@ export function RoomChat(props: Props) {
         aria-live="polite"
         onScroll={(e) => {
           const el = e.currentTarget;
-          nearBottom.current =
-            el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+          nearBottom.current = isChatAtLatest(el);
           setRoomAtLatest(nearBottom.current);
           if (nearBottom.current) {
             setUnseen(0);
@@ -420,20 +426,21 @@ export function RoomChat(props: Props) {
                     <button
                       className="reply-preview"
                       type="button"
-                      onClick={() =>
-                        document
-                          .getElementById(`message-${replied.id}`)
-                          ?.scrollIntoView({
-                            behavior:
-                              document.documentElement.dataset.reducedMotion ===
-                                "true" ||
+                      onClick={() => {
+                        const target = document.getElementById(
+                          `message-${replied.id}`,
+                        );
+                        if (target)
+                          revealChatMessage(
+                            target,
+                            document.documentElement.dataset.reducedMotion ===
+                              "true" ||
                               matchMedia("(prefers-reduced-motion: reduce)")
                                 .matches
-                                ? "instant"
-                                : "smooth",
-                            block: "center",
-                          })
-                      }
+                              ? "instant"
+                              : "smooth",
+                          );
+                      }}
                     >
                       <Reply size={13} />
                       <strong>{replied.name}</strong>
@@ -604,7 +611,11 @@ export function RoomChat(props: Props) {
             );
           })
         )}
-        <div ref={bottomRef} className="chat-bottom-spacer" aria-hidden="true" />
+        <div
+          ref={bottomRef}
+          className="chat-bottom-spacer"
+          aria-hidden="true"
+        />
       </div>
 
       {unseen > 0 && (
@@ -778,12 +789,11 @@ export function RoomChat(props: Props) {
                 aria-busy={busy}
                 value={draft}
                 onFocus={() => {
-                  forceFollowLatest.current = true;
-                  nearBottom.current = true;
                   setNativeChatComposerFocused(true);
                   requestAnimationFrame(() => {
                     const viewport = scrollRef.current;
-                    if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                    if (viewport && nearBottom.current)
+                      viewport.scrollTop = viewport.scrollHeight;
                   });
                 }}
                 onBlur={() => {
@@ -815,7 +825,11 @@ export function RoomChat(props: Props) {
               onPointerDown={(event) => event.preventDefault()}
               disabled={busy || (!draft.trim() && !image)}
             >
-              {busy ? <Loader2 className="spin" size={20} /> : <Send size={22} />}
+              {busy ? (
+                <Loader2 className="spin" size={20} />
+              ) : (
+                <Send size={22} />
+              )}
             </button>
           </div>
         </form>

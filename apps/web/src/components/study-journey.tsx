@@ -210,6 +210,8 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
   return (
     <aside
       ref={panel}
+      id="enturma-study-guide"
+      tabIndex={-1}
       className="study-guide study-journey"
       aria-labelledby="journey-title"
     >
@@ -319,6 +321,9 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
         onClick={() => setGuide(true)}
       >
         <CircleHelp size={17} /> Guia do Enturma
+      </button>
+      <button type="button" className="text-button journey-help" onClick={() => window.dispatchEvent(new Event("enturma-intro-replay"))}>
+        Ver apresentação novamente
       </button>
       {guide ? (
         <StudyTutorial

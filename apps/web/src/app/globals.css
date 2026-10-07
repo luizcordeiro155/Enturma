@@ -6,6 +6,13 @@
   --accent: #d8ef79;
   --border: #e5e8e4;
   --soft: #f1f5f2;
+  --surface: #ffffff;
+  --surface-raised: #f7faf8;
+  --surface-hover: #eaf1ec;
+  --surface-strong: #dde9e1;
+  --danger: #a12c3c;
+  --success: #276340;
+  --on-accent: #183f36;
   --enturma-safe-top: max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px));
   --enturma-safe-right: max(env(safe-area-inset-right, 0px), var(--native-safe-right, 0px));
   --enturma-safe-bottom: max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px));

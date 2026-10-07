@@ -1,4 +1,5 @@
 "use client";
+import { revealChatMessage } from "@/lib/chat-scroll";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -55,9 +56,11 @@ function activeContexts() {
 
 function contextsAlreadyAtLatest() {
   return new Set(
-    [...document.querySelectorAll<HTMLElement>(
-      '[data-notification-context][data-notification-at-latest="true"]',
-    )]
+    [
+      ...document.querySelectorAll<HTMLElement>(
+        '[data-notification-context][data-notification-at-latest="true"]',
+      ),
+    ]
       .filter((e) => e.getClientRects().length > 0)
       .map((e) => e.dataset.notificationContext!)
       .filter(Boolean),
@@ -158,8 +161,7 @@ export function NotificationsProvider({
       );
       const fresh = viewed.filter(
         (n) =>
-          !seen.current.has(n.id) &&
-          !latestContexts.has(n.contextKey ?? ""),
+          !seen.current.has(n.id) && !latestContexts.has(n.contextKey ?? ""),
       );
       setInline((old) =>
         [...fresh, ...old]
@@ -466,29 +468,45 @@ export function ConversationNotice({ context }: { context: string }) {
     </button>
   ) : null;
 }
+let cancelMessageFocus = () => {};
 export function focusMessage(id: string) {
+  cancelMessageFocus();
+  const observer = new MutationObserver(() => {
+    if (show()) observer.disconnect();
+  });
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  let target: HTMLElement | null = null;
+  let animation: Animation | undefined;
+  const cleanup = () => {
+    observer?.disconnect();
+    clearTimeout(timeout);
+    animation?.cancel();
+    target?.classList.remove("notification-target");
+  };
+  cancelMessageFocus = cleanup;
   const show = () => {
     const el = document.getElementById(id);
     if (!el) return false;
-    el.scrollIntoView({
-      block: "center",
-      behavior: reduced() ? "instant" : "smooth",
-    });
+    target = el;
+    if (!revealChatMessage(el, reduced() ? "instant" : "smooth"))
+      el.scrollIntoView({
+        block: "center",
+        behavior: reduced() ? "instant" : "smooth",
+      });
     el.classList.add("notification-target");
-    animate(el, [
+    animation = animate(el, [
       { outlineColor: "transparent" },
       { outlineColor: "var(--accent)" },
       { outlineColor: "transparent" },
     ]);
-    setTimeout(() => el.classList.remove("notification-target"), 4500);
+    clearTimeout(timeout);
+    timeout = setTimeout(cleanup, 4500);
     return true;
   };
-  if (show()) return;
-  const observer = new MutationObserver(() => {
-    if (show()) observer.disconnect();
-  });
+  if (show()) return cleanup;
   observer.observe(document.body, { childList: true, subtree: true });
-  setTimeout(() => observer.disconnect(), 10000);
+  timeout = setTimeout(cleanup, 10000);
+  return cleanup;
 }
 export function useNotificationTarget() {
   const path = usePathname();
@@ -508,6 +526,7 @@ export function useNotificationTarget() {
     window.addEventListener("hashchange", show);
     window.addEventListener("enturma-notification-open", event);
     return () => {
+      cancelMessageFocus();
       window.removeEventListener("hashchange", show);
       window.removeEventListener("enturma-notification-open", event);
     };
@@ -520,5 +539,5 @@ function reduced() {
   );
 }
 function animate(el: Element, frames: Keyframe[]) {
-  playMotion(el, frames, { duration: 420, easing: "ease-out" });
+  return playMotion(el, frames, { duration: 420, easing: "ease-out" });
 }

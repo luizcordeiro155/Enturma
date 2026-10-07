@@ -107,7 +107,9 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
     await expect(peer.getByText(/Alice está digitando/)).toBeVisible({
       timeout: 10000,
     });
-    await page.getByRole("button", { name: "Enviar", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Enviar mensagem", exact: true })
+      .click();
     await expect(
       peer.getByText("Uma dúvida de algoritmos", { exact: true }),
     ).toBeVisible();
@@ -122,9 +124,9 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
         await p
           .getByRole("button", { name: "Entrar na chamada", exact: true })
           .click();
-        await expect(
-          p.getByText("Voz conectada", { exact: true }),
-        ).toBeVisible({ timeout: 20000 });
+        await expect(p.getByText("Voz conectada", { exact: true })).toBeVisible(
+          { timeout: 20000 },
+        );
       }
       await expect(page.getByText("2 pessoas na chamada")).toBeVisible();
       await page.getByTitle("Sair da chamada").click();
@@ -132,7 +134,9 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
     } else {
       for (const p of [page, peer]) {
         await expect(
-          p.getByText("As chamadas ainda não estão disponíveis nesta instalação."),
+          p.getByText(
+            "As chamadas ainda não estão disponíveis nesta instalação.",
+          ),
         ).toBeVisible();
       }
     }

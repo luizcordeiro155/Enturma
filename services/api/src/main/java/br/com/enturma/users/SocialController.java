@@ -98,11 +98,18 @@ public class SocialController {
     return db.list(
         "SELECT f.id,f.requester,f.recipient,f.status,u.id"
             + " user_id,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS NOT"
-            + " NULL has_avatar FROM friendship f JOIN app_user u ON u.id=CASE WHEN f.requester=?"
-            + " THEN f.recipient ELSE f.requester END WHERE (f.requester=? OR f.recipient=?) AND"
-            + " u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
-            + " b.blocked_id=u.id) OR (b.blocked_id=? AND b.user_id=u.id)) ORDER BY f.created_at"
-            + " DESC",
+            + " NULL has_avatar,EXISTS(SELECT 1 FROM realtime_presence rp WHERE rp.user_id=u.id AND"
+            + " rp.expires_at>now()) online,latest.id last_message_id,latest.created_at"
+            + " last_message_at,(SELECT count(*) FROM notification n WHERE n.user_id=? AND"
+            + " n.context_key='friend:'||f.id::text AND n.read_at IS NULL AND n.kind IN"
+            + " ('PRIVATE_MESSAGE','MENTION')) unread_count FROM friendship f JOIN app_user u ON"
+            + " u.id=CASE WHEN f.requester=? THEN f.recipient ELSE f.requester END LEFT JOIN"
+            + " LATERAL (SELECT m.id,m.created_at FROM private_message m WHERE m.friendship_id=f.id"
+            + " ORDER BY m.created_at DESC,m.id DESC LIMIT 1) latest ON true WHERE (f.requester=?"
+            + " OR f.recipient=?) AND u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b"
+            + " WHERE (b.user_id=? AND b.blocked_id=u.id) OR (b.blocked_id=? AND b.user_id=u.id))"
+            + " ORDER BY COALESCE(latest.created_at,f.created_at) DESC",
+        a.id(),
         a.id(),
         a.id(),
         a.id(),
@@ -132,8 +139,8 @@ public class SocialController {
             peer);
     var friendship =
         db.one(
-            "SELECT id,status FROM friendship WHERE (requester=? AND recipient=?) OR (requester=? AND"
-                + " recipient=?)",
+            "SELECT id,status FROM friendship WHERE (requester=? AND recipient=?) OR (requester=?"
+                + " AND recipient=?)",
             a.id(),
             peer,
             peer,
@@ -184,7 +191,8 @@ public class SocialController {
   @DeleteMapping("/friends/{id}")
   public void remove(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
     var f = access(a, id, false);
-    UUID peer = a.id().equals(f.get("requester")) ? (UUID) f.get("recipient") : (UUID) f.get("requester");
+    UUID peer =
+        a.id().equals(f.get("requester")) ? (UUID) f.get("recipient") : (UUID) f.get("requester");
     db.jdbc.update("DELETE FROM friendship WHERE id=?", id);
     friendsChanged(a.id(), peer);
   }
@@ -269,8 +277,8 @@ public class SocialController {
     access(a, id, true);
     return db.list(
         "SELECT id,sender_id,ciphertext,iv,client_id,created_at,attachment_ciphertext,"
-            + " attachment_iv,attachment_mime,attachment_name,attachment_size FROM private_message WHERE"
-            + " friendship_id=? ORDER BY created_at DESC,id DESC LIMIT 50 OFFSET ?",
+            + " attachment_iv,attachment_mime,attachment_name,attachment_size FROM private_message"
+            + " WHERE friendship_id=? ORDER BY created_at DESC,id DESC LIMIT 50 OFFSET ?",
         id,
         Math.clamp(page, 0, 10000) * 50);
   }
@@ -281,8 +289,8 @@ public class SocialController {
     access(a, id, true);
     return db.list(
         "SELECT id,sender_id,ciphertext,iv,client_id,created_at,attachment_ciphertext,"
-            + " attachment_iv,attachment_mime,attachment_name,attachment_size FROM private_message WHERE"
-            + " friendship_id=? AND id=?",
+            + " attachment_iv,attachment_mime,attachment_name,attachment_size FROM private_message"
+            + " WHERE friendship_id=? AND id=?",
         id,
         target);
   }
@@ -330,15 +338,13 @@ public class SocialController {
     var friendship = access(a, id, true);
     if (!db.exists("SELECT EXISTS(SELECT 1 FROM private_identity WHERE user_id=?)", a.id()))
       throw ApiException.invalid("Configure a chave privada primeiro.");
-    if (!body.validAttachment())
-      throw ApiException.invalid("Anexo privado incompleto.");
+    if (!body.validAttachment()) throw ApiException.invalid("Anexo privado incompleto.");
     UUID message = UUID.randomUUID();
     int inserted =
         db.jdbc.update(
-            "INSERT INTO private_message("
-                + "id,friendship_id,sender_id,ciphertext,iv,client_id,"
-                + "attachment_ciphertext,attachment_iv,attachment_mime,attachment_name,attachment_size"
-                + ") VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(sender_id,client_id) DO NOTHING",
+            "INSERT INTO private_message(id,friendship_id,sender_id,ciphertext,iv,client_id,"
+                + "attachment_ciphertext,attachment_iv,attachment_mime,attachment_name,attachment_size)"
+                + " VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(sender_id,client_id) DO NOTHING",
             message,
             id,
             a.id(),
@@ -380,7 +386,8 @@ public class SocialController {
     var friendship = access(a, id, true);
     int updated =
         db.jdbc.update(
-            "UPDATE private_message SET ciphertext=?,iv=? WHERE id=? AND friendship_id=? AND sender_id=?",
+            "UPDATE private_message SET ciphertext=?,iv=? WHERE id=? AND friendship_id=? AND"
+                + " sender_id=?",
             body.ciphertext(),
             body.iv(),
             messageId,
@@ -399,9 +406,7 @@ public class SocialController {
   @DeleteMapping("/friends/{id}/messages/{messageId}")
   @Transactional
   public void deletePrivateMessage(
-      @AuthenticationPrincipal Actor a,
-      @PathVariable UUID id,
-      @PathVariable UUID messageId) {
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @PathVariable UUID messageId) {
     var friendship = access(a, id, true);
     int deleted =
         db.jdbc.update(
@@ -422,5 +427,4 @@ public class SocialController {
                 : friendship.get("requester"));
     friendsChanged(a.id(), peer);
   }
-
 }
