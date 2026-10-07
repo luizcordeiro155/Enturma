@@ -69,8 +69,8 @@ export function resizeMessageComposerTextarea(
   field: HTMLTextAreaElement | null,
 ) {
   if (!field) return;
-  const minHeight = 42;
-  const maxHeight = 96;
+  const minHeight = 46;
+  const maxHeight = 112;
   field.style.height = `${minHeight}px`;
   const required = Math.max(minHeight, field.scrollHeight);
   field.style.height = `${Math.min(required, maxHeight)}px`;
