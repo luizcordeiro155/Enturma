@@ -3135,3 +3135,70 @@
     --room-keyboard-offset: 0px;
   }
 }
+
+
+/* Shared message composer baseline.
+   Keeps the new single-row composer usable on desktop as well as mobile. */
+.enturma-message-composer .composer-main-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+}
+
+.enturma-message-composer .composer-text-field {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+}
+
+.enturma-message-composer .composer-text-field textarea {
+  width: 100%;
+  min-height: 46px;
+  max-height: 124px;
+  margin: 0;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.enturma-message-composer .composer-icon-button,
+.enturma-message-composer .composer-send-button {
+  flex: 0 0 44px;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  min-height: 44px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border-radius: 50%;
+}
+
+.enturma-message-composer .composer-image-button {
+  position: relative;
+  cursor: pointer;
+}
+
+.enturma-message-composer .composer-image-button input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.enturma-message-composer .composer-emoji-tray {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding: 6px 1px;
+}
+
+.enturma-message-composer .composer-emoji-tray button {
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  border-radius: 12px;
+}
