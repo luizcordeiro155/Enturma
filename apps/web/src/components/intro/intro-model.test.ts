@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { introQuality, introDimensions, INTRO_FEATURES } from "./intro-model";
+import {
+  introQuality,
+  introDimensions,
+  introNarrationAt,
+  INTRO_FEATURES,
+} from "./intro-model";
 describe("intro adaptation", () => {
   it("prioritizes accessibility over hardware capability", () =>
     expect(introQuality(true, 16, 16, 1920)).toBe("low"));
@@ -20,5 +25,14 @@ describe("intro adaptation", () => {
     expect(
       INTRO_FEATURES.every((feature) => feature.href.startsWith("/")),
     ).toBe(true);
+  });
+  it("keeps narration captions aligned when seeking across scene boundaries", () => {
+    expect(introNarrationAt(149)).toBe("Sua próxima conexão começa aqui.");
+    expect(introNarrationAt(150)).toBe("Enturma. Aprender nos aproxima.");
+    expect(introNarrationAt(1020)).toBe(
+      "Estude com materiais e inteligência artificial.",
+    );
+    expect(introNarrationAt(1800)).toBe("Enturma. Aprenda em boa companhia.");
+    expect(introNarrationAt(-1)).toBe(introNarrationAt(0));
   });
 });

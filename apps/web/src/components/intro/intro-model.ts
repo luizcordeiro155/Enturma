@@ -57,6 +57,35 @@ export type IntroProps = {
 };
 export const INTRO_STORAGE_KEY = "enturma-intro:v0.3";
 export const INTRO_FRAMES = 1800;
+export const INTRO_SCENE_FRAMES = [
+  0,
+  150,
+  300,
+  510,
+  720,
+  960,
+  1170,
+  1380,
+  1590,
+  INTRO_FRAMES,
+];
+export const INTRO_NARRATION_FILE = "intro/enturma-pt-br-dora-v1.mp3";
+export const INTRO_NARRATION = [
+  "Sua próxima conexão começa aqui.",
+  "Enturma. Aprender nos aproxima.",
+  "Suas matérias, organizadas em um só lugar.",
+  "Encontre quem aprende com você.",
+  "Compartilhe ideias e descubra novas perspectivas.",
+  "Estude com materiais e inteligência artificial.",
+  "Combine caronas e compartilhe o caminho.",
+  "Voz, vídeo e tela. Colabore de perto.",
+  "Enturma. Aprenda em boa companhia.",
+];
+export function introNarrationAt(frame: number) {
+  const position = Math.max(0, Math.min(INTRO_FRAMES - 1, frame));
+  const end = INTRO_SCENE_FRAMES.findIndex((boundary) => boundary > position);
+  return INTRO_NARRATION[end - 1];
+}
 export function introQuality(
   reduced: boolean,
   memory: number | undefined,

@@ -15,8 +15,10 @@ O Player recebe nome, avatar, matérias e período da sessão atual. Não expõe
 - **Pular** pausa, encerra a transição e desmonta o Player; o foco retorna ao guia no celular e às matérias no desktop. O término automático não muda o foco do usuário.
 - Ao terminar ou pular, permanece uma miniatura **Conheça o Enturma**, com botão **Assistir apresentação**. Ela não mantém Canvas/Player executando. O replay reabre a apresentação no início, na própria Home.
 - Controles de pausa e posição permitem explorar a timeline com mouse, toque e teclado.
+- A narração feminina em português brasileiro é um MP3 local de 30 segundos, sincronizado pelo mesmo relógio do Remotion. O carregamento automático começa sem som. **Ouvir narração** inicia a fala desde o começo na primeira ativação; depois, silenciar/reativar mantém a posição. Replay começa sem som novamente.
+- Uma legenda acompanha cada cena e permanece disponível sem áudio. Pausar, avançar, ocultar a aba ou minimizar também controla a narração; não há sintetizador de voz nem requisições a serviços de TTS no dispositivo do usuário.
 - Reprodução pausa fora da área visível ou com a aba oculta.
-- A preferência de pouca animação do Enturma e `prefers-reduced-motion` usam uma apresentação estática de três segundos, sem partículas.
+- A preferência de pouca animação do Enturma e `prefers-reduced-motion` usam as mesmas nove cenas e a mesma duração, com cada cena congelada e sem partículas ou transições. Assim, a narração completa continua acessível sem movimento.
 - Memória, número de núcleos e largura selecionam qualidade alta, otimizada ou baixa. Layouts lógicos específicos atendem retrato, paisagem, desktop e ultrawide.
 - Eventos, observadores, tweens GSAP e o Player são descartados ao desmontar. Não há Player oculto executando em segundo plano.
 
@@ -27,7 +29,27 @@ O Player recebe nome, avatar, matérias e período da sessão atual. Não expõe
 Para uma exportação de marketing, use o CLI/Renderer da mesma versão, instalado no ambiente de renderização; ele não integra o bundle web. Por exemplo, a partir da raiz:
 
 ```powershell
-npx --package @remotion/cli@4.0.530 remotion render apps/web/src/remotion/index.tsx EnturmaDesktop out/enturma-intro.mp4
+npx --package @remotion/cli@4.0.530 remotion render apps/web/src/remotion/index.tsx EnturmaDesktop out/enturma-intro.mp4 --public-dir apps/web/public
 ```
 
 As propriedades padrão usam recursos reais do produto, sem perfis fictícios. Uma exportação com perfis reais exige autorização para essa mídia; URLs de avatar autenticadas devem ser substituídas por arquivos acessíveis ao renderizador. A entrega web não depende de gerar MP4.
+
+## Narração
+
+Arquivo: `apps/web/public/intro/enturma-pt-br-dora-v1.mp3` (aproximadamente 361 KB, mono, 44,1 kHz, 96 kbps). Voz sintética feminina brasileira `pf_dora`, do [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M), gerada localmente com HyperFrames TTS, idioma `pt-br` e velocidade `0.96`. Não é uma gravação de locutora humana nem uma clonagem de voz. O modelo é disponibilizado sob Apache 2.0.
+
+Cada tomada foi gerada separadamente e inserida 160 ms após o início da respectiva cena, sem acelerar nem cortar palavras. As durações foram medidas com ffprobe; todas terminam antes do próximo corte. A mixagem usa `highpass=f=65,loudnorm=I=-18:TP=-1.5:LRA=7`, preenchimento até 30 segundos e codificação MP3. Pico medido do arquivo final: -1,9 dBFS. A transcrição independente do áudio foi conferida contra o roteiro.
+
+| Cena | Início da fala | Fala | Duração da tomada |
+| --- | --- | --- | --- |
+| Conexão | 0,16 s | Sua próxima conexão começa aqui. | 2,197 s |
+| Marca | 2,66 s | Enturma. Aprender nos aproxima. | 2,091 s |
+| Matérias | 5,16 s | Suas matérias, organizadas em um só lugar. | 2,795 s |
+| Pessoas | 8,66 s | Encontre quem aprende com você. | 2,176 s |
+| Comunidade | 12,16 s | Compartilhe ideias e descubra novas perspectivas. | 3,093 s |
+| Estudos | 16,16 s | Estude com materiais e inteligência artificial. | 3,115 s |
+| Caronas | 19,66 s | Combine caronas e compartilhe o caminho. | 2,517 s |
+| Chamadas | 23,16 s | Voz, vídeo e tela. Colabore de perto. | 2,389 s |
+| Encerramento | 26,66 s | Enturma. Aprenda em boa companhia. | 2,240 s |
+
+Para refazer uma tomada, use `npx hyperframes tts "Fala da cena" --voice pf_dora --lang pt-br --speed 0.96 --output scene.wav`, com `HYPERFRAMES_PYTHON` apontando para um Python com `kokoro-onnx` e `soundfile`. Remixe as tomadas nas posições acima e atualize conjuntamente o MP3, `INTRO_NARRATION` e `INTRO_SCENE_FRAMES` se o roteiro mudar. O aplicativo mantém uma única faixa montada durante toda a apresentação, por isso não necessita de tags de áudio auxiliares do Player.

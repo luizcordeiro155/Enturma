@@ -59,12 +59,57 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     )
     .toBeGreaterThan(20);
   await intro.getByRole("button", { name: "Pausar apresentação" }).click();
+  const narration = intro.locator('audio[src*="enturma-pt-br-dora"]');
+  await expect(narration).toHaveCount(1);
+  await expect
+    .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
+    .toBe(true);
+  await intro.getByRole("button", { name: "Ouvir narração" }).click();
+  await expect(
+    intro.getByRole("button", { name: "Silenciar narração" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect
+    .poll(() =>
+      narration.evaluate((audio: HTMLAudioElement) => ({
+        paused: audio.paused,
+        muted: audio.muted,
+        advancing: audio.currentTime > 0,
+        ready: audio.readyState,
+      })),
+    )
+    .toEqual({ paused: false, muted: false, advancing: true, ready: 4 });
+  // Turning sound on for the first time starts with the introduction, never mid-sentence.
+  expect(
+    await narration.evaluate((audio: HTMLAudioElement) => audio.currentTime),
+  ).toBeLessThan(2);
+  await intro.getByRole("button", { name: "Pausar apresentação" }).click();
+  await expect
+    .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.paused))
+    .toBe(true);
+  await intro
+    .getByRole("slider", { name: "Posição da apresentação" })
+    .fill("1020");
+  await expect
+    .poll(() =>
+      narration.evaluate((audio: HTMLAudioElement) =>
+        Math.abs(audio.currentTime - 17),
+      ),
+    )
+    .toBeLessThan(0.3);
+  await expect(intro.getByLabel("Legenda da narração")).toHaveText(
+    "Estude com materiais e inteligência artificial.",
+  );
+  await intro.getByRole("button", { name: "Silenciar narração" }).click();
+  await expect
+    .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
+    .toBe(true);
   await expect(intro).toHaveAttribute("data-layout", "portrait");
   await expect(intro.locator("canvas")).toHaveCount(1);
   await page.screenshot({ path: join(screenshots, "intro-mobile-dark.png") });
   await intro.getByRole("button", { name: "Pular" }).click();
   await expect(intro).toHaveAttribute("data-minimized", "true");
   await expect(intro.locator("canvas")).toHaveCount(0);
+  await expect(intro.locator("audio")).toHaveCount(0);
   await page.reload();
   await expect(
     page.getByRole("heading", { name: "Minhas matérias" }),
@@ -119,6 +164,25 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .getByRole("button", { name: "Ver apresentação novamente" })
     .click();
   await page.emulateMedia({ reducedMotion: "reduce" });
+  await expect(intro.locator("canvas")).toHaveCount(0);
+  await intro.getByRole("button", { name: "Ouvir narração" }).click();
+  await expect
+    .poll(() =>
+      narration.evaluate(
+        (audio: HTMLAudioElement) => !audio.muted && !audio.paused,
+      ),
+    )
+    .toBe(true);
+  await intro
+    .getByRole("slider", { name: "Posição da apresentação" })
+    .fill("1600");
+  await expect(intro.locator('[data-intro-scene="8"]')).toBeVisible();
+  await expect(intro.getByLabel("Legenda da narração")).toHaveText(
+    "Enturma. Aprenda em boa companhia.",
+  );
+  await intro
+    .getByRole("slider", { name: "Posição da apresentação" })
+    .fill("1790");
   await expect(intro).toHaveAttribute("data-minimized", "true", {
     timeout: 10000,
   });
