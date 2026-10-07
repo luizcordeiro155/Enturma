@@ -3,7 +3,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { ArrowLeft, ImagePlus, Send, Smile, X } from "lucide-react";
 import { preparePrivateChatImage } from "@/lib/chat-image";
-import { setNativeChatComposerFocused } from "@/lib/native-chat-ime";
+import {
+  isMobileTextEntryContext,
+  resizeMessageComposerTextarea,
+  setNativeChatComposerFocused,
+} from "@/lib/native-chat-ime";
 import {
   ConversationNotice,
   useNotificationTarget,
@@ -429,6 +433,10 @@ export function Friends() {
   };
   useLiveRefresh("notifications_changed", refreshFriendData);
   useLiveRefresh("friends_changed", refreshFriendData, 8000);
+
+  useEffect(() => {
+    resizeMessageComposerTextarea(composer.current);
+  }, [draft]);
   function selectImage(file: File | null) {
     if (!file) return;
     if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
@@ -954,14 +962,15 @@ export function Friends() {
                         maxLength={4000}
                         disabled={!finger}
                         rows={1}
-                        enterKeyHint="send"
+                        enterKeyHint="enter"
                         inputMode="text"
                         placeholder="Mensagem"
                         onKeyDown={(e) => {
                           if (
                             e.key === "Enter" &&
                             !e.shiftKey &&
-                            !e.nativeEvent.isComposing
+                            !e.nativeEvent.isComposing &&
+                            !isMobileTextEntryContext()
                           ) {
                             e.preventDefault();
                             e.currentTarget.form?.requestSubmit();
