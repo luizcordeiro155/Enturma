@@ -518,7 +518,7 @@ export function RoomChat(props: Props) {
               composerRef.current?.focus({ preventScroll: true });
             });
           }}
-          className="chat-composer persistent-composer"
+          className="chat-composer persistent-composer enturma-message-composer"
         >
           {replyTo ? (
             <div className="composer-reply">
