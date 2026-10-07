@@ -85,6 +85,7 @@ export function RoomChat(props: Props) {
   const [editBody, setEditBody] = useState("");
   const [unseen, setUnseen] = useState(0);
   const [firstUnread, setFirstUnread] = useState<string | null>(null);
+  const [roomAtLatest, setRoomAtLatest] = useState(true);
   const [emojiOpen, setEmojiOpen] = useState(false);
   const [roomActionMessage, setRoomActionMessage] = useState<Message | null>(
     null,
@@ -120,6 +121,7 @@ export function RoomChat(props: Props) {
       viewport.scrollTop = viewport.scrollHeight;
     });
     nearBottom.current = true;
+    setRoomAtLatest(true);
     setUnseen(0);
     setFirstUnread(null);
     window.dispatchEvent(
@@ -242,6 +244,7 @@ export function RoomChat(props: Props) {
   return (
     <section
       data-notification-context={`room:${roomId}`}
+      data-notification-at-latest={roomAtLatest ? "true" : "false"}
       className={compact ? "persistent-chat call-chat-pane" : "persistent-chat"}
     >
       <div className="chat-heading persistent-heading">
@@ -269,6 +272,7 @@ export function RoomChat(props: Props) {
           const el = e.currentTarget;
           nearBottom.current =
             el.scrollHeight - el.scrollTop - el.clientHeight < 100;
+          setRoomAtLatest(nearBottom.current);
           if (nearBottom.current) {
             setUnseen(0);
             setFirstUnread(null);
@@ -286,6 +290,7 @@ export function RoomChat(props: Props) {
             disabled={busy}
             onClick={async () => {
               nearBottom.current = false;
+              setRoomAtLatest(false);
               const el = scrollRef.current;
               const height = el?.scrollHeight ?? 0;
               await onLoadOlder();
