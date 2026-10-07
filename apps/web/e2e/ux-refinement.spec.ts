@@ -63,15 +63,14 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   await expect(intro.locator("canvas")).toHaveCount(1);
   await page.screenshot({ path: join(screenshots, "intro-mobile-dark.png") });
   await intro.getByRole("button", { name: "Pular" }).click();
-  await expect(intro).toHaveCount(0);
+  await expect(intro).toHaveAttribute("data-minimized", "true");
+  await expect(intro.locator("canvas")).toHaveCount(0);
   await page.reload();
   await expect(
     page.getByRole("heading", { name: "Minhas matérias" }),
   ).toBeAttached();
-  await expect(intro).toHaveCount(0);
-  await page
-    .getByRole("button", { name: "Ver apresentação novamente" })
-    .click();
+  await expect(intro).toHaveAttribute("data-minimized", "true");
+  await page.getByRole("button", { name: "Assistir apresentação" }).click();
   await expect(intro).toBeVisible();
   await expect
     .poll(async () =>
@@ -83,6 +82,34 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     )
     .toBeGreaterThan(20);
   await intro.getByRole("button", { name: "Pausar apresentação" }).click();
+  for (const frame of [100, 230, 410, 630, 850, 1080, 1280, 1480, 1690]) {
+    await intro
+      .getByRole("slider", { name: "Posição da apresentação" })
+      .fill(String(frame));
+    await expect(intro.locator("[data-intro-frame]")).toHaveAttribute(
+      "data-intro-frame",
+      String(frame),
+    );
+    const safe = await intro
+      .locator("[data-intro-safe]")
+      .evaluateAll((elements) =>
+        elements.map((el) => {
+          const b = el.getBoundingClientRect();
+          return { top: b.top, bottom: b.bottom, left: b.left, right: b.right };
+        }),
+      );
+    expect(
+      safe[0].bottom,
+      `Text overlaps art at frame ${frame}`,
+    ).toBeLessThanOrEqual(safe[1].top + 2);
+    for (const bounds of safe) {
+      expect(bounds.left).toBeGreaterThanOrEqual(0);
+      expect(bounds.right).toBeLessThanOrEqual(390);
+    }
+  }
+  await page.screenshot({
+    path: join(screenshots, "intro-mobile-refined.png"),
+  });
   await page.setViewportSize({ width: 1920, height: 1080 });
   await expect(intro).toHaveAttribute("data-layout", "desktop");
   await page.screenshot({ path: join(screenshots, "intro-desktop-dark.png") });
@@ -92,7 +119,9 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .getByRole("button", { name: "Ver apresentação novamente" })
     .click();
   await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(intro).toHaveCount(0, { timeout: 10000 });
+  await expect(intro).toHaveAttribute("data-minimized", "true", {
+    timeout: 10000,
+  });
 });
 
 test("private call rings in another route, connects real LiveKit peers and releases media", async ({
@@ -138,6 +167,7 @@ test("private call rings in another route, connects real LiveKit peers and relea
   await authenticate(b, bob);
   const caller = await a.newPage(),
     callee = await b.newPage();
+  await callee.setViewportSize({ width: 390, height: 844 });
   try {
     await callee.goto("/forum");
     await caller.goto(`/friends?chat=${friendship.id}`);
@@ -155,10 +185,13 @@ test("private call rings in another route, connects real LiveKit peers and relea
     ).toBeVisible({ timeout: 15000 });
     await callee.getByRole("button", { name: "Atender", exact: true }).click();
     for (const page of [caller, callee])
+      await expect(page).toHaveURL(/\/calls\//);
+    for (const page of [caller, callee])
       await expect(
         page.getByText("Voz conectada", { exact: true }),
       ).toBeVisible({ timeout: 25000 });
     await expect(caller.getByText("2 pessoas na chamada")).toBeVisible();
+    await expect(callee.getByTitle("Sair da chamada")).toBeInViewport();
     await caller.getByTitle("Ligar câmera").click();
     await expect(
       callee.locator('.call-member[data-camera="true"] video'),
@@ -184,12 +217,20 @@ test("private call rings in another route, connects real LiveKit peers and relea
     await caller.screenshot({
       path: join(screenshots, "private-call-desktop.png"),
     });
+    await callee.screenshot({
+      path: join(screenshots, "private-call-mobile.png"),
+    });
     await caller.getByTitle("Sair da chamada").click();
-    await expect(
-      callee.getByText("Chamada encerrada", { exact: true }),
-    ).toBeVisible({ timeout: 15000 });
+    for (const page of [caller, callee]) {
+      await expect(page).toHaveURL(/\/friends\?chat=/, { timeout: 15000 });
+      await expect(page.locator(".private-call-status")).toHaveCount(0);
+    }
     await expect(caller.locator(".call-panel")).toHaveCount(0);
     await expect(callee.locator(".call-panel")).toHaveCount(0);
+    await caller.goto("/home");
+    await caller.reload();
+    await expect(caller.locator(".private-call-status")).toHaveCount(0);
+    await expect(caller.locator(".global-call-dock.has-call")).toHaveCount(0);
   } finally {
     await a.close();
     await b.close();
@@ -236,6 +277,16 @@ test("theme surfaces stay readable across core routes and narrow screens", async
     await page.goto(route);
     await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
     await expect(page.locator("body")).toHaveCSS("color", "rgb(242, 246, 244)");
+    if (route === "/home") {
+      await expect(page.locator(".onboarding-banner .button")).toHaveCSS(
+        "background-color",
+        "rgb(21, 63, 53)",
+      );
+      await expect(page.locator(".onboarding-banner .button")).toHaveCSS(
+        "color",
+        "rgb(255, 255, 255)",
+      );
+    }
     const overflow = await page.evaluate(
       () => document.documentElement.scrollWidth > innerWidth + 2,
     );

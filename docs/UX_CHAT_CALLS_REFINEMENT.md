@@ -14,6 +14,14 @@
 
 ## API e persistência
 
+### Complemento de navegação e mídia
+
+Chamadas privadas usam a rota própria `/calls/[id]`, com transição ao atender, câmera local pequena e controles adaptados ao celular. Voltar minimiza uma chamada ainda ativa. Desligar remove a sessão e o controlador imediatamente; registros terminais retornados pela API são ignorados, inclusive após recarregar ou reabrir o app.
+
+A URL `/friends?chat=id` é a fonte única de navegação do chat, sem entradas sintéticas que reabram a conversa. Imagens privadas e da sala usam miniaturas limitadas a 320 × 240 px (260 × 220 no celular), com visualizador modal que mantém a conversa, fecha por botão/Esc/Voltar e devolve o foco. A imagem privada permanece cifrada no servidor.
+
+O botão da Home tem fundo verde escuro e texto branco sobre o cartão lima também no tema escuro. Esse complemento altera apenas a web: não exige migração, novo JAR ou APK. Regressões Playwright incluem encerramento/reabertura, chamada em página própria mobile/desktop, nove cenas verticais, miniatura/replay, anexos cifrados e histórico de navegação.
+
 Migrações aditivas V41/V42: chamadas privadas, leases de presença e estado de mídia nas salas. Nenhuma mensagem privada é descriptografada ou migrada.
 
 `GET /api/v1/friends/{id}/presence`, `GET/POST /api/v1/calls/private`, `POST /api/v1/calls/private/{id}/{ring|accept|decline|cancel|end}`, `POST .../{id}/voice`, `POST .../{id}/heartbeat`. Convite, aceite e emissão de token usam `deviceId` por aba. A API autentica ambos os participantes e valida a amizade novamente antes de emitir tokens.

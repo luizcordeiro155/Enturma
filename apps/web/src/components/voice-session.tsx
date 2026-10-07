@@ -616,6 +616,7 @@ export default function VoiceSession({
                 }
                 key={member.identity}
                 data-camera={member.camera}
+                data-local={member.local}
               >
                 <div
                   className="call-camera-slot"
@@ -642,6 +643,11 @@ export default function VoiceSession({
                         selectedScreenShare === member.identity
                           ? "call-member-screen active"
                           : "call-member-screen"
+                      }
+                      aria-label={
+                        selectedScreenShare === member.identity
+                          ? "Ocultar tela"
+                          : "Ver transmissão"
                       }
                       onClick={() =>
                         syncScreenStage(

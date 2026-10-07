@@ -1,8 +1,9 @@
 "use client";
+import { ChatImage } from "./chat-image-viewer";
 import { isChatAtLatest } from "@/lib/chat-scroll";
-import { PrivateCallButtons, PrivateCallView } from "./private-calls";
+import { PrivateCallButtons } from "./private-calls";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ImagePlus,
@@ -78,6 +79,7 @@ type PrivateMessage = Envelope & {
 };
 export function Friends() {
   const params = useSearchParams();
+  const router = useRouter();
   const requestedChat = params.get("chat");
   useNotificationTarget();
   const [me, setMe] = useState<PublicProfile>();
@@ -126,7 +128,7 @@ export function Friends() {
   const nearLatest = useRef(true);
   const previousMessageCount = useRef(0);
   const attachmentUrls = useRef(new Set<string>());
-  const mobileConversationHistory = useRef(false);
+
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
   const identity = useRef<Awaited<ReturnType<typeof createIdentity>> | null>(
@@ -389,15 +391,8 @@ export function Friends() {
   const closeConversation = useCallback(() => {
     composer.current?.blur();
     setNativeChatComposerFocused(false);
-    if (
-      mobileConversationHistory.current &&
-      matchMedia("(max-width: 760px)").matches
-    ) {
-      history.back();
-      return;
-    }
-    setSelected(undefined);
-  }, []);
+    router.replace("/friends", { scroll: false });
+  }, [router]);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -409,37 +404,23 @@ export function Friends() {
     };
   }, [selected]);
 
-  useEffect(() => {
-    const onPopState = () => {
-      if (!mobileConversationHistory.current) return;
-      mobileConversationHistory.current = false;
-      composer.current?.blur();
-      setNativeChatComposerFocused(false);
-      setSelected(undefined);
-    };
-    window.addEventListener("popstate", onPopState);
-    return () => window.removeEventListener("popstate", onPopState);
-  }, []);
-
   const choose = useCallback(
     (friend: Friend) => {
-      const mobile = matchMedia("(max-width: 760px)").matches;
-      if (selected?.id === friend.id) {
-        if (!key.current) setConnectionAttempt((n) => n + 1);
-        forceFollowLatest.current = true;
-        requestAnimationFrame(() => scrollToLatest("auto"));
-        return;
-      }
+      router.push(`/friends?chat=${friend.id}`, { scroll: false });
+    },
+    [router],
+  );
 
-      if (mobile && !mobileConversationHistory.current) {
-        history.pushState(
-          { ...(history.state ?? {}), enturmaPrivateChat: friend.id },
-          "",
-          location.href,
-        );
-        mobileConversationHistory.current = true;
-      }
-
+  // The URL is the single source of navigation state, including native Back.
+  useEffect(() => {
+    if (selected?.id === requestedChat) return;
+    const target = friends.find(
+      (f) => f.id === requestedChat && f.status === "ACCEPTED",
+    );
+    if (requestedChat && !target) return;
+    const frame = requestAnimationFrame(() => {
+      composer.current?.blur();
+      setNativeChatComposerFocused(false);
       setConnectionState("preparing");
       setConnectionError("");
       setError("");
@@ -457,21 +438,10 @@ export function Friends() {
       nearLatest.current = true;
       forceFollowLatest.current = true;
       previousMessageCount.current = 0;
-      setSelected(friend);
-      requestAnimationFrame(() => scrollToLatest("auto"));
-    },
-    [selected?.id, scrollToLatest],
-  );
-  useEffect(() => {
-    if (!requestedChat || selected?.id === requestedChat) return;
-    const target = friends.find(
-      (f) => f.id === requestedChat && f.status === "ACCEPTED",
-    );
-    if (target) {
-      const timer = setTimeout(() => choose(target), 0);
-      return () => clearTimeout(timer);
-    }
-  }, [requestedChat, friends, selected?.id, choose]);
+      setSelected(target);
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [requestedChat, friends, selected?.id]);
   const refreshFriendData = async () => {
     await refresh();
     if (selected && key.current)
@@ -895,7 +865,7 @@ export function Friends() {
                   </span>
                   <PrivateCallButtons friendshipId={selected.id} />
                 </header>
-                <PrivateCallView friendshipId={selected.id} />
+
                 {finger ? (
                   <details>
                     <summary>Código de segurança</summary>
@@ -1038,19 +1008,10 @@ export function Friends() {
                       />
                       <div className="private-message-body">
                         {m.attachmentUrl ? (
-                          <a
-                            className="private-chat-image-link"
-                            href={m.attachmentUrl}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              className="private-chat-image"
-                              src={m.attachmentUrl}
-                              alt={m.attachmentName ?? "Imagem privada"}
-                            />
-                          </a>
+                          <ChatImage
+                            src={m.attachmentUrl}
+                            alt={m.attachmentName ?? "Imagem privada"}
+                          />
                         ) : null}
                         {editingPrivate?.id === m.id ? (
                           <form

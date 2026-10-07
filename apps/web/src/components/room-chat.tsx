@@ -1,4 +1,5 @@
 "use client";
+import { ChatImage } from "./chat-image-viewer";
 
 import {
   useCallback,
@@ -500,22 +501,12 @@ export function RoomChat(props: Props) {
                           <small className="muted">editada</small>
                         )}
                         {message.attachmentId ? (
-                          <a
-                            className="chat-image-link"
-                            href={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
-                            target="_blank"
-                            rel="noreferrer"
-                          >
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img
-                              className="chat-image"
-                              src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
-                              alt={
-                                message.attachmentName ?? "Imagem compartilhada"
-                              }
-                              loading="lazy"
-                            />
-                          </a>
+                          <ChatImage
+                            src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
+                            alt={
+                              message.attachmentName ?? "Imagem compartilhada"
+                            }
+                          />
                         ) : null}
                       </>
                     )}

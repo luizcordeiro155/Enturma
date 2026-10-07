@@ -1,6 +1,8 @@
 # Apresentação oficial do Enturma
 
-`EnturmaIntroExperience` carrega o `@remotion/player` somente quando a apresentação está aberta. A composição compartilhada `EnturmaIntroComposition` conduz nove cenas em 900 frames a 60 FPS. GSAP controla a entrada e a saída do contêiner e as microinterações da aplicação; não conduz a narrativa do Player.
+`EnturmaIntroExperience` carrega o `@remotion/player` somente quando a apresentação está aberta. A composição compartilhada `EnturmaIntroComposition` conduz nove cenas em 1.800 frames a 60 FPS (30 segundos). GSAP controla a entrada e a saída do contêiner e as microinterações da aplicação; não conduz a narrativa do Player.
+
+A direção de motion usa o livro como ligação entre cenas: páginas vetoriais atravessam os cortes, palavras surgem por máscaras, matérias se montam em perspectiva, a rede se conecta ao avatar real, a comunidade ganha camadas e a rota da carona se desenha. Partículas, trilhas, pulsos e ondas são calculados pelo frame. A paleta cinematográfica de verde profundo, lima, menta e azul permanece consistente nos dois temas; os controles seguem o tema da aplicação. O layout vertical separa texto e arte e amplia a marca nos momentos de abertura/fechamento.
 
 SVG desenha a marca e as conexões. O Canvas desenha partículas determinísticas a partir do frame do Remotion, sem criar um segundo loop de animação. O scanner inicial apresenta o manifesto real dos módulos; não simula uma consulta ao GitHub.
 
@@ -10,7 +12,9 @@ O Player recebe nome, avatar, matérias e período da sessão atual. Não expõe
 
 - Primeira apresentação por dispositivo/versão: `enturma-intro:v0.3` no armazenamento local. O estado é registrado quando o contêiner entra na área visível.
 - Repetição manual: **Guia do Enturma → Ver apresentação novamente**.
-- **Pular** pausa, encerra a transição e desmonta o Player; o foco retorna ao guia no celular e às matérias no desktop.
+- **Pular** pausa, encerra a transição e desmonta o Player; o foco retorna ao guia no celular e às matérias no desktop. O término automático não muda o foco do usuário.
+- Ao terminar ou pular, permanece uma miniatura **Conheça o Enturma**, com botão **Assistir apresentação**. Ela não mantém Canvas/Player executando. O replay reabre a apresentação no início, na própria Home.
+- Controles de pausa e posição permitem explorar a timeline com mouse, toque e teclado.
 - Reprodução pausa fora da área visível ou com a aba oculta.
 - A preferência de pouca animação do Enturma e `prefers-reduced-motion` usam uma apresentação estática de três segundos, sem partículas.
 - Memória, número de núcleos e largura selecionam qualidade alta, otimizada ou baixa. Layouts lógicos específicos atendem retrato, paisagem, desktop e ultrawide.
