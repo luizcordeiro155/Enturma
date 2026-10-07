@@ -234,12 +234,12 @@ export function Friends() {
   }, [messages, scrollToLatest]);
 
   useEffect(() => {
+    const urls = attachmentUrls.current;
     return () => {
-      for (const url of attachmentUrls.current) URL.revokeObjectURL(url);
-      attachmentUrls.current.clear();
-      if (imagePreview) URL.revokeObjectURL(imagePreview);
+      for (const url of urls) URL.revokeObjectURL(url);
+      urls.clear();
     };
-  }, [imagePreview]);
+  }, []);
 
   useEffect(() => {
     if (!selected || !ready || !identity.current) return;
