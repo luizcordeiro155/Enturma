@@ -11,6 +11,7 @@ import {
 import { usePathname } from "next/navigation";
 import { api } from "@/lib/api";
 import { isInstalledApp } from "./desktop-updates";
+import { useKeyboardViewport } from "@/lib/use-keyboard-viewport";
 
 type ProfileShortcut = {
   id: string;
@@ -34,6 +35,7 @@ export function AppShellStateProvider({
 }: {
   children: React.ReactNode;
 }) {
+  useKeyboardViewport();
   const path = usePathname();
   const [installedApp, setInstalledApp] = useState(false);
   const [learning, setLearning] = useState(false);
