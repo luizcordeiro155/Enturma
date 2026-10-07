@@ -1,8 +1,9 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { ImagePlus, Send, Smile, X } from "lucide-react";
+import { ArrowLeft, ImagePlus, Send, Smile, X } from "lucide-react";
 import { preparePrivateChatImage } from "@/lib/chat-image";
+import { setNativeChatComposerFocused } from "@/lib/native-chat-ime";
 import {
   ConversationNotice,
   useNotificationTarget,
@@ -90,6 +91,7 @@ export function Friends() {
   const nearLatest = useRef(true);
   const previousMessageCount = useRef(0);
   const attachmentUrls = useRef(new Set<string>());
+  const mobileConversationHistory = useRef(false);
   const identity = useRef<Awaited<ReturnType<typeof createIdentity>> | null>(
     null,
   );
@@ -281,7 +283,8 @@ export function Friends() {
           forceFollowLatest.current = true;
           requestAnimationFrame(() => {
             scrollToLatest("auto");
-            composer.current?.focus({ preventScroll: true });
+            if (!matchMedia("(max-width: 760px)").matches)
+              composer.current?.focus({ preventScroll: true });
           });
         }
         if (target) {
@@ -333,24 +336,60 @@ export function Friends() {
       window.removeEventListener("enturma-notification-open", jump);
     };
   }, [selected, load]);
+  const closeConversation = useCallback(() => {
+    composer.current?.blur();
+    setNativeChatComposerFocused(false);
+    if (
+      mobileConversationHistory.current &&
+      matchMedia("(max-width: 760px)").matches
+    ) {
+      history.back();
+      return;
+    }
+    setSelected(undefined);
+  }, []);
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (selected) root.dataset.enturmaPrivateChat = "true";
+    else delete root.dataset.enturmaPrivateChat;
+    return () => {
+      delete root.dataset.enturmaPrivateChat;
+      setNativeChatComposerFocused(false);
+    };
+  }, [selected]);
+
+  useEffect(() => {
+    const onPopState = () => {
+      if (!mobileConversationHistory.current) return;
+      mobileConversationHistory.current = false;
+      composer.current?.blur();
+      setNativeChatComposerFocused(false);
+      setSelected(undefined);
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, []);
+
   const choose = useCallback(
     (friend: Friend) => {
+      const mobile = matchMedia("(max-width: 760px)").matches;
       if (selected?.id === friend.id) {
         if (!key.current) setConnectionAttempt((n) => n + 1);
         forceFollowLatest.current = true;
-        requestAnimationFrame(() => {
-          privateChat.current?.scrollIntoView({
-            block: "start",
-            behavior:
-              document.documentElement.dataset.reducedMotion === "true"
-                ? "auto"
-                : "smooth",
-          });
-          scrollToLatest("auto");
-          composer.current?.focus({ preventScroll: true });
-        });
+        requestAnimationFrame(() => scrollToLatest("auto"));
         return;
       }
+
+      if (mobile && !mobileConversationHistory.current) {
+        history.pushState(
+          { ...(history.state ?? {}), enturmaPrivateChat: friend.id },
+          "",
+          location.href,
+        );
+        mobileConversationHistory.current = true;
+      }
+
       setConnectionState("preparing");
       setConnectionError("");
       setError("");
@@ -369,15 +408,7 @@ export function Friends() {
       forceFollowLatest.current = true;
       previousMessageCount.current = 0;
       setSelected(friend);
-      requestAnimationFrame(() => {
-        privateChat.current?.scrollIntoView({
-          block: "start",
-          behavior:
-            document.documentElement.dataset.reducedMotion === "true"
-              ? "auto"
-              : "smooth",
-        });
-      });
+      requestAnimationFrame(() => scrollToLatest("auto"));
     },
     [selected?.id, scrollToLatest],
   );
@@ -479,7 +510,13 @@ export function Friends() {
   }
   return (
     <Shell>
-      <div className="friends-page">
+      <div
+        className={
+          selected
+            ? "friends-page mobile-private-chat-open"
+            : "friends-page"
+        }
+      >
         <h1>Amigos e conversas</h1>
         <p>
           Conecte-se com sua turma. Mensagens privadas são cifradas no seu
@@ -669,8 +706,18 @@ export function Friends() {
           >
             {selected ? (
               <>
-                <header>
-                  <UserIdentity user={{ ...selected, id: selected.userId }} />
+                <header className="private-chat-header">
+                  <button
+                    type="button"
+                    className="private-chat-back"
+                    aria-label="Voltar para conversas"
+                    onClick={closeConversation}
+                  >
+                    <ArrowLeft size={24} />
+                  </button>
+                  <div className="private-chat-peer">
+                    <UserIdentity user={{ ...selected, id: selected.userId }} />
+                  </div>
                   <span className="privacy-pill">
                     Ponta a ponta · ECDH + AES-GCM
                   </span>
@@ -897,6 +944,11 @@ export function Friends() {
                         onFocus={() => {
                           forceFollowLatest.current = true;
                           nearLatest.current = true;
+                          setNativeChatComposerFocused(true);
+                          requestAnimationFrame(() => scrollToLatest("auto"));
+                        }}
+                        onBlur={() => {
+                          setNativeChatComposerFocused(false);
                         }}
                         onChange={(e) => setDraft(e.target.value)}
                         maxLength={4000}
