@@ -925,6 +925,19 @@ export function Friends() {
                       key={m.id}
                       id={`message-${m.id}`}
                       className={m.senderId === me?.id ? "mine" : ""}
+                      onPointerDown={(event) => startPrivateLongPress(event, m)}
+                      onPointerMove={movePrivateLongPress}
+                      onPointerUp={cancelPrivateLongPress}
+                      onPointerCancel={cancelPrivateLongPress}
+                      onContextMenu={(event) => {
+                        if (
+                          m.senderId === me?.id &&
+                          isMobileTextEntryContext()
+                        ) {
+                          event.preventDefault();
+                          setPrivateActionMessage(m);
+                        }
+                      }}
                     >
                       <UserIdentity
                         compact
@@ -934,7 +947,7 @@ export function Friends() {
                             : { ...selected, id: selected.userId }
                         }
                       />
-                      <div>
+                      <div className="private-message-body">
                         {m.attachmentUrl ? (
                           <a
                             className="private-chat-image-link"
@@ -950,7 +963,36 @@ export function Friends() {
                             />
                           </a>
                         ) : null}
-                        {m.text ? <p>{m.text}</p> : null}
+                        {editingPrivate?.id === m.id ? (
+                          <form
+                            className="private-message-edit"
+                            onSubmit={(event) => {
+                              event.preventDefault();
+                              void savePrivateEdit(m);
+                            }}
+                          >
+                            <textarea
+                              value={editPrivateText}
+                              autoFocus
+                              maxLength={4000}
+                              onChange={(event) =>
+                                setEditPrivateText(event.target.value)
+                              }
+                            />
+                            <div>
+                              <button type="submit">Salvar</button>
+                              <button
+                                type="button"
+                                className="secondary"
+                                onClick={() => setEditingPrivate(null)}
+                              >
+                                Cancelar
+                              </button>
+                            </div>
+                          </form>
+                        ) : m.text ? (
+                          <p>{m.text}</p>
+                        ) : null}
                         <small>
                           {new Date(m.createdAt).toLocaleString("pt-BR")}
                         </small>
@@ -958,6 +1000,45 @@ export function Friends() {
                     </article>
                   ))}
                 </div>
+                {privateActionMessage ? (
+                  <div
+                    className="mobile-message-actions-sheet"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-label="Ações da mensagem"
+                  >
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditPrivateText(privateActionMessage.text);
+                        setEditingPrivate(privateActionMessage);
+                        setPrivateActionMessage(null);
+                      }}
+                    >
+                      <Pencil size={19} />
+                      Editar mensagem
+                    </button>
+                    <button
+                      type="button"
+                      className="danger"
+                      onClick={() =>
+                        void deletePrivateMessage(privateActionMessage)
+                      }
+                    >
+                      <Trash2 size={19} />
+                      Excluir mensagem
+                    </button>
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => setPrivateActionMessage(null)}
+                    >
+                      <X size={19} />
+                      Cancelar
+                    </button>
+                  </div>
+                ) : null}
+
                 <form
                   onSubmit={send}
                   className="private-composer enturma-message-composer"
