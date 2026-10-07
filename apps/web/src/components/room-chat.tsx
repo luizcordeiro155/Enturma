@@ -17,7 +17,11 @@ import {
 import { UserIdentity } from "./user-identity";
 import { ConversationNotice, useNotificationTarget } from "./notifications";
 import { api } from "@/lib/api";
-import { setNativeChatComposerFocused } from "@/lib/native-chat-ime";
+import {
+  isMobileTextEntryContext,
+  resizeMessageComposerTextarea,
+  setNativeChatComposerFocused,
+} from "@/lib/native-chat-ime";
 
 import { RichMessage } from "./rich-message";
 
@@ -147,6 +151,10 @@ export function RoomChat(props: Props) {
   useEffect(() => {
     return () => setNativeChatComposerFocused(false);
   }, []);
+
+  useEffect(() => {
+    resizeMessageComposerTextarea(composerRef.current);
+  }, [draft]);
 
   return (
     <section
@@ -634,7 +642,8 @@ export function RoomChat(props: Props) {
                   if (
                     e.key === "Enter" &&
                     !e.shiftKey &&
-                    !e.nativeEvent.isComposing
+                    !e.nativeEvent.isComposing &&
+                    !isMobileTextEntryContext()
                   ) {
                     e.preventDefault();
                     e.currentTarget.form?.requestSubmit();
@@ -642,7 +651,7 @@ export function RoomChat(props: Props) {
                 }}
                 maxLength={4000}
                 rows={1}
-                enterKeyHint="send"
+                enterKeyHint="enter"
                 inputMode="text"
                 placeholder="Mensagem"
               />
