@@ -8,6 +8,8 @@ import {
   Hash,
   ImagePlus,
   Loader2,
+  Send,
+  Smile,
   Reply,
   Trash2,
   X,
@@ -73,6 +75,7 @@ export function RoomChat(props: Props) {
   const [editBody, setEditBody] = useState("");
   const [unseen, setUnseen] = useState(0);
   const [firstUnread, setFirstUnread] = useState<string | null>(null);
+  const [emojiOpen, setEmojiOpen] = useState(false);
   const newestRef = useRef<string | undefined>(undefined);
   const countRef = useRef(messages.length);
   useNotificationTarget();
@@ -104,11 +107,8 @@ export function RoomChat(props: Props) {
     newestRef.current = latest;
     countRef.current = messages.length;
     const composerFocused = document.activeElement === composerRef.current;
-    const keyboardOpen =
-      document.documentElement.dataset.roomKeyboard === "true" ||
-      document.documentElement.dataset.enturmaIme === "true";
     if (
-      (nearBottom.current || forceFollowLatest.current || composerFocused || keyboardOpen) &&
+      (nearBottom.current || forceFollowLatest.current || composerFocused) &&
       scrollRef.current
     ) {
       requestAnimationFrame(() => {
@@ -507,6 +507,7 @@ export function RoomChat(props: Props) {
           onSubmit={async (event) => {
             forceFollowLatest.current = true;
             nearBottom.current = true;
+            setEmojiOpen(false);
             await onSubmit(event);
             requestAnimationFrame(() => {
               const viewport = scrollRef.current;
@@ -559,83 +560,90 @@ export function RoomChat(props: Props) {
             </div>
           ) : null}
 
-          <label>
-            <span className="sr-only">Mensagem</span>
-            <textarea
-              ref={composerRef}
-              aria-busy={busy}
-              value={draft}
-              onFocus={() => {
-                forceFollowLatest.current = true;
-                nearBottom.current = true;
-                requestAnimationFrame(() => {
-                  const viewport = scrollRef.current;
-                  if (viewport) viewport.scrollTop = viewport.scrollHeight;
-                });
-                setTimeout(() => {
-                  const viewport = scrollRef.current;
-                  if (viewport) viewport.scrollTop = viewport.scrollHeight;
-                }, 220);
-              }}
-              onChange={(e) => setDraft(e.target.value)}
-              onKeyDown={(e) => {
-                if (
-                  e.key === "Enter" &&
-                  !e.shiftKey &&
-                  !e.nativeEvent.isComposing
-                ) {
-                  e.preventDefault();
-                  e.currentTarget.form?.requestSubmit();
-                }
-              }}
-              maxLength={4000}
-              rows={compact ? 2 : 3}
-              placeholder={
-                compact
-                  ? "Conversar enquanto assiste…"
-                  : "Compartilhe uma ideia ou uma dúvida…"
-              }
-            />
-          </label>
+          {emojiOpen ? (
+            <div className="composer-emoji-tray" aria-label="Emojis rápidos">
+              {QUICK_EMOJIS.map((emoji) => (
+                <button
+                  type="button"
+                  key={emoji}
+                  disabled={busy}
+                  onClick={() => {
+                    setDraft(draft + emoji);
+                    setEmojiOpen(false);
+                    composerRef.current?.focus({ preventScroll: true });
+                  }}
+                  aria-label={`Adicionar ${emoji}`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          ) : null}
 
-          <div className="composer-tools">
-            {!compact ? (
-              <div className="emoji-picker" aria-label="Emojis rápidos">
-                {QUICK_EMOJIS.map((emoji) => (
-                  <button
-                    type="button"
-                    key={emoji}
-                    className="secondary"
-                    disabled={busy}
-                    onClick={() => setDraft(draft + emoji)}
-                    aria-label={`Adicionar ${emoji}`}
-                  >
-                    {emoji}
-                  </button>
-                ))}
-              </div>
-            ) : null}
+          <div className="composer-main-row">
+            <button
+              type="button"
+              className="composer-icon-button"
+              aria-label="Adicionar emoji"
+              aria-expanded={emojiOpen}
+              onClick={() => setEmojiOpen((open) => !open)}
+            >
+              <Smile size={22} />
+            </button>
 
-            <label className="image-picker">
-              <ImagePlus size={17} />
-              <span>{compact ? "Imagem" : "Adicionar imagem"}</span>
+            <label className="composer-icon-button composer-image-button">
+              <ImagePlus size={22} />
+              <span className="sr-only">Adicionar imagem</span>
               <input
                 type="file"
                 disabled={busy}
                 accept="image/jpeg,image/png,image/webp,image/gif"
-                onChange={(e) => selectImage(e.target.files?.[0] ?? null)}
+                onChange={(e) => {
+                  selectImage(e.target.files?.[0] ?? null);
+                  e.target.value = "";
+                }}
               />
             </label>
 
-            <button disabled={busy || (!draft.trim() && !image)}>
-              {busy ? "Enviando…" : "Enviar"}
+            <label className="composer-text-field">
+              <span className="sr-only">Mensagem</span>
+              <textarea
+                ref={composerRef}
+                aria-busy={busy}
+                value={draft}
+                onFocus={() => {
+                  forceFollowLatest.current = true;
+                  nearBottom.current = true;
+                }}
+                onChange={(e) => setDraft(e.target.value)}
+                onKeyDown={(e) => {
+                  if (
+                    e.key === "Enter" &&
+                    !e.shiftKey &&
+                    !e.nativeEvent.isComposing
+                  ) {
+                    e.preventDefault();
+                    e.currentTarget.form?.requestSubmit();
+                  }
+                }}
+                maxLength={4000}
+                rows={1}
+                placeholder={
+                  compact
+                    ? "Mensagem"
+                    : "Compartilhe uma ideia ou uma dúvida…"
+                }
+              />
+            </label>
+
+            <button
+              className="composer-send-button"
+              aria-label="Enviar mensagem"
+              disabled={busy || (!draft.trim() && !image)}
+            >
+              {busy ? <Loader2 className="spin" size={20} /> : <Send size={22} />}
             </button>
           </div>
-
-          <small className="composer-hint">
-            Enter envia · Shift+Enter cria uma nova linha
-            {!compact ? " · imagens até 8 MB, otimizadas antes do envio" : ""}
-          </small>
         </form>
       ) : (
         <div className="ended-chat-note">
