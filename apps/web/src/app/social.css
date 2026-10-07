@@ -2037,3 +2037,127 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
   .study-match-profile-preview{max-width:none}
   .room-mobile-members-list .participant-row{grid-template-columns:minmax(0,1fr)}
 }
+
+
+/* Mobile private-chat keyboard behavior.
+   The Android WebView already exposes IME visibility and shrinks to the visible
+   viewport. When the private composer owns focus, only the conversation becomes
+   a viewport-sized surface; the whole Enturma page no longer jumps upward. */
+@media (max-width: 760px) {
+  html[data-private-keyboard="true"] body:has(.friends-page .private-chat) {
+    overflow: hidden !important;
+  }
+
+  html[data-private-keyboard="true"] body:has(.friends-page .private-chat)
+    .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  html[data-private-keyboard="true"] body:has(.friends-page .private-chat)
+    .workspace {
+    height: var(--private-visual-viewport-height, 100dvh) !important;
+    min-height: 0 !important;
+    padding-bottom: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-private-keyboard="true"] body:has(.friends-page .private-chat)
+    .workspace > main {
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-private-keyboard="true"] .friends-page {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  html[data-private-keyboard="true"] .friends-page > :not(.friends-workspace) {
+    display: none !important;
+  }
+
+  html[data-private-keyboard="true"] .friends-workspace {
+    display: block !important;
+    height: 100%;
+    min-height: 0;
+    margin: 0;
+  }
+
+  html[data-private-keyboard="true"] .friends-workspace > aside {
+    display: none !important;
+  }
+
+  html[data-private-keyboard="true"] .private-chat {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    padding:
+      calc(8px + var(--enturma-safe-top, 0px))
+      calc(10px + var(--enturma-safe-right, 0px))
+      8px
+      calc(10px + var(--enturma-safe-left, 0px));
+    border: 0;
+    border-radius: 0;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  html[data-private-keyboard="true"] .private-chat > header {
+    flex: none;
+    margin-bottom: 6px;
+  }
+
+  html[data-private-keyboard="true"] .private-chat > details,
+  html[data-private-keyboard="true"] .private-chat > .private-connection-status,
+  html[data-private-keyboard="true"] .private-chat > .conversation-notice {
+    flex: none;
+    max-height: 74px;
+    overflow: auto;
+    margin-bottom: 5px;
+  }
+
+  html[data-private-keyboard="true"] .private-messages {
+    flex: 1 1 auto;
+    width: 100%;
+    height: auto !important;
+    min-height: 0 !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: 4px 0 12px;
+    scroll-padding-bottom: 18px;
+  }
+
+  html[data-private-keyboard="true"] .private-composer {
+    flex: none;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    gap: 6px;
+    padding: 8px 0 0;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  html[data-private-keyboard="true"] .private-composer textarea {
+    min-height: 62px;
+    max-height: 104px;
+    resize: none;
+    font-size: 16px;
+    scroll-margin-bottom: 12px;
+  }
+
+  html[data-private-keyboard="true"] .private-composer > button {
+    min-height: 44px;
+  }
+
+  html[data-private-keyboard="true"] .private-composer > small {
+    display: none;
+  }
+}

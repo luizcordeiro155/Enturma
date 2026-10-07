@@ -78,7 +78,9 @@ export function RoomChat(props: Props) {
   useNotificationTarget();
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const nearBottom = useRef(true);
+  const forceFollowLatest = useRef(false);
   const messageMap = useMemo(
     () => new Map(messages.map((message) => [message.id, message])),
     [messages],
@@ -101,8 +103,24 @@ export function RoomChat(props: Props) {
     }
     newestRef.current = latest;
     countRef.current = messages.length;
-    if (nearBottom.current && scrollRef.current)
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    const composerFocused = document.activeElement === composerRef.current;
+    const keyboardOpen =
+      document.documentElement.dataset.roomKeyboard === "true" ||
+      document.documentElement.dataset.enturmaIme === "true";
+    if (
+      (nearBottom.current || forceFollowLatest.current || composerFocused || keyboardOpen) &&
+      scrollRef.current
+    ) {
+      requestAnimationFrame(() => {
+        const viewport = scrollRef.current;
+        if (!viewport) return;
+        viewport.scrollTop = viewport.scrollHeight;
+        nearBottom.current = true;
+        forceFollowLatest.current = false;
+        setUnseen(0);
+        setFirstUnread(null);
+      });
+    }
   }, [messages, compact]);
 
   function selectImage(file: File | null) {
@@ -485,7 +503,22 @@ export function RoomChat(props: Props) {
           : ""}
       </div>
       {!ended ? (
-        <form onSubmit={onSubmit} className="chat-composer persistent-composer">
+        <form
+          onSubmit={async (event) => {
+            forceFollowLatest.current = true;
+            nearBottom.current = true;
+            await onSubmit(event);
+            requestAnimationFrame(() => {
+              const viewport = scrollRef.current;
+              if (!viewport) return;
+              viewport.scrollTop = viewport.scrollHeight;
+              setUnseen(0);
+              setFirstUnread(null);
+              composerRef.current?.focus({ preventScroll: true });
+            });
+          }}
+          className="chat-composer persistent-composer"
+        >
           {replyTo ? (
             <div className="composer-reply">
               <span>
@@ -529,8 +562,21 @@ export function RoomChat(props: Props) {
           <label>
             <span className="sr-only">Mensagem</span>
             <textarea
+              ref={composerRef}
               disabled={busy}
               value={draft}
+              onFocus={() => {
+                forceFollowLatest.current = true;
+                nearBottom.current = true;
+                requestAnimationFrame(() => {
+                  const viewport = scrollRef.current;
+                  if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                });
+                setTimeout(() => {
+                  const viewport = scrollRef.current;
+                  if (viewport) viewport.scrollTop = viewport.scrollHeight;
+                }, 220);
+              }}
               onChange={(e) => setDraft(e.target.value)}
               onKeyDown={(e) => {
                 if (
