@@ -83,13 +83,24 @@ export function MessageActionPopover({
       : undefined;
 
     const closeOnLayoutChange = () => onDismiss();
+    const closeOnBack = () => onDismiss();
+    const closeOnKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") onDismiss();
+    };
+
     window.addEventListener("resize", closeOnLayoutChange);
+    window.addEventListener("popstate", closeOnBack);
+    window.addEventListener("hashchange", closeOnBack);
+    window.addEventListener("keydown", closeOnKey);
     document.addEventListener("scroll", closeOnLayoutChange, true);
 
     return () => {
       popoverAnimation?.cancel();
       scrimAnimation?.cancel();
       window.removeEventListener("resize", closeOnLayoutChange);
+      window.removeEventListener("popstate", closeOnBack);
+      window.removeEventListener("hashchange", closeOnBack);
+      window.removeEventListener("keydown", closeOnKey);
       document.removeEventListener("scroll", closeOnLayoutChange, true);
     };
   }, [anchor, onDismiss]);
