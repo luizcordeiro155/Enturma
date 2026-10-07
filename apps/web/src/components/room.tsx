@@ -395,7 +395,7 @@ export function RoomView({ id }: { id: string }) {
 
   return (
     <Shell>
-      <div className="study-room-page">
+      <div className={`study-room-page room-section-${section}`}>
         <Feedback error={error} />
         {room ? (
           <>
