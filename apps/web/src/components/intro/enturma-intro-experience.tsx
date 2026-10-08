@@ -20,7 +20,6 @@ import {
   INTRO_FRAMES,
   INTRO_DURATION_LABEL,
   introTime,
-  introNarrationAt,
   type IntroProps,
 } from "./intro-model";
 
@@ -335,9 +334,6 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
         onMutedChange={setMuted}
         onPlaybackBlocked={onNarrationBlocked}
       />
-      <p className="intro-caption" aria-label="Legenda da narração">
-        {introNarrationAt(frame)}
-      </p>
       <footer className="intro-timeline">
         <span>{introTime(frame)}</span>
         <input

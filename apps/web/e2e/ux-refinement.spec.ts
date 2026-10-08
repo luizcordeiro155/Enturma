@@ -367,10 +367,18 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       })),
     )
     .toEqual({ paused: false, muted: false, advancing: true, ready: 4 });
-  // Default playback includes narration from the beginning.
+  // Synchronization is independent of asset-loading time and CI scheduling.
+  const playingFrame = Number(
+    await intro.locator("[data-intro-frame]").getAttribute("data-intro-frame"),
+  );
   expect(
-    await narration.evaluate((audio: HTMLAudioElement) => audio.currentTime),
-  ).toBeLessThan(2);
+    Math.abs(
+      (await narration.evaluate(
+        (audio: HTMLAudioElement) => audio.currentTime,
+      )) -
+        playingFrame / INTRO_FPS,
+    ),
+  ).toBeLessThan(0.3);
   await intro.getByRole("button", { name: "Pausar apresentação" }).click();
   await expect
     .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.paused))
@@ -389,7 +397,8 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       ),
     )
     .toBeLessThan(0.3);
-  await expect(intro.getByLabel("Legenda da narração")).toHaveText(
+  await expect(intro.getByLabel("Legenda da narração")).toHaveAttribute(
+    "data-transcript",
     studyCue.text,
   );
   await intro.getByRole("button", { name: "Silenciar narração" }).click();
@@ -427,6 +436,37 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .fill("0");
   await expect(intro.getByText("SUPERPODER.", { exact: true })).toBeVisible();
   await expect(intro.locator("[data-presenter]")).toBeVisible();
+  await expect(intro.locator(".intro-caption")).toHaveCount(0);
+  const sceneStart = INTRO_FEATURE_CUES[0].fromFrame;
+  const seek = intro.getByRole("slider", { name: "Posição da apresentação" });
+  const confettiPixels = () =>
+    intro.locator("canvas").evaluate((canvas: HTMLCanvasElement) => {
+      const pixels = canvas
+        .getContext("2d")!
+        .getImageData(0, 0, canvas.width, canvas.height).data;
+      let count = 0;
+      for (let i = 3; i < pixels.length; i += 4) if (pixels[i]) count++;
+      return count;
+    });
+  for (const offset of [12, 84, 12]) {
+    await seek.fill(String(sceneStart + offset));
+    if (offset === 84) await expect.poll(confettiPixels).toBeGreaterThan(0);
+    else await expect.poll(confettiPixels).toBe(0);
+  }
+  await seek.fill(String(sceneStart + 6));
+  const firstJoints = await intro
+    .locator("[data-presenter]")
+    .getAttribute("data-presenter-joints");
+  await seek.fill(String(sceneStart + 7));
+  await expect(intro.locator("[data-presenter]")).toHaveAttribute(
+    "data-presenter-frame",
+    "7",
+  );
+  expect(
+    await intro
+      .locator("[data-presenter]")
+      .getAttribute("data-presenter-joints"),
+  ).not.toBe(firstJoints);
   const expressions = new Set<string>();
   for (const frame of [
     ...INTRO_SCENE_FRAMES.slice(0, -1).map((start, i) =>
@@ -444,6 +484,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     const expression = await intro
       .locator("[data-presenter]")
       .getAttribute("data-presenter-expression");
+    await expect(intro.locator("[data-presenter-ground]")).toHaveCount(1);
     expect(expression).toBeTruthy();
     expressions.add(expression!);
     const safe = await intro
@@ -506,7 +547,10 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       "data-intro-scene",
       String(cue.scene),
     );
-    await expect(intro.getByLabel("Legenda da narração")).toHaveText(cue.text);
+    await expect(intro.getByLabel("Legenda da narração")).toHaveAttribute(
+      "data-transcript",
+      cue.text,
+    );
     await intro.screenshot({
       path: join(screenshots, `intro-comic-mobile-${index}.png`),
     });
@@ -557,7 +601,8 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .getByRole("slider", { name: "Posição da apresentação" })
     .fill(String(INTRO_SCENE_FRAMES[15] + 84));
   await expect(intro.locator('[data-intro-scene="15"]')).toBeVisible();
-  await expect(intro.getByLabel("Legenda da narração")).toHaveText(
+  await expect(intro.getByLabel("Legenda da narração")).toHaveAttribute(
+    "data-transcript",
     "Se enturme com o Enturma. Fique por dentro da sua faculdade conosco!",
   );
   await intro

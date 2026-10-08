@@ -256,7 +256,7 @@ export function Particles({
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;
     ctx.clearRect(0, 0, width, height);
-    if (q === "low") return;
+    if (q === "low" || raw < burstAt || raw >= burstAt + 100) return;
     const t = Math.max(0, raw - burstAt);
     const count = q === "high" ? 42 : 24;
     for (let i = 0; i < count; i++) {
@@ -326,7 +326,6 @@ export function Stage({
   color,
   shout,
   children,
-  preview = false,
 }: {
   scene: number;
   number: string;
@@ -335,7 +334,6 @@ export function Stage({
   color: string;
   shout: string;
   children: ReactNode;
-  preview?: boolean;
 }) {
   const { width, height } = useVideoConfig();
   const portrait = width < height;
@@ -359,7 +357,7 @@ export function Stage({
   const titleWidth = placements.left
     ? width - titleLeft - 30
     : width - placements.size - placements.edge - 54;
-  const actorSize = portrait ? placements.size : Math.min(190, height * 0.28);
+  const actorSize = portrait ? placements.size : Math.min(240, height * 0.36);
   return (
     <AbsoluteFill
       data-intro-scene={scene}
@@ -392,7 +390,7 @@ export function Stage({
             color,
           }}
         >
-          {preview ? "EM BREVE · PRÉVIA" : `${number} / 09 · ${kicker}`}
+          {`${number} / 09 · ${kicker}`}
         </span>
       </div>
       <div
@@ -435,19 +433,6 @@ export function Stage({
             </div>
           ))}
         </div>
-        {!portrait && (
-          <Shout
-            text={shout}
-            color={color}
-            frame={still ? 40 : f - 24}
-            size={Math.min(67, width * 0.052)}
-            style={{
-              marginTop: 36,
-              transform: `rotate(-6deg) scale(${pop(f, 24)})`,
-              transformOrigin: "left",
-            }}
-          />
-        )}
       </div>
       <div
         data-intro-safe
@@ -456,9 +441,9 @@ export function Stage({
         style={{
           position: "absolute",
           left: portrait ? 20 : width * 0.42,
-          top: portrait ? 280 : height * 0.14,
+          top: portrait ? 300 : height * 0.14,
           width: portrait ? width - 40 : width * 0.55,
-          height: portrait ? height - 405 : height * 0.73,
+          height: portrait ? height - 465 : height * 0.66,
           transform: `translateX(${shake}px) rotate(${still ? 0 : Math.sin(Math.floor(raw / 2) / 30) * 0.35}deg)`,
         }}
       >
@@ -482,14 +467,23 @@ export function Stage({
               ? placements.edge
               : width - placements.edge - actorSize
             : width * placements.desktopX,
-          top: portrait ? placements.top : height - actorSize - 30,
+          top: portrait ? placements.top : height - actorSize - 105,
         }}
       />
+      {!portrait && (
+        <Shout
+          text={shout}
+          color={color}
+          frame={still ? 40 : f - 24}
+          size={36}
+          style={{ position: "absolute", right: 50, top: 65 }}
+        />
+      )}
       {portrait && (
         <div
           style={{
             position: "absolute",
-            bottom: 80,
+            bottom: 139,
             left: 36,
             right: 36,
             textAlign: "right",
@@ -506,7 +500,7 @@ export function Stage({
       <div
         style={{
           position: "absolute",
-          bottom: 24,
+          bottom: 108,
           left: portrait ? 30 : 44,
           right: portrait ? 30 : 44,
           display: "flex",

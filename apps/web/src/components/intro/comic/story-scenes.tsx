@@ -121,7 +121,7 @@ export function HookScene() {
           position: "absolute",
           left: portrait ? 30 : 48,
           right: portrait ? 30 : width * 0.53,
-          bottom: portrait ? 90 : 83,
+          bottom: portrait ? 130 : 114,
           display: "flex",
           gap: 9,
         }}
@@ -153,18 +153,6 @@ export function HookScene() {
             </div>
           </div>
         ))}
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: 30,
-          bottom: 25,
-          color: C.yellow,
-          font: "800 12px Arial",
-          letterSpacing: ".2em",
-        }}
-      >
-        SUA FACULDADE. SEU UNIVERSO.
       </div>
       <Particles burstAt={3} />
     </AbsoluteFill>
@@ -598,8 +586,8 @@ export function ProofScene() {
           position: "absolute",
           left: portrait ? 30 : 48,
           right: portrait ? 30 : 48,
-          bottom: portrait ? 83 : 43,
-          fontSize: portrait ? 48 : 55,
+          bottom: portrait ? 134 : 115,
+          fontSize: portrait ? 43 : 48,
           color: C.white,
           transform: `scale(${pop(f, 40)})`,
           textAlign: portrait ? "left" : "center",
@@ -612,7 +600,7 @@ export function ProofScene() {
       <div
         style={{
           position: "absolute",
-          bottom: 25,
+          bottom: 112,
           right: 30,
           fontSize: 12,
           color: "#ddd",
@@ -691,7 +679,7 @@ export function BuildupScene() {
           position: "absolute",
           left: 40,
           right: 40,
-          bottom: portrait ? 120 : 75,
+          bottom: portrait ? 135 : 119,
           textAlign: "center",
           opacity: prog(f, 12, 14),
         }}
@@ -823,7 +811,7 @@ export function CtaScene() {
           position: "absolute",
           left: portrait ? 30 : 56,
           right: portrait ? 30 : 55,
-          bottom: portrait ? 108 : 110,
+          bottom: portrait ? 162 : 130,
           display: "flex",
           gap: 14,
           justifyContent: portrait ? "center" : "flex-start",
@@ -866,7 +854,7 @@ export function CtaScene() {
           position: "absolute",
           left: 30,
           right: 30,
-          bottom: 37,
+          bottom: 117,
           textAlign: "center",
           fontFamily: "Arial",
           color: C.white,
