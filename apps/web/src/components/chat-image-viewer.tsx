@@ -4,7 +4,10 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { Download, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { playMotion } from "@/lib/motion";
-import { useOverlayHistory } from "@/lib/use-overlay-history";
+import {
+  useOverlayHistory,
+  waitForOverlayHistory,
+} from "@/lib/use-overlay-history";
 
 export function ChatImage({ src, alt }: { src: string; alt: string }) {
   const [open, setOpen] = useState(false);
@@ -124,10 +127,18 @@ export function ChatImage({ src, alt }: { src: string; alt: string }) {
   useEffect(() => {
     if (open || !hasOpened.current) return;
     // Browser/Next history restoration runs before returning focus to the thumbnail.
-    const frame = requestAnimationFrame(() =>
-      trigger.current?.focus({ preventScroll: true }),
-    );
-    return () => cancelAnimationFrame(frame);
+    let cancelled = false;
+    let frame = 0;
+    void waitForOverlayHistory().then(() => {
+      if (cancelled) return;
+      frame = requestAnimationFrame(() =>
+        trigger.current?.focus({ preventScroll: true }),
+      );
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(frame);
+    };
   }, [open]);
   return (
     <>

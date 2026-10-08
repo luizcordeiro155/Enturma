@@ -128,7 +128,9 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await page
     .getByLabel("Mensagem", { exact: true })
     .fill("Mensagem E2E em tempo real");
-  await page.getByRole("button", { name: "Enviar", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Enviar mensagem", exact: true })
+    .click();
   await expect(
     page.getByText("Mensagem E2E em tempo real", { exact: true }),
   ).toBeVisible();
@@ -141,12 +143,14 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
       "base64",
     ),
   });
-  await page.getByRole("button", { name: "Enviar", exact: true }).click();
-  await expect(page.locator(".chat-image")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Enviar mensagem", exact: true })
+    .click();
+  await expect(page.locator(".chat-image-thumbnail img")).toBeVisible();
   await expect
     .poll(() =>
       page
-        .locator(".chat-image")
+        .locator(".chat-image-thumbnail img")
         .evaluate((img: HTMLImageElement) => img.naturalWidth),
     )
     .toBeGreaterThan(0);
@@ -203,7 +207,9 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await page
     .getByLabel("Mensagem", { exact: true })
     .fill("Atualização pelo WebSocket");
-  await page.getByRole("button", { name: "Enviar", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Enviar mensagem", exact: true })
+    .click();
   await expect(
     peerPage.getByText("Atualização pelo WebSocket", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
@@ -223,7 +229,7 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     page.getByRole("status").filter({ hasText: "Sessão encerrada" }),
   ).toBeVisible();
   await expect(
-    peerPage.getByRole("button", { name: "Enviar", exact: true }),
+    peerPage.getByRole("button", { name: "Enviar mensagem", exact: true }),
   ).toHaveCount(0);
   const riderContext = peer;
   const riderPage = peerPage;

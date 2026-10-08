@@ -310,9 +310,14 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   await page.goto("/home");
   const intro = page.getByRole("region", { name: "Apresentação do Enturma" });
   await expect(intro).toBeVisible();
-  await intro.scrollIntoViewIfNeeded();
   const narration = intro.locator('audio[src*="enturma-pt-br-presenter"]');
   await expect(narration).toHaveCount(1);
+  // The dynamically loaded composition changes the card height. Scroll only
+  // after it mounts so the visibility observer can start playback.
+  await intro.locator("[data-intro-frame]").scrollIntoViewIfNeeded();
+  await expect(intro.locator("[data-intro-frame]")).toBeInViewport({
+    ratio: 0.5,
+  });
   const startAudio = intro.getByRole("button", { name: "Reproduzir com som" });
   await expect
     .poll(
@@ -543,6 +548,21 @@ test("private call rings in another route, connects real LiveKit peers and relea
       caller.getByRole("button", { name: "Ligar por voz" }),
     ).toBeEnabled({ timeout: 35000 });
     await caller.getByRole("button", { name: "Ligar por voz" }).click();
+    const capabilities = await (
+      await caller.request.get("/api/backend/capabilities")
+    ).json();
+    if (!capabilities.voice) {
+      await expect(
+        caller.getByText("As chamadas estão indisponíveis no momento.", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        callee.getByRole("dialog", { name: "Alice Chamada" }),
+      ).toHaveCount(0);
+      await expect(caller.locator(".call-panel")).toHaveCount(0);
+      return;
+    }
     await expect(
       callee.getByRole("dialog", { name: "Alice Chamada" }),
     ).toBeVisible({ timeout: 15000 });
@@ -944,6 +964,12 @@ test.describe("touch chat", () => {
         .click();
       await page.getByRole("button", { name: /Excluir para mim/ }).click();
       await expect(incoming).toHaveCount(0);
+      await expect(
+        page.getByRole("dialog", { name: "Ações da mensagem" }),
+      ).toHaveCount(0);
+      await expect
+        .poll(() => page.evaluate(() => Boolean(history.state?.enturmaOverlay)))
+        .toBe(false);
       await page.reload();
       await expect(composer).toBeVisible();
       await expect(incoming).toHaveCount(0);

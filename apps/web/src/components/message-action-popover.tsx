@@ -2,7 +2,10 @@
 import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { playMotion } from "@/lib/motion";
-import { useOverlayHistory } from "@/lib/use-overlay-history";
+import {
+  useOverlayHistory,
+  waitForOverlayHistory,
+} from "@/lib/use-overlay-history";
 
 export type MessageActionAnchor = {
   top: number;
@@ -106,13 +109,16 @@ export function MessageActionPopover({
       window.removeEventListener("resize", place);
       window.visualViewport?.removeEventListener("resize", place);
       el.removeEventListener("keydown", keys);
-      requestAnimationFrame(() => {
-        if (
-          previous?.isConnected &&
-          (!document.activeElement || document.activeElement === document.body)
-        )
-          previous.focus({ preventScroll: true });
-      });
+      void waitForOverlayHistory().then(() =>
+        requestAnimationFrame(() => {
+          if (
+            previous?.isConnected &&
+            (!document.activeElement ||
+              document.activeElement === document.body)
+          )
+            previous.focus({ preventScroll: true });
+        }),
+      );
     };
   }, [anchor, wide]);
   return createPortal(

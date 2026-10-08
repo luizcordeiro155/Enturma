@@ -3,6 +3,11 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 
 let pendingBack: Promise<void> | undefined;
 
+/** Focus restoration must follow the asynchronous Back traversal. */
+export function waitForOverlayHistory() {
+  return pendingBack ?? Promise.resolve();
+}
+
 /** Back closes the top overlay before navigating out of the conversation. */
 export function useOverlayHistory(onClose: () => void, enabled = true) {
   const close = useRef(onClose);
