@@ -65,9 +65,19 @@ export default function Rooms() {
     [profile],
   );
 
-  const directCount = useMemo(
-    () => rooms.filter((room) => subjectIds.has(room.subjectId)).length,
+  const visibleRooms = useMemo(
+    () =>
+      rooms.filter(
+        (room) =>
+          subjectIds.has(room.subjectId) ||
+          room.recommendationReason === "COURSE",
+      ),
     [rooms, subjectIds],
+  );
+
+  const directCount = useMemo(
+    () => visibleRooms.filter((room) => subjectIds.has(room.subjectId)).length,
+    [visibleRooms, subjectIds],
   );
 
   const join = useCallback(
@@ -98,7 +108,7 @@ export default function Rooms() {
         paddingBottom: 110,
         gap: 12,
       }}
-      data={rooms}
+      data={visibleRooms}
       keyExtractor={(room) => room.id}
       keyboardShouldPersistTaps="handled"
       ListHeaderComponent={
@@ -185,7 +195,7 @@ export default function Rooms() {
             </Pressable>
           </View>
 
-          {rooms.length ? (
+          {visibleRooms.length ? (
             <View
               style={{
                 flexDirection: "row",
@@ -207,7 +217,7 @@ export default function Rooms() {
               <Text style={styles.muted}>
                 {directCount > 0
                   ? `${directCount} da(s) sua(s) matéria(s)`
-                  : `${rooms.length} do seu curso`}
+                  : `${visibleRooms.length} do seu curso`}
               </Text>
             </View>
           ) : null}
