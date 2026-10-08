@@ -28,9 +28,9 @@ public class AutoModController {
   public record Appeal(@NotBlank @Size(max = 2000) String reason) {}
 
   @PostMapping("/moderation/{id}/appeal")
-  public void appeal(
+  public Object appeal(
       @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Appeal p) {
-    service.appeal(a, id, p.reason());
+    return service.appeal(a, id, p.reason());
   }
 
   @GetMapping("/admin/moderation")
