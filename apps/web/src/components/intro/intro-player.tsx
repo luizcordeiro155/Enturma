@@ -68,11 +68,36 @@ export default function IntroPlayer({
     }
     void player.current?.play();
     let alive = true;
+    let readinessTimer: ReturnType<typeof setTimeout> | undefined;
+    let narration: HTMLAudioElement | null = null;
+    const checkPlayback = () => {
+      clearTimeout(readinessTimer);
+      const initialFrame = player.current?.getCurrentFrame();
+      readinessTimer = setTimeout(() => {
+        const instance = player.current;
+        // AudioContext.resume() can stay pending without a NotAllowedError.
+        // Once media is buffered, a stationary timeline needs a user gesture.
+        if (
+          alive &&
+          narration &&
+          !narration.muted &&
+          narration.readyState >= 3 &&
+          instance?.isPlaying() &&
+          instance.getCurrentFrame() === initialFrame
+        ) {
+          onPlaybackBlocked();
+        }
+      }, 1500);
+    };
     const checked = new WeakSet<HTMLAudioElement>();
     const startNarration = () => {
       const audio = container.current?.querySelector("audio");
       if (!audio || audio.muted || checked.has(audio)) return;
       checked.add(audio);
+      narration?.removeEventListener("canplay", checkPlayback);
+      narration = audio;
+      audio.addEventListener("canplay", checkPlayback);
+      if (audio.readyState >= 3) checkPlayback();
       void audio.play().catch((error: DOMException) => {
         if (alive && error.name === "NotAllowedError") onPlaybackBlocked();
       });
@@ -85,6 +110,8 @@ export default function IntroPlayer({
     return () => {
       alive = false;
       observer.disconnect();
+      clearTimeout(readinessTimer);
+      narration?.removeEventListener("canplay", checkPlayback);
     };
   }, [playing, reduced, onEnd, player, onPlaybackBlocked]);
   return (
