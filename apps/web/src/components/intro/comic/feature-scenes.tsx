@@ -11,6 +11,8 @@ import {
   prog,
   useInkTime,
   clamp,
+  float,
+  snap,
 } from "./comic-kit";
 
 export function RewardsScene() {
@@ -31,7 +33,7 @@ export function RewardsScene() {
           CADA DIA CONTA
         </Label>
         <g
-          transform={`translate(128 185) scale(${1 + Math.sin(f / 6) * 0.035})`}
+          transform={`translate(${128 + float(raw, 0.7, 5)} ${185 + float(raw, 0.9, 4)}) rotate(${float(raw, 0.5, 1.8)}) scale(${1 + Math.sin(f / 6) * 0.05})`}
         >
           <path
             d="M0 105C-95 34-10-6-17-106C44-55 86-10 69 48C94 25 95 5 94-12C154 84 59 140 0 105Z"
@@ -63,7 +65,7 @@ export function RewardsScene() {
           + XP A CADA CONQUISTA
         </Label>
       </Panel>
-      <g transform={`translate(620 456) rotate(7) scale(${pop(f, 55)})`}>
+      <g transform={`translate(${620 + float(raw, 0.45, 7)} ${456 + float(raw, 0.8, 5)}) rotate(${7 + float(raw, 0.55, 2.2)}) scale(${snap(f, 55)})`}>
         <path
           d="M-55-67H165L191 1L165 66H-55L-81 1Z"
           fill={C.magenta}
@@ -94,7 +96,7 @@ export function AiScene() {
       color={C.cyan}
       shout="VOILÀ!"
     >
-      <g transform={`translate(442 245) rotate(${still ? 0 : f * 2})`}>
+      <g transform={`translate(${442 + float(raw, 0.34, 6)} ${245 + float(raw, 0.56, 4)}) rotate(${still ? 0 : f * 2.4}) scale(${0.96 + Math.sin(raw / 13) * 0.04})`}>
         {[140, 178, 216].map((r, i) => (
           <circle
             key={r}
@@ -151,7 +153,7 @@ export function AiScene() {
         return (
           <g
             key={label}
-            transform={`translate(${74 + i * 250} ${385 + (1 - a) * 170}) rotate(${(i - 1) * 6}) scale(${a})`}
+            transform={`translate(${74 + i * 250 + float(raw + i * 9, 0.42, 5)} ${385 + (1 - a) * 170 + float(raw + i * 13, 0.58, 4)}) rotate(${(i - 1) * 6 + float(raw + i * 7, 0.4, 1.5)}) scale(${a})`}
           >
             <Panel w={230} h={170} fill={INKS[i]}>
               <Label x={115} y={54} size={23} color="#000" anchor="middle">
@@ -186,7 +188,7 @@ export function FeedScene() {
       color={C.magenta}
       shout="UP!"
     >
-      <g transform={`translate(0 ${-Math.max(0, f - 50) * 0.25})`}>
+      <g transform={`translate(${float(raw, 0.28, 4)} ${-Math.max(0, f - 50) * 0.25 + float(raw, 0.48, 3)})`}>
         {[
           ["Alguém tem as anotações", "da P1 de Física?", C.magenta],
           ["Revisão em grupo?", "A sala já está aberta.", C.cyan],
@@ -194,7 +196,7 @@ export function FeedScene() {
         ].map(([a, b, color], i) => (
           <g
             key={a}
-            transform={`translate(0 ${(1 - pop(f, i * 6)) * 200})`}
+            transform={`translate(${(1 - snap(f, i * 6)) * (i % 2 ? 95 : -95)} ${(1 - snap(f, i * 6)) * 210 + float(raw + i * 17, 0.52, 2)}) rotate(${(1 - snap(f, i * 6)) * (i % 2 ? 4 : -4)}deg)`}
             opacity={prog(f, i * 6, 8)}
           >
             <Panel
@@ -219,7 +221,7 @@ export function FeedScene() {
           </g>
         ))}
       </g>
-      <g transform={`translate(285 ${470 + (1 - pop(f, 64)) * 150})`}>
+      <g transform={`translate(${285 + float(raw, 0.42, 5)} ${470 + (1 - snap(f, 64)) * 150 + float(raw, 0.6, 3)}) scale(${0.96 + snap(f, 64) * 0.04})`}>
         <Panel w={540} h={110} fill={C.magenta}>
           <Label x={25} y={46} color="#000" size={27}>
             {phase < 2 ? "digitando..." : "3 pessoas responderam"}
@@ -265,7 +267,7 @@ export function ChatScene() {
           return (
             <g
               key={line}
-              transform={`translate(${i % 2 ? 120 : 25} ${96 + i * 73 + (1 - p) * 45})`}
+              transform={`translate(${i % 2 ? 120 + (1-p)*50 : 25 - (1-p)*50} ${96 + i * 73 + (1 - p) * 55}) rotate(${(1-p)*(i%2?2:-2)}deg)`}
               opacity={prog(f, i * 7, 6)}
             >
               <rect
@@ -288,7 +290,7 @@ export function ChatScene() {
             : "CONEXÃO FEITA. CONVERSA ABERTA."}
         </Label>
       </Panel>
-      <g transform={`translate(666 25) scale(${pop(f, 56)})`}>
+      <g transform={`translate(${666 + float(raw, 0.8, 4)} ${25 + float(raw, 0.9, 4)}) rotate(${float(raw, 0.6, 4)}) scale(${snap(f, 56)})`}>
         <circle r="65" fill={C.cyan} stroke="#000" strokeWidth="5" />
         <text y="25" textAnchor="middle" fontSize="75">
           ✦
@@ -299,7 +301,7 @@ export function ChatScene() {
 }
 
 export function RideScene() {
-  const { f } = useInkTime();
+  const { f, raw } = useInkTime();
   const p = interpolate(
     f,
     [0, 8, 20, 38, 65, 85],
@@ -366,7 +368,7 @@ export function RideScene() {
           ROTA PARA O CAMPUS
         </Label>
       </Panel>
-      <g transform={`translate(${x} ${y}) rotate(-12)`}>
+      <g transform={`translate(${x} ${y + float(raw, 1.2, 3)}) rotate(${-12 + float(raw, 0.7, 2.4)}) scale(${0.98 + Math.sin(raw/9)*0.02})`}>
         <path
           d="M-68 0L-43-37H37L64 0L75 5V43H-79V6Z"
           fill={C.green}
@@ -383,7 +385,7 @@ export function RideScene() {
         <circle cx="43" cy="40" r="14" />
         <path d="M-125 12H-85M-146 29H-91" stroke={C.green} strokeWidth="8" />
       </g>
-      <g transform={`translate(105 ${445 + (1 - pop(f, 42)) * 140})`}>
+      <g transform={`translate(${105 + float(raw, 0.36, 4)} ${445 + (1 - snap(f, 42)) * 140 + float(raw, 0.55, 3)}) scale(${0.97 + snap(f,42)*0.03})`}>
         <Panel w={670} h={127} fill={C.green}>
           <Label x={24} y={43} size={29} color="#000">
             3 PRA ENGENHARIA · SAI 7H
@@ -425,7 +427,7 @@ export function CallsScene() {
         return (
           <g
             key={i}
-            transform={`translate(${55 + (i % 2) * 410 + (1 - p) * (i % 2 ? 400 : -400)} ${35 + Math.floor(i / 2) * 245})`}
+            transform={`translate(${55 + (i % 2) * 410 + (1 - p) * (i % 2 ? 430 : -430) + float(raw+i*11,0.34,4)} ${35 + Math.floor(i / 2) * 245 + (1-p)*40 + float(raw+i*7,0.52,3)}) rotate(${(1-p)*(i%2?3:-3)}deg) scale(${0.96+p*0.04})`}
             opacity={prog(f, i * 3, 6)}
           >
             <Panel
@@ -453,7 +455,7 @@ export function CallsScene() {
         );
       })}
       {share && (
-        <g transform={`translate(155 202) scale(${pop(f, 65)})`}>
+        <g transform={`translate(${155 + float(raw,0.28,5)} ${202 + float(raw,0.5,4)}) rotate(${float(raw,0.3,1.2)}) scale(${snap(f, 65)})`}>
           <Panel w={590} h={252} fill="#f0e6fa" rotate={2}>
             <rect width="590" height="47" rx="16" fill={C.violet} />
             <Label x={22} y={32} size={20} color="#000">
@@ -520,7 +522,7 @@ export function GamesScene() {
         {["L", "O", "G", "I", "C"].map((letter, i) => (
           <g
             key={i}
-            transform={`translate(${43 + i * 131} 91) scale(${pop(f, i * 4)})`}
+            transform={`translate(${43 + i * 131} ${91 + float(raw+i*10,0.7,3)}) rotate(${(1-snap(f,i*4))*(i%2?7:-7)}deg) scale(${snap(f, i * 4)})`}
           >
             <rect
               width="109"
@@ -566,7 +568,7 @@ export function GamesScene() {
           />
         ))}
       </Panel>
-      <g transform={`translate(742 486) rotate(8) scale(${pop(f, 88)})`}>
+      <g transform={`translate(${742 + float(raw,0.4,6)} ${486 + float(raw,0.75,5)}) rotate(${8 + float(raw,0.45,2.5)}) scale(${snap(f, 88)})`}>
         <path
           d="M-52-49H56V2Q56 55 0 59Q-52 55-52 2Z"
           fill={C.yellow}
