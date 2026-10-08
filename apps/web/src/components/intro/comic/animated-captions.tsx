@@ -66,10 +66,10 @@ export function AnimatedCaptions() {
         boxSizing: "border-box",
         padding: portrait ? "13px 15px 17px" : "10px 20px 14px",
         color: "#fff",
-        background: "#070b16f5",
-        border: "2px solid #ffffff38",
+        background: "#111719f5",
+        border: "2px solid #64ca8352",
         borderRadius: 14,
-        boxShadow: "0 5px 0 #000,0 0 24px #00f0ff18",
+        boxShadow: "0 5px 0 #000,0 0 28px #64ca8324",
         fontFamily: "Arial,sans-serif",
         fontWeight: 800,
         fontSize: portrait ? 30 : 29,
@@ -122,8 +122,8 @@ export function AnimatedCaptions() {
                 display: "inline-block",
                 padding: "1px 4px",
                 scale,
-                color: i === active ? "#0a0a0f" : "#fff",
-                background: i === active ? "#ffe600" : "transparent",
+                color: i === active ? "#173f36" : "#fff",
+                background: i === active ? "#d8ef79" : "transparent",
                 borderRadius: 5,
                 textShadow: i === active ? undefined : "1px 2px #000",
               }}
@@ -150,7 +150,7 @@ export function AnimatedCaptions() {
           style={{
             height: "100%",
             width: `${p * 100}%`,
-            background: "linear-gradient(90deg,#00f0ff,#a855f7,#ffe600)",
+            background: "linear-gradient(90deg,#64ca83,#d8ef79,#6fd8c5)",
           }}
         />
       </div>
