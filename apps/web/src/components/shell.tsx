@@ -205,7 +205,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         </header>
         ) : null}
         <main id="content">
-          <CommunityFeedback />
+          {path.startsWith("/rooms") ? <CommunityFeedback /> : null}
           {children}
         </main>
         {!inRideHub ? (

@@ -6,6 +6,7 @@ import {
   Bell,
   CheckCheck,
   MessageCircle,
+  ShieldAlert,
   X,
   AtSign,
   Trash2,
@@ -405,7 +406,9 @@ export function NotificationBell() {
                 className={`notification-item ${n.readAt ? "" : "unread"}`}
                 onClick={() => void visit(n)}
               >
-                {n.kind === "MENTION" ? (
+                {n.kind === "MODERATION" ? (
+                  <ShieldAlert size={18} />
+                ) : n.kind === "MENTION" ? (
                   <AtSign size={18} />
                 ) : (
                   <MessageCircle size={18} />
