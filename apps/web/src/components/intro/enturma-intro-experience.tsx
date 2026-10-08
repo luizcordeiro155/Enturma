@@ -39,8 +39,8 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
   const [visible, setVisible] = useState(false);
   const [paused, setPaused] = useState(false);
   const [frame, setFrame] = useState(0);
-  const [muted, setMuted] = useState(true);
-  const [heard, setHeard] = useState(false);
+  const [muted, setMuted] = useState(false);
+  const [audioBlocked, setAudioBlocked] = useState(false);
   const [seekFrame, setSeekFrame] = useState<number>();
   const [dimensions, setDimensions] = useState(introDimensions(900));
   const [theme, setTheme] = useState<IntroProps["theme"]>("light");
@@ -57,8 +57,8 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
       gsap.set(container.current, { clearProps: "opacity,transform" });
     setPaused(false);
     setFrame(0);
-    setMuted(true);
-    setHeard(false);
+    setMuted(false);
+    setAudioBlocked(false);
     setSeekFrame(undefined);
     setRun((value) => value + 1);
     setOpen(true);
@@ -186,6 +186,13 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
     [quality],
   );
   const ended = useCallback(() => finish(false), [finish]);
+  const onNarrationBlocked = useCallback(() => {
+    player.current?.pause();
+    player.current?.seekTo(0);
+    setFrame(0);
+    setPaused(true);
+    setAudioBlocked(true);
+  }, []);
 
   const inputProps = useMemo<IntroProps>(
     () => ({
@@ -256,19 +263,19 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
               if (!muted) {
                 instance.mute();
                 setMuted(true);
+                if (audioBlocked) {
+                  instance.play(event);
+                  setAudioBlocked(false);
+                  setPaused(false);
+                }
                 return;
               }
               // Start the mounted audio inside the gesture, including Mobile Safari.
-              if (!heard) {
-                instance.seekTo(0);
-                setSeekFrame(0);
-                setFrame(0);
-              }
               instance.pause();
               instance.unmute();
               instance.play(event);
               setMuted(false);
-              setHeard(true);
+              setAudioBlocked(false);
               setPaused(false);
             }}
           >
@@ -279,8 +286,10 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
             type="button"
             className="intro-control"
             onClickCapture={(event) => {
-              if (paused) player.current?.play(event);
-              else player.current?.pause();
+              if (paused) {
+                player.current?.play(event);
+                setAudioBlocked(false);
+              } else player.current?.pause();
               setPaused((value) => !value);
             }}
             aria-label={
@@ -298,6 +307,21 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
           </button>
         </div>
       </header>
+      {audioBlocked && (
+        <button
+          type="button"
+          className="intro-audio-start"
+          onClickCapture={(event) => {
+            player.current?.unmute();
+            player.current?.play(event);
+            setMuted(false);
+            setAudioBlocked(false);
+            setPaused(false);
+          }}
+        >
+          <Volume2 size={20} /> Reproduzir com som
+        </button>
+      )}
       <IntroPlayer
         key={run}
         inputProps={inputProps}
@@ -309,6 +333,7 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
         seekFrame={seekFrame}
         playerRef={player}
         onMutedChange={setMuted}
+        onPlaybackBlocked={onNarrationBlocked}
       />
       <p className="intro-caption" aria-label="Legenda da narração">
         {introNarrationAt(frame)}

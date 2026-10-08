@@ -47,7 +47,8 @@ export function useAppConnection() {
           ws.send(JSON.stringify({ token, scope: "activity" }));
           clearInterval(heartbeat);
           heartbeat = setInterval(() => {
-            if (ws.readyState === WebSocket.OPEN) ws.send(JSON.stringify({ type: "presence_ping" }));
+            if (ws.readyState === WebSocket.OPEN)
+              ws.send(JSON.stringify({ type: "presence_ping" }));
           }, 20000);
         };
 
@@ -96,18 +97,12 @@ export function useAppConnection() {
           clearInterval(heartbeat);
           markDisconnected();
           if (active)
-            retry = setTimeout(
-              connect,
-              Math.min(15000, 1000 * 2 ** attempt++),
-            );
+            retry = setTimeout(connect, Math.min(15000, 1000 * 2 ** attempt++));
         };
       } catch {
         markDisconnected();
         if (active)
-          retry = setTimeout(
-            connect,
-            Math.min(15000, 1000 * 2 ** attempt++),
-          );
+          retry = setTimeout(connect, Math.min(15000, 1000 * 2 ** attempt++));
       }
     }
 
@@ -137,6 +132,7 @@ export function useLiveRefresh(
     let active = true;
     let running = false;
     let queued = false;
+    let dirty = false;
     let lastRunAt = 0;
     let delay: ReturnType<typeof setTimeout>;
 
@@ -151,13 +147,18 @@ export function useLiveRefresh(
 
     async function run() {
       // Call signaling must work in background tabs; content refresh can wait.
-      if (!active || (document.hidden && type !== "private_call_changed")) return;
+      if (!active) return;
+      if (document.hidden && type !== "private_call_changed") {
+        dirty = true;
+        return;
+      }
       if (running) {
         queued = true;
         return;
       }
 
       running = true;
+      dirty = false;
       lastRunAt = Date.now();
       try {
         await latest.current();
@@ -184,7 +185,10 @@ export function useLiveRefresh(
     const onVisible = () => {
       if (
         document.visibilityState === "visible" &&
-        (type === "private_call_changed" || (!liveConnected && Date.now() - lastRunAt >= Math.max(interval, 60000)))
+        (dirty ||
+          type === "private_call_changed" ||
+          (!liveConnected &&
+            Date.now() - lastRunAt >= Math.max(interval, 60000)))
       ) {
         refresh();
       }
@@ -192,9 +196,16 @@ export function useLiveRefresh(
 
     // WebSocket é a fonte normal. Polling só entra como rede de segurança
     // quando o realtime realmente caiu, e nunca recarrega a rota/documento.
-    const fallbackEvery = type === "private_call_changed" ? Math.max(interval, 3000) : Math.max(interval, 60000);
+    const fallbackEvery =
+      type === "private_call_changed"
+        ? Math.max(interval, 3000)
+        : Math.max(interval, 60000);
     const timer = window.setInterval(() => {
-      if (type === "private_call_changed" || (!liveConnected && !document.hidden)) refresh();
+      if (
+        type === "private_call_changed" ||
+        (!liveConnected && !document.hidden)
+      )
+        refresh();
     }, fallbackEvery);
 
     window.addEventListener(`enturma-${type}`, refresh);

@@ -134,6 +134,7 @@ export interface MessageReaction {
   mine: boolean;
 }
 export interface Message extends IdentityStyle {
+  hiddenAt?: string | null;
   reactions?: MessageReaction[];
   id: string;
   userId: string;

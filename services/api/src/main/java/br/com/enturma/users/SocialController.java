@@ -105,10 +105,13 @@ public class SocialController {
             + " ('PRIVATE_MESSAGE','MENTION')) unread_count FROM friendship f JOIN app_user u ON"
             + " u.id=CASE WHEN f.requester=? THEN f.recipient ELSE f.requester END LEFT JOIN"
             + " LATERAL (SELECT m.id,m.created_at FROM private_message m WHERE m.friendship_id=f.id"
-            + " ORDER BY m.created_at DESC,m.id DESC LIMIT 1) latest ON true WHERE (f.requester=?"
-            + " OR f.recipient=?) AND u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b"
-            + " WHERE (b.user_id=? AND b.blocked_id=u.id) OR (b.blocked_id=? AND b.user_id=u.id))"
-            + " ORDER BY COALESCE(latest.created_at,f.created_at) DESC",
+            + " AND m.deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM private_message_hidden h"
+            + " WHERE h.message_id=m.id AND h.user_id=?::uuid) ORDER BY m.created_at DESC,m.id DESC"
+            + " LIMIT 1) latest ON true WHERE (f.requester=? OR f.recipient=?) AND"
+            + " u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
+            + " b.blocked_id=u.id) OR (b.blocked_id=? AND b.user_id=u.id)) ORDER BY"
+            + " COALESCE(latest.created_at,f.created_at) DESC",
+        a.id(),
         a.id(),
         a.id(),
         a.id(),
@@ -275,24 +278,95 @@ public class SocialController {
       @PathVariable UUID id,
       @RequestParam(defaultValue = "0") int page) {
     access(a, id, true);
-    return db.list(
-        "SELECT id,sender_id,ciphertext,iv,client_id,created_at,attachment_ciphertext,"
-            + " attachment_iv,attachment_mime,attachment_name,attachment_size FROM private_message"
-            + " WHERE friendship_id=? ORDER BY created_at DESC,id DESC LIMIT 50 OFFSET ?",
-        id,
-        Math.clamp(page, 0, 10000) * 50);
+    return privateRows(a, id, page, null);
   }
 
   @GetMapping("/friends/{id}/messages/target/{target}")
   public Object messageTarget(
       @AuthenticationPrincipal Actor a, @PathVariable UUID id, @PathVariable UUID target) {
     access(a, id, true);
+    return privateRows(a, id, 0, target);
+  }
+
+  private Object privateRows(Actor a, UUID id, int page, UUID target) {
     return db.list(
-        "SELECT id,sender_id,ciphertext,iv,client_id,created_at,attachment_ciphertext,"
-            + " attachment_iv,attachment_mime,attachment_name,attachment_size FROM private_message"
-            + " WHERE friendship_id=? AND id=?",
+        "SELECT"
+            + " m.id,m.sender_id,m.ciphertext,m.iv,m.client_id,m.created_at,m.edited_at,m.deleted_at,"
+            + " m.attachment_ciphertext,m.attachment_iv,m.attachment_mime,m.attachment_name,m.attachment_size,h.created_at"
+            + " hidden_at, COALESCE((SELECT jsonb_agg(r) FROM (SELECT emoji,count(*)"
+            + " count,bool_or(user_id=?::uuid) mine FROM private_message_reaction WHERE"
+            + " message_id=m.id GROUP BY emoji ORDER BY min(created_at)) r),'[]'::jsonb) reactions"
+            + " FROM private_message m LEFT JOIN private_message_hidden h ON h.message_id=m.id AND"
+            + " h.user_id=?::uuid WHERE m.friendship_id=? AND (?::uuid IS NULL OR m.id=?) ORDER BY"
+            + " m.created_at DESC,m.id DESC LIMIT 50 OFFSET ?",
+        a.id(),
+        a.id(),
         id,
-        target);
+        target,
+        target,
+        Math.clamp(page, 0, 10000) * 50);
+  }
+
+  @PostMapping("/friends/{id}/messages/{messageId}/hide")
+  @Transactional
+  public void hidePrivateMessage(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @PathVariable UUID messageId) {
+    access(a, id, true);
+    privateMessage(id, messageId);
+    db.jdbc.update(
+        "INSERT INTO private_message_hidden(message_id,user_id) VALUES (?,?) ON CONFLICT DO"
+            + " NOTHING",
+        messageId,
+        a.id());
+    db.jdbc.update("DELETE FROM notification WHERE target_id=? AND user_id=?", messageId, a.id());
+    friendsChanged(a.id());
+  }
+
+  private void privateMessage(UUID friendship, UUID message) {
+    if (!db.exists(
+        "SELECT EXISTS(SELECT 1 FROM private_message WHERE id=? AND friendship_id=?)",
+        message,
+        friendship)) throw ApiException.missing();
+  }
+
+  @PostMapping("/friends/{id}/messages/{messageId}/reactions")
+  @Transactional
+  public void reactPrivateMessage(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID id,
+      @PathVariable UUID messageId,
+      @RequestParam String emoji) {
+    var f = access(a, id, true);
+    EmojiReaction.validate(emoji);
+    if (!db.exists(
+        "SELECT EXISTS(SELECT 1 FROM private_message WHERE id=? AND friendship_id=? AND deleted_at"
+            + " IS NULL)",
+        messageId,
+        id)) throw ApiException.missing();
+    db.jdbc.update(
+        "INSERT INTO private_message_reaction(message_id,user_id,emoji) VALUES (?,?,?) ON CONFLICT"
+            + " DO NOTHING",
+        messageId,
+        a.id(),
+        emoji);
+    friendsChanged((UUID) f.get("requester"), (UUID) f.get("recipient"));
+  }
+
+  @DeleteMapping("/friends/{id}/messages/{messageId}/reactions")
+  @Transactional
+  public void unreactPrivateMessage(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID id,
+      @PathVariable UUID messageId,
+      @RequestParam String emoji) {
+    var f = access(a, id, true);
+    privateMessage(id, messageId);
+    db.jdbc.update(
+        "DELETE FROM private_message_reaction WHERE message_id=? AND user_id=? AND emoji=?",
+        messageId,
+        a.id(),
+        emoji);
+    friendsChanged((UUID) f.get("requester"), (UUID) f.get("recipient"));
   }
 
   public record PrivateMessageEdit(
@@ -386,8 +460,8 @@ public class SocialController {
     var friendship = access(a, id, true);
     int updated =
         db.jdbc.update(
-            "UPDATE private_message SET ciphertext=?,iv=? WHERE id=? AND friendship_id=? AND"
-                + " sender_id=?",
+            "UPDATE private_message SET ciphertext=?,iv=?,edited_at=now() WHERE deleted_at IS NULL"
+                + " AND id=? AND friendship_id=? AND sender_id=?",
             body.ciphertext(),
             body.iv(),
             messageId,
@@ -410,11 +484,14 @@ public class SocialController {
     var friendship = access(a, id, true);
     int deleted =
         db.jdbc.update(
-            "DELETE FROM private_message WHERE id=? AND friendship_id=? AND sender_id=?",
+            "UPDATE private_message SET"
+                + " deleted_at=now(),ciphertext='',iv='',attachment_ciphertext=NULL,attachment_iv=NULL,attachment_mime=NULL,attachment_name=NULL,attachment_size=NULL"
+                + " WHERE id=? AND friendship_id=? AND sender_id=?",
             messageId,
             id,
             a.id());
     if (deleted == 0) throw ApiException.missing();
+    db.jdbc.update("DELETE FROM private_message_reaction WHERE message_id=?", messageId);
 
     db.jdbc.update(
         "DELETE FROM notification WHERE target_id=? AND kind IN ('PRIVATE_MESSAGE','MENTION')",

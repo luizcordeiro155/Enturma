@@ -504,6 +504,32 @@ label small {
 .auth-main form > p {
   font-size: 14px;
 }
+.auth-app-downloads {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
+}
+.auth-app-downloads strong,
+.auth-app-downloads small {
+  display: block;
+}
+.auth-app-downloads small {
+  margin-top: 3px;
+  color: var(--muted);
+}
+.auth-app-downloads a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  width: fit-content;
+  font-weight: 700;
+}
+.auth-app-downloads svg {
+  flex-shrink: 0;
+}
 .skip {
   position: absolute;
   left: 12px;

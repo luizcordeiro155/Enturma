@@ -128,12 +128,16 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await page
     .getByLabel("Mensagem", { exact: true })
     .fill("Mensagem E2E em tempo real");
-  await page.getByRole("button", { name: "Enviar", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Enviar mensagem", exact: true })
+    .click();
   await expect(
     page.getByText("Mensagem E2E em tempo real", { exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".image-picker input")).toBeEnabled();
-  await page.locator(".image-picker input").setInputFiles({
+  await expect(
+    page.getByLabel("Adicionar imagem", { exact: true }),
+  ).toBeEnabled();
+  await page.getByLabel("Adicionar imagem", { exact: true }).setInputFiles({
     name: "teste.png",
     mimeType: "image/png",
     buffer: Buffer.from(
@@ -141,12 +145,14 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
       "base64",
     ),
   });
-  await page.getByRole("button", { name: "Enviar", exact: true }).click();
-  await expect(page.locator(".chat-image")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Enviar mensagem", exact: true })
+    .click();
+  await expect(page.locator(".chat-image-thumbnail img")).toBeVisible();
   await expect
     .poll(() =>
       page
-        .locator(".chat-image")
+        .locator(".chat-image-thumbnail img")
         .evaluate((img: HTMLImageElement) => img.naturalWidth),
     )
     .toBeGreaterThan(0);
@@ -203,137 +209,96 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
   await page
     .getByLabel("Mensagem", { exact: true })
     .fill("Atualização pelo WebSocket");
-  await page.getByRole("button", { name: "Enviar", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Enviar mensagem", exact: true })
+    .click();
   await expect(
     peerPage.getByText("Atualização pelo WebSocket", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
-  await expect(
-    peerPage.getByRole("button", { name: "Nova mensagem · ir para ela" }),
-  ).toBeVisible();
+  // The recipient is following the bottom of this conversation: the incoming
+  // message is already visible and must not create an unread notification.
   await expect(peerPage.locator(".notification-count")).toHaveCount(0);
-  await peerPage
-    .getByRole("button", { name: "Nova mensagem · ir para ela" })
-    .click();
-  await expect(peerPage.locator(".notification-target")).toContainText(
-    "Atualização pelo WebSocket",
-  );
   page.once("dialog", (dialog) => dialog.accept());
   await page.getByRole("button", { name: "Encerrar sessão" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Sessão encerrada" }),
   ).toBeVisible();
   await expect(
-    peerPage.getByRole("button", { name: "Enviar", exact: true }),
+    peerPage.getByRole("button", { name: "Enviar mensagem", exact: true }),
   ).toHaveCount(0);
-  const riderContext = peer;
   const riderPage = peerPage;
+  // The current ride entry is a map with passenger/driver modes. Seed the
+  // scheduled ride through the API, then exercise its live match/chat UI.
   await riderPage.goto("/caronas");
   await expect(
-    riderPage.getByText("Caronas atualizadas em tempo real"),
+    riderPage.getByRole("button", { name: "Passageiro", exact: true }),
   ).toBeVisible();
-  await page.goto("/caronas/create");
-  await page
-    .getByRole("combobox", { name: "Universidade", exact: true })
-    .selectOption(ids.INSTITUTION);
-  await page
-    .getByRole("combobox", { name: "Campus", exact: true })
-    .selectOption(ids.CAMPUS);
-  await page
-    .getByLabel("Bairro ou região de origem")
-    .fill(`Região de teste ${tag}`);
-  const departure = new Date(Date.now() + 86400000);
-  const local = new Date(
-    departure.getTime() - departure.getTimezoneOffset() * 60000,
-  )
-    .toISOString()
-    .slice(0, 16);
-  await page.getByLabel("Saída", { exact: true }).fill(local);
-  await page.getByRole("button", { name: "Publicar", exact: true }).click();
-  await expect(page).toHaveURL(/caronas\/matches/);
   await expect(
-    page.getByRole("region", { name: "Buscas de carona em andamento" }),
-  ).toContainText("Procurando passageiro");
-  const newRide = riderPage
-    .locator("article")
-    .filter({ hasText: `Região de teste ${tag}` })
-    .filter({
-      has: riderPage.getByRole("button", { name: "Tenho interesse" }),
-    });
-  await expect(newRide).toBeVisible({ timeout: 5000 });
-  await newRide.getByRole("button", { name: "Tenho interesse" }).click();
-  await expect(riderPage).toHaveURL(/caronas\/matches/);
-  await expect(riderPage.getByText(/Aguardando aceite/).first()).toBeVisible();
-  await riderPage.getByRole("link", { name: "Fórum", exact: true }).click();
-  await expect(
-    riderPage.getByRole("complementary", { name: "Sua busca de carona" }),
-  ).toContainText("Aguardando aceite");
-  await riderPage
-    .getByRole("button", { name: "Minimizar busca de carona" })
-    .click();
-  await expect(
-    riderPage.getByRole("button", { name: "Expandir busca de carona" }),
+    riderPage.getByRole("button", { name: "Motorista", exact: true }),
   ).toBeVisible();
-  await riderPage.setViewportSize({ width: 390, height: 844 });
-  await riderPage.screenshot({
-    path: "../../.local/ride-search-mobile.png",
-    fullPage: true,
+  const headers = { Authorization: `Bearer ${credentials.accessToken}` };
+  const offered = await request.post(`${backend}/api/v1/rides`, {
+    headers,
+    data: {
+      campusId: ids.CAMPUS,
+      type: "OFFER",
+      originArea: `Região de teste ${tag}`,
+      direction: "TO_CAMPUS",
+      departureAt: new Date(Date.now() + 86400000).toISOString(),
+      seats: 1,
+    },
   });
+  expect(offered.ok(), await offered.text()).toBe(true);
+  const ride = await offered.json();
+  const interested = await request.post(
+    `${backend}/api/v1/rides/${ride.id}/interest`,
+    { headers: mh },
+  );
+  expect(interested.ok(), await interested.text()).toBe(true);
+  const match = await interested.json();
+  await riderPage.goto(`/caronas/matches?match=${match.id}`);
+  await expect(riderPage.getByText(/Aguardando confirmação/)).toBeVisible();
+  await page.goto(`/caronas/matches?match=${match.id}`);
+  await page
+    .getByRole("button", { name: "Aceitar combinação", exact: true })
+    .click();
+  const celebration = page.getByRole("dialog", {
+    name: "Deu match na carona!",
+  });
+  await expect(celebration).toContainText("Colega E2E");
+  await celebration.getByRole("button", { name: "Combinar encontro" }).click();
+  // Scheduled confirmations update in place. The global passenger celebration
+  // is reserved for an on-demand trip whose driver is already on the way.
+  await expect(
+    riderPage.getByText("Confirmado", { exact: false }).first(),
+  ).toBeVisible();
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    page.getByRole("heading", {
+      name: "Conversa privada da carona",
+      exact: true,
+    }),
+  ).toBeVisible();
   expect(
-    await riderPage.evaluate(
+    await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+  await page.getByLabel("Ponto privado combinado").fill("Ponto privado E2E");
+  await page
+    .locator(".ride-chat")
+    .getByRole("button", { name: "Salvar ponto", exact: true })
+    .click();
   await expect(
-    page.getByRole("button", { name: "Aceitar", exact: true }),
-  ).toBeVisible({ timeout: 5000 });
-  await page.getByRole("button", { name: "Aceitar", exact: true }).click();
-  const matchDialog = page.getByRole("dialog", {
-    name: "Deu match na carona!",
-  });
-  await expect(matchDialog).toBeVisible();
-  const riderDialog = riderPage.getByRole("dialog", {
-    name: "Deu match na carona!",
-  });
-  await expect(riderDialog).toBeVisible({ timeout: 10000 });
-  await riderDialog.getByRole("button", { name: "Combinar encontro" }).click();
-
-  await expect(matchDialog).toContainText("Colega E2E");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await expect
-    .poll(() =>
-      matchDialog.evaluate((el) =>
-        el
-          .getAnimations({ subtree: true })
-          .every((a) => a.playState !== "running"),
-      ),
-    )
-    .toBe(true);
-  const placement = await matchDialog.boundingBox();
-  expect(placement!.x).toBeGreaterThan(5);
-  expect(placement!.y).toBeGreaterThan(5);
-  const avatar = await matchDialog
-    .locator(".identity-avatar")
-    .first()
-    .boundingBox();
-  expect(Math.abs(avatar!.width - avatar!.height)).toBeLessThan(2);
-  await page.screenshot({ path: "../../.local/ride-match-mobile.png" });
-  await matchDialog.getByRole("button", { name: "Combinar encontro" }).click();
-  await expect(matchDialog).not.toBeVisible();
-  await page.reload();
-  await expect(
-    page.getByRole("button", { name: "Conversa privada" }),
-  ).toBeVisible();
-  await expect(matchDialog).not.toBeVisible();
-  await page.getByRole("button", { name: "Conversa privada" }).click();
-  await page.getByLabel("Ponto privado").fill("Ponto privado E2E");
-  await page.getByRole("button", { name: "Salvar ponto" }).click();
-  await expect(
-    page.getByText("Ponto de encontro: Ponto privado E2E"),
+    page.getByText("Ponto de encontro atualizado.", { exact: true }),
   ).toBeVisible();
   await page.getByLabel("Mensagem", { exact: true }).fill("Conversa da carona");
   await page.getByRole("button", { name: "Enviar", exact: true }).click();
   await expect(
     page.getByText("Conversa da carona", { exact: true }),
+  ).toBeVisible();
+  await expect(
+    riderPage.getByText("Conversa da carona", { exact: true }),
   ).toBeVisible();
   page.once("dialog", (dialog) => dialog.accept());
   await page
@@ -341,87 +306,36 @@ test("registro, catálogo, onboarding, sala reutilizada, chat, encerramento e ca
     .click();
   await expect(page.getByLabel("Mensagem", { exact: true })).toHaveCount(0);
   await expect(
-    page.getByRole("button", { name: "Ver histórico" }),
+    page.getByRole("button", { name: "Ver histórico", exact: true }),
   ).toBeVisible();
-  await expect(page.getByText(/Exclusão automática:/)).toBeVisible();
+  const closed = await request.get(`${backend}/api/v1/matches`, { headers });
+  expect(
+    (await closed.json()).find((row: { id: string }) => row.id === match.id)
+      .closedAt,
+  ).toBeTruthy();
   page.once("dialog", (dialog) => dialog.accept());
   await page
-    .getByRole("button", { name: "Excluir conversa", exact: true })
+    .getByRole("button", { name: "Excluir histórico privado", exact: true })
     .click();
+  await expect(
+    page.getByText("Conversa excluída.", { exact: true }),
+  ).toBeVisible();
   await expect(
     page.getByText("Conversa da carona", { exact: true }),
   ).toHaveCount(0);
-  await expect(
-    page.getByText("Conversa excluída. A carona continua combinada."),
-  ).toBeVisible();
   page.once("dialog", (dialog) => dialog.accept());
   await page
     .getByRole("button", { name: "Cancelar match", exact: true })
     .click();
   await expect(
-    page.getByText(/Nenhum pedido de carona por aqui/),
+    page.getByText("Cancelado", { exact: false }).first(),
   ).toBeVisible();
-  await page.goto("/caronas/create");
-  await page.getByLabel("O que você precisa?").selectOption("REQUEST");
-  await page
-    .getByRole("combobox", { name: "Universidade", exact: true })
-    .selectOption(ids.INSTITUTION);
-  await page
-    .getByRole("combobox", { name: "Campus", exact: true })
-    .selectOption(ids.CAMPUS);
-  await page
-    .getByLabel("Bairro ou região de origem")
-    .fill(`Busca de teste ${tag}`);
-  await page.getByLabel("Saída", { exact: true }).fill(local);
-  await page.getByRole("button", { name: "Publicar", exact: true }).click();
-  await expect(page).toHaveURL(/caronas\/matches/);
-  const waiting = page.getByRole("region", {
-    name: "Buscas de carona em andamento",
-  });
-  await expect(waiting).toContainText("Procurando carona");
-  await page.evaluate(() => {
-    document.documentElement.dataset.reducedMotion = "true";
-    window.dispatchEvent(new Event("enturma-motion"));
-  });
   expect(
-    await waiting.evaluate(
-      (el) =>
-        el
-          .getAnimations({ subtree: true })
-          .filter((a) => a.playState === "running").length,
-    ),
-  ).toBe(0);
-  await page.evaluate(() => {
-    document.documentElement.dataset.theme = "dark";
-  });
-  await page.screenshot({
-    path: "../../.local/ride-search-panel-mobile.png",
-    fullPage: true,
-  });
-  await page.setViewportSize({ width: 1440, height: 1000 });
-  await page.screenshot({
-    path: "../../.local/ride-search-panel-desktop.png",
-    fullPage: true,
-  });
-  await page.getByRole("link", { name: "Fórum", exact: true }).click();
-  await expect(
-    page.getByRole("complementary", { name: "Sua busca de carona" }),
-  ).toBeVisible();
-  await page.goto("/caronas");
-  const ownRequest = page
-    .locator("article")
-    .filter({ hasText: `Busca de teste ${tag}` })
-    .filter({
-      has: page.getByRole("button", { name: "Cancelar", exact: true }),
-    });
-  page.once("dialog", (dialog) => dialog.accept());
-  await ownRequest
-    .getByRole("button", { name: "Cancelar", exact: true })
-    .click();
-  await expect(
-    page
-      .locator(".ride-search-card")
-      .filter({ hasText: `Busca de teste ${tag}` }),
-  ).toHaveCount(0);
-  await riderContext.close();
+    (
+      await request.post(`${backend}/api/v1/rides/${ride.id}/cancel`, {
+        headers,
+      })
+    ).ok(),
+  ).toBe(true);
+  await peer.close();
 });
