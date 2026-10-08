@@ -141,6 +141,18 @@ public class AutoModService {
       UUID responsible,
       String evidence,
       String key) {
+    var active =
+        db.list(
+            "SELECT c.id FROM moderation_case c JOIN moderation_action a ON a.case_id=c.id"
+                + " WHERE c.user_id=? AND c.rule=? AND ((c.room_id IS NULL AND ?::uuid IS NULL)"
+                + " OR c.room_id=?) AND a.revoked_at IS NULL AND a.ends_at>now()"
+                + " ORDER BY a.ends_at DESC LIMIT 1",
+            user,
+            rule,
+            room,
+            room);
+    if (!active.isEmpty()) return (UUID) active.getFirst().get("id");
+
     UUID id = UUID.randomUUID();
     int inserted =
         db.jdbc.update(
