@@ -703,6 +703,8 @@ export function BuildupScene() {
 export function CtaScene() {
   const { width, height } = useVideoConfig();
   const portrait = width < height;
+  const compact = !portrait && width < 1100;
+  const presenterSize = portrait ? 180 : compact ? 210 : 240;
   const { f, raw, still } = useInkTime();
   const final = raw > 124 && !still;
   return (
@@ -724,10 +726,10 @@ export function CtaScene() {
         scene={15}
         style={{
           position: "absolute",
-          width: portrait ? 180 : 240,
-          height: portrait ? 180 : 240,
-          left: portrait ? 0 : width * 0.4,
-          top: portrait ? 427 : height - 290,
+          width: presenterSize,
+          height: presenterSize,
+          left: portrait ? 0 : width * (compact ? 0.47 : 0.4),
+          top: portrait ? 427 : height - (compact ? 360 : 380),
         }}
       />
       <div
@@ -755,7 +757,7 @@ export function CtaScene() {
         >
           BORA SE ENTURMAR?
         </div>
-        <Brand size={portrait ? 80 : 112} />
+        <Brand size={portrait ? 80 : Math.min(112, width * 0.085)} />
         <div
           style={{
             fontSize: portrait ? 25 : 28,
@@ -779,7 +781,7 @@ export function CtaScene() {
           position: "absolute",
           left: portrait ? (width - 245) / 2 : width * 0.67,
           top: portrait ? 353 : 78,
-          width: portrait ? 245 : 255,
+          width: portrait ? 245 : Math.min(255, width * 0.24),
           transform: `rotate(2deg) scale(${pop(f, 24)})`,
           background: "#fff",
           padding: 13,
@@ -854,7 +856,7 @@ export function CtaScene() {
           position: "absolute",
           left: 30,
           right: 30,
-          bottom: 117,
+          bottom: portrait ? 117 : 94,
           textAlign: "center",
           fontFamily: "Arial",
           color: C.white,

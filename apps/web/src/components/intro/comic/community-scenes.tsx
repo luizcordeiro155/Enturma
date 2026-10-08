@@ -125,7 +125,7 @@ export function SubjectsScene() {
       </Panel>
       <g transform={`translate(334 ${497 + (1 - pop(f, 64)) * 100})`}>
         <Panel w={472} h={86} fill={C.yellow}>
-          <Label x={236} y={54} size={32} color="#000" anchor="middle">
+          <Label x={236} y={54} size={26} color="#000" anchor="middle">
             VAMOS ESTUDAR JUNTOS →
           </Label>
         </Panel>

@@ -497,29 +497,31 @@ export function Stage({
           />
         </div>
       )}
-      <div
-        style={{
-          position: "absolute",
-          bottom: 108,
-          left: portrait ? 30 : 44,
-          right: portrait ? 30 : 44,
-          display: "flex",
-          alignItems: "center",
-          gap: 5,
-        }}
-      >
-        {Array.from({ length: 9 }, (_, i) => (
-          <span
-            key={i}
-            style={{
-              height: 4,
-              flex: 1,
-              background: i === Number(number) - 1 ? color : "#ffffff20",
-              transform: `scaleY(${i === Number(number) - 1 ? 2 : 1})`,
-            }}
-          />
-        ))}
-      </div>
+      {portrait && (
+        <div
+          style={{
+            position: "absolute",
+            bottom: 108,
+            left: portrait ? 30 : 44,
+            right: portrait ? 30 : 44,
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+          }}
+        >
+          {Array.from({ length: 9 }, (_, i) => (
+            <span
+              key={i}
+              style={{
+                height: 4,
+                flex: 1,
+                background: i === Number(number) - 1 ? color : "#ffffff20",
+                transform: `scaleY(${i === Number(number) - 1 ? 2 : 1})`,
+              }}
+            />
+          ))}
+        </div>
+      )}
       <Particles color={color} />
       <PageTear color={color} />
     </AbsoluteFill>
