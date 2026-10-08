@@ -203,57 +203,68 @@ export function CommunityFeedback() {
             </p>
           ) : null}
 
-          <form
-            onSubmit={async (event) => {
-              event.preventDefault();
-              const reason = String(
-                new FormData(event.currentTarget).get("reason") ?? "",
-              ).trim();
-              try {
-                const result = await post<AppealDecision>(
-                  `/moderation/${visiblePenalty.id}/appeal`,
-                  { reason },
-                );
-                setStatus(
-                  result.revoked
-                    ? "Recurso aceito pela Enturma AI. Penalidade removida."
-                    : result.analysis,
-                );
-                if (result.revoked) {
-                  setPenalties((old) =>
-                    old.filter((item) => item.id !== visiblePenalty.id),
-                  );
-                } else {
-                  setPenalties((old) =>
-                    old.map((item) =>
-                      item.id === visiblePenalty.id
-                        ? {
-                            ...item,
-                            appeal: reason,
-                            status: result.status,
-                            reviewNote: result.analysis,
+          {!visiblePenalty.appeal ? (
+                      <form
+                        onSubmit={async (event) => {
+                          event.preventDefault();
+                          const reason = String(
+                            new FormData(event.currentTarget).get("reason") ?? "",
+                          ).trim();
+                          try {
+                            const result = await post<AppealDecision>(
+                              `/moderation/${visiblePenalty.id}/appeal`,
+                              { reason },
+                            );
+                            setStatus(
+                              result.revoked
+                                ? "Recurso aceito pela Enturma AI. Penalidade removida."
+                                : result.analysis,
+                            );
+                            if (result.revoked) {
+                              setPenalties((old) =>
+                                old.filter((item) => item.id !== visiblePenalty.id),
+                              );
+                            } else {
+                              setPenalties((old) =>
+                                old.map((item) =>
+                                  item.id === visiblePenalty.id
+                                    ? {
+                                        ...item,
+                                        appeal: reason,
+                                        status: result.status,
+                                        reviewNote: result.analysis,
+                                      }
+                                    : item,
+                                ),
+                              );
+                            }
+                          } catch (error) {
+                            setStatus((error as Error).message);
                           }
-                        : item,
-                    ),
-                  );
-                }
-              } catch (error) {
-                setStatus((error as Error).message);
-              }
-            }}
-          >
-            <label>
-              Recorrer da penalidade
-              <textarea
-                name="reason"
-                required
-                minLength={20}
-                maxLength={2000}
-                placeholder="Explique claramente o contexto e por que a penalidade deve ser removida."
-              />
-            </label>
-            <button>Enviar para análise da Enturma AI</button>
-          </form>
+                        }}
+                      >
+                        <label>
+                          Recorrer da penalidade
+                          <textarea
+                            name="reason"
+                            required
+                            minLength={20}
+                            maxLength={2000}
+                            placeholder="Explique claramente o contexto e por que a penalidade deve ser removida."
+                          />
+                        </label>
+                        <button>Enviar para análise da Enturma AI</button>
+                      </form>
+          ) : (
+            <p className="penalty-appeal-closed">
+              Você já utilizou o recurso desta penalidade.
+              {visiblePenalty.status === "CONFIRMED"
+                ? " A Enturma AI manteve a medida; aguarde o contador finalizar."
+                : visiblePenalty.status === "APPEALED"
+                  ? " A análise foi registrada; aguarde a conclusão."
+                  : ""}
+            </p>
+          )}
 
           <p role="status">{status}</p>
 
