@@ -3,13 +3,13 @@
     "name": "Enturma",
     "slug": "enturma",
     "scheme": "enturma",
-    "version": "0.3.29",
+    "version": "0.3.30",
     "orientation": "default",
     "userInterfaceStyle": "automatic",
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "br.com.enturma.app",
-      "buildNumber": "30",
+      "buildNumber": "31",
       "infoPlist": {
         "NSCameraUsageDescription": "Use sua câmera nas chamadas de estudo.",
         "NSMicrophoneUsageDescription": "Converse por voz com sua turma.",
@@ -19,7 +19,7 @@
     },
     "android": {
       "package": "br.com.enturma.app",
-      "versionCode": 32,
+      "versionCode": 33,
       "permissions": [
         "CAMERA",
         "RECORD_AUDIO",
