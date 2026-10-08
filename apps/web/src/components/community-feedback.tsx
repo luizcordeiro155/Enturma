@@ -1,20 +1,31 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { Award, ShieldAlert, X } from "lucide-react";
 import { api, post } from "@/lib/api";
 import type { Achievement } from "./profile-showcase";
+
 type Penalty = {
   id: string;
   roomId?: string;
   rule: string;
   kind: string;
   endsAt?: string;
+  remainingSeconds?: number;
   revokedAt?: string;
   status: string;
   appeal?: string;
+  reviewNote?: string;
   createdAt: string;
 };
+
+type AppealDecision = {
+  status: string;
+  revoked: boolean;
+  analysis: string;
+  confidence?: number;
+};
+
 const rules: Record<string, string> = {
   FLOOD: "Muitas mensagens em pouco tempo",
   REPETITION: "Envio repetido da mesma mensagem",
@@ -23,36 +34,74 @@ const rules: Record<string, string> = {
   THREAT_OR_HARASSMENT: "Ameaça ou assédio",
   MALICIOUS_LINK: "Link identificado como malicioso",
 };
+
 const actions: Record<string, string> = {
   WARNING: "Advertência",
   MUTE: "Silenciamento temporário",
   RESTRICTION: "Restrição temporária",
-  KICK: "Remoção da sala",
+  KICK: "Remoção temporária da sala",
   SUSPENSION: "Conta suspensa temporariamente",
-  BAN: "Conta banida",
+  BAN: "Banimento temporário",
 };
+
+function secondsLeft(penalty: Penalty, now: number) {
+  if (!penalty.endsAt) return Math.max(0, penalty.remainingSeconds ?? 0);
+  return Math.max(
+    0,
+    Math.ceil((new Date(penalty.endsAt).getTime() - now) / 1000),
+  );
+}
+
+function formatRemaining(seconds: number) {
+  const safe = Math.max(0, seconds);
+  const minutes = Math.floor(safe / 60);
+  const secs = safe % 60;
+  if (minutes >= 60) {
+    const hours = Math.floor(minutes / 60);
+    const rest = minutes % 60;
+    return `${hours}h ${String(rest).padStart(2, "0")}min`;
+  }
+  return `${minutes}:${String(secs).padStart(2, "0")}`;
+}
+
 export function CommunityFeedback() {
   const [achievement, setAchievement] = useState<Achievement>();
   const [penalties, setPenalties] = useState<Penalty[]>([]);
-  const [acknowledged, setAcknowledged] = useState<string[]>([]);
   const [status, setStatus] = useState("");
+  const [now, setNow] = useState(Date.now());
+  const [dismissed, setDismissed] = useState<string[]>([]);
   const card = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    try {
+      const stored = JSON.parse(
+        localStorage.getItem("enturma:penalties:dismissed") ?? "[]",
+      );
+      if (Array.isArray(stored))
+        setDismissed(stored.filter((id) => typeof id === "string"));
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => setNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
+
   useEffect(() => {
     let live = true;
     const load = () =>
       api<Penalty[]>("/moderation/mine")
         .then((rows) => {
-          if (live)
-            setPenalties(
-              rows
-                .filter(
-                  (p) =>
-                    !p.revokedAt &&
-                    p.status !== "REVOKED" &&
-                    (!p.endsAt || new Date(p.endsAt).getTime() > Date.now()),
-                )
-                .slice(0, 3),
-            );
+          if (!live) return;
+          setPenalties(
+            rows.filter(
+              (p) =>
+                !p.revokedAt &&
+                p.status !== "REVOKED" &&
+                p.status !== "EXPIRED" &&
+                secondsLeft(p, Date.now()) > 0,
+            ),
+          );
         })
         .catch(() => {});
     const unlocked = () =>
@@ -65,6 +114,7 @@ export function CommunityFeedback() {
           if (live && latest) setAchievement(latest);
         })
         .catch(() => {});
+
     void load();
     window.addEventListener("enturma-moderation_action", load);
     window.addEventListener("enturma-achievement_unlocked", unlocked);
@@ -74,6 +124,13 @@ export function CommunityFeedback() {
       window.removeEventListener("enturma-achievement_unlocked", unlocked);
     };
   }, []);
+
+  useEffect(() => {
+    setPenalties((current) =>
+      current.filter((penalty) => secondsLeft(penalty, now) > 0),
+    );
+  }, [now]);
+
   useEffect(() => {
     if (!achievement || !card.current) return;
     const reduced =
@@ -94,6 +151,25 @@ export function CommunityFeedback() {
       clearTimeout(timer);
     };
   }, [achievement]);
+
+  const visiblePenalty = useMemo(
+    () => penalties.find((penalty) => !dismissed.includes(penalty.id)),
+    [dismissed, penalties],
+  );
+
+  function dismiss(id: string) {
+    setDismissed((current) => {
+      const next = current.includes(id) ? current : [...current, id];
+      try {
+        localStorage.setItem(
+          "enturma:penalties:dismissed",
+          JSON.stringify(next.slice(-100)),
+        );
+      } catch {}
+      return next;
+    });
+  }
+
   return (
     <>
       {achievement && (
@@ -114,88 +190,110 @@ export function CommunityFeedback() {
           </button>
         </section>
       )}
-      {penalties.map((p) => (
-        <details
-          className={`penalty-notice ${["BAN", "SUSPENSION"].includes(p.kind) && !acknowledged.includes(p.id) ? "account-penalty" : ""}`}
-          open={["BAN", "SUSPENSION"].includes(p.kind) ? true : undefined}
-          key={p.id}
-        >
-          <summary>
-            <ShieldAlert size={18} />
-            {actions[p.kind] ?? p.kind} · {rules[p.rule] ?? p.rule}
-          </summary>
-          {["BAN", "SUSPENSION"].includes(p.kind) && (
-            <>
-              <h2>Sua participação está limitada</h2>
-              <p>
-                Consulte a medida aplicada à sua conta. Você pode solicitar uma
-                revisão humana abaixo.
-              </p>
-              <Link href="/settings">Configurações e segurança da conta</Link>
-            </>
-          )}
+
+      {visiblePenalty ? (
+        <section className="penalty-notice active-penalty" role="status">
+          <div className="penalty-notice-heading">
+            <ShieldAlert size={19} />
+            <div>
+              <strong>
+                {actions[visiblePenalty.kind] ?? visiblePenalty.kind} ·{" "}
+                {rules[visiblePenalty.rule] ?? visiblePenalty.rule}
+              </strong>
+              <span>
+                Tempo restante:{" "}
+                <b>{formatRemaining(secondsLeft(visiblePenalty, now))}</b>
+              </span>
+            </div>
+          </div>
+
           <p>
-            Regra: {p.rule}.{" "}
-            {p.endsAt
-              ? `Termina em ${new Date(p.endsAt).toLocaleString("pt-BR")}.`
-              : p.kind === "WARNING"
-                ? "Orientação registrada; evite repetir esta conduta."
-                : "Sem prazo automático. Você pode pedir revisão."}
+            A medida é temporária e desaparece automaticamente quando o contador
+            chegar a zero. O aviso acompanha você entre as salas enquanto estiver
+            ativo.
           </p>
-          <p>
-            Escopo: {p.roomId ? "sala de estudo" : "conta"}. Esta medida não
-            inspeciona mensagens privadas cifradas.
-          </p>
-          {p.appeal ? (
-            <p>Pedido de revisão enviado. Situação: {p.status}.</p>
-          ) : (
-            <form
-              onSubmit={async (e) => {
-                e.preventDefault();
-                const reason = String(
-                  new FormData(e.currentTarget).get("reason"),
+
+          {visiblePenalty.appeal ? (
+            <p>
+              Recurso analisado:{" "}
+              {visiblePenalty.status === "APPEALED"
+                ? "aguardando análise da Enturma AI"
+                : visiblePenalty.status === "CONFIRMED"
+                  ? "penalidade mantida"
+                  : visiblePenalty.status}.
+              {visiblePenalty.reviewNote
+                ? ` ${visiblePenalty.reviewNote}`
+                : ""}
+            </p>
+          ) : null}
+
+          <form
+            onSubmit={async (event) => {
+              event.preventDefault();
+              const reason = String(
+                new FormData(event.currentTarget).get("reason") ?? "",
+              ).trim();
+              try {
+                const result = await post<AppealDecision>(
+                  `/moderation/${visiblePenalty.id}/appeal`,
+                  { reason },
                 );
-                try {
-                  await post(`/moderation/${p.id}/appeal`, { reason });
+                setStatus(
+                  result.revoked
+                    ? "Recurso aceito pela Enturma AI. Penalidade removida."
+                    : result.analysis,
+                );
+                if (result.revoked) {
+                  setPenalties((old) =>
+                    old.filter((item) => item.id !== visiblePenalty.id),
+                  );
+                } else {
                   setPenalties((old) =>
                     old.map((item) =>
-                      item.id === p.id
-                        ? { ...item, appeal: reason, status: "APPEALED" }
+                      item.id === visiblePenalty.id
+                        ? {
+                            ...item,
+                            appeal: reason,
+                            status: result.status,
+                            reviewNote: result.analysis,
+                          }
                         : item,
                     ),
                   );
-                  setStatus("Pedido enviado para revisão humana.");
-                } catch (e) {
-                  setStatus((e as Error).message);
                 }
-              }}
-            >
-              <label>
-                Solicitar revisão
-                <textarea
-                  name="reason"
-                  required
-                  minLength={5}
-                  maxLength={2000}
-                />
-              </label>
-              <button>Enviar pedido</button>
-            </form>
-          )}
+              } catch (error) {
+                setStatus((error as Error).message);
+              }
+            }}
+          >
+            <label>
+              Recorrer da penalidade
+              <textarea
+                name="reason"
+                required
+                minLength={20}
+                maxLength={2000}
+                placeholder="Explique claramente o contexto e por que a penalidade deve ser removida."
+              />
+            </label>
+            <button>Enviar para análise da Enturma AI</button>
+          </form>
+
           <p role="status">{status}</p>
-          {!acknowledged.includes(p.id) && (
-            <button
-              className="secondary"
-              onClick={() => setAcknowledged((old) => [...old, p.id])}
-            >
-              Entendi
-            </button>
-          )}
-        </details>
-      ))}
+
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => dismiss(visiblePenalty.id)}
+          >
+            Entendi
+          </button>
+        </section>
+      ) : null}
     </>
   );
 }
+
 const categoryNames: Record<string, string> = {
   ROOM_MESSAGE: "Mensagens de salas",
   PRIVATE_MESSAGE: "Mensagens privadas",
@@ -206,16 +304,25 @@ const categoryNames: Record<string, string> = {
   RIDE: "Caronas",
   FRIEND: "Amizades",
 };
-type Preference = { category: string; inApp: boolean; email: boolean; push: boolean };
+
+type Preference = {
+  category: string;
+  inApp: boolean;
+  email: boolean;
+  push: boolean;
+};
+
 export function NotificationPreferences() {
   const [items, setItems] = useState<Preference[]>([]);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
+
   useEffect(() => {
     api<Preference[]>("/notifications/preferences")
       .then(setItems)
       .catch((e) => setStatus(e.message));
   }, []);
+
   async function save(item: Preference) {
     setBusy(true);
     try {
@@ -233,13 +340,14 @@ export function NotificationPreferences() {
       setBusy(false);
     }
   }
+
   return (
     <section className="notification-preferences">
       <h2>Como você recebe novidades</h2>
       <p>
-        Escolha separadamente o que aparece dentro do Enturma, chega por push no celular ou PC
-        ou é enviado por e-mail. E-mails de segurança, confirmação de conta e recuperação
-        de senha continuam ativos.
+        Escolha separadamente o que aparece dentro do Enturma, chega por push no
+        celular ou PC ou é enviado por e-mail. E-mails de segurança, confirmação
+        de conta e recuperação de senha continuam ativos.
       </p>
       {items.map((item) => (
         <fieldset key={item.category}>
