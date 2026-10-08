@@ -319,28 +319,36 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     ratio: 0.5,
   });
   const startAudio = intro.getByRole("button", { name: "Reproduzir com som" });
-  await expect
-    .poll(async () => ({
-      canStart:
-        (await startAudio.isVisible()) ||
-        Number(
-          await intro
-            .locator("[data-intro-frame]")
-            .getAttribute("data-intro-frame"),
-        ) > 20,
-      media: await narration.evaluate((audio: HTMLAudioElement) => ({
-        time: audio.currentTime,
-        paused: audio.paused,
-        ready: audio.readyState,
-        error: audio.error?.message,
-        muted: audio.muted,
-        network: audio.networkState,
-        visibility: document.visibilityState,
-        rect: audio.closest(".enturma-intro")?.getBoundingClientRect().toJSON(),
-      })),
-    }))
-    .toMatchObject({ canStart: true });
-  if (await startAudio.isVisible()) await startAudio.click();
+  async function startNarrationWhenReady() {
+    await expect(narration).toHaveCount(1);
+    await intro.locator("[data-intro-frame]").scrollIntoViewIfNeeded();
+    await expect
+      .poll(async () => ({
+        canStart:
+          (await startAudio.isVisible()) ||
+          Number(
+            await intro
+              .locator("[data-intro-frame]")
+              .getAttribute("data-intro-frame"),
+          ) > 20,
+        media: await narration.evaluate((audio: HTMLAudioElement) => ({
+          time: audio.currentTime,
+          paused: audio.paused,
+          ready: audio.readyState,
+          error: audio.error?.message,
+          muted: audio.muted,
+          network: audio.networkState,
+          visibility: document.visibilityState,
+          rect: audio
+            .closest(".enturma-intro")
+            ?.getBoundingClientRect()
+            .toJSON(),
+        })),
+      }))
+      .toMatchObject({ canStart: true });
+    if (await startAudio.isVisible()) await startAudio.click();
+  }
+  await startNarrationWhenReady();
   await expect
     .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
     .toBe(false);
@@ -396,6 +404,8 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   await expect(intro).toHaveAttribute("data-minimized", "true");
   await page.getByRole("button", { name: "Assistir apresentação" }).click();
   await expect(intro).toBeVisible();
+  // Replay mounts a fresh audio context; browser autoplay policy applies again.
+  await startNarrationWhenReady();
   await expect
     .poll(async () =>
       Number(
@@ -470,7 +480,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .click();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(intro.locator("canvas")).toHaveCount(0);
-  if (await startAudio.isVisible()) await startAudio.click();
+  await startNarrationWhenReady();
   await expect
     .poll(() =>
       narration.evaluate(
