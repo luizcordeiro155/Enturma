@@ -19,6 +19,7 @@ import {
   Send,
   Smile,
   Reply,
+  ShieldAlert,
   X,
 } from "lucide-react";
 import { UserIdentity } from "./user-identity";
@@ -42,6 +43,32 @@ import { MessageMenu } from "./message-menu";
 import { EmojiPicker, AnimatedEmoji } from "./emoji-picker";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
+
+type ActivePenalty = {
+  id: string;
+  roomId?: string;
+  rule: string;
+  kind: string;
+  endsAt?: string;
+  remainingSeconds?: number;
+  status: string;
+};
+
+function moderationSecondsLeft(penalty: ActivePenalty | undefined, now: number) {
+  if (!penalty) return 0;
+  if (penalty.endsAt)
+    return Math.max(
+      0,
+      Math.ceil((new Date(penalty.endsAt).getTime() - now) / 1000),
+    );
+  return Math.max(0, penalty.remainingSeconds ?? 0);
+}
+
+function moderationCountdown(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  const rest = seconds % 60;
+  return `${minutes}:${String(rest).padStart(2, "0")}`;
+}
 
 type Props = {
   typing?: { id: string; name: string }[];
@@ -110,9 +137,54 @@ export function RoomChat(props: Props) {
   );
   const [roomActionAnchor, setRoomActionAnchor] =
     useState<MessageActionAnchor | null>(null);
+  const [activePenalty, setActivePenalty] = useState<ActivePenalty>();
+  const [penaltyNow, setPenaltyNow] = useState(Date.now());
   const newestRef = useRef<string | undefined>(undefined);
   const countRef = useRef(messages.length);
   useNotificationTarget();
+
+  const loadPenalty = useCallback(async () => {
+    try {
+      const rows = await api<ActivePenalty[]>("/moderation/mine", {
+        cache: "no-store",
+      });
+      const current = rows.find(
+        (penalty) =>
+          (penalty.roomId === roomId || !penalty.roomId) &&
+          penalty.kind !== "WARNING" &&
+          moderationSecondsLeft(penalty, Date.now()) > 0,
+      );
+      setActivePenalty(current);
+      if (!current) setPenaltyNow(Date.now());
+    } catch {
+      // A conversa continua disponível se o estado de moderação não carregar.
+    }
+  }, [roomId]);
+
+  useEffect(() => {
+    void loadPenalty();
+    const onModeration = () => void loadPenalty();
+    window.addEventListener("enturma-moderation_action", onModeration);
+    return () =>
+      window.removeEventListener("enturma-moderation_action", onModeration);
+  }, [loadPenalty]);
+
+  useEffect(() => {
+    if (!activePenalty) return;
+    const timer = window.setInterval(() => {
+      const next = Date.now();
+      setPenaltyNow(next);
+      if (moderationSecondsLeft(activePenalty, next) <= 0) {
+        setActivePenalty(undefined);
+        void loadPenalty();
+      }
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [activePenalty, loadPenalty]);
+
+  const penaltySeconds = moderationSecondsLeft(activePenalty, penaltyNow);
+  const composerBlocked = Boolean(activePenalty && penaltySeconds > 0);
+
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
@@ -647,13 +719,28 @@ export function RoomChat(props: Props) {
       ) : null}
 
       <div className="typing-status" role="status">
-        {props.typing?.length
-          ? `${props.typing.map((p) => p.name).join(", ")} ${props.typing.length === 1 ? "está digitando" : "estão digitando"}…`
-          : ""}
+        {composerBlocked
+          ? `Envio temporariamente bloqueado · ${moderationCountdown(penaltySeconds)}`
+          : props.typing?.length
+            ? `${props.typing.map((p) => p.name).join(", ")} ${props.typing.length === 1 ? "está digitando" : "estão digitando"}…`
+            : ""}
       </div>
+      {composerBlocked ? (
+        <div className="room-penalty-timer" role="status" aria-live="polite">
+          <ShieldAlert size={17} />
+          <span>
+            Aguarde <strong>{moderationCountdown(penaltySeconds)}</strong> para
+            enviar novas mensagens.
+          </span>
+        </div>
+      ) : null}
       {!ended ? (
         <form
           onSubmit={async (event) => {
+            if (composerBlocked) {
+              event.preventDefault();
+              return;
+            }
             forceFollowLatest.current = true;
             nearBottom.current = true;
             setEmojiOpen(false);
@@ -732,6 +819,7 @@ export function RoomChat(props: Props) {
               className="composer-icon-button"
               aria-label="Adicionar emoji"
               aria-expanded={emojiOpen}
+              disabled={composerBlocked}
               onPointerDown={(event) => event.preventDefault()}
               onClick={(event) => {
                 setEmojiAnchor(messageActionAnchor(event.currentTarget));
@@ -746,7 +834,7 @@ export function RoomChat(props: Props) {
               <span className="sr-only">Adicionar imagem</span>
               <input
                 type="file"
-                disabled={busy}
+                disabled={busy || composerBlocked}
                 accept="image/jpeg,image/png,image/webp,image/gif"
                 onChange={(e) => {
                   selectImage(e.target.files?.[0] ?? null);
@@ -760,6 +848,7 @@ export function RoomChat(props: Props) {
               <textarea
                 ref={composerRef}
                 aria-busy={busy}
+                disabled={composerBlocked}
                 value={draft}
                 onFocus={() => {
                   setNativeChatComposerFocused(true);
@@ -788,7 +877,11 @@ export function RoomChat(props: Props) {
                 rows={1}
                 enterKeyHint="enter"
                 inputMode="text"
-                placeholder="Mensagem"
+                placeholder={
+                  composerBlocked
+                    ? `Você poderá enviar em ${moderationCountdown(penaltySeconds)}`
+                    : "Mensagem"
+                }
               />
             </label>
 
@@ -796,7 +889,7 @@ export function RoomChat(props: Props) {
               className="composer-send-button"
               aria-label="Enviar mensagem"
               onPointerDown={(event) => event.preventDefault()}
-              disabled={busy || (!draft.trim() && !image)}
+              disabled={composerBlocked || busy || (!draft.trim() && !image)}
             >
               {busy ? (
                 <Loader2 className="spin" size={20} />
