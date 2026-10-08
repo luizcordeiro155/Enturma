@@ -185,9 +185,18 @@ export function CommunityFeedback() {
 
           <p>
             A medida é temporária e desaparece automaticamente quando o contador
-            chegar a zero. O aviso acompanha você entre as salas enquanto estiver
-            ativo.
+            chegar a zero. O aviso permanece somente na área de Salas enquanto
+            estiver ativo.
           </p>
+
+          {visiblePenalty.roomId ? (
+            <Link
+              className="button secondary"
+              href={`/rooms/${visiblePenalty.roomId}`}
+            >
+              Abrir sala da penalidade
+            </Link>
+          ) : null}
 
           {visiblePenalty.appeal ? (
             <p>
