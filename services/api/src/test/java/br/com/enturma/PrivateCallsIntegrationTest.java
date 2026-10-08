@@ -15,6 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 @SpringBootTest
+// Release scheduled workers before another test context uses the same database.
+@org.springframework.test.annotation.DirtiesContext(
+    classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class PrivateCallsIntegrationTest {
   @Autowired AuthService auth;
   @Autowired Db db;

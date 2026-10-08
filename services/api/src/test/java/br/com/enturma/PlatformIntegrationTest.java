@@ -22,6 +22,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@org.springframework.test.annotation.DirtiesContext(
+    classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class PlatformIntegrationTest {
   @org.springframework.test.context.bean.override.mockito.MockitoBean
   br.com.enturma.ai.AiProvider aiProvider;
