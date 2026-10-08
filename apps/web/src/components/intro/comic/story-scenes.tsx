@@ -29,6 +29,7 @@ import {
   Shout,
   useInkTime,
 } from "./comic-kit";
+import { StaticPresenter } from "./static-presenter";
 
 const previewFeatures = [
   { Icon: MessagesSquare, label: "SUA TURMA", color: C.magenta },
@@ -54,7 +55,7 @@ export function HookScene() {
           width: portrait ? 500 : height * 1.2,
           height: portrait ? 500 : height * 1.2,
           opacity: 0.8,
-          transform: `rotate(${still ? 0 : raw * 0.5}deg)`,
+          transform: `rotate(${still ? 0 : raw * 0.8}deg) scale(${still ? 1 : 0.96 + Math.sin(raw / 10) * 0.04})`,
         }}
       >
         <Burst color={C.green} frame={f + 24} />
@@ -76,7 +77,7 @@ export function HookScene() {
             color: C.white,
             fontSize: portrait ? 58 : Math.min(77, width * 0.06),
             marginTop: 27,
-            transform: `translateX(${still ? 0 : Math.sin((Math.min(raw, 12) / 12) * Math.PI) * -12}px)`,
+            transform: `translateX(${still ? 0 : Math.sin((Math.min(raw, 14) / 14) * Math.PI) * -18}px) translateY(${still ? 0 : Math.sin(raw/15)*2}px) scale(${0.96 + pop(f,2)*0.04})`,
           }}
         >
           A VIDA
@@ -89,6 +90,19 @@ export function HookScene() {
         </div>
       </div>
 
+      <StaticPresenter
+        atlas="poses"
+        cell={0}
+        style={{
+          position: "absolute",
+          width: portrait ? 230 : Math.min(300, height * 0.46),
+          height: portrait ? 230 : Math.min(300, height * 0.46),
+          right: portrait ? 18 : 34,
+          top: portrait ? 286 : 96,
+          zIndex: 4,
+          filter: "drop-shadow(0 22px 28px #0008)",
+        }}
+      />
       <div
         data-intro-copy
         style={{
@@ -183,6 +197,20 @@ export function LonelyScene() {
           <span style={{ color: C.green }}>CADÊ A TURMA?</span>
         </div>
       </div>
+      <StaticPresenter
+        atlas="story"
+        cell={0}
+        gray
+        style={{
+          position: "absolute",
+          width: portrait ? 220 : Math.min(280, height * 0.43),
+          height: portrait ? 220 : Math.min(280, height * 0.43),
+          left: portrait ? 22 : 58,
+          top: portrait ? 250 : 245,
+          zIndex: 4,
+          filter: "drop-shadow(0 20px 28px #0008)",
+        }}
+      />
       <div
         data-intro-safe
         data-intro-copy
@@ -288,6 +316,19 @@ export function ChaosScene() {
       >
         ???
       </div>
+      <StaticPresenter
+        atlas="story"
+        cell={1}
+        style={{
+          position: "absolute",
+          width: portrait ? 155 : 205,
+          height: portrait ? 155 : 205,
+          left: portrait ? 32 : 54,
+          bottom: portrait ? 128 : 112,
+          zIndex: 5,
+          filter: "drop-shadow(0 18px 24px #0008)",
+        }}
+      />
       <svg
         viewBox="0 0 900 600"
         style={{
@@ -413,6 +454,19 @@ export function TurnScene() {
         </div>
       </div>
 
+      <StaticPresenter
+        atlas="poses"
+        cell={3}
+        style={{
+          position: "absolute",
+          width: portrait ? 215 : Math.min(290, height * 0.45),
+          height: portrait ? 215 : Math.min(290, height * 0.45),
+          right: portrait ? 16 : 38,
+          top: portrait ? 300 : 170,
+          zIndex: 4,
+          filter: "drop-shadow(0 22px 28px #0008)",
+        }}
+      />
       <div
         data-intro-safe
         data-intro-copy
@@ -462,6 +516,19 @@ export function ProofScene() {
       >
         <Brand size={portrait ? 29 : 32} />
       </div>
+      <StaticPresenter
+        atlas="social"
+        cell={3}
+        style={{
+          position: "absolute",
+          width: portrait ? 145 : 180,
+          height: portrait ? 145 : 180,
+          left: portrait ? 20 : 28,
+          top: portrait ? 22 : 94,
+          zIndex: 5,
+          filter: "drop-shadow(0 18px 24px #0008)",
+        }}
+      />
       <svg
         viewBox="0 0 900 562"
         style={{
@@ -575,6 +642,19 @@ export function BuildupScene() {
     <AbsoluteFill data-intro-scene="14" style={{ overflow: "hidden" }}>
       <Backdrop color={C.green} />
 
+      <StaticPresenter
+        atlas="finale"
+        cell={1}
+        style={{
+          position: "absolute",
+          width: portrait ? 170 : 210,
+          height: portrait ? 170 : 210,
+          left: portrait ? 25 : 56,
+          top: portrait ? 52 : 82,
+          zIndex: 5,
+          filter: "drop-shadow(0 18px 24px #0008)",
+        }}
+      />
       <div
         style={{
           position: "absolute",
@@ -664,6 +744,19 @@ export function CtaScene() {
         <Burst color={C.green} frame={f} />
       </div>
 
+      <StaticPresenter
+        atlas="finale"
+        cell={2}
+        style={{
+          position: "absolute",
+          width: portrait ? 165 : 215,
+          height: portrait ? 165 : 215,
+          left: portrait ? 16 : width * 0.46,
+          top: portrait ? 438 : 265,
+          zIndex: 5,
+          filter: "drop-shadow(0 18px 24px #0008)",
+        }}
+      />
       <div
         data-intro-safe
         data-intro-copy
