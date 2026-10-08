@@ -647,7 +647,6 @@ export function CtaScene() {
   const { width, height } = useVideoConfig();
   const portrait = width < height;
   const compact = !portrait && width < 1100;
-  const presenterSize = portrait ? 180 : compact ? 210 : 240;
   const { f, raw, still } = useInkTime();
   const final = raw > 124 && !still;
   return (
