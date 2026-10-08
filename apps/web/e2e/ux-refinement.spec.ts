@@ -12,8 +12,9 @@ import { join } from "node:path";
 import pg from "pg";
 import {
   INTRO_FRAMES,
+  INTRO_FPS,
   INTRO_SCENE_FRAMES,
-  INTRO_BOOK_PAGES,
+  INTRO_FEATURE_CUES,
   INTRO_CUES,
 } from "../src/components/intro/intro-model";
 const backend = process.env.E2E_API_URL || "http://localhost:8080";
@@ -311,7 +312,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   await page.goto("/home");
   const intro = page.getByRole("region", { name: "Apresentação do Enturma" });
   await expect(intro).toBeVisible();
-  const narration = intro.locator('audio[src*="enturma-pt-br-presenter"]');
+  const narration = intro.locator('audio[src*="enturma-comic-90"]');
   await expect(narration).toHaveCount(1);
   // The dynamically loaded composition changes the card height. Scroll only
   // after it mounts so the visibility observer can start playback.
@@ -375,7 +376,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.paused))
     .toBe(true);
   const studyCue = INTRO_CUES.find((cue) => cue.scene === 5)!;
-  const studyFrame = studyCue.voiceStartFrame + 60;
+  const studyFrame = studyCue.voiceStartFrame + INTRO_FPS;
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
     .fill(String(studyFrame));
@@ -384,7 +385,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       narration.evaluate(
         (audio: HTMLAudioElement, target: number) =>
           Math.abs(audio.currentTime - target),
-        studyFrame / 60,
+        studyFrame / INTRO_FPS,
       ),
     )
     .toBeLessThan(0.3);
@@ -421,9 +422,17 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     )
     .toBeGreaterThan(20);
   await intro.getByRole("button", { name: "Pausar apresentação" }).click();
+  await intro
+    .getByRole("slider", { name: "Posição da apresentação" })
+    .fill("0");
+  await expect(intro.getByText("SUPERPODER.", { exact: true })).toBeVisible();
+  await expect(intro.locator("[data-presenter]")).toBeVisible();
+  const expressions = new Set<string>();
   for (const frame of [
-    ...INTRO_SCENE_FRAMES.slice(0, -1).map((start) => start + 160),
-    ...INTRO_BOOK_PAGES.map((cue) => cue.fromFrame + 100),
+    ...INTRO_SCENE_FRAMES.slice(0, -1).map((start, i) =>
+      Math.floor((start + INTRO_SCENE_FRAMES[i + 1]) / 2),
+    ),
+    ...INTRO_FEATURE_CUES.map((cue) => cue.fromFrame + 48),
   ]) {
     await intro
       .getByRole("slider", { name: "Posição da apresentação" })
@@ -432,6 +441,11 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       "data-intro-frame",
       String(frame),
     );
+    const expression = await intro
+      .locator("[data-presenter]")
+      .getAttribute("data-presenter-expression");
+    expect(expression).toBeTruthy();
+    expressions.add(expression!);
     const safe = await intro
       .locator("[data-intro-safe]")
       .evaluateAll((elements) =>
@@ -440,26 +454,61 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
           return { top: b.top, bottom: b.bottom, left: b.left, right: b.right };
         }),
       );
-    expect(
-      safe[0].bottom,
-      `Text overlaps art at frame ${frame}`,
-    ).toBeLessThanOrEqual(safe[1].top + 2);
+    const titleLocator = intro.locator("[data-intro-title]");
+    const artLocator = intro.locator("[data-intro-art]");
+    const title = (await titleLocator.count())
+      ? await titleLocator.boundingBox()
+      : null;
+    const art = (await artLocator.count())
+      ? await artLocator.boundingBox()
+      : null;
+    if (title && art) {
+      expect(
+        title.y + title.height,
+        `Text overlaps art at frame ${frame}`,
+      ).toBeLessThanOrEqual(art.y + 2);
+    }
+    const faceLocator = intro.locator("[data-presenter-face]");
+    const face = (await faceLocator.count())
+      ? await faceLocator.boundingBox()
+      : null;
+    if (face) {
+      const cards = await intro
+        .locator("[data-presenter-copy]")
+        .evaluateAll((elements) =>
+          elements.map((el) => {
+            const r = el.getBoundingClientRect();
+            return { x: r.x, y: r.y, w: r.width, h: r.height };
+          }),
+        );
+      for (const card of cards) {
+        const overlap =
+          card.x < face.x + face.width &&
+          card.x + card.w > face.x &&
+          card.y < face.y + face.height &&
+          card.y + card.h > face.y;
+        expect(overlap, `Card covers presenter face at frame ${frame}`).toBe(
+          false,
+        );
+      }
+    }
     for (const bounds of safe) {
       expect(bounds.left).toBeGreaterThanOrEqual(0);
       expect(bounds.right).toBeLessThanOrEqual(390);
     }
   }
-  for (const [index, cue] of INTRO_BOOK_PAGES.entries()) {
+  expect(expressions.size).toBe(16);
+  for (const [index, cue] of INTRO_FEATURE_CUES.entries()) {
     await intro
       .getByRole("slider", { name: "Posição da apresentação" })
-      .fill(String(cue.fromFrame + 100));
-    await expect(intro.locator("[data-book-page]")).toHaveAttribute(
-      "data-book-page",
-      String(index),
+      .fill(String(cue.fromFrame + 48));
+    await expect(intro.locator("[data-intro-scene]")).toHaveAttribute(
+      "data-intro-scene",
+      String(cue.scene),
     );
     await expect(intro.getByLabel("Legenda da narração")).toHaveText(cue.text);
     await intro.screenshot({
-      path: join(screenshots, `intro-book-mobile-${index}.png`),
+      path: join(screenshots, `intro-comic-mobile-${index}.png`),
     });
   }
   await page.screenshot({
@@ -469,11 +518,13 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   await expect(intro).toHaveAttribute("data-layout", "desktop");
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill(String(INTRO_BOOK_PAGES[0].fromFrame + 100));
-  await intro.screenshot({ path: join(screenshots, "intro-book-desktop.png") });
+    .fill(String(INTRO_FEATURE_CUES[0].fromFrame + 48));
+  await intro.screenshot({
+    path: join(screenshots, "intro-comic-desktop.png"),
+  });
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill(String(INTRO_SCENE_FRAMES[9] + 230));
+    .fill(String(INTRO_SCENE_FRAMES[15] + 84));
   await intro.screenshot({
     path: join(screenshots, "intro-closing-desktop.png"),
   });
@@ -493,21 +544,21 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       ),
     )
     .toBe(true);
-  for (const [index, cue] of INTRO_BOOK_PAGES.entries()) {
+  for (const cue of INTRO_FEATURE_CUES) {
     await intro
       .getByRole("slider", { name: "Posição da apresentação" })
-      .fill(String(cue.fromFrame + 60));
-    await expect(intro.locator("[data-book-page]")).toHaveAttribute(
-      "data-book-page",
-      String(index),
+      .fill(String(cue.fromFrame + 36));
+    await expect(intro.locator("[data-intro-scene]")).toHaveAttribute(
+      "data-intro-scene",
+      String(cue.scene),
     );
   }
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill(String(INTRO_SCENE_FRAMES[9] + 160));
-  await expect(intro.locator('[data-intro-scene="9"]')).toBeVisible();
+    .fill(String(INTRO_SCENE_FRAMES[15] + 84));
+  await expect(intro.locator('[data-intro-scene="15"]')).toBeVisible();
   await expect(intro.getByLabel("Legenda da narração")).toHaveText(
-    "Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.",
+    "Se enturme com o Enturma. Fique por dentro da sua faculdade conosco!",
   );
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })

@@ -1,99 +1,123 @@
 {
-  "durationInFrames": 3000,
-  "fps": 60,
-  "audioFile": "intro/enturma-pt-br-presenter-v3.mp3",
-  "sceneFrames": [0, 173, 380, 614, 860, 1095, 1340, 1550, 1778, 2730, 3000],
+  "durationInFrames": 2160,
+  "fps": 24,
+  "audioFile": "intro/comic/enturma-comic-90.mp3",
+  "sceneFrames": [
+    0, 59, 145, 260, 349, 504, 691, 828, 985, 1130, 1300, 1460, 1596, 1753,
+    1918, 2005, 2160
+  ],
   "cues": [
     {
       "fromFrame": 0,
       "scene": 0,
-      "text": "Que tal ter a faculdade inteira mais perto de você?",
-      "voiceStartFrame": 6,
-      "voiceDuration": 2.666666
+      "text": "A vida universitária ganhou superpoder.",
+      "voiceStartFrame": 2,
+      "voiceDuration": 2.23808
     },
     {
-      "fromFrame": 173,
+      "fromFrame": 59,
       "scene": 1,
-      "text": "Com o Enturma, cada conexão vira uma nova possibilidade.",
-      "voiceStartFrame": 181,
-      "voiceDuration": 3.190459
+      "text": "Porque a dúvida não pode ficar perdida num grupo sem resposta.",
+      "voiceStartFrame": 62,
+      "voiceDuration": 3.32142
     },
     {
-      "fromFrame": 380,
+      "fromFrame": 145,
       "scene": 2,
-      "text": "Comece pelas suas matérias e organize o semestre em um só lugar.",
-      "voiceStartFrame": 387,
-      "voiceDuration": 3.65475
+      "text": "A prova chega, o tempo corre, e até encontrar companhia pra aula vira uma missão.",
+      "voiceStartFrame": 148,
+      "voiceDuration": 4.54763
     },
     {
-      "fromFrame": 614,
+      "fromFrame": 260,
       "scene": 3,
-      "text": "Daí, encontre colegas com os mesmos interesses e forme sua turma.",
-      "voiceStartFrame": 621,
-      "voiceDuration": 3.84525
+      "text": "Com o Enturma, você conecta sua faculdade inteira em um só lugar.",
+      "voiceStartFrame": 263,
+      "voiceDuration": 3.47621
     },
     {
-      "fromFrame": 860,
+      "fromFrame": 349,
       "scene": 4,
-      "text": "No feed, compartilhe novidades e descubra o que acontece no campus.",
-      "voiceStartFrame": 867,
-      "voiceDuration": 3.678583
+      "text": "Estude, participe e ganhe XP. Cada conquista mantém sua sequência e mostra o quanto você está evoluindo.",
+      "voiceStartFrame": 352,
+      "voiceDuration": 6.19046
     },
     {
-      "fromFrame": 1095,
+      "fromFrame": 504,
       "scene": 5,
-      "text": "Quando for estudar, abra uma sala e reúna a galera com seus materiais.",
-      "voiceStartFrame": 1103,
-      "voiceDuration": 3.821416
+      "text": "Nos cadernos com IA, documentos, links e imagens viram explicações, resumos e flashcards pra entender de verdade.",
+      "voiceStartFrame": 507,
+      "voiceDuration": 7.53571
     },
     {
-      "fromFrame": 1340,
+      "fromFrame": 691,
       "scene": 6,
-      "text": "Na hora de sair, combine uma carona e divida o caminho.",
-      "voiceStartFrame": 1347,
-      "voiceDuration": 3.261916
+      "text": "No feed, descubra o que acontece no campus, compartilhe uma ideia e encontre quem também quer conversar.",
+      "voiceStartFrame": 694,
+      "voiceDuration": 5.48812
     },
     {
-      "fromFrame": 1550,
+      "fromFrame": 828,
       "scene": 7,
-      "text": "E continue a conversa por voz, vídeo ou compartilhando a tela.",
-      "voiceStartFrame": 1558,
-      "voiceDuration": 3.535709
+      "text": "Da conversa nasce uma turma: abra uma sala, troque mensagens e resolva aquela dúvida junto com seus colegas.",
+      "voiceStartFrame": 831,
+      "voiceDuration": 6.26187
     },
     {
-      "fromFrame": 1778,
+      "fromFrame": 985,
       "scene": 8,
-      "text": "Olha como é simples: curta e comente as publicações que te interessam,",
-      "voiceStartFrame": 1785,
-      "voiceDuration": 3.773833
+      "text": "Vai pra faculdade? Combine uma carona com quem segue na mesma direção e acerte o encontro pelo chat.",
+      "voiceStartFrame": 988,
+      "voiceDuration": 5.78575
     },
     {
-      "fromFrame": 2018,
-      "scene": 8,
-      "text": "resolva aquela dúvida em grupo e acompanhe a discussão,",
-      "voiceStartFrame": 2025,
-      "voiceDuration": 2.952374
-    },
-    {
-      "fromFrame": 2207,
-      "scene": 8,
-      "text": "combine o ponto de encontro com seu motorista pelo chat,",
-      "voiceStartFrame": 2211,
-      "voiceDuration": 2.964291
-    },
-    {
-      "fromFrame": 2396,
-      "scene": 8,
-      "text": "e transforme documentos, links e imagens em explicações nos cadernos com IA.",
-      "voiceStartFrame": 2404,
-      "voiceDuration": 5.321416
-    },
-    {
-      "fromFrame": 2730,
+      "fromFrame": 1130,
       "scene": 9,
-      "text": "Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.",
-      "voiceStartFrame": 2738,
-      "voiceDuration": 3.916666
+      "text": "Precisa mostrar como faz? Entre na chamada, abra o vídeo ou compartilhe a tela. Fica mais fácil aprender junto.",
+      "voiceStartFrame": 1133,
+      "voiceDuration": 6.85717
+    },
+    {
+      "fromFrame": 1300,
+      "scene": 10,
+      "text": "Pra praticar, encare os minigames e complete missões diárias. Cada desafio é um novo passo na sua evolução.",
+      "voiceStartFrame": 1303,
+      "voiceDuration": 6.39287
+    },
+    {
+      "fromFrame": 1460,
+      "scene": 11,
+      "text": "E vem mais por aí: frequência no radar, pra acompanhar suas presenças e planejar as próximas aulas.",
+      "voiceStartFrame": 1463,
+      "voiceDuration": 5.42858
+    },
+    {
+      "fromFrame": 1596,
+      "scene": 12,
+      "text": "Uma rotina com espaço pra focar, organizar a semana e também fazer uma pausa. Seu tempo merece esse cuidado.",
+      "voiceStartFrame": 1599,
+      "voiceDuration": 6.28571
+    },
+    {
+      "fromFrame": 1753,
+      "scene": 13,
+      "text": "Assim, uma dúvida vira conversa, um caminho vira amizade e uma conquista puxa a próxima. É a vida inteira conectada.",
+      "voiceStartFrame": 1756,
+      "voiceDuration": 6.631
+    },
+    {
+      "fromFrame": 1918,
+      "scene": 14,
+      "text": "Sua próxima conexão começa aqui. Bora fazer parte?",
+      "voiceStartFrame": 1921,
+      "voiceDuration": 3.36904
+    },
+    {
+      "fromFrame": 2005,
+      "scene": 15,
+      "text": "Se enturme com o Enturma. Fique por dentro da sua faculdade conosco!",
+      "voiceStartFrame": 2008,
+      "voiceDuration": 3.85717
     }
   ]
 }

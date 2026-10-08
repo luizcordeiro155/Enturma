@@ -6,6 +6,8 @@ import {
   INTRO_FEATURES,
   INTRO_CUES,
   INTRO_FRAMES,
+  INTRO_FPS,
+  INTRO_FEATURE_CUES,
   INTRO_SCENE_FRAMES,
   INTRO_DURATION_LABEL,
   introTime,
@@ -37,18 +39,22 @@ describe("intro adaptation", () => {
       expect(introNarrationAt(cue.fromFrame)).toBe(cue.text);
     });
     expect(introNarrationAt(INTRO_FRAMES)).toBe(
-      "Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.",
+      "Se enturme com o Enturma. Fique por dentro da sua faculdade conosco!",
     );
     expect(introNarrationAt(-1)).toBe(introNarrationAt(0));
   });
   it("keeps complete phrases within their visual cues without padded pauses", () => {
     INTRO_CUES.forEach((cue, index) => {
       const next = INTRO_CUES[index + 1]?.fromFrame ?? INTRO_FRAMES;
-      expect(cue.voiceStartFrame + cue.voiceDuration * 60).toBeLessThan(next);
+      expect(cue.voiceStartFrame + cue.voiceDuration * INTRO_FPS).toBeLessThan(
+        next,
+      );
       const nextVoice = INTRO_CUES[index + 1]?.voiceStartFrame;
       if (nextVoice !== undefined) {
         const breath =
-          nextVoice / 60 - cue.voiceStartFrame / 60 - cue.voiceDuration;
+          nextVoice / INTRO_FPS -
+          cue.voiceStartFrame / INTRO_FPS -
+          cue.voiceDuration;
         expect(breath).toBeGreaterThanOrEqual(0);
         expect(breath).toBeLessThan(0.4);
       }
@@ -57,7 +63,10 @@ describe("intro adaptation", () => {
       );
       expect(cue.fromFrame).toBeLessThan(INTRO_SCENE_FRAMES[cue.scene + 1]);
     });
-    expect(introTime(INTRO_FRAMES)).toBe("0:50");
-    expect(INTRO_DURATION_LABEL).toBe("50 s");
+    expect(INTRO_FRAMES).toBe(2160);
+    expect(INTRO_FPS).toBe(24);
+    expect(INTRO_FEATURE_CUES).toHaveLength(9);
+    expect(introTime(INTRO_FRAMES)).toBe("1:30");
+    expect(INTRO_DURATION_LABEL).toBe("1 min 30 s");
   });
 });

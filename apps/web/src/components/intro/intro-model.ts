@@ -59,10 +59,13 @@ export type IntroProps = {
 };
 export const INTRO_STORAGE_KEY = "enturma-intro:v0.3";
 export const INTRO_FRAMES = storyboard.durationInFrames;
+export const INTRO_FPS = storyboard.fps;
 export const INTRO_SCENE_FRAMES = storyboard.sceneFrames;
 export const INTRO_NARRATION_FILE = storyboard.audioFile;
 export const INTRO_CUES = storyboard.cues;
-export const INTRO_BOOK_PAGES = INTRO_CUES.filter((cue) => cue.scene === 8);
+export const INTRO_FEATURE_CUES = INTRO_CUES.filter(
+  (cue) => cue.scene >= 4 && cue.scene <= 12,
+);
 const durationSeconds = INTRO_FRAMES / storyboard.fps;
 export const INTRO_DURATION_LABEL =
   durationSeconds < 60

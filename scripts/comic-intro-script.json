@@ -1,0 +1,73 @@
+{
+  "fps": 24,
+  "duration": 90,
+  "voice": "pt-BR-FranciscaNeural",
+  "rate": "+5%",
+  "pitch": "+1Hz",
+  "scenes": [
+    {
+      "id": "hook",
+      "text": "A vida universitária ganhou superpoder."
+    },
+    {
+      "id": "lonely",
+      "text": "Porque a dúvida não pode ficar perdida num grupo sem resposta."
+    },
+    {
+      "id": "chaos",
+      "text": "A prova chega, o tempo corre, e até encontrar companhia pra aula vira uma missão."
+    },
+    {
+      "id": "turn",
+      "text": "Com o Enturma, você conecta sua faculdade inteira em um só lugar."
+    },
+    {
+      "id": "rewards",
+      "text": "Estude, participe e ganhe XP. Cada conquista mantém sua sequência e mostra o quanto você está evoluindo."
+    },
+    {
+      "id": "ai",
+      "text": "Nos cadernos com IA, documentos, links e imagens viram explicações, resumos e flashcards pra entender de verdade."
+    },
+    {
+      "id": "feed",
+      "text": "No feed, descubra o que acontece no campus, compartilhe uma ideia e encontre quem também quer conversar."
+    },
+    {
+      "id": "chat",
+      "text": "Da conversa nasce uma turma: abra uma sala, troque mensagens e resolva aquela dúvida junto com seus colegas."
+    },
+    {
+      "id": "rides",
+      "text": "Vai pra faculdade? Combine uma carona com quem segue na mesma direção e acerte o encontro pelo chat."
+    },
+    {
+      "id": "calls",
+      "text": "Precisa mostrar como faz? Entre na chamada, abra o vídeo ou compartilhe a tela. Fica mais fácil aprender junto."
+    },
+    {
+      "id": "games",
+      "text": "Pra praticar, encare os minigames e complete missões diárias. Cada desafio é um novo passo na sua evolução."
+    },
+    {
+      "id": "attendance",
+      "text": "E vem mais por aí: frequência no radar, pra acompanhar suas presenças e planejar as próximas aulas."
+    },
+    {
+      "id": "routine",
+      "text": "Uma rotina com espaço pra focar, organizar a semana e também fazer uma pausa. Seu tempo merece esse cuidado."
+    },
+    {
+      "id": "proof",
+      "text": "Assim, uma dúvida vira conversa, um caminho vira amizade e uma conquista puxa a próxima. É a vida inteira conectada."
+    },
+    {
+      "id": "buildup",
+      "text": "Sua próxima conexão começa aqui. Bora fazer parte?"
+    },
+    {
+      "id": "cta",
+      "text": "Se enturme com o Enturma. Fique por dentro da sua faculdade conosco!"
+    }
+  ]
+}
