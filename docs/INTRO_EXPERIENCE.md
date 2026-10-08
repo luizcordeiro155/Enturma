@@ -1,6 +1,6 @@
 # Apresentação oficial do Enturma
 
-`EnturmaIntroExperience` carrega o `@remotion/player` somente quando a apresentação está aberta. A composição compartilhada `EnturmaIntroComposition` conduz dez cenas em 3.960 frames a 60 FPS (1 minuto e 6 segundos). GSAP controla a entrada e a saída do contêiner e as microinterações da aplicação; não conduz a narrativa do Player.
+`EnturmaIntroExperience` carrega o `@remotion/player` somente quando a apresentação está aberta. A composição compartilhada `EnturmaIntroComposition` conduz dez cenas em 3.000 frames a 60 FPS (50 segundos). GSAP controla a entrada e a saída do contêiner e as microinterações da aplicação; não conduz a narrativa do Player.
 
 A direção de motion usa o livro como ligação entre cenas: páginas vetoriais atravessam os cortes, palavras surgem por máscaras, matérias se montam em perspectiva, a rede se conecta ao avatar real, a comunidade ganha camadas e a rota da carona se desenha. Partículas, trilhas, pulsos e ondas são calculados pelo frame. A paleta cinematográfica de verde profundo, lima, menta e azul permanece consistente nos dois temas; os controles seguem o tema da aplicação. O layout vertical separa texto e arte e amplia a marca nos momentos de abertura/fechamento.
 
@@ -15,7 +15,7 @@ O Player recebe nome, avatar, matérias e período da sessão atual. Não expõe
 - **Pular** pausa, encerra a transição e desmonta o Player; o foco retorna ao guia no celular e às matérias no desktop. O término automático não muda o foco do usuário.
 - Ao terminar ou pular, permanece uma miniatura **Conheça o Enturma**, com botão **Assistir apresentação**. Ela não mantém Canvas/Player executando. O replay reabre a apresentação no início, na própria Home.
 - Controles de pausa e posição permitem explorar a timeline com mouse, toque e teclado.
-- A narração feminina em português brasileiro é um MP3 local de 66 segundos, sincronizado pelo mesmo relógio do Remotion. A apresentação e o replay começam com o som ativado. **Silenciar narração** permite desligá-lo; reativar mantém a posição. Quando a política do navegador bloqueia áudio automático, o vídeo aguarda no início e oferece **Reproduzir com som**, que libera a fala pelo gesto do usuário. Não avançamos silenciosamente enquanto essa permissão está pendente.
+- A narração feminina em português brasileiro é um MP3 local de 50 segundos, sincronizado pelo mesmo relógio do Remotion. A apresentação e o replay começam com o som ativado. **Silenciar narração** permite desligá-lo; reativar mantém a posição. Quando a política do navegador bloqueia áudio automático, o vídeo aguarda no início e oferece **Reproduzir com som**, que libera a fala pelo gesto do usuário. Não avançamos silenciosamente enquanto essa permissão está pendente.
 - Uma legenda acompanha cada cena e permanece disponível sem áudio. Pausar, avançar, ocultar a aba ou minimizar também controla a narração; não há sintetizador de voz nem requisições a serviços de TTS no dispositivo do usuário.
 - Reprodução pausa fora da área visível ou com a aba oculta.
 - A preferência de pouca animação do Enturma e `prefers-reduced-motion` usam as mesmas dez cenas e a mesma duração, com cada cena congelada e sem partículas ou transições. Assim, a narração completa continua acessível sem movimento.
@@ -42,24 +42,36 @@ Depois das oito cenas de apresentação, `BookShowcaseScene` abre um livro em pe
 
 ## Narração
 
-Arquivo atual: `apps/web/public/intro/enturma-pt-br-presenter-v2.mp3`, mono, 44,1 kHz, 96 kbps. Voz sintética feminina brasileira **pt-BR-FranciscaNeural**, sintetizada pelo serviço de fala da Microsoft durante a preparação da mídia. Substitui a interpretação Kokoro anterior. O roteiro usa convites, perguntas, pausas e frases completas para apresentar o aplicativo. A voz foi gerada com velocidade `+5%` e pitch `+1Hz`, sem esticar ou acelerar o áudio na mixagem. Não é gravação de uma locutora humana nem clonagem de voz.
+Arquivo atual: `apps/web/public/intro/enturma-pt-br-presenter-v3.mp3`, mono, 44,1 kHz, 96 kbps. A voz aprovada foi preservada: **pt-BR-FranciscaNeural**, feminina brasileira, com velocidade `+5%` e pitch `+1Hz`. É voz sintética da Microsoft, preparada antes da publicação, sem clonagem ou síntese no navegador.
 
-As 13 tomadas começam 11 frames após sua deixa visual. A duração das cenas foi definida a partir da fala, com margem para respiração antes do próximo corte. `intro-storyboard.json` é a fonte única para áudio, cenas, legendas e viradas de página. As durações são medidas com ffprobe e verificadas nos testes para evitar cortes e sobreposição. A faixa final foi normalizada com `highpass=f=65,loudnorm=I=-17:TP=-1.5:LRA=8`, preenchida até 66 segundos e transcrita independentemente para conferir o roteiro.
+O roteiro agora é uma **única tomada contínua**. As frases conectam os recursos sem reiniciar a apresentação em cada corte. No livro final, a narração demonstra ações (comentar, discutir, combinar o ponto de encontro e estudar com fontes) em vez de repetir a lista de recursos. A interpretação mantém suas respirações naturais; não há silêncio inserido entre cenas, aceleração na mixagem ou cortes de palavras.
 
-| Início da cena | Roteiro                                                                     |
-| -------------- | --------------------------------------------------------------------------- |
-| 0 s            | Ei! Que tal viver a faculdade mais conectado?                               |
-| 4.5 s          | Esse é o Enturma! Seu ponto de encontro na faculdade.                       |
-| 9 s            | Organize suas matérias e encontre sua próxima turma de estudos.             |
-| 14.5 s         | Conheça colegas, troque experiências e aprenda em boa companhia.            |
-| 20 s           | No feed, compartilhe novidades, faça perguntas e participe da conversa.     |
-| 26 s           | Entre nas salas! Reúna seus materiais e estude com inteligência artificial. |
-| 32 s           | Vai pra faculdade? Combine uma carona e encontre companhia no caminho.      |
-| 37.5 s         | Converse por voz, vídeo ou compartilhe a tela. É só se conectar!            |
-| 43 s           | As novidades da faculdade, no seu feed.                                     |
-| 47 s           | Salas pra aprender em companhia.                                            |
-| 50.5 s         | Caronas pra compartilhar o caminho.                                         |
-| 54 s           | E cadernos com inteligência artificial, pra estudar do seu jeito!           |
-| 59 s           | Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.        |
+`scripts/intro-narration.json` contém o roteiro e a configuração da voz. `scripts/generate-intro-narration.py` sintetiza o parágrafo inteiro e alinha cada deixa pelos timestamps de palavras recebidos do provedor. Os cortes visuais ficam no meio da respiração entre frases. O `intro-storyboard.json` gerado conduz cenas, legendas, áudio e viradas do livro; desktop, retrato, paisagem e ultrawide compartilham os mesmos tempos.
 
-Para refazer uma tomada, o comando usado foi `python -m edge_tts --voice pt-BR-FranciscaNeural --rate=+5% --pitch=+1Hz --text "Fala da cena" --write-media take.mp3`. A ferramenta é de preparação, não uma dependência da aplicação. Remixe as tomadas com os offsets de `voiceStartFrame`, meça as durações e atualize conjuntamente o áudio e o storyboard. O player mantém uma única faixa durante toda a apresentação, sem sintetizador no navegador ou chamadas de TTS durante o uso.
+A composição passou de 66 para **50 segundos**. Nesta gravação, as pausas internas detectadas acima de 180 ms ficam entre **0,21 e 0,31 segundo** (`silencedetect`, limiar −42 dB). Restam cerca de 0,4 segundo de respiro após a última palavra. A normalização usa `highpass=f=65,loudnorm=I=-17:TP=-1.5:LRA=8`, sem alterar a velocidade; ffprobe confere a duração do arquivo. Uma transcrição independente conferiu a sequência das falas, com as variações esperadas na grafia da marca.
+
+| Início visual | Roteiro                                                                      |
+| ------------- | ---------------------------------------------------------------------------- |
+| 0.00 s        | Que tal ter a faculdade inteira mais perto de você?                          |
+| 2.88 s        | Com o Enturma, cada conexão vira uma nova possibilidade.                     |
+| 6.33 s        | Comece pelas suas matérias e organize o semestre em um só lugar.             |
+| 10.23 s       | Daí, encontre colegas com os mesmos interesses e forme sua turma.            |
+| 14.33 s       | No feed, compartilhe novidades e descubra o que acontece no campus.          |
+| 18.25 s       | Quando for estudar, abra uma sala e reúna a galera com seus materiais.       |
+| 22.33 s       | Na hora de sair, combine uma carona e divida o caminho.                      |
+| 25.83 s       | E continue a conversa por voz, vídeo ou compartilhando a tela.               |
+| 29.63 s       | Olha como é simples: curta e comente as publicações que te interessam,       |
+| 33.63 s       | resolva aquela dúvida em grupo e acompanhe a discussão,                      |
+| 36.78 s       | combine o ponto de encontro com seu motorista pelo chat,                     |
+| 39.93 s       | e transforme documentos, links e imagens em explicações nos cadernos com IA. |
+| 45.50 s       | Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.         |
+
+Para reproduzir a preparação, use Python com `edge-tts==7.2.8`, FFmpeg e ffprobe no PATH:
+
+```powershell
+python scripts/generate-intro-narration.py
+# Remixar a mesma tomada sem solicitar uma nova síntese:
+python scripts/generate-intro-narration.py --reuse
+```
+
+O cache em `.local/intro-continuous` guarda a tomada original e os timestamps. A opção `--reuse` verifica o hash do roteiro antes de reutilizar o áudio. O nome versionado do MP3 evita servir a narração anterior pelo cache; a mídia v2 permanece disponível para sessões com código antigo. O estado de primeira exibição não é reiniciado por esta atualização.
