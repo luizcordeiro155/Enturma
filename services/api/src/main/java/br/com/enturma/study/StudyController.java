@@ -28,8 +28,9 @@ public class StudyController {
   public Object list(
       @AuthenticationPrincipal Actor a,
       @RequestParam(required = false) UUID subjectId,
-      @RequestParam(defaultValue = "0") int page) {
-    return study.list(a, subjectId, page);
+      @RequestParam(defaultValue = "0") int page,
+      @RequestParam(defaultValue = "false") boolean recommended) {
+    return study.list(a, subjectId, page, recommended);
   }
 
   @PostMapping

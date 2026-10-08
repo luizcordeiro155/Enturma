@@ -42,17 +42,55 @@ public class StudyService {
     events.publishEvent(new AppChanged("rooms_changed", Set.of()));
   }
 
-  public List<Map<String, Object>> list(Actor a, UUID subject, int page) {
+  public List<Map<String, Object>> list(
+      Actor a, UUID subject, int page, boolean recommended) {
+    if (!recommended)
+      return db.list(
+          "SELECT r.*,s.name subject_name,(SELECT count(*) FROM room_participant p WHERE"
+              + " p.room_id=r.id AND left_at IS NULL) participants FROM study_room r JOIN"
+              + " academic_entry s ON s.id=r.subject_id WHERE r.status IN ('OPEN','ACTIVE') AND"
+              + " ends_at>now() AND (?::uuid IS NULL OR subject_id=?) AND NOT EXISTS(SELECT 1 FROM"
+              + " room_participant p JOIN user_block b ON (b.user_id=? AND b.blocked_id=p.user_id) OR"
+              + " (b.blocked_id=? AND b.user_id=p.user_id) WHERE p.room_id=r.id AND p.left_at IS"
+              + " NULL) ORDER BY r.created_at DESC,r.id LIMIT 30 OFFSET ?",
+          subject,
+          subject,
+          a.id(),
+          a.id(),
+          Db.offset(page));
+
     return db.list(
-        "SELECT r.*,s.name subject_name,(SELECT count(*) FROM room_participant p WHERE"
-            + " p.room_id=r.id AND left_at IS NULL) participants FROM study_room r JOIN"
-            + " academic_entry s ON s.id=r.subject_id WHERE r.status IN ('OPEN','ACTIVE') AND"
-            + " ends_at>now() AND (?::uuid IS NULL OR subject_id=?) AND NOT EXISTS(SELECT 1 FROM"
-            + " room_participant p JOIN user_block b ON (b.user_id=? AND b.blocked_id=p.user_id) OR"
-            + " (b.blocked_id=? AND b.user_id=p.user_id) WHERE p.room_id=r.id AND p.left_at IS"
-            + " NULL) ORDER BY r.created_at DESC,r.id LIMIT 30 OFFSET ?",
+        "SELECT r.*,s.name subject_name,"
+            + " (SELECT count(*) FROM room_participant p WHERE p.room_id=r.id AND left_at IS NULL)"
+            + " participants,CASE WHEN us.subject_id IS NOT NULL THEN 'SUBJECT' ELSE 'COURSE' END"
+            + " recommendation_reason FROM study_room r JOIN academic_entry s ON s.id=r.subject_id"
+            + " JOIN academic_curriculum_subject rs ON rs.id=r.subject_id"
+            + " JOIN academic_curriculum room_curriculum ON room_curriculum.id=rs.curriculum_id"
+            + " LEFT JOIN user_subject us ON us.user_id=? AND us.subject_id=r.subject_id"
+            + " LEFT JOIN academic_enrollment own ON own.user_id=?"
+            + " WHERE r.status IN ('OPEN','ACTIVE') AND r.ends_at>now()"
+            + " AND (?::uuid IS NULL OR r.subject_id=?)"
+            + " AND (us.subject_id IS NOT NULL"
+            + " OR own.course_offering_id=room_curriculum.course_offering_id)"
+            + " AND NOT EXISTS(SELECT 1 FROM room_participant p JOIN user_block b ON"
+            + " (b.user_id=? AND b.blocked_id=p.user_id) OR (b.blocked_id=? AND b.user_id=p.user_id)"
+            + " WHERE p.room_id=r.id AND p.left_at IS NULL)"
+            + " AND (NOT r.entries_locked OR EXISTS(SELECT 1 FROM room_participant mine"
+            + " WHERE mine.room_id=r.id AND mine.user_id=? AND mine.left_at IS NULL))"
+            + " AND ((SELECT count(*) FROM room_participant p WHERE p.room_id=r.id AND"
+            + " p.left_at IS NULL)<r.max_participants OR EXISTS(SELECT 1 FROM room_participant mine"
+            + " WHERE mine.room_id=r.id AND mine.user_id=? AND mine.left_at IS NULL))"
+            + " ORDER BY CASE WHEN us.subject_id IS NOT NULL THEN 0 ELSE 1 END,"
+            + " CASE WHEN EXISTS(SELECT 1 FROM room_participant mine WHERE mine.room_id=r.id AND"
+            + " mine.user_id=? AND mine.left_at IS NULL) THEN 0 ELSE 1 END,"
+            + " participants DESC,r.created_at DESC,r.id LIMIT 30 OFFSET ?",
+        a.id(),
+        a.id(),
         subject,
         subject,
+        a.id(),
+        a.id(),
+        a.id(),
         a.id(),
         a.id(),
         Db.offset(page));
