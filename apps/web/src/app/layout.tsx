@@ -27,6 +27,7 @@ import "./call-tiles.css";
 import "./theme-surfaces.css";
 import "./interaction-refinement.css";
 import "./chat-interactions.css";
+import "./rooms-discovery.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";

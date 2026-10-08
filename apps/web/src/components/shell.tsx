@@ -29,6 +29,7 @@ import {
 } from "./ride-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
+  { href: "/rooms", label: "Salas", icon: Users },
   { href: "/forum", label: "Fórum", icon: MessageCircle },
   { href: "/notebooks", label: "Cadernos IA", icon: BookOpen },
   { href: "/friends", label: "Amigos", icon: Users },
