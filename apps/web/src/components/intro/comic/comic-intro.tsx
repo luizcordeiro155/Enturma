@@ -11,7 +11,6 @@ import type { IntroProps } from "../intro-model";
 import storyboard from "../intro-storyboard.json";
 import { AnimatedCaptions } from "./animated-captions";
 import { C, Quality } from "./comic-kit";
-import { PresenterFrame } from "./motion-state";
 import {
   HookScene,
   LonelyScene,
@@ -40,16 +39,10 @@ function ComicCadence({
   children: ReactNode;
   still: boolean;
 }) {
-  const frame = useCurrentFrame();
   return (
-    <PresenterFrame.Provider value={frame}>
-      <Freeze
-        frame={still ? 110 : Math.floor(frame / 2) * 2}
-        active={still || frame % 36 < 12}
-      >
-        {children}
-      </Freeze>
-    </PresenterFrame.Provider>
+    <Freeze frame={110} active={still}>
+      {children}
+    </Freeze>
   );
 }
 export function ComicIntro(props: IntroProps) {
