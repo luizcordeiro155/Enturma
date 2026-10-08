@@ -10,6 +10,7 @@ final class NotificationPresentation {
       case "PRIVATE_MESSAGE" -> who + " enviou uma mensagem privada";
       case "MENTION" -> who + " mencionou você";
       case "ROOM_NOTICE" -> "Aviso da sala";
+      case "MODERATION" -> "Penalidade temporária no Enturma";
       case "FORUM_REPLY" -> who + " respondeu no fórum";
       case "FORUM_LIKE" -> who + " curtiu sua publicação";
       case "FORUM_REACTION" -> who + " reagiu à sua publicação";
