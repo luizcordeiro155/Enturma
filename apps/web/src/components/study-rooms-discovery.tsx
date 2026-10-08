@@ -65,7 +65,10 @@ export function StudyRoomsDiscovery() {
   }, [router]);
 
   useEffect(() => {
-    void load();
+    const timer = window.setTimeout(() => {
+      void load();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [load]);
 
   useLiveRefresh("rooms_changed", load, 12000);
