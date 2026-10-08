@@ -29,7 +29,6 @@ import {
   Shout,
   useInkTime,
 } from "./comic-kit";
-import { Presenter } from "./presenter";
 
 const previewFeatures = [
   { Icon: MessagesSquare, label: "SUA TURMA", color: C.magenta },
@@ -46,7 +45,7 @@ export function HookScene() {
       data-intro-scene="0"
       style={{ background: C.ink, overflow: "hidden" }}
     >
-      <Backdrop color={C.yellow} />
+      <Backdrop color={C.green} />
       <div
         style={{
           position: "absolute",
@@ -58,16 +57,16 @@ export function HookScene() {
           transform: `rotate(${still ? 0 : raw * 0.5}deg)`,
         }}
       >
-        <Burst color={C.yellow} frame={f + 24} />
+        <Burst color={C.green} frame={f + 24} />
       </div>
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 30 : 48,
           top: portrait ? 30 : 42,
-          width: portrait ? width - 60 : width * 0.47,
+          width: portrait ? width - 60 : width * 0.56,
         }}
       >
         <Brand size={portrait ? 35 : 45} />
@@ -84,44 +83,36 @@ export function HookScene() {
           <br />
           UNIVERSITÁRIA
           <br />
-          <span style={{ color: C.yellow }}>GANHOU</span>
+          <span style={{ color: C.green }}>GANHOU</span>
           <br />
-          <span style={{ color: C.cyan }}>SUPERPODER.</span>
+          <span style={{ color: C.yellow }}>SUPERPODER.</span>
         </div>
       </div>
-      <Presenter
-        style={{
-          position: "absolute",
-          width: portrait ? 410 : height * 0.8,
-          height: portrait ? 410 : height * 0.8,
-          right: portrait ? 8 : width * 0.025,
-          top: portrait ? 325 : 54,
-        }}
-      />
+
       <div
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
-          left: portrait ? 32 : width * 0.51,
-          top: portrait ? 440 : height * 0.64,
+          left: portrait ? 34 : width * 0.60,
+          top: portrait ? 408 : height * 0.53,
           transform: `rotate(-8deg) scale(${0.92 + pop(f + 5) * 0.08})`,
         }}
       >
         <Shout
           text="POW!"
-          color={C.yellow}
+          color={C.green}
           size={portrait ? 83 : 85}
           frame={raw + 10}
         />
       </div>
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 30 : 48,
-          right: portrait ? 30 : width * 0.53,
-          bottom: portrait ? 130 : 114,
+          right: portrait ? 30 : width * 0.47,
+          bottom: portrait ? 132 : 116,
           display: "flex",
           gap: 9,
         }}
@@ -134,7 +125,7 @@ export function HookScene() {
               minWidth: 0,
               border: "3px solid #000",
               boxShadow: `4px 4px ${color}`,
-              background: C.ink,
+              background: "#161e21",
               padding: portrait ? "12px 8px" : "14px 8px",
               color,
               transform: `translateY(${still ? 0 : (1 - pop(f, i * 3)) * 18}px)`,
@@ -166,22 +157,11 @@ export function LonelyScene() {
   const second = still || raw > 40;
   return (
     <AbsoluteFill data-intro-scene="1" style={{ overflow: "hidden" }}>
-      <Backdrop dark color="#9393af" />
-      <Presenter
-        scene={1}
-        gray
-        style={{
-          position: "absolute",
-          width: portrait ? 370 : height * 0.78,
-          height: portrait ? 370 : height * 0.78,
-          left: portrait ? 20 : undefined,
-          right: portrait ? undefined : 0,
-          top: portrait ? 220 : 92,
-        }}
-      />
+      <Backdrop dark color={C.deep} />
+
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 30 : 50,
@@ -200,17 +180,17 @@ export function LonelyScene() {
         >
           TANTA GENTE.
           <br />
-          <span style={{ color: C.magenta }}>CADÊ A TURMA?</span>
+          <span style={{ color: C.green }}>CADÊ A TURMA?</span>
         </div>
       </div>
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
-          left: portrait ? 30 : 50,
-          top: portrait ? 598 : 286,
-          width: portrait ? width - 60 : width * 0.44,
+          left: portrait ? 30 : width * 0.49,
+          top: portrait ? 360 : 215,
+          width: portrait ? width - 60 : width * 0.43,
           boxSizing: "border-box",
           border: "4px solid #000",
           background: "#d5d2d9",
@@ -253,16 +233,16 @@ export function LonelyScene() {
       </div>
       <Shout
         text="UHHH…"
-        color="#9393af"
+        color={C.green}
         size={portrait ? 45 : 63}
         frame={40}
         style={{
           position: "absolute",
-          top: portrait ? 326 : 474,
-          left: portrait ? 385 : 65,
+          top: portrait ? 285 : 440,
+          left: portrait ? 385 : width * 0.12,
         }}
       />
-      <PageTear color="#9795ad" />
+      <PageTear color={C.deep} />
     </AbsoluteFill>
   );
 }
@@ -275,10 +255,10 @@ export function ChaosScene() {
   const ramp = interpolate(f, [0, 20, 55, 82, 110], [0, 20, 27, 80, 160]);
   return (
     <AbsoluteFill data-intro-scene="2" style={{ overflow: "hidden" }}>
-      <Backdrop color={C.magenta} dark />
+      <Backdrop color={C.green} dark />
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 34 : 55,
@@ -291,14 +271,14 @@ export function ChaosScene() {
         >
           ALGUÉM VAI
           <br />
-          <span style={{ color: C.magenta }}>PRA AULA AMANHÃ?</span>
+          <span style={{ color: C.green }}>PRA AULA AMANHÃ?</span>
         </div>
       </div>
       <div
         style={{
           ...display,
           fontSize: portrait ? 310 : 380,
-          color: C.magenta,
+          color: C.green,
           position: "absolute",
           left: portrait ? 65 : width * 0.5,
           top: portrait ? 230 : 100,
@@ -340,7 +320,7 @@ export function ChaosScene() {
           </g>
           <path
             d="M0 0L64 45"
-            stroke={C.magenta}
+            stroke={C.green}
             strokeWidth="13"
             strokeLinecap="round"
           />
@@ -366,25 +346,16 @@ export function ChaosScene() {
           </g>
         ))}
       </svg>
-      <Presenter
-        scene={2}
-        style={{
-          position: "absolute",
-          width: portrait ? 255 : 260,
-          height: portrait ? 255 : 260,
-          left: portrait ? 315 : 52,
-          top: portrait ? 220 : 278,
-        }}
-      />
+
       <div
         style={{
           position: "absolute",
           inset: 0,
-          boxShadow: `inset 0 0 ${prog(f, 65, 25) * 65}px ${C.magenta}88`,
+          boxShadow: `inset 0 0 ${prog(f, 65, 25) * 65}px ${C.green}66`,
           pointerEvents: "none",
         }}
       />
-      <PageTear color={C.magenta} />
+      <PageTear color={C.green} />
     </AbsoluteFill>
   );
 }
@@ -395,12 +366,12 @@ export function TurnScene() {
   const { f, raw, still } = useInkTime();
   return (
     <AbsoluteFill data-intro-scene="3" style={{ overflow: "hidden" }}>
-      <Backdrop color={C.magenta} />
+      <Backdrop color={C.green} />
       <div
         style={{
           position: "absolute",
           inset: "-40%",
-          background: `conic-gradient(from ${still ? 15 : f * 2}deg,${C.cyan},${C.violet},${C.magenta},${C.yellow},${C.cyan})`,
+          background: `conic-gradient(from ${still ? 15 : f * 1.35}deg,${C.green},${C.yellow},${C.cyan},${C.violet},${C.green})`,
           opacity: 0.4,
           transform: `scale(${0.6 + prog(f, 0, 12) * 0.4})`,
         }}
@@ -414,7 +385,7 @@ export function TurnScene() {
       />
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 30 : 50,
@@ -426,7 +397,7 @@ export function TurnScene() {
           text="BAM!"
           frame={f + 10}
           size={portrait ? 88 : 110}
-          color={C.yellow}
+          color={C.green}
         />
         <div
           style={{
@@ -438,39 +409,29 @@ export function TurnScene() {
         >
           SUA FACULDADE.
           <br />
-          <span style={{ color: C.cyan }}>TODA CONECTADA.</span>
+          <span style={{ color: C.yellow }}>TODA CONECTADA.</span>
         </div>
       </div>
-      <Presenter
-        scene={3}
-        style={{
-          position: "absolute",
-          width: portrait ? 410 : height * 0.85,
-          height: portrait ? 410 : height * 0.85,
-          right: portrait ? 15 : 22,
-          top: portrait ? 280 : 60,
-          transform: `translateY(${(1 - pop(raw, 2)) * 25}px)`,
-        }}
-      />
+
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 35 : 55,
-          top: portrait ? 690 : 370,
+          top: portrait ? 525 : 345,
           width: portrait ? width - 70 : width * 0.43,
           boxSizing: "border-box",
           background: C.ink,
           padding: portrait ? "16px 20px" : 22,
-          border: `4px solid ${C.yellow}`,
-          boxShadow: `7px 7px ${C.magenta}`,
+          border: `4px solid ${C.green}`,
+          boxShadow: `7px 7px ${C.yellow}`,
           transform: `rotate(-2deg) scale(${0.95 + pop(f, 15) * 0.05})`,
         }}
       >
         <Brand size={portrait ? 59 : 67} />
       </div>
-      <Particles color={C.magenta} burstAt={4} />
+      <Particles color={C.green} burstAt={4} />
       <PageTear color={C.cyan} />
     </AbsoluteFill>
   );
@@ -488,20 +449,11 @@ export function ProofScene() {
   ];
   return (
     <AbsoluteFill data-intro-scene="13" style={{ overflow: "hidden" }}>
-      <Backdrop color={C.magenta} />
-      <Presenter
-        scene={13}
-        style={{
-          position: "absolute",
-          width: portrait ? 160 : 205,
-          height: portrait ? 160 : 205,
-          left: portrait ? width - 187 : 20,
-          top: portrait ? 0 : 175,
-        }}
-      />
+      <Backdrop color={C.green} />
+
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 30 : 45,
@@ -580,7 +532,7 @@ export function ProofScene() {
       </svg>
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           ...display,
           position: "absolute",
@@ -609,7 +561,7 @@ export function ProofScene() {
       >
         Cenas ilustrativas do universo Enturma
       </div>
-      <PageTear color={C.violet} />
+      <PageTear color={C.green} />
     </AbsoluteFill>
   );
 }
@@ -621,17 +573,8 @@ export function BuildupScene() {
   const shrink = 1 - prog(f, 0, 30) * 0.75;
   return (
     <AbsoluteFill data-intro-scene="14" style={{ overflow: "hidden" }}>
-      <Backdrop color={C.cyan} />
-      <Presenter
-        scene={14}
-        style={{
-          position: "absolute",
-          width: portrait ? 220 : 240,
-          height: portrait ? 220 : 240,
-          left: portrait ? (width - 220) / 2 : 65,
-          top: portrait ? 55 : 70,
-        }}
-      />
+      <Backdrop color={C.green} />
+
       <div
         style={{
           position: "absolute",
@@ -671,7 +614,7 @@ export function BuildupScene() {
       </div>
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           ...display,
           color: C.white,
@@ -686,13 +629,13 @@ export function BuildupScene() {
       >
         SUA PRÓXIMA
         <br />
-        <span style={{ color: C.cyan }}>CONEXÃO COMEÇA AQUI.</span>
+        <span style={{ color: C.green }}>CONEXÃO COMEÇA AQUI.</span>
       </div>
       <div
         style={{
           position: "absolute",
           inset: 0,
-          border: `${still ? 4 : 3 + Math.sin(f) * 1}px solid ${C.magenta}`,
+          border: `${still ? 4 : 3 + Math.sin(f) * 1}px solid ${C.green}`,
           opacity: prog(f, 40, 20),
         }}
       />
@@ -709,7 +652,7 @@ export function CtaScene() {
   const final = raw > 124 && !still;
   return (
     <AbsoluteFill data-intro-scene="15" style={{ overflow: "hidden" }}>
-      <Backdrop color={C.yellow} />
+      <Backdrop color={C.green} />
       <div
         style={{
           position: "absolute",
@@ -720,21 +663,12 @@ export function CtaScene() {
           opacity: Math.max(0.16, 1 - prog(f, 6, 22) * 0.82),
         }}
       >
-        <Burst color={C.magenta} frame={f} />
+        <Burst color={C.green} frame={f} />
       </div>
-      <Presenter
-        scene={15}
-        style={{
-          position: "absolute",
-          width: presenterSize,
-          height: presenterSize,
-          left: portrait ? 0 : width * (compact ? 0.47 : 0.4),
-          top: portrait ? 427 : height - (compact ? 360 : 380),
-        }}
-      />
+
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 35 : 55,
@@ -751,7 +685,7 @@ export function CtaScene() {
           style={{
             ...display,
             fontSize: portrait ? 43 : 42,
-            color: C.yellow,
+            color: C.green,
             marginBottom: 12,
           }}
         >
@@ -776,7 +710,7 @@ export function CtaScene() {
       </div>
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? (width - 245) / 2 : width * 0.67,
@@ -786,7 +720,7 @@ export function CtaScene() {
           background: "#fff",
           padding: 13,
           border: "6px solid #000",
-          boxShadow: `11px 11px ${C.yellow}`,
+          boxShadow: `11px 11px ${C.green}`,
           boxSizing: "border-box",
         }}
       >
@@ -808,7 +742,7 @@ export function CtaScene() {
       </div>
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: portrait ? 30 : 56,
@@ -835,7 +769,7 @@ export function CtaScene() {
                 alignItems: "center",
                 background: C.white,
                 border: "4px solid #000",
-                boxShadow: `5px 5px ${C.cyan}`,
+                boxShadow: `5px 5px ${C.green}`,
                 padding: "12px 18px",
                 fontSize: portrait ? 22 : 25,
                 fontWeight: 800,
@@ -851,7 +785,7 @@ export function CtaScene() {
       </div>
       <div
         data-intro-safe
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
           left: 30,
@@ -864,10 +798,10 @@ export function CtaScene() {
           fontWeight: 700,
         }}
       >
-        enturma-flax.vercel.app <span style={{ color: C.yellow }}>· 2026</span>
+        enturma-flax.vercel.app <span style={{ color: C.green }}>· 2026</span>
       </div>
-      <Particles color={C.yellow} burstAt={2} />
-      <PageTear color={C.yellow} />
+      <Particles color={C.green} burstAt={2} />
+      <PageTear color={C.green} />
       {final && (
         <div
           style={{
