@@ -18,6 +18,7 @@ public class AutoModService {
   private final Db db;
   private final RoomEvents rooms;
   private final org.springframework.context.ApplicationEventPublisher events;
+  private final NotificationService notices;
   private final AiProvider ai;
   private final ObjectMapper json;
 
@@ -25,11 +26,13 @@ public class AutoModService {
       Db db,
       RoomEvents rooms,
       org.springframework.context.ApplicationEventPublisher events,
+      NotificationService notices,
       AiProvider ai,
       ObjectMapper json) {
     this.db = db;
     this.rooms = rooms;
     this.events = events;
+    this.notices = notices;
     this.ai = ai;
     this.json = json;
   }
@@ -195,6 +198,18 @@ public class AutoModService {
             room,
             user);
     }
+
+    notices.send(
+        null,
+        user,
+        "MODERATION",
+        room == null ? "moderation" : "room:" + room,
+        id,
+        room == null ? "/rooms" : "/rooms/" + room,
+        "Penalidade temporária ativa por "
+            + effectiveMinutes
+            + " min. Toque para abrir a sala e ver o aviso.");
+
     events.publishEvent(new AppChanged("moderation_action", Set.of(user)));
     return id;
   }
