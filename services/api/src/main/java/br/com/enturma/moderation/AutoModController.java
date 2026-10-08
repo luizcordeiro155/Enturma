@@ -60,7 +60,7 @@ public class AutoModController {
       @NotNull UUID userId,
       UUID roomId,
       @NotBlank @Pattern(regexp = "WARNING|MUTE|RESTRICTION|KICK|SUSPENSION|BAN") String kind,
-      @Min(0) @Max(43200) int minutes,
+      @Min(0) @Max(60) int minutes,
       @NotBlank @Size(max = 60) String rule,
       @NotBlank @Size(max = 4000) String evidence,
       @NotNull UUID requestId) {}
@@ -72,10 +72,10 @@ public class AutoModController {
     var target = db.one("SELECT role FROM app_user WHERE id=?", p.userId());
     if (!target.get("role").equals("USER") && !a.role().equals("SUPER_ADMIN"))
       throw ApiException.forbidden();
-    if (Set.of("MUTE", "RESTRICTION", "SUSPENSION").contains(p.kind()) && p.minutes() == 0)
+    if (!p.kind().equals("WARNING") && p.minutes() == 0)
       throw ApiException.invalid("Informe a duração da medida temporária.");
-    if (p.kind().equals("BAN") && p.minutes() != 0)
-      throw ApiException.invalid("Banimento exige revisão humana e não tem prazo automático.");
+    if (p.kind().equals("BAN") && p.minutes() > 60)
+      throw ApiException.invalid("Banimentos temporários não podem ultrapassar 60 minutos.");
     if (Set.of("BAN", "SUSPENSION").contains(p.kind()) && p.roomId() != null)
       throw ApiException.invalid("Suspensão e banimento são medidas de conta.");
     if (Set.of("MUTE", "KICK").contains(p.kind()) && p.roomId() == null)
