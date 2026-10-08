@@ -646,7 +646,6 @@ export function BuildupScene() {
 export function CtaScene() {
   const { width, height } = useVideoConfig();
   const portrait = width < height;
-  const compact = !portrait && width < 1100;
   const { f, raw, still } = useInkTime();
   const final = raw > 124 && !still;
   return (
