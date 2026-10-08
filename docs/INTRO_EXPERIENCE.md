@@ -1,77 +1,71 @@
-# Apresentação oficial do Enturma
+# Apresentação oficial do Enturma — edição quadrinhos
 
-`EnturmaIntroExperience` carrega o `@remotion/player` somente quando a apresentação está aberta. A composição compartilhada `EnturmaIntroComposition` conduz dez cenas em 3.000 frames a 60 FPS (50 segundos). GSAP controla a entrada e a saída do contêiner e as microinterações da aplicação; não conduz a narrativa do Player.
+A composição compartilhada `EnturmaIntroComposition` agora apresenta **90 segundos, 2.160 frames a 24 fps**, em dezesseis cenas. `EnturmaIntroExperience` continua carregando o Player sob demanda. Os cortes acompanham uma tomada contínua de voz, sem inserir pausas para preencher blocos fixos.
 
-A direção de motion usa o livro como ligação entre cenas: páginas vetoriais atravessam os cortes, palavras surgem por máscaras, matérias se montam em perspectiva, a rede se conecta ao avatar real, a comunidade ganha camadas e a rota da carona se desenha. Partículas, trilhas, pulsos e ondas são calculados pelo frame. A paleta cinematográfica de verde profundo, lima, menta e azul permanece consistente nos dois temas; os controles seguem o tema da aplicação. O layout vertical separa texto e arte e amplia a marca nos momentos de abertura/fechamento.
+## Formatos e narrativa
 
-SVG desenha a marca e as conexões. O Canvas desenha partículas determinísticas a partir do frame do Remotion, sem criar um segundo loop de animação. O scanner inicial apresenta o manifesto real dos módulos; não simula uma consulta ao GitHub.
+Mantivemos os formatos existentes conforme a revisão do briefing: `EnturmaPortrait` (600×860), `EnturmaDesktop` (1200×675), `EnturmaLandscape` (960×600) e `EnturmaUltrawide` (1600×640). O retrato mantém a proporção usada no aplicativo, em vez de impor 9:16.
 
-O Player recebe nome, avatar, matérias e período da sessão atual. Não expõe dados privados. Como ainda não existe uma autorização específica para usar uma lista pública de estudantes nessa apresentação, os nós secundários mostram recursos do Enturma. Não são apresentados estudantes fictícios em produção.
+O roteiro passa pela abertura, dúvida, falta de tempo, conexão com o Enturma, nove recursos, comunidade e convite final. Frequência e Pomodoro/rotina são identificados como **EM BREVE · PRÉVIA**, pois ainda não existem no produto. Posts, resultados, contadores e avatares desenhados são exemplos ilustrativos, não dados reais de estudantes. O CTA e o QR apontam para **https://enturma-flax.vercel.app/download**, com Android e Windows, sem selos de lojas não publicadas.
+
+## Motion e apresentadora
+
+Retícula Ben-Day, contornos pretos, sombras duras, tipografia Archivo Black, rasgos diagonais, impactos cromáticos e partículas compõem a linguagem de quadrinhos. A paleta inclui ciano, magenta, amarelo, verde, roxo e laranja. SVG e Canvas são determinísticos, calculados pelo frame; não há animação CSS independente nem segundo loop de requestAnimationFrame.
+
+A abertura já mostra marca, título, apresentadora e recursos no primeiro frame. Cada uma das dezesseis cenas tem uma pose/expressão exclusiva: boas-vindas, dúvida, preocupação, solução, orgulho, curiosidade, conversa social, escuta, indicação da carona, chamada com fones, celebração, atenção à frequência, organização, aprovação, apresentação e convite final. Não existe ciclo de poses padronizado. Escala, direção, posição e ritmo de oscilação são definidos por cena, com áreas reservadas que mantêm os cards longe do rosto.
+
+A atuação usa poses-chave ilustradas e movimento contínuo em 24 fps; não é gravação de uma pessoa nem sincronização labial por fonema. Nos painéis de recursos, os primeiros 12 frames de cada grupo de 36 seguram cada desenho por dois frames, simulando 12 fps; o restante usa 24 fps. O relógio separado da apresentadora preserva sua fluidez mesmo durante esses holds.
+
+After Effects, OBS, Ableton, Suno e Udio não foram usados. As cenas são construídas em código, não capturas da interface.
+
+## Narração e trilha
+
+Arquivo: `apps/web/public/intro/comic/enturma-comic-90.mp3`, estéreo, 44,1 kHz, 160 kbps e 90 segundos.
+
+A voz aprovada foi preservada: **pt-BR-FranciscaNeural**, feminina brasileira, velocidade `+5%`, pitch `+1Hz`. Uma única tomada termina em aproximadamente 87,5 segundos. As pausas internas medidas ficam entre 0,21 e 0,31 segundo, sem alongar o áudio nem reiniciar a apresentação a cada recurso.
+
+A trilha instrumental original em 138 BPM usa bumbo, subgrave, percussão e sintetizadores gerados com NumPy. Efeitos acompanham confirmações, portal, conquistas e carona; a trilha baixa durante a voz. Há impactos em 0, 3, 12, 51 e 84 segundos, redução da percussão entre 39 e 51, uma interrupção musical de um beat em 78 e stinger final. A narração continua durante a pausa musical, atendendo à orientação de fluidez. A narradora feminina permanece como única voz.
+
+Normalização: `loudnorm=I=-16:TP=-1.5:LRA=9`. O áudio é preparado antes da publicação; não há TTS nem síntese de voz no navegador. Legendas por cena e palavras destacadas compartilham os timestamps da tomada.
+
+`scripts/comic-intro-script.json` contém o roteiro. `scripts/generate-comic-intro-audio.py` sintetiza a fala, verifica palavras, cria a trilha e grava o MP3, `intro-storyboard.json` e `comic/narration-words.json`. Reutiliza o cache em `.local/comic-intro` quando o hash do roteiro/voz coincide. Os cortes são calculados no meio das pequenas respirações.
+
+Para reproduzir, use Python com NumPy, `edge-tts==7.2.8`, FFmpeg e ffprobe:
+
+```powershell
+python scripts/generate-comic-intro-audio.py
+```
+
+O antigo `generate-intro-narration.py` pertence à edição de 50 segundos e não deve ser executado sobre esta timeline. Mídias antigas permanecem para sessões com código anterior.
 
 ## Reprodução e acessibilidade
 
-- Primeira apresentação por dispositivo/versão: `enturma-intro:v0.3` no armazenamento local. O estado é registrado quando o contêiner entra na área visível.
-- Repetição manual: **Guia do Enturma → Ver apresentação novamente**.
-- **Pular** pausa, encerra a transição e desmonta o Player; o foco retorna ao guia no celular e às matérias no desktop. O término automático não muda o foco do usuário.
-- Ao terminar ou pular, permanece uma miniatura **Conheça o Enturma**, com botão **Assistir apresentação**. Ela não mantém Canvas/Player executando. O replay reabre a apresentação no início, na própria Home.
-- Controles de pausa e posição permitem explorar a timeline com mouse, toque e teclado.
-- A narração feminina em português brasileiro é um MP3 local de 50 segundos, sincronizado pelo mesmo relógio do Remotion. A apresentação e o replay começam com o som ativado. **Silenciar narração** permite desligá-lo; reativar mantém a posição. Quando a política do navegador bloqueia áudio automático, o vídeo aguarda no início e oferece **Reproduzir com som**, que libera a fala pelo gesto do usuário. Não avançamos silenciosamente enquanto essa permissão está pendente.
-- Uma legenda acompanha cada cena e permanece disponível sem áudio. Pausar, avançar, ocultar a aba ou minimizar também controla a narração; não há sintetizador de voz nem requisições a serviços de TTS no dispositivo do usuário.
-- Reprodução pausa fora da área visível ou com a aba oculta.
-- A preferência de pouca animação do Enturma e `prefers-reduced-motion` usam as mesmas dez cenas e a mesma duração, com cada cena congelada e sem partículas ou transições. Assim, a narração completa continua acessível sem movimento.
-- Memória, número de núcleos e largura selecionam qualidade alta, otimizada ou baixa. Layouts lógicos específicos atendem retrato, paisagem, desktop e ultrawide.
-- Eventos, observadores, tweens GSAP e o Player são descartados ao desmontar. Não há Player oculto executando em segundo plano.
+- Som ativado por padrão na apresentação e no replay, com opção de silenciar. Se o navegador bloquear o áudio automático, aguarda no início e oferece **Reproduzir com som**.
+- Pausa, posição, teclado, minimização e replay continuam funcionando. Aba oculta ou Player fora da área visível pausam a reprodução.
+- Ao pular ou terminar, fica a miniatura **Conheça o Enturma**, sem áudio, Canvas ou Player executando em segundo plano.
+- Pouca animação e `prefers-reduced-motion` congelam cada cena em um estado legível, retiram partículas/transições e preservam as falas e legendas.
+- O estado `enturma-intro:v0.3` não é reiniciado para quem já assistiu; o replay permite ver a edição nova.
 
-## Reutilização em vídeo
+## Assets e procedência
 
-`apps/web/src/remotion/index.tsx` registra a mesma composição, sem uma segunda implementação, nos formatos `EnturmaDesktop`, `EnturmaPortrait`, `EnturmaLandscape` e `EnturmaUltrawide`. O Player e o Remotion estão fixados na versão `4.0.530`.
+`ArchivoBlack-Regular.ttf` vem do repositório oficial Google Fonts e está acompanhado de `ArchivoBlack-OFL.txt`, sob SIL Open Font License.
 
-Para uma exportação de marketing, use o CLI/Renderer da mesma versão, instalado no ambiente de renderização; ele não integra o bundle web. Por exemplo, a partir da raiz:
+As ilustrações em `public/intro/comic/` foram geradas com a ferramenta integrada de imagens. A referência original e as pranchas PNG ficam preservadas no diretório de geração; `presenter-poses.webp`, `presenter-story.webp`, `presenter-social.webp` e `presenter-finale.webp` são pranchas transparentes 2×2. Cada célula é enquadrada em React. Não representam usuários reais. As imagens originais estão preservadas no diretório de geração do Codex.
 
-```powershell
-npx --package @remotion/cli@4.0.530 remotion render apps/web/src/remotion/index.tsx EnturmaDesktop out/enturma-intro.mp4 --public-dir apps/web/public
-```
+Prompt-base: “A precisely aligned 2 by 2 sprite sheet of four waist-up poses of the same fictional Afro-Brazilian university presenter. Preserve her identity, short curly black afro, warm brown skin, pearl earrings, cyan varsity jacket with magenta trim, yellow backpack straps, white top, rich detailed inked neon comic-book illustration and halftone. Same scale in equal square cells, transparent background, no text or borders. Distinct believable facial expressions, head angles, eye direction and gestures; hands inside each cell.”
 
-As propriedades padrão usam recursos reais do produto, sem perfis fictícios. Uma exportação com perfis reais exige autorização para essa mídia; URLs de avatar autenticadas devem ser substituídas por arquivos acessíveis ao renderizador. A entrega web não depende de gerar MP4.
+Direção por prancha: saudação/palma aberta/indicação/aprovação; dúvida/preocupação com relógio/troféu/curiosidade com livro IA; compartilhamento no telefone/escuta/indicação com chaves/chamada com fones; comemoração/checklist verde/caderno aberto/convite com as mãos.
 
-## Livro e encerramento
+## Exportação e validação
 
-Depois das oito cenas de apresentação, `BookShowcaseScene` abre um livro em perspectiva. Quatro páginas demonstram feed, salas, caronas e cadernos com IA: cartões e reações surgem em sequência, conversas se montam, uma rota é desenhada e materiais viram etapas de estudo. As viradas usam duas faces, rotação no eixo Y, sombra de dobra e camadas de papel. O livro tem proporções e índice próprios no retrato; os textos essenciais permanecem dentro da área visível.
-
-`PresenterClosingScene` reúne as páginas, desenha o símbolo do livro e revela a marca e a frase: **Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.** Tipografia, símbolos e recursos entram em tempos distintos. Todo movimento deriva dos frames, inclusive a exportação. Em movimento reduzido, as quatro páginas mudam sem animação na hora correspondente da fala e o encerramento aparece estático.
-
-## Narração
-
-Arquivo atual: `apps/web/public/intro/enturma-pt-br-presenter-v3.mp3`, mono, 44,1 kHz, 96 kbps. A voz aprovada foi preservada: **pt-BR-FranciscaNeural**, feminina brasileira, com velocidade `+5%` e pitch `+1Hz`. É voz sintética da Microsoft, preparada antes da publicação, sem clonagem ou síntese no navegador.
-
-O roteiro agora é uma **única tomada contínua**. As frases conectam os recursos sem reiniciar a apresentação em cada corte. No livro final, a narração demonstra ações (comentar, discutir, combinar o ponto de encontro e estudar com fontes) em vez de repetir a lista de recursos. A interpretação mantém suas respirações naturais; não há silêncio inserido entre cenas, aceleração na mixagem ou cortes de palavras.
-
-`scripts/intro-narration.json` contém o roteiro e a configuração da voz. `scripts/generate-intro-narration.py` sintetiza o parágrafo inteiro e alinha cada deixa pelos timestamps de palavras recebidos do provedor. Os cortes visuais ficam no meio da respiração entre frases. O `intro-storyboard.json` gerado conduz cenas, legendas, áudio e viradas do livro; desktop, retrato, paisagem e ultrawide compartilham os mesmos tempos.
-
-A composição passou de 66 para **50 segundos**. Nesta gravação, as pausas internas detectadas acima de 180 ms ficam entre **0,21 e 0,31 segundo** (`silencedetect`, limiar −42 dB). Restam cerca de 0,4 segundo de respiro após a última palavra. A normalização usa `highpass=f=65,loudnorm=I=-17:TP=-1.5:LRA=8`, sem alterar a velocidade; ffprobe confere a duração do arquivo. Uma transcrição independente conferiu a sequência das falas, com as variações esperadas na grafia da marca.
-
-| Início visual | Roteiro                                                                      |
-| ------------- | ---------------------------------------------------------------------------- |
-| 0.00 s        | Que tal ter a faculdade inteira mais perto de você?                          |
-| 2.88 s        | Com o Enturma, cada conexão vira uma nova possibilidade.                     |
-| 6.33 s        | Comece pelas suas matérias e organize o semestre em um só lugar.             |
-| 10.23 s       | Daí, encontre colegas com os mesmos interesses e forme sua turma.            |
-| 14.33 s       | No feed, compartilhe novidades e descubra o que acontece no campus.          |
-| 18.25 s       | Quando for estudar, abra uma sala e reúna a galera com seus materiais.       |
-| 22.33 s       | Na hora de sair, combine uma carona e divida o caminho.                      |
-| 25.83 s       | E continue a conversa por voz, vídeo ou compartilhando a tela.               |
-| 29.63 s       | Olha como é simples: curta e comente as publicações que te interessam,       |
-| 33.63 s       | resolva aquela dúvida em grupo e acompanhe a discussão,                      |
-| 36.78 s       | combine o ponto de encontro com seu motorista pelo chat,                     |
-| 39.93 s       | e transforme documentos, links e imagens em explicações nos cadernos com IA. |
-| 45.50 s       | Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.         |
-
-Para reproduzir a preparação, use Python com `edge-tts==7.2.8`, FFmpeg e ffprobe no PATH:
+Player e exports usam a mesma composição, com Remotion 4.0.530. A partir de `apps/web`:
 
 ```powershell
-python scripts/generate-intro-narration.py
-# Remixar a mesma tomada sem solicitar uma nova síntese:
-python scripts/generate-intro-narration.py --reuse
+npx --package @remotion/cli@4.0.530 remotion studio src/remotion/index.tsx --port=3017
+npx --package @remotion/cli@4.0.530 remotion render src/remotion/index.tsx EnturmaPortrait ../../dist/enturma-comic-90-portrait.mp4 --codec=h264 --scale=2 --crf=18
+npx --package @remotion/cli@4.0.530 remotion render src/remotion/index.tsx EnturmaDesktop ../../dist/enturma-comic-90-desktop.mp4 --codec=h264 --scale=2 --crf=18
 ```
 
-O cache em `.local/intro-continuous` guarda a tomada original e os timestamps. A opção `--reuse` verifica o hash do roteiro antes de reutilizar o áudio. O nome versionado do MP3 evita servir a narração anterior pelo cache; a mídia v2 permanece disponível para sessões com código antigo. O estado de primeira exibição não é reiniciado por esta atualização.
+O fator 2 preserva as proporções, produz 1200×1720 e 2400×1350 e mantém dimensões pares para H.264. A entrega web não depende dos MP4.
+
+Os testes cobrem duração/FPS, nove recursos, sincronização, enquadramento vertical, cards sem sobreposição no rosto, pausa, busca, minimização, replay, navegação, bloqueio de autoplay e movimento reduzido. Stills e exports permitem conferir os layouts e a sequência completa.

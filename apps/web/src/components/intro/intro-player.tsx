@@ -3,7 +3,7 @@ import { useEffect, useRef, type RefObject } from "react";
 import { Player, type PlayerRef } from "@remotion/player";
 import { EnturmaIntroComposition } from "./enturma-intro-composition";
 import type { IntroProps } from "./intro-model";
-import { INTRO_FRAMES } from "./intro-model";
+import { INTRO_FRAMES, INTRO_FPS } from "./intro-model";
 
 export default function IntroPlayer({
   inputProps,
@@ -120,7 +120,7 @@ export default function IntroPlayer({
         ref={player}
         component={EnturmaIntroComposition}
         inputProps={inputProps}
-        fps={60}
+        fps={INTRO_FPS}
         durationInFrames={INTRO_FRAMES}
         compositionWidth={width}
         compositionHeight={height}
