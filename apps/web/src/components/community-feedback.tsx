@@ -68,7 +68,7 @@ export function CommunityFeedback() {
   const [achievement, setAchievement] = useState<Achievement>();
   const [penalties, setPenalties] = useState<Penalty[]>([]);
   const [status, setStatus] = useState("");
-  const [now, setNow] = useState(Date.now());
+  const [now, setNow] = useState(0);
   const card = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -113,12 +113,6 @@ export function CommunityFeedback() {
       window.removeEventListener("enturma-achievement_unlocked", unlocked);
     };
   }, []);
-
-  useEffect(() => {
-    setPenalties((current) =>
-      current.filter((penalty) => secondsLeft(penalty, now) > 0),
-    );
-  }, [now]);
 
   useEffect(() => {
     if (!achievement || !card.current) return;
