@@ -215,7 +215,6 @@ export default function Rooms() {
       }
       renderItem={({ item: room }) => {
         const direct = subjectIds.has(room.subjectId);
-        const full = room.participants >= room.maxParticipants;
         return (
           <View style={[styles.row, { gap: 12 }]}>
             <View
@@ -330,14 +329,8 @@ export default function Rooms() {
             </View>
 
             <Button
-              title={
-                joiningId === room.id
-                  ? "Entrando..."
-                  : full
-                    ? "Sala completa"
-                    : "Entrar na sala"
-              }
-              disabled={Boolean(joiningId) || full}
+              title={joiningId === room.id ? "Entrando..." : "Entrar na sala"}
+              disabled={Boolean(joiningId)}
               onPress={() => void join(room)}
             />
           </View>
