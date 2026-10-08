@@ -14,6 +14,7 @@ import {
 } from "remotion";
 import { BookOpen } from "lucide-react";
 import { Quality } from "./motion-state";
+import { StaticPresenter, type StaticPresenterAtlas } from "./static-presenter";
 export { Quality } from "./motion-state";
 
 export const C = {
@@ -43,6 +44,16 @@ export const pop = (f: number, delay = 0) =>
     fps: 24,
     config: { damping: 17, stiffness: 120, mass: 0.82 },
   });
+export const snap = (f: number, delay = 0) =>
+  spring({
+    frame: Math.max(0, f - delay),
+    fps: 24,
+    config: { damping: 13, stiffness: 210, mass: 0.58 },
+  });
+export const float = (f: number, speed = 1, amount = 1) =>
+  Math.sin((f / 11) * speed) * amount;
+export const cameraPush = (f: number, from = 0, duration = 26) =>
+  interpolate(f, [from, from + duration], [0, 1], clamp);
 export const display: CSSProperties = {
   fontFamily: '"Comic Archivo",Arial,sans-serif',
   fontWeight: 900,
@@ -181,6 +192,31 @@ export function Backdrop({
           transform: `translate(${still ? 0 : Math.sin(f / 86) * 18}px,${still ? 0 : Math.cos(f / 74) * 12}px) scale(${still ? 1 : 1.015 + Math.sin(f / 120) * 0.008})`,
         }}
       />
+      <div
+        style={{
+          position: "absolute",
+          width: width * 0.52,
+          height: width * 0.52,
+          borderRadius: "50%",
+          left: width * 0.58 + (still ? 0 : Math.sin(f / 28) * 24),
+          top: height * 0.06 + (still ? 0 : Math.cos(f / 33) * 18),
+          background: `radial-gradient(circle,${color}2b,transparent 67%)`,
+          filter: "blur(12px)",
+          opacity: 0.9,
+        }}
+      />
+      <div
+        style={{
+          position: "absolute",
+          width: width * 0.4,
+          height: width * 0.4,
+          borderRadius: "50%",
+          left: width * 0.02 + (still ? 0 : Math.cos(f / 37) * 20),
+          top: height * 0.48 + (still ? 0 : Math.sin(f / 31) * 16),
+          background: `radial-gradient(circle,${C.green}22,transparent 70%)`,
+          filter: "blur(18px)",
+        }}
+      />
       <svg
         width={width}
         height={height}
@@ -215,6 +251,28 @@ export function Backdrop({
           borderLeft: `2px solid ${color}44`,
         }}
       />
+      <svg
+        viewBox={`0 0 ${width} ${height}`}
+        width={width}
+        height={height}
+        style={{ position: "absolute", inset: 0, opacity: dark ? 0.08 : 0.14 }}
+      >
+        {Array.from({ length: 8 }, (_, i) => {
+          const offset = ((f * (i % 2 ? 0.7 : -0.48) + i * 150) % (width + 420)) - 210;
+          return (
+            <line
+              key={`speed-${i}`}
+              x1={offset}
+              y1={height * (0.1 + i * 0.1)}
+              x2={offset + width * 0.24}
+              y2={height * (0.1 + i * 0.1) - 70}
+              stroke={i % 3 === 0 ? C.green : color}
+              strokeWidth={i % 3 === 0 ? 3 : 1.5}
+              opacity={still ? 0.15 : 0.32}
+            />
+          );
+        })}
+      </svg>
       {!dark && (
         <svg
           viewBox={`0 0 ${width} ${height}`}
@@ -342,8 +400,22 @@ export function Stage({
   const titleWidth = portrait ? width - 60 : width * 0.37;
   const artTop = portrait ? 270 : height * 0.13;
   const artHeight = portrait ? height - 425 : height * 0.69;
-  const artRise = still ? 0 : (1 - pop(f, 6)) * 22;
-  const artScale = still ? 1 : 0.985 + pop(f, 7) * 0.015;
+  const push = still ? 1 : cameraPush(f, 0, 34);
+  const artRise = still ? 0 : (1 - pop(f, 6)) * 32 + float(raw, 0.52, 3.2);
+  const artScale = still ? 1 : 0.955 + pop(f, 7) * 0.045 + push * 0.012;
+  const artYaw = still ? 0 : Math.sin(raw / 34) * 0.42;
+  const presenterLooks: Array<{ atlas: StaticPresenterAtlas; cell: number }> = [
+    { atlas: "poses", cell: 0 },
+    { atlas: "story", cell: 2 },
+    { atlas: "social", cell: 1 },
+    { atlas: "poses", cell: 3 },
+    { atlas: "story", cell: 3 },
+    { atlas: "social", cell: 2 },
+    { atlas: "poses", cell: 2 },
+    { atlas: "social", cell: 3 },
+    { atlas: "finale", cell: 0 },
+  ];
+  const presenterLook = presenterLooks[scene - 4] ?? presenterLooks[0];
   return (
     <AbsoluteFill
       data-intro-scene={scene}
@@ -388,8 +460,9 @@ export function Stage({
           left: portrait ? 30 : 46,
           top: portrait ? 96 : 92,
           width: titleWidth,
-          transform: `translateY(${(1 - pop(f, 4)) * 28}px)`,
+          transform: `translateY(${(1 - snap(f, 4)) * 42 + float(raw, 0.35, 1.5)}px) scale(${0.94 + snap(f, 4) * 0.06}) rotate(${still ? 0 : -1.2 + snap(f, 4) * 1.2}deg)`,
           opacity: prog(f, 4, 7),
+          filter: still ? undefined : `blur(${(1 - prog(f, 3, 8)) * 4}px)`,
         }}
       >
         <div
@@ -430,8 +503,9 @@ export function Stage({
           top: artTop,
           width: portrait ? width - 40 : width * 0.65,
           height: artHeight,
-          transform: `translate(${shake}px,${artRise}px) scale(${artScale}) rotate(${still ? 0 : Math.sin(raw / 42) * 0.22}deg)`,
+          transform: `translate(${shake + float(raw, 0.28, 2.2)}px,${artRise}px) scale(${artScale}) rotate(${artYaw}deg)`,
           transformOrigin: "50% 45%",
+          filter: still ? undefined : `drop-shadow(0 18px 35px #0006)`,
         }}
       >
         <svg
@@ -443,6 +517,51 @@ export function Stage({
           {children}
         </svg>
       </div>
+      <StaticPresenter
+        atlas={presenterLook.atlas}
+        cell={presenterLook.cell}
+        style={{
+          position: "absolute",
+          width: portrait ? 150 : Math.min(190, height * 0.29),
+          height: portrait ? 150 : Math.min(190, height * 0.29),
+          left: portrait ? 20 : 34,
+          bottom: portrait ? 127 : 103,
+          zIndex: 5,
+          transform: `translateY(${still ? 0 : (1 - snap(f, 9)) * 34}px) scale(${0.94 + snap(f, 9) * 0.06})`,
+          filter: `drop-shadow(0 18px 24px #0007)`,
+        }}
+      />
+      <svg
+        width={width}
+        height={height}
+        viewBox={`0 0 ${width} ${height}`}
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 3,
+          pointerEvents: "none",
+          opacity: still ? 0.15 : 0.45,
+        }}
+      >
+        <circle
+          cx={portrait ? width * 0.5 : width * 0.68}
+          cy={portrait ? height * 0.5 : height * 0.46}
+          r={80 + ((raw * 4) % 220)}
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          opacity={1 - ((raw * 4) % 220) / 220}
+        />
+        <circle
+          cx={portrait ? width * 0.5 : width * 0.68}
+          cy={portrait ? height * 0.5 : height * 0.46}
+          r={40 + ((raw * 2.2 + 80) % 180)}
+          fill="none"
+          stroke={C.green}
+          strokeWidth="1.5"
+          opacity={0.7 - (((raw * 2.2 + 80) % 180) / 180) * 0.7}
+        />
+      </svg>
       {!portrait && (
         <Shout
           text={shout}
