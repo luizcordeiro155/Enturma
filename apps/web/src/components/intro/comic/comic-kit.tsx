@@ -14,23 +14,23 @@ import {
 } from "remotion";
 import { BookOpen } from "lucide-react";
 import { Quality } from "./motion-state";
-import { Presenter } from "./presenter";
 export { Quality } from "./motion-state";
 
 export const C = {
-  ink: "#0a0a0f",
-  purple: "#1a0a2f",
-  night: "#1a1a2e",
-  yellow: "#ffe600",
-  cyan: "#00f0ff",
-  magenta: "#ff00aa",
-  green: "#39ff14",
-  violet: "#a855f7",
-  orange: "#ff6b35",
-  pink: "#ff1493",
-  white: "#ffffff",
+  ink: "#111719",
+  deep: "#173f36",
+  purple: "#24332e",
+  night: "#161e21",
+  yellow: "#d8ef79",
+  cyan: "#6fd8c5",
+  magenta: "#f58db5",
+  green: "#64ca83",
+  violet: "#aaa4ff",
+  orange: "#ffb36b",
+  pink: "#ff8fb7",
+  white: "#f2f6f4",
 };
-export const INKS = [C.cyan, C.magenta, C.yellow, C.green, C.violet, C.orange];
+export const INKS = [C.green, C.yellow, C.cyan, C.violet, C.orange, C.magenta];
 export const clamp = {
   extrapolateLeft: "clamp",
   extrapolateRight: "clamp",
@@ -41,7 +41,7 @@ export const pop = (f: number, delay = 0) =>
   spring({
     frame: Math.max(0, f - delay),
     fps: 24,
-    config: { damping: 10, stiffness: 160, mass: 0.65 },
+    config: { damping: 17, stiffness: 120, mass: 0.82 },
   });
 export const display: CSSProperties = {
   fontFamily: '"Comic Archivo",Arial,sans-serif',
@@ -84,7 +84,7 @@ export function Brand({
     >
       <BookOpen size={size * 0.9} strokeWidth={3} />
       <span>
-        enturma<span style={{ color: C.yellow }}>.</span>
+        enturma<span style={{ color: C.green }}>.</span>
       </span>
     </div>
   );
@@ -151,7 +151,7 @@ export function Shout({
         transform: `scale(${pop(f)}) rotate(-5deg) translateX(${!still && f < 5 ? Math.sin(f * 4) * 8 : 0}px)`,
         filter:
           f < 6
-            ? `drop-shadow(3px 0 ${C.magenta}) drop-shadow(-3px 0 ${C.cyan})`
+            ? `drop-shadow(3px 0 ${C.green}) drop-shadow(-3px 0 ${C.cyan})`
             : undefined,
         ...style,
       }}
@@ -161,7 +161,7 @@ export function Shout({
   );
 }
 export function Backdrop({
-  color = C.cyan,
+  color = C.green,
   dark = false,
 }: {
   color?: string;
@@ -176,9 +176,9 @@ export function Backdrop({
       <div
         style={{
           position: "absolute",
-          inset: "-15%",
-          background: `radial-gradient(ellipse at 65% 38%,${color}35,transparent 56%),radial-gradient(ellipse at 0% 90%,${C.violet}35,transparent 55%)`,
-          transform: `translate(${still ? 0 : Math.sin(f / 80) * 15}px,${still ? 0 : Math.cos(f / 70) * 10}px)`,
+          inset: "-18%",
+          background: `radial-gradient(ellipse at 68% 34%,${C.green}38,transparent 54%),radial-gradient(ellipse at 8% 86%,${color}2f,transparent 52%),linear-gradient(135deg,${C.night},${C.ink} 62%)`,
+          transform: `translate(${still ? 0 : Math.sin(f / 86) * 18}px,${still ? 0 : Math.cos(f / 74) * 12}px) scale(${still ? 1 : 1.015 + Math.sin(f / 120) * 0.008})`,
         }}
       />
       <svg
@@ -242,7 +242,7 @@ export function Backdrop({
   );
 }
 export function Particles({
-  color = C.yellow,
+  color = C.green,
   burstAt = 72,
 }: {
   color?: string;
@@ -283,7 +283,7 @@ export function Particles({
     />
   );
 }
-export function PageTear({ color = C.pink }: { color?: string }) {
+export function PageTear({ color = C.green }: { color?: string }) {
   const { raw, still } = useInkTime();
   const { width, height } = useVideoConfig();
   if (still || raw > 10) return null;
@@ -338,26 +338,12 @@ export function Stage({
   const { width, height } = useVideoConfig();
   const portrait = width < height;
   const { f, raw, still } = useInkTime();
-  const shake = !still && raw % 36 < 3 ? Math.sin(raw * 3) * 2 : 0;
-  // Direction, height and scale belong to the scene's acting, not a shared loop.
-  const placements = [
-    { left: false, size: 200, top: 89, edge: 12, desktopX: 0.1 },
-    { left: true, size: 210, top: 83, edge: 10, desktopX: 0.18 },
-    { left: false, size: 220, top: 77, edge: 5, desktopX: 0.04 },
-    { left: true, size: 195, top: 99, edge: 5, desktopX: 0.15 },
-    { left: false, size: 185, top: 105, edge: 15, desktopX: 0.08 },
-    { left: true, size: 215, top: 81, edge: 15, desktopX: 0.19 },
-    { left: true, size: 225, top: 75, edge: 7, desktopX: 0.03 },
-    { left: false, size: 200, top: 92, edge: 25, desktopX: 0.13 },
-    { left: true, size: 185, top: 88, edge: 12, desktopX: 0.2 },
-  ][scene - 4];
-  const titleLeft = placements.left
-    ? placements.edge + placements.size + 12
-    : 30;
-  const titleWidth = placements.left
-    ? width - titleLeft - 30
-    : width - placements.size - placements.edge - 54;
-  const actorSize = portrait ? placements.size : Math.min(240, height * 0.36);
+  const shake = !still && raw % 48 < 3 ? Math.sin(raw * 2.4) * 1.4 : 0;
+  const titleWidth = portrait ? width - 60 : width * 0.37;
+  const artTop = portrait ? 270 : height * 0.13;
+  const artHeight = portrait ? height - 425 : height * 0.69;
+  const artRise = still ? 0 : (1 - pop(f, 6)) * 22;
+  const artScale = still ? 1 : 0.985 + pop(f, 7) * 0.015;
   return (
     <AbsoluteFill
       data-intro-scene={scene}
@@ -396,12 +382,12 @@ export function Stage({
       <div
         data-intro-safe
         data-intro-title
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
-          left: portrait ? titleLeft : 46,
-          top: portrait ? 100 : 120,
-          width: portrait ? titleWidth : width * 0.4,
+          left: portrait ? 30 : 46,
+          top: portrait ? 96 : 92,
+          width: titleWidth,
           transform: `translateY(${(1 - pop(f, 4)) * 28}px)`,
           opacity: prog(f, 4, 7),
         }}
@@ -416,9 +402,9 @@ export function Stage({
                     (Math.max(...title.map((line) => line.length)) * 0.61),
                 )
               : Math.min(
-                  72,
-                  width * 0.06,
-                  (width * 0.4) /
+                  70,
+                  width * 0.058,
+                  titleWidth /
                     (Math.max(...title.map((line) => line.length)) * 0.61),
                 ),
             color: C.white,
@@ -437,14 +423,15 @@ export function Stage({
       <div
         data-intro-safe
         data-intro-art
-        data-presenter-copy
+        data-intro-copy
         style={{
           position: "absolute",
-          left: portrait ? 20 : width * 0.42,
-          top: portrait ? 300 : height * 0.14,
-          width: portrait ? width - 40 : width * 0.55,
-          height: portrait ? height - 465 : height * 0.66,
-          transform: `translateX(${shake}px) rotate(${still ? 0 : Math.sin(Math.floor(raw / 2) / 30) * 0.35}deg)`,
+          left: portrait ? 20 : width * 0.31,
+          top: artTop,
+          width: portrait ? width - 40 : width * 0.65,
+          height: artHeight,
+          transform: `translate(${shake}px,${artRise}px) scale(${artScale}) rotate(${still ? 0 : Math.sin(raw / 42) * 0.22}deg)`,
+          transformOrigin: "50% 45%",
         }}
       >
         <svg
@@ -456,20 +443,6 @@ export function Stage({
           {children}
         </svg>
       </div>
-      <Presenter
-        scene={scene}
-        style={{
-          position: "absolute",
-          width: actorSize,
-          height: actorSize,
-          left: portrait
-            ? placements.left
-              ? placements.edge
-              : width - placements.edge - actorSize
-            : width * placements.desktopX,
-          top: portrait ? placements.top : height - actorSize - 105,
-        }}
-      />
       {!portrait && (
         <Shout
           text={shout}
@@ -483,7 +456,7 @@ export function Stage({
         <div
           style={{
             position: "absolute",
-            bottom: 139,
+            bottom: 142,
             left: 36,
             right: 36,
             textAlign: "right",
@@ -493,7 +466,7 @@ export function Stage({
             text={shout}
             color={color}
             frame={still ? 40 : f - 24}
-            size={52}
+            size={50}
           />
         </div>
       )}
@@ -502,8 +475,8 @@ export function Stage({
           style={{
             position: "absolute",
             bottom: 108,
-            left: portrait ? 30 : 44,
-            right: portrait ? 30 : 44,
+            left: 30,
+            right: 30,
             display: "flex",
             alignItems: "center",
             gap: 5,
