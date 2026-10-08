@@ -1,0 +1,59 @@
+{
+  "voice": "pt-BR-FranciscaNeural",
+  "rate": "+5%",
+  "pitch": "+1Hz",
+  "cues": [
+    {
+      "scene": 0,
+      "text": "Que tal ter a faculdade inteira mais perto de você?"
+    },
+    {
+      "scene": 1,
+      "text": "Com o Enturma, cada conexão vira uma nova possibilidade."
+    },
+    {
+      "scene": 2,
+      "text": "Comece pelas suas matérias e organize o semestre em um só lugar."
+    },
+    {
+      "scene": 3,
+      "text": "Daí, encontre colegas com os mesmos interesses e forme sua turma."
+    },
+    {
+      "scene": 4,
+      "text": "No feed, compartilhe novidades e descubra o que acontece no campus."
+    },
+    {
+      "scene": 5,
+      "text": "Quando for estudar, abra uma sala e reúna a galera com seus materiais."
+    },
+    {
+      "scene": 6,
+      "text": "Na hora de sair, combine uma carona e divida o caminho."
+    },
+    {
+      "scene": 7,
+      "text": "E continue a conversa por voz, vídeo ou compartilhando a tela."
+    },
+    {
+      "scene": 8,
+      "text": "Olha como é simples: curta e comente as publicações que te interessam,"
+    },
+    {
+      "scene": 8,
+      "text": "resolva aquela dúvida em grupo e acompanhe a discussão,"
+    },
+    {
+      "scene": 8,
+      "text": "combine o ponto de encontro com seu motorista pelo chat,"
+    },
+    {
+      "scene": 8,
+      "text": "e transforme documentos, links e imagens em explicações nos cadernos com IA."
+    },
+    {
+      "scene": 9,
+      "text": "Se enturme com o Enturma! Fique por dentro da sua faculdade conosco."
+    }
+  ]
+}

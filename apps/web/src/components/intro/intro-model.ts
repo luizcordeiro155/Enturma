@@ -64,7 +64,10 @@ export const INTRO_NARRATION_FILE = storyboard.audioFile;
 export const INTRO_CUES = storyboard.cues;
 export const INTRO_BOOK_PAGES = INTRO_CUES.filter((cue) => cue.scene === 8);
 const durationSeconds = INTRO_FRAMES / storyboard.fps;
-export const INTRO_DURATION_LABEL = `${Math.floor(durationSeconds / 60)} min ${String(durationSeconds % 60).padStart(2, "0")} s`;
+export const INTRO_DURATION_LABEL =
+  durationSeconds < 60
+    ? `${Math.ceil(durationSeconds)} s`
+    : `${Math.floor(durationSeconds / 60)} min ${String(Math.ceil(durationSeconds % 60)).padStart(2, "0")} s`;
 export function introTime(frame: number) {
   const seconds = Math.floor(frame / storyboard.fps);
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;

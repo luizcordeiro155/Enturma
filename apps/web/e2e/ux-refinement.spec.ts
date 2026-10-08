@@ -14,6 +14,7 @@ import {
   INTRO_FRAMES,
   INTRO_SCENE_FRAMES,
   INTRO_BOOK_PAGES,
+  INTRO_CUES,
 } from "../src/components/intro/intro-model";
 const backend = process.env.E2E_API_URL || "http://localhost:8080";
 const screenshots = join(tmpdir(), "enturma-ux-review");
@@ -373,18 +374,22 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   await expect
     .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.paused))
     .toBe(true);
+  const studyCue = INTRO_CUES.find((cue) => cue.scene === 5)!;
+  const studyFrame = studyCue.voiceStartFrame + 60;
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill("1620");
+    .fill(String(studyFrame));
   await expect
     .poll(() =>
-      narration.evaluate((audio: HTMLAudioElement) =>
-        Math.abs(audio.currentTime - 27),
+      narration.evaluate(
+        (audio: HTMLAudioElement, target: number) =>
+          Math.abs(audio.currentTime - target),
+        studyFrame / 60,
       ),
     )
     .toBeLessThan(0.3);
   await expect(intro.getByLabel("Legenda da narração")).toHaveText(
-    "Entre nas salas! Reúna seus materiais e estude com inteligência artificial.",
+    studyCue.text,
   );
   await intro.getByRole("button", { name: "Silenciar narração" }).click();
   await expect
@@ -499,7 +504,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   }
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill("3700");
+    .fill(String(INTRO_SCENE_FRAMES[9] + 160));
   await expect(intro.locator('[data-intro-scene="9"]')).toBeVisible();
   await expect(intro.getByLabel("Legenda da narração")).toHaveText(
     "Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.",
