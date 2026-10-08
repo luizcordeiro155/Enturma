@@ -14,6 +14,7 @@ import {
   MonitorCog,
   Moon,
   Sun,
+  Download,
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Feedback } from "./feedback";
@@ -1101,6 +1102,19 @@ export function AuthForm({ mode }: { mode: Mode }) {
             <p>
               Já tem acesso? <Link href="/login">Entrar na minha conta</Link>
             </p>
+          )}
+          {(mode === "login" || mode === "register") && (
+            <div className="auth-app-downloads">
+              <div>
+                <strong>Leve o Enturma com você</strong>
+                <small>Aplicativos oficiais para Android e Windows.</small>
+              </div>
+              <Link href="/download">
+                <Download size={18} aria-hidden="true" />
+                Baixar aplicativos
+                <ArrowRight size={16} aria-hidden="true" />
+              </Link>
+            </div>
           )}
         </form>
       </main>

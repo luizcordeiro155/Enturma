@@ -320,16 +320,26 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   });
   const startAudio = intro.getByRole("button", { name: "Reproduzir com som" });
   await expect
-    .poll(
-      async () =>
+    .poll(async () => ({
+      canStart:
         (await startAudio.isVisible()) ||
         Number(
           await intro
             .locator("[data-intro-frame]")
             .getAttribute("data-intro-frame"),
         ) > 20,
-    )
-    .toBe(true);
+      media: await narration.evaluate((audio: HTMLAudioElement) => ({
+        time: audio.currentTime,
+        paused: audio.paused,
+        ready: audio.readyState,
+        error: audio.error?.message,
+        muted: audio.muted,
+        network: audio.networkState,
+        visibility: document.visibilityState,
+        rect: audio.closest(".enturma-intro")?.getBoundingClientRect().toJSON(),
+      })),
+    }))
+    .toMatchObject({ canStart: true });
   if (await startAudio.isVisible()) await startAudio.click();
   await expect
     .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
