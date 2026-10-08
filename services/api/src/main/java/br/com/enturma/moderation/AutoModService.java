@@ -217,22 +217,20 @@ public class AutoModService {
       throw ApiException.invalid(
           "Explique com clareza o contexto do recurso em pelo menos 20 caracteres.");
 
-    var c =
-        db.one(
+    var active =
+        db.list(
             "SELECT c.*,a.kind,a.ends_at,a.revoked_at FROM moderation_case c JOIN"
-                + " moderation_action a ON a.case_id=c.id WHERE c.id=? AND c.user_id=? FOR UPDATE",
+                + " moderation_action a ON a.case_id=c.id WHERE c.id=? AND c.user_id=?"
+                + " AND a.revoked_at IS NULL AND a.ends_at>now() FOR UPDATE",
             id,
             a.id());
-    if (c.get("revokedAt") != null
-        || c.get("endsAt") == null
-        || !((java.time.OffsetDateTime) c.get("endsAt"))
-            .toInstant()
-            .isAfter(Instant.now()))
-      throw ApiException.invalid("Esta penalidade já foi finalizada.");
+    if (active.isEmpty()) throw ApiException.invalid("Esta penalidade já foi finalizada.");
+    var c = active.getFirst();
 
     String priorAppeal = (String) c.get("appeal");
-    if (priorAppeal != null && priorAppeal.strip().equalsIgnoreCase(cleaned))
-      throw ApiException.invalid("Envie uma justificativa nova para uma nova análise.");
+    if (priorAppeal != null && !priorAppeal.isBlank())
+      throw ApiException.invalid(
+          "Você já utilizou o recurso desta penalidade. Aguarde o contador finalizar.");
 
     db.jdbc.update(
         "INSERT INTO moderation_evidence(id,case_id,content) VALUES (?,?,?)",
