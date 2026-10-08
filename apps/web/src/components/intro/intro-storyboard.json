@@ -1,10 +1,25 @@
 {
   "durationInFrames": 2160,
   "fps": 24,
-  "audioFile": "intro/comic/enturma-comic-90.mp3",
+  "audioFile": "intro/comic/enturma-comic-90-presenter-v2.mp3",
   "sceneFrames": [
-    0, 59, 145, 260, 349, 504, 691, 828, 985, 1130, 1300, 1460, 1596, 1753,
-    1918, 2005, 2160
+    0,
+    59,
+    145,
+    260,
+    349,
+    504,
+    691,
+    828,
+    985,
+    1130,
+    1300,
+    1460,
+    1622,
+    1779,
+    1944,
+    2031,
+    2160
   ],
   "cues": [
     {
@@ -87,37 +102,37 @@
     {
       "fromFrame": 1460,
       "scene": 11,
-      "text": "E vem mais por aí: frequência no radar, pra acompanhar suas presenças e planejar as próximas aulas.",
+      "text": "E a conexão continua: adicione amigos, personalize seu perfil e mantenha suas conversas privadas sempre por perto.",
       "voiceStartFrame": 1463,
-      "voiceDuration": 5.42858
+      "voiceDuration": 6.52383
     },
     {
-      "fromFrame": 1596,
+      "fromFrame": 1622,
       "scene": 12,
-      "text": "Uma rotina com espaço pra focar, organizar a semana e também fazer uma pausa. Seu tempo merece esse cuidado.",
-      "voiceStartFrame": 1599,
-      "voiceDuration": 6.28571
+      "text": "Escolha as disciplinas do semestre e encontre estudantes das mesmas matérias. Sua próxima turma começa aqui.",
+      "voiceStartFrame": 1625,
+      "voiceDuration": 6.29762
     },
     {
-      "fromFrame": 1753,
+      "fromFrame": 1779,
       "scene": 13,
       "text": "Assim, uma dúvida vira conversa, um caminho vira amizade e uma conquista puxa a próxima. É a vida inteira conectada.",
-      "voiceStartFrame": 1756,
-      "voiceDuration": 6.631
+      "voiceStartFrame": 1782,
+      "voiceDuration": 6.63096
     },
     {
-      "fromFrame": 1918,
+      "fromFrame": 1944,
       "scene": 14,
       "text": "Sua próxima conexão começa aqui. Bora fazer parte?",
-      "voiceStartFrame": 1921,
-      "voiceDuration": 3.36904
+      "voiceStartFrame": 1947,
+      "voiceDuration": 3.369
     },
     {
-      "fromFrame": 2005,
+      "fromFrame": 2031,
       "scene": 15,
       "text": "Se enturme com o Enturma. Fique por dentro da sua faculdade conosco!",
-      "voiceStartFrame": 2008,
-      "voiceDuration": 3.85717
+      "voiceStartFrame": 2034,
+      "voiceDuration": 3.85712
     }
   ]
 }

@@ -5,12 +5,11 @@ import {
   Sequence,
   staticFile,
   useCurrentFrame,
-  useVideoConfig,
 } from "remotion";
 import type { ReactNode } from "react";
 import type { IntroProps } from "../intro-model";
 import storyboard from "../intro-storyboard.json";
-import words from "./narration-words.json";
+import { AnimatedCaptions } from "./animated-captions";
 import { C, Quality } from "./comic-kit";
 import { PresenterFrame } from "./motion-state";
 import {
@@ -30,9 +29,8 @@ import {
   RideScene,
   CallsScene,
   GamesScene,
-  AttendanceScene,
-  RoutineScene,
 } from "./feature-scenes";
+import { FriendsScene, SubjectsScene } from "./community-scenes";
 
 const cuts = storyboard.sceneFrames;
 function ComicCadence({
@@ -52,54 +50,6 @@ function ComicCadence({
         {children}
       </Freeze>
     </PresenterFrame.Provider>
-  );
-}
-function Karaoke() {
-  const frame = useCurrentFrame();
-  const { fps, width, height } = useVideoConfig();
-  const ms = (frame / fps) * 1000;
-  const active = words.findIndex(
-    (word) => word.startMs <= ms && word.endMs >= ms,
-  );
-  if (active < 0 || frame >= cuts[15]) return null;
-  const from = Math.floor(active / 5) * 5;
-  const group = words.slice(from, from + 5);
-  const portrait = width < height;
-  return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "absolute",
-        left: portrait ? 25 : 80,
-        right: portrait ? 25 : 80,
-        bottom: portrait ? 43 : 21,
-        display: "flex",
-        justifyContent: "center",
-        gap: 7,
-        flexWrap: "wrap",
-        zIndex: 12,
-        fontFamily: "Arial,sans-serif",
-        fontSize: portrait ? 19 : 22,
-        fontWeight: 800,
-        lineHeight: 1.25,
-        pointerEvents: "none",
-      }}
-    >
-      {group.map((word, i) => (
-        <span
-          key={word.startMs}
-          style={{
-            color: from + i <= active ? C.yellow : C.white,
-            background: "#0a0a0fdd",
-            padding: "3px 5px",
-            borderRadius: 3,
-            textShadow: "2px 2px #000",
-          }}
-        >
-          {word.text}
-        </span>
-      ))}
-    </div>
   );
 }
 export function ComicIntro(props: IntroProps) {
@@ -217,21 +167,21 @@ export function ComicIntro(props: IntroProps) {
           </ComicCadence>
         </Sequence>
         <Sequence
-          name="12 - Frequência - Em breve"
+          name="12 - Amigos e perfil"
           from={cuts[11]}
           durationInFrames={cuts[12] - cuts[11]}
         >
           <ComicCadence still={still}>
-            <AttendanceScene />
+            <FriendsScene />
           </ComicCadence>
         </Sequence>
         <Sequence
-          name="13 - Rotina - Em breve"
+          name="13 - Minhas matérias"
           from={cuts[12]}
           durationInFrames={cuts[13] - cuts[12]}
         >
           <ComicCadence still={still}>
-            <RoutineScene />
+            <SubjectsScene />
           </ComicCadence>
         </Sequence>
         <Sequence
@@ -261,7 +211,7 @@ export function ComicIntro(props: IntroProps) {
             <CtaScene />
           </Freeze>
         </Sequence>
-        <Karaoke />
+        <AnimatedCaptions />
       </AbsoluteFill>
     </Quality.Provider>
   );

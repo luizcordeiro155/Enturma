@@ -121,7 +121,7 @@ export function HookScene() {
           position: "absolute",
           left: portrait ? 30 : 48,
           right: portrait ? 30 : width * 0.53,
-          bottom: portrait ? 90 : 83,
+          bottom: portrait ? 130 : 114,
           display: "flex",
           gap: 9,
         }}
@@ -153,18 +153,6 @@ export function HookScene() {
             </div>
           </div>
         ))}
-      </div>
-      <div
-        style={{
-          position: "absolute",
-          left: 30,
-          bottom: 25,
-          color: C.yellow,
-          font: "800 12px Arial",
-          letterSpacing: ".2em",
-        }}
-      >
-        SUA FACULDADE. SEU UNIVERSO.
       </div>
       <Particles burstAt={3} />
     </AbsoluteFill>
@@ -598,8 +586,8 @@ export function ProofScene() {
           position: "absolute",
           left: portrait ? 30 : 48,
           right: portrait ? 30 : 48,
-          bottom: portrait ? 83 : 43,
-          fontSize: portrait ? 48 : 55,
+          bottom: portrait ? 134 : 115,
+          fontSize: portrait ? 43 : 48,
           color: C.white,
           transform: `scale(${pop(f, 40)})`,
           textAlign: portrait ? "left" : "center",
@@ -612,7 +600,7 @@ export function ProofScene() {
       <div
         style={{
           position: "absolute",
-          bottom: 25,
+          bottom: 112,
           right: 30,
           fontSize: 12,
           color: "#ddd",
@@ -691,7 +679,7 @@ export function BuildupScene() {
           position: "absolute",
           left: 40,
           right: 40,
-          bottom: portrait ? 120 : 75,
+          bottom: portrait ? 135 : 119,
           textAlign: "center",
           opacity: prog(f, 12, 14),
         }}
@@ -715,6 +703,8 @@ export function BuildupScene() {
 export function CtaScene() {
   const { width, height } = useVideoConfig();
   const portrait = width < height;
+  const compact = !portrait && width < 1100;
+  const presenterSize = portrait ? 180 : compact ? 210 : 240;
   const { f, raw, still } = useInkTime();
   const final = raw > 124 && !still;
   return (
@@ -736,10 +726,10 @@ export function CtaScene() {
         scene={15}
         style={{
           position: "absolute",
-          width: portrait ? 180 : 240,
-          height: portrait ? 180 : 240,
-          left: portrait ? 0 : width * 0.4,
-          top: portrait ? 427 : height - 290,
+          width: presenterSize,
+          height: presenterSize,
+          left: portrait ? 0 : width * (compact ? 0.47 : 0.4),
+          top: portrait ? 427 : height - (compact ? 360 : 380),
         }}
       />
       <div
@@ -767,7 +757,7 @@ export function CtaScene() {
         >
           BORA SE ENTURMAR?
         </div>
-        <Brand size={portrait ? 80 : 112} />
+        <Brand size={portrait ? 80 : Math.min(112, width * 0.085)} />
         <div
           style={{
             fontSize: portrait ? 25 : 28,
@@ -791,7 +781,7 @@ export function CtaScene() {
           position: "absolute",
           left: portrait ? (width - 245) / 2 : width * 0.67,
           top: portrait ? 353 : 78,
-          width: portrait ? 245 : 255,
+          width: portrait ? 245 : Math.min(255, width * 0.24),
           transform: `rotate(2deg) scale(${pop(f, 24)})`,
           background: "#fff",
           padding: 13,
@@ -823,7 +813,7 @@ export function CtaScene() {
           position: "absolute",
           left: portrait ? 30 : 56,
           right: portrait ? 30 : 55,
-          bottom: portrait ? 108 : 110,
+          bottom: portrait ? 162 : 130,
           display: "flex",
           gap: 14,
           justifyContent: portrait ? "center" : "flex-start",
@@ -866,7 +856,7 @@ export function CtaScene() {
           position: "absolute",
           left: 30,
           right: 30,
-          bottom: 37,
+          bottom: portrait ? 117 : 94,
           textAlign: "center",
           fontFamily: "Arial",
           color: C.white,

@@ -1171,533 +1171,512 @@
   {
     "text": "E",
     "startMs": 60940,
-    "endMs": 61024,
+    "endMs": 61036,
     "timestampMs": 60940,
     "confidence": null
   },
   {
-    "text": "vem",
-    "startMs": 61036,
-    "endMs": 61190,
-    "timestampMs": 61036,
-    "confidence": null
-  },
-  {
-    "text": "mais",
-    "startMs": 61202,
-    "endMs": 61405,
-    "timestampMs": 61202,
-    "confidence": null
-  },
-  {
-    "text": "por",
-    "startMs": 61417,
-    "endMs": 61560,
-    "timestampMs": 61417,
-    "confidence": null
-  },
-  {
-    "text": "aí",
-    "startMs": 61571,
-    "endMs": 61821,
-    "timestampMs": 61571,
-    "confidence": null
-  },
-  {
-    "text": "frequência",
-    "startMs": 61988,
-    "endMs": 62500,
-    "timestampMs": 61988,
-    "confidence": null
-  },
-  {
-    "text": "no",
-    "startMs": 62512,
-    "endMs": 62607,
-    "timestampMs": 62512,
-    "confidence": null
-  },
-  {
-    "text": "radar",
-    "startMs": 62619,
-    "endMs": 63036,
-    "timestampMs": 62619,
-    "confidence": null
-  },
-  {
-    "text": "pra",
-    "startMs": 63119,
-    "endMs": 63238,
-    "timestampMs": 63119,
-    "confidence": null
-  },
-  {
-    "text": "acompanhar",
-    "startMs": 63250,
-    "endMs": 63750,
-    "timestampMs": 63250,
-    "confidence": null
-  },
-  {
-    "text": "suas",
-    "startMs": 63762,
-    "endMs": 64000,
-    "timestampMs": 63762,
-    "confidence": null
-  },
-  {
-    "text": "presenças",
-    "startMs": 64012,
-    "endMs": 64571,
-    "timestampMs": 64012,
-    "confidence": null
-  },
-  {
-    "text": "e",
-    "startMs": 64583,
-    "endMs": 64679,
-    "timestampMs": 64583,
-    "confidence": null
-  },
-  {
-    "text": "planejar",
-    "startMs": 64702,
-    "endMs": 65167,
-    "timestampMs": 64702,
-    "confidence": null
-  },
-  {
-    "text": "as",
-    "startMs": 65179,
-    "endMs": 65321,
-    "timestampMs": 65179,
-    "confidence": null
-  },
-  {
-    "text": "próximas",
-    "startMs": 65333,
-    "endMs": 65810,
-    "timestampMs": 65333,
-    "confidence": null
-  },
-  {
-    "text": "aulas",
-    "startMs": 65821,
-    "endMs": 66369,
-    "timestampMs": 65821,
-    "confidence": null
-  },
-  {
-    "text": "Uma",
-    "startMs": 66619,
-    "endMs": 66786,
-    "timestampMs": 66619,
-    "confidence": null
-  },
-  {
-    "text": "rotina",
-    "startMs": 66798,
-    "endMs": 67190,
-    "timestampMs": 66798,
-    "confidence": null
-  },
-  {
-    "text": "com",
-    "startMs": 67202,
-    "endMs": 67333,
-    "timestampMs": 67202,
-    "confidence": null
-  },
-  {
-    "text": "espaço",
-    "startMs": 67345,
-    "endMs": 67750,
-    "timestampMs": 67345,
-    "confidence": null
-  },
-  {
-    "text": "pra",
-    "startMs": 67762,
-    "endMs": 67893,
-    "timestampMs": 67762,
-    "confidence": null
-  },
-  {
-    "text": "focar",
-    "startMs": 67905,
-    "endMs": 68321,
-    "timestampMs": 67905,
-    "confidence": null
-  },
-  {
-    "text": "organizar",
-    "startMs": 68524,
-    "endMs": 69060,
-    "timestampMs": 68524,
-    "confidence": null
-  },
-  {
     "text": "a",
-    "startMs": 69071,
-    "endMs": 69107,
-    "timestampMs": 69071,
-    "confidence": null
-  },
-  {
-    "text": "semana",
-    "startMs": 69119,
-    "endMs": 69607,
-    "timestampMs": 69119,
-    "confidence": null
-  },
-  {
-    "text": "e",
-    "startMs": 69619,
-    "endMs": 69679,
-    "timestampMs": 69619,
-    "confidence": null
-  },
-  {
-    "text": "também",
-    "startMs": 69690,
-    "endMs": 70036,
-    "timestampMs": 69690,
-    "confidence": null
-  },
-  {
-    "text": "fazer",
-    "startMs": 70048,
-    "endMs": 70345,
-    "timestampMs": 70048,
-    "confidence": null
-  },
-  {
-    "text": "uma",
-    "startMs": 70357,
-    "endMs": 70512,
-    "timestampMs": 70357,
-    "confidence": null
-  },
-  {
-    "text": "pausa",
-    "startMs": 70524,
-    "endMs": 70964,
-    "timestampMs": 70524,
-    "confidence": null
-  },
-  {
-    "text": "Seu",
-    "startMs": 71214,
-    "endMs": 71488,
-    "timestampMs": 71214,
-    "confidence": null
-  },
-  {
-    "text": "tempo",
-    "startMs": 71500,
-    "endMs": 71810,
-    "timestampMs": 71500,
-    "confidence": null
-  },
-  {
-    "text": "merece",
-    "startMs": 71821,
-    "endMs": 72190,
-    "timestampMs": 71821,
-    "confidence": null
-  },
-  {
-    "text": "esse",
-    "startMs": 72202,
-    "endMs": 72369,
-    "timestampMs": 72202,
-    "confidence": null
-  },
-  {
-    "text": "cuidado",
-    "startMs": 72381,
-    "endMs": 72905,
-    "timestampMs": 72381,
-    "confidence": null
-  },
-  {
-    "text": "Assim",
-    "startMs": 73155,
-    "endMs": 73548,
-    "timestampMs": 73155,
-    "confidence": null
-  },
-  {
-    "text": "uma",
-    "startMs": 73571,
-    "endMs": 73738,
-    "timestampMs": 73571,
-    "confidence": null
-  },
-  {
-    "text": "dúvida",
-    "startMs": 73750,
-    "endMs": 74143,
-    "timestampMs": 73750,
-    "confidence": null
-  },
-  {
-    "text": "vira",
-    "startMs": 74155,
-    "endMs": 74345,
-    "timestampMs": 74155,
-    "confidence": null
-  },
-  {
-    "text": "conversa",
-    "startMs": 74357,
-    "endMs": 74940,
-    "timestampMs": 74357,
-    "confidence": null
-  },
-  {
-    "text": "um",
-    "startMs": 75179,
-    "endMs": 75238,
-    "timestampMs": 75179,
-    "confidence": null
-  },
-  {
-    "text": "caminho",
-    "startMs": 75250,
-    "endMs": 75607,
-    "timestampMs": 75250,
-    "confidence": null
-  },
-  {
-    "text": "vira",
-    "startMs": 75619,
-    "endMs": 75833,
-    "timestampMs": 75619,
-    "confidence": null
-  },
-  {
-    "text": "amizade",
-    "startMs": 75845,
-    "endMs": 76440,
-    "timestampMs": 75845,
-    "confidence": null
-  },
-  {
-    "text": "e",
-    "startMs": 76452,
-    "endMs": 76512,
-    "timestampMs": 76452,
-    "confidence": null
-  },
-  {
-    "text": "uma",
-    "startMs": 76524,
-    "endMs": 76643,
-    "timestampMs": 76524,
-    "confidence": null
-  },
-  {
-    "text": "conquista",
-    "startMs": 76655,
-    "endMs": 77107,
-    "timestampMs": 76655,
-    "confidence": null
-  },
-  {
-    "text": "puxa",
-    "startMs": 77131,
-    "endMs": 77405,
-    "timestampMs": 77131,
-    "confidence": null
-  },
-  {
-    "text": "a",
-    "startMs": 77417,
-    "endMs": 77452,
-    "timestampMs": 77417,
-    "confidence": null
-  },
-  {
-    "text": "próxima",
-    "startMs": 77464,
-    "endMs": 78000,
-    "timestampMs": 77464,
-    "confidence": null
-  },
-  {
-    "text": "É",
-    "startMs": 78250,
-    "endMs": 78369,
-    "timestampMs": 78250,
-    "confidence": null
-  },
-  {
-    "text": "a",
-    "startMs": 78381,
-    "endMs": 78440,
-    "timestampMs": 78381,
-    "confidence": null
-  },
-  {
-    "text": "vida",
-    "startMs": 78452,
-    "endMs": 78690,
-    "timestampMs": 78452,
-    "confidence": null
-  },
-  {
-    "text": "inteira",
-    "startMs": 78702,
-    "endMs": 79048,
-    "timestampMs": 78702,
-    "confidence": null
-  },
-  {
-    "text": "conectada",
-    "startMs": 79060,
-    "endMs": 79786,
-    "timestampMs": 79060,
-    "confidence": null
-  },
-  {
-    "text": "Sua",
-    "startMs": 80036,
-    "endMs": 80333,
-    "timestampMs": 80036,
-    "confidence": null
-  },
-  {
-    "text": "próxima",
-    "startMs": 80345,
-    "endMs": 80750,
-    "timestampMs": 80345,
+    "startMs": 61048,
+    "endMs": 61095,
+    "timestampMs": 61048,
     "confidence": null
   },
   {
     "text": "conexão",
-    "startMs": 80762,
-    "endMs": 81310,
-    "timestampMs": 80762,
+    "startMs": 61107,
+    "endMs": 61631,
+    "timestampMs": 61107,
     "confidence": null
   },
   {
-    "text": "começa",
-    "startMs": 81321,
-    "endMs": 81714,
-    "timestampMs": 81321,
+    "text": "continua",
+    "startMs": 61643,
+    "endMs": 62202,
+    "timestampMs": 61643,
     "confidence": null
   },
   {
-    "text": "aqui",
-    "startMs": 81726,
-    "endMs": 82048,
-    "timestampMs": 81726,
+    "text": "adicione",
+    "startMs": 62440,
+    "endMs": 62857,
+    "timestampMs": 62440,
     "confidence": null
   },
   {
-    "text": "Bora",
-    "startMs": 82298,
-    "endMs": 82571,
-    "timestampMs": 82298,
+    "text": "amigos",
+    "startMs": 62869,
+    "endMs": 63345,
+    "timestampMs": 62869,
     "confidence": null
   },
   {
-    "text": "fazer",
-    "startMs": 82583,
-    "endMs": 82869,
-    "timestampMs": 82583,
+    "text": "personalize",
+    "startMs": 63417,
+    "endMs": 64119,
+    "timestampMs": 63417,
     "confidence": null
   },
   {
-    "text": "parte",
-    "startMs": 82881,
-    "endMs": 83405,
-    "timestampMs": 82881,
+    "text": "seu",
+    "startMs": 64131,
+    "endMs": 64274,
+    "timestampMs": 64131,
     "confidence": null
   },
   {
-    "text": "Se",
-    "startMs": 83655,
-    "endMs": 83833,
-    "timestampMs": 83655,
+    "text": "perfil",
+    "startMs": 64286,
+    "endMs": 64714,
+    "timestampMs": 64286,
     "confidence": null
   },
   {
-    "text": "enturme",
-    "startMs": 83845,
-    "endMs": 84286,
-    "timestampMs": 83845,
+    "text": "e",
+    "startMs": 64726,
+    "endMs": 64774,
+    "timestampMs": 64726,
     "confidence": null
   },
   {
-    "text": "com",
-    "startMs": 84298,
-    "endMs": 84440,
-    "timestampMs": 84298,
+    "text": "mantenha",
+    "startMs": 64786,
+    "endMs": 65167,
+    "timestampMs": 64786,
     "confidence": null
   },
   {
-    "text": "o",
-    "startMs": 84452,
-    "endMs": 84476,
-    "timestampMs": 84452,
+    "text": "suas",
+    "startMs": 65179,
+    "endMs": 65393,
+    "timestampMs": 65179,
     "confidence": null
   },
   {
-    "text": "Enturma",
-    "startMs": 84488,
-    "endMs": 84988,
-    "timestampMs": 84488,
+    "text": "conversas",
+    "startMs": 65405,
+    "endMs": 65940,
+    "timestampMs": 65405,
     "confidence": null
   },
   {
-    "text": "Fique",
-    "startMs": 85238,
-    "endMs": 85512,
-    "timestampMs": 85238,
+    "text": "privadas",
+    "startMs": 65952,
+    "endMs": 66488,
+    "timestampMs": 65952,
+    "confidence": null
+  },
+  {
+    "text": "sempre",
+    "startMs": 66500,
+    "endMs": 66833,
+    "timestampMs": 66500,
     "confidence": null
   },
   {
     "text": "por",
-    "startMs": 85524,
-    "endMs": 85667,
-    "timestampMs": 85524,
+    "startMs": 66845,
+    "endMs": 67000,
+    "timestampMs": 66845,
+    "confidence": null
+  },
+  {
+    "text": "perto",
+    "startMs": 67024,
+    "endMs": 67464,
+    "timestampMs": 67024,
+    "confidence": null
+  },
+  {
+    "text": "Escolha",
+    "startMs": 67714,
+    "endMs": 68131,
+    "timestampMs": 67714,
+    "confidence": null
+  },
+  {
+    "text": "as",
+    "startMs": 68143,
+    "endMs": 68214,
+    "timestampMs": 68143,
+    "confidence": null
+  },
+  {
+    "text": "disciplinas",
+    "startMs": 68226,
+    "endMs": 68833,
+    "timestampMs": 68226,
+    "confidence": null
+  },
+  {
+    "text": "do",
+    "startMs": 68845,
+    "endMs": 68940,
+    "timestampMs": 68845,
+    "confidence": null
+  },
+  {
+    "text": "semestre",
+    "startMs": 68952,
+    "endMs": 69571,
+    "timestampMs": 68952,
+    "confidence": null
+  },
+  {
+    "text": "e",
+    "startMs": 69595,
+    "endMs": 69631,
+    "timestampMs": 69595,
+    "confidence": null
+  },
+  {
+    "text": "encontre",
+    "startMs": 69643,
+    "endMs": 70083,
+    "timestampMs": 69643,
+    "confidence": null
+  },
+  {
+    "text": "estudantes",
+    "startMs": 70095,
+    "endMs": 70679,
+    "timestampMs": 70095,
+    "confidence": null
+  },
+  {
+    "text": "das",
+    "startMs": 70690,
+    "endMs": 70893,
+    "timestampMs": 70690,
+    "confidence": null
+  },
+  {
+    "text": "mesmas",
+    "startMs": 70905,
+    "endMs": 71298,
+    "timestampMs": 70905,
+    "confidence": null
+  },
+  {
+    "text": "matérias",
+    "startMs": 71310,
+    "endMs": 71976,
+    "timestampMs": 71310,
+    "confidence": null
+  },
+  {
+    "text": "Sua",
+    "startMs": 72226,
+    "endMs": 72536,
+    "timestampMs": 72226,
+    "confidence": null
+  },
+  {
+    "text": "próxima",
+    "startMs": 72548,
+    "endMs": 72988,
+    "timestampMs": 72548,
+    "confidence": null
+  },
+  {
+    "text": "turma",
+    "startMs": 73000,
+    "endMs": 73298,
+    "timestampMs": 73000,
+    "confidence": null
+  },
+  {
+    "text": "começa",
+    "startMs": 73310,
+    "endMs": 73679,
+    "timestampMs": 73310,
+    "confidence": null
+  },
+  {
+    "text": "aqui",
+    "startMs": 73690,
+    "endMs": 74012,
+    "timestampMs": 73690,
+    "confidence": null
+  },
+  {
+    "text": "Assim",
+    "startMs": 74262,
+    "endMs": 74655,
+    "timestampMs": 74262,
+    "confidence": null
+  },
+  {
+    "text": "uma",
+    "startMs": 74679,
+    "endMs": 74845,
+    "timestampMs": 74679,
+    "confidence": null
+  },
+  {
+    "text": "dúvida",
+    "startMs": 74857,
+    "endMs": 75250,
+    "timestampMs": 74857,
+    "confidence": null
+  },
+  {
+    "text": "vira",
+    "startMs": 75262,
+    "endMs": 75452,
+    "timestampMs": 75262,
+    "confidence": null
+  },
+  {
+    "text": "conversa",
+    "startMs": 75464,
+    "endMs": 76048,
+    "timestampMs": 75464,
+    "confidence": null
+  },
+  {
+    "text": "um",
+    "startMs": 76286,
+    "endMs": 76345,
+    "timestampMs": 76286,
+    "confidence": null
+  },
+  {
+    "text": "caminho",
+    "startMs": 76357,
+    "endMs": 76714,
+    "timestampMs": 76357,
+    "confidence": null
+  },
+  {
+    "text": "vira",
+    "startMs": 76726,
+    "endMs": 76940,
+    "timestampMs": 76726,
+    "confidence": null
+  },
+  {
+    "text": "amizade",
+    "startMs": 76952,
+    "endMs": 77548,
+    "timestampMs": 76952,
+    "confidence": null
+  },
+  {
+    "text": "e",
+    "startMs": 77560,
+    "endMs": 77619,
+    "timestampMs": 77560,
+    "confidence": null
+  },
+  {
+    "text": "uma",
+    "startMs": 77631,
+    "endMs": 77750,
+    "timestampMs": 77631,
+    "confidence": null
+  },
+  {
+    "text": "conquista",
+    "startMs": 77762,
+    "endMs": 78214,
+    "timestampMs": 77762,
+    "confidence": null
+  },
+  {
+    "text": "puxa",
+    "startMs": 78238,
+    "endMs": 78512,
+    "timestampMs": 78238,
+    "confidence": null
+  },
+  {
+    "text": "a",
+    "startMs": 78524,
+    "endMs": 78560,
+    "timestampMs": 78524,
+    "confidence": null
+  },
+  {
+    "text": "próxima",
+    "startMs": 78571,
+    "endMs": 79107,
+    "timestampMs": 78571,
+    "confidence": null
+  },
+  {
+    "text": "É",
+    "startMs": 79357,
+    "endMs": 79476,
+    "timestampMs": 79357,
+    "confidence": null
+  },
+  {
+    "text": "a",
+    "startMs": 79488,
+    "endMs": 79548,
+    "timestampMs": 79488,
+    "confidence": null
+  },
+  {
+    "text": "vida",
+    "startMs": 79560,
+    "endMs": 79798,
+    "timestampMs": 79560,
+    "confidence": null
+  },
+  {
+    "text": "inteira",
+    "startMs": 79810,
+    "endMs": 80155,
+    "timestampMs": 79810,
+    "confidence": null
+  },
+  {
+    "text": "conectada",
+    "startMs": 80167,
+    "endMs": 80893,
+    "timestampMs": 80167,
+    "confidence": null
+  },
+  {
+    "text": "Sua",
+    "startMs": 81143,
+    "endMs": 81440,
+    "timestampMs": 81143,
+    "confidence": null
+  },
+  {
+    "text": "próxima",
+    "startMs": 81452,
+    "endMs": 81857,
+    "timestampMs": 81452,
+    "confidence": null
+  },
+  {
+    "text": "conexão",
+    "startMs": 81869,
+    "endMs": 82417,
+    "timestampMs": 81869,
+    "confidence": null
+  },
+  {
+    "text": "começa",
+    "startMs": 82429,
+    "endMs": 82821,
+    "timestampMs": 82429,
+    "confidence": null
+  },
+  {
+    "text": "aqui",
+    "startMs": 82833,
+    "endMs": 83155,
+    "timestampMs": 82833,
+    "confidence": null
+  },
+  {
+    "text": "Bora",
+    "startMs": 83405,
+    "endMs": 83679,
+    "timestampMs": 83405,
+    "confidence": null
+  },
+  {
+    "text": "fazer",
+    "startMs": 83690,
+    "endMs": 83976,
+    "timestampMs": 83690,
+    "confidence": null
+  },
+  {
+    "text": "parte",
+    "startMs": 83988,
+    "endMs": 84512,
+    "timestampMs": 83988,
+    "confidence": null
+  },
+  {
+    "text": "Se",
+    "startMs": 84762,
+    "endMs": 84940,
+    "timestampMs": 84762,
+    "confidence": null
+  },
+  {
+    "text": "enturme",
+    "startMs": 84952,
+    "endMs": 85393,
+    "timestampMs": 84952,
+    "confidence": null
+  },
+  {
+    "text": "com",
+    "startMs": 85405,
+    "endMs": 85548,
+    "timestampMs": 85405,
+    "confidence": null
+  },
+  {
+    "text": "o",
+    "startMs": 85560,
+    "endMs": 85583,
+    "timestampMs": 85560,
+    "confidence": null
+  },
+  {
+    "text": "Enturma",
+    "startMs": 85595,
+    "endMs": 86095,
+    "timestampMs": 85595,
+    "confidence": null
+  },
+  {
+    "text": "Fique",
+    "startMs": 86345,
+    "endMs": 86619,
+    "timestampMs": 86345,
+    "confidence": null
+  },
+  {
+    "text": "por",
+    "startMs": 86631,
+    "endMs": 86774,
+    "timestampMs": 86631,
     "confidence": null
   },
   {
     "text": "dentro",
-    "startMs": 85679,
-    "endMs": 86024,
-    "timestampMs": 85679,
+    "startMs": 86786,
+    "endMs": 87131,
+    "timestampMs": 86786,
     "confidence": null
   },
   {
     "text": "da",
-    "startMs": 86036,
-    "endMs": 86155,
-    "timestampMs": 86036,
+    "startMs": 87143,
+    "endMs": 87262,
+    "timestampMs": 87143,
     "confidence": null
   },
   {
     "text": "sua",
-    "startMs": 86167,
-    "endMs": 86369,
-    "timestampMs": 86167,
+    "startMs": 87274,
+    "endMs": 87476,
+    "timestampMs": 87274,
     "confidence": null
   },
   {
     "text": "faculdade",
-    "startMs": 86381,
-    "endMs": 86929,
-    "timestampMs": 86381,
+    "startMs": 87488,
+    "endMs": 88036,
+    "timestampMs": 87488,
     "confidence": null
   },
   {
     "text": "conosco",
-    "startMs": 86940,
-    "endMs": 87512,
-    "timestampMs": 86940,
+    "startMs": 88048,
+    "endMs": 88619,
+    "timestampMs": 88048,
     "confidence": null
   }
 ]

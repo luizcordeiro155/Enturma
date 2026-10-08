@@ -115,7 +115,7 @@ def score():
         elif scene['id']=='rides':
             t=np.arange(SR)/SR; engine=np.sin(2*np.pi*(55*t+85*t*t))*np.sin(np.pi*t)**2
             add(effects,engine,start+1.4,.18)
-        elif scene['id']=='attendance':
+        elif scene['id']=='friends':
             for j in range(4): add(effects,tone(660,.05,22),start+1+j*.35,.17)
         else:
             add(effects,tone(660,.12,22)+tone(880,.12,22)*.4,start+3,.16)
@@ -151,8 +151,8 @@ async def main():
     stereo/=max(1,float(np.max(np.abs(stereo)))/.93)
     stereo[:2*SR//24]*=np.linspace(0,1,2*SR//24)[:,None]
     write_audio(WORK/'mix.wav',stereo)
-    command('ffmpeg','-v','error','-y','-i',str(WORK/'mix.wav'),'-af','loudnorm=I=-16:TP=-1.5:LRA=9,aresample=44100,apad','-t','90','-c:a','libmp3lame','-b:a','160k',str(PUBLIC/'enturma-comic-90.mp3'))
-    (ROOT/'apps/web/src/components/intro/intro-storyboard.json').write_text(json.dumps(dict(durationInFrames=2160,fps=24,audioFile='intro/comic/enturma-comic-90.mp3',sceneFrames=[round(s['start']*24) for s in CONFIG['scenes']]+[2160],cues=cues),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
+    command('ffmpeg','-v','error','-y','-i',str(WORK/'mix.wav'),'-af','loudnorm=I=-16:TP=-1.5:LRA=9,aresample=44100,apad','-t','90','-c:a','libmp3lame','-b:a','160k',str(PUBLIC/'enturma-comic-90-presenter-v2.mp3'))
+    (ROOT/'apps/web/src/components/intro/intro-storyboard.json').write_text(json.dumps(dict(durationInFrames=2160,fps=24,audioFile='intro/comic/enturma-comic-90-presenter-v2.mp3',sceneFrames=[round(s['start']*24) for s in CONFIG['scenes']]+[2160],cues=cues),ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     (ROOT/'apps/web/src/components/intro/comic/narration-words.json').write_text(json.dumps(words,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     print('90-second original score and narration ready.',flush=True)
 
