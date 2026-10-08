@@ -27,7 +27,11 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   }
   await authenticate(page.context(), users[0]);
   await page.goto("/forum");
-  await expect(page.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-realtime",
+    "connected",
+    { timeout: 20000 },
+  );
   await page.getByRole("button", { name: "Nova publicação" }).click();
   const editor = page.getByRole("dialog", { name: "Nova publicação" });
   const title = `Recursão e algoritmos ${tag}`;
@@ -111,7 +115,11 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   const peerPage = await peer.newPage();
   await authenticate(peer, users[1]);
   await peerPage.goto(url);
-  await expect(peerPage.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
+  await expect(peerPage.locator("html")).toHaveAttribute(
+    "data-realtime",
+    "connected",
+    { timeout: 20000 },
+  );
   await peerPage
     .getByLabel("Seu comentário")
     .fill(`O caso base interrompe as chamadas recursivas. @Autor_${tag}`);
@@ -126,6 +134,20 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await expect(
     post.getByRole("button", { name: "Reagir com 💡" }),
   ).toHaveAttribute("aria-pressed", "true");
+  await post.getByRole("button", { name: "Mais reações" }).click();
+  await peerPage
+    .getByRole("searchbox", { name: "Pesquisar emoji" })
+    .fill("coruja");
+  await peerPage.getByRole("button", { name: "coruja", exact: true }).click();
+  await expect(
+    post.getByRole("button", { name: "Reagir com 🦉" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await expect(
+    page
+      .locator(".forum-card")
+      .first()
+      .getByRole("button", { name: "Reagir com 🦉" }),
+  ).toBeVisible();
   await expect(
     post.getByRole("button", { name: "Editar publicação ou comentário" }),
   ).toHaveCount(0);

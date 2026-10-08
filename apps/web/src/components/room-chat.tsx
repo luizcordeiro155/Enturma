@@ -12,14 +12,13 @@ import {
 import type { Message, Profile, RoomSystemEvent } from "@enturma/contracts";
 import {
   BookOpen,
-  Pencil,
+  MoreHorizontal,
   Hash,
   ImagePlus,
   Loader2,
   Send,
   Smile,
   Reply,
-  Trash2,
   X,
 } from "lucide-react";
 import { UserIdentity } from "./user-identity";
@@ -38,6 +37,9 @@ import {
   messageActionAnchor,
   type MessageActionAnchor,
 } from "./message-action-popover";
+
+import { MessageMenu } from "./message-menu";
+import { EmojiPicker, AnimatedEmoji } from "./emoji-picker";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
 
@@ -71,7 +73,7 @@ export function RoomChat(props: Props) {
     roomId,
     ended,
     connected,
-    messages,
+    messages: allMessages,
     me,
     hasOlder,
     busy,
@@ -90,12 +92,19 @@ export function RoomChat(props: Props) {
     setError,
   } = props;
 
+  const messages = useMemo(
+    () => allMessages.filter((m) => !m.hiddenAt),
+    [allMessages],
+  );
   const [editing, setEditing] = useState<string | null>(null);
   const [editBody, setEditBody] = useState("");
   const [unseen, setUnseen] = useState(0);
   const [firstUnread, setFirstUnread] = useState<string | null>(null);
   const [roomAtLatest, setRoomAtLatest] = useState(true);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [emojiAnchor, setEmojiAnchor] = useState<MessageActionAnchor | null>(
+    null,
+  );
   const [roomActionMessage, setRoomActionMessage] = useState<Message | null>(
     null,
   );
@@ -207,9 +216,8 @@ export function RoomChat(props: Props) {
     message: Message,
   ) {
     if (
-      message.userId !== me?.id ||
-      message.deletedAt ||
-      !isMobileTextEntryContext()
+      event.pointerType === "mouse" ||
+      (event.target as HTMLElement).closest("button,a,input,textarea")
     )
       return;
     cancelRoomLongPress();
@@ -233,17 +241,22 @@ export function RoomChat(props: Props) {
       cancelRoomLongPress();
   }
 
-  async function deleteRoomMessage(message: Message) {
-    try {
-      await api(`/study-rooms/${roomId}/messages/${message.id}`, {
-        method: "DELETE",
-      });
-      setRoomActionMessage(null);
-      setRoomActionAnchor(null);
-      await onReloadMessages();
-    } catch (cause) {
-      setError((cause as Error).message);
-    }
+  async function deleteRoomMessage(message: Message, scope: "me" | "everyone") {
+    await api(
+      `/study-rooms/${roomId}/messages/${message.id}${scope === "me" ? "/hide" : ""}`,
+      { method: scope === "me" ? "POST" : "DELETE" },
+    );
+    await onReloadMessages();
+  }
+  async function react(message: Message, emoji: string) {
+    const mine = messages
+      .find((m) => m.id === message.id)
+      ?.reactions?.some((r) => r.emoji === emoji && r.mine);
+    await api(
+      `/study-rooms/${roomId}/messages/${message.id}/reactions?emoji=${encodeURIComponent(emoji)}`,
+      { method: mine ? "DELETE" : "POST" },
+    );
+    await onReloadMessages();
   }
 
   useEffect(() => {
@@ -380,9 +393,7 @@ export function RoomChat(props: Props) {
                 onPointerCancel={cancelRoomLongPress}
                 onContextMenu={(event) => {
                   if (
-                    message.userId === me?.id &&
-                    !message.deletedAt &&
-                    isMobileTextEntryContext()
+                    !(event.target as HTMLElement).closest("input,textarea")
                   ) {
                     event.preventDefault();
                     setRoomActionAnchor(
@@ -392,6 +403,21 @@ export function RoomChat(props: Props) {
                   }
                 }}
               >
+                <button
+                  type="button"
+                  className="message-overflow-trigger"
+                  aria-label="Ações da mensagem"
+                  onClick={(event) => {
+                    setRoomActionAnchor(
+                      messageActionAnchor(
+                        event.currentTarget.closest("article")!,
+                      ),
+                    );
+                    setRoomActionMessage(message);
+                  }}
+                >
+                  <MoreHorizontal size={19} />
+                </button>
                 {message.id === firstUnread && (
                   <div
                     className="unread-divider"
@@ -520,15 +546,12 @@ export function RoomChat(props: Props) {
                           key={r.emoji}
                           aria-pressed={r.mine}
                           onClick={() =>
-                            api(
-                              `/study-rooms/${roomId}/messages/${message.id}/reactions?emoji=${encodeURIComponent(r.emoji)}`,
-                              { method: "POST" },
+                            void react(message, r.emoji).catch((e) =>
+                              setError(e.message),
                             )
-                              .then(onReloadMessages)
-                              .catch((e) => setError(e.message))
                           }
                         >
-                          {r.emoji} {r.count}
+                          <AnimatedEmoji value={r.emoji} /> {r.count}
                         </button>
                       ))}
                     </div>
@@ -551,50 +574,15 @@ export function RoomChat(props: Props) {
                             title={`Reagir com ${emoji}`}
                             aria-label={`Reagir com ${emoji}`}
                             onClick={() =>
-                              api(
-                                `/study-rooms/${roomId}/messages/${message.id}/reactions?emoji=${encodeURIComponent(emoji)}`,
-                                { method: "POST" },
-                              ).catch((e) => setError((e as Error).message))
+                              void react(message, emoji).catch((e) =>
+                                setError(e.message),
+                              )
                             }
                           >
                             {emoji}
                           </button>
                         ))}
                       </div>
-
-                      {message.userId === me?.id && message.body && !ended && (
-                        <button
-                          type="button"
-                          className="text-button desktop-message-edit"
-                          onClick={() => {
-                            setEditing(message.id);
-                            setEditBody(message.body ?? "");
-                          }}
-                        >
-                          <Pencil size={14} /> Editar
-                        </button>
-                      )}
-                      {message.userId === me?.id ? (
-                        <button
-                          className="text-button desktop-message-delete"
-                          type="button"
-                          onClick={async () => {
-                            try {
-                              await api(
-                                `/study-rooms/${roomId}/messages/${message.id}`,
-                                {
-                                  method: "DELETE",
-                                },
-                              );
-                              await onReloadMessages();
-                            } catch (e) {
-                              setError((e as Error).message);
-                            }
-                          }}
-                        >
-                          <Trash2 size={14} /> Remover
-                        </button>
-                      ) : null}
                     </div>
                   ) : null}
                 </div>
@@ -621,47 +609,41 @@ export function RoomChat(props: Props) {
         </button>
       )}
       {roomActionMessage && roomActionAnchor ? (
-        <MessageActionPopover
+        <MessageMenu
           anchor={roomActionAnchor}
           onDismiss={() => {
             setRoomActionMessage(null);
             setRoomActionAnchor(null);
           }}
-        >
-          {roomActionMessage.body && !ended ? (
-            <button
-              type="button"
-              onClick={() => {
-                setEditing(roomActionMessage.id);
-                setEditBody(roomActionMessage.body ?? "");
-                setRoomActionMessage(null);
-                setRoomActionAnchor(null);
-              }}
-            >
-              <Pencil size={18} />
-              Editar
-            </button>
-          ) : null}
-          <button
-            type="button"
-            className="danger"
-            onClick={() => void deleteRoomMessage(roomActionMessage)}
-          >
-            <Trash2 size={18} />
-            Excluir
-          </button>
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => {
-              setRoomActionMessage(null);
-              setRoomActionAnchor(null);
-            }}
-          >
-            <X size={18} />
-            Cancelar
-          </button>
-        </MessageActionPopover>
+          text={roomActionMessage.body ?? undefined}
+          onReply={
+            !roomActionMessage.deletedAt
+              ? () => setReplyTo(roomActionMessage)
+              : undefined
+          }
+          onEdit={
+            roomActionMessage.userId === me?.id &&
+            roomActionMessage.body &&
+            !ended &&
+            !roomActionMessage.deletedAt
+              ? () => {
+                  setEditing(roomActionMessage.id);
+                  setEditBody(roomActionMessage.body ?? "");
+                }
+              : undefined
+          }
+          canDeleteEveryone={
+            roomActionMessage.userId === me?.id &&
+            !ended &&
+            !roomActionMessage.deletedAt
+          }
+          onDelete={(scope) => deleteRoomMessage(roomActionMessage, scope)}
+          onReact={
+            !ended && !roomActionMessage.deletedAt
+              ? (emoji) => react(roomActionMessage, emoji)
+              : undefined
+          }
+        />
       ) : null}
 
       <div className="typing-status" role="status">
@@ -727,24 +709,21 @@ export function RoomChat(props: Props) {
             </div>
           ) : null}
 
-          {emojiOpen ? (
-            <div className="composer-emoji-tray" aria-label="Emojis rápidos">
-              {QUICK_EMOJIS.map((emoji) => (
-                <button
-                  type="button"
-                  key={emoji}
-                  disabled={busy}
-                  onClick={() => {
-                    setDraft(draft + emoji);
-                    setEmojiOpen(false);
-                    composerRef.current?.focus({ preventScroll: true });
-                  }}
-                  aria-label={`Adicionar ${emoji}`}
-                >
-                  {emoji}
-                </button>
-              ))}
-            </div>
+          {emojiOpen && emojiAnchor ? (
+            <MessageActionPopover
+              anchor={emojiAnchor}
+              label="Emojis"
+              wide
+              onDismiss={() => setEmojiOpen(false)}
+            >
+              <EmojiPicker
+                onSelect={(emoji) => {
+                  setDraft(draft + emoji);
+                  setEmojiOpen(false);
+                  composerRef.current?.focus({ preventScroll: true });
+                }}
+              />
+            </MessageActionPopover>
           ) : null}
 
           <div className="composer-main-row">
@@ -754,7 +733,10 @@ export function RoomChat(props: Props) {
               aria-label="Adicionar emoji"
               aria-expanded={emojiOpen}
               onPointerDown={(event) => event.preventDefault()}
-              onClick={() => setEmojiOpen((open) => !open)}
+              onClick={(event) => {
+                setEmojiAnchor(messageActionAnchor(event.currentTarget));
+                setEmojiOpen((open) => !open);
+              }}
             >
               <Smile size={22} />
             </button>

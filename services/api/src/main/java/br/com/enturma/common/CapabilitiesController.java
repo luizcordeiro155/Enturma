@@ -26,6 +26,8 @@ public class CapabilitiesController {
         "aiWebSearch", ai.webSearchEnabled(),
         "voice", voice.enabled(),
         "materials", storage.enabled(),
-        "privateImageAttachments", true);
+        "privateImageAttachments", true,
+        "messageActions", true,
+        "emojiCatalog", "17.0");
   }
 }

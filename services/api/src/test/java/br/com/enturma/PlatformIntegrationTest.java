@@ -29,8 +29,7 @@ class PlatformIntegrationTest {
   @org.springframework.test.context.bean.override.mockito.MockitoBean
   br.com.enturma.materials.ObjectStorageService storage;
 
-  @org.springframework.test.context.bean.override.mockito.MockitoBean
-  RideMapService rideMapService;
+  @org.springframework.test.context.bean.override.mockito.MockitoBean RideMapService rideMapService;
 
   @Autowired br.com.enturma.materials.MaterialService materials;
   @Autowired br.com.enturma.ai.AiService ai;
@@ -361,20 +360,15 @@ class PlatformIntegrationTest {
     UUID requestRide = (UUID) first.get("id");
     var accepted = (Map<?, ?>) rideDispatch.acceptRequest(member, requestRide);
     UUID match = (UUID) accepted.get("matchId");
-    assertThat(
-            ((Map<?, ?>) rideDispatch.state(host)).get("activeMatch"))
-        .isNotNull();
+    assertThat(((Map<?, ?>) rideDispatch.state(host)).get("activeMatch")).isNotNull();
     assertThatThrownBy(() -> rideDispatch.acceptRequest(outsider, requestRide))
         .isInstanceOf(ApiException.class);
 
     rides.cancelMatch(member, match);
-    assertThat(
-            db.one("SELECT status,trip_status FROM ride WHERE id=?", requestRide)
-                .get("status"))
+    assertThat(db.one("SELECT status,trip_status FROM ride WHERE id=?", requestRide).get("status"))
         .isEqualTo("OPEN");
     assertThat(
-            db.one("SELECT status,trip_status FROM ride WHERE id=?", requestRide)
-                .get("tripStatus"))
+            db.one("SELECT status,trip_status FROM ride WHERE id=?", requestRide).get("tripStatus"))
         .isEqualTo("MATCHING");
   }
 
@@ -540,6 +534,86 @@ class PlatformIntegrationTest {
   }
 
   @Autowired br.com.enturma.users.SocialController social;
+
+  @Test
+  void messageVisibilityAndReactionsAreScopedToTheirConversationAndAccount() throws Exception {
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", member.id()).get("username");
+    UUID friendship =
+        (UUID) ((Map<?, ?>) social.invite(host, new SocialController.Invite(username))).get("id");
+    social.accept(member, friendship);
+    social.identity(
+        host, new SocialController.PublicKey("EC", "P-256", "a".repeat(43), "b".repeat(43)));
+    social.send(
+        host,
+        friendship,
+        new SocialController.Envelope(UUID.randomUUID(), "Y2lwaGVydGV4dA==", "abcdefghijklmnop"));
+    UUID message =
+        (UUID) db.one("SELECT id FROM private_message WHERE friendship_id=?", friendship).get("id");
+    social.reactPrivateMessage(member, friendship, message, "👩🏽‍💻");
+    social.reactPrivateMessage(member, friendship, message, "👩🏽‍💻");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM private_message_reaction WHERE message_id=?",
+                Integer.class,
+                message))
+        .isEqualTo(1);
+    assertThatThrownBy(() -> social.reactPrivateMessage(outsider, friendship, message, "❤️"))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> social.reactPrivateMessage(member, friendship, message, "<script>"))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> social.deletePrivateMessage(member, friendship, message))
+        .isInstanceOf(ApiException.class);
+    social.hidePrivateMessage(member, friendship, message);
+    assertThat(
+            ((Map<?, ?>) ((List<?>) social.messages(member, friendship, 0)).getFirst())
+                .get("hiddenAt"))
+        .isNotNull();
+    assertThat(
+            ((Map<?, ?>) ((List<?>) social.messages(host, friendship, 0)).getFirst())
+                .get("hiddenAt"))
+        .isNull();
+    assertThat((List<?>) social.friends(member)).hasSize(1);
+    assertThat(((Map<?, ?>) ((List<?>) social.friends(member)).getFirst()).get("lastMessageId"))
+        .isNull();
+    assertThat(((Map<?, ?>) ((List<?>) social.friends(host)).getFirst()).get("lastMessageId"))
+        .isEqualTo(message);
+    social.editPrivateMessage(
+        host,
+        friendship,
+        message,
+        new SocialController.PrivateMessageEdit("bmV3", "abcdefghijklmnop"));
+    assertThat(
+            ((Map<?, ?>) ((List<?>) social.messages(host, friendship, 0)).getFirst())
+                .get("editedAt"))
+        .isNotNull();
+    social.deletePrivateMessage(host, friendship, message);
+    var removed = (Map<?, ?>) ((List<?>) social.messages(host, friendship, 0)).getFirst();
+    assertThat(removed.get("deletedAt")).isNotNull();
+    assertThat(removed.get("ciphertext")).isEqualTo("");
+    assertThatThrownBy(() -> social.reactPrivateMessage(member, friendship, message, "❤️"))
+        .isInstanceOf(ApiException.class);
+
+    UUID room = room(8);
+    study.join(member, room);
+    UUID roomMessage = (UUID) ((Map<?, ?>) chat.send(host, room, "Minha mensagem", null)).get("id");
+    chat.react(member, room, roomMessage, "👨‍👩‍👧‍👦");
+    chat.unreact(member, room, roomMessage, "👨‍👩‍👧‍👦");
+    assertThat((List<?>) chat.reactions(member, room, roomMessage)).isEmpty();
+    chat.hide(member, room, roomMessage);
+    assertThat(((Map<?, ?>) ((List<?>) chat.messages(member, room, 0)).getFirst()).get("hiddenAt"))
+        .isNotNull();
+    assertThat(((Map<?, ?>) ((List<?>) chat.messages(host, room, 0)).getFirst()).get("hiddenAt"))
+        .isNull();
+    assertThatThrownBy(() -> chat.hide(outsider, room, roomMessage))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> chat.hide(member, room, message)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> chat.delete(member, room, roomMessage))
+        .isInstanceOf(ApiException.class);
+    chat.delete(host, room, roomMessage);
+    assertThat(((Map<?, ?>) ((List<?>) chat.messages(member, room, 0)).getFirst()).get("deletedAt"))
+        .isNotNull();
+  }
 
   @Test
   void friendshipsRequireAcceptanceAndPrivateMessagesStayCiphertext() throws Exception {
@@ -1329,10 +1403,8 @@ class PlatformIntegrationTest {
                         120))
                 .get("id");
     var publicRide =
-        ((List<Map<String, Object>>) rides.list(member, campus, 0)).stream()
-            .filter(row -> row.get("id").equals(offer))
-            .findFirst()
-            .orElseThrow();
+        ((List<Map<String, Object>>) rides.list(member, campus, 0))
+            .stream().filter(row -> row.get("id").equals(offer)).findFirst().orElseThrow();
     assertThat(publicRide).doesNotContainKeys("areaLat", "areaLng", "areaAccuracyM");
     UUID request =
         (UUID)
@@ -1433,14 +1505,14 @@ class PlatformIntegrationTest {
   @Test
   void recurringRidesAndVehicleProfileStayOwnedAndGenerateUpcomingTrips() {
     var vehicle =
-        (Map<?, ?>)
-            rideMobility.saveVehicle(host, "Honda", "Fit", "Prata", 2020, 3, "••1A23");
+        (Map<?, ?>) rideMobility.saveVehicle(host, "Honda", "Fit", "Prata", 2020, 3, "••1A23");
     assertThat(vehicle.get("model")).isEqualTo("Fit");
 
-    int weekday = java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Sao_Paulo"))
-        .plusDays(1)
-        .getDayOfWeek()
-        .getValue();
+    int weekday =
+        java.time.ZonedDateTime.now(java.time.ZoneId.of("America/Sao_Paulo"))
+            .plusDays(1)
+            .getDayOfWeek()
+            .getValue();
     UUID recurrence =
         (UUID)
             ((Map<?, ?>)
@@ -1853,7 +1925,8 @@ class PlatformIntegrationTest {
     UUID practiceSession = UUID.randomUUID();
 
     db.jdbc.update(
-        "INSERT INTO campus_task(id,user_id,kind,title,due_at) VALUES (?,?,'STUDY','Privado',now())",
+        "INSERT INTO campus_task(id,user_id,kind,title,due_at) VALUES"
+            + " (?,?,'STUDY','Privado',now())",
         campusTask,
         userId);
     db.jdbc.update(
@@ -1926,8 +1999,12 @@ class PlatformIntegrationTest {
             "teacher_class_member")) {
       assertThat(
               db.jdbc.queryForObject(
-                  "SELECT count(*) FROM " + table + " WHERE "
-                      + (table.equals("teacher_class_member") ? "user_id" : table.equals("teacher_class") ? "owner_id" : "user_id")
+                  "SELECT count(*) FROM "
+                      + table
+                      + " WHERE "
+                      + (table.equals("teacher_class_member")
+                          ? "user_id"
+                          : table.equals("teacher_class") ? "owner_id" : "user_id")
                       + "=?",
                   Integer.class,
                   userId))
@@ -1968,5 +2045,4 @@ class PlatformIntegrationTest {
     assertThat(db.one("SELECT status FROM app_user WHERE id=?", userId).get("status"))
         .isEqualTo("DELETED");
   }
-
 }

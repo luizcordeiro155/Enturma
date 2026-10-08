@@ -7,10 +7,9 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ImagePlus,
-  Pencil,
+  MoreHorizontal,
   Send,
   Smile,
-  Trash2,
   X,
 } from "lucide-react";
 import { preparePrivateChatImage } from "@/lib/chat-image";
@@ -49,6 +48,8 @@ import {
   messageActionAnchor,
   type MessageActionAnchor,
 } from "./message-action-popover";
+import { MessageMenu } from "./message-menu";
+import { EmojiPicker, EmojiText, AnimatedEmoji } from "./emoji-picker";
 type Friend = Omit<PublicProfile, "id"> & {
   id: string;
   userId: string;
@@ -61,6 +62,10 @@ type Friend = Omit<PublicProfile, "id"> & {
   unreadCount?: number;
 };
 type Envelope = {
+  deletedAt?: string | null;
+  hiddenAt?: string | null;
+  editedAt?: string | null;
+  reactions?: { emoji: string; count: number; mine: boolean }[];
   id: string;
   senderId: string;
   clientId: string;
@@ -93,6 +98,9 @@ export function Friends() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [privateImagesEnabled, setPrivateImagesEnabled] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
+  const [emojiAnchor, setEmojiAnchor] = useState<MessageActionAnchor | null>(
+    null,
+  );
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [identityError, setIdentityError] = useState("");
@@ -128,6 +136,7 @@ export function Friends() {
   const nearLatest = useRef(true);
   const previousMessageCount = useRef(0);
   const attachmentUrls = useRef(new Set<string>());
+  const loadedPages = useRef(0);
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -221,13 +230,27 @@ export function Friends() {
           : `/friends/${friend.id}/messages?page=${index}`,
         { signal: AbortSignal.timeout(12000) },
       );
+      if (!target && index === 0 && loadedPages.current > 0) {
+        const olderRows = await Promise.all(
+          Array.from({ length: loadedPages.current }, (_, i) =>
+            api<Envelope[]>(`/friends/${friend.id}/messages?page=${i + 1}`, {
+              signal: AbortSignal.timeout(12000),
+            }),
+          ),
+        );
+        rows.push(...olderRows.flat());
+      }
+      if (!target) loadedPages.current = Math.max(loadedPages.current, index);
       const decoded = await Promise.all(
         rows.map(async (m) => {
-          const text = await decryptMessage(cryptoKey, m, friend.id).catch(
-            () => "Não foi possível autenticar esta mensagem.",
-          );
+          const text =
+            m.deletedAt || m.hiddenAt
+              ? ""
+              : await decryptMessage(cryptoKey, m, friend.id).catch(
+                  () => "Não foi possível autenticar esta mensagem.",
+                );
           let attachmentUrl: string | undefined;
-          if (m.attachmentCiphertext) {
+          if (m.attachmentCiphertext && !m.hiddenAt && !m.deletedAt) {
             const blob = await decryptAttachment(cryptoKey, m, friend.id).catch(
               () => null,
             );
@@ -240,9 +263,9 @@ export function Friends() {
         }),
       );
       if (version !== generation.current) return;
-      const newest = [...decoded].sort((a, b) =>
-        b.createdAt.localeCompare(a.createdAt),
-      )[0];
+      const newest = decoded
+        .filter((m) => !m.deletedAt && !m.hiddenAt)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))[0];
       if (newest)
         setPreviews((old) => ({
           ...old,
@@ -254,12 +277,18 @@ export function Friends() {
           },
         }));
       setMessages((old) =>
-        [...new Map([...old, ...decoded].map((m) => [m.id, m])).values()].sort(
-          (a, b) =>
-            a.createdAt.localeCompare(b.createdAt) || a.id.localeCompare(b.id),
-        ),
+        [...new Map([...old, ...decoded].map((m) => [m.id, m])).values()]
+          .filter((m) => !m.hiddenAt)
+          .sort(
+            (a, b) =>
+              a.createdAt.localeCompare(b.createdAt) ||
+              a.id.localeCompare(b.id),
+          ),
       );
-      if (!target) setOlder(rows.length === 50);
+      if (!target)
+        setOlder(
+          rows.length === (index === 0 ? (loadedPages.current + 1) * 50 : 50),
+        );
     },
     [],
   );
@@ -425,6 +454,10 @@ export function Friends() {
       setConnectionError("");
       setError("");
       setMessages([]);
+      loadedPages.current = 0;
+      setPrivateActionMessage(null);
+      setPrivateActionAnchor(null);
+      setEditingPrivate(null);
       setDraft("");
       setImage(null);
       setImagePreview((old) => {
@@ -466,7 +499,11 @@ export function Friends() {
     event: React.PointerEvent<HTMLElement>,
     message: PrivateMessage,
   ) {
-    if (message.senderId !== me?.id || !isMobileTextEntryContext()) return;
+    if (
+      event.pointerType === "mouse" ||
+      (event.target as HTMLElement).closest("button,a,input,textarea")
+    )
+      return;
     cancelPrivateLongPress();
     longPressOrigin.current = { x: event.clientX, y: event.clientY };
     const target = event.currentTarget;
@@ -488,19 +525,43 @@ export function Friends() {
       cancelPrivateLongPress();
   }
 
-  async function deletePrivateMessage(message: PrivateMessage) {
-    if (!selected || message.senderId !== me?.id) return;
-    try {
-      await api(`/friends/${selected.id}/messages/${message.id}`, {
-        method: "DELETE",
-      });
-      setMessages((old) => old.filter((item) => item.id !== message.id));
-      setPrivateActionMessage(null);
-      setPrivateActionAnchor(null);
-      setEditingPrivate(null);
-    } catch (cause) {
-      setError((cause as Error).message);
-    }
+  async function deletePrivateMessage(
+    message: PrivateMessage,
+    scope: "me" | "everyone",
+  ) {
+    if (!selected) return;
+    await api(
+      `/friends/${selected.id}/messages/${message.id}${scope === "me" ? "/hide" : ""}`,
+      { method: scope === "me" ? "POST" : "DELETE" },
+    );
+    setMessages((old) =>
+      scope === "me"
+        ? old.filter((m) => m.id !== message.id)
+        : old.map((m) =>
+            m.id === message.id
+              ? {
+                  ...m,
+                  text: "",
+                  deletedAt: new Date().toISOString(),
+                  attachmentUrl: undefined,
+                  reactions: [],
+                }
+              : m,
+          ),
+    );
+    setEditingPrivate(null);
+    if (key.current) await load(selected, key.current, 0, generation.current);
+  }
+  async function reactPrivate(message: PrivateMessage, emoji: string) {
+    if (!selected || !key.current) return;
+    const mine = messages
+      .find((m) => m.id === message.id)
+      ?.reactions?.some((r) => r.emoji === emoji && r.mine);
+    await api(
+      `/friends/${selected.id}/messages/${message.id}/reactions?emoji=${encodeURIComponent(emoji)}`,
+      { method: mine ? "DELETE" : "POST" },
+    );
+    await load(selected, key.current, 0, generation.current);
   }
 
   async function savePrivateEdit(message: PrivateMessage) {
@@ -987,8 +1048,9 @@ export function Friends() {
                       onPointerCancel={cancelPrivateLongPress}
                       onContextMenu={(event) => {
                         if (
-                          m.senderId === me?.id &&
-                          isMobileTextEntryContext()
+                          !(event.target as HTMLElement).closest(
+                            "input,textarea",
+                          )
                         ) {
                           event.preventDefault();
                           setPrivateActionAnchor(
@@ -998,6 +1060,21 @@ export function Friends() {
                         }
                       }}
                     >
+                      <button
+                        type="button"
+                        className="message-overflow-trigger"
+                        aria-label="Ações da mensagem"
+                        onClick={(event) => {
+                          setPrivateActionAnchor(
+                            messageActionAnchor(
+                              event.currentTarget.closest("article")!,
+                            ),
+                          );
+                          setPrivateActionMessage(m);
+                        }}
+                      >
+                        <MoreHorizontal size={19} />
+                      </button>
                       <UserIdentity
                         compact
                         user={
@@ -1007,7 +1084,10 @@ export function Friends() {
                         }
                       />
                       <div className="private-message-body">
-                        {m.attachmentUrl ? (
+                        {m.deletedAt ? (
+                          <p className="muted">Mensagem removida.</p>
+                        ) : null}
+                        {!m.deletedAt && m.attachmentUrl ? (
                           <ChatImage
                             src={m.attachmentUrl}
                             alt={m.attachmentName ?? "Imagem privada"}
@@ -1041,57 +1121,68 @@ export function Friends() {
                             </div>
                           </form>
                         ) : m.text ? (
-                          <p>{m.text}</p>
+                          <p>
+                            <EmojiText text={m.text} />
+                          </p>
                         ) : null}
                         <small>
                           {new Date(m.createdAt).toLocaleString("pt-BR")}
+                          {m.editedAt ? " · editada" : ""}
                         </small>
+                        {!m.deletedAt && (
+                          <div className="message-reactions">
+                            {m.reactions?.map((r) => (
+                              <button
+                                type="button"
+                                key={r.emoji}
+                                aria-pressed={r.mine}
+                                aria-label={`Reagir com ${r.emoji}`}
+                                onClick={() =>
+                                  void reactPrivate(m, r.emoji).catch((e) =>
+                                    setError(e.message),
+                                  )
+                                }
+                              >
+                                <AnimatedEmoji value={r.emoji} /> {r.count}
+                              </button>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </article>
                   ))}
                 </div>
                 {privateActionMessage && privateActionAnchor ? (
-                  <MessageActionPopover
+                  <MessageMenu
                     anchor={privateActionAnchor}
                     onDismiss={() => {
                       setPrivateActionMessage(null);
                       setPrivateActionAnchor(null);
                     }}
-                  >
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setEditPrivateText(privateActionMessage.text);
-                        setEditingPrivate(privateActionMessage);
-                        setPrivateActionMessage(null);
-                        setPrivateActionAnchor(null);
-                      }}
-                    >
-                      <Pencil size={18} />
-                      Editar
-                    </button>
-                    <button
-                      type="button"
-                      className="danger"
-                      onClick={() =>
-                        void deletePrivateMessage(privateActionMessage)
-                      }
-                    >
-                      <Trash2 size={18} />
-                      Excluir
-                    </button>
-                    <button
-                      type="button"
-                      className="secondary"
-                      onClick={() => {
-                        setPrivateActionMessage(null);
-                        setPrivateActionAnchor(null);
-                      }}
-                    >
-                      <X size={18} />
-                      Cancelar
-                    </button>
-                  </MessageActionPopover>
+                    text={privateActionMessage.text}
+                    onEdit={
+                      privateActionMessage.senderId === me?.id &&
+                      !privateActionMessage.deletedAt &&
+                      privateActionMessage.text
+                        ? () => {
+                            setEditPrivateText(privateActionMessage.text);
+                            setEditingPrivate(privateActionMessage);
+                          }
+                        : undefined
+                    }
+                    canDeleteEveryone={
+                      privateActionMessage.senderId === me?.id &&
+                      !privateActionMessage.deletedAt
+                    }
+                    onDelete={(scope) =>
+                      deletePrivateMessage(privateActionMessage, scope)
+                    }
+                    onReact={
+                      !privateActionMessage.deletedAt
+                        ? (emoji) => reactPrivate(privateActionMessage, emoji)
+                        : undefined
+                    }
+                  />
                 ) : null}
 
                 <form
@@ -1125,27 +1216,21 @@ export function Friends() {
                     </div>
                   ) : null}
 
-                  {emojiOpen ? (
-                    <div
-                      className="composer-emoji-tray"
-                      aria-label="Emojis rápidos"
+                  {emojiOpen && emojiAnchor ? (
+                    <MessageActionPopover
+                      anchor={emojiAnchor}
+                      label="Emojis"
+                      wide
+                      onDismiss={() => setEmojiOpen(false)}
                     >
-                      {["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"].map(
-                        (emoji) => (
-                          <button
-                            type="button"
-                            key={emoji}
-                            onClick={() => {
-                              setDraft((value) => value + emoji);
-                              setEmojiOpen(false);
-                              composer.current?.focus({ preventScroll: true });
-                            }}
-                          >
-                            {emoji}
-                          </button>
-                        ),
-                      )}
-                    </div>
+                      <EmojiPicker
+                        onSelect={(emoji) => {
+                          setDraft((value) => value + emoji);
+                          setEmojiOpen(false);
+                          composer.current?.focus({ preventScroll: true });
+                        }}
+                      />
+                    </MessageActionPopover>
                   ) : null}
 
                   <div className="composer-main-row">
@@ -1155,7 +1240,12 @@ export function Friends() {
                       aria-label="Adicionar emoji"
                       aria-expanded={emojiOpen}
                       onPointerDown={(event) => event.preventDefault()}
-                      onClick={() => setEmojiOpen((open) => !open)}
+                      onClick={(event) => {
+                        setEmojiAnchor(
+                          messageActionAnchor(event.currentTarget),
+                        );
+                        setEmojiOpen((open) => !open);
+                      }}
                     >
                       <Smile size={22} />
                     </button>

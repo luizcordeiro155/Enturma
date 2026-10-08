@@ -16,11 +16,18 @@ import {
   Flag,
   Pencil,
   Trash2,
+  SmilePlus,
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { UserIdentity, type PublicProfile } from "./user-identity";
 import { Feedback } from "./feedback";
+import { EmojiPicker, AnimatedEmoji } from "./emoji-picker";
+import {
+  MessageActionPopover,
+  messageActionAnchor,
+  type MessageActionAnchor,
+} from "./message-action-popover";
 const categories: Record<string, string> = {
   GENERAL: "Conversa geral",
   PROGRAMMING: "Programação",
@@ -57,6 +64,10 @@ export function Forum({
   id?: string;
   initialCategory?: string;
 }) {
+  const [emojiTarget, setEmojiTarget] = useState<{
+    entry: Entry;
+    anchor: MessageActionAnchor;
+  } | null>(null);
   const router = useRouter();
   useNotificationTarget();
   const [me, setMe] = useState<Me>();
@@ -277,7 +288,9 @@ export function Forum({
         <button
           className="text-button"
           disabled={busy}
-          onClick={() => mutate(`/forum/${entry.rootId}/accept/${entry.id}`, "POST")}
+          onClick={() =>
+            mutate(`/forum/${entry.rootId}/accept/${entry.id}`, "POST")
+          }
         >
           {entry.accepted ? "Remover solução" : "Aceitar resposta"}
         </button>
@@ -314,25 +327,39 @@ export function Forum({
   );
   const reactions = (entry: Entry) => (
     <div className="forum-reactions" aria-label="Reações">
-      {emojis.map((emoji) => {
-        const reaction = entry.reactions.find((r) => r.emoji === emoji);
-        return (
-          <button
-            key={emoji}
-            disabled={busy}
-            aria-label={`Reagir com ${emoji}`}
-            aria-pressed={!!reaction?.mine}
-            onClick={() =>
-              mutate(`/forum/${entry.id}/reaction`, "PUT", {
-                emoji: reaction?.mine ? "" : emoji,
-              })
-            }
-          >
-            {emoji}
-            <span>{reaction?.count ?? 0}</span>
-          </button>
-        );
-      })}
+      {[...new Set([...emojis, ...entry.reactions.map((r) => r.emoji)])].map(
+        (emoji) => {
+          const reaction = entry.reactions.find((r) => r.emoji === emoji);
+          return (
+            <button
+              key={emoji}
+              disabled={busy}
+              aria-label={`Reagir com ${emoji}`}
+              aria-pressed={!!reaction?.mine}
+              onClick={() =>
+                mutate(`/forum/${entry.id}/reaction`, "PUT", {
+                  emoji: reaction?.mine ? "" : emoji,
+                })
+              }
+            >
+              <AnimatedEmoji value={emoji} />
+              <span>{reaction?.count ?? 0}</span>
+            </button>
+          );
+        },
+      )}
+      <button
+        type="button"
+        aria-label="Mais reações"
+        onClick={(event) =>
+          setEmojiTarget({
+            entry,
+            anchor: messageActionAnchor(event.currentTarget),
+          })
+        }
+      >
+        <SmilePlus size={19} />
+      </button>
     </div>
   );
   function card(entry: Entry, detail = false) {
@@ -351,8 +378,12 @@ export function Forum({
             })}
             {entry.updatedAt !== entry.createdAt ? " · editado" : ""}
           </span>
-          <span className="forum-reputation">{entry.reputation ?? 0} reputação</span>
-          {entry.accepted ? <span className="forum-accepted-badge">✓ Resposta aceita</span> : null}
+          <span className="forum-reputation">
+            {entry.reputation ?? 0} reputação
+          </span>
+          {entry.accepted ? (
+            <span className="forum-accepted-badge">✓ Resposta aceita</span>
+          ) : null}
           {!entry.rootId ? (
             <Link
               className="forum-category"
@@ -411,6 +442,28 @@ export function Forum({
   }
   return (
     <Shell>
+      {emojiTarget && (
+        <MessageActionPopover
+          anchor={emojiTarget.anchor}
+          label="Reagir à publicação"
+          wide
+          onDismiss={() => setEmojiTarget(null)}
+        >
+          <EmojiPicker
+            disabled={busy}
+            onSelect={(emoji) => {
+              void mutate(`/forum/${emojiTarget.entry.id}/reaction`, "PUT", {
+                emoji: emojiTarget.entry.reactions.some(
+                  (r) => r.emoji === emoji && r.mine,
+                )
+                  ? ""
+                  : emoji,
+              });
+              setEmojiTarget(null);
+            }}
+          />
+        </MessageActionPopover>
+      )}
       <div className="forum-page">
         <header className="forum-heading">
           <div>

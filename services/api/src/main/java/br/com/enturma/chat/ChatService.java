@@ -47,9 +47,11 @@ public class ChatService {
   private Object messageRows(Actor a, UUID room, int page, UUID target) {
     study.member(a, room);
     return db.list(
-        "SELECT"
-            + " m.id,m.user_id,m.body,m.reply_to,m.created_at,m.edited_at,m.deleted_at,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes"
-            + " IS NOT NULL has_avatar, a.id attachment_id,a.file_name attachment_name,a.mime_type"
+        "SELECT m.id,m.user_id,m.body,m.reply_to,m.created_at,m.edited_at,m.deleted_at,(SELECT"
+            + " created_at FROM room_message_hidden h WHERE h.message_id=m.id AND"
+            + " h.user_id=?::uuid)"
+            + " hidden_at,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS NOT"
+            + " NULL has_avatar, a.id attachment_id,a.file_name attachment_name,a.mime_type"
             + " attachment_mime, a.file_size attachment_size, COALESCE((SELECT jsonb_agg(r) FROM"
             + " (SELECT emoji,count(*) count,bool_or(user_id=?::uuid) mine FROM room_reaction WHERE"
             + " message_id=m.id GROUP BY emoji ORDER BY min(created_at)) r),'[]'::jsonb) reactions"
@@ -58,6 +60,7 @@ public class ChatService {
             + " EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND b.blocked_id=m.user_id) OR"
             + " (b.blocked_id=? AND b.user_id=m.user_id)) ORDER BY m.created_at DESC,m.id DESC"
             + " LIMIT 50 OFFSET ?",
+        a.id(),
         a.id(),
         room,
         target,
@@ -171,6 +174,20 @@ public class ChatService {
             room,
             a.id())) throw ApiException.forbidden();
     db.jdbc.update("UPDATE room_message SET body=NULL,deleted_at=now() WHERE id=?", id);
+    db.jdbc.update("DELETE FROM room_reaction WHERE message_id=?", id);
+    db.jdbc.update("DELETE FROM notification WHERE target_id=?", id);
+  }
+
+  @Transactional
+  public void hide(Actor a, UUID room, UUID id) {
+    study.member(a, room);
+    if (!db.exists("SELECT EXISTS(SELECT 1 FROM room_message WHERE id=? AND room_id=?)", id, room))
+      throw ApiException.missing();
+    db.jdbc.update(
+        "INSERT INTO room_message_hidden(message_id,user_id) VALUES (?,?) ON CONFLICT DO NOTHING",
+        id,
+        a.id());
+    db.jdbc.update("DELETE FROM notification WHERE target_id=? AND user_id=?", id, a.id());
   }
 
   @Transactional
@@ -206,6 +223,11 @@ public class ChatService {
 
   public Download download(Actor a, UUID room, UUID id) {
     study.member(a, room);
+    if (db.exists(
+        "SELECT EXISTS(SELECT 1 FROM room_message WHERE attachment_id=? AND room_id=? AND"
+            + " deleted_at IS NOT NULL)",
+        id,
+        room)) throw ApiException.missing();
     var attachment = db.one("SELECT * FROM room_attachment WHERE id=? AND room_id=?", id, room);
     return new Download(
         attachment.get("inlineBytes") instanceof byte[] content
@@ -220,8 +242,7 @@ public class ChatService {
     study.activeLocked(room);
     study.member(a, room);
     automod.allowed(a.id(), room);
-    if (emoji == null || emoji.isBlank() || emoji.length() > 16)
-      throw ApiException.invalid("Reação inválida.");
+    EmojiReaction.validate(emoji);
     if (!db.exists(
         "SELECT EXISTS(SELECT 1 FROM room_message WHERE id=? AND room_id=? AND deleted_at IS NULL)",
         message,

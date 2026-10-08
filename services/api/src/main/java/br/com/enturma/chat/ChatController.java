@@ -56,6 +56,12 @@ public class ChatController {
     chat.delete(a, room, id);
   }
 
+  @PostMapping("/{id}/hide")
+  public void hide(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID room, @PathVariable UUID id) {
+    chat.hide(a, room, id);
+  }
+
   @PostMapping(value = "/attachments", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public Object upload(
       @AuthenticationPrincipal Actor a, @PathVariable UUID room, @RequestParam MultipartFile file)

@@ -1,7 +1,14 @@
 "use client";
 import { ForumLinks } from "./forum-links";
+import { EmojiText, emojiOnly } from "./emoji-picker";
 // Only text nodes are rendered. HTML and executable markdown are never interpreted.
 export function RichMessage({ text }: { text: string }) {
+  if (emojiOnly(text))
+    return (
+      <div className="rich-message">
+        <EmojiText text={text} />
+      </div>
+    );
   return (
     <div className="rich-message">
       {text.split(/(```[\s\S]*?```)/g).map((block, i) =>

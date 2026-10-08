@@ -1,5 +1,5 @@
 // Production redeploy marker: account-switch/mobile-profile fixes 2026-10-03.
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import "./advanced-games.css";
 import "./profile-customization.css";
@@ -26,6 +26,7 @@ import "./intro-experience.css";
 import "./call-tiles.css";
 import "./theme-surfaces.css";
 import "./interaction-refinement.css";
+import "./chat-interactions.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";
@@ -33,6 +34,13 @@ import { MobilePushRegistration } from "@/components/mobile-push-registration";
 import { WebPushRegistration } from "@/components/web-push-registration";
 import { AppShellStateProvider } from "@/components/app-shell-state";
 import { PwaProvider } from "@/components/pwa-install";
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
 export const metadata: Metadata = {
   title: "Enturma — estude em companhia",
   description: "Encontre sua matéria, entre em uma turma e aprenda junto.",

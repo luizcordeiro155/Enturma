@@ -1,4 +1,9 @@
-import { test, expect, type APIRequestContext } from "@playwright/test";
+import {
+  test,
+  expect,
+  chromium,
+  type APIRequestContext,
+} from "@playwright/test";
 import { authenticate } from "./session";
 import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -27,6 +32,258 @@ async function user(request: APIRequestContext, name: string) {
   expect(result.ok(), await result.text()).toBe(true);
   return { ...(await result.json()), username };
 }
+
+test("message menus, full emojis, private deletion and image gestures synchronize across users", async ({
+  page,
+  browser,
+  request,
+}) => {
+  test.setTimeout(150000);
+  const alice = await user(request, "Ana Conversas"),
+    bob = await user(request, "Bia Conversas");
+  const otherContext = await browser.newContext({
+    hasTouch: true,
+    isMobile: true,
+    viewport: { width: 1376, height: 768 },
+  });
+  const other = await otherContext.newPage();
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  other.on("pageerror", (e) => errors.push(e.message));
+  await authenticate(page.context(), alice);
+  await authenticate(otherContext, bob);
+  for (const p of [page, other]) {
+    await p.goto("/friends");
+    await p.getByText("Chaves e backup das conversas").click();
+    await expect(
+      p.getByRole("button", { name: "Baixar backup cifrado" }),
+    ).toBeEnabled();
+  }
+  const invitation = await request.post(`${backend}/api/v1/friends`, {
+    headers: { Authorization: `Bearer ${alice.accessToken}` },
+    data: { username: bob.username },
+  });
+  expect(invitation.ok(), await invitation.text()).toBe(true);
+  const friendship = await invitation.json();
+  expect(
+    (
+      await request.post(`${backend}/api/v1/friends/${friendship.id}/accept`, {
+        headers: { Authorization: `Bearer ${bob.accessToken}` },
+      })
+    ).ok(),
+  ).toBe(true);
+  try {
+    for (const p of [page, other]) {
+      await p.goto(`/friends?chat=${friendship.id}`);
+      await expect(p.locator("html")).toHaveAttribute(
+        "data-realtime",
+        "connected",
+      );
+      await expect(p.getByLabel("Mensagem privada")).toBeEnabled();
+    }
+    const send = async (text: string) => {
+      await page.getByLabel("Mensagem privada").fill(text);
+      await page
+        .getByRole("button", { name: "Enviar mensagem", exact: true })
+        .click();
+    };
+    const row = (p: typeof page, text: string) =>
+      p.locator(".private-messages article").filter({ hasText: text });
+    await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
+    await send("Uma explicação para revisar.");
+    await expect(row(other, "Uma explicação para revisar.")).toBeVisible();
+    await row(page, "Uma explicação para revisar.").click({ button: "right" });
+    await expect(
+      page.getByRole("dialog", { name: "Ações da mensagem" }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Editar mensagem", exact: true })
+      .click();
+    await page
+      .locator(".private-message-edit textarea")
+      .fill("Explicação revisada.");
+    await page.getByRole("button", { name: "Salvar", exact: true }).click();
+    await expect(row(other, "Explicação revisada.")).toBeVisible();
+    await row(other, "Explicação revisada.")
+      .getByRole("button", { name: "Ações da mensagem", exact: true })
+      .click();
+    await other
+      .getByRole("button", { name: "Mais emojis", exact: true })
+      .click();
+    await other
+      .getByRole("searchbox", { name: "Pesquisar emoji" })
+      .fill("coruja");
+    await other.getByRole("button", { name: "coruja", exact: true }).click();
+    await expect(
+      row(page, "Explicação revisada.").getByRole("button", {
+        name: "Reagir com 🦉",
+      }),
+    ).toBeVisible();
+    await row(page, "Explicação revisada.").click({ button: "right" });
+    await page
+      .getByRole("button", { name: "Excluir mensagem", exact: true })
+      .click();
+    await expect(
+      page.getByRole("button", { name: /Excluir para todos/ }),
+    ).toBeVisible();
+    await page.screenshot({
+      path: join(screenshots, "chat-delete-desktop.png"),
+    });
+    await page.getByRole("button", { name: "Cancelar", exact: true }).click();
+    await expect(row(page, "Explicação revisada.")).toBeVisible();
+    await row(other, "Explicação revisada.")
+      .getByRole("button", { name: "Ações da mensagem", exact: true })
+      .click();
+    await other
+      .getByRole("button", { name: "Excluir mensagem", exact: true })
+      .click();
+    await expect(
+      other.getByRole("button", { name: /Excluir para todos/ }),
+    ).toHaveCount(0);
+    await other.getByRole("button", { name: /Excluir para mim/ }).click();
+    await expect(row(other, "Explicação revisada.")).toHaveCount(0);
+    await expect(
+      other.getByRole("dialog", { name: "Excluir mensagem" }),
+    ).toHaveCount(0);
+    await expect
+      .poll(() => other.evaluate(() => Boolean(history.state?.enturmaOverlay)))
+      .toBe(false);
+    await other.reload();
+    await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
+    await expect(row(other, "Explicação revisada.")).toHaveCount(0);
+    await expect(row(page, "Explicação revisada.")).toBeVisible();
+    await send("Excluir em todos os dispositivos");
+    await expect(row(other, "Excluir em todos os dispositivos")).toBeVisible();
+    await row(page, "Excluir em todos os dispositivos").click({
+      button: "right",
+    });
+    await page
+      .getByRole("button", { name: "Excluir mensagem", exact: true })
+      .click();
+    await page.getByRole("button", { name: /Excluir para todos/ }).click();
+    await expect(row(other, "Excluir em todos os dispositivos")).toHaveCount(0);
+    await expect(
+      other.getByText("Mensagem removida.", { exact: true }),
+    ).toBeVisible();
+    await page
+      .getByRole("button", { name: "Adicionar emoji", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Animados", exact: true }).click();
+    await page.getByRole("button", { name: "foguete", exact: true }).click();
+    await expect(page.getByLabel("Mensagem privada")).toHaveValue("🚀");
+    await page
+      .getByRole("button", { name: "Enviar mensagem", exact: true })
+      .click();
+    await expect(other.locator(".emoji-message")).toHaveText("🚀");
+    const image = await page.evaluate(() => {
+      const c = document.createElement("canvas");
+      c.width = 1200;
+      c.height = 800;
+      const ctx = c.getContext("2d")!;
+      ctx.fillStyle = "#285e4c";
+      ctx.fillRect(0, 0, 1200, 800);
+      ctx.fillStyle = "#dbef7b";
+      ctx.font = "80px sans-serif";
+      ctx.fillText("Anotações de estudo", 150, 400);
+      return c.toDataURL("image/png").split(",")[1];
+    });
+    await page.locator('.private-composer input[type="file"]').setInputFiles({
+      name: "revisao.png",
+      mimeType: "image/png",
+      buffer: Buffer.from(image, "base64"),
+    });
+    await page
+      .getByRole("button", { name: "Enviar mensagem", exact: true })
+      .click();
+    const thumbnail = other.locator(".chat-image-thumbnail").last();
+    await expect(thumbnail).toBeVisible();
+    await thumbnail.click();
+    const viewer = other.getByRole("dialog", {
+      name: "Visualização de imagem",
+    });
+    await expect(viewer).toBeVisible();
+    await viewer.getByRole("button", { name: "Ampliar imagem aberta" }).click();
+    await expect(viewer.locator(".chat-image-canvas")).toHaveAttribute(
+      "data-scale",
+      "1.50",
+    );
+    await other.keyboard.press("0");
+    await expect(viewer.locator(".chat-image-canvas")).toHaveAttribute(
+      "data-scale",
+      "1.00",
+    );
+    await other.keyboard.press("Escape");
+    await expect(viewer).toHaveCount(0);
+    await other.setViewportSize({ width: 390, height: 844 });
+    await other.evaluate(() => {
+      document.documentElement.dataset.theme = "dark";
+    });
+    await thumbnail.click();
+    await expect(viewer).toBeVisible();
+    const area = (await viewer.locator(".chat-image-canvas").boundingBox())!;
+    const cx = area.x + area.width / 2,
+      cy = area.y + area.height / 2;
+    const cdp = await otherContext.newCDPSession(other);
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchStart",
+      touchPoints: [
+        { x: cx - 30, y: cy },
+        { x: cx + 30, y: cy },
+      ],
+    });
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchMove",
+      touchPoints: [
+        { x: cx - 90, y: cy },
+        { x: cx + 90, y: cy },
+      ],
+    });
+    await cdp.send("Input.dispatchTouchEvent", {
+      type: "touchEnd",
+      touchPoints: [],
+    });
+    await expect
+      .poll(async () =>
+        Number(
+          await viewer.locator(".chat-image-canvas").getAttribute("data-scale"),
+        ),
+      )
+      .toBeGreaterThan(1.5);
+    await other.screenshot({
+      path: join(screenshots, "chat-image-mobile-zoom.png"),
+    });
+    await other.goBack();
+    await expect(viewer).toHaveCount(0);
+    await expect(other).toHaveURL(
+      new RegExp(`friends\\?chat=${friendship.id}`),
+    );
+    await other
+      .getByRole("button", { name: "Adicionar emoji", exact: true })
+      .click();
+    await expect(
+      other.getByRole("dialog", { name: "Emojis", exact: true }),
+    ).toBeVisible();
+    await expect(
+      other.getByRole("searchbox", { name: "Pesquisar emoji" }),
+    ).toBeVisible();
+    const firstEmoji = other.locator(".emoji-grid button").first();
+    await expect(firstEmoji).toBeVisible();
+    expect((await firstEmoji.boundingBox())!.width).toBeGreaterThan(40);
+    await other.screenshot({
+      path: join(screenshots, "chat-emojis-mobile.png"),
+    });
+    await other.goBack();
+    await expect(
+      other.getByRole("dialog", { name: "Emojis", exact: true }),
+    ).toHaveCount(0);
+    await expect(other).toHaveURL(
+      new RegExp(`friends\\?chat=${friendship.id}`),
+    );
+    expect(errors).toEqual([]);
+  } finally {
+    await otherContext.close();
+  }
+});
 test("Remotion intro adapts, pauses, skips, replays and does not remount after navigation", async ({
   page,
   request,
@@ -54,22 +311,24 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   const intro = page.getByRole("region", { name: "Apresentação do Enturma" });
   await expect(intro).toBeVisible();
   await intro.scrollIntoViewIfNeeded();
-  await expect
-    .poll(async () =>
-      Number(
-        await intro
-          .locator("[data-intro-frame]")
-          .getAttribute("data-intro-frame"),
-      ),
-    )
-    .toBeGreaterThan(20);
-  await intro.getByRole("button", { name: "Pausar apresentação" }).click();
   const narration = intro.locator('audio[src*="enturma-pt-br-presenter"]');
   await expect(narration).toHaveCount(1);
+  const startAudio = intro.getByRole("button", { name: "Reproduzir com som" });
+  await expect
+    .poll(
+      async () =>
+        (await startAudio.isVisible()) ||
+        Number(
+          await intro
+            .locator("[data-intro-frame]")
+            .getAttribute("data-intro-frame"),
+        ) > 20,
+    )
+    .toBe(true);
+  if (await startAudio.isVisible()) await startAudio.click();
   await expect
     .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
-    .toBe(true);
-  await intro.getByRole("button", { name: "Ouvir narração" }).click();
+    .toBe(false);
   await expect(
     intro.getByRole("button", { name: "Silenciar narração" }),
   ).toHaveAttribute("aria-pressed", "true");
@@ -83,7 +342,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       })),
     )
     .toEqual({ paused: false, muted: false, advancing: true, ready: 4 });
-  // Turning sound on for the first time starts with the introduction, never mid-sentence.
+  // Default playback includes narration from the beginning.
   expect(
     await narration.evaluate((audio: HTMLAudioElement) => audio.currentTime),
   ).toBeLessThan(2);
@@ -196,7 +455,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .click();
   await page.emulateMedia({ reducedMotion: "reduce" });
   await expect(intro.locator("canvas")).toHaveCount(0);
-  await intro.getByRole("button", { name: "Ouvir narração" }).click();
+  if (await startAudio.isVisible()) await startAudio.click();
   await expect
     .poll(() =>
       narration.evaluate(
@@ -645,6 +904,50 @@ test.describe("touch chat", () => {
       await expect(
         page.getByRole("dialog", { name: "Ações da mensagem" }),
       ).toHaveCount(0);
+      await own
+        .getByRole("button", { name: "Ações da mensagem", exact: true })
+        .click();
+      await page
+        .getByRole("button", { name: "Mais emojis", exact: true })
+        .click();
+      await page
+        .getByRole("searchbox", { name: "Pesquisar emoji" })
+        .fill("coruja");
+      await page.getByRole("button", { name: "coruja", exact: true }).click();
+      await expect(
+        own.getByRole("button", { name: "🦉 1", exact: true }),
+      ).toBeVisible();
+      await own
+        .getByRole("button", { name: "Ações da mensagem", exact: true })
+        .click();
+      await page.goBack();
+      await expect(
+        page.getByRole("dialog", { name: "Ações da mensagem" }),
+      ).toHaveCount(0);
+      await expect(page).toHaveURL(new RegExp(`/rooms/${room.id}`));
+      await page.setViewportSize({ width: 1376, height: 768 });
+      await own.click({ button: "right" });
+      await page
+        .getByRole("button", { name: "Excluir mensagem", exact: true })
+        .click();
+      await page.getByRole("button", { name: /Excluir para todos/ }).click();
+      await expect(own).toHaveCount(0);
+      await expect(
+        page.getByText("Mensagem removida.", { exact: true }),
+      ).toBeVisible();
+      const incoming = page
+        .locator(".persistent-message")
+        .filter({ hasText: "Nova dúvida que não deve puxar a leitura" });
+      await incoming.click({ button: "right" });
+      await page
+        .getByRole("button", { name: "Excluir mensagem", exact: true })
+        .click();
+      await page.getByRole("button", { name: /Excluir para mim/ }).click();
+      await expect(incoming).toHaveCount(0);
+      await page.reload();
+      await expect(composer).toBeVisible();
+      await expect(incoming).toHaveCount(0);
+      await page.setViewportSize({ width: 390, height: 480 });
       await page.screenshot({
         path: join(screenshots, "room-mobile-keyboard-height.png"),
       });
@@ -653,6 +956,75 @@ test.describe("touch chat", () => {
         headers: { Authorization: `Bearer ${author.accessToken}` },
       });
       await db.end();
+    }
+  });
+});
+
+test.describe("narration autoplay policy", () => {
+  test("blocked audio waits for a gesture and begins unmuted", async ({
+    request,
+  }) => {
+    const browser = await chromium.launch({
+      args: ["--autoplay-policy=document-user-activation-required"],
+    });
+    const page = await browser.newPage({
+      baseURL: process.env.E2E_WEB_URL ?? "http://localhost:3000",
+      viewport: { width: 1376, height: 1800 },
+    });
+    // Inject a policy denial: headless Chromium may grant audio permission
+    // despite autoplay flags. All playback after a real gesture stays native.
+    await page.addInitScript(() => {
+      let unlocked = false;
+      for (const event of ["pointerdown", "keydown"]) {
+        window.addEventListener(
+          event,
+          (e) => {
+            if (e.isTrusted) unlocked = true;
+          },
+          { capture: true },
+        );
+      }
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function () {
+        if (this instanceof HTMLAudioElement && !this.muted && !unlocked)
+          return Promise.reject(
+            new DOMException("Autoplay requires a gesture", "NotAllowedError"),
+          );
+        return play.call(this);
+      };
+    });
+    try {
+      const credentials = await user(request, "Narração inicial");
+      await authenticate(page.context(), credentials);
+      await page.goto("/home");
+      const intro = page.getByRole("region", {
+        name: "Apresentação do Enturma",
+      });
+      const start = intro.getByRole("button", { name: "Reproduzir com som" });
+      await expect(intro.locator("audio")).toHaveCount(1);
+      await expect(start).toBeVisible();
+      await expect(
+        intro.getByRole("slider", { name: "Posição da apresentação" }),
+      ).toHaveValue("0");
+      await start.click();
+      await expect
+        .poll(() =>
+          intro
+            .locator("audio")
+            .evaluate(
+              (el: HTMLAudioElement) =>
+                !el.muted && !el.paused && el.currentTime > 0,
+            ),
+        )
+        .toBe(true);
+      await intro.getByRole("button", { name: "Silenciar narração" }).click();
+      await expect
+        .poll(() =>
+          intro.locator("audio").evaluate((el: HTMLAudioElement) => el.muted),
+        )
+        .toBe(true);
+    } finally {
+      await browser.close();
     }
   });
 });

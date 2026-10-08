@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, type RefObject } from "react";
+import { useEffect, useRef, type RefObject } from "react";
 import { Player, type PlayerRef } from "@remotion/player";
 import { EnturmaIntroComposition } from "./enturma-intro-composition";
 import type { IntroProps } from "./intro-model";
@@ -15,6 +15,7 @@ export default function IntroPlayer({
   seekFrame,
   playerRef,
   onMutedChange,
+  onPlaybackBlocked,
 }: {
   inputProps: IntroProps;
   width: number;
@@ -25,8 +26,10 @@ export default function IntroPlayer({
   seekFrame?: number;
   playerRef: RefObject<PlayerRef | null>;
   onMutedChange: (muted: boolean) => void;
+  onPlaybackBlocked: () => void;
 }) {
   const player = playerRef;
+  const container = useRef<HTMLDivElement>(null);
   const reduced = inputProps.quality === "low";
   useEffect(() => {
     const instance = player.current;
@@ -59,30 +62,54 @@ export default function IntroPlayer({
     if (reduced) player.current?.seekTo(0);
   }, [reduced, player]);
   useEffect(() => {
-    if (playing) void player.current?.play();
-    else player.current?.pause();
-  }, [playing, reduced, onEnd, player]);
+    if (!playing) {
+      player.current?.pause();
+      return;
+    }
+    void player.current?.play();
+    let alive = true;
+    const checked = new WeakSet<HTMLAudioElement>();
+    const startNarration = () => {
+      const audio = container.current?.querySelector("audio");
+      if (!audio || audio.muted || checked.has(audio)) return;
+      checked.add(audio);
+      void audio.play().catch((error: DOMException) => {
+        if (alive && error.name === "NotAllowedError") onPlaybackBlocked();
+      });
+    };
+    // Remotion may mount its audio after the Player effect has run.
+    const observer = new MutationObserver(startNarration);
+    if (container.current)
+      observer.observe(container.current, { childList: true, subtree: true });
+    startNarration();
+    return () => {
+      alive = false;
+      observer.disconnect();
+    };
+  }, [playing, reduced, onEnd, player, onPlaybackBlocked]);
   return (
-    <Player
-      ref={player}
-      component={EnturmaIntroComposition}
-      inputProps={inputProps}
-      fps={60}
-      durationInFrames={INTRO_FRAMES}
-      compositionWidth={width}
-      compositionHeight={height}
-      style={{ width: "100%" }}
-      controls={false}
-      clickToPlay={false}
-      initiallyMuted
-      // One continuous audio track stays mounted for the full timeline.
-      numberOfSharedAudioTags={0}
-      moveToBeginningWhenEnded={false}
-      errorFallback={() => (
-        <div className="intro-fallback">
-          Sua turma está pronta para você. Use Pular para continuar.
-        </div>
-      )}
-    />
+    <div ref={container}>
+      <Player
+        ref={player}
+        component={EnturmaIntroComposition}
+        inputProps={inputProps}
+        fps={60}
+        durationInFrames={INTRO_FRAMES}
+        compositionWidth={width}
+        compositionHeight={height}
+        style={{ width: "100%" }}
+        controls={false}
+        clickToPlay={false}
+        initiallyMuted={false}
+        // One continuous audio track stays mounted for the full timeline.
+        numberOfSharedAudioTags={0}
+        moveToBeginningWhenEnded={false}
+        errorFallback={() => (
+          <div className="intro-fallback">
+            Sua turma está pronta para você. Use Pular para continuar.
+          </div>
+        )}
+      />
+    </div>
   );
 }

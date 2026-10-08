@@ -12,7 +12,6 @@ public class ForumService {
   private final br.com.enturma.notifications.NotificationService notices;
   private static final Set<String> CATEGORIES =
       Set.of("GENERAL", "PROGRAMMING", "ACADEMIC", "CAREER", "CAMPUS");
-  private static final Set<String> REACTIONS = Set.of("👍", "❤️", "💡", "🎉", "🤔");
 
   public ForumService(Db db, br.com.enturma.notifications.NotificationService notices) {
     this.notices = notices;
@@ -42,19 +41,18 @@ public class ForumService {
 
   private String projection() {
     return "SELECT e.*,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS NOT"
-        + " NULL has_avatar,"
-        + " ((SELECT accepted_answer_id FROM forum_entry root WHERE root.id=coalesce(e.root_id,e.id))=e.id) accepted,"
-        + " ((SELECT count(*)*25 FROM forum_entry root JOIN forum_entry ans ON ans.id=root.accepted_answer_id"
-        + " WHERE ans.author_id=e.author_id)"
-        + " + (SELECT count(*)*2 FROM forum_vote fv JOIN forum_entry fe ON fe.id=fv.entry_id"
-        + " WHERE fe.author_id=e.author_id AND fv.value=1)) reputation,"
-        + " coalesce((SELECT sum(v.value) FROM forum_vote v WHERE"
-        + " v.entry_id=e.id),0) score,coalesce((SELECT v.value FROM forum_vote v WHERE"
-        + " v.entry_id=e.id AND v.user_id=?),0) my_vote,(SELECT count(*) FROM forum_entry c"
-        + " WHERE c.root_id=e.id AND NOT c.deleted) comments_count,coalesce((SELECT"
-        + " jsonb_agg(r) FROM (SELECT emoji,count(*) count,bool_or(user_id=?) mine FROM"
-        + " forum_reaction WHERE entry_id=e.id GROUP BY emoji ORDER BY emoji)r),'[]'::jsonb)"
-        + " reactions FROM forum_entry e JOIN app_user u ON u.id=e.author_id ";
+               + " NULL has_avatar, ((SELECT accepted_answer_id FROM forum_entry root WHERE"
+               + " root.id=coalesce(e.root_id,e.id))=e.id) accepted, ((SELECT count(*)*25 FROM"
+               + " forum_entry root JOIN forum_entry ans ON ans.id=root.accepted_answer_id WHERE"
+               + " ans.author_id=e.author_id) + (SELECT count(*)*2 FROM forum_vote fv JOIN"
+               + " forum_entry fe ON fe.id=fv.entry_id WHERE fe.author_id=e.author_id AND"
+               + " fv.value=1)) reputation, coalesce((SELECT sum(v.value) FROM forum_vote v WHERE"
+               + " v.entry_id=e.id),0) score,coalesce((SELECT v.value FROM forum_vote v WHERE"
+               + " v.entry_id=e.id AND v.user_id=?),0) my_vote,(SELECT count(*) FROM forum_entry c"
+               + " WHERE c.root_id=e.id AND NOT c.deleted) comments_count,coalesce((SELECT"
+               + " jsonb_agg(r) FROM (SELECT emoji,count(*) count,bool_or(user_id=?) mine FROM"
+               + " forum_reaction WHERE entry_id=e.id GROUP BY emoji ORDER BY emoji)r),'[]'::jsonb)"
+               + " reactions FROM forum_entry e JOIN app_user u ON u.id=e.author_id ";
   }
 
   public Object list(Actor a, String query, String category, String sort, int page, boolean mine) {
@@ -337,7 +335,7 @@ public class ForumService {
       notices.forumChanged();
       return;
     }
-    if (!REACTIONS.contains(emoji)) throw ApiException.invalid("Reação inválida.");
+    br.com.enturma.common.EmojiReaction.validate(emoji);
     db.jdbc.update(
         "INSERT INTO forum_reaction(entry_id,user_id,emoji) VALUES (?,?,?) ON"
             + " CONFLICT(entry_id,user_id) DO UPDATE SET emoji=EXCLUDED.emoji",

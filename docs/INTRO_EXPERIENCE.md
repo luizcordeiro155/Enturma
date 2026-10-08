@@ -15,7 +15,7 @@ O Player recebe nome, avatar, matérias e período da sessão atual. Não expõe
 - **Pular** pausa, encerra a transição e desmonta o Player; o foco retorna ao guia no celular e às matérias no desktop. O término automático não muda o foco do usuário.
 - Ao terminar ou pular, permanece uma miniatura **Conheça o Enturma**, com botão **Assistir apresentação**. Ela não mantém Canvas/Player executando. O replay reabre a apresentação no início, na própria Home.
 - Controles de pausa e posição permitem explorar a timeline com mouse, toque e teclado.
-- A narração feminina em português brasileiro é um MP3 local de 66 segundos, sincronizado pelo mesmo relógio do Remotion. O carregamento automático começa sem som. **Ouvir narração** inicia a fala desde o começo na primeira ativação; depois, silenciar/reativar mantém a posição. Replay começa sem som novamente.
+- A narração feminina em português brasileiro é um MP3 local de 66 segundos, sincronizado pelo mesmo relógio do Remotion. A apresentação e o replay começam com o som ativado. **Silenciar narração** permite desligá-lo; reativar mantém a posição. Quando a política do navegador bloqueia áudio automático, o vídeo aguarda no início e oferece **Reproduzir com som**, que libera a fala pelo gesto do usuário. Não avançamos silenciosamente enquanto essa permissão está pendente.
 - Uma legenda acompanha cada cena e permanece disponível sem áudio. Pausar, avançar, ocultar a aba ou minimizar também controla a narração; não há sintetizador de voz nem requisições a serviços de TTS no dispositivo do usuário.
 - Reprodução pausa fora da área visível ou com a aba oculta.
 - A preferência de pouca animação do Enturma e `prefers-reduced-motion` usam as mesmas dez cenas e a mesma duração, com cada cena congelada e sem partículas ou transições. Assim, a narração completa continua acessível sem movimento.
@@ -46,20 +46,20 @@ Arquivo atual: `apps/web/public/intro/enturma-pt-br-presenter-v2.mp3`, mono, 44,
 
 As 13 tomadas começam 11 frames após sua deixa visual. A duração das cenas foi definida a partir da fala, com margem para respiração antes do próximo corte. `intro-storyboard.json` é a fonte única para áudio, cenas, legendas e viradas de página. As durações são medidas com ffprobe e verificadas nos testes para evitar cortes e sobreposição. A faixa final foi normalizada com `highpass=f=65,loudnorm=I=-17:TP=-1.5:LRA=8`, preenchida até 66 segundos e transcrita independentemente para conferir o roteiro.
 
-| Início da cena | Roteiro |
-| --- | --- |
-| 0 s | Ei! Que tal viver a faculdade mais conectado? |
-| 4.5 s | Esse é o Enturma! Seu ponto de encontro na faculdade. |
-| 9 s | Organize suas matérias e encontre sua próxima turma de estudos. |
-| 14.5 s | Conheça colegas, troque experiências e aprenda em boa companhia. |
-| 20 s | No feed, compartilhe novidades, faça perguntas e participe da conversa. |
-| 26 s | Entre nas salas! Reúna seus materiais e estude com inteligência artificial. |
-| 32 s | Vai pra faculdade? Combine uma carona e encontre companhia no caminho. |
-| 37.5 s | Converse por voz, vídeo ou compartilhe a tela. É só se conectar! |
-| 43 s | As novidades da faculdade, no seu feed. |
-| 47 s | Salas pra aprender em companhia. |
-| 50.5 s | Caronas pra compartilhar o caminho. |
-| 54 s | E cadernos com inteligência artificial, pra estudar do seu jeito! |
-| 59 s | Se enturme com o Enturma! Fique por dentro da sua faculdade conosco. |
+| Início da cena | Roteiro                                                                     |
+| -------------- | --------------------------------------------------------------------------- |
+| 0 s            | Ei! Que tal viver a faculdade mais conectado?                               |
+| 4.5 s          | Esse é o Enturma! Seu ponto de encontro na faculdade.                       |
+| 9 s            | Organize suas matérias e encontre sua próxima turma de estudos.             |
+| 14.5 s         | Conheça colegas, troque experiências e aprenda em boa companhia.            |
+| 20 s           | No feed, compartilhe novidades, faça perguntas e participe da conversa.     |
+| 26 s           | Entre nas salas! Reúna seus materiais e estude com inteligência artificial. |
+| 32 s           | Vai pra faculdade? Combine uma carona e encontre companhia no caminho.      |
+| 37.5 s         | Converse por voz, vídeo ou compartilhe a tela. É só se conectar!            |
+| 43 s           | As novidades da faculdade, no seu feed.                                     |
+| 47 s           | Salas pra aprender em companhia.                                            |
+| 50.5 s         | Caronas pra compartilhar o caminho.                                         |
+| 54 s           | E cadernos com inteligência artificial, pra estudar do seu jeito!           |
+| 59 s           | Se enturme com o Enturma! Fique por dentro da sua faculdade conosco.        |
 
 Para refazer uma tomada, o comando usado foi `python -m edge_tts --voice pt-BR-FranciscaNeural --rate=+5% --pitch=+1Hz --text "Fala da cena" --write-media take.mp3`. A ferramenta é de preparação, não uma dependência da aplicação. Remixe as tomadas com os offsets de `voiceStartFrame`, meça as durações e atualize conjuntamente o áudio e o storyboard. O player mantém uma única faixa durante toda a apresentação, sem sintetizador no navegador ou chamadas de TTS durante o uso.
