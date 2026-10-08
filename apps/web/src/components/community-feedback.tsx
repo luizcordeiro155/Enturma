@@ -69,18 +69,7 @@ export function CommunityFeedback() {
   const [penalties, setPenalties] = useState<Penalty[]>([]);
   const [status, setStatus] = useState("");
   const [now, setNow] = useState(Date.now());
-  const [dismissed, setDismissed] = useState<string[]>([]);
   const card = useRef<HTMLElement>(null);
-
-  useEffect(() => {
-    try {
-      const stored = JSON.parse(
-        localStorage.getItem("enturma:penalties:dismissed") ?? "[]",
-      );
-      if (Array.isArray(stored))
-        setDismissed(stored.filter((id) => typeof id === "string"));
-    } catch {}
-  }, []);
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -153,22 +142,9 @@ export function CommunityFeedback() {
   }, [achievement]);
 
   const visiblePenalty = useMemo(
-    () => penalties.find((penalty) => !dismissed.includes(penalty.id)),
-    [dismissed, penalties],
+    () => penalties.find((penalty) => secondsLeft(penalty, now) > 0),
+    [now, penalties],
   );
-
-  function dismiss(id: string) {
-    setDismissed((current) => {
-      const next = current.includes(id) ? current : [...current, id];
-      try {
-        localStorage.setItem(
-          "enturma:penalties:dismissed",
-          JSON.stringify(next.slice(-100)),
-        );
-      } catch {}
-      return next;
-    });
-  }
 
   return (
     <>
@@ -281,13 +257,6 @@ export function CommunityFeedback() {
 
           <p role="status">{status}</p>
 
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => dismiss(visiblePenalty.id)}
-          >
-            Entendi
-          </button>
         </section>
       ) : null}
     </>
