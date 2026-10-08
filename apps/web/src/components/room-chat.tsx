@@ -138,7 +138,7 @@ export function RoomChat(props: Props) {
   const [roomActionAnchor, setRoomActionAnchor] =
     useState<MessageActionAnchor | null>(null);
   const [activePenalty, setActivePenalty] = useState<ActivePenalty>();
-  const [penaltyNow, setPenaltyNow] = useState(Date.now());
+  const [penaltyNow, setPenaltyNow] = useState(0);
   const newestRef = useRef<string | undefined>(undefined);
   const countRef = useRef(messages.length);
   useNotificationTarget();
@@ -155,18 +155,19 @@ export function RoomChat(props: Props) {
           moderationSecondsLeft(penalty, Date.now()) > 0,
       );
       setActivePenalty(current);
-      if (!current) setPenaltyNow(Date.now());
     } catch {
       // A conversa continua disponível se o estado de moderação não carregar.
     }
   }, [roomId]);
 
   useEffect(() => {
-    void loadPenalty();
+    const initial = window.setTimeout(() => void loadPenalty(), 0);
     const onModeration = () => void loadPenalty();
     window.addEventListener("enturma-moderation_action", onModeration);
-    return () =>
+    return () => {
+      window.clearTimeout(initial);
       window.removeEventListener("enturma-moderation_action", onModeration);
+    };
   }, [loadPenalty]);
 
   useEffect(() => {
