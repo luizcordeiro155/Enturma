@@ -1,0 +1,68 @@
+.auth-session-gate {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  background: var(--background, #101818);
+  color: var(--ink, #f5f8f6);
+}
+
+.auth-session-gate-card {
+  width: min(100%, 480px);
+  display: grid;
+  justify-items: start;
+  gap: 18px;
+  padding: clamp(24px, 6vw, 40px);
+  border: 1px solid var(--border, #324b43);
+  border-radius: 22px;
+  background: var(--surface, #182522);
+  box-shadow: 0 20px 60px #0002;
+}
+
+.auth-session-gate-card > svg {
+  color: #64ca83;
+}
+
+.auth-session-gate-card h1 {
+  font-size: clamp(24px, 5vw, 32px);
+  line-height: 1.15;
+}
+
+.auth-session-gate-card p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--muted, #b6c5bd);
+}
+
+.auth-session-gate-card [role="alert"] {
+  color: #edbd80;
+}
+
+.auth-session-gate-card .button {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.auth-session-gate-card > a {
+  color: #64ca83;
+  font-weight: 700;
+}
+
+.auth-session-gate-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.auth-session-gate-spin {
+  animation: enturma-session-spin .85s linear infinite;
+}
+
+@keyframes enturma-session-spin {
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-session-gate-spin { animation: none; }
+}
