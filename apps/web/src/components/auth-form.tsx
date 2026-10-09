@@ -17,6 +17,7 @@ import {
   Download,
 } from "lucide-react";
 import { api, post } from "@/lib/api";
+import { authDestination } from "@/lib/auth-navigation";
 import { Feedback } from "./feedback";
 type Mode =
   "login" | "register" | "forgot-password" | "reset-password" | "verify-email";
@@ -468,7 +469,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             })
           : await post<RecoveryStarted | void>(`/auth/${mode}`, payload);
       if (mode === "login" || mode === "register")
-        router.push(mode === "register" ? "/onboarding" : "/home");
+        router.replace(mode === "register" ? "/onboarding" : authDestination(new URLSearchParams(window.location.search).get("next")));
       else if (mode === "verify-email") {
         setSuccess("E-mail confirmado com sucesso.");
         setCompleted("verify");
