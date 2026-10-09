@@ -468,8 +468,20 @@ export function AuthForm({ mode }: { mode: Mode }) {
               body: JSON.stringify(payload),
             })
           : await post<RecoveryStarted | void>(`/auth/${mode}`, payload);
-      if (mode === "login" || mode === "register")
-        router.replace(mode === "register" ? "/onboarding" : authDestination(new URLSearchParams(window.location.search).get("next")));
+      if (mode === "login" || mode === "register") {
+        // Credentials are stored by the BFF route handler using Set-Cookie.
+        // App Router may still hold a pre-login (unauthenticated) RSC redirect
+        // for /home or /onboarding. A document navigation guarantees the newly
+        // stored cookies are sent before the protected route is evaluated.
+        const destination =
+          mode === "register"
+            ? "/onboarding"
+            : authDestination(
+                new URLSearchParams(window.location.search).get("next"),
+              );
+        window.location.replace(destination);
+        return;
+      }
       else if (mode === "verify-email") {
         setSuccess("E-mail confirmado com sucesso.");
         setCompleted("verify");
