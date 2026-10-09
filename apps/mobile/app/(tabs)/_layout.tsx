@@ -1,4 +1,6 @@
-import { Tabs } from "expo-router";
+import { Redirect, Tabs, usePathname } from "expo-router";
+import { useEffect, useState } from "react";
+import { api, session } from "../../src/api";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, View } from "react-native";
 import { useExperience, useStyles } from "../../src/ui";
@@ -8,6 +10,34 @@ export default function TabLayout() {
   const styles = useStyles();
   const { preference } = useExperience();
   const insets = useSafeAreaInsets();
+  const path = usePathname();
+  const [access, setAccess] = useState<"checking" | "allowed" | "login">("checking");
+
+  useEffect(() => {
+    let active = true;
+    const verify = async () => {
+      try {
+        if (!(await session())) {
+          if (active) setAccess("login");
+          return;
+        }
+        await api("/users/me");
+        if (active) setAccess("allowed");
+      } catch (error) {
+        if (active)
+          setAccess(
+            (error as { status?: number }).status === 401
+              ? "login"
+              : "checking",
+          );
+      }
+    };
+    void verify();
+    return () => { active = false; };
+  }, [path]);
+
+  if (access === "login") return <Redirect href="/" />;
+  if (access !== "allowed") return null;
 
   return (
     <Tabs
