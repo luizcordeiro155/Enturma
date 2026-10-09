@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { backendUrl } from "@/lib/server-config";
+import { backendUrl, upstreamHeaders } from "@/lib/server-config";
 import { authDestination } from "@/lib/auth-navigation";
 
 const PUBLIC_ROUTES = new Set([
@@ -59,7 +59,7 @@ export async function proxy(req: NextRequest) {
 
   try {
     const result = await fetch(`${backendUrl()}/api/v1/users/me`, {
-      headers: { Authorization: `Bearer ${access}` },
+      headers: { Authorization: `Bearer ${access}`, ...Object.fromEntries(upstreamHeaders(req)) },
       cache: "no-store",
       signal: AbortSignal.timeout(8000),
     });
