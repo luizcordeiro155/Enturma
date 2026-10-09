@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { useRouter } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { request, type Credentials } from "@enturma/contracts";
-import { base, save } from "../src/api";
+import { api, base, save, session } from "../src/api";
 import { Screen, Field, Button, ErrorMessage, useStyles } from "../src/ui";
 
 export default function Login() {
@@ -16,6 +16,25 @@ export default function Login() {
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const router = useRouter();
+  const [restoring, setRestoring] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+    const verify = async () => {
+      try {
+        if (await session()) {
+          await api("/users/me");
+          if (active) router.replace("/home");
+        }
+      } catch {
+        // A falha de rede não apaga o login salvo; o usuário pode tentar novamente.
+      } finally {
+        if (active) setRestoring(false);
+      }
+    };
+    void verify();
+    return () => { active = false; };
+  }, [router]);
 
   async function submit() {
     setBusy(true);
@@ -42,6 +61,12 @@ export default function Login() {
       setBusy(false);
     }
   }
+
+  if (restoring) return (
+    <Screen title="">
+      <Text style={styles.muted}>Verificando sua sessão...</Text>
+    </Screen>
+  );
 
   return (
     <Screen title="">

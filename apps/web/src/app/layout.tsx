@@ -28,6 +28,7 @@ import "./theme-surfaces.css";
 import "./interaction-refinement.css";
 import "./chat-interactions.css";
 import "./rooms-discovery.css";
+import "./session-gate.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";

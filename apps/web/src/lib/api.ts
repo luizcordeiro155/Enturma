@@ -65,7 +65,7 @@ async function renew() {
     const res = await fetch("/api/session", { method: "POST" });
     return res.ok;
   };
-  return navigator.locks
+  return navigator.locks?.request
     ? navigator.locks.request("enturma-refresh", run)
     : run();
 }
