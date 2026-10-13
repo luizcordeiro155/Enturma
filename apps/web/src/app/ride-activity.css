@@ -1263,3 +1263,56 @@ body:has(.ride-mobility-app) .workspace footer { display:none; }
     width: 100%;
   }
 }
+
+
+/* Saved passenger/driver routines: separate list and safe removal flow. */
+.ride-saved-routines { margin-top: 24px; }
+.ride-saved-routines-heading h3 { margin: 0 0 5px; }
+.ride-saved-routines-heading p,
+.ride-routines-empty { color: var(--muted); line-height: 1.5; }
+.ride-saved-routine { display: grid !important; gap: 12px; }
+.ride-saved-routine-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  width: 100%;
+}
+.ride-saved-routine-summary { min-width: 0; overflow-wrap: anywhere; }
+.ride-routine-remove,
+.ride-routine-confirm-delete {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-height: 42px;
+  padding: 9px 14px;
+  border-radius: 12px;
+  border: 1px solid #b94c59;
+  background: color-mix(in srgb, #b94c59 11%, var(--surface));
+  color: #c24858;
+  font-weight: 750;
+  cursor: pointer;
+}
+html[data-theme="dark"] .ride-routine-remove,
+html[data-theme="dark"] .ride-routine-confirm-delete {
+  background: #392429;
+  color: #ffbdc4;
+  border-color: #814650;
+}
+.ride-routine-remove:disabled,
+.ride-routine-confirm-delete:disabled { opacity: .6; cursor: wait; }
+.ride-routine-confirm {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+}
+.ride-routine-confirm p { margin: 0; line-height: 1.5; }
+.ride-routine-confirm-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+@media (max-width: 520px) {
+  .ride-saved-routine-main { align-items: flex-start; }
+  .ride-routine-confirm-actions > button { flex: 1 1 135px; }
+}
