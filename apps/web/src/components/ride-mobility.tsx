@@ -8,6 +8,7 @@ import {
   Navigation,
   Route,
   Star,
+  Trash2,
   UserCheck,
   Users,
 } from "lucide-react";
@@ -256,6 +257,8 @@ export function RidePreferences({
 }) {
   const [vehicle, setVehicle] = useState<RideVehicle>({});
   const [recurrences, setRecurrences] = useState<RideRecurrence[]>([]);
+  const [pendingRemoval, setPendingRemoval] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [location, setLocation] = useState<{
@@ -279,6 +282,36 @@ export function RidePreferences({
     }, 0);
     return () => window.clearTimeout(timer);
   }, [load]);
+
+  // The current endpoint deactivates a saved recurrence. Once removed, it
+  // must not keep appearing as "Desativada" in the user's ride profile.
+  const visibleRecurrences = recurrences.filter(
+    (item) =>
+      item.active && item.type === (mode === "DRIVER" ? "OFFER" : "REQUEST"),
+  );
+
+  async function removeRoutine(item: RideRecurrence) {
+    if (removingId) return;
+    setRemovingId(item.id);
+    setError("");
+    setMessage("");
+    try {
+      await api(`/rides/recurrences/${item.id}`, { method: "DELETE" });
+      setRecurrences((current) =>
+        current.filter((routine) => routine.id !== item.id),
+      );
+      setPendingRemoval(null);
+      setMessage(
+        "Rotina removida do perfil. Ela não criará novas caronas; as já publicadas continuam disponíveis.",
+      );
+      onChanged?.();
+      await load();
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setRemovingId(null);
+    }
+  }
 
   return (
     <section className="ride-mobility-section">
@@ -524,41 +557,94 @@ export function RidePreferences({
           <button>Criar rotina</button>
         </form>
       </div>
-      {recurrences.length ? (
-        <div className="ride-recurrence-list">
-          {recurrences.map((item, index) => (
-            <article
-              key={item.id}
-              ref={(node) => {
-                rideEnter(node, index);
-              }}
-            >
-              <div>
-                <strong>{item.campusName}</strong>
-                <p>
-                  {item.originArea} · {String(item.localTime).slice(0, 5)} ·{" "}
-                  {item.weekdays}
-                </p>
-              </div>
-              {item.active ? (
-                <button
-                  className="secondary"
-                  onClick={async () => {
-                    await api(`/rides/recurrences/${item.id}`, {
-                      method: "DELETE",
-                    });
-                    await load();
-                  }}
-                >
-                  Desativar
-                </button>
-              ) : (
-                <small>Desativada</small>
-              )}
-            </article>
-          ))}
+      <div className="ride-saved-routines">
+        <div className="ride-saved-routines-heading">
+          <h3>
+            {mode === "DRIVER"
+              ? "Suas rotinas como motorista"
+              : "Suas rotinas como passageiro"}
+          </h3>
+          <p>
+            Você pode remover uma rotina sem apagar seu perfil ou cancelar
+            caronas que já foram publicadas.
+          </p>
         </div>
-      ) : null}
+        {visibleRecurrences.length ? (
+          <div className="ride-recurrence-list">
+            {visibleRecurrences.map((item, index) => (
+              <article
+                key={item.id}
+                className="ride-saved-routine"
+                ref={(node) => {
+                  rideEnter(node, index);
+                }}
+              >
+                <div className="ride-saved-routine-main">
+                  <div className="ride-saved-routine-summary">
+                    <strong>{item.campusName}</strong>
+                    <p>
+                      {item.originArea} · {String(item.localTime).slice(0, 5)} ·{" "}
+                      {item.weekdays}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="ride-routine-remove"
+                    disabled={removingId !== null}
+                    aria-label={`Remover rotina de ${item.campusName} do perfil`}
+                    aria-expanded={pendingRemoval === item.id}
+                    onClick={() => {
+                      setError("");
+                      setMessage("");
+                      setPendingRemoval(item.id);
+                    }}
+                  >
+                    <Trash2 size={16} aria-hidden="true" />
+                    Remover
+                  </button>
+                </div>
+                {pendingRemoval === item.id ? (
+                  <div
+                    className="ride-routine-confirm"
+                    role="group"
+                    aria-label={`Confirmar remoção da rotina de ${item.campusName}`}
+                  >
+                    <p>
+                      Remover esta rotina do perfil? Ela não será usada para
+                      gerar novas caronas automaticamente. Caronas já publicadas
+                      não serão canceladas.
+                    </p>
+                    <div className="ride-routine-confirm-actions">
+                      <button
+                        type="button"
+                        className="ride-routine-confirm-delete"
+                        disabled={removingId !== null}
+                        onClick={() => void removeRoutine(item)}
+                      >
+                        {removingId === item.id ? "Removendo…" : "Sim, remover rotina"}
+                      </button>
+                      <button
+                        type="button"
+                        className="secondary"
+                        disabled={removingId !== null}
+                        onClick={() => setPendingRemoval(null)}
+                      >
+                        Cancelar
+                      </button>
+                    </div>
+                  </div>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        ) : (
+          <p className="ride-routines-empty">
+            {mode === "DRIVER"
+              ? "Nenhuma rotina de motorista salva. Crie uma quando quiser oferecer caronas."
+              : "Nenhuma rotina de passageiro salva. Crie uma quando quiser procurar caronas."}
+          </p>
+        )}
+      </div>
     </section>
   );
 }
