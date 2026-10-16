@@ -50,6 +50,7 @@ public class RequestSecurity extends OncePerRequestFilter {
     var current = SecurityContextHolder.getContext().getAuthentication();
     String route = req.getRequestURI();
     boolean pendingAllowed = route.startsWith("/api/v1/auth/")
+        || route.matches("/api/v1/account/privacy/deletion(?:/(schedule|cancel|now))?")
         || ((req.getMethod().equals("GET") || req.getMethod().equals("HEAD"))
             && (route.equals("/api/v1/users/me") || route.startsWith("/api/v1/catalog/")
                 || route.startsWith("/api/v1/public/") || route.matches("/api/v1/users/[^/]+/(avatar|banner)")))

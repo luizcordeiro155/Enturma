@@ -99,6 +99,28 @@ class AcademicIdentityIntegrationTest {
     mvc.perform(get("/api/v1/friends").header("Authorization", "Bearer " + credentials.accessToken())).andExpect(status().isOk());
   }
 
+  @Test void pendingAccountCanEraseItsOwnVerificationDataWithoutStudentAccess() throws Exception {
+    for (boolean hasDocument : List.of(false, true)) {
+      var account = register(null);
+      Actor pending = auth.authenticate(account.accessToken()).orElseThrow();
+      identities.choose(pending, institution, campus);
+      identities.askSupport(pending, "Solicitação sintética de suporte acadêmico.");
+      if (hasDocument)
+        identities.submitDocument(pending, "application/pdf", "%PDF-1.4\nFixture de teste\n%%EOF".getBytes(StandardCharsets.US_ASCII));
+      else send(pending, "erase-" + pending.id() + "@" + domain);
+      mvc.perform(get("/api/v1/account/privacy/deletion").header("Authorization", "Bearer " + account.accessToken()))
+          .andExpect(status().isOk());
+      mvc.perform(delete("/api/v1/account/privacy/deletion/now").header("Authorization", "Bearer " + account.accessToken()))
+          .andExpect(status().isOk()).andExpect(jsonPath("$.deleted").value(true));
+      for (String table : List.of("academic_identity", "academic_verification_token", "academic_verification_document",
+          "academic_verification_support", "academic_verification_audit", "account_token"))
+        assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM " + table + " WHERE user_id=?)", pending.id())).as(table).isFalse();
+      assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM email_outbox WHERE academic_verification_user=?)", pending.id())).isFalse();
+      assertThat(auth.authenticate(account.accessToken())).isEmpty();
+      assertThat(identities.status(user)).containsEntry("status", "PENDING");
+    }
+  }
+
   @Test void subdomainsRequireExplicitApprovalAndCannotMatchSuffixLookalikes() {
     code(() -> identities.sendEmail(user, "x@alunos." + domain), "ACADEMIC_DOMAIN_NOT_ALLOWED");
     identities.saveDomain(admin, institution, domain, "APPROVED", false, true, "https://example.test/subdomains");

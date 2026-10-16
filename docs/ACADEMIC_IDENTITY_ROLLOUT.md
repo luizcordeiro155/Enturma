@@ -8,6 +8,7 @@ Implementação preparada na branch `codex/academic-identity-experience`, a part
 - Confirmação por e-mail usa a fila SMTP existente, domínio autorizado por instituição, token aleatório armazenado por hash, validade de 30 minutos, consumo único, substituição no reenvio e limites por usuário/IP. A aprovação significa **controle de endereço acadêmico autorizado**, não matrícula ativa comprovada.
 - Comprovantes PDF/PNG/JPEG, até 2 MB, ficam privados no PostgreSQL. Apenas administradores autenticados podem baixar a solicitação vigente. Aprovação/rejeição exige justificativa, impede autoaprovação e remove imediatamente o documento. Documentos não analisados expiram em 14 dias; a rotina de limpeza roda de hora em hora. Backups seguem a retenção operacional do banco.
 - `/admin/academic-verification` administra associações de domínio, análise, auditoria e dúvidas de usuários. Sem domínio confirmado, a instituição oferece análise documental real. Nenhuma aprovação é simulada.
+- A exclusão solicitada pela própria conta continua acessível enquanto pendente e remove tokens, comprovantes, suporte e dados acadêmicos, sem exigir aprovação prévia.
 - Java bloqueia HTTP e WebSockets estudantis de contas pendentes. O canal `academic` entrega somente o estado da própria conta; mensagens do navegador apenas pedem uma consulta autenticada. WebSocket, BroadcastChannel, retorno ao app e polling visível de 12 segundos sincronizam as telas. Oscilações de rede não apagam sessões.
 - O livro animado substitui a tela de restauração na abertura normal; erros continuam oferecendo recuperação funcional. Tema, páginas, entrada em caronas e perfis usam Remotion/JavaScript e respeitam redução de movimento. As páginas retidas pelo Next Activity mantêm estado; snapshots em memória preservam conteúdo recente quando a rota é remontada, com atualização em segundo plano e limpeza na troca de conta.
 - O editor de perfil oferece prévia ao vivo, cores fortes, mural seguindo o perfil/com cores próprias/com fundo padrão, direção e movimento do degradê e entradas selecionáveis. Fotos e banners ficam fora das camadas coloridas. Respostas atrasadas não substituem o rascunho.
@@ -41,7 +42,7 @@ Referências iniciais: [UFMG](https://www.ufmg.br/prograd/noticia/matricula-nas-
 
 ## Verificação executada
 
-- Maven `package`: 95 testes Java aprovados. Migração real em schema descartável verifica Gmail/Outlook/institucional, administrador, e-mail não confirmado, sessões intactas, idempotência, cadastro posterior e importação tardia de catálogo.
+- Maven: suíte inicial com 95 testes; o ciclo adicional de identidade e plataforma aprovou 65 testes, incluindo a nova exclusão de conta pendente (96 testes no total). Migração real em schema descartável verifica Gmail/Outlook/institucional, administrador, e-mail não confirmado, sessões intactas, idempotência, cadastro posterior e importação tardia de catálogo.
 - `npm test`: 41 testes Web, 4 Mobile, 12 Desktop e 8 do atualizador aprovados.
 - TypeScript Web/Mobile e build Web de produção aprovados. Lint sem erros; avisos não bloqueantes existentes em componentes de caronas, imagens e refs permanecem.
 - Playwright com banco local, API Java real e SMTP local: cadastro na interface → entrega → confirmação em outro contexto sem cookies → avanço da tela original → sessão reaberta; bloqueios HTTP/WS; offline/broadcast sem aprovação; documento privado/análise/purge; administração; navegação, perfil, mural e privacidade; regressões de estudos, fórum, conversas, chamadas e vídeo. Uma conexão local `ECONNRESET` no teste de privacidade passou na repetição isolada.
@@ -49,6 +50,8 @@ Referências iniciais: [UFMG](https://www.ufmg.br/prograd/noticia/matricula-nas-
 - O APK distribuído usa o shell WebView documentado em [MOBILE.md](MOBILE.md), compartilhando o Player e páginas Web; o código Expo também recebe os controles de identidade e aparência. Exportação JS não equivale a assinar APK/IPA. Testes Chromium com toque não substituem validação manual do binário instalado em aparelho físico.
 
 Para reproduzir E2E, crie somente o banco local `enturma_e2e`, inicie `node apps/web/e2e/mail-server.cjs` e configure a API de testes com `MAIL_ENABLED=true`, `MAIL_HOST=127.0.0.1`, `MAIL_PORT=1025`, `MAIL_AUTH=false`, `MAIL_TLS=false`, `APP_URL=http://localhost:3000`. Defina `E2E_DATABASE_URL` por variável protegida; execute `npm run test:e2e -w @enturma/web`. Fixtures aprovam apenas contas sintéticas de testes de funcionalidades existentes; o teste acadêmico usa o fluxo real, sem esse atalho. A CI foi atualizada para iniciar o SMTP isolado.
+
+Backup de produção restaurado em banco local isolado: 14 contas e 164 sessões. V45–V49 aplicadas com sucesso nessa cópia antes da publicação. O arquivo privado de backup permanece fora do Git.
 
 ## Configuração externa e implantação autorizada
 
