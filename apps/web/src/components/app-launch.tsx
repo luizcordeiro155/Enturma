@@ -38,6 +38,15 @@ export function AppLaunch() {
         path,
       );
     if (!protectedPage) return;
+    try {
+      if (sessionStorage.getItem("enturma:launch-recovery-shown") === "1") {
+        sessionStorage.removeItem("enturma:launch-recovery-shown");
+        launched.current = true;
+        return;
+      }
+    } catch {
+      // Session storage may be disabled.
+    }
     const ride = path.startsWith("/caronas") && !rideVisited.current;
     const boot = !launched.current;
     if (!boot && !ride) return;
