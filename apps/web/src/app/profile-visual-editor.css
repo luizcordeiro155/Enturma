@@ -575,7 +575,6 @@ html[data-theme="dark"] .profile-shared-surface .public-profile-body {
 html .profile-shared-surface .profile-public-advanced,
 html .profile-shared-surface .profile-preview-mural {
   background: var(--mural-background) !important;
-  background-image: none !important;
   border-left: 0 !important;
   box-shadow: none !important;
 }
