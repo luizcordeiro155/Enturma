@@ -429,7 +429,7 @@ export function UserIdentity({
                 ×
               </button>
               {profile ? (
-                <div className="profile-public-content profile-discord-public-layout profile-shared-surface" style={profileStyle(profile)}>
+                <div className={`profile-public-content profile-discord-public-layout profile-shared-surface ${profile.showcaseAppearance?.muralMode === "PROFILE" ? "profile-mural-linked" : ""}`} style={profileStyle(profile)}>
                   <section
                     className={`profile-public-primary profile-theme-${profile.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${profile.showcaseAppearance?.effect ?? "NONE"}`}
                     style={profileStyle(profile)}
