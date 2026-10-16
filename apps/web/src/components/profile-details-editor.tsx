@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PROFILE_PALETTES } from "@enturma/contracts";
-import { ProfileBackdrop, profileEntrance } from "./profile-motion";
+import { ProfileBackdrop } from "./profile-motion";
 import { useRouter } from "next/navigation";
 import {
   Camera,
@@ -48,8 +48,8 @@ export function ProfileDetailsEditor({
   const [busy, setBusy] = useState(false);
   const [previewTab, setPreviewTab] = useState<"PROFILE" | "MURAL">("PROFILE");
   const [editorView, setEditorView] = useState<"EDIT" | "PREVIEW">("EDIT");
-  const preview = useRef<HTMLDivElement>(null);
   const [mediaVersion, setMediaVersion] = useState(0);
+  const [uploadedMedia, setUploadedMedia] = useState<"avatar" | "banner" | null>(null);
   const [crop, setCrop] = useState<{ file: File; kind: "avatar" | "banner" }>();
   const [appearance, setAppearance] = useState({
     name: profile.name,
@@ -119,6 +119,7 @@ export function ProfileDetailsEditor({
       );
     }
     await onSaved();
+    setUploadedMedia(crop.kind);
     setMediaVersion(Date.now());
     window.dispatchEvent(new Event("enturma-profile-updated"));
     setCrop(undefined);
@@ -166,7 +167,9 @@ export function ProfileDetailsEditor({
   const previewUser: PublicProfile = {
     ...profile,
     ...appearance,
-    mediaVersion,
+    mediaVersion: mediaVersion || profile.mediaVersion,
+    hasAvatar: uploadedMedia === "avatar" || profile.hasAvatar,
+    hasBanner: uploadedMedia === "banner" || profile.hasBanner,
     profileDetails: details,
     showcaseAppearance: showcase?.appearance,
   };
@@ -259,23 +262,10 @@ export function ProfileDetailsEditor({
               >
                 Mural
               </button>
-              <button
-                type="button"
-                aria-label="Reproduzir animação do perfil"
-                onClick={() => {
-                  if (preview.current)
-                    profileEntrance(
-                      preview.current,
-                      showcase?.appearance.entrance,
-                    );
-                }}
-              >
-                <Sparkles size={18} />
-              </button>
+
             </div>
             <div
-              ref={preview}
-              className="profile-preview-combined"
+              className="profile-preview-combined profile-shared-surface"
               data-preview-tab={previewTab}
               style={profileStyle(previewUser)}
             >
