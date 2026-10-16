@@ -1,5 +1,6 @@
+import { test } from "./student-fixture";
 import { authenticate } from "./session";
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("caderno privado: cadastro acentuado, fontes, aula, citações e persistência", async ({
   page,
@@ -53,15 +54,13 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     ).toBeDisabled();
   }
   await page.getByRole("button", { name: "Arquivo", exact: true }).click();
-  await page
-    .getByLabel("Arquivo de estudo")
-    .setInputFiles({
-      name: "revisao.txt",
-      mimeType: "text/plain",
-      buffer: Buffer.from(
-        "Variáveis guardam valores durante a execução de um programa. Elas podem representar números, textos e outras estruturas.",
-      ),
-    });
+  await page.getByLabel("Arquivo de estudo").setInputFiles({
+    name: "revisao.txt",
+    mimeType: "text/plain",
+    buffer: Buffer.from(
+      "Variáveis guardam valores durante a execução de um programa. Elas podem representar números, textos e outras estruturas.",
+    ),
+  });
   await expect(page.getByLabel("Usar revisao.txt")).toBeEnabled({
     timeout: 20000,
   });
@@ -76,13 +75,11 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     x.fillText("Algoritmo", 10, 40);
     return c.toDataURL("image/png").split(",")[1];
   });
-  await page
-    .getByLabel("Arquivo de estudo")
-    .setInputFiles({
-      name: "aula.png",
-      mimeType: "image/png",
-      buffer: Buffer.from(png, "base64"),
-    });
+  await page.getByLabel("Arquivo de estudo").setInputFiles({
+    name: "aula.png",
+    mimeType: "image/png",
+    buffer: Buffer.from(png, "base64"),
+  });
   if (notebookState.aiEnabled) {
     await expect(page.getByLabel("Usar aula.png")).toBeEnabled({
       timeout: 20000,
@@ -133,7 +130,7 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
   });
   const visitor = await browser.newContext();
   const other = await visitor.newPage();
-  const registered = await page.request.post(
+  const registered = await request.post(
     `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
     {
       data: {

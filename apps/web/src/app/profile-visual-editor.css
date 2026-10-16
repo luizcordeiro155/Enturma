@@ -1,0 +1,240 @@
+/* Profile color lives below the banner. Media keeps its original pixels. */
+html .public-profile-card::before,
+html .public-profile-banner::after,
+html .profile-public-primary::before {
+  content: none;
+  display: none;
+  animation: none;
+}
+html .public-profile-card .public-profile-banner {
+  background: var(--soft);
+  background-image: none;
+}
+html .public-profile-card .public-profile-body,
+html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
+  position: relative;
+  isolation: isolate;
+  background: var(--profile-gradient);
+  color: var(--profile-copy);
+  padding-bottom: 24px;
+}
+html .public-profile-body > .identity-avatar {
+  position: relative;
+  z-index: 3;
+}
+.profile-copy-content {
+  position: relative;
+  z-index: 1;
+  border-radius: 14px;
+  padding: 12px;
+  background: var(--profile-copy-panel);
+  color: var(--profile-copy);
+}
+html .profile-copy-content :is(h2, p, strong, a, small) {
+  color: inherit;
+}
+html .profile-public-primary {
+  background: var(--profile-gradient);
+  color: var(--profile-copy);
+}
+html .profile-public-primary .profile-dialog-actions {
+  position: relative;
+  background: transparent;
+  padding: 16px 22px;
+}
+html .profile-public-primary .profile-main-meta {
+  position: relative;
+  color: inherit;
+  background: var(--profile-copy-panel);
+  border-radius: 12px;
+  padding: 12px;
+}
+.profile-color-layer {
+  display: block;
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  isolation: isolate;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 0;
+}
+.profile-color-layer > span {
+  display: block;
+  position: absolute;
+  inset: -45%;
+  background: var(--profile-gradient);
+  transform: translate(0, 0);
+}
+.profile-color-layer > .profile-color-dots::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(#ffffff30 1px, transparent 1.5px);
+  background-size: 20px 20px;
+}
+html .profile-public-advanced {
+  isolation: isolate;
+  background: var(--mural-background, var(--surface)) !important;
+  color: var(--mural-copy, var(--ink));
+  box-shadow: none;
+}
+.mural-color-layer > span {
+  background: var(--mural-background, var(--surface));
+}
+.profile-public-advanced > :not(.profile-color-layer) {
+  position: relative;
+  z-index: 1;
+}
+.profile-public-advanced
+  :is(.profile-public-advanced-heading, .profile-mural-empty) {
+  padding: 14px;
+  border-radius: 14px;
+  background: var(--mural-copy-panel);
+  color: inherit;
+}
+html .profile-public-advanced-heading :is(h2, p, span) {
+  color: inherit;
+}
+.profile-public-advanced .showcase-widget,
+.profile-public-advanced .achievement-card {
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  color: var(--ink);
+}
+.profile-public-advanced .profile-showcase > small {
+  background: var(--mural-copy-panel);
+  padding: 8px;
+  border-radius: 8px;
+  color: inherit;
+}
+html .profile-public-advanced .profile-stat-row > span {
+  background: var(--mural-copy-panel, var(--soft));
+  color: var(--mural-copy, var(--ink));
+  border: 1px solid currentColor;
+}
+.profile-preview-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.profile-preview-toolbar strong {
+  margin-right: auto;
+  font-size: 0.85rem;
+}
+.profile-preview-toolbar button {
+  min-height: 36px;
+  padding: 7px 11px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 10px;
+}
+.profile-preview-toolbar button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--accent-ink, #12261b);
+}
+.profile-preview-combined {
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  display: grid;
+  grid-template-columns: 1fr;
+}
+.profile-preview-combined .public-profile-card {
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  box-shadow: none;
+}
+.profile-preview-mural {
+  position: relative;
+  min-height: 280px;
+  padding: 20px !important;
+  margin: 0 !important;
+  border: 0;
+}
+.profile-preview-combined[data-preview-tab="PROFILE"] .profile-preview-mural {
+  display: none;
+}
+.profile-preview-combined[data-preview-tab="MURAL"] .profile-preview-identity {
+  display: none;
+}
+.profile-palette-options {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.profile-palette-options button {
+  flex: 1;
+  min-width: 70px;
+  min-height: 64px;
+  padding: 8px;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  display: grid;
+  align-items: end;
+  cursor: pointer;
+}
+.profile-palette-options button span {
+  font-size: 0.65rem;
+  color: #fff;
+  background: #080b12c9;
+  padding: 4px;
+  border-radius: 5px;
+}
+.profile-palette-options button:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+@media (min-width: 1450px) {
+  .profile-editor-scroll {
+    grid-template-columns: minmax(460px, 1.1fr) minmax(0, 1fr);
+  }
+  .profile-preview-combined {
+    grid-template-columns: minmax(240px, 1fr) minmax(220px, 1fr);
+  }
+  .profile-preview-combined .profile-preview-identity,
+  .profile-preview-combined .profile-preview-mural {
+    display: block !important;
+  }
+  .profile-preview-toolbar button[aria-pressed] {
+    display: none;
+  }
+}
+@media (max-width: 760px) {
+  .profile-preview-stage {
+    position: sticky !important;
+    top: -14px !important;
+    z-index: 12;
+    background: var(--surface);
+    padding-top: 8px;
+    padding-bottom: 12px;
+  }
+  .profile-preview-combined {
+    max-height: 32dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .profile-preview-combined .public-profile-banner {
+    height: 86px;
+  }
+  .profile-preview-combined .public-profile-body > .identity-avatar {
+    width: 54px;
+    height: 54px;
+    margin-top: -28px;
+  }
+  .profile-copy-content {
+    padding: 6px;
+  }
+  .profile-preview-combined h2 {
+    font-size: 1.1rem;
+  }
+  .profile-preview-combined .public-profile-body {
+    padding-bottom: 10px;
+  }
+  .profile-preview-toolbar {
+    margin-bottom: 8px;
+  }
+}

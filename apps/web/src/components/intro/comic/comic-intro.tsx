@@ -1,66 +1,53 @@
 import {
   AbsoluteFill,
-  Freeze,
   Html5Audio,
   Sequence,
   staticFile,
   useCurrentFrame,
+  useVideoConfig,
 } from "remotion";
-import type { ReactNode } from "react";
 import type { IntroProps } from "../intro-model";
 import storyboard from "../intro-storyboard.json";
 import { AnimatedCaptions } from "./animated-captions";
-import { C, Quality } from "./comic-kit";
-import { PresenterFrame } from "./motion-state";
+import { Quality } from "./motion-state";
 import {
-  HookScene,
-  LonelyScene,
-  ChaosScene,
-  TurnScene,
-  ProofScene,
-  BuildupScene,
-  CtaScene,
-} from "./story-scenes";
+  BookOpening,
+  LostQuestion,
+  CampusChaos,
+  BookConnection,
+  ConnectedLife,
+  NextConnection,
+  BookFinale,
+} from "../book/story-scenes";
 import {
-  RewardsScene,
-  AiScene,
-  FeedScene,
-  ChatScene,
-  RideScene,
-  CallsScene,
-  GamesScene,
-} from "./feature-scenes";
-import { FriendsScene, SubjectsScene } from "./community-scenes";
+  RewardsChapter,
+  AiChapter,
+  GamesChapter,
+  SubjectsChapter,
+} from "../book/study-scenes";
+import {
+  FeedChapter,
+  ChatChapter,
+  CallsChapter,
+  FriendsChapter,
+} from "../book/social-scenes";
+import { RideChapter } from "../book/ride-scene";
 
 const cuts = storyboard.sceneFrames;
-function ComicCadence({
-  children,
-  still,
-}: {
-  children: ReactNode;
-  still: boolean;
-}) {
-  const frame = useCurrentFrame();
-  return (
-    <PresenterFrame.Provider value={frame}>
-      <Freeze
-        frame={still ? 110 : Math.floor(frame / 2) * 2}
-        active={still || frame % 36 < 12}
-      >
-        {children}
-      </Freeze>
-    </PresenterFrame.Provider>
-  );
-}
+/** The book is the presenter. All movement is deterministic and seekable at 24fps. */
 export function ComicIntro(props: IntroProps) {
   const frame = useCurrentFrame();
-  const still = props.quality === "low";
+  const { fps } = useVideoConfig();
   return (
     <Quality.Provider value={props.quality}>
       <AbsoluteFill
         data-intro-frame={frame}
+        data-intro-scene={cuts.findLastIndex(
+          (cut, index) => index < cuts.length - 1 && frame >= cut,
+        )}
+        data-intro-edition="book-cinema"
         style={{
-          background: C.ink,
+          background: "#080f15",
           overflow: "hidden",
           fontFamily: "Arial,sans-serif",
         }}
@@ -68,148 +55,132 @@ export function ComicIntro(props: IntroProps) {
         <style>{`@font-face{font-family:'Comic Archivo';src:url('${staticFile("intro/comic/ArchivoBlack-Regular.ttf")}') format('truetype');font-weight:400 900;font-display:block;}`}</style>
         <Html5Audio src={staticFile(storyboard.audioFile)} pauseWhenBuffering />
         <Sequence
-          name="01 - POW"
+          name="01 · O livro abre seu universo"
           from={cuts[0]}
           durationInFrames={cuts[1] - cuts[0]}
+          premountFor={fps}
         >
-          <Freeze frame={110} active={still}>
-            <HookScene />
-          </Freeze>
+          <BookOpening />
         </Sequence>
         <Sequence
-          name="02 - A dúvida"
+          name="02 · Uma pergunta sem resposta"
           from={cuts[1]}
           durationInFrames={cuts[2] - cuts[1]}
+          premountFor={fps}
         >
-          <Freeze frame={110} active={still}>
-            <LonelyScene />
-          </Freeze>
+          <LostQuestion />
         </Sequence>
         <Sequence
-          name="03 - O caos"
+          name="03 · A vida corre"
           from={cuts[2]}
           durationInFrames={cuts[3] - cuts[2]}
+          premountFor={fps}
         >
-          <Freeze frame={110} active={still}>
-            <ChaosScene />
-          </Freeze>
+          <CampusChaos />
         </Sequence>
         <Sequence
-          name="04 - BAM"
+          name="04 · As páginas conectam"
           from={cuts[3]}
           durationInFrames={cuts[4] - cuts[3]}
+          premountFor={fps}
         >
-          <Freeze frame={110} active={still}>
-            <TurnScene />
-          </Freeze>
+          <BookConnection />
         </Sequence>
         <Sequence
-          name="05 - Recompensas"
+          name="05 · Recompensas e sequência"
           from={cuts[4]}
           durationInFrames={cuts[5] - cuts[4]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <RewardsScene />
-          </ComicCadence>
+          <RewardsChapter />
         </Sequence>
         <Sequence
-          name="06 - Cadernos IA"
+          name="06 · Cadernos com inteligência artificial"
           from={cuts[5]}
           durationInFrames={cuts[6] - cuts[5]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <AiScene />
-          </ComicCadence>
+          <AiChapter />
         </Sequence>
         <Sequence
-          name="07 - Feed"
+          name="07 · O campus tem voz"
           from={cuts[6]}
           durationInFrames={cuts[7] - cuts[6]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <FeedScene />
-          </ComicCadence>
+          <FeedChapter />
         </Sequence>
         <Sequence
-          name="08 - Salas e chats"
+          name="08 · Salas e conversas"
           from={cuts[7]}
           durationInFrames={cuts[8] - cuts[7]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <ChatScene />
-          </ComicCadence>
+          <ChatChapter />
         </Sequence>
         <Sequence
-          name="09 - Caronas"
+          name="09 · Caronas em movimento"
           from={cuts[8]}
           durationInFrames={cuts[9] - cuts[8]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <RideScene />
-          </ComicCadence>
+          <RideChapter />
         </Sequence>
         <Sequence
-          name="10 - Chamadas"
+          name="10 · Voz, vídeo e tela"
           from={cuts[9]}
           durationInFrames={cuts[10] - cuts[9]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <CallsScene />
-          </ComicCadence>
+          <CallsChapter />
         </Sequence>
         <Sequence
-          name="11 - Minigames"
+          name="11 · Aprenda jogando"
           from={cuts[10]}
           durationInFrames={cuts[11] - cuts[10]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <GamesScene />
-          </ComicCadence>
+          <GamesChapter />
         </Sequence>
         <Sequence
-          name="12 - Amigos e perfil"
+          name="12 · Amigos e perfil"
           from={cuts[11]}
           durationInFrames={cuts[12] - cuts[11]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <FriendsScene />
-          </ComicCadence>
+          <FriendsChapter />
         </Sequence>
         <Sequence
-          name="13 - Minhas matérias"
+          name="13 · Matérias do semestre"
           from={cuts[12]}
           durationInFrames={cuts[13] - cuts[12]}
+          premountFor={fps}
         >
-          <ComicCadence still={still}>
-            <SubjectsScene />
-          </ComicCadence>
+          <SubjectsChapter />
         </Sequence>
         <Sequence
-          name="14 - A vida inteira"
+          name="14 · A vida inteira conectada"
           from={cuts[13]}
           durationInFrames={cuts[14] - cuts[13]}
+          premountFor={fps}
         >
-          <Freeze frame={110} active={still}>
-            <ProofScene />
-          </Freeze>
+          <ConnectedLife />
         </Sequence>
         <Sequence
-          name="15 - Sua próxima conexão"
+          name="15 · Sua próxima página"
           from={cuts[14]}
           durationInFrames={cuts[15] - cuts[14]}
+          premountFor={fps}
         >
-          <Freeze frame={110} active={still}>
-            <BuildupScene />
-          </Freeze>
+          <NextConnection />
         </Sequence>
         <Sequence
-          name="16 - Bora se enturmar"
+          name="16 · Se enturme"
           from={cuts[15]}
           durationInFrames={cuts[16] - cuts[15]}
+          premountFor={fps}
         >
-          <Freeze frame={110} active={still}>
-            <CtaScene />
-          </Freeze>
+          <BookFinale />
         </Sequence>
         <AnimatedCaptions />
       </AbsoluteFill>

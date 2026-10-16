@@ -17,15 +17,9 @@ import {
   X,
 } from "lucide-react";
 import Link from "next/link";
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AcademicEntry } from "@enturma/contracts";
-import { api, post } from "@/lib/api";
+import { api, post, peekApiSnapshot } from "@/lib/api";
 import { useRideUpdates } from "@/lib/use-ride-updates";
 import {
   RideMobilityMap,
@@ -370,7 +364,11 @@ function AddressFinder({
                 <strong>{item.label}</strong>
                 <small>{item.address || item.label}</small>
                 <em>
-                  {index === 0 && current ? "Mais perto de você" : item.poi ? item.category || "Estabelecimento" : "Endereço"}
+                  {index === 0 && current
+                    ? "Mais perto de você"
+                    : item.poi
+                      ? item.category || "Estabelecimento"
+                      : "Endereço"}
                   {item.distanceMeters != null
                     ? ` · ${meters(item.distanceMeters)}`
                     : ""}
@@ -390,7 +388,9 @@ function Radar({ label }: { label: string }) {
     const node = root.current;
     if (!node) return;
     let frame = 0;
-    const rings = [...node.querySelectorAll<HTMLElement>(".ride-dispatch-ring")];
+    const rings = [
+      ...node.querySelectorAll<HTMLElement>(".ride-dispatch-ring"),
+    ];
     const dot = node.querySelector<HTMLElement>(".ride-dispatch-dot");
     const reduced =
       document.documentElement.dataset.reducedMotion === "true" ||
@@ -486,9 +486,15 @@ function BottomSheet({
 
 export function RideMobilityExperience() {
   const online = useOnline();
-  const [state, setState] = useState<MobilityState>();
-  const [me, setMe] = useState("");
-  const [campuses, setCampuses] = useState<AcademicEntry[]>([]);
+  const [state, setState] = useState<MobilityState | undefined>(() =>
+    peekApiSnapshot<MobilityState>("/rides/mobility/state"),
+  );
+  const [me, setMe] = useState(
+    () => peekApiSnapshot<{ id: string }>("/users/me")?.id ?? "",
+  );
+  const [campuses, setCampuses] = useState<AcademicEntry[]>(
+    () => peekApiSnapshot<AcademicEntry[]>("/academics?kind=CAMPUS") ?? [],
+  );
   const [mode, setMode] = useState<Mode>("PASSENGER");
   const [direction, setDirection] = useState<Direction>("TO_CAMPUS");
   const [selected, setSelected] = useState<LocationResult>();
@@ -496,10 +502,13 @@ export function RideMobilityExperience() {
   const [location, setLocation] = useState<MapPoint>();
   const [locationLabel, setLocationLabel] = useState("Sua localização");
   const [selectOnMap, setSelectOnMap] = useState(false);
-  const [mapPickPurpose, setMapPickPurpose] = useState<"ROUTE" | "CAMPUS">("ROUTE");
+  const [mapPickPurpose, setMapPickPurpose] = useState<"ROUTE" | "CAMPUS">(
+    "ROUTE",
+  );
   const [campusOverride, setCampusOverride] = useState<LocationResult>();
   const [campusSetupOpen, setCampusSetupOpen] = useState(false);
-  const [pendingRouteChoice, setPendingRouteChoice] = useState<LocationResult>();
+  const [pendingRouteChoice, setPendingRouteChoice] =
+    useState<LocationResult>();
   const [driverRequests, setDriverRequests] = useState<DriverRequest[]>([]);
   const [nearbyDrivers, setNearbyDrivers] = useState<NearbyDriver[]>([]);
   const [searchRadiusKm, setSearchRadiusKm] = useState(5);
@@ -575,19 +584,18 @@ export function RideMobilityExperience() {
       setMode("PASSENGER");
       setDirection(next.activeRequest.direction);
     }
-    const actualCenter =
-      next.driverAvailability?.enabled
-        ? point(next.driverAvailability.lat, next.driverAvailability.lng)
-        : next.activeMatch
-          ? next.activeMatch.driverId === user.id
-            ? point(next.activeMatch.startLat, next.activeMatch.startLng)
-            : point(
-                next.activeMatch.passengerStartLat,
-                next.activeMatch.passengerStartLng,
-              )
-          : next.activeRequest
-            ? point(next.activeRequest.startLat, next.activeRequest.startLng)
-            : point(next.preference?.campusLat, next.preference?.campusLng);
+    const actualCenter = next.driverAvailability?.enabled
+      ? point(next.driverAvailability.lat, next.driverAvailability.lng)
+      : next.activeMatch
+        ? next.activeMatch.driverId === user.id
+          ? point(next.activeMatch.startLat, next.activeMatch.startLng)
+          : point(
+              next.activeMatch.passengerStartLat,
+              next.activeMatch.passengerStartLng,
+            )
+        : next.activeRequest
+          ? point(next.activeRequest.startLat, next.activeRequest.startLng)
+          : point(next.preference?.campusLat, next.preference?.campusLng);
     if (actualCenter && !currentLocationRef.current) {
       currentLocationRef.current = actualCenter;
       setLocation(actualCenter);
@@ -638,7 +646,10 @@ export function RideMobilityExperience() {
       ? { lat: campusOverride.lat, lng: campusOverride.lng }
       : undefined);
   const campusLabel =
-    campusOverride?.label || pref?.campusAddress || pref?.campusName || "Campus";
+    campusOverride?.label ||
+    pref?.campusAddress ||
+    pref?.campusName ||
+    "Campus";
   const activeMatch = state?.activeMatch ?? undefined;
   const activeRequest = state?.activeRequest ?? undefined;
   const availability = state?.driverAvailability ?? undefined;
@@ -665,8 +676,9 @@ export function RideMobilityExperience() {
       const animationDirection = nextMode === "DRIVER" ? 1 : -1;
       requestAnimationFrame(() => {
         const switcher = modeSwitchRef.current;
-        const panel =
-          mobilityRoot.current?.querySelector<HTMLElement>(".ride-sheet-content");
+        const panel = mobilityRoot.current?.querySelector<HTMLElement>(
+          ".ride-sheet-content",
+        );
         const reduced =
           document.documentElement.dataset.reducedMotion === "true" ||
           matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -720,8 +732,7 @@ export function RideMobilityExperience() {
       setError(
         ge?.code === 1
           ? "Permita o acesso à localização para usar a Carona."
-          : (e as Error).message ||
-              "Não foi possível obter sua localização.",
+          : (e as Error).message || "Não foi possível obter sua localização.",
       );
       throw e;
     } finally {
@@ -1119,9 +1130,7 @@ export function RideMobilityExperience() {
   }
   async function rejectDriverRequest(request: DriverRequest) {
     await post(`/rides/driver/requests/${request.id}/reject`);
-    setDriverRequests((rows) =>
-      rows.filter((row) => row.id !== request.id),
-    );
+    setDriverRequests((rows) => rows.filter((row) => row.id !== request.id));
   }
 
   async function cancelCurrent() {
@@ -1256,9 +1265,12 @@ export function RideMobilityExperience() {
 
   useEffect(() => {
     if (!activeMatch || mode !== "PASSENGER") return;
-    if (!["ARRIVING", "WAITING_PASSENGER"].includes(activeMatch.tripStatus)) return;
+    if (!["ARRIVING", "WAITING_PASSENGER"].includes(activeMatch.tripStatus))
+      return;
     if (!("vibrate" in navigator)) return;
-    navigator.vibrate(activeMatch.tripStatus === "WAITING_PASSENGER" ? [180, 100, 180] : 120);
+    navigator.vibrate(
+      activeMatch.tripStatus === "WAITING_PASSENGER" ? [180, 100, 180] : 120,
+    );
   }, [activeMatch?.tripStatus, activeMatch?.id, mode]);
 
   useEffect(() => {
@@ -1274,9 +1286,7 @@ export function RideMobilityExperience() {
     if (now - activeRouteAt.current < 14000) return;
     activeRouteAt.current = now;
     const driverPoint =
-      activeMatch.driverId === me
-        ? location
-        : { lat: peer.lat, lng: peer.lng };
+      activeMatch.driverId === me ? location : { lat: peer.lat, lng: peer.lng };
     const pickup = point(activeMatch.pickupLat, activeMatch.pickupLng);
     const passengerEnd = point(
       activeMatch.passengerEndLat,
@@ -1334,18 +1344,12 @@ export function RideMobilityExperience() {
         kind: direction === "TO_CAMPUS" ? "pickup" : "destination",
         label: direction === "TO_CAMPUS" ? "Embarque" : "Destino",
       });
-    if (
-      peer?.available &&
-      peer.lat != null &&
-      peer.lng != null &&
-      activeMatch
-    )
+    if (peer?.available && peer.lat != null && peer.lng != null && activeMatch)
       rows.push({
         id: "peer",
         point: { lat: peer.lat, lng: peer.lng },
         kind: activeMatch.driverId === me ? "passenger" : "driver",
-        heading:
-          activeMatch.driverId === me ? undefined : peer.heading,
+        heading: activeMatch.driverId === me ? undefined : peer.heading,
         label:
           activeMatch.driverId === me
             ? activeMatch.passengerName
@@ -1405,7 +1409,7 @@ export function RideMobilityExperience() {
           lat: (trackingPair.mine.lat + trackingPair.peer.lat) / 2,
           lng: (trackingPair.mine.lng + trackingPair.peer.lng) / 2,
         }
-      : location ?? campusPoint;
+      : (location ?? campusPoint);
   const mapZoom = trackingPair
     ? pairDistance > 12
       ? 10
@@ -1458,7 +1462,8 @@ export function RideMobilityExperience() {
   useEffect(() => {
     if (!activeMatch) return;
     const timer = window.setTimeout(() => {
-      const panel = mobilityRoot.current?.querySelector<HTMLElement>(".ride-bottom-sheet");
+      const panel =
+        mobilityRoot.current?.querySelector<HTMLElement>(".ride-bottom-sheet");
       if (!panel) return;
       const reduced =
         document.documentElement.dataset.reducedMotion === "true" ||
@@ -1640,10 +1645,10 @@ export function RideMobilityExperience() {
               <GraduationCap size={30} />
               <h2>Confirme onde fica sua faculdade</h2>
               <p>
-                O catálogo ainda não tem a posição exata deste campus. Pesquise o
-                endereço da faculdade ou marque o ponto no mapa. Isso é feito uma
-                vez e depois você poderá pedir carona de casa para a faculdade e
-                da faculdade para casa normalmente.
+                O catálogo ainda não tem a posição exata deste campus. Pesquise
+                o endereço da faculdade ou marque o ponto no mapa. Isso é feito
+                uma vez e depois você poderá pedir carona de casa para a
+                faculdade e da faculdade para casa normalmente.
               </p>
               <AddressFinder
                 title="Endereço do campus"
@@ -1716,9 +1721,11 @@ export function RideMobilityExperience() {
 
               <div className="ride-active-profile">
                 <div className="ride-active-profile-banner" aria-hidden="true">
-                  {(mode === "PASSENGER"
-                    ? activeMatch.driverHasBanner
-                    : activeMatch.passengerHasBanner) ? (
+                  {(
+                    mode === "PASSENGER"
+                      ? activeMatch.driverHasBanner
+                      : activeMatch.passengerHasBanner
+                  ) ? (
                     <img
                       src={`/api/backend/users/${
                         mode === "PASSENGER"
@@ -1731,9 +1738,11 @@ export function RideMobilityExperience() {
                 </div>
                 <div className="ride-person-summary">
                   <div className="ride-person-avatar">
-                    {(mode === "PASSENGER"
-                      ? activeMatch.driverHasAvatar
-                      : activeMatch.passengerHasAvatar) ? (
+                    {(
+                      mode === "PASSENGER"
+                        ? activeMatch.driverHasAvatar
+                        : activeMatch.passengerHasAvatar
+                    ) ? (
                       <img
                         src={`/api/backend/users/${
                           mode === "PASSENGER"
@@ -1871,9 +1880,11 @@ export function RideMobilityExperience() {
               <small>Carona concluída</small>
               <h2>Você chegou 🎉</h2>
               <p>
-                Avalie {recentCompleted.driverId === me
+                Avalie{" "}
+                {recentCompleted.driverId === me
                   ? recentCompleted.passengerName
-                  : recentCompleted.driverName} para manter a comunidade útil.
+                  : recentCompleted.driverName}{" "}
+                para manter a comunidade útil.
               </p>
               <div className="ride-review-stars" aria-label="Avaliação">
                 {[1, 2, 3, 4, 5].map((rating) => (
@@ -2111,7 +2122,10 @@ export function RideMobilityExperience() {
                   {driverRequests.length ? (
                     <div className="ride-request-stack">
                       {driverRequests.map((request) => (
-                        <article className="ride-driver-request" key={request.id}>
+                        <article
+                          className="ride-driver-request"
+                          key={request.id}
+                        >
                           <div className="ride-request-person">
                             <span className="ride-person-avatar">
                               {request.passengerHasAvatar ? (
@@ -2134,7 +2148,9 @@ export function RideMobilityExperience() {
                             </span>
                           </div>
                           <div className="ride-request-facts">
-                            <span>{request.etaMinutes} min até o estudante</span>
+                            <span>
+                              {request.etaMinutes} min até o estudante
+                            </span>
                             <span>+{request.detourMinutes} min de desvio</span>
                             <span>{request.pickupDistanceKm} km</span>
                           </div>

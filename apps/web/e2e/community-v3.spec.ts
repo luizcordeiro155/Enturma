@@ -1,5 +1,6 @@
+import { test } from "./student-fixture";
 import { authenticate } from "./session";
-import { test, expect, type Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";

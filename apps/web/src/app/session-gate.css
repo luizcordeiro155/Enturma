@@ -2,7 +2,8 @@
   min-height: 100dvh;
   display: grid;
   place-items: center;
-  padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+  padding: max(24px, env(safe-area-inset-top)) 20px
+    max(24px, env(safe-area-inset-bottom));
   background: var(--background, #101818);
   color: var(--ink, #f5f8f6);
 }
@@ -56,13 +57,76 @@
 }
 
 .auth-session-gate-spin {
-  animation: enturma-session-spin .85s linear infinite;
+  animation: enturma-session-spin 0.85s linear infinite;
 }
 
 @keyframes enturma-session-spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .auth-session-gate-spin { animation: none; }
+  .auth-session-gate-spin {
+    animation: none;
+  }
+}
+.enturma-initial-shell {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  color: var(--ink);
+  font-weight: 800;
+  font-size: 36px;
+}
+.enturma-launch-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  padding: var(--enturma-safe-top) 20px var(--enturma-safe-bottom);
+}
+.enturma-launch-scene {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  max-width: 560px;
+  min-height: 340px;
+  color: var(--ink);
+  text-align: center;
+}
+.enturma-launch-scene > strong {
+  font-size: clamp(26px, 4vw, 42px);
+  letter-spacing: -0.045em;
+}
+.enturma-launch-scene > span {
+  margin-top: 10px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.enturma-launch-skip {
+  position: absolute;
+  bottom: calc(24px + var(--enturma-safe-bottom));
+  right: 24px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  padding: 10px 18px;
+  border-radius: 12px;
+}
+.enturma-theme-transition::view-transition-old(root),
+.enturma-theme-transition::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+.enturma-theme-transition::view-transition-old(root) {
+  z-index: 1;
+}
+.enturma-theme-transition::view-transition-new(root) {
+  z-index: 2;
 }

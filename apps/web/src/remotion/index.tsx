@@ -1,5 +1,6 @@
 import { Composition, registerRoot } from "remotion";
 import { EnturmaIntroComposition } from "../components/intro/enturma-intro-composition";
+import { LaunchComposition } from "../components/motion/launch-composition";
 import {
   INTRO_FEATURES,
   INTRO_FRAMES,
@@ -10,6 +11,24 @@ import {
 function IntroRoot() {
   return (
     <>
+      <Composition
+        id="EnturmaLaunch"
+        component={LaunchComposition}
+        width={560}
+        height={400}
+        fps={24}
+        durationInFrames={144}
+        defaultProps={{ ride: false, reduced: false }}
+      />
+      <Composition
+        id="EnturmaRideLaunch"
+        component={LaunchComposition}
+        width={560}
+        height={400}
+        fps={24}
+        durationInFrames={72}
+        defaultProps={{ ride: true, reduced: false }}
+      />
       <Composition
         id="EnturmaDesktop"
         component={EnturmaIntroComposition}

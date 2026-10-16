@@ -14,7 +14,7 @@ import {
   Send,
   LoaderCircle,
 } from "lucide-react";
-import { api, post } from "@/lib/api";
+import { api, post, peekApiSnapshot } from "@/lib/api";
 import { prepareChatImage } from "@/lib/chat-image";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
@@ -88,8 +88,15 @@ export function StudyNotebooks({ id }: { id?: string }) {
   const router = useRouter();
   const [items, setItems] = useState<
     { id: string; title: string; updatedAt: string }[]
-  >([]);
-  const [data, setData] = useState<Notebook>();
+  >(
+    () =>
+      peekApiSnapshot<{
+        items: { id: string; title: string; updatedAt: string }[];
+      }>("/notebooks")?.items ?? [],
+  );
+  const [data, setData] = useState<Notebook | undefined>(() =>
+    id ? peekApiSnapshot<Notebook>(`/notebooks/${id}`) : undefined,
+  );
   const [title, setTitle] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -121,11 +128,18 @@ export function StudyNotebooks({ id }: { id?: string }) {
   const autoRunning = useRef(false);
   const load = useCallback(async () => {
     if (id) {
-      const cached=await resilientRead("notebook:"+id,()=>api<Notebook>(`/notebooks/${id}`,{cache:"no-store"}));
-      setData(cached.value);setOffline(cached.offline);
+      const cached = await resilientRead("notebook:" + id, () =>
+        api<Notebook>(`/notebooks/${id}`, { cache: "no-store" }),
+      );
+      setData(cached.value);
+      setOffline(cached.offline);
     } else {
-      const cached=await resilientRead<{items:typeof items}>("notebooks:list",()=>api<{items:typeof items}>("/notebooks",{cache:"no-store"}));
-      setItems(cached.value.items);setOffline(cached.offline);
+      const cached = await resilientRead<{ items: typeof items }>(
+        "notebooks:list",
+        () => api<{ items: typeof items }>("/notebooks", { cache: "no-store" }),
+      );
+      setItems(cached.value.items);
+      setOffline(cached.offline);
     }
   }, [id]);
   useEffect(() => {
@@ -143,7 +157,7 @@ export function StudyNotebooks({ id }: { id?: string }) {
       clearInterval(timer);
     };
   }, [id, load]);
-  useEffect(()=>refreshWhenOnline(()=>void load()),[load]);
+  useEffect(() => refreshWhenOnline(() => void load()), [load]);
   const selected =
     data?.sources
       .filter((s) => s.status === "READY" && !excluded.includes(s.id))
@@ -181,12 +195,21 @@ export function StudyNotebooks({ id }: { id?: string }) {
   }, [data, id, load]);
   async function persistFlashcards() {
     if (!id) return;
-    setBusy(true);setError("");setNotice("");
+    setBusy(true);
+    setError("");
+    setNotice("");
     try {
-      const out=await post<{created:number}>(`/practice/notebooks/${id}/flashcards`);
-      setNotice(`${out.created} flashcards foram criados e entraram na revisão espaçada do Campus.`);
-    } catch(e) { setError((e as Error).message); }
-    finally { setBusy(false); }
+      const out = await post<{ created: number }>(
+        `/practice/notebooks/${id}/flashcards`,
+      );
+      setNotice(
+        `${out.created} flashcards foram criados e entraram na revisão espaçada do Campus.`,
+      );
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function generate(mode: string) {
@@ -302,7 +325,14 @@ export function StudyNotebooks({ id }: { id?: string }) {
             <BookOpen size={44} />
           )}
         </header>
-        <Feedback error={error} success={offline?"Modo offline: mostrando a última cópia sincronizada.":notice} />
+        <Feedback
+          error={error}
+          success={
+            offline
+              ? "Modo offline: mostrando a última cópia sincronizada."
+              : notice
+          }
+        />
         {!id ? (
           <>
             <form
@@ -586,8 +616,12 @@ export function StudyNotebooks({ id }: { id?: string }) {
                   </div>
                 </div>
                 <div className="notebook-smart-actions">
-                  <button className="secondary" disabled={busy || !data.aiEnabled || !selected.length} onClick={() => void persistFlashcards()}>
-                    <Sparkles size={16}/> Criar flashcards de revisão espaçada
+                  <button
+                    className="secondary"
+                    disabled={busy || !data.aiEnabled || !selected.length}
+                    onClick={() => void persistFlashcards()}
+                  >
+                    <Sparkles size={16} /> Criar flashcards de revisão espaçada
                   </button>
                 </div>
                 <div className="study-modes">

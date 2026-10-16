@@ -5,6 +5,10 @@ import { Ionicons } from "@expo/vector-icons";
 import { request, type Credentials } from "@enturma/contracts";
 import { api, base, save, session } from "../src/api";
 import { Screen, Field, Button, ErrorMessage, useStyles } from "../src/ui";
+import {
+  NativeBookMotion,
+  type AcademicIdentity,
+} from "../src/academic-identity";
 
 export default function Login() {
   const styles = useStyles();
@@ -23,8 +27,11 @@ export default function Login() {
     const verify = async () => {
       try {
         if (await session()) {
-          await api("/users/me");
-          if (active) router.replace("/home");
+          const identity = await api<AcademicIdentity>("/auth/academic/status");
+          if (active)
+            router.replace(
+              identity.accessAllowed ? "/home" : "/academic-verification",
+            );
         }
       } catch {
         // A falha de rede não apaga o login salvo; o usuário pode tentar novamente.
@@ -33,7 +40,9 @@ export default function Login() {
       }
     };
     void verify();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [router]);
 
   async function submit() {
@@ -54,7 +63,10 @@ export default function Login() {
         },
       );
       await save(c);
-      router.replace(register ? "/onboarding" : "/home");
+      const identity = await api<AcademicIdentity>("/auth/academic/status");
+      router.replace(
+        identity.accessAllowed ? "/home" : "/academic-verification",
+      );
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -62,11 +74,13 @@ export default function Login() {
     }
   }
 
-  if (restoring) return (
-    <Screen title="">
-      <Text style={styles.muted}>Verificando sua sessão...</Text>
-    </Screen>
-  );
+  if (restoring)
+    return (
+      <Screen title="">
+        <NativeBookMotion />
+        <Text style={[styles.title, { textAlign: "center" }]}>enturma.</Text>
+      </Screen>
+    );
 
   return (
     <Screen title="">

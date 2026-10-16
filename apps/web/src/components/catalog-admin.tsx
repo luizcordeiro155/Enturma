@@ -73,6 +73,7 @@ export function CatalogAdmin({ section = "summary" }: { section?: string }) {
       <h1>Catálogo acadêmico</h1>
       <p className="lead">Fontes, cobertura e importações verificáveis.</p>
       <nav className="admin-tabs">
+        <Link href="/admin/academic-verification">Identidade acadêmica</Link>
         {[
           ["summary", "Visão geral"],
           ["imports", "Importações"],

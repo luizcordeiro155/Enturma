@@ -1,9 +1,5 @@
-import {
-  test,
-  expect,
-  chromium,
-  type APIRequestContext,
-} from "@playwright/test";
+import { test } from "./student-fixture";
+import { expect, chromium, type APIRequestContext } from "@playwright/test";
 import { authenticate } from "./session";
 import { randomUUID } from "node:crypto";
 import { mkdirSync } from "node:fs";
@@ -312,7 +308,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   await page.goto("/home");
   const intro = page.getByRole("region", { name: "Apresentação do Enturma" });
   await expect(intro).toBeVisible();
-  const narration = intro.locator('audio[src*="enturma-comic-90"]');
+  const narration = intro.locator('audio[src*="enturma-book-cinema-90"]');
   await expect(narration).toHaveCount(1);
   // The dynamically loaded composition changes the card height. Scroll only
   // after it mounts so the visibility observer can start playback.
@@ -406,7 +402,9 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
     .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
     .toBe(true);
   await expect(intro).toHaveAttribute("data-layout", "portrait");
-  await expect(intro.locator("canvas")).toHaveCount(1);
+  await expect(
+    intro.locator("[data-brand-book]:visible").first(),
+  ).toBeVisible();
   await page.screenshot({ path: join(screenshots, "intro-mobile-dark.png") });
   await intro.getByRole("button", { name: "Pular" }).click();
   await expect(intro).toHaveAttribute("data-minimized", "true");
@@ -434,40 +432,32 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
     .fill("0");
-  await expect(intro.getByText("SUPERPODER.", { exact: true })).toBeVisible();
-  await expect(intro.locator("[data-presenter]")).toBeVisible();
+  await expect(
+    intro.getByText("OUTRO UNIVERSO.", { exact: true }),
+  ).toBeVisible();
+  await expect(intro.locator("[data-presenter]")).toHaveCount(0);
   await expect(intro.locator(".intro-caption")).toHaveCount(0);
   const sceneStart = INTRO_FEATURE_CUES[0].fromFrame;
   const seek = intro.getByRole("slider", { name: "Posição da apresentação" });
-  const confettiPixels = () =>
-    intro.locator("canvas").evaluate((canvas: HTMLCanvasElement) => {
-      const pixels = canvas
-        .getContext("2d")!
-        .getImageData(0, 0, canvas.width, canvas.height).data;
-      let count = 0;
-      for (let i = 3; i < pixels.length; i += 4) if (pixels[i]) count++;
-      return count;
-    });
   for (const offset of [12, 84, 12]) {
     await seek.fill(String(sceneStart + offset));
-    if (offset === 84) await expect.poll(confettiPixels).toBeGreaterThan(0);
-    else await expect.poll(confettiPixels).toBe(0);
+    await expect(intro.locator("[data-book-confetti]:visible")).toHaveCount(
+      offset === 84 ? 1 : 0,
+    );
   }
   await seek.fill(String(sceneStart + 6));
-  const firstJoints = await intro
-    .locator("[data-presenter]")
-    .getAttribute("data-presenter-joints");
+  const bookTransform = () =>
+    intro
+      .locator("[data-brand-book]:visible")
+      .first()
+      .evaluate((node) =>
+        [...node.querySelectorAll("div")]
+          .map((n) => getComputedStyle(n).transform)
+          .join("|"),
+      );
+  const beforeTurn = await bookTransform();
   await seek.fill(String(sceneStart + 7));
-  await expect(intro.locator("[data-presenter]")).toHaveAttribute(
-    "data-presenter-frame",
-    "7",
-  );
-  expect(
-    await intro
-      .locator("[data-presenter]")
-      .getAttribute("data-presenter-joints"),
-  ).not.toBe(firstJoints);
-  const expressions = new Set<string>();
+  await expect.poll(bookTransform).not.toBe(beforeTurn);
   for (const frame of [
     ...INTRO_SCENE_FRAMES.slice(0, -1).map((start, i) =>
       Math.floor((start + INTRO_SCENE_FRAMES[i + 1]) / 2),
@@ -481,12 +471,10 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
       "data-intro-frame",
       String(frame),
     );
-    const expression = await intro
-      .locator("[data-presenter]")
-      .getAttribute("data-presenter-expression");
-    await expect(intro.locator("[data-presenter-ground]")).toHaveCount(1);
-    expect(expression).toBeTruthy();
-    expressions.add(expression!);
+    await expect(
+      intro.locator("[data-brand-book]:visible").first(),
+    ).toBeVisible();
+    await expect(intro.locator("[data-presenter]")).toHaveCount(0);
     const safe = await intro
       .locator("[data-intro-safe]")
       .evaluateAll((elements) =>
@@ -509,36 +497,11 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
         `Text overlaps art at frame ${frame}`,
       ).toBeLessThanOrEqual(art.y + 2);
     }
-    const faceLocator = intro.locator("[data-presenter-face]");
-    const face = (await faceLocator.count())
-      ? await faceLocator.boundingBox()
-      : null;
-    if (face) {
-      const cards = await intro
-        .locator("[data-presenter-copy]")
-        .evaluateAll((elements) =>
-          elements.map((el) => {
-            const r = el.getBoundingClientRect();
-            return { x: r.x, y: r.y, w: r.width, h: r.height };
-          }),
-        );
-      for (const card of cards) {
-        const overlap =
-          card.x < face.x + face.width &&
-          card.x + card.w > face.x &&
-          card.y < face.y + face.height &&
-          card.y + card.h > face.y;
-        expect(overlap, `Card covers presenter face at frame ${frame}`).toBe(
-          false,
-        );
-      }
-    }
     for (const bounds of safe) {
       expect(bounds.left).toBeGreaterThanOrEqual(0);
       expect(bounds.right).toBeLessThanOrEqual(390);
     }
   }
-  expect(expressions.size).toBe(16);
   for (const [index, cue] of INTRO_FEATURE_CUES.entries()) {
     await intro
       .getByRole("slider", { name: "Posição da apresentação" })

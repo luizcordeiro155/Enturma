@@ -25,7 +25,7 @@ import {
 } from "./notifications";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { mentionsUser } from "@/lib/mentions";
-import { api, post } from "@/lib/api";
+import { api, post, peekApiSnapshot } from "@/lib/api";
 import {
   conversationKey,
   createIdentity,
@@ -87,8 +87,12 @@ export function Friends() {
   const router = useRouter();
   const requestedChat = params.get("chat");
   useNotificationTarget();
-  const [me, setMe] = useState<PublicProfile>();
-  const [friends, setFriends] = useState<Friend[]>([]);
+  const [me, setMe] = useState<PublicProfile | undefined>(() =>
+    peekApiSnapshot<PublicProfile>("/users/me"),
+  );
+  const [friends, setFriends] = useState<Friend[]>(
+    () => peekApiSnapshot<Friend[]>("/friends") ?? [],
+  );
   const [selected, setSelected] = useState<Friend>();
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");

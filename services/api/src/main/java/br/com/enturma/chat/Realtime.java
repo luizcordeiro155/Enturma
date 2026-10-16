@@ -32,6 +32,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
     volatile UUID user;
     volatile boolean rides;
     volatile boolean activity;
+    volatile boolean academic;
     String previous = "";
     String name = "";
     String typingPrevious = "";
@@ -81,6 +82,8 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       try {
         var data = json.readTree(message.getPayload());
         Actor actor = auth.authenticate(c.token).orElseThrow();
+        if (c.academic) return;
+        if (!auth.studentAccess(actor)) throw new IllegalStateException("Academic verification required");
         if (c.activity && "presence_ping".equals(data.path("type").asText())) {
           presence.touch(socket.getId(), actor.id());
           return;
@@ -108,6 +111,13 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       String token = data.path("token").asText();
       Actor actor = auth.authenticate(token).orElseThrow();
       c.user = actor.id();
+      if ("academic".equals(data.path("scope").asText())) {
+        c.academic = true;
+        c.token = token;
+        synchronized(c) { socket.sendMessage(new TextMessage("{\"type\":\"academic_ready\"}")); }
+        return;
+      }
+      if (!auth.studentAccess(actor)) throw new IllegalStateException("Academic verification required");
       c.name = (String) db.one("SELECT name FROM app_user WHERE id=?", actor.id()).get("name");
       if ("activity".equals(data.path("scope").asText())) {
         c.activity = true;
@@ -149,8 +159,9 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
         // Global activity/ride sockets are event-driven. Authenticating every
         // one of them on the 1.2s room snapshot loop created needless database
         // traffic and slowed the whole API as connected clients increased.
-        if (c.rides || c.activity) continue;
+        if (c.rides || c.activity || c.academic) continue;
         Actor actor = auth.authenticate(c.token).orElseThrow();
+        if (!auth.studentAccess(actor)) throw new IllegalStateException("Academic verification required");
         if (System.currentTimeMillis() - c.lastHeartbeat > 30000) {
           study.heartbeat(actor, c.room);
           c.lastHeartbeat = System.currentTimeMillis();
@@ -217,7 +228,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
           || !c.socket.isOpen()
           || (!event.publicListing() && !event.users().contains(c.user))) continue;
       try {
-        if (auth.authenticate(c.token).isEmpty()) {
+        if (auth.authenticate(c.token).filter(auth::studentAccess).isEmpty()) {
           c.socket.close(CloseStatus.POLICY_VIOLATION);
           continue;
         }
@@ -239,11 +250,12 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       fallbackExecution = true)
   public void appChanged(br.com.enturma.notifications.AppChanged event) {
     for (var c : connections.values()) {
-      if (!c.activity
+      if ((!c.activity && !c.academic)
           || !c.socket.isOpen()
           || (!event.users().isEmpty() && !event.users().contains(c.user))) continue;
+      if (c.academic && (!event.type().equals("academic_identity_changed") || !event.users().contains(c.user))) continue;
       try {
-        if (auth.authenticate(c.token).isEmpty()) {
+        if (auth.authenticate(c.token).filter(actor -> c.academic || auth.studentAccess(actor)).isEmpty()) {
           c.socket.close(CloseStatus.POLICY_VIOLATION);
           continue;
         }

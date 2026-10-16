@@ -13,13 +13,14 @@ const EXCLUDED =
 export function Motion() {
   const path = usePathname();
   useEffect(() => {
+    document.body.dataset.appPage = path === "/profile" ? "profile" : path.startsWith("/caronas") ? "rides" : /^\/rooms\/(?!new$).+/.test(path) ? "room" : "standard";
     const seen = new WeakSet<Element>();
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     let context = gsap.context(() => {});
     let pressed: HTMLElement | null = null;
     let scanFrame = 0;
     const animate = (el: Element, from: gsap.TweenVars, to: gsap.TweenVars) => {
-      if (reducedMotion() || el.closest(EXCLUDED)) return;
+      if (reducedMotion() || el.closest(EXCLUDED) || !el.getClientRects().length) return;
       context.add(() => {
         gsap.fromTo(el, from, {
           duration: 0.28,
@@ -103,6 +104,9 @@ export function Motion() {
       attributeFilter: ["data-reduced-motion"],
     });
     scan();
+    const routeEntrances = reducedMotion() ? [] : [...document.querySelectorAll<HTMLElement>("main")]
+      .filter((element) => element.getClientRects().length && !element.closest(".room-active-shell"))
+      .map((element) => element.animate?.([{opacity:.7,transform:"translateY(6px)"},{opacity:1,transform:"translateY(0)"}], {duration:260,easing:"cubic-bezier(.16,1,.3,1)"}));
     mutations.observe(document.body, { subtree: true, childList: true });
     document.addEventListener("pointerdown", press, { passive: true });
     document.addEventListener("pointerup", release, { passive: true });
@@ -111,6 +115,7 @@ export function Motion() {
     media.addEventListener("change", preference);
     window.addEventListener("enturma-motion", preference);
     return () => {
+      routeEntrances.forEach((animation) => animation?.cancel());
       cancelAnimationFrame(scanFrame);
       observer.disconnect();
       mutations.disconnect();

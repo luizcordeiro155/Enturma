@@ -471,6 +471,29 @@ public class RideMobilityService {
     if (updated == 0) throw ApiException.missing();
   }
 
+  private void retireRoutineTrips(UUID recurrence) {
+    // Same row order as booking: a confirmed/started trip remains a real booking.
+    for (var row : db.list("SELECT id,trip_status FROM ride WHERE recurrence_id=? AND status='OPEN' ORDER BY id FOR UPDATE", recurrence)) {
+      UUID ride = (UUID) row.get("id");
+      if (!Set.of("SCHEDULED", "MATCHING").contains(row.get("tripStatus"))
+          || db.exists("SELECT EXISTS(SELECT 1 FROM ride_match WHERE (ride_id=? OR request_ride_id=?) AND status='ACCEPTED' AND deleted_at IS NULL)", ride, ride)) {
+        db.jdbc.update("UPDATE ride SET recurrence_id=NULL WHERE id=?", ride);
+        continue;
+      }
+      db.jdbc.update("UPDATE ride SET status='CANCELLED',trip_status='CANCELLED' WHERE id=?", ride);
+      for (var match : db.list("SELECT id,driver_id,passenger_id FROM ride_match WHERE (ride_id=? OR request_ride_id=?) AND status IN ('PENDING','WAITLISTED') FOR UPDATE",ride,ride)) {
+        db.jdbc.update("UPDATE ride_match SET status='CANCELLED',closed_at=coalesce(closed_at,now()),purge_at=coalesce(purge_at,now()+interval '24 hours') WHERE id=?",match.get("id"));
+        changedMatch(match);
+      }
+      closeRideMatches(ride);
+      db.jdbc.update("DELETE FROM notification WHERE kind='RIDE_REMINDER_30' AND target_id=?", ride);
+      db.jdbc.update("DELETE FROM notification_desktop_push_event WHERE kind='RIDE_REMINDER_30' AND target_id=?", ride);
+      db.jdbc.update("DELETE FROM email_outbox WHERE sent_at IS NULL AND dedupe_key=?", "RIDE_REMINDER_30:" + ride + ":null");
+      changedRide(ride, true);
+      notices.changed((UUID) db.one("SELECT owner_id FROM ride WHERE id=?",ride).get("ownerId"));
+    }
+  }
+
   public Object publicSafety(UUID token) {
     var share =
         db.one(
@@ -633,11 +656,14 @@ public class RideMobilityService {
             id,
             actor.id());
     if (updated == 0) throw ApiException.missing();
+    retireRoutineTrips(id);
   }
 
   @Scheduled(fixedDelay = 3600000, initialDelay = 30000)
   @Transactional
   public void materializeRecurrences() {
+    for (var row : db.list("SELECT id FROM ride_recurrence WHERE NOT active AND EXISTS(SELECT 1 FROM ride WHERE recurrence_id=ride_recurrence.id AND status='OPEN') ORDER BY id FOR UPDATE SKIP LOCKED"))
+      retireRoutineTrips((UUID) row.get("id"));
     for (var row :
         db.list(
             "SELECT id FROM ride_recurrence WHERE active ORDER BY id FOR UPDATE SKIP LOCKED"))
@@ -711,12 +737,13 @@ public class RideMobilityService {
   }
 
   @Scheduled(fixedDelay = 300000, initialDelay = 45000)
+  @Transactional
   public void upcomingRideReminders() {
     for (var row :
         db.list(
-            "SELECT id FROM ride WHERE status='OPEN' AND departure_at"
+            "SELECT id FROM ride WHERE status='OPEN' AND (recurrence_id IS NULL OR EXISTS(SELECT 1 FROM ride_recurrence rr WHERE rr.id=ride.recurrence_id AND rr.active)) AND departure_at"
                 + " BETWEEN now()+interval '25 minutes' AND now()+interval '35 minutes'"
-                + " ORDER BY departure_at,id LIMIT 200"))
+                + " ORDER BY departure_at,id LIMIT 200 FOR UPDATE SKIP LOCKED"))
       notifyRide(
           null,
           (UUID) row.get("id"),

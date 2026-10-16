@@ -192,6 +192,7 @@ public class NotificationService {
     for (var row : rows) {
       long sequence = ((Number) row.get("sequence")).longValue();
       cursor = Math.max(cursor, sequence);
+      if (!NotificationDeliveryPolicy.current(db, (String) row.get("kind"), (UUID) row.get("targetId"))) continue;
       var item = new LinkedHashMap<String, Object>(row);
       item.put(
           "title",

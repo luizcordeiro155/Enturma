@@ -97,6 +97,7 @@ public class WebPushNotificationService {
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT, fallbackExecution = true)
   public void deliver(PushRequested event) {
+    if (!NotificationDeliveryPolicy.current(db, event.kind(), event.target())) return;
     if (!preferences.pushEnabled(event.user(), event.category())) return;
 
     var subscriptions =

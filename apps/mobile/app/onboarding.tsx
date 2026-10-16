@@ -5,6 +5,8 @@ import {
   academicLabels,
   type AcademicEntry,
   catalogOptions,
+  academicOnboardingContext,
+  type AcademicContext,
 } from "@enturma/contracts";
 import { api } from "../src/api";
 import { Screen, Button, Field, ErrorMessage, useStyles } from "../src/ui";
@@ -40,7 +42,29 @@ export default function Onboarding() {
   const [selection, setSelection] = useState<AcademicEntry[]>([]);
   const router = useRouter();
   const parent = ids[step - 1];
+  const [contextReady, setContextReady] = useState(false);
   useEffect(() => {
+    let active = true;
+    api<AcademicContext>("/auth/academic/status")
+      .then((identity) => {
+        if (!active) return;
+        const context = academicOnboardingContext(identity);
+        if (context.length) {
+          setIds(context.map((item) => item.id));
+          setSelection(context);
+          setStep(context.length);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setContextReady(true);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+  useEffect(() => {
+    if (!contextReady) return;
     let active = true;
     const timer = setTimeout(() => {
       setBusy(true);
@@ -63,7 +87,7 @@ export default function Onboarding() {
       active = false;
       clearTimeout(timer);
     };
-  }, [step, parent, search, page, revision]);
+  }, [step, parent, search, page, revision, contextReady]);
   return (
     <Screen title={names[step]}>
       <Text style={styles.muted}>

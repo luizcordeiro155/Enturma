@@ -1137,6 +1137,7 @@ class PlatformIntegrationTest {
             "test-password-long",
             "JUnit");
     host = auth.authenticate(hostCredentials.accessToken()).orElseThrow();
+    approveFixture(host);
     member = create("member" + suffix);
     outsider = create("outsider" + suffix);
     admin = new Actor(host.id(), host.sessionId(), "ADMIN");
@@ -1173,7 +1174,13 @@ class PlatformIntegrationTest {
   Actor create(String username) {
     var c =
         auth.register("Teste", username, username + "@example.test", "test-password-long", "JUnit");
-    return auth.authenticate(c.accessToken()).orElseThrow();
+    Actor actor = auth.authenticate(c.accessToken()).orElseThrow();
+    approveFixture(actor);
+    return actor;
+  }
+
+  void approveFixture(Actor actor) {
+    db.jdbc.update("UPDATE academic_identity SET status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE user_id=?", actor.id());
   }
 
   UUID room(int capacity) {
@@ -1542,6 +1549,63 @@ class PlatformIntegrationTest {
         .isInstanceOf(ApiException.class);
   }
 
+  private UUID recurringFixture(String type) {
+    int weekday = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).plusDays(1).getDayOfWeek().getValue();
+    return (UUID)((Map<?,?>)rideMobility.createRecurrence(host,campus,type,"Ouro Preto","TO_CAMPUS",LocalTime.of(8,0),"America/Sao_Paulo",List.of(weekday),2,-19.911,-43.961,150)).get("id");
+  }
+
+  @Test
+  void deletingRoutineCancelsUnbookedTripsAndQueuedRemindersImmediately() {
+    UUID routine = recurringFixture("OFFER");
+    UUID ride = (UUID)db.one("SELECT id FROM ride WHERE recurrence_id=? ORDER BY departure_at LIMIT 1", routine).get("id");
+    db.jdbc.update("UPDATE ride SET departure_at=now()+interval '30 minutes' WHERE id=?", ride);
+    UUID pending = (UUID)((Map<?,?>)rides.interest(member, ride)).get("id");
+    rideMobility.upcomingRideReminders();
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND kind='RIDE_REMINDER_30')",ride)).isTrue();
+    assertThat(br.com.enturma.notifications.NotificationDeliveryPolicy.current(db,"RIDE_REMINDER_30",ride)).isTrue();
+    rideMobility.deleteRecurrence(host,routine);
+    rideMobility.deleteRecurrence(host,routine);
+    assertThat(db.one("SELECT status FROM ride_match WHERE id=?",pending).get("status")).isEqualTo("CANCELLED");
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM ride WHERE recurrence_id=? AND status='OPEN')",routine)).isFalse();
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND kind='RIDE_REMINDER_30')",ride)).isFalse();
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notification_desktop_push_event WHERE target_id=? AND kind='RIDE_REMINDER_30')",ride)).isFalse();
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM email_outbox WHERE dedupe_key=? AND sent_at IS NULL)","RIDE_REMINDER_30:"+ride+":null")).isFalse();
+    assertThat(br.com.enturma.notifications.NotificationDeliveryPolicy.currentEmail(db,"RIDE_REMINDER_30:"+ride+":null")).isFalse();
+    rideMobility.upcomingRideReminders();
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND kind='RIDE_REMINDER_30')",ride)).isFalse();
+  }
+
+  @Test
+  void deletingRoutinePreservesConfirmedCarpoolAndRepairsPreviouslyDeletedPassengerRoutine() {
+    UUID routine = recurringFixture("OFFER");
+    UUID ride = (UUID)db.one("SELECT id FROM ride WHERE recurrence_id=? ORDER BY departure_at LIMIT 1",routine).get("id");
+    UUID match = (UUID)((Map<?,?>)rides.interest(member,ride)).get("id");
+    rides.accept(host,match);
+    rideMobility.deleteRecurrence(host,routine);
+    var kept=db.one("SELECT status,recurrence_id FROM ride WHERE id=?",ride);
+    assertThat(kept.get("status")).isEqualTo("OPEN");
+    assertThat(kept.get("recurrenceId")).isNull();
+    assertThat(db.one("SELECT status FROM ride_match WHERE id=?",match).get("status")).isEqualTo("ACCEPTED");
+    UUID removed = recurringFixture("REQUEST");
+    db.jdbc.update("UPDATE ride_recurrence SET active=false WHERE id=?",removed);
+    rideMobility.materializeRecurrences();
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM ride WHERE recurrence_id=? AND status='OPEN')",removed)).isFalse();
+  }
+
+  @Test
+  void profileVisualSettingsSurviveOldClientsAndStayPublicWithoutPrivateWidgets() throws Exception {
+    String previous = """
+        {"secondaryColor":"#b51038","theme":"GRADIENT","effect":"DOTS","layout":"IDENTITY_FIRST","goal":"private goal","technologies":"private tech","projects":"private project","privacy":{},"widgets":[],"badges":[]}
+        """;
+    String updated=previous.strip().replace("\"badges\":[]", "\"badges\":[],\"muralMode\":\"CUSTOM\",\"muralColor\":\"#240758\",\"muralSecondaryColor\":\"#007b86\",\"gradientAngle\":220,\"gradientFlow\":\"FLOW\",\"entrance\":\"BOOK\"");
+    mvc.perform(put("/api/v1/users/me/showcase").header("Authorization","Bearer "+hostCredentials.accessToken()).contentType("application/json").content(updated)).andExpect(status().isOk());
+    mvc.perform(put("/api/v1/users/me/showcase").header("Authorization","Bearer "+hostCredentials.accessToken()).contentType("application/json").content(previous)).andExpect(status().isOk());
+    var appearance=(Map<String,Object>)((Map<?,?>)showcase.get(member,host.id())).get("appearance");
+    assertThat(appearance).containsEntry("muralMode","CUSTOM").containsEntry("gradientAngle",220).containsEntry("entrance","BOOK").doesNotContainKeys("goal","technologies","projects");
+    mvc.perform(put("/api/v1/users/me/showcase").header("Authorization","Bearer "+hostCredentials.accessToken()).contentType("application/json").content(updated.replace("#007b86","url(evil)"))).andExpect(status().isBadRequest());
+    mvc.perform(get("/api/v1/users/me/showcase").header("Authorization","Bearer "+hostCredentials.accessToken())).andExpect(status().isOk()).andExpect(jsonPath("$.appearance.muralMode").value("CUSTOM"));
+  }
+
   @Test
   void loginExplainsUnknownEmailAndWrongPasswordSeparately() {
     assertThatThrownBy(() -> auth.login("nao-existe@example.test", "qualquer-senha", "JUnit"))
@@ -1753,11 +1817,12 @@ class PlatformIntegrationTest {
             Map.of("WIDGETS", true, "STATS", true),
             List.of(
                 new br.com.enturma.community.ProfileShowcaseController.Widget("GOAL", true, true)),
-            List.of());
+            List.of(), "CUSTOM", "#b51038", "#240758", 145, "FLOW", "BOOK");
     showcase.save(host, input);
     var shown = (Map<String, Object>) showcase.get(member, host.id());
     assertThat(shown).containsKey("stats").doesNotContainKeys("academic", "privacy");
     assertThat((List<?>) shown.get("widgets")).hasSize(1);
+    assertThat((Map<String,Object>)shown.get("appearance")).containsEntry("muralMode", "CUSTOM").containsEntry("muralColor", "#b51038").containsEntry("entrance", "BOOK");
     assertThatThrownBy(
             () ->
                 showcase.save(
@@ -1772,7 +1837,7 @@ class PlatformIntegrationTest {
                         "",
                         Map.of(),
                         List.of(),
-                        List.of("VETERAN"))))
+                        List.of("VETERAN"), null, null, null, null, null, null)))
         .isInstanceOf(ApiException.class);
     db.jdbc.update(
         "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", member.id(), host.id());

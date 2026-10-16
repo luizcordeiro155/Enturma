@@ -60,7 +60,7 @@ public class SocialController {
             id);
     var appearance =
         db.list(
-            "SELECT secondary_color,theme,effect,layout FROM profile_showcase WHERE user_id=?", id);
+            "SELECT secondary_color,theme,effect,layout,mural_mode,mural_color,mural_secondary_color,gradient_angle,gradient_flow,entrance FROM profile_showcase WHERE user_id=?", id);
     if (!appearance.isEmpty()) profile.put("showcaseAppearance", appearance.getFirst());
     return profile;
   }

@@ -24,6 +24,11 @@ export default defineConfig({
   },
   projects: [
     {
+      name: "chromium-academic",
+      testMatch: /academic-identity\.spec\.ts/,
+      use: { ...devices["Desktop Chrome"], viewport: { width: 1376, height: 900 } },
+    },
+    {
       name: "chromium-ux",
       testMatch: /ux-refinement\.spec\.ts/,
       use: {

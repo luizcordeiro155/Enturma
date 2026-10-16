@@ -3,6 +3,8 @@ import { StatusBar } from "expo-status-bar";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NativeCallProvider } from "../src/native-call";
 import { MobileThemeProvider, useResolvedDark, useStyles } from "../src/ui";
+import { NativeAcademicGate } from "../src/academic-identity";
+import { NativeExperienceMotion } from "../src/experience-motion";
 function Navigation() {
   const styles = useStyles();
   const dark = useResolvedDark();
@@ -20,6 +22,8 @@ function Navigation() {
       >
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
       </Stack>
+      <NativeAcademicGate />
+      <NativeExperienceMotion />
     </NativeCallProvider>
   );
 }

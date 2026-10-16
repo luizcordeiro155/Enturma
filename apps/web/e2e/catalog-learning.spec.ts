@@ -1,5 +1,6 @@
+import { test } from "./student-fixture";
 import { authenticate } from "./session";
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   page,

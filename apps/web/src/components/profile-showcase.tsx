@@ -28,6 +28,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import type { ProfileVisualAppearance } from "@enturma/contracts";
 export type Achievement = {
   code: string;
   name: string;
@@ -47,11 +48,7 @@ export type Widget = {
   content?: { name?: string; title?: string; game?: string; id?: string }[];
 };
 export type Showcase = {
-  appearance: {
-    secondaryColor: string;
-    theme: string;
-    effect: string;
-    layout: string;
+  appearance: ProfileVisualAppearance & {
     goal: string;
     technologies: string;
     projects: string;
@@ -239,6 +236,79 @@ export function ShowcaseFields({
           >
             <option value="IDENTITY_FIRST">Identidade primeiro</option>
             <option value="WIDGETS_FIRST">Mural primeiro</option>
+          </select>
+        </label>
+        <label>
+          Fundo do mural
+          <select
+            value={value.appearance.muralMode ?? "PROFILE"}
+            onChange={(e) => appearance("muralMode", e.target.value)}
+          >
+            <option value="PROFILE">Continuar as cores do perfil</option>
+            <option value="DEFAULT">Padrão do aplicativo</option>
+            <option value="CUSTOM">Cores próprias do mural</option>
+          </select>
+        </label>
+        {value.appearance.muralMode === "CUSTOM" ? (
+          <>
+            <label>
+              Cor principal do mural
+              <input
+                type="color"
+                value={value.appearance.muralColor ?? "#18243d"}
+                onChange={(e) => appearance("muralColor", e.target.value)}
+              />
+            </label>
+            <label>
+              Segunda cor do mural
+              <input
+                type="color"
+                value={value.appearance.muralSecondaryColor ?? "#661245"}
+                onChange={(e) =>
+                  appearance("muralSecondaryColor", e.target.value)
+                }
+              />
+            </label>
+          </>
+        ) : null}
+        <label>
+          Direção do degradê · {value.appearance.gradientAngle ?? 155}°
+          <input
+            type="range"
+            min="0"
+            max="360"
+            value={value.appearance.gradientAngle ?? 155}
+            onChange={(e) =>
+              onChange({
+                ...value,
+                appearance: {
+                  ...value.appearance,
+                  gradientAngle: Number(e.target.value),
+                },
+              })
+            }
+          />
+        </label>
+        <label>
+          Movimento das cores
+          <select
+            value={value.appearance.gradientFlow ?? "STILL"}
+            onChange={(e) => appearance("gradientFlow", e.target.value)}
+          >
+            <option value="STILL">Parado</option>
+            <option value="FLOW">Rio de cores</option>
+          </select>
+        </label>
+        <label>
+          Animação ao abrir o perfil
+          <select
+            value={value.appearance.entrance ?? "RISE"}
+            onChange={(e) => appearance("entrance", e.target.value)}
+          >
+            <option value="NONE">Sem animação</option>
+            <option value="RISE">Revelação suave</option>
+            <option value="BOOK">Abrir como um livro</option>
+            <option value="ORBIT">Órbita</option>
           </select>
         </label>
         {(
@@ -467,8 +537,8 @@ export function ShowcaseView({
                   </strong>
                   <p>{a.description}</p>
                   <p>
-                    {Math.min(a.requirement, a.progress)}/{a.requirement} · {a.xp}{" "}
-                    XP
+                    {Math.min(a.requirement, a.progress)}/{a.requirement} ·{" "}
+                    {a.xp} XP
                   </p>
                   {a.earnedAt && (
                     <small>
@@ -546,8 +616,7 @@ export function ShowcaseView({
       <div className="showcase-grid">
         {value.widgets
           .filter(
-            (w) =>
-              w.visible && (!detailed || !summarizedKinds.has(w.kind)),
+            (w) => w.visible && (!detailed || !summarizedKinds.has(w.kind)),
           )
           .map((w) => (
             <article

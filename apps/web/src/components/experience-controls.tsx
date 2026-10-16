@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Accessibility, Moon, Sun, MonitorCog, X } from "lucide-react";
 import type { ExperiencePreference } from "@enturma/contracts";
 import { api } from "@/lib/api";
+import { applyEnturmaTheme } from "@/lib/theme-motion";
 const defaults: ExperiencePreference = {
   theme: "SYSTEM",
   fontScale: 1,
@@ -82,7 +83,7 @@ export function ExperienceControls() {
     const system = matchMedia("(prefers-color-scheme: dark)");
     function apply() {
       const root = document.documentElement;
-      root.dataset.theme =
+      const nextTheme =
         preference.theme === "SYSTEM"
           ? system.matches
             ? "dark"
@@ -90,6 +91,7 @@ export function ExperienceControls() {
           : preference.theme.toLowerCase();
       root.dataset.highContrast = String(preference.highContrast);
       root.dataset.reducedMotion = String(preference.reducedMotion);
+      applyEnturmaTheme(nextTheme, changed.current);
       root.dataset.enhancedFocus = String(preference.enhancedFocus);
       root.style.setProperty("--font-scale", String(preference.fontScale));
       window.dispatchEvent(new Event("enturma-motion"));

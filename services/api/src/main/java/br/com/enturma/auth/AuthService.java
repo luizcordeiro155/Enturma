@@ -148,6 +148,11 @@ public class AuthService {
         .findFirst();
   }
 
+  public boolean studentAccess(Actor actor) {
+    return db.exists("SELECT EXISTS(SELECT 1 FROM academic_identity WHERE user_id=?"
+        + " AND status IN ('LEGACY_APPROVED','STUDENT_VERIFIED'))", actor.id());
+  }
+
   @Transactional
   public void resendVerification(Actor actor) {
     Account user = accounts.findById(actor.id()).orElseThrow();

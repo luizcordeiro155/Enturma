@@ -1,7 +1,7 @@
 import { backendUrl } from "@/lib/server-config";
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
+import { connection } from "next/server";
 export async function GET() {
+  await connection();
   try {
     const res = await fetch(`${backendUrl()}/actuator/health`, {
       cache: "no-store",

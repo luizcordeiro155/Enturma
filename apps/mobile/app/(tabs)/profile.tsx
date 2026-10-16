@@ -1,9 +1,10 @@
 import { useCallback, useRef, useState } from "react";
-import { Text, View, Image } from "react-native";
+import { Text, View } from "react-native";
 import { useFocusEffect } from "expo-router";
 import * as ImagePicker from "expo-image-picker";
-import type { Profile } from "@enturma/contracts";
-import { api, base, session } from "../../src/api";
+import type { Profile, ProfileVisualAppearance } from "@enturma/contracts";
+import { api, session } from "../../src/api";
+import { NativeProfilePreview } from "../../src/profile-visual-preview";
 import { NativeShowcaseEditor } from "../../src/profile-showcase";
 import {
   Screen,
@@ -15,6 +16,7 @@ import {
 } from "../../src/ui";
 export default function ProfilePage() {
   const styles = useStyles();
+  const [visual, setVisual] = useState<ProfileVisualAppearance>();
   const [details, setDetails] = useState<
     NonNullable<Profile["profileDetails"]>
   >({});
@@ -86,29 +88,18 @@ export default function ProfilePage() {
       <ErrorMessage message={error} />
       <FeedbackMessage message={notice} tone="success" />
       {p && (
-        <View style={[styles.row, { borderColor: color }]}>
-          {p.hasBanner && (
-            <Image
-              source={{
-                uri: `${base}/users/${p.id}/banner?v=${version}`,
-                headers: { Authorization: `Bearer ${token}` },
-              }}
-              style={{ height: 120, width: "100%", borderRadius: 10 }}
-            />
-          )}
-          {p.hasAvatar && (
-            <Image
-              source={{
-                uri: `${base}/users/${p.id}/avatar?v=${version}`,
-                headers: { Authorization: `Bearer ${token}` },
-              }}
-              style={{ width: 80, height: 80, borderRadius: 40 }}
-            />
-          )}
-          <Text style={styles.title}>{name}</Text>
-          <Text style={styles.muted}>@{p.username}</Text>
-          <Text style={styles.text}>{bio}</Text>
-        </View>
+        <NativeProfilePreview
+          profile={{
+            ...p,
+            name,
+            bio,
+            accentColor: color,
+            profileDetails: details,
+          }}
+          appearance={visual}
+          token={token}
+          version={version}
+        />
       )}
       <Button
         title="Editar foto e recortar"
@@ -212,7 +203,7 @@ export default function ProfilePage() {
           }
         }}
       />
-      <NativeShowcaseEditor />
+      <NativeShowcaseEditor primary={color} onAppearance={setVisual} />
     </Screen>
   );
 }

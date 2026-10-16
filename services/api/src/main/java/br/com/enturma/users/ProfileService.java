@@ -32,6 +32,10 @@ public class ProfileService {
                 + " avatar_bytes IS NOT NULL has_avatar,banner_bytes IS NOT NULL has_banner"
                 + " FROM app_user WHERE id=?",
             a.id());
+    var identity = db.one("SELECT status,method,confidence,institution_id,campus_id,verified_at,"
+        + " status IN ('LEGACY_APPROVED','STUDENT_VERIFIED') access_allowed FROM academic_identity WHERE user_id=?", a.id());
+    user.put("academicIdentity", identity);
+    user.put("academicAccess", identity.get("accessAllowed"));
     user.put(
         "enrollment",
         db

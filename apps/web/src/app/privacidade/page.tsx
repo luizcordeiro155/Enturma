@@ -4,7 +4,8 @@ import { LegalDocument } from "@/components/legal-document";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade | Enturma",
-  description: "Como o Enturma trata dados pessoais, acadêmicos e de mobilidade.",
+  description:
+    "Como o Enturma trata dados pessoais, acadêmicos e de mobilidade.",
   robots: { index: false, follow: false },
 };
 
@@ -13,7 +14,7 @@ export default function PrivacyPage() {
     <LegalDocument
       title="Política de Privacidade"
       summary="Esta política explica quais dados o Enturma utiliza, por que eles são necessários e quais controles você possui sobre sua conta, seus conteúdos e sua localização."
-      updatedAt="06 de outubro de 2026"
+      updatedAt="15 de outubro de 2026"
     >
       <section>
         <h2>1. Sobre esta política</h2>
@@ -47,15 +48,15 @@ export default function PrivacyPage() {
             por você nos recursos em que existe persistência.
           </li>
           <li>
-            <strong>Dados técnicos:</strong> informações de dispositivo,
-            versão do aplicativo, sessão, registros de erro, segurança,
-            notificações e eventos necessários para operar o serviço.
+            <strong>Dados técnicos:</strong> informações de dispositivo, versão
+            do aplicativo, sessão, registros de erro, segurança, notificações e
+            eventos necessários para operar o serviço.
           </li>
           <li>
             <strong>Caronas e mobilidade:</strong> campus, direção da viagem,
-            pontos escolhidos, dados de veículo quando cadastrados e
-            localização quando você conceder permissão para recursos que
-            realmente dependem dela.
+            pontos escolhidos, dados de veículo quando cadastrados e localização
+            quando você conceder permissão para recursos que realmente dependem
+            dela.
           </li>
         </ul>
       </section>
@@ -70,7 +71,9 @@ export default function PrivacyPage() {
           <li>entregar chat, chamadas, materiais, notificações e portfólio;</li>
           <li>processar recursos de IA solicitados por você;</li>
           <li>operar matching, rota e segurança do Enturma Caronas;</li>
-          <li>prevenir abuso, fraude, acesso indevido e falhas de segurança;</li>
+          <li>
+            prevenir abuso, fraude, acesso indevido e falhas de segurança;
+          </li>
           <li>diagnosticar erros e melhorar estabilidade e desempenho.</li>
         </ul>
       </section>
@@ -94,8 +97,8 @@ export default function PrivacyPage() {
       <section>
         <h2>5. Inteligência artificial</h2>
         <p>
-          Quando você usa um recurso de IA, o conteúdo necessário para atender
-          à solicitação pode ser enviado ao provedor de IA configurado pelo
+          Quando você usa um recurso de IA, o conteúdo necessário para atender à
+          solicitação pode ser enviado ao provedor de IA configurado pelo
           Enturma. Materiais e contexto devem respeitar as permissões do recurso
           que originou a solicitação.
         </p>
@@ -137,15 +140,14 @@ export default function PrivacyPage() {
       <section>
         <h2>8. Retenção e exclusão</h2>
         <p>
-          O Enturma possui controles de exclusão de conta. Quando disponíveis
-          no aplicativo, você pode solicitar exclusão imediata ou agendada com
+          O Enturma possui controles de exclusão de conta. Quando disponíveis no
+          aplicativo, você pode solicitar exclusão imediata ou agendada com
           janela para cancelamento.
         </p>
         <p>
           Alguns registros podem precisar ser anonimizados ou preservados pelo
-          período estritamente necessário para integridade, segurança,
-          prevenção de abuso, cumprimento de obrigações aplicáveis ou defesa de
-          direitos.
+          período estritamente necessário para integridade, segurança, prevenção
+          de abuso, cumprimento de obrigações aplicáveis ou defesa de direitos.
         </p>
       </section>
 
@@ -162,17 +164,41 @@ export default function PrivacyPage() {
           O repositório oficial do Enturma está disponível em{" "}
           <Link href="https://github.com/luizcordeiro155/Enturma">
             github.com/luizcordeiro155/Enturma
-          </Link>.
+          </Link>
+          .
         </p>
       </section>
 
       <section>
+        <h2>Verificação acadêmica</h2>
+        <p>
+          Novas contas precisam confirmar um endereço acadêmico autorizado ou
+          passar pela análise de um comprovante. A confirmação do e-mail
+          comprova o controle do endereço; não atesta, por si só, uma matrícula
+          ativa. Contas anteriores à implantação mantêm seu acesso por
+          compatibilidade.
+        </p>
+        <p>
+          Comprovantes são armazenados de forma privada, acessíveis apenas à
+          equipe administrativa responsável. O arquivo é excluído após a decisão
+          ou ao completar 14 dias. Registros da decisão, método, instituição e
+          auditoria são preservados para acompanhamento e controle de acesso.
+          Cópias de segurança seguem seu ciclo de retenção e não disponibilizam
+          documentos ao público.
+        </p>
+        <p>
+          Envie somente os dados necessários para demonstrar seu vínculo.
+          Dúvidas e correções podem ser encaminhadas pela página de ajuda da
+          verificação, inclusive enquanto a conta estiver pendente.
+        </p>
+      </section>
+      <section>
         <h2>10. Segurança</h2>
         <p>
           O Enturma adota controles técnicos e de autorização para reduzir
-          acesso indevido a contas e dados. Nenhum sistema é completamente
-          imune a falhas, por isso vulnerabilidades devem ser reportadas de
-          forma responsável e sem exposição pública de dados de terceiros.
+          acesso indevido a contas e dados. Nenhum sistema é completamente imune
+          a falhas, por isso vulnerabilidades devem ser reportadas de forma
+          responsável e sem exposição pública de dados de terceiros.
         </p>
       </section>
 

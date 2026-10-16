@@ -44,7 +44,9 @@ export async function api<T>(
       !(e instanceof ApiError) ||
       e.status !== 401 ||
       !c ||
-      (path.startsWith("/auth/") && path !== "/auth/logout")
+      (path.startsWith("/auth/") &&
+        path !== "/auth/logout" &&
+        !path.startsWith("/auth/academic/"))
     )
       throw e;
     if (!rotating)

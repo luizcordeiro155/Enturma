@@ -8,6 +8,7 @@ const PUBLIC_ROUTES = new Set([
   "/forgot-password",
   "/reset-password",
   "/verify-email",
+  "/verify-academic",
   "/download",
   "/privacidade",
   "/termos",
@@ -59,11 +60,20 @@ export async function proxy(req: NextRequest) {
 
   try {
     const result = await fetch(`${backendUrl()}/api/v1/users/me`, {
-      headers: { Authorization: `Bearer ${access}`, ...Object.fromEntries(upstreamHeaders(req)) },
+      headers: {
+        Authorization: `Bearer ${access}`,
+        ...Object.fromEntries(upstreamHeaders(req)),
+      },
       cache: "no-store",
       signal: AbortSignal.timeout(8000),
     });
     if (result.ok) {
+      const profile = await result.json();
+      if (
+        profile.academicAccess === false &&
+        !req.nextUrl.pathname.startsWith("/academic-verification")
+      )
+        return toPage(req, "/academic-verification");
       const response = NextResponse.next();
       response.headers.set("Cache-Control", "private, no-store");
       return response;

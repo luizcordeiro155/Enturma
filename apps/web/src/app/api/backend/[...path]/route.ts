@@ -6,7 +6,6 @@ import {
   upstreamHeaders,
 } from "@/lib/server-config";
 import { MAX_WEB_REQUEST_BYTES } from "@/lib/upload-limits";
-export const runtime = "nodejs";
 export const maxDuration = 60;
 const secure = process.env.NODE_ENV === "production";
 const cookieOptions = {
@@ -91,9 +90,7 @@ async function proxy(
       res.cookies.set(
         "enturma_access",
         credentials.accessToken,
-        rememberConnected
-          ? { ...cookieOptions, maxAge: 600 }
-          : cookieOptions,
+        rememberConnected ? { ...cookieOptions, maxAge: 600 } : cookieOptions,
       );
       res.cookies.set(
         "enturma_refresh",

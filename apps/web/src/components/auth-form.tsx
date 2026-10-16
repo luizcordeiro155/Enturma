@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { authDestination } from "@/lib/auth-navigation";
+import { applyEnturmaTheme } from "@/lib/theme-motion";
 import { Feedback } from "./feedback";
 type Mode =
   "login" | "register" | "forgot-password" | "reset-password" | "verify-email";
@@ -61,12 +62,13 @@ function AuthThemeControl() {
     if (!ready) return;
     const system = window.matchMedia("(prefers-color-scheme: dark)");
     const apply = () => {
-      document.documentElement.dataset.theme =
+      const nextTheme =
         theme === "SYSTEM"
           ? system.matches
             ? "dark"
             : "light"
           : theme.toLowerCase();
+      applyEnturmaTheme(nextTheme);
     };
     apply();
     if (theme !== "SYSTEM") return;
@@ -173,9 +175,15 @@ export function AuthForm({ mode }: { mode: Mode }) {
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
     if (reduced) return;
     const animations: Animation[] = [];
-    const orbit = document.querySelector<HTMLElement>(".auth-login-progress-orbit");
-    const core = document.querySelector<HTMLElement>(".auth-login-progress-core");
-    const dots = document.querySelectorAll<HTMLElement>(".auth-login-progress-dot");
+    const orbit = document.querySelector<HTMLElement>(
+      ".auth-login-progress-orbit",
+    );
+    const core = document.querySelector<HTMLElement>(
+      ".auth-login-progress-core",
+    );
+    const dots = document.querySelectorAll<HTMLElement>(
+      ".auth-login-progress-dot",
+    );
     if (orbit && typeof orbit.animate === "function")
       animations.push(
         orbit.animate(
@@ -475,14 +483,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
         // stored cookies are sent before the protected route is evaluated.
         const destination =
           mode === "register"
-            ? "/onboarding"
+            ? "/academic-verification?next=%2Fonboarding"
             : authDestination(
                 new URLSearchParams(window.location.search).get("next"),
               );
         window.location.replace(destination);
         return;
-      }
-      else if (mode === "verify-email") {
+      } else if (mode === "verify-email") {
         setSuccess("E-mail confirmado com sucesso.");
         setCompleted("verify");
       } else if (mode === "reset-password") {
@@ -596,13 +603,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
             </p>
           </div>
           <footer className="auth-story-footer">
-          <span>Seu espaço de estudo e conexão.</span>
-          <nav aria-label="Informações legais">
-            <Link href="/privacidade">Política de Privacidade</Link>
-            <span aria-hidden="true">•</span>
-            <Link href="/termos">Termos de Uso</Link>
-          </nav>
-        </footer>
+            <span>Seu espaço de estudo e conexão.</span>
+            <nav aria-label="Informações legais">
+              <Link href="/privacidade">Política de Privacidade</Link>
+              <span aria-hidden="true">•</span>
+              <Link href="/termos">Termos de Uso</Link>
+            </nav>
+          </footer>
         </section>
         <main className="auth-main auth-success-main">
           <section
@@ -759,13 +766,13 @@ export function AuthForm({ mode }: { mode: Mode }) {
             </p>
           </div>
           <footer className="auth-story-footer">
-          <span>Seu espaço de estudo e conexão.</span>
-          <nav aria-label="Informações legais">
-            <Link href="/privacidade">Política de Privacidade</Link>
-            <span aria-hidden="true">•</span>
-            <Link href="/termos">Termos de Uso</Link>
-          </nav>
-        </footer>
+            <span>Seu espaço de estudo e conexão.</span>
+            <nav aria-label="Informações legais">
+              <Link href="/privacidade">Política de Privacidade</Link>
+              <span aria-hidden="true">•</span>
+              <Link href="/termos">Termos de Uso</Link>
+            </nav>
+          </footer>
         </section>
         <main className="auth-main auth-success-main">
           <section
@@ -873,7 +880,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 </span>
               </div>
               <h2>Entrando no Enturma…</h2>
-              <p>Estamos preparando sua conta e restaurando seu espaço de estudo.</p>
+              <p>
+                Estamos preparando sua conta e restaurando seu espaço de estudo.
+              </p>
               <div className="auth-login-progress-dots" aria-hidden="true">
                 <span className="auth-login-progress-dot" />
                 <span className="auth-login-progress-dot" />
@@ -891,7 +900,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <h1>{titles[mode]}</h1>
           <p className="muted">
             {mode === "register"
-              ? "Comece sua jornada de estudo em companhia."
+              ? "Crie sua conta, escolha sua instituição e confirme seu vínculo acadêmico para entrar na comunidade."
               : "Entre no seu espaço de estudo."}
           </p>
           <Feedback error={error} success={success} />

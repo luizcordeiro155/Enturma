@@ -63,6 +63,16 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM notification_push_device WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM notification_web_push_subscription WHERE user_id=?",userId);
     db.jdbc.update("UPDATE user_session SET revoked_at=coalesce(revoked_at,now()) WHERE user_id=?",userId);
+    // Provisional accounts can erase their own verification data without approval.
+    // Lock in the same order as verification/review before removing private proof.
+    db.list("SELECT user_id FROM academic_identity WHERE user_id=? FOR UPDATE",userId);
+    db.jdbc.update("DELETE FROM academic_verification_token WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM academic_verification_document WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM academic_verification_support WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM academic_verification_audit WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM email_outbox WHERE academic_verification_user=?",userId);
+    db.jdbc.update("DELETE FROM academic_identity WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM account_token WHERE user_id=?",userId);
     // A conta é anonimizada, não apagada fisicamente. Portanto, dados que dependem
     // somente de ON DELETE CASCADE precisam ser removidos explicitamente aqui.
     db.jdbc.update("DELETE FROM ai_message WHERE user_id=?",userId);
