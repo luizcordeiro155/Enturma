@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { LaunchSplash } from "@/components/app-launch";
 import { authDestination } from "@/lib/auth-navigation";
+import { APP_LAUNCH_MIN_MS } from "@/lib/launch-performance";
 
 // The recovery splash is the app's opening animation. Do not replay it once
 // the verified session returns to a protected page.
@@ -40,6 +41,7 @@ export function SessionRecovery() {
     let disposed = false;
     let inFlight = false;
     let attempts = 0;
+    const startedAt = performance.now();
     let timer: number | undefined;
     let controller: AbortController | undefined;
 
@@ -97,7 +99,10 @@ export function SessionRecovery() {
         } catch {
           // Storage may be unavailable in hardened browsers.
         }
-        window.location.replace(returnToApp());
+        const remaining = Math.max(0, APP_LAUNCH_MIN_MS - (performance.now() - startedAt));
+        timer = window.setTimeout(() => {
+          if (!disposed) window.location.replace(returnToApp());
+        }, remaining);
       } catch (error) {
         if (!disposed && !(error instanceof DOMException && error.name === "AbortError"))
           schedule();
