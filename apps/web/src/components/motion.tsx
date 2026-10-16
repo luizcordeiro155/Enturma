@@ -13,22 +13,39 @@ const EXCLUDED =
 export function Motion() {
   const path = usePathname();
   useEffect(() => {
-    document.body.dataset.appPage = path === "/profile" ? "profile" : path.startsWith("/caronas") ? "rides" : /^\/rooms\/(?!new$).+/.test(path) ? "room" : "standard";
+    document.body.dataset.appPage =
+      path === "/profile"
+        ? "profile"
+        : path.startsWith("/caronas")
+          ? "rides"
+          : /^\/rooms\/(?!new$).+/.test(path)
+            ? "room"
+            : "standard";
     const seen = new WeakSet<Element>();
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     let context = gsap.context(() => {});
     let pressed: HTMLElement | null = null;
     let scanFrame = 0;
-    const animate = (el: Element, from: gsap.TweenVars, to: gsap.TweenVars) => {
-      if (reducedMotion() || el.closest(EXCLUDED) || !el.getClientRects().length) return;
-      context.add(() => {
-        gsap.fromTo(el, from, {
-          duration: 0.28,
-          ease: "power2.out",
-          overwrite: "auto",
-          clearProps: "transform,opacity",
-          ...to,
-        });
+    const reveals = new Set<Animation>();
+    const animate = (el: Element) => {
+      if (
+        reducedMotion() ||
+        el.closest(EXCLUDED) ||
+        !el.getClientRects().length
+      )
+        return;
+      // Streaming routes may still be hydrating when the global observer sees
+      // them. WAAPI animates without rewriting React's server-rendered styles.
+      const animation = el.animate(
+        [
+          { opacity: 0.25, transform: "translateY(8px)" },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        { duration: 280, easing: "cubic-bezier(.16,1,.3,1)" },
+      );
+      reveals.add(animation);
+      animation.addEventListener("finish", () => reveals.delete(animation), {
+        once: true,
       });
     };
     const observer = new IntersectionObserver(
@@ -36,7 +53,7 @@ export function Motion() {
         for (const entry of entries) {
           if (!entry.isIntersecting) continue;
           observer.unobserve(entry.target);
-          animate(entry.target, { opacity: 0.25, y: 8 }, { opacity: 1, y: 0 });
+          animate(entry.target);
         }
       },
       { threshold: 0.08 },
@@ -93,6 +110,8 @@ export function Motion() {
     };
     const preference = () => {
       if (!reducedMotion()) return;
+      reveals.forEach((animation) => animation.cancel());
+      reveals.clear();
       pressed = null;
       context.revert();
       context = gsap.context(() => {});
@@ -104,9 +123,23 @@ export function Motion() {
       attributeFilter: ["data-reduced-motion"],
     });
     scan();
-    const routeEntrances = reducedMotion() ? [] : [...document.querySelectorAll<HTMLElement>("main")]
-      .filter((element) => element.getClientRects().length && !element.closest(".room-active-shell"))
-      .map((element) => element.animate?.([{opacity:.7,transform:"translateY(6px)"},{opacity:1,transform:"translateY(0)"}], {duration:260,easing:"cubic-bezier(.16,1,.3,1)"}));
+    const routeEntrances = reducedMotion()
+      ? []
+      : [...document.querySelectorAll<HTMLElement>("main")]
+          .filter(
+            (element) =>
+              element.getClientRects().length &&
+              !element.closest(".room-active-shell"),
+          )
+          .map((element) =>
+            element.animate?.(
+              [
+                { opacity: 0.7, transform: "translateY(6px)" },
+                { opacity: 1, transform: "translateY(0)" },
+              ],
+              { duration: 260, easing: "cubic-bezier(.16,1,.3,1)" },
+            ),
+          );
     mutations.observe(document.body, { subtree: true, childList: true });
     document.addEventListener("pointerdown", press, { passive: true });
     document.addEventListener("pointerup", release, { passive: true });
@@ -115,6 +148,8 @@ export function Motion() {
     media.addEventListener("change", preference);
     window.addEventListener("enturma-motion", preference);
     return () => {
+      reveals.forEach((animation) => animation.cancel());
+      reveals.clear();
       routeEntrances.forEach((animation) => animation?.cancel());
       cancelAnimationFrame(scanFrame);
       observer.disconnect();

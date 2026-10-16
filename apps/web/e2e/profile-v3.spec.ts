@@ -7,6 +7,12 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   page,
   request,
 }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (error) => errors.push(error.message));
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  await page.setViewportSize({ width: 1920, height: 1080 });
   const tag = randomUUID().slice(0, 8);
   const response = await request.post(
     `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
@@ -27,6 +33,12 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
     localStorage.setItem("enturma-intro:v0.3", "seen"),
   );
   await page.goto("/profile");
+  await page
+    .getByRole("textbox", { name: "Objetivo da semana", exact: true })
+    .fill("Atualizar meu projeto e compartilhar materiais com a turma.");
+  await page
+    .getByRole("textbox", { name: "Tecnologias que estudo", exact: true })
+    .fill("Java / JavaScript / TypeScript / PostgreSQL");
   await page.getByLabel("Cor principal do perfil").fill("#ff0044");
   await page.getByLabel("Cor secundária", { exact: true }).fill("#240075");
   await page.getByLabel("Fundo decorativo").selectOption("GRADIENT");
@@ -81,11 +93,55 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await page
     .getByRole("button", { name: "Reproduzir animação do perfil" })
     .click();
+  await expect
+    .poll(() =>
+      preview.evaluate((node) =>
+        node
+          .getAnimations()
+          .every((animation) => animation.playState === "finished"),
+      ),
+    )
+    .toBe(true);
+  const controls = page.locator(".profile-editor-controls");
+  const identity = preview.locator(".profile-preview-identity");
+  const mural = preview.locator(".profile-preview-mural");
+  await expect(identity).toBeVisible();
+  await expect(mural).toBeVisible();
+  expect((await controls.boundingBox())!.x).toBeLessThan(
+    (await preview.boundingBox())!.x,
+  );
+  expect((await identity.boundingBox())!.width).toBeGreaterThanOrEqual(320);
+  expect((await mural.boundingBox())!.width).toBeGreaterThanOrEqual(360);
+  expect(
+    await mural.evaluate((node) => node.scrollWidth <= node.clientWidth),
+  ).toBe(true);
+  expect(
+    await mural
+      .locator(".profile-advanced-highlight")
+      .first()
+      .evaluate((node) => node.clientWidth),
+  ).toBeGreaterThan(270);
   await page.screenshot({
     path: "../../.local/profile-visual-desktop.png",
     fullPage: true,
   });
+  await page.setViewportSize({ width: 1366, height: 900 });
+  await expect(
+    page.getByRole("button", { name: "Perfil", exact: true }),
+  ).toBeVisible();
+  await page.getByRole("button", { name: "Mural", exact: true }).click();
+  expect((await mural.boundingBox())!.width).toBeGreaterThan(300);
+  expect(
+    await mural.evaluate((node) => node.scrollWidth <= node.clientWidth),
+  ).toBe(true);
+  await page.screenshot({ path: "../../.local/profile-visual-laptop.png" });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(controls).toBeVisible();
+  await expect(page.locator(".profile-preview-stage")).toBeHidden();
+  await page.getByRole("button", { name: "Ver prévia", exact: true }).click();
+  await expect(controls).toBeHidden();
   await page.getByRole("button", { name: "Mural", exact: true }).click();
   await expect(preview.locator(".profile-preview-mural")).toBeVisible();
   expect(
@@ -97,9 +153,20 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
     path: "../../.local/profile-visual-mobile.png",
     fullPage: true,
   });
+  await page.setViewportSize({ width: 360, height: 780 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.getByRole("button", { name: "Editar", exact: true }).click();
+  await expect(page.getByLabel("Nome exibido", { exact: true })).toHaveValue(
+    "Meu rascunho preservado",
+  );
   await page
     .getByRole("combobox", { name: "Fundo do mural", exact: true })
     .selectOption("DEFAULT");
+  await page.getByRole("button", { name: "Ver prévia", exact: true }).click();
   await expect
     .poll(() =>
       preview
@@ -107,6 +174,7 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
         .evaluate((node) => getComputedStyle(node).backgroundImage),
     )
     .toBe("none");
+  expect(errors).toEqual([]);
 });
 test("mural preserva widgets após recarregar e respeita privacidade", async ({
   page,
