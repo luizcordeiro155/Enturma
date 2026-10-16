@@ -1,6 +1,6 @@
 # Identidade acadêmica e experiência integrada — 15/10/2026
 
-Implementação preparada na branch `codex/academic-identity-experience`, a partir de `main` (`66be413`). Nenhuma implantação, publicação de aplicativos ou migração em produção foi executada. A publicação depende de autorização explícita.
+Implementação preparada na branch `codex/academic-identity-experience`, a partir de `main` (`66be413`). A publicação em produção foi autorizada pelo responsável em 15/10/2026, incluindo a atualização dos aplicativos quando necessária. A integração aguarda CI aprovada, backup e verificação do ambiente; o resultado da implantação será registrado no PR.
 
 ## Fluxos implementados
 

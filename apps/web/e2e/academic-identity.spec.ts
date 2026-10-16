@@ -201,7 +201,9 @@ test("cadastro real, SMTP e confirmação em outro dispositivo liberam a tela se
         name: "E-mail acadêmico confirmado.",
       }),
     ).toBeVisible();
-    await expect(page).toHaveURL(/onboarding/, { timeout: 20000 });
+    await expect(page).toHaveURL((url) => url.pathname === "/onboarding", {
+      timeout: 20000,
+    });
     await expect(page.getByText(/Etapa 3 de 6/)).toBeVisible();
     const state = await db.query(
       "SELECT a.status,a.confidence,u.email_verified FROM academic_identity a JOIN app_user u ON u.id=a.user_id WHERE u.username=$1",
@@ -361,7 +363,9 @@ test("comprovante privado, decisão administrativa e descarte real; mobile claro
       .getByLabel("Justificativa")
       .fill("Vínculo confirmado pela equipe no comprovante de teste.");
     await card.getByRole("button", { name: "Aprovar vínculo" }).click();
-    await expect(page).toHaveURL(/onboarding/, { timeout: 20000 });
+    await expect(page).toHaveURL((url) => url.pathname === "/onboarding", {
+      timeout: 20000,
+    });
     expect(
       (
         await db.query(
