@@ -553,3 +553,41 @@ html .profile-studio .profile-preview-toolbar button {
     display: none;
   }
 }
+
+
+/* One continuous surface for profile identity + mural; preview/public use same colors. */
+.profile-shared-surface {
+  --mural-unified-background: var(--profile-gradient);
+  background: var(--profile-gradient) !important;
+  gap: 0 !important;
+}
+.profile-shared-surface:has(.profile-public-advanced) {
+  border-color: transparent;
+}
+.profile-shared-surface .profile-public-primary,
+.profile-shared-surface .profile-preview-identity {
+  background: transparent !important;
+}
+html .profile-shared-surface .public-profile-body,
+html[data-theme="dark"] .profile-shared-surface .public-profile-body {
+  background: transparent !important;
+}
+html .profile-shared-surface .profile-public-advanced,
+html .profile-shared-surface .profile-preview-mural {
+  background: var(--mural-background) !important;
+  background-image: none !important;
+  border-left: 0 !important;
+  box-shadow: none !important;
+}
+html .profile-shared-surface.profile-mural-linked .profile-public-advanced,
+html .profile-shared-surface.profile-mural-linked .profile-preview-mural {
+  background: transparent !important;
+}
+.profile-shared-surface .profile-public-advanced::before,
+.profile-shared-surface .profile-public-advanced::after {
+  display: none !important;
+}
+.profile-shared-surface .profile-mural-empty,
+.profile-shared-surface .profile-public-advanced-heading {
+  background: var(--mural-copy-panel);
+}
