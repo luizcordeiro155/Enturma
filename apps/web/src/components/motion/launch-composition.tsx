@@ -25,8 +25,8 @@ export function LaunchComposition({
         extrapolateRight: "clamp",
       })
     : 0;
-  const arrive = 0.82 + 0.18 * spring({
-    frame,
+  const arrive = spring({
+    frame: Math.max(0, frame - 6),
     fps,
     config: { damping: 17, stiffness: 105 },
   });
