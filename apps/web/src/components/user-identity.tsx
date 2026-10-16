@@ -306,7 +306,6 @@ export function UserIdentity({
     const animation = card.current
       ? profileEntrance(
           card.current,
-          profile?.showcaseAppearance?.entrance,
           true,
         )
       : undefined;
@@ -325,7 +324,6 @@ export function UserIdentity({
     if (!open || !profile || !card.current) return;
     const animation = profileEntrance(
       card.current,
-      profile.showcaseAppearance?.entrance,
     );
     return () => animation?.cancel();
   }, [open, profile]);
@@ -431,7 +429,7 @@ export function UserIdentity({
                 ×
               </button>
               {profile ? (
-                <div className="profile-public-content profile-discord-public-layout">
+                <div className="profile-public-content profile-discord-public-layout profile-shared-surface" style={profileStyle(profile)}>
                   <section
                     className={`profile-public-primary profile-theme-${profile.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${profile.showcaseAppearance?.effect ?? "NONE"}`}
                     style={profileStyle(profile)}
