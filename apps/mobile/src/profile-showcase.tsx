@@ -162,12 +162,6 @@ export function NativeShowcaseEditor({
           ["Parado", "Rio de cores"],
         ],
         [
-          "entrance",
-          "Abertura do perfil",
-          ["NONE", "RISE", "BOOK", "ORBIT"],
-          ["Sem animação", "Suave", "Livro", "Órbita"],
-        ],
-        [
           "effect",
           "Efeito",
           ["NONE", "AURORA", "DOTS"],
