@@ -19,7 +19,7 @@ export function launchRemainingMs(
 }
 
 /** Keep the animated book but simplify decorative layers on modest hardware. */
-export function useLightweightLaunch(
+export function isLightweightLaunchDevice(
   memoryGb?: number,
   logicalProcessors?: number,
 ) {
