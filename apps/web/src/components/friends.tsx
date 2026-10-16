@@ -289,8 +289,7 @@ export function Friends() {
       setMessages((old) => {
         const incomingClients = new Set(decoded.map((message) => message.clientId));
         const withoutConfirmedPending = old.filter(
-          (message) =>
-            !message.sendStatus || !incomingClients.has(message.clientId),
+          (message) => !incomingClients.has(message.clientId),
         );
         return [...new Map([...withoutConfirmedPending, ...decoded].map((m) => [m.id, m])).values()]
           .filter((m) => !m.hiddenAt)
