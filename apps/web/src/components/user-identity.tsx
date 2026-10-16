@@ -13,7 +13,6 @@ import {
 } from "@/lib/use-overlay-history";
 import { createPortal } from "react-dom";
 import Link from "next/link";
-import { CalendarDays } from "lucide-react";
 import { api, post } from "@/lib/api";
 import {
   FeaturedAchievementBadges,
@@ -103,9 +102,17 @@ export function profileStyle(user: PublicProfile): React.CSSProperties {
           ? `linear-gradient(${angle}deg,${muralPrimary},${muralSecondary})`
           : gradient,
     "--mural-copy":
-      appearance?.muralMode === "DEFAULT" ? "var(--ink)" : muralContrast.ink,
+      appearance?.muralMode === "DEFAULT"
+        ? "var(--ink)"
+        : appearance?.muralMode === "CUSTOM"
+          ? muralContrast.ink
+          : contrast.ink,
     "--mural-copy-panel":
-      appearance?.muralMode === "DEFAULT" ? "transparent" : muralContrast.panel,
+      appearance?.muralMode === "DEFAULT"
+        ? "transparent"
+        : appearance?.muralMode === "CUSTOM"
+          ? muralContrast.panel
+          : contrast.panel,
   } as React.CSSProperties;
 }
 export function LiveIdentity({ id, name }: { id: string; name: string }) {
@@ -306,7 +313,6 @@ export function UserIdentity({
     const animation = card.current
       ? profileEntrance(
           card.current,
-          profile?.showcaseAppearance?.entrance,
           true,
         )
       : undefined;
@@ -325,7 +331,6 @@ export function UserIdentity({
     if (!open || !profile || !card.current) return;
     const animation = profileEntrance(
       card.current,
-      profile.showcaseAppearance?.entrance,
     );
     return () => animation?.cancel();
   }, [open, profile]);
@@ -431,7 +436,7 @@ export function UserIdentity({
                 ×
               </button>
               {profile ? (
-                <div className="profile-public-content profile-discord-public-layout">
+                <div className={`profile-public-content profile-discord-public-layout profile-shared-surface ${profile.showcaseAppearance?.muralMode === "PROFILE" ? "profile-mural-linked" : ""}`} style={profileStyle(profile)}>
                   <section
                     className={`profile-public-primary profile-theme-${profile.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${profile.showcaseAppearance?.effect ?? "NONE"}`}
                     style={profileStyle(profile)}
@@ -494,19 +499,6 @@ export function UserIdentity({
                         )}
                       </div>
                     ) : null}
-                    {showcase?.joinedAt ? (
-                      <div className="profile-main-meta">
-                        <CalendarDays size={15} />
-                        <span>
-                          No Enturma desde{" "}
-                          <strong>
-                            {new Date(showcase.joinedAt).toLocaleDateString(
-                              "pt-BR",
-                            )}
-                          </strong>
-                        </span>
-                      </div>
-                    ) : null}
                   </section>
 
                   <section
@@ -517,20 +509,7 @@ export function UserIdentity({
                       appearance={profile.showcaseAppearance}
                       mural
                     />
-                    <div className="profile-public-advanced-heading">
-                      <span>Personalização avançada</span>
-                      <h2>
-                        {isOwnProfile
-                          ? "Seu perfil, como as outras pessoas veem"
-                          : "Mais sobre este perfil"}
-                      </h2>
-                      <p>
-                        {isOwnProfile
-                          ? "Tudo que você configurou no Enturma aparece aqui."
-                          : "Conquistas, estatísticas e widgets compartilhados por este usuário."}
-                      </p>
-                    </div>
-
+                    <h2 className="profile-mural-title">Seu mural</h2>
                     {isOwnProfile ? (
                       <div className="profile-owner-actions">
                         <p>

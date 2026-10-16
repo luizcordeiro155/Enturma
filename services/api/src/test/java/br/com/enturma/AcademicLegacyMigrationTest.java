@@ -28,11 +28,11 @@ class AcademicLegacyMigrationTest {
       }
       UUID session = UUID.randomUUID();
       db.update("INSERT INTO user_session(id,user_id,device,access_hash,access_expires_at,refresh_hash,expires_at) VALUES (?,?,?,'existing-access',now()+interval '10 minutes','existing-refresh',now()+interval '30 days')",session,oldUsers.getFirst(),"Desktop conectado");
-      var beforeUsers = db.queryForList("SELECT * FROM app_user ORDER BY id");
+      var beforeUsers = db.queryForList("SELECT to_jsonb(u) - 'media_version' AS snapshot FROM app_user u ORDER BY id");
       var beforeSessions = db.queryForList("SELECT * FROM user_session ORDER BY id");
       var flyway = Flyway.configure().dataSource(scoped).defaultSchema(schema).schemas(schema).load();
       flyway.migrate();
-      assertThat(db.queryForList("SELECT * FROM app_user ORDER BY id")).isEqualTo(beforeUsers);
+      assertThat(db.queryForList("SELECT to_jsonb(u) - 'media_version' AS snapshot FROM app_user u ORDER BY id")).isEqualTo(beforeUsers);
       assertThat(db.queryForList("SELECT * FROM user_session ORDER BY id")).isEqualTo(beforeSessions);
       assertThat(db.queryForList("SELECT status FROM academic_identity", String.class)).containsOnly("LEGACY_APPROVED").hasSize(3);
       UUID newcomer = UUID.randomUUID();

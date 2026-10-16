@@ -241,7 +241,7 @@ export function ShowcaseFields({
         <label>
           Fundo do mural
           <select
-            value={value.appearance.muralMode ?? "PROFILE"}
+            value={value.appearance.muralMode ?? "DEFAULT"}
             onChange={(e) => appearance("muralMode", e.target.value)}
           >
             <option value="PROFILE">Continuar as cores do perfil</option>
@@ -297,18 +297,6 @@ export function ShowcaseFields({
           >
             <option value="STILL">Parado</option>
             <option value="FLOW">Rio de cores</option>
-          </select>
-        </label>
-        <label>
-          Animação ao abrir o perfil
-          <select
-            value={value.appearance.entrance ?? "RISE"}
-            onChange={(e) => appearance("entrance", e.target.value)}
-          >
-            <option value="NONE">Sem animação</option>
-            <option value="RISE">Revelação suave</option>
-            <option value="BOOK">Abrir como um livro</option>
-            <option value="ORBIT">Órbita</option>
           </select>
         </label>
         {(

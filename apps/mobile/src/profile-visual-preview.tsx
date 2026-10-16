@@ -18,7 +18,6 @@ import { base } from "./api";
 import { useExperience, useStyles } from "./ui";
 
 export function NativeProfileEntrance({
-  appearance,
   children,
 }: {
   appearance?: ProfileVisualAppearance;
@@ -26,14 +25,12 @@ export function NativeProfileEntrance({
 }) {
   const {preference}=useExperience();
   const progress = useRef(new Animated.Value(1)).current;
-  const mode = appearance?.entrance ?? "RISE";
   useEffect(() => {
     let live = true;
     void AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
       if (
         !live ||
         reduced || preference.reducedMotion ||
-        mode === "NONE" ||
         AppState.currentState !== "active"
       )
         return;
@@ -50,7 +47,7 @@ export function NativeProfileEntrance({
       live = false;
       progress.stopAnimation();progress.setValue(1);
     };
-  }, [mode, progress, preference.reducedMotion]);
+  }, [progress, preference.reducedMotion]);
   return (
     <Animated.View
       style={{
@@ -60,19 +57,19 @@ export function NativeProfileEntrance({
           {
             translateY: progress.interpolate({
               inputRange: [0, 1],
-              outputRange: [mode === "RISE" ? 20 : 0, 0],
+              outputRange: [20, 0],
             }),
           },
           {
             rotateY: progress.interpolate({
               inputRange: [0, 1],
-              outputRange: [mode === "BOOK" ? "-24deg" : "0deg", "0deg"],
+              outputRange: ["0deg", "0deg"],
             }),
           },
           {
             rotate: progress.interpolate({
               inputRange: [0, 1],
-              outputRange: [mode === "ORBIT" ? "-4deg" : "0deg", "0deg"],
+              outputRange: ["0deg", "0deg"],
             }),
           },
           {

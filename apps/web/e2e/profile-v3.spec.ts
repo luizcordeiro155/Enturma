@@ -46,7 +46,6 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await expect
     .poll(() =>
       preview
-        .locator(".public-profile-body")
         .evaluate((node) => getComputedStyle(node).backgroundImage),
     )
     .toContain("rgb(255, 0, 68)");
@@ -90,18 +89,9 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await expect(
     page.getByLabel("Cor principal do mural", { exact: true }),
   ).toHaveValue("#0055cc");
-  await page
-    .getByRole("button", { name: "Reproduzir animação do perfil" })
-    .click();
-  await expect
-    .poll(() =>
-      preview.evaluate((node) =>
-        node
-          .getAnimations()
-          .every((animation) => animation.playState === "finished"),
-      ),
-    )
-    .toBe(true);
+  await expect(
+    page.getByRole("button", { name: "Reproduzir animação do perfil" }),
+  ).toHaveCount(0);
   const controls = page.locator(".profile-editor-controls");
   const identity = preview.locator(".profile-preview-identity");
   const mural = preview.locator(".profile-preview-mural");

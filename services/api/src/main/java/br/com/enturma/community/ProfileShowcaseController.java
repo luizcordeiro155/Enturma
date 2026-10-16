@@ -166,7 +166,9 @@ public class ProfileShowcaseController {
                 "technologies",
                 "",
                 "projects",
-                "")
+                "",
+                "muralMode",
+                "DEFAULT")
             : rows.getFirst());
     if (!owner && !privacy.get("WIDGETS") && !rows.isEmpty()) {
       var publicAppearance = new LinkedHashMap<>(rows.getFirst());
