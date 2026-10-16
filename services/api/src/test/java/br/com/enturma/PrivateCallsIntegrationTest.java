@@ -45,6 +45,8 @@ class PrivateCallsIntegrationTest {
     a = user();
     b = user();
     outsider = user();
+    for (Actor actor : List.of(a, b, outsider))
+      db.jdbc.update("UPDATE academic_identity SET status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE user_id=?", actor.id());
     friendship = UUID.randomUUID();
     deviceA = UUID.randomUUID();
     deviceB = UUID.randomUUID();

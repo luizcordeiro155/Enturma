@@ -2,7 +2,7 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { AcademicEntry } from "@enturma/contracts";
-import { academicLabels, catalogOptions } from "@enturma/contracts";
+import { academicLabels, catalogOptions, academicOnboardingContext, type AcademicContext } from "@enturma/contracts";
 import { api } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
@@ -28,7 +28,18 @@ export function Onboarding() {
   const [page, setPage] = useState(0);
   const router = useRouter();
   const parent = selected[step - 1];
+  const [contextReady, setContextReady] = useState(false);
   useEffect(() => {
+    let active = true;
+    api<AcademicContext>("/auth/academic/status", {cache:"no-store"}).then(identity => {
+      if (!active) return;
+      const context = academicOnboardingContext(identity);
+      if (context.length) { setSelected(context.map(item=>item.id)); setSelection(context); setStep(context.length); }
+    }).catch(()=>{}).finally(()=>{if(active)setContextReady(true);});
+    return()=>{active=false;};
+  }, []);
+  useEffect(() => {
+    if (!contextReady) return;
     const controller = new AbortController();
     let alive = true;
     const url = `/catalog/onboarding/options?kind=${step < 5 ? steps[step][0] : "SUBJECT"}${parent ? `&parentId=${parent}` : ""}&search=${encodeURIComponent(search)}&page=${page}`;
@@ -62,7 +73,7 @@ export function Onboarding() {
       controller.abort();
       clearTimeout(timer);
     };
-  }, [step, parent, search, page, retry]);
+  }, [step, parent, search, page, retry, contextReady]);
   function choose(item: AcademicEntry) {
     setBusy(true);
     setSelected((s) => [...s.slice(0, step), item.id]);

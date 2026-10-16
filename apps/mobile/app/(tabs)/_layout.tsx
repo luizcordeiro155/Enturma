@@ -11,7 +11,9 @@ export default function TabLayout() {
   const { preference } = useExperience();
   const insets = useSafeAreaInsets();
   const path = usePathname();
-  const [access, setAccess] = useState<"checking" | "allowed" | "login">("checking");
+  const [access, setAccess] = useState<"checking" | "allowed" | "login">(
+    "checking",
+  );
 
   useEffect(() => {
     let active = true;
@@ -28,12 +30,14 @@ export default function TabLayout() {
           setAccess(
             (error as { status?: number }).status === 401
               ? "login"
-              : "checking",
+              : (current) => (current === "allowed" ? "allowed" : "checking"),
           );
       }
     };
     void verify();
-    return () => { active = false; };
+    return () => {
+      active = false;
+    };
   }, [path]);
 
   if (access === "login") return <Redirect href="/" />;

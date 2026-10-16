@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 // Enturma Stabilization / Polish validation marker.
 const config: NextConfig = {
+  cacheComponents: true,
   devIndicators: false,
   transpilePackages: ["@enturma/contracts", "@enturma/design-tokens"],
   poweredByHeader: false,
@@ -12,7 +13,11 @@ const config: NextConfig = {
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "DENY" },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
-          { key: "Permissions-Policy", value: "camera=(self), microphone=(self), display-capture=(self), geolocation=(self)" },
+          {
+            key: "Permissions-Policy",
+            value:
+              "camera=(self), microphone=(self), display-capture=(self), geolocation=(self)",
+          },
         ],
       },
     ];

@@ -1,3 +1,7 @@
+export {
+  academicOnboardingContext,
+  type AcademicContext,
+} from "./academic-identity";
 export interface AcademicEntry {
   id: string;
   kind: string;
@@ -214,3 +218,4 @@ export async function request<T>(
   const body = await response.text();
   return body ? (JSON.parse(body) as T) : (undefined as T);
 }
+export * from "./profile-appearance";

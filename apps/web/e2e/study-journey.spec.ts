@@ -1,5 +1,6 @@
+import { test } from "./student-fixture";
 import { authenticate } from "./session";
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
 
@@ -34,7 +35,11 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
     await db.query("UPDATE app_user SET role='ADMIN' WHERE email=$1", [email]);
     await authenticate(page.context(), credentials);
     await page.goto("/home");
-    await expect(page.locator("html")).toHaveAttribute("data-realtime", "connected", { timeout: 20000 });
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-realtime",
+      "connected",
+      { timeout: 20000 },
+    );
     const journey = page.getByRole("complementary", {
       name: "Seu espaço de estudo",
     });

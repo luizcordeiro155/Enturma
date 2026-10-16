@@ -87,7 +87,10 @@ export function PrivateCallsProvider({
   }, [session]);
   const path = usePathname();
   const router = useRouter();
-  const enabled = !["/", "/login", "/register"].includes(path);
+  const enabled =
+    /^\/(home|portfolio|subjects|learn|profile|settings|friends|notebooks|rooms|caronas|forum|onboarding|admin)(\/|$)/.test(
+      path,
+    );
 
   const apply = useCallback(
     (value: PrivateCall | Record<string, never>) => {

@@ -1,5 +1,6 @@
+import { test } from "./student-fixture";
 import { authenticate } from "./session";
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 
 test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", async ({
@@ -48,8 +49,8 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await expect(
     page.getByRole("heading", { name: title, exact: true }),
   ).toBeVisible();
-  await expect(page.locator(".forum-body code")).toContainText("return 1");
-  await expect(page.locator(".forum-body")).toContainText("<script>");
+  await expect(page.locator(".forum-body:visible code")).toContainText("return 1");
+  await expect(page.locator(".forum-body:visible")).toContainText("<script>");
   await page
     .getByRole("link", {
       name: "https://example.org/estudo?tema=recursao",
@@ -91,7 +92,7 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await page.getByRole("link", { name: "Voltar ao fórum" }).click();
   await page.getByLabel("Buscar publicações").fill(tag);
   await page.getByRole("button", { name: "Buscar no fórum" }).click();
-  await expect(page.locator(".forum-card")).toHaveCount(1);
+  await expect(page.locator(".forum-card:visible")).toHaveCount(1);
   const newPost = await request.post(`${backend}/api/v1/forum`, {
     headers: { Authorization: `Bearer ${users[1].accessToken}` },
     data: {
@@ -108,7 +109,7 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await request.delete(`${backend}/api/v1/forum/${newId}`, {
     headers: { Authorization: `Bearer ${users[1].accessToken}` },
   });
-  await expect(page.locator(".forum-card")).toHaveCount(1);
+  await expect(page.locator(".forum-card:visible")).toHaveCount(1);
 
   await page.getByRole("link", { name: title, exact: true }).click();
   const peer = await browser.newContext();
@@ -124,8 +125,8 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
     .getByLabel("Seu comentário")
     .fill(`O caso base interrompe as chamadas recursivas. @Autor_${tag}`);
   await peerPage.getByRole("button", { name: "Comentar", exact: true }).click();
-  await expect(peerPage.locator(".forum-comment")).toContainText("interrompe");
-  const post = peerPage.locator(".forum-card").first();
+  await expect(peerPage.locator(".forum-comment:visible")).toContainText("interrompe");
+  const post = peerPage.locator(".forum-card:visible").first();
   await post.getByRole("button", { name: "Votar a favor" }).click();
   await expect(
     post.getByRole("button", { name: "Votar a favor" }),
@@ -144,14 +145,14 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   ).toHaveAttribute("aria-pressed", "true");
   await expect(
     page
-      .locator(".forum-card")
+      .locator(".forum-card:visible")
       .first()
       .getByRole("button", { name: "Reagir com 🦉" }),
   ).toBeVisible();
   await expect(
     post.getByRole("button", { name: "Editar publicação ou comentário" }),
   ).toHaveCount(0);
-  await expect(page.locator(".forum-comment")).toContainText("interrompe", {
+  await expect(page.locator(".forum-comment:visible")).toContainText("interrompe", {
     timeout: 15000,
   });
   await page.getByRole("button", { name: /Notificações,.*não lidas/ }).click();
@@ -211,14 +212,14 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   await featured.getByRole("heading", { name: title, exact: true }).click();
   await expect(page).toHaveURL(url);
   await page
-    .locator(".forum-comment")
+    .locator(".forum-comment:visible")
     .getByRole("button", { name: "Responder", exact: true })
     .click();
   await page.getByLabel("Seu comentário").fill("Agora entendi, obrigado!");
   await page.getByRole("button", { name: "Comentar", exact: true }).click();
-  await expect(page.locator(".forum-replies")).toContainText("Agora entendi");
+  await expect(page.locator(".forum-replies:visible")).toContainText("Agora entendi");
   await page
-    .locator(".forum-card")
+    .locator(".forum-card:visible")
     .first()
     .getByRole("button", { name: "Editar publicação ou comentário" })
     .click();
@@ -255,18 +256,18 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   });
   peerPage.once("dialog", (d) => d.accept());
   await peerPage
-    .locator(".forum-comment")
+    .locator(".forum-comment:visible")
     .getByRole("button", { name: "Excluir publicação ou comentário" })
     .click();
-  await expect(peerPage.locator(".forum-comment").first()).toContainText(
+  await expect(peerPage.locator(".forum-comment:visible").first()).toContainText(
     "excluído",
   );
-  await expect(peerPage.locator(".forum-replies")).toContainText(
+  await expect(peerPage.locator(".forum-replies:visible")).toContainText(
     "Agora entendi",
   );
   page.once("dialog", (d) => d.accept());
   await page
-    .locator(".forum-card")
+    .locator(".forum-card:visible")
     .first()
     .getByRole("button", { name: "Excluir publicação ou comentário" })
     .click();

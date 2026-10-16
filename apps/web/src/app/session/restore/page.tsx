@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { BookOpen, LoaderCircle, RefreshCw } from "lucide-react";
 import { authDestination } from "@/lib/auth-navigation";
+import { LaunchSplash } from "@/components/app-launch";
 
 function destination() {
   return authDestination(
@@ -37,14 +38,16 @@ export default function RestorePage() {
       if (response.ok) {
         window.location.replace(next);
       } else if (response.status === 401 || response.status === 403) {
-        window.location.replace(
-          `/login?next=${encodeURIComponent(next)}`,
-        );
+        window.location.replace(`/login?next=${encodeURIComponent(next)}`);
       } else {
-        setError("Não foi possível verificar sua sessão agora. Tente novamente.");
+        setError(
+          "Não foi possível verificar sua sessão agora. Tente novamente.",
+        );
       }
     } catch {
-      setError("Sem conexão com o Enturma. Verifique sua internet e tente novamente.");
+      setError(
+        "Sem conexão com o Enturma. Verifique sua internet e tente novamente.",
+      );
     } finally {
       setWorking(false);
     }
@@ -57,26 +60,36 @@ export default function RestorePage() {
 
   return (
     <main className="auth-session-gate">
-      <section className="auth-session-gate-card" aria-live="polite">
-        <BookOpen size={42} aria-hidden="true" />
-        <h1>Restaurando sua sessão</h1>
-        <p>
-          Estamos verificando seu acesso ao Enturma. Suas aulas e conversas
-          permanecem protegidas enquanto isso.
-        </p>
-        {error ? <p role="alert">{error}</p> : null}
-        {working ? (
-          <p className="auth-session-gate-progress" role="status">
-            <LoaderCircle className="auth-session-gate-spin" size={19} />
-            Verificando sua conta…
+      {working ? (
+        <LaunchSplash>
+          <span className="sr-only">Verificando sua sessão…</span>
+        </LaunchSplash>
+      ) : (
+        <section className="auth-session-gate-card" aria-live="polite">
+          <BookOpen size={42} aria-hidden="true" />
+          <h1>Vamos reconectar você</h1>
+          <p>
+            Estamos verificando seu acesso ao Enturma. Suas aulas e conversas
+            permanecem protegidas enquanto isso.
           </p>
-        ) : (
-          <button type="button" className="button" onClick={() => void retry()}>
-            <RefreshCw size={17} /> Tentar novamente
-          </button>
-        )}
-        <Link href="/login">Entrar com outra conta</Link>
-      </section>
+          {error ? <p role="alert">{error}</p> : null}
+          {working ? (
+            <p className="auth-session-gate-progress" role="status">
+              <LoaderCircle className="auth-session-gate-spin" size={19} />
+              Verificando sua conta…
+            </p>
+          ) : (
+            <button
+              type="button"
+              className="button"
+              onClick={() => void retry()}
+            >
+              <RefreshCw size={17} /> Tentar novamente
+            </button>
+          )}
+          <Link href="/login">Entrar com outra conta</Link>
+        </section>
+      )}
     </main>
   );
 }

@@ -168,7 +168,9 @@ export function RideSuggestions({
           {items.map((item) => (
             <article className="ride-suggestion" key={item.id}>
               <div className="ride-suggestion-main">
-                <div className="ride-match-level">{matchLevelLabel(item.matchLevel)}</div>
+                <div className="ride-match-level">
+                  {matchLevelLabel(item.matchLevel)}
+                </div>
                 <h3>{item.ownerName}</h3>
                 <p>
                   {item.originArea} → {item.campusName}
@@ -302,7 +304,7 @@ export function RidePreferences({
       );
       setPendingRemoval(null);
       setMessage(
-        "Rotina removida do perfil. Ela não criará novas caronas; as já publicadas continuam disponíveis.",
+        "Rotina removida. Caronas automáticas sem confirmação e seus lembretes foram cancelados. Viagens já confirmadas ou iniciadas permanecem disponíveis.",
       );
       onChanged?.();
       await load();
@@ -337,113 +339,115 @@ export function RidePreferences({
       {message ? <p className="feedback success">{message}</p> : null}
       <div className="ride-preferences-grid">
         {mode === "DRIVER" ? (
-        <form
-          className="ride-vehicle-profile-card"
-          onSubmit={async (event) => {
-            event.preventDefault();
-            const formElement = event.currentTarget;
-            const form = new FormData(formElement);
-            try {
-              setVehicle(
-                await api<RideVehicle>("/rides/vehicle", {
-                  method: "PUT",
-                  body: JSON.stringify({
-                    brand: form.get("brand"),
-                    model: form.get("model"),
-                    color: form.get("color"),
-                    modelYear: form.get("year")
-                      ? Number(form.get("year"))
-                      : null,
-                    seats: Number(form.get("seats")),
-                    plateHint: form.get("plate"),
+          <form
+            className="ride-vehicle-profile-card"
+            onSubmit={async (event) => {
+              event.preventDefault();
+              const formElement = event.currentTarget;
+              const form = new FormData(formElement);
+              try {
+                setVehicle(
+                  await api<RideVehicle>("/rides/vehicle", {
+                    method: "PUT",
+                    body: JSON.stringify({
+                      brand: form.get("brand"),
+                      model: form.get("model"),
+                      color: form.get("color"),
+                      modelYear: form.get("year")
+                        ? Number(form.get("year"))
+                        : null,
+                      seats: Number(form.get("seats")),
+                      plateHint: form.get("plate"),
+                    }),
                   }),
-                }),
-              );
-              setMessage("Perfil do veículo atualizado.");
-              rideAccept(formElement);
-              onChanged?.();
-            } catch (e) {
-              setError((e as Error).message);
-            }
-          }}
-        >
-          <h3>Veículo</h3>
-          <label>
-            Marca
-            <input
-              name="brand"
-              required
-              maxLength={60}
-              defaultValue={vehicle.brand ?? ""}
-              key={`brand-${vehicle.brand ?? ""}`}
-            />
-          </label>
-          <label>
-            Modelo
-            <input
-              name="model"
-              required
-              maxLength={80}
-              defaultValue={vehicle.model ?? ""}
-              key={`model-${vehicle.model ?? ""}`}
-            />
-          </label>
-          <div className="form-row">
+                );
+                setMessage("Perfil do veículo atualizado.");
+                rideAccept(formElement);
+                onChanged?.();
+              } catch (e) {
+                setError((e as Error).message);
+              }
+            }}
+          >
+            <h3>Veículo</h3>
             <label>
-              Cor
+              Marca
               <input
-                name="color"
+                name="brand"
                 required
-                maxLength={40}
-                defaultValue={vehicle.color ?? ""}
-                key={`color-${vehicle.color ?? ""}`}
+                maxLength={60}
+                defaultValue={vehicle.brand ?? ""}
+                key={`brand-${vehicle.brand ?? ""}`}
               />
             </label>
             <label>
-              Ano
+              Modelo
               <input
-                name="year"
-                type="number"
-                min={1980}
-                max={2100}
-                defaultValue={vehicle.modelYear ?? ""}
-                key={`year-${vehicle.modelYear ?? ""}`}
-              />
-            </label>
-          </div>
-          <div className="form-row">
-            <label>
-              Vagas
-              <input
-                name="seats"
-                type="number"
-                min={1}
-                max={8}
-                defaultValue={vehicle.seats ?? 3}
+                name="model"
                 required
+                maxLength={80}
+                defaultValue={vehicle.model ?? ""}
+                key={`model-${vehicle.model ?? ""}`}
               />
             </label>
-            <label>
-              Identificação parcial
-              <input
-                name="plate"
-                maxLength={8}
-                placeholder="Ex.: •••1A23"
-                defaultValue={vehicle.plateHint ?? ""}
-                key={`plate-${vehicle.plateHint ?? ""}`}
-              />
-            </label>
-          </div>
-          <button className="ride-profile-save">Salvar veículo</button>
-        </form>
+            <div className="form-row">
+              <label>
+                Cor
+                <input
+                  name="color"
+                  required
+                  maxLength={40}
+                  defaultValue={vehicle.color ?? ""}
+                  key={`color-${vehicle.color ?? ""}`}
+                />
+              </label>
+              <label>
+                Ano
+                <input
+                  name="year"
+                  type="number"
+                  min={1980}
+                  max={2100}
+                  defaultValue={vehicle.modelYear ?? ""}
+                  key={`year-${vehicle.modelYear ?? ""}`}
+                />
+              </label>
+            </div>
+            <div className="form-row">
+              <label>
+                Vagas
+                <input
+                  name="seats"
+                  type="number"
+                  min={1}
+                  max={8}
+                  defaultValue={vehicle.seats ?? 3}
+                  required
+                />
+              </label>
+              <label>
+                Identificação parcial
+                <input
+                  name="plate"
+                  maxLength={8}
+                  placeholder="Ex.: •••1A23"
+                  defaultValue={vehicle.plateHint ?? ""}
+                  key={`plate-${vehicle.plateHint ?? ""}`}
+                />
+              </label>
+            </div>
+            <button className="ride-profile-save">Salvar veículo</button>
+          </form>
         ) : (
           <div className="ride-passenger-profile-card">
-            <div className="ride-passenger-profile-icon" aria-hidden="true">✦</div>
+            <div className="ride-passenger-profile-icon" aria-hidden="true">
+              ✦
+            </div>
             <div>
               <h3>Perfil pronto para pedir carona</h3>
               <p>
-                O Enturma usa seu campus e o ponto escolhido no mapa somente para
-                calcular e combinar sua rota com motoristas compatíveis.
+                O Enturma usa seu campus e o ponto escolhido no mapa somente
+                para calcular e combinar sua rota com motoristas compatíveis.
               </p>
             </div>
           </div>
@@ -485,7 +489,11 @@ export function RidePreferences({
             }
           }}
         >
-          <h3>{mode === "DRIVER" ? "Rotina como motorista" : "Rotina como passageiro"}</h3>
+          <h3>
+            {mode === "DRIVER"
+              ? "Rotina como motorista"
+              : "Rotina como passageiro"}
+          </h3>
           <label>
             Campus
             <select name="campus" required defaultValue="">
@@ -500,7 +508,10 @@ export function RidePreferences({
           <div className="form-row">
             <label>
               Tipo
-              <select name="type" defaultValue={mode === "DRIVER" ? "OFFER" : "REQUEST"}>
+              <select
+                name="type"
+                defaultValue={mode === "DRIVER" ? "OFFER" : "REQUEST"}
+              >
                 {mode === "DRIVER" ? (
                   <option value="OFFER">Ofereço carona</option>
                 ) : (
@@ -611,8 +622,9 @@ export function RidePreferences({
                   >
                     <p>
                       Remover esta rotina do perfil? Ela não será usada para
-                      gerar novas caronas automaticamente. Caronas já publicadas
-                      não serão canceladas.
+                      gerar novas caronas automaticamente. As caronas sem
+                      confirmação e seus lembretes serão cancelados. Viagens
+                      confirmadas ou iniciadas serão mantidas.
                     </p>
                     <div className="ride-routine-confirm-actions">
                       <button
@@ -621,7 +633,9 @@ export function RidePreferences({
                         disabled={removingId !== null}
                         onClick={() => void removeRoutine(item)}
                       >
-                        {removingId === item.id ? "Removendo…" : "Sim, remover rotina"}
+                        {removingId === item.id
+                          ? "Removendo…"
+                          : "Sim, remover rotina"}
                       </button>
                       <button
                         type="button"

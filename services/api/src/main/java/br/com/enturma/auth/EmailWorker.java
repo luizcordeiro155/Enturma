@@ -34,6 +34,15 @@ public class EmailWorker {
         db.list(
             "SELECT * FROM email_outbox WHERE sent_at IS NULL AND attempts<10 ORDER BY created_at"
                 + " LIMIT 10 FOR UPDATE SKIP LOCKED")) {
+      if (!br.com.enturma.notifications.NotificationDeliveryPolicy.currentEmail(db, row.get("dedupeKey"))) {
+        db.jdbc.update("UPDATE email_outbox SET attempts=10,body='' WHERE id=?", row.get("id"));
+        continue;
+      }
+      if (row.get("deliveryExpiresAt") != null
+          && java.time.Instant.parse((String) row.get("deliveryExpiresAt")).isBefore(java.time.Instant.now())) {
+        db.jdbc.update("UPDATE email_outbox SET attempts=10,body='' WHERE id=?", row.get("id"));
+        continue;
+      }
       if (row.get("category") != null
           && !db.exists(
               "SELECT EXISTS(SELECT 1 FROM notification_preference WHERE user_id=? AND category=?"

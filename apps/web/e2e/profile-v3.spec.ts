@@ -1,6 +1,113 @@
+import { test } from "./student-fixture";
 import { authenticate } from "./session";
-import { test, expect } from "@playwright/test";
+import { expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
+
+test("cores vivas, mural independente e rascunho preservado ao trocar de página", async ({
+  page,
+  request,
+}) => {
+  const tag = randomUUID().slice(0, 8);
+  const response = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Perfil visual",
+        username: `visual_${tag}`,
+        email: `visual_${tag}@example.test`,
+        password: "Profile-visual-test-123",
+        device: "E2E",
+      },
+    },
+  );
+  expect(response.ok()).toBe(true);
+  const credentials = await response.json();
+  await authenticate(page.context(), credentials);
+  await page.addInitScript(() =>
+    localStorage.setItem("enturma-intro:v0.3", "seen"),
+  );
+  await page.goto("/profile");
+  await page.getByLabel("Cor principal do perfil").fill("#ff0044");
+  await page.getByLabel("Cor secundária", { exact: true }).fill("#240075");
+  await page.getByLabel("Fundo decorativo").selectOption("GRADIENT");
+  const preview = page.locator(".profile-preview-combined");
+  await expect
+    .poll(() =>
+      preview
+        .locator(".public-profile-body")
+        .evaluate((node) => getComputedStyle(node).backgroundImage),
+    )
+    .toContain("rgb(255, 0, 68)");
+  await page
+    .getByRole("combobox", { name: "Fundo do mural", exact: true })
+    .selectOption("CUSTOM");
+  await page
+    .getByLabel("Cor principal do mural", { exact: true })
+    .fill("#0055cc");
+  await page
+    .getByLabel("Segunda cor do mural", { exact: true })
+    .fill("#00bb88");
+  await expect
+    .poll(() =>
+      preview
+        .locator(".profile-public-advanced")
+        .evaluate((node) => getComputedStyle(node).backgroundImage),
+    )
+    .toContain("rgb(0, 85, 204)");
+  await page
+    .getByLabel("Nome exibido", { exact: true })
+    .fill("Meu rascunho preservado");
+  await page.getByRole("link", { name: "Salas", exact: true }).first().click();
+  await expect(page).toHaveURL(/rooms/);
+  await page
+    .getByRole("link", { name: "Abrir meu perfil para editar", exact: true })
+    .click();
+  await expect(page.getByLabel("Nome exibido", { exact: true })).toHaveValue(
+    "Meu rascunho preservado",
+  );
+  await expect(
+    page.getByLabel("Cor principal do mural", { exact: true }),
+  ).toHaveValue("#0055cc");
+  await page
+    .getByRole("button", { name: "Salvar perfil", exact: true })
+    .click();
+  await expect(
+    page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
+  ).toBeVisible();
+  await page.reload();
+  await expect(
+    page.getByLabel("Cor principal do mural", { exact: true }),
+  ).toHaveValue("#0055cc");
+  await page
+    .getByRole("button", { name: "Reproduzir animação do perfil" })
+    .click();
+  await page.screenshot({
+    path: "../../.local/profile-visual-desktop.png",
+    fullPage: true,
+  });
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.getByRole("button", { name: "Mural", exact: true }).click();
+  await expect(preview.locator(".profile-preview-mural")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+  await page.screenshot({
+    path: "../../.local/profile-visual-mobile.png",
+    fullPage: true,
+  });
+  await page
+    .getByRole("combobox", { name: "Fundo do mural", exact: true })
+    .selectOption("DEFAULT");
+  await expect
+    .poll(() =>
+      preview
+        .locator(".profile-public-advanced")
+        .evaluate((node) => getComputedStyle(node).backgroundImage),
+    )
+    .toBe("none");
+});
 test("mural preserva widgets após recarregar e respeita privacidade", async ({
   page,
   request,

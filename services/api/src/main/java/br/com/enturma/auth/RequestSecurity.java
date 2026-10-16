@@ -49,6 +49,18 @@ public class RequestSecurity extends OncePerRequestFilter {
                               List.of(new SimpleGrantedAuthority("ROLE_" + actor.role())))));
     var current = SecurityContextHolder.getContext().getAuthentication();
     String route = req.getRequestURI();
+    boolean pendingAllowed = route.startsWith("/api/v1/auth/")
+        || ((req.getMethod().equals("GET") || req.getMethod().equals("HEAD"))
+            && (route.equals("/api/v1/users/me") || route.startsWith("/api/v1/catalog/")
+                || route.startsWith("/api/v1/public/") || route.matches("/api/v1/users/[^/]+/(avatar|banner)")))
+        || route.equals("/actuator/health") || route.equals("/ws");
+    if (current != null && !pendingAllowed && !auth.studentAccess((Actor) current.getPrincipal())) {
+      res.setStatus(403);
+      res.setContentType("application/json");
+      json.writeValue(res.getOutputStream(), Errors.body(403, "ACADEMIC_VERIFICATION_REQUIRED",
+          "Conclua sua verificação acadêmica para acessar a comunidade.", req));
+      return;
+    }
     if (current != null
         && !route.startsWith("/api/v1/auth/")
         && !route.startsWith("/api/v1/moderation/")
@@ -99,6 +111,10 @@ public class RequestSecurity extends OncePerRequestFilter {
         prefix = "auth-email:";
         limit = 5;
         windowSeconds = 900;
+      } else if (uri.equals("/api/v1/auth/academic/confirm")) {
+        prefix = "academic-confirm:";
+        limit = 12;
+        windowSeconds = 300;
       } else if (uri.equals("/api/v1/auth/reset-password")
           || uri.equals("/api/v1/auth/verify-email")) {
         prefix = "auth-token:";

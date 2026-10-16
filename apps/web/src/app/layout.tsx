@@ -1,5 +1,6 @@
 // Production redeploy marker: account-switch/mobile-profile fixes 2026-10-03.
 import type { Metadata, Viewport } from "next";
+import { Suspense } from "react";
 import "./globals.css";
 import "./advanced-games.css";
 import "./profile-customization.css";
@@ -29,6 +30,8 @@ import "./interaction-refinement.css";
 import "./chat-interactions.css";
 import "./rooms-discovery.css";
 import "./session-gate.css";
+import "./academic-verification.css";
+import "./profile-visual-editor.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";
@@ -36,6 +39,7 @@ import { MobilePushRegistration } from "@/components/mobile-push-registration";
 import { WebPushRegistration } from "@/components/web-push-registration";
 import { AppShellStateProvider } from "@/components/app-shell-state";
 import { PwaProvider } from "@/components/pwa-install";
+import { AppLaunch } from "@/components/app-launch";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -68,21 +72,30 @@ export default function Layout({
         />
       </head>
       <body>
-        <Motion />
-        <ThemeSync />
-        <MobilePushRegistration />
-        <WebPushRegistration />
-        <PwaProvider>
-          <CallSessionProvider>
-            <PrivateCallsProvider>
-              <DesktopUpdateProvider>
-                <AppShellStateProvider>
-                  <RideActivity>{children}</RideActivity>
-                </AppShellStateProvider>
-              </DesktopUpdateProvider>
-            </PrivateCallsProvider>
-          </CallSessionProvider>
-        </PwaProvider>
+        <Suspense
+          fallback={
+            <div className="enturma-initial-shell" role="status">
+              enturma.
+            </div>
+          }
+        >
+          <Motion />
+          <ThemeSync />
+          <AppLaunch />
+          <MobilePushRegistration />
+          <WebPushRegistration />
+          <PwaProvider>
+            <CallSessionProvider>
+              <PrivateCallsProvider>
+                <DesktopUpdateProvider>
+                  <AppShellStateProvider>
+                    <RideActivity>{children}</RideActivity>
+                  </AppShellStateProvider>
+                </DesktopUpdateProvider>
+              </PrivateCallsProvider>
+            </CallSessionProvider>
+          </PwaProvider>
+        </Suspense>
       </body>
     </html>
   );

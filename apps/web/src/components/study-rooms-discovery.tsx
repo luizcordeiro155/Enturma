@@ -12,7 +12,7 @@ import {
   Users,
 } from "lucide-react";
 import type { Profile, Room } from "@enturma/contracts";
-import { api, post } from "@/lib/api";
+import { api, post, peekApiSnapshot } from "@/lib/api";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { Feedback, Loading } from "./feedback";
 import { Shell } from "./shell";
@@ -34,11 +34,18 @@ function remainingLabel(endsAt: string) {
 
 export function StudyRoomsDiscovery() {
   const router = useRouter();
-  const [profile, setProfile] = useState<Profile>();
-  const [rooms, setRooms] = useState<RecommendedRoom[]>([]);
+  const [profile, setProfile] = useState<Profile | undefined>(() =>
+    peekApiSnapshot<Profile>("/users/me"),
+  );
+  const [rooms, setRooms] = useState<RecommendedRoom[]>(
+    () =>
+      peekApiSnapshot<RecommendedRoom[]>("/study-rooms?recommended=true") ?? [],
+  );
   const [query, setQuery] = useState("");
   const [joining, setJoining] = useState<string>();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(
+    () => !peekApiSnapshot("/study-rooms?recommended=true"),
+  );
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
@@ -123,8 +130,8 @@ export function StudyRoomsDiscovery() {
             </span>
             <h1>Encontre uma sala para estudar agora.</h1>
             <p>
-              O Enturma mostra primeiro salas abertas ligadas às suas matérias
-              e ao seu curso.
+              O Enturma mostra primeiro salas abertas ligadas às suas matérias e
+              ao seu curso.
             </p>
           </div>
           <Link className="button rooms-create-button" href="/rooms/new">
@@ -135,7 +142,10 @@ export function StudyRoomsDiscovery() {
 
         <Feedback error={error} />
 
-        <section className="rooms-context-card" aria-label="Seu contexto acadêmico">
+        <section
+          className="rooms-context-card"
+          aria-label="Seu contexto acadêmico"
+        >
           <div className="rooms-context-heading">
             <div className="rooms-context-icon" aria-hidden="true">
               <GraduationCap size={22} />

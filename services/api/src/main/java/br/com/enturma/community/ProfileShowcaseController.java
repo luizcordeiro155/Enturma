@@ -14,10 +14,12 @@ import org.springframework.web.bind.annotation.*;
 public class ProfileShowcaseController {
   private final Db db;
   private final AchievementService achievements;
+  private final org.springframework.context.ApplicationEventPublisher events;
 
-  public ProfileShowcaseController(Db db, AchievementService achievements) {
+  public ProfileShowcaseController(Db db, AchievementService achievements, org.springframework.context.ApplicationEventPublisher events) {
     this.db = db;
     this.achievements = achievements;
+    this.events = events;
   }
 
   private static final Set<String> FIELDS =
@@ -49,7 +51,13 @@ public class ProfileShowcaseController {
       @NotNull @Size(max = 1000) String projects,
       @NotNull @Size(max = 5) Map<String, Boolean> privacy,
       @NotNull @Size(max = 8) List<@NotNull @Valid Widget> widgets,
-      @NotNull @Size(max = 4) List<@NotBlank String> badges) {}
+      @NotNull @Size(max = 4) List<@NotBlank String> badges,
+      @Pattern(regexp = "PROFILE|DEFAULT|CUSTOM") String muralMode,
+      @Pattern(regexp = "#[0-9a-fA-F]{6}") String muralColor,
+      @Pattern(regexp = "#[0-9a-fA-F]{6}") String muralSecondaryColor,
+      @Min(0) @Max(360) Integer gradientAngle,
+      @Pattern(regexp = "STILL|FLOW") String gradientFlow,
+      @Pattern(regexp = "NONE|RISE|BOOK|ORBIT") String entrance) {}
 
   @PutMapping("/users/me/showcase")
   @Transactional
@@ -79,6 +87,9 @@ public class ProfileShowcaseController {
         s.goal(),
         s.technologies(),
         s.projects());
+    // Older native clients omit the new fields: retain saved customization on their updates.
+    db.jdbc.update("UPDATE profile_showcase SET mural_mode=COALESCE(?,mural_mode),mural_color=COALESCE(?,mural_color),mural_secondary_color=COALESCE(?,mural_secondary_color),gradient_angle=COALESCE(?,gradient_angle),gradient_flow=COALESCE(?,gradient_flow),entrance=COALESCE(?,entrance) WHERE user_id=?",
+        s.muralMode(), s.muralColor(), s.muralSecondaryColor(), s.gradientAngle(), s.gradientFlow(), s.entrance(), a.id());
     for (String f : FIELDS)
       db.jdbc.update(
           "INSERT INTO profile_privacy_setting(user_id,field,visible) VALUES (?,?,?) ON"
@@ -106,7 +117,11 @@ public class ProfileShowcaseController {
           a.id(),
           s.badges().get(i),
           i);
+    events.publishEvent(new br.com.enturma.notifications.AppChanged("profile_changed", Set.of()));
   }
+
+  @GetMapping("/users/me/showcase")
+  public Object own(@AuthenticationPrincipal Actor a) { return get(a, a.id()); }
 
   @GetMapping("/users/{id}/showcase")
   public Object get(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
@@ -131,7 +146,7 @@ public class ProfileShowcaseController {
     var result = new LinkedHashMap<String, Object>();
     var rows =
         db.list(
-            "SELECT secondary_color,theme,effect,layout,goal,technologies,projects FROM"
+            "SELECT secondary_color,theme,effect,layout,goal,technologies,projects,mural_mode,mural_color,mural_secondary_color,gradient_angle,gradient_flow,entrance FROM"
                 + " profile_showcase WHERE user_id=?",
             id);
     result.put(
@@ -153,20 +168,11 @@ public class ProfileShowcaseController {
                 "projects",
                 "")
             : rows.getFirst());
-    if (!owner && !privacy.get("WIDGETS"))
-      result.put(
-          "appearance",
-          rows.isEmpty()
-              ? Map.of()
-              : Map.of(
-                  "secondaryColor",
-                  rows.getFirst().get("secondaryColor"),
-                  "theme",
-                  rows.getFirst().get("theme"),
-                  "effect",
-                  rows.getFirst().get("effect"),
-                  "layout",
-                  rows.getFirst().get("layout")));
+    if (!owner && !privacy.get("WIDGETS") && !rows.isEmpty()) {
+      var publicAppearance = new LinkedHashMap<>(rows.getFirst());
+      for (String privateField : List.of("goal", "technologies", "projects")) publicAppearance.remove(privateField);
+      result.put("appearance", publicAppearance);
+    }
     if (owner) result.put("privacy", privacy);
     if (owner || privacy.get("JOINED")) result.put("joinedAt", user.get("createdAt"));
     if (owner || privacy.get("STATS")) result.put("stats", achievements.stats(id));

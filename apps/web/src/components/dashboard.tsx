@@ -1,9 +1,15 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { BookOpen, Users, Clock, ArrowRight, GraduationCap } from "lucide-react";
+import {
+  BookOpen,
+  Users,
+  Clock,
+  ArrowRight,
+  GraduationCap,
+} from "lucide-react";
 import type { Profile, Room } from "@enturma/contracts";
-import { api, post } from "@/lib/api";
+import { api, post, peekApiSnapshot } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
 import { useRouter } from "next/navigation";
@@ -13,10 +19,16 @@ import { StudyJourney } from "./study-journey";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { EnturmaIntroExperience } from "./intro/enturma-intro-experience";
 export function Dashboard() {
-  const [profile, setProfile] = useState<Profile>();
-  const [rooms, setRooms] = useState<Room[]>([]);
+  const [profile, setProfile] = useState<Profile | undefined>(() =>
+    peekApiSnapshot<Profile>("/users/me"),
+  );
+  const [rooms, setRooms] = useState<Room[]>(
+    () => peekApiSnapshot<Room[]>("/study-rooms?page=0") ?? [],
+  );
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(
+    () => !peekApiSnapshot("/study-rooms?page=0"),
+  );
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const router = useRouter();
@@ -46,7 +58,9 @@ export function Dashboard() {
     };
   }, [router, page]);
   async function refreshRooms() {
-    const next = await api<Room[]>(`/study-rooms?page=${page}`, { cache: "no-store" });
+    const next = await api<Room[]>(`/study-rooms?page=${page}`, {
+      cache: "no-store",
+    });
     setRooms(next);
   }
   useLiveRefresh("rooms_changed", refreshRooms, 12000);
@@ -65,7 +79,11 @@ export function Dashboard() {
         <div className="dashboard-main">
           <div className="dashboard-intro">
             <h1>
-              <>Seu próximo estudo<br />começa em boa companhia.</>
+              <>
+                Seu próximo estudo
+                <br />
+                começa em boa companhia.
+              </>
             </h1>
             <p className="lead">
               Encontre sua matéria, entre em uma turma e aprenda junto.
@@ -96,11 +114,13 @@ export function Dashboard() {
               </section>
             ) : null}
           </div>
+          {profile ? <EnturmaIntroExperience profile={profile} /> : null}
           {profile ? (
-            <EnturmaIntroExperience profile={profile} />
-          ) : null}
-          {profile ? (
-            <section id="minhas-materias" tabIndex={-1} className="home-subjects-section">
+            <section
+              id="minhas-materias"
+              tabIndex={-1}
+              className="home-subjects-section"
+            >
               <div className="section-heading">
                 <div>
                   <span className="home-section-kicker">
@@ -140,7 +160,8 @@ export function Dashboard() {
                   <div>
                     <h3>Escolha suas matérias</h3>
                     <p>
-                      Elas ficam no Início e conectam você a salas, conteúdos e colegas.
+                      Elas ficam no Início e conectam você a salas, conteúdos e
+                      colegas.
                     </p>
                   </div>
                   <Link className="button" href="/onboarding">
@@ -159,11 +180,14 @@ export function Dashboard() {
                 </Link>
               ) : null}
             </div>
-            <label className="home-room-filter">Filtrar salas<input
-                  value={filter}
-                  onChange={(e) => setFilter(e.target.value)}
-                  placeholder="Busque pelo assunto ou objetivo"
-                /></label>
+            <label className="home-room-filter">
+              Filtrar salas
+              <input
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+                placeholder="Busque pelo assunto ou objetivo"
+              />
+            </label>
             {loading ? (
               <Loading />
             ) : !error && rooms.length === 0 ? (
@@ -215,26 +239,26 @@ export function Dashboard() {
               </div>
             )}
             <div className="actions home-room-pages">
-                <button
-                  disabled={page === 0}
-                  onClick={() => {
-                    setLoading(true);
-                    setPage((p) => p - 1);
-                  }}
-                >
-                  Anterior
-                </button>
-                <span>Página {page + 1}</span>
-                <button
-                  disabled={rooms.length < 30}
-                  onClick={() => {
-                    setLoading(true);
-                    setPage((p) => p + 1);
-                  }}
-                >
-                  Próxima
-                </button>
-              </div>
+              <button
+                disabled={page === 0}
+                onClick={() => {
+                  setLoading(true);
+                  setPage((p) => p - 1);
+                }}
+              >
+                Anterior
+              </button>
+              <span>Página {page + 1}</span>
+              <button
+                disabled={rooms.length < 30}
+                onClick={() => {
+                  setLoading(true);
+                  setPage((p) => p + 1);
+                }}
+              >
+                Próxima
+              </button>
+            </div>
             <ForumHighlights />
           </div>
         </div>

@@ -52,6 +52,7 @@ public class SecurityConfig {
                         "/api/v1/auth/recovery-status",
                         "/api/v1/auth/reset-password",
                         "/api/v1/auth/verify-email",
+                        "/api/v1/auth/academic/confirm",
                         "/ws")
                     .permitAll()
                     .requestMatchers("/api/v1/admin/**")

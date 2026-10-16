@@ -1,10 +1,8 @@
-import { NextResponse } from "next/server";
+import { connection, NextResponse } from "next/server";
 import { backendUrl, websocketUrl } from "@/lib/server-config";
 
-export const runtime = "nodejs";
-export const dynamic = "force-dynamic";
-
 export async function GET() {
+  await connection();
   return NextResponse.json(
     {
       version: "0.3.0",

@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Profile } from "@enturma/contracts";
-import { api, post } from "@/lib/api";
+import { api, post, peekApiSnapshot } from "@/lib/api";
 import { MailCheck, X } from "lucide-react";
 import { Shell } from "./shell";
 import { ProfileDetailsEditor } from "./profile-details-editor";
@@ -21,7 +21,9 @@ export function ProfileView({
   settings?: boolean;
 }) {
   const router = useRouter();
-  const [p, setP] = useState<Profile>();
+  const [p, setP] = useState<Profile | undefined>(() =>
+    peekApiSnapshot<Profile>("/users/me"),
+  );
   const [sessions, setSessions] = useState<
     { id: string; device: string; createdAt: string }[]
   >([]);

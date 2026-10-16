@@ -18,7 +18,7 @@ import {
   Trash2,
   SmilePlus,
 } from "lucide-react";
-import { api, post } from "@/lib/api";
+import { api, post, peekApiSnapshot } from "@/lib/api";
 import { Shell } from "./shell";
 import { UserIdentity, type PublicProfile } from "./user-identity";
 import { Feedback } from "./feedback";
@@ -70,8 +70,15 @@ export function Forum({
   } | null>(null);
   const router = useRouter();
   useNotificationTarget();
-  const [me, setMe] = useState<Me>();
-  const [items, setItems] = useState<Entry[]>([]);
+  const [me, setMe] = useState<Me | undefined>(() =>
+    peekApiSnapshot<Me>("/users/me"),
+  );
+  const [items, setItems] = useState<Entry[]>(
+    () =>
+      peekApiSnapshot<PageData>(
+        `/forum?${new URLSearchParams({ q: "", category: initialCategory, sort: "new", mine: "false", page: "0" })}`,
+      )?.items ?? [],
+  );
   const [current, setCurrent] = useState<Entry>();
   const [comments, setComments] = useState<Entry[]>([]);
   const [related, setRelated] = useState<Entry[]>([]);
@@ -82,7 +89,13 @@ export function Forum({
   const [mine, setMine] = useState(false);
   const [page, setPage] = useState(0);
   const [more, setMore] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(() =>
+    id
+      ? true
+      : !peekApiSnapshot(
+          `/forum?${new URLSearchParams({ q: "", category: initialCategory, sort: "new", mine: "false", page: "0" })}`,
+        ),
+  );
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");

@@ -6,7 +6,6 @@ import {
   websocketUrl,
   upstreamHeaders,
 } from "@/lib/server-config";
-export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   if (!allowedOrigin(req)) return new NextResponse(null, { status: 403 });
   try {
@@ -18,7 +17,11 @@ export async function POST(req: NextRequest) {
         cache: "no-store",
         signal: AbortSignal.timeout(10000),
       });
-      if (check.ok) return NextResponse.json({ ok: true }, { headers: { "Cache-Control": "no-store" } });
+      if (check.ok)
+        return NextResponse.json(
+          { ok: true },
+          { headers: { "Cache-Control": "no-store" } },
+        );
     }
     const refresh = req.cookies.get("enturma_refresh")?.value;
     if (!refresh) return new NextResponse(null, { status: 401 });

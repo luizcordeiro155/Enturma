@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { PROFILE_PALETTES } from "@enturma/contracts";
+import { ProfileBackdrop, profileEntrance } from "./profile-motion";
 import { useRouter } from "next/navigation";
 import {
   Camera,
@@ -12,9 +14,10 @@ import {
   X,
 } from "lucide-react";
 import { ProfileImageEditor } from "./profile-image-editor";
-import { api } from "@/lib/api";
+import { api, peekApiSnapshot } from "@/lib/api";
 import {
   ProfileCard,
+  profileStyle,
   type PublicProfile,
   type ProfileDetails,
 } from "./user-identity";
@@ -34,8 +37,17 @@ export function ProfileDetailsEditor({
 }) {
   const router = useRouter();
   const [status, setStatus] = useState("");
-  const [showcase, setShowcase] = useState<Showcase>();
+  const showcaseEdited = useRef(false);
+  const [showcase, applyShowcase] = useState<Showcase | undefined>(() =>
+    peekApiSnapshot<Showcase>(`/users/${profile.id}/showcase`),
+  );
+  function setShowcase(update: React.SetStateAction<Showcase | undefined>) {
+    showcaseEdited.current = true;
+    applyShowcase(update);
+  }
   const [busy, setBusy] = useState(false);
+  const [previewTab, setPreviewTab] = useState<"PROFILE" | "MURAL">("PROFILE");
+  const preview = useRef<HTMLDivElement>(null);
   const [mediaVersion, setMediaVersion] = useState(0);
   const [crop, setCrop] = useState<{ file: File; kind: "avatar" | "banner" }>();
   const [appearance, setAppearance] = useState({
@@ -53,7 +65,9 @@ export function ProfileDetailsEditor({
     let active = true;
     api<Showcase>(`/users/${profile.id}/showcase`)
       .then((value) => {
-        if (active) setShowcase(value);
+        // Activity restores effects when returning to this page. A background
+        // response must never replace the user's unsaved visual edits.
+        if (active && !showcaseEdited.current) applyShowcase(value);
       })
       .catch((error) => {
         if (active) setStatus(error.message);
@@ -69,7 +83,11 @@ export function ProfileDetailsEditor({
 
   function choose(kind: "avatar" | "banner", file?: File) {
     if (!file) return;
-    if (!["image/jpeg", "image/png", "image/webp", "image/gif"].includes(file.type)) {
+    if (
+      !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
+        file.type,
+      )
+    ) {
       setStatus("Use JPG, PNG, WEBP ou GIF.");
       return;
     }
@@ -83,7 +101,9 @@ export function ProfileDetailsEditor({
   async function upload(file: File) {
     if (!crop) return;
     if (file.size > (crop.kind === "avatar" ? 2 : 3) * 1024 * 1024) {
-      throw Error("A imagem excede o limite. Use o recorte ou escolha um arquivo menor.");
+      throw Error(
+        "A imagem excede o limite. Use o recorte ou escolha um arquivo menor.",
+      );
     }
     const form = new FormData();
     form.set("file", file);
@@ -109,6 +129,8 @@ export function ProfileDetailsEditor({
     setBusy(true);
     setStatus("");
     try {
+      if (!showcase)
+        throw Error("Aguarde o carregamento do perfil antes de salvar.");
       await api("/users/me/appearance", {
         method: "PUT",
         body: JSON.stringify(appearance),
@@ -117,7 +139,6 @@ export function ProfileDetailsEditor({
         method: "PUT",
         body: JSON.stringify(details),
       });
-      if (!showcase) throw Error("Aguarde o carregamento do perfil antes de salvar.");
       await api("/users/me/showcase", {
         method: "PUT",
         body: JSON.stringify({
@@ -180,22 +201,86 @@ export function ProfileDetailsEditor({
           </button>
         </header>
 
-        <div className="profile-single-note">Um único perfil para todo o Enturma</div>
+        <div className="profile-single-note">
+          Um único perfil para todo o Enturma
+        </div>
 
         <div className="profile-editor-scroll">
-          <section className="profile-preview-stage" aria-label="Prévia do perfil">
-            <span className="profile-preview-label">Prévia do perfil</span>
-            <ProfileCard user={previewUser} showcase={showcase} />
+          <section
+            className="profile-preview-stage"
+            aria-label="Prévia do perfil"
+          >
+            <div className="profile-preview-toolbar">
+              <strong>Prévia ao vivo</strong>
+              <button
+                type="button"
+                aria-pressed={previewTab === "PROFILE"}
+                onClick={() => setPreviewTab("PROFILE")}
+              >
+                Perfil
+              </button>
+              <button
+                type="button"
+                aria-pressed={previewTab === "MURAL"}
+                onClick={() => setPreviewTab("MURAL")}
+              >
+                Mural
+              </button>
+              <button
+                type="button"
+                aria-label="Reproduzir animação do perfil"
+                onClick={() => {
+                  if (preview.current)
+                    profileEntrance(
+                      preview.current,
+                      showcase?.appearance.entrance,
+                    );
+                }}
+              >
+                <Sparkles size={18} />
+              </button>
+            </div>
+            <div
+              ref={preview}
+              className="profile-preview-combined"
+              data-preview-tab={previewTab}
+              style={profileStyle(previewUser)}
+            >
+              <div className="profile-preview-identity">
+                <ProfileCard user={previewUser} showcase={showcase} />
+              </div>
+              {showcase ? (
+                <div className="profile-preview-mural profile-public-advanced">
+                  <ProfileBackdrop appearance={showcase.appearance} mural />
+                  <h2>Seu mural</h2>
+                  <ShowcaseView value={showcase} detailed showBadges={false} />
+                  {!showcase.widgets.some((widget) => widget.visible) ? (
+                    <p className="profile-mural-empty">
+                      Escolha os widgets abaixo para compor seu mural.
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
+            </div>
           </section>
 
-          {status ? <p className="profile-save-status" role="status">{status}</p> : null}
+          {status ? (
+            <p className="profile-save-status" role="status">
+              {status}
+            </p>
+          ) : null}
 
           <section className="profile-editor-section">
             <h2>Visual do perfil</h2>
             <div className="profile-media-grid discord-media-grid">
               <label className="profile-media-action">
-                <span className="profile-media-icon"><Camera size={22} /></span>
-                <span><strong>Foto de perfil</strong><small>JPG, PNG, WEBP ou GIF</small></span>
+                <span className="profile-media-icon">
+                  <Camera size={22} />
+                </span>
+                <span>
+                  <strong>Foto de perfil</strong>
+                  <small>JPG, PNG, WEBP ou GIF</small>
+                </span>
                 <ChevronRight size={20} />
                 <input
                   type="file"
@@ -209,8 +294,13 @@ export function ProfileDetailsEditor({
               </label>
 
               <label className="profile-media-action">
-                <span className="profile-media-icon"><ImageIcon size={22} /></span>
-                <span><strong>Banner</strong><small>JPG, PNG, WEBP ou GIF animado</small></span>
+                <span className="profile-media-icon">
+                  <ImageIcon size={22} />
+                </span>
+                <span>
+                  <strong>Banner</strong>
+                  <small>JPG, PNG, WEBP ou GIF animado</small>
+                </span>
                 <ChevronRight size={20} />
                 <input
                   type="file"
@@ -235,7 +325,10 @@ export function ProfileDetailsEditor({
                 minLength={2}
                 maxLength={100}
                 onChange={(event) =>
-                  setAppearance((current) => ({ ...current, name: event.target.value }))
+                  setAppearance((current) => ({
+                    ...current,
+                    name: event.target.value,
+                  }))
                 }
               />
             </label>
@@ -255,7 +348,10 @@ export function ProfileDetailsEditor({
                 maxLength={280}
                 placeholder="Conte um pouco sobre você"
                 onChange={(event) =>
-                  setAppearance((current) => ({ ...current, bio: event.target.value }))
+                  setAppearance((current) => ({
+                    ...current,
+                    bio: event.target.value,
+                  }))
                 }
               />
               <small>{appearance.bio.length}/280</small>
@@ -266,22 +362,68 @@ export function ProfileDetailsEditor({
                 value={details.statusText ?? ""}
                 maxLength={80}
                 placeholder="📚 Estudando algoritmos"
-                onChange={(event) => setDetail("statusText", event.target.value)}
+                onChange={(event) =>
+                  setDetail("statusText", event.target.value)
+                }
               />
             </label>
           </section>
 
           <section className="profile-editor-section">
             <h2>Tema e identidade</h2>
+            <div
+              className="profile-palette-options"
+              aria-label="Paletas do perfil"
+            >
+              {PROFILE_PALETTES.map((palette) => (
+                <button
+                  type="button"
+                  key={palette.name}
+                  title={palette.name}
+                  aria-label={`Usar paleta ${palette.name}`}
+                  style={{
+                    background: `linear-gradient(135deg,${palette.primary},${palette.secondary})`,
+                  }}
+                  onClick={() => {
+                    setAppearance((current) => ({
+                      ...current,
+                      accentColor: palette.primary,
+                    }));
+                    setShowcase((current) =>
+                      current
+                        ? {
+                            ...current,
+                            appearance: {
+                              ...current.appearance,
+                              secondaryColor: palette.secondary,
+                              theme: "GRADIENT",
+                            },
+                          }
+                        : current,
+                    );
+                  }}
+                >
+                  <span>{palette.name}</span>
+                </button>
+              ))}
+            </div>
             <label className="profile-setting-row profile-color-row">
-              <span className="profile-setting-icon"><Palette size={21} /></span>
-              <span><strong>Cor principal</strong><small>{appearance.accentColor}</small></span>
+              <span className="profile-setting-icon">
+                <Palette size={21} />
+              </span>
+              <span>
+                <strong>Cor principal</strong>
+                <small>{appearance.accentColor}</small>
+              </span>
               <input
                 type="color"
                 value={appearance.accentColor}
                 aria-label="Cor principal do perfil"
                 onChange={(event) =>
-                  setAppearance((current) => ({ ...current, accentColor: event.target.value }))
+                  setAppearance((current) => ({
+                    ...current,
+                    accentColor: event.target.value,
+                  }))
                 }
               />
             </label>
@@ -289,7 +431,9 @@ export function ProfileDetailsEditor({
             {showcase ? (
               <>
                 <label className="profile-setting-row profile-color-row">
-                  <span className="profile-setting-icon"><Palette size={21} /></span>
+                  <span className="profile-setting-icon">
+                    <Palette size={21} />
+                  </span>
                   <span>
                     <strong>Cor secundária</strong>
                     <small>{showcase.appearance.secondaryColor}</small>
@@ -315,7 +459,9 @@ export function ProfileDetailsEditor({
                 </label>
 
                 <label className="profile-setting-row">
-                  <span className="profile-setting-icon"><Sparkles size={21} /></span>
+                  <span className="profile-setting-icon">
+                    <Sparkles size={21} />
+                  </span>
                   <span>
                     <strong>Cores do perfil</strong>
                     <small>
@@ -362,7 +508,9 @@ export function ProfileDetailsEditor({
             ) : null}
 
             <label className="profile-setting-row">
-              <span className="profile-setting-icon"><Sparkles size={21} /></span>
+              <span className="profile-setting-icon">
+                <Sparkles size={21} />
+              </span>
               <span>
                 <strong>Decoração do avatar</strong>
                 <small>
@@ -378,7 +526,9 @@ export function ProfileDetailsEditor({
               <select
                 value={details.decoration}
                 aria-label="Decoração do avatar"
-                onChange={(event) => setDetail("decoration", event.target.value)}
+                onChange={(event) =>
+                  setDetail("decoration", event.target.value)
+                }
               >
                 <option value="NONE">Sem decoração</option>
                 <option value="RING">Anel colorido</option>
@@ -388,7 +538,9 @@ export function ProfileDetailsEditor({
             </label>
 
             <label className="profile-setting-row">
-              <span className="profile-setting-icon"><Type size={21} /></span>
+              <span className="profile-setting-icon">
+                <Type size={21} />
+              </span>
               <span>
                 <strong>Estilo do nome</strong>
                 <small>
@@ -439,13 +591,11 @@ export function ProfileDetailsEditor({
               <div className="profile-advanced-heading">
                 <span>Personalização avançada</span>
                 <h2>Mural, efeitos, widgets e privacidade</h2>
-                <p>Todos os recursos já existentes continuam no mesmo perfil global.</p>
+                <p>
+                  Veja as mudanças na prévia. Salve quando ficar do seu jeito.
+                </p>
               </div>
               <ShowcaseFields value={showcase} onChange={setShowcase} />
-              <section className="profile-showcase-preview">
-                <h2>Prévia do mural</h2>
-                <ShowcaseView value={showcase} />
-              </section>
               {showcase.achievements ? (
                 <section className="profile-editor-section">
                   <h2>Suas conquistas</h2>
@@ -457,7 +607,11 @@ export function ProfileDetailsEditor({
             <p className="profile-loading-card">Carregando personalização…</p>
           )}
 
-          <button type="submit" className="profile-desktop-save" disabled={busy || !showcase}>
+          <button
+            type="submit"
+            className="profile-desktop-save"
+            disabled={busy || !showcase}
+          >
             {busy ? "Salvando…" : "Salvar perfil"}
           </button>
           <div className="profile-editor-bottom-space" />
