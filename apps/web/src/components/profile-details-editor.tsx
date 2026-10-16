@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PROFILE_PALETTES } from "@enturma/contracts";
-import { ProfileBackdrop } from "./profile-motion";
+import { ProfileVisualSurface } from "./profile-visual-surface";
 import { useRouter } from "next/navigation";
 import {
   Camera,
@@ -16,14 +16,12 @@ import {
 import { ProfileImageEditor } from "./profile-image-editor";
 import { api, peekApiSnapshot } from "@/lib/api";
 import {
-  ProfileCard,
   profileStyle,
   type PublicProfile,
   type ProfileDetails,
 } from "./user-identity";
 import {
   ShowcaseFields,
-  ShowcaseView,
   AchievementGrid,
   type Showcase,
 } from "./profile-showcase";
@@ -264,27 +262,14 @@ export function ProfileDetailsEditor({
               </button>
 
             </div>
-            <div
-              className={`profile-preview-combined profile-shared-surface ${showcase?.appearance.muralMode === "PROFILE" ? "profile-mural-linked" : ""}`}
-              data-preview-tab={previewTab}
-              style={profileStyle(previewUser)}
-            >
-              <div className="profile-preview-identity">
-                <ProfileCard user={previewUser} showcase={showcase} />
-              </div>
-              {showcase ? (
-                <div className="profile-preview-mural profile-public-advanced">
-                  <ProfileBackdrop appearance={showcase.appearance} mural />
-                  <h2>Seu mural</h2>
-                  <ShowcaseView value={showcase} detailed showBadges={false} />
-                  {!showcase.widgets.some((widget) => widget.visible) ? (
-                    <p className="profile-mural-empty">
-                      Escolha os widgets na edição para compor seu mural.
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
+            {showcase ? (
+              <ProfileVisualSurface
+                user={previewUser}
+                showcase={showcase}
+                preview
+                previewTab={previewTab}
+              />
+            ) : null}
           </section>
 
           <div
