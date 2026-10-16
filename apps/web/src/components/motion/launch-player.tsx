@@ -2,11 +2,15 @@
 import { Player, type PlayerRef } from "@remotion/player";
 import { useEffect, useRef, useState } from "react";
 import { LaunchComposition } from "./launch-composition";
+import { useLightweightLaunch } from "@/lib/launch-performance";
 export default function LaunchPlayer({ ride = false }: { ride?: boolean }) {
   const player = useRef<PlayerRef>(null);
   const [reduced, setReduced] = useState(true);
+  const [lightweight, setLightweight] = useState(false);
   useEffect(() => {
     const instance = player.current;
+    const device = navigator as Navigator & { deviceMemory?: number };
+    setLightweight(useLightweightLaunch(device.deviceMemory, navigator.hardwareConcurrency));
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => {
       const reduce =
@@ -29,7 +33,7 @@ export default function LaunchPlayer({ ride = false }: { ride?: boolean }) {
     <Player
       ref={player}
       component={LaunchComposition}
-      inputProps={{ ride, reduced }}
+      inputProps={{ ride, reduced, lightweight }}
       compositionWidth={560}
       compositionHeight={400}
       fps={24}
