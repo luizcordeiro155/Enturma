@@ -2,11 +2,14 @@
 import { Player, type PlayerRef } from "@remotion/player";
 import { useEffect, useRef, useState } from "react";
 import { LaunchComposition } from "./launch-composition";
-import { useLightweightLaunch } from "@/lib/launch-performance";
+import { isLightweightLaunchDevice } from "@/lib/launch-performance";
 export default function LaunchPlayer({ ride = false }: { ride?: boolean }) {
   const player = useRef<PlayerRef>(null);
   const [reduced, setReduced] = useState(true);
-  const [lightweight, setLightweight] = useState(false);
+  const [lightweight] = useState(() => {
+    const device = navigator as Navigator & { deviceMemory?: number };
+    return isLightweightLaunchDevice(device.deviceMemory, navigator.hardwareConcurrency);
+  });
   useEffect(() => {
     const instance = player.current;
     const device = navigator as Navigator & { deviceMemory?: number };
