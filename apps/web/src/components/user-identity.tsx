@@ -443,7 +443,6 @@ export function UserIdentity({
                   showcase={showcase}
                   actions={!isOwnProfile ? (
                     <>
-<div className="profile-dialog-actions">
                         {friendshipLoading ? (
                           <button type="button" disabled>
                             Verificando amizade…
@@ -497,7 +496,6 @@ export function UserIdentity({
                             Adicionar amizade
                           </button>
                         )}
-                      </div>
                     </>
                   ) : (
                     <Link className="button" href="/profile" onClick={() => setOpen(false)}>
