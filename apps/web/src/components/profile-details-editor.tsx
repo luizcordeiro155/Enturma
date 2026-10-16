@@ -47,6 +47,7 @@ export function ProfileDetailsEditor({
   }
   const [busy, setBusy] = useState(false);
   const [previewTab, setPreviewTab] = useState<"PROFILE" | "MURAL">("PROFILE");
+  const [editorView, setEditorView] = useState<"EDIT" | "PREVIEW">("EDIT");
   const preview = useRef<HTMLDivElement>(null);
   const [mediaVersion, setMediaVersion] = useState(0);
   const [crop, setCrop] = useState<{ file: File; kind: "avatar" | "banner" }>();
@@ -171,9 +172,19 @@ export function ProfileDetailsEditor({
   };
 
   return (
-    <section className="profile-details-editor profile-discord-editor">
+    <section
+      className="profile-details-editor profile-discord-editor profile-studio"
+      data-editor-view={editorView}
+    >
       <form
         className="profile-discord-form"
+        onInvalidCapture={(event) => {
+          if (editorView !== "PREVIEW") return;
+          event.preventDefault();
+          setEditorView("EDIT");
+          const field = event.target as HTMLInputElement;
+          requestAnimationFrame(() => field.reportValidity());
+        }}
         onSubmit={(event) => {
           event.preventDefault();
           void saveProfile();
@@ -189,8 +200,8 @@ export function ProfileDetailsEditor({
             <X size={28} />
           </button>
           <div>
-            <strong>Perfil</strong>
-            <small>Usado em todo o Enturma</small>
+            <strong>Personalizar perfil</strong>
+            <small>Seu perfil, do seu jeito.</small>
           </div>
           <button
             type="submit"
@@ -201,9 +212,31 @@ export function ProfileDetailsEditor({
           </button>
         </header>
 
-        <div className="profile-single-note">
-          Um único perfil para todo o Enturma
+        <div
+          className="profile-studio-mobile-switch"
+          aria-label="Modo de personalização"
+        >
+          <button
+            type="button"
+            aria-pressed={editorView === "EDIT"}
+            onClick={() => setEditorView("EDIT")}
+          >
+            Editar
+          </button>
+          <button
+            type="button"
+            aria-pressed={editorView === "PREVIEW"}
+            onClick={() => setEditorView("PREVIEW")}
+          >
+            Ver prévia
+          </button>
         </div>
+
+        {status ? (
+          <p className="profile-save-status" role="status">
+            {status}
+          </p>
+        ) : null}
 
         <div className="profile-editor-scroll">
           <section
@@ -256,7 +289,7 @@ export function ProfileDetailsEditor({
                   <ShowcaseView value={showcase} detailed showBadges={false} />
                   {!showcase.widgets.some((widget) => widget.visible) ? (
                     <p className="profile-mural-empty">
-                      Escolha os widgets abaixo para compor seu mural.
+                      Escolha os widgets na edição para compor seu mural.
                     </p>
                   ) : null}
                 </div>
@@ -264,357 +297,363 @@ export function ProfileDetailsEditor({
             </div>
           </section>
 
-          {status ? (
-            <p className="profile-save-status" role="status">
-              {status}
-            </p>
-          ) : null}
-
-          <section className="profile-editor-section">
-            <h2>Visual do perfil</h2>
-            <div className="profile-media-grid discord-media-grid">
-              <label className="profile-media-action">
-                <span className="profile-media-icon">
-                  <Camera size={22} />
-                </span>
-                <span>
-                  <strong>Foto de perfil</strong>
-                  <small>JPG, PNG, WEBP ou GIF</small>
-                </span>
-                <ChevronRight size={20} />
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  disabled={busy}
-                  onChange={(event) => {
-                    choose("avatar", event.target.files?.[0]);
-                    event.target.value = "";
-                  }}
-                />
-              </label>
-
-              <label className="profile-media-action">
-                <span className="profile-media-icon">
-                  <ImageIcon size={22} />
-                </span>
-                <span>
-                  <strong>Banner</strong>
-                  <small>JPG, PNG, WEBP ou GIF animado</small>
-                </span>
-                <ChevronRight size={20} />
-                <input
-                  type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif"
-                  disabled={busy}
-                  onChange={(event) => {
-                    choose("banner", event.target.files?.[0]);
-                    event.target.value = "";
-                  }}
-                />
-              </label>
-            </div>
-          </section>
-
-          <section className="profile-editor-section">
-            <h2>Sobre você</h2>
-            <label className="profile-discord-field">
-              <span>Nome exibido</span>
-              <input
-                value={appearance.name}
-                required
-                minLength={2}
-                maxLength={100}
-                onChange={(event) =>
-                  setAppearance((current) => ({
-                    ...current,
-                    name: event.target.value,
-                  }))
-                }
-              />
-            </label>
-            <label className="profile-discord-field">
-              <span>Pronomes</span>
-              <input
-                value={details.pronouns ?? ""}
-                maxLength={40}
-                placeholder="Opcional"
-                onChange={(event) => setDetail("pronouns", event.target.value)}
-              />
-            </label>
-            <label className="profile-discord-field">
-              <span>Bio</span>
-              <textarea
-                value={appearance.bio}
-                maxLength={280}
-                placeholder="Conte um pouco sobre você"
-                onChange={(event) =>
-                  setAppearance((current) => ({
-                    ...current,
-                    bio: event.target.value,
-                  }))
-                }
-              />
-              <small>{appearance.bio.length}/280</small>
-            </label>
-            <label className="profile-discord-field">
-              <span>Status personalizado</span>
-              <input
-                value={details.statusText ?? ""}
-                maxLength={80}
-                placeholder="📚 Estudando algoritmos"
-                onChange={(event) =>
-                  setDetail("statusText", event.target.value)
-                }
-              />
-            </label>
-          </section>
-
-          <section className="profile-editor-section">
-            <h2>Tema e identidade</h2>
-            <div
-              className="profile-palette-options"
-              aria-label="Paletas do perfil"
-            >
-              {PROFILE_PALETTES.map((palette) => (
-                <button
-                  type="button"
-                  key={palette.name}
-                  title={palette.name}
-                  aria-label={`Usar paleta ${palette.name}`}
-                  style={{
-                    background: `linear-gradient(135deg,${palette.primary},${palette.secondary})`,
-                  }}
-                  onClick={() => {
-                    setAppearance((current) => ({
-                      ...current,
-                      accentColor: palette.primary,
-                    }));
-                    setShowcase((current) =>
-                      current
-                        ? {
-                            ...current,
-                            appearance: {
-                              ...current.appearance,
-                              secondaryColor: palette.secondary,
-                              theme: "GRADIENT",
-                            },
-                          }
-                        : current,
-                    );
-                  }}
-                >
-                  <span>{palette.name}</span>
-                </button>
-              ))}
-            </div>
-            <label className="profile-setting-row profile-color-row">
-              <span className="profile-setting-icon">
-                <Palette size={21} />
-              </span>
-              <span>
-                <strong>Cor principal</strong>
-                <small>{appearance.accentColor}</small>
-              </span>
-              <input
-                type="color"
-                value={appearance.accentColor}
-                aria-label="Cor principal do perfil"
-                onChange={(event) =>
-                  setAppearance((current) => ({
-                    ...current,
-                    accentColor: event.target.value,
-                  }))
-                }
-              />
-            </label>
-
-            {showcase ? (
-              <>
-                <label className="profile-setting-row profile-color-row">
-                  <span className="profile-setting-icon">
-                    <Palette size={21} />
+          <div
+            className="profile-editor-controls"
+            aria-label="Opções de personalização"
+            tabIndex={0}
+          >
+            <section className="profile-editor-section">
+              <h2>Visual do perfil</h2>
+              <div className="profile-media-grid discord-media-grid">
+                <label className="profile-media-action">
+                  <span className="profile-media-icon">
+                    <Camera size={22} />
                   </span>
                   <span>
-                    <strong>Cor secundária</strong>
-                    <small>{showcase.appearance.secondaryColor}</small>
+                    <strong>Foto de perfil</strong>
+                    <small>JPG, PNG, WEBP ou GIF</small>
                   </span>
+                  <ChevronRight size={20} />
                   <input
-                    type="color"
-                    value={showcase.appearance.secondaryColor}
-                    aria-label="Cor secundária do perfil"
-                    onChange={(event) =>
-                      setShowcase((current) =>
-                        current
-                          ? {
-                              ...current,
-                              appearance: {
-                                ...current.appearance,
-                                secondaryColor: event.target.value,
-                              },
-                            }
-                          : current,
-                      )
-                    }
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    disabled={busy}
+                    onChange={(event) => {
+                      choose("avatar", event.target.files?.[0]);
+                      event.target.value = "";
+                    }}
                   />
                 </label>
 
-                <label className="profile-setting-row">
-                  <span className="profile-setting-icon">
-                    <Sparkles size={21} />
+                <label className="profile-media-action">
+                  <span className="profile-media-icon">
+                    <ImageIcon size={22} />
                   </span>
                   <span>
-                    <strong>Cores do perfil</strong>
-                    <small>
-                      {showcase.appearance.theme === "GRADIENT"
-                        ? "Degradê entre as duas cores"
-                        : "Cor principal sólida"}
-                    </small>
+                    <strong>Banner</strong>
+                    <small>JPG, PNG, WEBP ou GIF animado</small>
                   </span>
-                  <select
-                    value={showcase.appearance.theme}
-                    aria-label="Modo das cores do perfil"
-                    onChange={(event) =>
+                  <ChevronRight size={20} />
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    disabled={busy}
+                    onChange={(event) => {
+                      choose("banner", event.target.files?.[0]);
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section className="profile-editor-section">
+              <h2>Sobre você</h2>
+              <label className="profile-discord-field">
+                <span>Nome exibido</span>
+                <input
+                  value={appearance.name}
+                  required
+                  minLength={2}
+                  maxLength={100}
+                  onChange={(event) =>
+                    setAppearance((current) => ({
+                      ...current,
+                      name: event.target.value,
+                    }))
+                  }
+                />
+              </label>
+              <label className="profile-discord-field">
+                <span>Pronomes</span>
+                <input
+                  value={details.pronouns ?? ""}
+                  maxLength={40}
+                  placeholder="Opcional"
+                  onChange={(event) =>
+                    setDetail("pronouns", event.target.value)
+                  }
+                />
+              </label>
+              <label className="profile-discord-field">
+                <span>Bio</span>
+                <textarea
+                  value={appearance.bio}
+                  maxLength={280}
+                  placeholder="Conte um pouco sobre você"
+                  onChange={(event) =>
+                    setAppearance((current) => ({
+                      ...current,
+                      bio: event.target.value,
+                    }))
+                  }
+                />
+                <small>{appearance.bio.length}/280</small>
+              </label>
+              <label className="profile-discord-field">
+                <span>Status personalizado</span>
+                <input
+                  value={details.statusText ?? ""}
+                  maxLength={80}
+                  placeholder="📚 Estudando algoritmos"
+                  onChange={(event) =>
+                    setDetail("statusText", event.target.value)
+                  }
+                />
+              </label>
+            </section>
+
+            <section className="profile-editor-section">
+              <h2>Tema e identidade</h2>
+              <div
+                className="profile-palette-options"
+                aria-label="Paletas do perfil"
+              >
+                {PROFILE_PALETTES.map((palette) => (
+                  <button
+                    type="button"
+                    key={palette.name}
+                    title={palette.name}
+                    aria-label={`Usar paleta ${palette.name}`}
+                    style={{
+                      background: `linear-gradient(135deg,${palette.primary},${palette.secondary})`,
+                    }}
+                    onClick={() => {
+                      setAppearance((current) => ({
+                        ...current,
+                        accentColor: palette.primary,
+                      }));
                       setShowcase((current) =>
                         current
                           ? {
                               ...current,
                               appearance: {
                                 ...current.appearance,
-                                theme: event.target.value,
+                                secondaryColor: palette.secondary,
+                                theme: "GRADIENT",
                               },
                             }
                           : current,
-                      )
-                    }
+                      );
+                    }}
                   >
-                    <option value="SOLID">Cor sólida</option>
-                    <option value="GRADIENT">Duas cores</option>
-                  </select>
-                </label>
-
-                <div
-                  className="profile-dual-color-preview"
-                  aria-label="Prévia das cores do perfil"
-                  style={{
-                    background:
-                      showcase.appearance.theme === "GRADIENT"
-                        ? `linear-gradient(135deg,${appearance.accentColor},${showcase.appearance.secondaryColor})`
-                        : appearance.accentColor,
-                  }}
-                >
-                  <span>Prévia das cores</span>
-                </div>
-              </>
-            ) : null}
-
-            <label className="profile-setting-row">
-              <span className="profile-setting-icon">
-                <Sparkles size={21} />
-              </span>
-              <span>
-                <strong>Decoração do avatar</strong>
-                <small>
-                  {details.decoration === "NONE"
-                    ? "Nenhuma"
-                    : details.decoration === "RING"
-                      ? "Anel colorido"
-                      : details.decoration === "GLOW"
-                        ? "Brilho"
-                        : "Anel degradê"}
-                </small>
-              </span>
-              <select
-                value={details.decoration}
-                aria-label="Decoração do avatar"
-                onChange={(event) =>
-                  setDetail("decoration", event.target.value)
-                }
-              >
-                <option value="NONE">Sem decoração</option>
-                <option value="RING">Anel colorido</option>
-                <option value="GLOW">Brilho</option>
-                <option value="GRADIENT">Anel degradê</option>
-              </select>
-            </label>
-
-            <label className="profile-setting-row">
-              <span className="profile-setting-icon">
-                <Type size={21} />
-              </span>
-              <span>
-                <strong>Estilo do nome</strong>
-                <small>
-                  {details.nameFont === "MONO"
-                    ? "Código"
-                    : details.nameFont === "SERIF"
-                      ? "Editorial"
-                      : "Padrão"}
-                </small>
-              </span>
-              <select
-                value={details.nameFont}
-                aria-label="Estilo do nome"
-                onChange={(event) => setDetail("nameFont", event.target.value)}
-              >
-                <option value="SYSTEM">Padrão</option>
-                <option value="MONO">Código</option>
-                <option value="SERIF">Editorial</option>
-              </select>
-            </label>
-          </section>
-
-          <section className="profile-editor-section">
-            <h2>Mais sobre você</h2>
-            <label className="profile-discord-field">
-              <span>Interesses</span>
-              <input
-                value={details.interests ?? ""}
-                maxLength={120}
-                placeholder="JavaScript, UX, jogos…"
-                onChange={(event) => setDetail("interests", event.target.value)}
-              />
-            </label>
-            <label className="profile-discord-field">
-              <span>Site ou GitHub</span>
-              <input
-                type="url"
-                value={details.website ?? ""}
-                maxLength={200}
-                placeholder="https://"
-                onChange={(event) => setDetail("website", event.target.value)}
-              />
-            </label>
-          </section>
-
-          {showcase ? (
-            <section className="profile-advanced-area">
-              <div className="profile-advanced-heading">
-                <span>Personalização avançada</span>
-                <h2>Mural, efeitos, widgets e privacidade</h2>
-                <p>
-                  Veja as mudanças na prévia. Salve quando ficar do seu jeito.
-                </p>
+                    <span>{palette.name}</span>
+                  </button>
+                ))}
               </div>
-              <ShowcaseFields value={showcase} onChange={setShowcase} />
-              {showcase.achievements ? (
-                <section className="profile-editor-section">
-                  <h2>Suas conquistas</h2>
-                  <AchievementGrid achievements={showcase.achievements} />
-                </section>
-              ) : null}
-            </section>
-          ) : (
-            <p className="profile-loading-card">Carregando personalização…</p>
-          )}
+              <label className="profile-setting-row profile-color-row">
+                <span className="profile-setting-icon">
+                  <Palette size={21} />
+                </span>
+                <span>
+                  <strong>Cor principal</strong>
+                  <small>{appearance.accentColor}</small>
+                </span>
+                <input
+                  type="color"
+                  value={appearance.accentColor}
+                  aria-label="Cor principal do perfil"
+                  onChange={(event) =>
+                    setAppearance((current) => ({
+                      ...current,
+                      accentColor: event.target.value,
+                    }))
+                  }
+                />
+              </label>
 
-          <button
-            type="submit"
-            className="profile-desktop-save"
-            disabled={busy || !showcase}
-          >
-            {busy ? "Salvando…" : "Salvar perfil"}
-          </button>
-          <div className="profile-editor-bottom-space" />
+              {showcase ? (
+                <>
+                  <label className="profile-setting-row profile-color-row">
+                    <span className="profile-setting-icon">
+                      <Palette size={21} />
+                    </span>
+                    <span>
+                      <strong>Cor secundária</strong>
+                      <small>{showcase.appearance.secondaryColor}</small>
+                    </span>
+                    <input
+                      type="color"
+                      value={showcase.appearance.secondaryColor}
+                      aria-label="Cor secundária do perfil"
+                      onChange={(event) =>
+                        setShowcase((current) =>
+                          current
+                            ? {
+                                ...current,
+                                appearance: {
+                                  ...current.appearance,
+                                  secondaryColor: event.target.value,
+                                },
+                              }
+                            : current,
+                        )
+                      }
+                    />
+                  </label>
+
+                  <label className="profile-setting-row">
+                    <span className="profile-setting-icon">
+                      <Sparkles size={21} />
+                    </span>
+                    <span>
+                      <strong>Cores do perfil</strong>
+                      <small>
+                        {showcase.appearance.theme === "GRADIENT"
+                          ? "Degradê entre as duas cores"
+                          : "Cor principal sólida"}
+                      </small>
+                    </span>
+                    <select
+                      value={showcase.appearance.theme}
+                      aria-label="Modo das cores do perfil"
+                      onChange={(event) =>
+                        setShowcase((current) =>
+                          current
+                            ? {
+                                ...current,
+                                appearance: {
+                                  ...current.appearance,
+                                  theme: event.target.value,
+                                },
+                              }
+                            : current,
+                        )
+                      }
+                    >
+                      <option value="SOLID">Cor sólida</option>
+                      <option value="GRADIENT">Duas cores</option>
+                    </select>
+                  </label>
+
+                  <div
+                    className="profile-dual-color-preview"
+                    aria-label="Prévia das cores do perfil"
+                    style={{
+                      background:
+                        showcase.appearance.theme === "GRADIENT"
+                          ? `linear-gradient(135deg,${appearance.accentColor},${showcase.appearance.secondaryColor})`
+                          : appearance.accentColor,
+                    }}
+                  >
+                    <span>Prévia das cores</span>
+                  </div>
+                </>
+              ) : null}
+
+              <label className="profile-setting-row">
+                <span className="profile-setting-icon">
+                  <Sparkles size={21} />
+                </span>
+                <span>
+                  <strong>Decoração do avatar</strong>
+                  <small>
+                    {details.decoration === "NONE"
+                      ? "Nenhuma"
+                      : details.decoration === "RING"
+                        ? "Anel colorido"
+                        : details.decoration === "GLOW"
+                          ? "Brilho"
+                          : "Anel degradê"}
+                  </small>
+                </span>
+                <select
+                  value={details.decoration}
+                  aria-label="Decoração do avatar"
+                  onChange={(event) =>
+                    setDetail("decoration", event.target.value)
+                  }
+                >
+                  <option value="NONE">Sem decoração</option>
+                  <option value="RING">Anel colorido</option>
+                  <option value="GLOW">Brilho</option>
+                  <option value="GRADIENT">Anel degradê</option>
+                </select>
+              </label>
+
+              <label className="profile-setting-row">
+                <span className="profile-setting-icon">
+                  <Type size={21} />
+                </span>
+                <span>
+                  <strong>Estilo do nome</strong>
+                  <small>
+                    {details.nameFont === "MONO"
+                      ? "Código"
+                      : details.nameFont === "SERIF"
+                        ? "Editorial"
+                        : "Padrão"}
+                  </small>
+                </span>
+                <select
+                  value={details.nameFont}
+                  aria-label="Estilo do nome"
+                  onChange={(event) =>
+                    setDetail("nameFont", event.target.value)
+                  }
+                >
+                  <option value="SYSTEM">Padrão</option>
+                  <option value="MONO">Código</option>
+                  <option value="SERIF">Editorial</option>
+                </select>
+              </label>
+            </section>
+
+            <section className="profile-editor-section">
+              <h2>Mais sobre você</h2>
+              <label className="profile-discord-field">
+                <span>Interesses</span>
+                <input
+                  value={details.interests ?? ""}
+                  maxLength={120}
+                  placeholder="JavaScript, UX, jogos…"
+                  onChange={(event) =>
+                    setDetail("interests", event.target.value)
+                  }
+                />
+              </label>
+              <label className="profile-discord-field">
+                <span>Site ou GitHub</span>
+                <input
+                  type="url"
+                  value={details.website ?? ""}
+                  maxLength={200}
+                  placeholder="https://"
+                  onChange={(event) => setDetail("website", event.target.value)}
+                />
+              </label>
+            </section>
+
+            {showcase ? (
+              <section className="profile-advanced-area">
+                <div className="profile-advanced-heading">
+                  <span>Personalização avançada</span>
+                  <h2>Mural, efeitos, widgets e privacidade</h2>
+                  <p>
+                    Veja as mudanças na prévia. Salve quando ficar do seu jeito.
+                  </p>
+                </div>
+                <ShowcaseFields value={showcase} onChange={setShowcase} />
+                {showcase.achievements ? (
+                  <section className="profile-editor-section">
+                    <h2>Suas conquistas</h2>
+                    <AchievementGrid achievements={showcase.achievements} />
+                  </section>
+                ) : null}
+              </section>
+            ) : (
+              <p className="profile-loading-card">Carregando personalização…</p>
+            )}
+
+            <button
+              type="submit"
+              className="profile-desktop-save"
+              disabled={busy || !showcase}
+            >
+              {busy ? "Salvando…" : "Salvar perfil"}
+            </button>
+            <div className="profile-editor-bottom-space" />
+          </div>
         </div>
       </form>
 

@@ -9,6 +9,8 @@ html .profile-public-primary::before {
 html .public-profile-card .public-profile-banner {
   background: var(--soft);
   background-image: none;
+  height: auto;
+  aspect-ratio: 3 / 1;
 }
 html .public-profile-card .public-profile-body,
 html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
@@ -188,53 +190,366 @@ html .profile-public-advanced .profile-stat-row > span {
   outline: 3px solid var(--ink);
   outline-offset: 3px;
 }
-@media (min-width: 1450px) {
-  .profile-editor-scroll {
-    grid-template-columns: minmax(460px, 1.1fr) minmax(0, 1fr);
+/* The editor allocates space to its preview, rather than splitting a narrow
+   preview again based on the browser width. The same mural sizing is used in
+   public profiles so real widgets stay readable at every container width. */
+.profile-customization-page {
+  max-width: 1560px;
+}
+.profile-customization-page > .profile-page-heading h1 {
+  font-size: 28px;
+  margin: 0 0 18px;
+}
+.profile-studio.profile-discord-editor {
+  margin: 0 0 32px;
+  border: 1px solid var(--border) !important;
+  border-radius: 22px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.profile-studio .profile-discord-form {
+  display: flex;
+  flex-direction: column;
+  height: min(900px, calc(100dvh - 180px));
+  min-height: 560px;
+}
+.profile-studio .profile-mobile-editor-header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 16px 22px;
+  border-bottom: 1px solid var(--border);
+  flex: none;
+  background: var(--surface);
+}
+.profile-studio .profile-mobile-editor-header > div {
+  display: grid;
+  gap: 4px;
+  flex: 1;
+}
+.profile-studio .profile-mobile-editor-header strong {
+  font-size: 18px;
+}
+.profile-studio .profile-mobile-editor-header small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.profile-studio .profile-editor-close {
+  display: none;
+}
+.profile-studio-mobile-switch {
+  display: none;
+}
+.profile-studio .profile-editor-scroll {
+  display: grid;
+  grid-template-columns: minmax(280px, 320px) minmax(0, 1fr);
+  gap: 0;
+  flex: 1;
+  min-height: 0;
+  align-items: stretch;
+  overflow: hidden;
+}
+.profile-studio .profile-editor-controls {
+  grid-column: 1;
+  grid-row: 1;
+  min-width: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border-right: 1px solid var(--border);
+  scrollbar-width: thin;
+  scrollbar-gutter: stable;
+}
+.profile-studio .profile-editor-controls > * {
+  flex: none;
+  min-width: 0;
+}
+.profile-studio .profile-editor-section {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  border-radius: 0;
+  gap: 14px;
+}
+.profile-studio .profile-editor-section + .profile-editor-section {
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+.profile-studio .profile-media-grid {
+  grid-template-columns: 1fr;
+  margin: 0;
+}
+.profile-studio .profile-setting-row {
+  grid-template-columns: 36px minmax(0, 1fr);
+  padding: 10px;
+}
+.profile-studio .profile-setting-icon {
+  width: 34px;
+  height: 34px;
+}
+.profile-studio .profile-setting-row > :is(select, input) {
+  grid-column: 1/-1;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+.profile-studio .profile-color-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+}
+.profile-studio .profile-color-row .profile-setting-icon {
+  display: none;
+}
+.profile-studio .profile-color-row > input {
+  grid-column: auto;
+  width: 58px;
+}
+.profile-studio .profile-palette-options {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.profile-studio .profile-palette-options button {
+  min-width: 0;
+}
+.profile-studio .profile-save-status {
+  grid-column: auto;
+  overflow-wrap: anywhere;
+  flex: none;
+  margin: 8px 18px;
+}
+.profile-studio .profile-advanced-heading {
+  padding: 14px;
+}
+.profile-studio .profile-advanced-heading p {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+.profile-studio .showcase-fields :is(input, textarea, select) {
+  max-width: 100%;
+  min-width: 0;
+}
+.profile-studio .showcase-fields {
+  min-inline-size: 0;
+}
+.profile-studio .widget-editor-row .actions {
+  display: flex;
+}
+.profile-studio .profile-preview-stage {
+  container: profile-preview / inline-size;
+  grid-column: 2;
+  grid-row: 1;
+  position: relative;
+  top: auto;
+  min-width: 0;
+  min-height: 0;
+  margin: 0;
+  padding: 20px 24px 24px;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+.profile-studio .profile-preview-toolbar {
+  flex: none;
+}
+html .profile-studio .profile-preview-toolbar button {
+  background: var(--surface);
+  color: var(--ink);
+  border-color: var(--border);
+}
+.profile-studio .profile-preview-combined {
+  min-height: 0;
+  flex: 1;
+  align-content: start;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  overscroll-behavior: contain;
+  grid-template-columns: minmax(0, 1fr);
+  background: var(--surface);
+}
+.profile-studio .profile-preview-identity {
+  min-width: 0;
+  background: var(--profile-gradient);
+}
+.profile-studio .profile-preview-combined .public-profile-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.profile-studio .profile-preview-combined .public-profile-banner {
+  flex: none;
+  height: auto;
+  aspect-ratio: 3 / 1;
+}
+.profile-studio .profile-preview-combined .public-profile-body {
+  flex: 1;
+  padding: 0 18px 24px;
+}
+.profile-studio
+  .profile-preview-combined
+  .public-profile-body
+  > .identity-avatar {
+  width: 88px;
+  height: 88px;
+  margin-top: -40px;
+}
+.profile-studio .profile-copy-content {
+  padding: 12px 4px;
+}
+.profile-studio .profile-copy-content h2 {
+  font-size: clamp(20px, 2cqw, 28px);
+  line-height: 1.2;
+  margin: 12px 0 8px;
+}
+.profile-studio .profile-copy-content p {
+  margin: 12px 0;
+  line-height: 1.5;
+}
+.profile-studio .profile-preview-mural {
+  min-width: 0;
+  padding: 24px !important;
+}
+.profile-studio .profile-preview-mural > h2 {
+  font-size: 22px;
+  margin: 0 0 18px;
+}
+.profile-public-advanced {
+  container: profile-mural / inline-size;
+}
+.profile-public-advanced .profile-advanced-highlights,
+.profile-public-advanced .profile-showcase-detailed .showcase-grid,
+.profile-public-advanced .profile-showcase-detailed .achievement-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+.profile-public-advanced .profile-advanced-highlight,
+.profile-public-advanced .profile-advanced-academic {
+  color: var(--ink);
+}
+.profile-public-advanced
+  :is(
+    .achievement-card-heading,
+    .profile-advanced-highlight > div,
+    .profile-advanced-academic > div
+  ) {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.profile-public-advanced .profile-showcase-detailed {
+  display: grid;
+  gap: 18px;
+}
+.profile-public-advanced .profile-stat-row {
+  gap: 8px;
+}
+@container profile-preview (min-width: 720px) {
+  .profile-studio .profile-preview-combined {
+    grid-template-columns: minmax(320px, 0.9fr) minmax(360px, 1.1fr);
+    align-content: stretch;
   }
-  .profile-preview-combined {
-    grid-template-columns: minmax(240px, 1fr) minmax(220px, 1fr);
+  .profile-studio .profile-preview-combined .profile-preview-identity,
+  .profile-studio .profile-preview-combined .profile-preview-mural {
+    display: block;
   }
-  .profile-preview-combined .profile-preview-identity,
-  .profile-preview-combined .profile-preview-mural {
-    display: block !important;
-  }
-  .profile-preview-toolbar button[aria-pressed] {
+  .profile-studio .profile-preview-toolbar button[aria-pressed] {
     display: none;
   }
 }
+@container profile-mural (min-width: 580px) {
+  .profile-public-advanced .profile-advanced-highlights,
+  .profile-public-advanced .profile-showcase-detailed .showcase-grid,
+  .profile-public-advanced .profile-showcase-detailed .achievement-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1100px) and (min-width: 761px) {
+  .profile-studio .profile-editor-scroll {
+    grid-template-columns: minmax(250px, 0.9fr) minmax(320px, 1.1fr);
+  }
+  .profile-studio .profile-preview-stage {
+    padding: 16px;
+  }
+}
 @media (max-width: 760px) {
-  .profile-preview-stage {
-    position: sticky !important;
-    top: -14px !important;
-    z-index: 12;
-    background: var(--surface);
-    padding-top: 8px;
-    padding-bottom: 12px;
+  .profile-studio.profile-discord-editor {
+    border: 0 !important;
+    border-radius: 0;
+    height: 100dvh;
   }
-  .profile-preview-combined {
-    max-height: 32dvh;
+  .profile-studio .profile-discord-form {
+    height: 100dvh;
+    min-height: 0;
+  }
+  .profile-studio .profile-mobile-editor-header {
+    padding: calc(8px + var(--enturma-safe-top)) 14px 8px;
+    min-height: 66px;
+  }
+  .profile-studio .profile-mobile-editor-header strong {
+    font-size: 17px;
+  }
+  .profile-studio .profile-editor-close {
+    display: grid;
+    place-items: center;
+  }
+  .profile-studio-mobile-switch {
+    display: flex;
+    flex: none;
+    padding: 8px 14px;
+    gap: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+  html .profile-studio-mobile-switch button {
+    flex: 1;
+    min-height: 40px;
+    padding: 8px 16px;
+    background: var(--soft);
+    color: var(--ink);
+    border-color: transparent;
+  }
+  .profile-studio .profile-editor-scroll {
+    display: block;
+    height: auto;
+    padding: 16px !important;
+    padding-bottom: calc(24px + var(--enturma-safe-bottom)) !important;
     overflow-y: auto;
-    overscroll-behavior: contain;
+    background: var(--surface);
   }
-  .profile-preview-combined .public-profile-banner {
-    height: 86px;
+  .profile-studio .profile-editor-controls {
+    padding: 0;
+    border: 0;
+    overflow: visible;
+    scrollbar-gutter: auto;
   }
-  .profile-preview-combined .public-profile-body > .identity-avatar {
-    width: 54px;
-    height: 54px;
-    margin-top: -28px;
+  .profile-studio .profile-editor-section {
+    margin: 0 !important;
+    padding: 18px !important;
+    border: 1px solid var(--border);
+    border-radius: 16px;
   }
-  .profile-copy-content {
-    padding: 6px;
+  .profile-studio .profile-preview-stage {
+    display: none;
+    padding: 0;
+    background: transparent;
   }
-  .profile-preview-combined h2 {
-    font-size: 1.1rem;
+  .profile-studio[data-editor-view="PREVIEW"] .profile-editor-controls {
+    display: none;
   }
-  .profile-preview-combined .public-profile-body {
-    padding-bottom: 10px;
+  .profile-studio[data-editor-view="PREVIEW"] .profile-preview-stage {
+    display: flex;
   }
-  .profile-preview-toolbar {
-    margin-bottom: 8px;
+  .profile-studio .profile-preview-combined {
+    max-height: none;
+    overflow: hidden;
+    flex: none;
+  }
+  .profile-studio .profile-preview-mural {
+    padding: 18px !important;
+  }
+  .profile-studio .profile-copy-content h2 {
+    font-size: 24px;
+  }
+  .profile-studio .profile-editor-bottom-space {
+    display: none;
   }
 }

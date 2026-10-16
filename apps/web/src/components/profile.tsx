@@ -149,7 +149,13 @@ export function ProfileView({
 
   return (
     <Shell>
-      <div className={subjectsOnly ? "narrow" : "profile-page"}>
+      <div
+        className={
+          subjectsOnly
+            ? "narrow"
+            : `profile-page${settings ? "" : " profile-customization-page"}`
+        }
+      >
         <div className="profile-page-heading">
           <h1>
             {subjectsOnly
