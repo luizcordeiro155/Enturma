@@ -4,7 +4,7 @@ import {
   REDUCED_LAUNCH_MIN_MS,
   RIDE_LAUNCH_MIN_MS,
   launchRemainingMs,
-  useLightweightLaunch,
+  isLightweightLaunchDevice,
 } from "./launch-performance";
 
 describe("consistent Enturma launch", () => {
@@ -21,9 +21,9 @@ describe("consistent Enturma launch", () => {
     expect(launchRemainingMs(0, 250, "app", true)).toBe(0);
   });
   it("simplifies effects on low-resource PCs without disabling animation", () => {
-    expect(useLightweightLaunch(4, 8)).toBe(true);
-    expect(useLightweightLaunch(8, 4)).toBe(true);
-    expect(useLightweightLaunch(8, 8)).toBe(false);
-    expect(useLightweightLaunch(undefined, undefined)).toBe(false);
+    expect(isLightweightLaunchDevice(4, 8)).toBe(true);
+    expect(isLightweightLaunchDevice(8, 4)).toBe(true);
+    expect(isLightweightLaunchDevice(8, 8)).toBe(false);
+    expect(isLightweightLaunchDevice(undefined, undefined)).toBe(false);
   });
 });
