@@ -26,7 +26,7 @@ export function LaunchComposition({
       })
     : 0;
   const arrive = spring({
-    frame,
+    frame: Math.max(0, frame - 6),
     fps,
     config: { damping: 17, stiffness: 105 },
   });
