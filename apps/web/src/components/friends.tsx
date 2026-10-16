@@ -645,10 +645,6 @@ export function Friends() {
     try {
       await post(`/friends/${friendshipId}/messages`, payload);
       pendingSends.current.delete(clientId);
-      const currentFriend = selected?.id === friendshipId ? selected : undefined;
-      if (currentFriend && key.current) {
-        await load(currentFriend, key.current, 0, generation.current);
-      }
       setMessages((old) =>
         old.map((message) =>
           message.clientId === clientId
@@ -656,6 +652,13 @@ export function Friends() {
             : message,
         ),
       );
+      const currentFriend = selected?.id === friendshipId ? selected : undefined;
+      if (currentFriend && key.current) {
+        void load(currentFriend, key.current, 0, generation.current).catch(() => {
+          // Server already confirmed delivery; a refresh failure must not mark
+          // the message as undelivered.
+        });
+      }
     } catch (error) {
       setMessages((old) =>
         old.map((message) =>
@@ -695,6 +698,7 @@ export function Friends() {
     const clientId = crypto.randomUUID();
     const now = new Date().toISOString();
     const preview = imagePreview;
+    if (preview) attachmentUrls.current.add(preview);
     // Show the outgoing bubble before encryption and the server round trip.
     const optimistic: PrivateMessage = {
       id: clientId,
@@ -750,12 +754,9 @@ export function Friends() {
       });
       await deliverPending(friend.id, clientId, sendPayload);
     } catch (error) {
+      pendingSends.current.delete(clientId);
       setMessages((old) =>
-        old.map((message) =>
-          message.clientId === clientId
-            ? { ...message, sendStatus: "failed" }
-            : message,
-        ),
+        old.filter((message) => message.clientId !== clientId),
       );
       setError((error as Error).message);
       // Encryption errors have no retryable envelope; restore the original draft.
