@@ -5,7 +5,7 @@ import { LaunchComposition } from "./launch-composition";
 import { isLightweightLaunchDevice } from "@/lib/launch-performance";
 export default function LaunchPlayer({ ride = false }: { ride?: boolean }) {
   const player = useRef<PlayerRef>(null);
-  const [reduced, setReduced] = useState(true);
+  const [reduced, setReduced] = useState(false);
   const [lightweight] = useState(() => {
     const device = navigator as Navigator & { deviceMemory?: number };
     return isLightweightLaunchDevice(device.deviceMemory, navigator.hardwareConcurrency);
