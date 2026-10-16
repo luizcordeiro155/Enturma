@@ -130,6 +130,81 @@ test.afterAll(async () => {
   await db?.end();
 });
 
+test("instituições mantêm contraste legível antes e depois da seleção nos dois temas", async ({
+  page,
+  request,
+}) => {
+  const account = await register(request);
+  await authenticate(page.context(), account);
+  for (const theme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: theme, reducedMotion: "reduce" });
+    await page.setViewportSize(
+      theme === "dark"
+        ? { width: 390, height: 844 }
+        : { width: 1376, height: 900 },
+    );
+    await page.goto("/academic-verification");
+    await page.getByLabel("Buscar instituição").fill(institutionName);
+    const card = page.getByRole("button", {
+      name: new RegExp(institutionName),
+    });
+    await expect(card).toHaveAttribute("aria-pressed", "false");
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    for (const selected of [false, true]) {
+      if (selected) {
+        await card.focus();
+        await page.keyboard.press("Enter");
+        await expect(card).toHaveAttribute("aria-pressed", "true");
+      }
+      await expect
+        .poll(() =>
+          card.evaluate((element) => {
+            const context = document.createElement("canvas").getContext("2d")!;
+            const luminance = (color: string) => {
+              context.fillStyle = color;
+              context.fillRect(0, 0, 1, 1);
+              const [r, g, b] = Array.from(
+                context.getImageData(0, 0, 1, 1).data,
+              )
+                .slice(0, 3)
+                .map((value) => {
+                  const c = value / 255;
+                  return c <= 0.04045
+                    ? c / 12.92
+                    : ((c + 0.055) / 1.055) ** 2.4;
+                });
+              return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            };
+            const background = luminance(
+              getComputedStyle(element).backgroundColor,
+            );
+            return Math.min(
+              ...["strong", "small"].map((selector) => {
+                const foreground = luminance(
+                  getComputedStyle(element.querySelector(selector)!).color,
+                );
+                return (
+                  (Math.max(background, foreground) + 0.05) /
+                  (Math.min(background, foreground) + 0.05)
+                );
+              }),
+            );
+          }),
+        )
+        .toBeGreaterThanOrEqual(4.5);
+    }
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: `../../.local/academic-selection-${theme}.png`,
+      fullPage: true,
+    });
+  }
+});
+
 test("cadastro real, SMTP e confirmação em outro dispositivo liberam a tela sem atualizar", async ({
   page,
   browser,
