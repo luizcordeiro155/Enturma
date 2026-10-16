@@ -12,8 +12,6 @@ export default function LaunchPlayer({ ride = false }: { ride?: boolean }) {
   });
   useEffect(() => {
     const instance = player.current;
-    const device = navigator as Navigator & { deviceMemory?: number };
-    setLightweight(useLightweightLaunch(device.deviceMemory, navigator.hardwareConcurrency));
     const media = matchMedia("(prefers-reduced-motion: reduce)");
     const update = () => {
       const reduce =
