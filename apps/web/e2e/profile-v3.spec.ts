@@ -135,6 +135,8 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
     await mural.evaluate((node) => node.scrollWidth <= node.clientWidth),
   ).toBe(true);
   await page.screenshot({ path: "../../.local/profile-visual-laptop.png" });
+  await page.emulateMedia({ colorScheme: "dark" });
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(controls).toBeVisible();
   await expect(page.locator(".profile-preview-stage")).toBeHidden();
