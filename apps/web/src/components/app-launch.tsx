@@ -4,6 +4,7 @@ import { BookOpen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { api } from "@/lib/api";
+import { launchRemainingMs } from "@/lib/launch-performance";
 const LaunchPlayer = dynamic(() => import("./motion/launch-player"), {
   ssr: false,
   loading: () => <BookOpen size={76} strokeWidth={1.5} />,
@@ -53,8 +54,11 @@ export function AppLaunch() {
     let active = true;
     let animation: Animation | undefined;
     let timeout: ReturnType<typeof setTimeout>;
+    let visibleSince = 0;
+    let closed = false;
     const close = () => {
-      if (!active) return;
+      if (!active || closed) return;
+      closed = true;
       const element = layer.current;
       if (
         element?.animate &&
@@ -79,17 +83,21 @@ export function AppLaunch() {
       launched.current = true;
       if (ride) rideVisited.current = true;
       setScene(ride ? "ride" : "app");
-      if (ride)
+      visibleSince = performance.now();
+      const finish = () => {
+        if (!active) return;
+        const reduced =
+          matchMedia("(prefers-reduced-motion: reduce)").matches ||
+          document.documentElement.dataset.reducedMotion === "true";
         timeout = setTimeout(
           close,
-          matchMedia("(prefers-reduced-motion: reduce)").matches ? 200 : 1900,
+          launchRemainingMs(visibleSince, performance.now(), ride ? "ride" : "app", reduced),
         );
-      else
-        void api("/users/me", { cache: "no-store" })
-          .then(() => {
-            timeout = setTimeout(close, 150);
-          })
-          .catch(() => close());
+      };
+      if (ride) finish();
+      else void api("/users/me", { cache: "no-store" })
+        .then(finish)
+        .catch(finish);
     }, 0);
     return () => {
       active = false;
