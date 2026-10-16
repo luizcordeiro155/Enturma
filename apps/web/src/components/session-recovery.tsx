@@ -40,7 +40,7 @@ export function SessionRecovery() {
     let disposed = false;
     let inFlight = false;
     let attempts = 0;
-    let timer: ReturnType<typeof setTimeout> | undefined;
+    let timer: number | undefined;
     let controller: AbortController | undefined;
 
     const schedule = () => {
