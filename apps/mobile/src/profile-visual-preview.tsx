@@ -26,14 +26,14 @@ export function NativeProfileEntrance({
 }) {
   const {preference}=useExperience();
   const progress = useRef(new Animated.Value(1)).current;
-  const mode = appearance?.entrance ?? "RISE";
+  // A single understated entrance is shared by all profiles.
+  const mode = "RISE";
   useEffect(() => {
     let live = true;
     void AccessibilityInfo.isReduceMotionEnabled().then((reduced) => {
       if (
         !live ||
         reduced || preference.reducedMotion ||
-        mode === "NONE" ||
         AppState.currentState !== "active"
       )
         return;
