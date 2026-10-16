@@ -46,7 +46,6 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await expect
     .poll(() =>
       preview
-        .locator(".public-profile-body")
         .evaluate((node) => getComputedStyle(node).backgroundImage),
     )
     .toContain("rgb(255, 0, 68)");
