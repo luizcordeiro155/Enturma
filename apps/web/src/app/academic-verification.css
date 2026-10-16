@@ -160,7 +160,7 @@
   padding: 4px;
   margin: 0 -4px;
 }
-.academic-institutions > button {
+html .academic-page .academic-institutions > button {
   display: flex;
   width: 100%;
   align-items: center;
@@ -185,9 +185,11 @@
   color: var(--muted);
   margin-top: 4px;
 }
-.academic-institutions > button[aria-pressed="true"] {
-  border-color: var(--success);
-  background: color-mix(in srgb, var(--success) 9%, var(--surface));
+html .academic-page .academic-institutions > button[aria-pressed="true"] {
+  /* The shared pressed-button rule is important; keep this card's text readable. */
+  border-color: var(--success) !important;
+  background: color-mix(in srgb, var(--success) 9%, var(--surface)) !important;
+  color: var(--ink) !important;
 }
 .academic-institutions svg {
   flex: none;
@@ -199,9 +201,9 @@
   font-size: 12px;
   margin: 12px 0;
 }
-.academic-pagination button,
-.academic-text-button,
-.academic-footer button {
+html .academic-page .academic-pagination button,
+html .academic-page .academic-text-button,
+html .academic-page .academic-footer button {
   border: 0;
   background: transparent;
   color: var(--ink);
@@ -246,7 +248,7 @@
   color: var(--muted);
   margin-top: 4px;
 }
-.academic-selected button {
+html .academic-page .academic-selected button {
   border: 0;
   background: var(--soft);
   border-radius: 8px;
@@ -283,7 +285,7 @@
   font-size: 14px;
   margin-bottom: 20px;
 }
-.academic-error button {
+html .academic-page .academic-error button {
   display: flex;
   align-items: center;
   gap: 8px;
