@@ -265,7 +265,7 @@ export function ProfileDetailsEditor({
 
             </div>
             <div
-              className="profile-preview-combined profile-shared-surface"
+              className={`profile-preview-combined profile-shared-surface ${showcase?.appearance.muralMode === "PROFILE" ? "profile-mural-linked" : ""}`}
               data-preview-tab={previewTab}
               style={profileStyle(previewUser)}
             >
