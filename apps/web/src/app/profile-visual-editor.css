@@ -590,3 +590,89 @@ html .profile-shared-surface.profile-mural-linked .profile-preview-mural {
 .profile-shared-surface .profile-public-advanced-heading {
   background: var(--mural-copy-panel);
 }
+
+
+/* Identical shared profile composition in the editor and public dialog. */
+html .profile-shared-surface {
+  display: grid !important;
+  grid-template-columns: minmax(0, 45%) minmax(0, 55%);
+  grid-auto-flow: row;
+  grid-auto-columns: auto;
+  align-content: stretch;
+  min-height: 100%;
+  gap: 0 !important;
+  overflow: hidden;
+}
+html .profile-shared-surface .profile-preview-identity,
+html .profile-shared-surface .profile-preview-mural {
+  display: block;
+  min-width: 0;
+  min-height: 0;
+}
+html .profile-shared-surface .profile-preview-identity {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  overflow-y: auto;
+  background: transparent !important;
+}
+html .profile-shared-surface .profile-preview-mural {
+  padding: 24px !important;
+  margin: 0 !important;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--mural-background) !important;
+  border: 0 !important;
+}
+html .profile-shared-surface.profile-mural-linked .profile-preview-mural {
+  background: transparent !important;
+}
+html .profile-shared-surface .public-profile-card {
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+}
+html .profile-shared-surface .public-profile-body {
+  background: transparent !important;
+}
+html .profile-shared-surface .public-profile-banner {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 3 / 1;
+  height: auto;
+}
+html .profile-shared-surface .profile-preview-mural > .profile-mural-title {
+  margin: 0 0 16px;
+  font-size: 22px;
+}
+html .profile-shared-surface .profile-dialog-actions {
+  padding: 16px 22px !important;
+  background: transparent !important;
+}
+@media (max-width: 760px) {
+  html .profile-shared-surface {
+    display: block !important;
+    height: auto;
+    overflow: visible;
+    min-height: 0;
+  }
+  html .profile-shared-surface .profile-preview-identity,
+  html .profile-shared-surface .profile-preview-mural {
+    height: auto;
+    overflow: visible;
+  }
+  html .profile-shared-surface .profile-preview-mural {
+    padding: 20px !important;
+  }
+}
+/* On narrow editor previews only the selected tab is visible. */
+@media (max-width: 1100px) {
+  html .profile-studio .profile-shared-surface[data-preview-tab="PROFILE"] .profile-preview-mural {
+    display: none;
+  }
+  html .profile-studio .profile-shared-surface[data-preview-tab="MURAL"] .profile-preview-identity {
+    display: none;
+  }
+}

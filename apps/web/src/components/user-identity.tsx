@@ -7,6 +7,7 @@ import {
   type ProfileVisualAppearance,
 } from "@enturma/contracts";
 import { ProfileBackdrop, profileEntrance } from "./profile-motion";
+import { ProfileVisualSurface } from "./profile-visual-surface";
 import {
   useOverlayHistory,
   waitForOverlayHistory,
@@ -301,6 +302,7 @@ export function UserIdentity({
   const [isOwnProfile, setIsOwnProfile] = useState(false);
   const [friendship, setFriendship] = useState<FriendshipSummary>();
   const [friendshipLoading, setFriendshipLoading] = useState(false);
+  const loadingProfile = useRef(false);
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
   const trigger = useRef<HTMLButtonElement>(null);
@@ -325,7 +327,7 @@ export function UserIdentity({
     closing.current = false;
     await waitForOverlayHistory();
     trigger.current?.focus({ preventScroll: true });
-  }, [profile?.showcaseAppearance?.entrance]);
+  }, []);
   useOverlayHistory(() => void close(), open);
   useEffect(() => {
     if (!open || !profile || !card.current) return;
@@ -333,7 +335,7 @@ export function UserIdentity({
       card.current,
     );
     return () => animation?.cancel();
-  }, [open, profile]);
+  }, [open]);
   useEffect(() => {
     if (!open) return;
     const anchor = trigger.current;
@@ -362,10 +364,9 @@ export function UserIdentity({
     };
   }, [open, close]);
   async function show() {
+    if (loadingProfile.current) return;
+    loadingProfile.current = true;
     setMessage("");
-    setFriendship(undefined);
-    setFriendshipLoading(true);
-    setOpen(true);
     try {
       const [loadedProfile, loadedShowcase, me] = await Promise.all([
         api<PublicProfile>(`/users/${user.id}/profile`, { cache: "no-store" }),
@@ -373,23 +374,24 @@ export function UserIdentity({
         api<{ id: string }>("/users/me"),
       ]);
       const own = me.id === user.id;
-      profileCache.set(user.id, Promise.resolve(loadedProfile));
-      setProfile({
+      const loadedFriendships = own
+        ? []
+        : await api<FriendshipSummary[]>("/friends", { cache: "no-store" });
+      const complete = {
         ...loadedProfile,
         showcaseAppearance: loadedShowcase.appearance,
-      });
+      };
+      profileCache.set(user.id, Promise.resolve(complete));
+      setProfile(complete);
       setShowcase(loadedShowcase);
       setIsOwnProfile(own);
-      if (!own) {
-        const friendships = await api<FriendshipSummary[]>("/friends", {
-          cache: "no-store",
-        });
-        setFriendship(friendships.find((item) => item.userId === user.id));
-      }
-    } catch (e) {
-      setMessage((e as Error).message);
-    } finally {
+      setFriendship(loadedFriendships.find((item) => item.userId === user.id));
       setFriendshipLoading(false);
+      setOpen(true);
+    } catch (error) {
+      setMessage((error as Error).message);
+    } finally {
+      loadingProfile.current = false;
     }
   }
   return (
@@ -435,15 +437,12 @@ export function UserIdentity({
               >
                 ×
               </button>
-              {profile ? (
-                <div className={`profile-public-content profile-discord-public-layout profile-shared-surface ${profile.showcaseAppearance?.muralMode === "PROFILE" ? "profile-mural-linked" : ""}`} style={profileStyle(profile)}>
-                  <section
-                    className={`profile-public-primary profile-theme-${profile.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${profile.showcaseAppearance?.effect ?? "NONE"}`}
-                    style={profileStyle(profile)}
-                  >
-                    <ProfileCard user={profile} showcase={showcase} />
-                    {!isOwnProfile ? (
-                      <div className="profile-dialog-actions">
+              {profile && showcase ? (
+                <ProfileVisualSurface
+                  user={profile}
+                  showcase={showcase}
+                  actions={!isOwnProfile ? (
+                    <>
                         {friendshipLoading ? (
                           <button type="button" disabled>
                             Verificando amizade…
@@ -497,50 +496,14 @@ export function UserIdentity({
                             Adicionar amizade
                           </button>
                         )}
-                      </div>
-                    ) : null}
-                  </section>
-
-                  <section
-                    className="profile-public-advanced"
-                    style={profileStyle(profile)}
-                  >
-                    <ProfileBackdrop
-                      appearance={profile.showcaseAppearance}
-                      mural
-                    />
-                    <h2 className="profile-mural-title">Seu mural</h2>
-                    {isOwnProfile ? (
-                      <div className="profile-owner-actions">
-                        <p>
-                          Este é o seu perfil, do jeito que as outras pessoas
-                          veem.
-                        </p>
-                        <Link
-                          className="button"
-                          href="/profile"
-                          onClick={() => setOpen(false)}
-                        >
-                          Editar perfil
-                        </Link>
-                      </div>
-                    ) : null}
-
-                    {showcase ? (
-                      <ShowcaseView
-                        value={showcase}
-                        showBadges={false}
-                        compact
-                        detailed
-                      />
-                    ) : (
-                      <p className="muted">Carregando personalização…</p>
-                    )}
-                  </section>
-                </div>
-              ) : (
-                <p>Carregando perfil…</p>
-              )}
+                    </>
+                  ) : (
+                    <Link className="button" href="/profile" onClick={() => setOpen(false)}>
+                      Editar perfil
+                    </Link>
+                  )}
+                />
+              ) : null}
               {message ? <p role="status">{message}</p> : null}
             </div>,
             document.body,
