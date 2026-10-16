@@ -1182,7 +1182,6 @@ export function Friends() {
                                 type="button"
                                 className="text-button"
                                 onClick={() => retryPending(m.clientId)}
-                                disabled={!pendingSends.current.has(m.clientId)}
                               >
                                 Não enviada · Tentar novamente
                               </button>
