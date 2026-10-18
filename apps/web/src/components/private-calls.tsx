@@ -16,7 +16,7 @@ import { useCallSession, CallMount } from "./call-session-provider";
 import { Avatar } from "./user-identity";
 import { playMotion } from "@/lib/motion";
 import { callDevice } from "@/lib/call-device";
-import { privateCallsEnabled } from "@/lib/private-call-lifecycle";
+import { privateCallsEnabled, isOrphanedLocalPrivateCall } from "@/lib/private-call-lifecycle";
 import { useCallRingtone } from "@/lib/call-ringtone";
 
 type PrivateCall = {
@@ -119,7 +119,16 @@ export function PrivateCallsProvider({
   const refresh = useCallback(async () => {
     if (!enabled || !me) return;
     try {
-      apply(await api<PrivateCall>("/calls/private", { cache: "no-store" }));
+      const found = await api<PrivateCall>("/calls/private", { cache: "no-store" });
+      if (found.id && viewer.current &&
+          isOrphanedLocalPrivateCall(found, viewer.current, callDevice(),
+            currentMedia.current?.roomId === found.id)) {
+        try {
+          await post(`/calls/private/${found.id}/end`);
+          ignored.current.add(found.id);
+          if (latest.current?.id === found.id) { latest.current = null; setCall(null); }
+        } catch { apply(found); }
+      } else apply(found);
       setReady(true);
     } catch (cause) {
       setError((cause as Error).message);
