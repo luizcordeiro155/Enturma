@@ -52,3 +52,17 @@ export function isOrphanedLocalPrivateCall(
 export function isTerminalCallOperation(operation: string) {
   return operation === "end" || operation === "decline" || operation === "cancel";
 }
+
+/** Never hang up a call just because a document has no media yet.
+ * Ringing and pending connections are valid states without LiveKit.
+ */
+export function shouldEndOnPageExit(
+  call: { state: string; callerId: string; calleeId: string; callerDevice: string; calleeDevice?: string },
+  userId: string,
+  deviceId: string,
+  hasConnectedMedia: boolean,
+  bfcache: boolean,
+) {
+  return !bfcache && call.state === "CONNECTED" && hasConnectedMedia &&
+    deviceOwnsPrivateCall(call, userId, deviceId);
+}
