@@ -650,6 +650,12 @@ test("private call rings in another route, connects real LiveKit peers and relea
     await expect(
       callee.getByRole("dialog", { name: "Alice Chamada" }),
     ).toBeVisible({ timeout: 15000 });
+    // Give polling and realtime refresh time to run before accepting.
+    // A ringing invitation must not be auto-ended by missing local media.
+    await callee.waitForTimeout(6500);
+    await expect(
+      callee.getByRole("button", { name: "Atender", exact: true }),
+    ).toBeVisible();
     await callee.getByRole("button", { name: "Atender", exact: true }).click();
     for (const page of [caller, callee])
       await expect(page).toHaveURL(/\/calls\//);
