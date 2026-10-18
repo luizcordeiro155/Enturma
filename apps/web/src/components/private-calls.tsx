@@ -235,6 +235,21 @@ export function PrivateCallsProvider({
     },
     [apply, leave],
   );
+  useEffect(() => {
+    const onPageExit = () => {
+      const active = latest.current;
+      if (!active || !viewer.current || !activeStates.has(active.state)) return;
+      const mine = viewer.current === active.callerId
+        ? active.callerDevice === callDevice()
+        : viewer.current === active.calleeId && active.calleeDevice === callDevice();
+      if (!mine) return;
+      const body = new Blob([JSON.stringify({ deviceId: callDevice() })],
+        { type: "application/json" });
+      navigator.sendBeacon(`/api/backend/calls/private/${active.id}/end`, body);
+    };
+    window.addEventListener("pagehide", onPageExit);
+    return () => window.removeEventListener("pagehide", onPageExit);
+  }, []);
   const incoming =
     !!call &&
     call.calleeId === me &&
