@@ -16,7 +16,7 @@ import { useCallSession, CallMount } from "./call-session-provider";
 import { Avatar } from "./user-identity";
 import { playMotion } from "@/lib/motion";
 import { callDevice } from "@/lib/call-device";
-import { privateCallsEnabled, isOrphanedLocalPrivateCall } from "@/lib/private-call-lifecycle";
+import { privateCallsEnabled, deviceOwnsPrivateCall, shouldEndOnPageExit } from "@/lib/private-call-lifecycle";
 import { useCallRingtone } from "@/lib/call-ringtone";
 
 type PrivateCall = {
@@ -119,16 +119,10 @@ export function PrivateCallsProvider({
   const refresh = useCallback(async () => {
     if (!enabled || !me) return;
     try {
-      const found = await api<PrivateCall>("/calls/private", { cache: "no-store" });
-      if (found.id && viewer.current &&
-          isOrphanedLocalPrivateCall(found, viewer.current, callDevice(),
-            currentMedia.current?.roomId === found.id)) {
-        try {
-          await post(`/calls/private/${found.id}/end`);
-          ignored.current.add(found.id);
-          if (latest.current?.id === found.id) { latest.current = null; setCall(null); }
-        } catch { apply(found); }
-      } else apply(found);
+      // A call is not orphaned merely because its LiveKit session has not
+      // mounted yet. While ringing/accepting, no media is expected.
+      // Periodic/event-driven refreshes must NEVER issue a hangup.
+      apply(await api<PrivateCall>("/calls/private", { cache: "no-store" }));
       setReady(true);
     } catch (cause) {
       setError((cause as Error).message);
@@ -236,15 +230,24 @@ export function PrivateCallsProvider({
     [apply, leave],
   );
   useEffect(() => {
-    const onPageExit = () => {
+    const onPageExit = (event: PageTransitionEvent) => {
       const active = latest.current;
-      if (!active || !viewer.current || !activeStates.has(active.state)) return;
-      const mine = viewer.current === active.callerId
-        ? active.callerDevice === callDevice()
-        : viewer.current === active.calleeId && active.calleeDevice === callDevice();
-      if (!mine) return;
-      const body = new Blob([JSON.stringify({ deviceId: callDevice() })],
-        { type: "application/json" });
+      if (
+        !active ||
+        !viewer.current ||
+        !shouldEndOnPageExit(
+          active,
+          viewer.current,
+          callDevice(),
+          currentMedia.current?.roomId === active.id,
+          event.persisted,
+        )
+      ) return;
+      // A document unload is not the same as a route change. Only a locally
+      // connected call is eligible; ringing calls must keep ringing.
+      const body = new Blob([JSON.stringify({ deviceId: callDevice() })], {
+        type: "application/json",
+      });
       navigator.sendBeacon(`/api/backend/calls/private/${active.id}/end`, body);
     };
     window.addEventListener("pagehide", onPageExit);
@@ -326,8 +329,25 @@ export function PrivateCallsProvider({
   }, [apply]);
   const invite = useCallback(
     async (friendshipId: string, video: boolean) => {
-      if (session || (latest.current && activeStates.has(latest.current.state)))
+      if (session || currentMedia.current)
         throw Error("Encerre sua chamada atual antes de ligar.");
+      const previous = latest.current;
+      if (previous && activeStates.has(previous.state)) {
+        // Explicitly starting another call may replace a stranded local
+        // CONNECTING/CONNECTED call. Never cancel a ringing invitation
+        // or a call hosted on the user's other device.
+        if (
+          !viewer.current ||
+          !deviceOwnsPrivateCall(previous, viewer.current, callDevice()) ||
+          !mediaStates.has(previous.state) ||
+          started.current === previous.id
+        ) throw Error("Encerre sua chamada atual antes de ligar.");
+        await post(`/calls/private/${previous.id}/end`);
+        ignored.current.add(previous.id);
+        latest.current = null;
+        started.current = null;
+        setCall(null);
+      }
       const created = await post<PrivateCall>("/calls/private", {
         friendshipId,
         video,
