@@ -195,22 +195,36 @@ export function PrivateCallsProvider({
   const action = useCallback(
     async (operation: string) => {
       const current = latest.current;
-      if (!current) return;
+      if (!current || closingCall.current) return;
+      const terminal = ["end", "cancel", "decline"].includes(operation);
+      if (terminal) {
+        closingCall.current = true;
+        ignored.current.add(current.id);
+        latest.current = null;
+        started.current = null;
+        setCall(null);
+        if (currentMedia.current?.roomId === current.id) leave();
+      }
       setBusy(true);
       setError("");
       try {
-        apply(
-          await post<PrivateCall>(`/calls/private/${current.id}/${operation}`, {
-            deviceId: callDevice(),
-          }),
-        );
+        const result = await post<PrivateCall>(`/calls/private/${current.id}/${operation}`, {
+          deviceId: callDevice(),
+        });
+        if (!terminal) apply(result);
       } catch (cause) {
+        if (terminal) {
+          ignored.current.delete(current.id);
+          latest.current = current;
+          setCall(current);
+        }
         setError((cause as Error).message);
       } finally {
+        closingCall.current = false;
         setBusy(false);
       }
     },
-    [apply],
+    [apply, leave],
   );
   const incoming =
     !!call &&
