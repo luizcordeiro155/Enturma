@@ -522,22 +522,16 @@ export function PrivateCallPage({ id }: { id: string }) {
               <Avatar user={peer} />
               <h1>{peer.name}</h1>
               <p role="status">{labels[call.state]}</p>
-              {mediaStates.has(call.state) ? (
-                <p>Chamada aberta em outro dispositivo.</p>
-              ) : (
-                <button
-                  className="call-cancel"
-                  disabled={context?.busy}
-                  onClick={() =>
-                    void context?.action(
-                      call.callerId === context.me ? "cancel" : "decline",
-                    )
-                  }
-                  aria-label="Cancelar chamada"
-                >
-                  <PhoneOff size={28} />
-                </button>
-              )}
+              {mediaStates.has(call.state) ? <p>Conectando chamada…</p> : null}
+              <button
+                type="button"
+                className="call-cancel"
+                disabled={context?.busy}
+                onClick={() => void context?.action(mediaStates.has(call.state) ? "end" : call.callerId === context.me ? "cancel" : "decline")}
+                aria-label="Desligar chamada"
+              >
+                <PhoneOff size={28} />
+              </button>
             </div>
           )}
         </>
