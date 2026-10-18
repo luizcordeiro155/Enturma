@@ -16,6 +16,7 @@ import { useCallSession, CallMount } from "./call-session-provider";
 import { Avatar } from "./user-identity";
 import { playMotion } from "@/lib/motion";
 import { callDevice } from "@/lib/call-device";
+import { privateCallsEnabled } from "@/lib/private-call-lifecycle";
 import { useCallRingtone } from "@/lib/call-ringtone";
 
 type PrivateCall = {
@@ -80,6 +81,7 @@ export function PrivateCallsProvider({
   const latest = useRef<PrivateCall | null>(null);
   const viewer = useRef<string | undefined>(undefined);
   const started = useRef<string | null>(null);
+  const closingCall = useRef(false);
   const { session, start, leave } = useCallSession();
   const currentMedia = useRef(session);
   useEffect(() => {
@@ -87,10 +89,7 @@ export function PrivateCallsProvider({
   }, [session]);
   const path = usePathname();
   const router = useRouter();
-  const enabled =
-    /^\/(home|portfolio|subjects|learn|profile|settings|friends|notebooks|rooms|caronas|forum|onboarding|admin)(\/|$)/.test(
-      path,
-    );
+  const enabled = privateCallsEnabled(path);
 
   const apply = useCallback(
     (value: PrivateCall | Record<string, never>) => {
