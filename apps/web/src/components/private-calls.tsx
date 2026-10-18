@@ -16,6 +16,7 @@ import { useCallSession, CallMount } from "./call-session-provider";
 import { Avatar } from "./user-identity";
 import { playMotion } from "@/lib/motion";
 import { callDevice } from "@/lib/call-device";
+import { privateCallsEnabled, isOrphanedLocalPrivateCall } from "@/lib/private-call-lifecycle";
 import { useCallRingtone } from "@/lib/call-ringtone";
 
 type PrivateCall = {
@@ -80,6 +81,7 @@ export function PrivateCallsProvider({
   const latest = useRef<PrivateCall | null>(null);
   const viewer = useRef<string | undefined>(undefined);
   const started = useRef<string | null>(null);
+  const closingCall = useRef(false);
   const { session, start, leave } = useCallSession();
   const currentMedia = useRef(session);
   useEffect(() => {
@@ -87,10 +89,7 @@ export function PrivateCallsProvider({
   }, [session]);
   const path = usePathname();
   const router = useRouter();
-  const enabled =
-    /^\/(home|portfolio|subjects|learn|profile|settings|friends|notebooks|rooms|caronas|forum|onboarding|admin)(\/|$)/.test(
-      path,
-    );
+  const enabled = privateCallsEnabled(path);
 
   const apply = useCallback(
     (value: PrivateCall | Record<string, never>) => {
@@ -120,7 +119,16 @@ export function PrivateCallsProvider({
   const refresh = useCallback(async () => {
     if (!enabled || !me) return;
     try {
-      apply(await api<PrivateCall>("/calls/private", { cache: "no-store" }));
+      const found = await api<PrivateCall>("/calls/private", { cache: "no-store" });
+      if (found.id && viewer.current &&
+          isOrphanedLocalPrivateCall(found, viewer.current, callDevice(),
+            currentMedia.current?.roomId === found.id)) {
+        try {
+          await post(`/calls/private/${found.id}/end`);
+          ignored.current.add(found.id);
+          if (latest.current?.id === found.id) { latest.current = null; setCall(null); }
+        } catch { apply(found); }
+      } else apply(found);
       setReady(true);
     } catch (cause) {
       setError((cause as Error).message);
@@ -196,23 +204,52 @@ export function PrivateCallsProvider({
   const action = useCallback(
     async (operation: string) => {
       const current = latest.current;
-      if (!current) return;
+      if (!current || closingCall.current) return;
+      const terminal = ["end", "cancel", "decline"].includes(operation);
+      if (terminal) {
+        closingCall.current = true;
+        ignored.current.add(current.id);
+        latest.current = null;
+        started.current = null;
+        setCall(null);
+        if (currentMedia.current?.roomId === current.id) leave();
+      }
       setBusy(true);
       setError("");
       try {
-        apply(
-          await post<PrivateCall>(`/calls/private/${current.id}/${operation}`, {
-            deviceId: callDevice(),
-          }),
-        );
+        const result = await post<PrivateCall>(`/calls/private/${current.id}/${operation}`, {
+          deviceId: callDevice(),
+        });
+        if (!terminal) apply(result);
       } catch (cause) {
+        if (terminal) {
+          ignored.current.delete(current.id);
+          latest.current = current;
+          setCall(current);
+        }
         setError((cause as Error).message);
       } finally {
+        closingCall.current = false;
         setBusy(false);
       }
     },
-    [apply],
+    [apply, leave],
   );
+  useEffect(() => {
+    const onPageExit = () => {
+      const active = latest.current;
+      if (!active || !viewer.current || !activeStates.has(active.state)) return;
+      const mine = viewer.current === active.callerId
+        ? active.callerDevice === callDevice()
+        : viewer.current === active.calleeId && active.calleeDevice === callDevice();
+      if (!mine) return;
+      const body = new Blob([JSON.stringify({ deviceId: callDevice() })],
+        { type: "application/json" });
+      navigator.sendBeacon(`/api/backend/calls/private/${active.id}/end`, body);
+    };
+    window.addEventListener("pagehide", onPageExit);
+    return () => window.removeEventListener("pagehide", onPageExit);
+  }, []);
   const incoming =
     !!call &&
     call.calleeId === me &&
@@ -509,22 +546,16 @@ export function PrivateCallPage({ id }: { id: string }) {
               <Avatar user={peer} />
               <h1>{peer.name}</h1>
               <p role="status">{labels[call.state]}</p>
-              {mediaStates.has(call.state) ? (
-                <p>Chamada aberta em outro dispositivo.</p>
-              ) : (
-                <button
-                  className="call-cancel"
-                  disabled={context?.busy}
-                  onClick={() =>
-                    void context?.action(
-                      call.callerId === context.me ? "cancel" : "decline",
-                    )
-                  }
-                  aria-label="Cancelar chamada"
-                >
-                  <PhoneOff size={28} />
-                </button>
-              )}
+              {mediaStates.has(call.state) ? <p>Conectando chamada…</p> : null}
+              <button
+                type="button"
+                className="call-cancel"
+                disabled={context?.busy}
+                onClick={() => void context?.action(mediaStates.has(call.state) ? "end" : call.callerId === context.me ? "cancel" : "decline")}
+                aria-label="Desligar chamada"
+              >
+                <PhoneOff size={28} />
+              </button>
             </div>
           )}
         </>
