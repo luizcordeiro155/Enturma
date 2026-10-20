@@ -166,6 +166,25 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await expect(controls).toBeHidden();
   await page.getByRole("button", { name: "Mural", exact: true }).click();
   await expect(preview.locator(".profile-preview-mural")).toBeVisible();
+  // Long custom murals must be reachable by the phone's single scroller.
+  // A temporary tall test widget avoids depending on a user's real content.
+  await preview.locator(".profile-preview-mural").evaluate((node) => {
+    const fixture = document.createElement("div");
+    fixture.id = "mural-scroll-fixture";
+    fixture.style.height = "1150px";
+    fixture.textContent = "Fim do mural de teste";
+    node.appendChild(fixture);
+  });
+  const scroller = page.locator(".profile-editor-scroll");
+  await expect.poll(() => scroller.evaluate(
+    (element) => element.scrollHeight - element.clientHeight,
+  )).toBeGreaterThan(600);
+  await scroller.evaluate((element) => { element.scrollTop = element.scrollHeight; });
+  await expect.poll(() => scroller.evaluate(
+    (element) => element.scrollTop,
+  )).toBeGreaterThan(500);
+  await expect(preview.locator("#mural-scroll-fixture")).toBeInViewport();
+  await preview.locator("#mural-scroll-fixture").evaluate((node) => node.remove());
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

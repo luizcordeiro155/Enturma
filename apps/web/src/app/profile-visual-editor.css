@@ -676,3 +676,49 @@ html .profile-shared-surface .profile-dialog-actions {
     display: none;
   }
 }
+
+
+/* Mobile preview: one vertically scrolling viewport. Nested hidden/auto
+   overflow on the shared profile prevented touch from reaching the mural end. */
+@media (max-width: 760px) {
+  html .profile-studio .profile-editor-scroll {
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    flex: 1 1 auto !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+    scrollbar-width: thin;
+  }
+  html .profile-studio[data-editor-view="PREVIEW"] .profile-preview-stage {
+    display: flex;
+    flex-direction: column;
+    min-height: min-content;
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+  }
+  html .profile-studio[data-editor-view="PREVIEW"] .profile-preview-combined.profile-shared-surface {
+    display: block !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: visible !important;
+    flex: none !important;
+  }
+  html .profile-studio[data-editor-view="PREVIEW"] .profile-shared-surface .profile-preview-mural,
+  html .profile-studio[data-editor-view="PREVIEW"] .profile-shared-surface .profile-preview-identity {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    min-height: 0 !important;
+    touch-action: pan-y;
+  }
+  html .profile-studio[data-editor-view="PREVIEW"] .profile-preview-mural > .profile-showcase {
+    min-height: min-content;
+    overflow: visible;
+  }
+}
