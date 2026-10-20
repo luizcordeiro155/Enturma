@@ -30,6 +30,12 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await expect(page.getByRole("menu", { name: "Escolher tema" })).toBeVisible();
   await page.getByRole("menuitemradio", { name: /Escuro/ }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await theme.click();
+  const darkMenu = page.getByRole("menu", { name: "Escolher tema" });
+  const selectedDark = darkMenu.getByRole("menuitemradio", { name: /Escuro/ });
+  await expect(selectedDark).toHaveCSS("color", "rgb(242, 246, 244)");
+  await expect(selectedDark.locator("svg").first()).toHaveCSS("color", "rgb(227, 232, 255)");
+  await selectedDark.click();
   await page.getByRole("button", { name: /^Sobre você/ }).click();
   await page
     .getByLabel("Nome exibido", { exact: true })
