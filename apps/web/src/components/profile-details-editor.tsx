@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { PROFILE_PALETTES } from "@enturma/contracts";
-import { ProfileBackdrop, profileEntrance } from "./profile-motion";
+import { ProfileVisualSurface } from "./profile-visual-surface";
 import { useRouter } from "next/navigation";
 import {
   Camera,
@@ -13,6 +13,7 @@ import {
   Type,
   X,
 } from "lucide-react";
+import { ProfileBackdrop } from "./profile-motion";
 import { ProfileEditPanel } from "./profile-edit-panel";
 import { ProfileImageEditor } from "./profile-image-editor";
 import { api, peekApiSnapshot } from "@/lib/api";
@@ -23,8 +24,8 @@ import {
   type ProfileDetails,
 } from "./user-identity";
 import {
-  ShowcaseFields,
   ShowcaseView,
+  ShowcaseFields,
   AchievementGrid,
   type Showcase,
 } from "./profile-showcase";
@@ -49,8 +50,10 @@ export function ProfileDetailsEditor({
   const [busy, setBusy] = useState(false);
   const [previewTab, setPreviewTab] = useState<"PROFILE" | "MURAL">("PROFILE");
   const [editorView, setEditorView] = useState<"EDIT" | "PREVIEW">("EDIT");
-  const preview = useRef<HTMLDivElement>(null);
   const [mediaVersion, setMediaVersion] = useState(0);
+  const [uploadedMedia, setUploadedMedia] = useState<
+    "avatar" | "banner" | null
+  >(null);
   const [crop, setCrop] = useState<{ file: File; kind: "avatar" | "banner" }>();
   const [appearance, setAppearance] = useState({
     name: profile.name,
@@ -120,6 +123,7 @@ export function ProfileDetailsEditor({
       );
     }
     await onSaved();
+    setUploadedMedia(crop.kind);
     setMediaVersion(Date.now());
     window.dispatchEvent(new Event("enturma-profile-updated"));
     setCrop(undefined);
@@ -191,7 +195,9 @@ export function ProfileDetailsEditor({
   const previewUser: PublicProfile = {
     ...profile,
     ...appearance,
-    mediaVersion,
+    mediaVersion: mediaVersion || profile.mediaVersion,
+    hasAvatar: uploadedMedia === "avatar" || profile.hasAvatar,
+    hasBanner: uploadedMedia === "banner" || profile.hasBanner,
     profileDetails: details,
     showcaseAppearance: showcase?.appearance,
   };
@@ -284,42 +290,15 @@ export function ProfileDetailsEditor({
               >
                 Mural
               </button>
-              <button
-                type="button"
-                aria-label="Reproduzir animação do perfil"
-                onClick={() => {
-                  if (preview.current)
-                    profileEntrance(
-                      preview.current,
-                      showcase?.appearance.entrance,
-                    );
-                }}
-              >
-                <Sparkles size={18} />
-              </button>
             </div>
-            <div
-              ref={preview}
-              className="profile-preview-combined"
-              data-preview-tab={previewTab}
-              style={profileStyle(previewUser)}
-            >
-              <div className="profile-preview-identity">
-                <ProfileCard user={previewUser} showcase={showcase} />
-              </div>
-              {showcase ? (
-                <div className="profile-preview-mural profile-public-advanced">
-                  <ProfileBackdrop appearance={showcase.appearance} mural />
-                  <h2>Seu mural</h2>
-                  <ShowcaseView value={showcase} detailed showBadges={false} />
-                  {!showcase.widgets.some((widget) => widget.visible) ? (
-                    <p className="profile-mural-empty">
-                      Escolha os widgets na edição para compor seu mural.
-                    </p>
-                  ) : null}
-                </div>
-              ) : null}
-            </div>
+            {showcase ? (
+              <ProfileVisualSurface
+                user={previewUser}
+                showcase={showcase}
+                preview
+                previewTab={previewTab}
+              />
+            ) : null}
           </section>
 
           <div

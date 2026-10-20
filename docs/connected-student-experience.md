@@ -16,7 +16,7 @@
 
 ## Migrações
 
-V50–V56 são aditivas: mídia/limites de salas, Monitor/cadernos compartilhados, cofre de conta, typing privado, atividades e padrão de mural, PIN/segurança e arquivos do portfólio. V50 ajusta a capacidade pública de salas antigas sem remover participantes. Não modifica aprovação acadêmica, perfil existente, senha, verificação de email ou sessões. V54 muda apenas o padrão de novas configurações de mural.
+V52–V58 são aditivas: mídia/limites de salas, Monitor/cadernos compartilhados, cofre de conta, typing privado, atividades e padrão de mural, PIN/segurança e arquivos do portfólio. V52 ajusta a capacidade pública de salas antigas sem remover participantes. Não modifica aprovação acadêmica, perfil existente, senha, verificação de email ou sessões. V56 muda apenas o padrão de novas configurações de mural.
 
 ## Publicação
 

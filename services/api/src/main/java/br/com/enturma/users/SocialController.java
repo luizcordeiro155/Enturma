@@ -54,7 +54,7 @@ public class SocialController {
     unblocked(a.id(), id);
     var profile =
         db.one(
-            "SELECT id,name,username,bio,accent_color,profile_details,avatar_bytes IS NOT NULL"
+            "SELECT id,name,username,bio,accent_color,profile_details,media_version,avatar_bytes IS NOT NULL"
                 + " has_avatar,banner_bytes IS NOT NULL has_banner FROM app_user WHERE id=? AND"
                 + " status='ACTIVE'",
             id);
@@ -103,7 +103,7 @@ public class SocialController {
   public Object friends(@AuthenticationPrincipal Actor a) {
     return db.list(
         "SELECT f.id,f.requester,f.recipient,f.status,u.id"
-            + " user_id,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS NOT"
+            + " user_id,u.name,u.username,u.accent_color,u.profile_details,u.media_version,u.avatar_bytes IS NOT"
             + " NULL has_avatar,EXISTS(SELECT 1 FROM realtime_presence rp WHERE rp.user_id=u.id AND"
             + " rp.expires_at>now()) online,latest.id last_message_id,latest.created_at"
             + " last_message_at,(SELECT count(*) FROM notification n WHERE n.user_id=? AND"

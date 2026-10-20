@@ -322,7 +322,7 @@ html
   .user-profile-popover
   .profile-discord-public-layout
   .profile-public-primary {
-  background: var(--profile-gradient) !important;
+  background: transparent !important;
   color: var(--profile-copy);
 }
 html .user-profile-popover .profile-discord-public-layout .public-profile-body {
@@ -332,7 +332,7 @@ html .user-profile-popover .profile-public-primary .profile-main-meta,
 html .user-profile-popover .profile-public-primary .profile-main-meta strong {
   color: inherit;
 }
-.user-profile-popover .profile-public-advanced {
+html .user-profile-popover .profile-shared-surface .profile-has-community {
   padding: 0 !important;
   background: var(--mural-background, var(--surface)) !important;
   color: var(--mural-copy, var(--ink));
@@ -1132,4 +1132,11 @@ html .interactive-star-rating button[data-filled="true"] {
   align-items: center;
   gap: 5px;
   color: #e7b83f;
+}
+
+html
+  .user-profile-popover
+  .profile-shared-surface.profile-mural-linked
+  .profile-has-community {
+  background: transparent !important;
 }

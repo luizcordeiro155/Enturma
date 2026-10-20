@@ -83,6 +83,7 @@ type Envelope = {
 type PrivateMessage = Envelope & {
   text: string;
   attachmentUrl?: string;
+  sendStatus?: "sending" | "failed";
 };
 export function Friends() {
   const params = useSearchParams();
@@ -144,6 +145,16 @@ export function Friends() {
   const previousMessageCount = useRef(0);
   const attachmentUrls = useRef(new Set<string>());
   const loadedPages = useRef(0);
+  const pendingSends = useRef(
+    new Map<
+      string,
+      {
+        friendshipId: string;
+        text: string;
+        payload: Record<string, unknown>;
+      }
+    >(),
+  );
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -258,15 +269,25 @@ export function Friends() {
               (newest.attachmentUrl ? "Imagem" : "Mensagem privada"),
           },
         }));
-      setMessages((old) =>
-        [...new Map([...old, ...decoded].map((m) => [m.id, m])).values()]
+      setMessages((old) => {
+        const incomingClients = new Set(
+          decoded.map((message) => message.clientId),
+        );
+        const withoutConfirmedPending = old.filter(
+          (message) => !incomingClients.has(message.clientId),
+        );
+        return [
+          ...new Map(
+            [...withoutConfirmedPending, ...decoded].map((m) => [m.id, m]),
+          ).values(),
+        ]
           .filter((m) => !m.hiddenAt)
           .sort(
             (a, b) =>
               a.createdAt.localeCompare(b.createdAt) ||
               a.id.localeCompare(b.id),
-          ),
-      );
+          );
+      });
       if (!target)
         setOlder(
           rows.length === (index === 0 ? (loadedPages.current + 1) * 50 : 50),
@@ -604,57 +625,141 @@ export function Friends() {
     setError("");
   }
 
+  async function deliverPending(
+    friendshipId: string,
+    clientId: string,
+    payload: Record<string, unknown>,
+  ) {
+    try {
+      await post(`/friends/${friendshipId}/messages`, payload);
+      pendingSends.current.delete(clientId);
+      setMessages((old) =>
+        old.map((message) =>
+          message.clientId === clientId
+            ? { ...message, sendStatus: undefined }
+            : message,
+        ),
+      );
+      const currentFriend =
+        selected?.id === friendshipId ? selected : undefined;
+      if (currentFriend && key.current) {
+        void load(currentFriend, key.current, 0, generation.current).catch(
+          () => {
+            // Server already confirmed delivery; a refresh failure must not mark
+            // the message as undelivered.
+          },
+        );
+      }
+    } catch (error) {
+      setMessages((old) =>
+        old.map((message) =>
+          message.clientId === clientId
+            ? { ...message, sendStatus: "failed" }
+            : message,
+        ),
+      );
+      setError((error as Error).message);
+    }
+  }
+
+  function retryPending(clientId: string) {
+    const pending = pendingSends.current.get(clientId);
+    if (!pending) return;
+    setError("");
+    setMessages((old) =>
+      old.map((message) =>
+        message.clientId === clientId
+          ? { ...message, sendStatus: "sending" }
+          : message,
+      ),
+    );
+    void deliverPending(pending.friendshipId, clientId, pending.payload);
+  }
+
   async function send(e: React.FormEvent) {
     e.preventDefault();
     if (!selected || !me || !key.current || busy || (!draft.trim() && !image))
       return;
 
+    const friend = selected;
+    const sender = me.id;
+    const text = draft.trim();
+    const selectedImage = image;
+    const cryptoKey = key.current;
+    const clientId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const preview = imagePreview;
+    if (preview) attachmentUrls.current.add(preview);
+    // Show the outgoing bubble before encryption and the server round trip.
+    const optimistic: PrivateMessage = {
+      id: clientId,
+      clientId,
+      senderId: sender,
+      text,
+      iv: "",
+      ciphertext: "",
+      createdAt: now,
+      attachmentUrl: preview ?? undefined,
+      sendStatus: "sending",
+    };
+    setMessages((old) => [...old, optimistic]);
+    setPreviews((old) => ({
+      ...old,
+      [friend.id]: { id: clientId, text: text || "Imagem" },
+    }));
+    forceFollowLatest.current = true;
+    nearLatest.current = true;
+    privateTyping.stop();
+    setDraft("");
+    setImage(null);
+    setImagePreview(null);
+    setEmojiOpen(false);
     setBusy(true);
     setError("");
-    const friend = selected;
-    const clientId = crypto.randomUUID();
+    requestAnimationFrame(() => {
+      scrollToLatest("auto");
+      composer.current?.focus({ preventScroll: true });
+    });
     try {
       const payload = await encryptMessage(
-        key.current,
-        draft.trim(),
+        cryptoKey,
+        text,
         friend.id,
-        me.id,
+        sender,
         clientId,
       );
-      const preparedImage = image ? await preparePrivateChatImage(image) : null;
+      const preparedImage = selectedImage
+        ? await preparePrivateChatImage(selectedImage)
+        : null;
       const attachment = preparedImage
         ? await encryptAttachment(
-            key.current,
+            cryptoKey,
             preparedImage,
             friend.id,
-            me.id,
+            sender,
             clientId,
           )
         : {};
-
-      forceFollowLatest.current = true;
-      await post(`/friends/${friend.id}/messages`, {
+      const sendPayload = {
         ...payload,
         ...attachment,
-        mentioned: !!friend.username && mentionsUser(draft, friend.username),
+        mentioned: !!friend.username && mentionsUser(text, friend.username),
+      };
+      pendingSends.current.set(clientId, {
+        friendshipId: friend.id,
+        text,
+        payload: sendPayload,
       });
-
-      privateTyping.stop();
-      setDraft("");
-      setImage(null);
-      setImagePreview((old) => {
-        if (old) URL.revokeObjectURL(old);
-        return null;
-      });
-      setEmojiOpen(false);
-      await load(friend, key.current, 0, generation.current);
-      requestAnimationFrame(() => {
-        scrollToLatest("auto");
-        if (document.activeElement !== composer.current)
-          composer.current?.focus({ preventScroll: true });
-      });
-    } catch (e) {
-      setError((e as Error).message);
+      await deliverPending(friend.id, clientId, sendPayload);
+    } catch (error) {
+      pendingSends.current.delete(clientId);
+      setMessages((old) =>
+        old.filter((message) => message.clientId !== clientId),
+      );
+      setError((error as Error).message);
+      // Encryption errors have no retryable envelope; restore the original draft.
+      setDraft((current) => current || text);
+      if (selectedImage) setImage(selectedImage);
     } finally {
       setBusy(false);
     }
@@ -1067,6 +1172,24 @@ export function Friends() {
                         }
                       />
                       <div className="private-message-body">
+                        {m.sendStatus ? (
+                          <div
+                            className="private-message-send-state"
+                            role="status"
+                          >
+                            {m.sendStatus === "sending" ? (
+                              <small>Enviando…</small>
+                            ) : (
+                              <button
+                                type="button"
+                                className="text-button"
+                                onClick={() => retryPending(m.clientId)}
+                              >
+                                Não enviada · Tentar novamente
+                              </button>
+                            )}
+                          </div>
+                        ) : null}
                         {m.deletedAt ? (
                           <p className="muted">Mensagem removida.</p>
                         ) : null}

@@ -353,10 +353,9 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     path: "../../.local/profile-popover.png",
     animations: "disabled",
   });
-  await expect(page.locator(".profile-public-primary")).toHaveCSS(
-    "background-color",
-    "rgb(24, 63, 54)",
-  );
+  await expect(
+    page.locator(".user-profile-popover .profile-shared-surface"),
+  ).toHaveCSS("background-color", "rgb(24, 63, 54)");
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
   await page

@@ -10,9 +10,11 @@ import { BrandBook } from "./brand-book";
 export function LaunchComposition({
   ride = false,
   reduced = false,
+  lightweight = false,
 }: {
   ride?: boolean;
   reduced?: boolean;
+  lightweight?: boolean;
 }) {
   const raw = useCurrentFrame();
   const { fps } = useVideoConfig();
@@ -24,7 +26,7 @@ export function LaunchComposition({
       })
     : 0;
   const arrive = spring({
-    frame,
+    frame: Math.max(0, frame - 6),
     fps,
     config: { damping: 17, stiffness: 105 },
   });
@@ -47,7 +49,7 @@ export function LaunchComposition({
           scale: 1 + Math.sin(frame / 20) * 0.04,
         }}
       />
-      {[0, 1, 2].map((i) => (
+      {(lightweight ? [0] : [0, 1, 2]).map((i) => (
         <div
           key={i}
           style={{

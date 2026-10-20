@@ -34,7 +34,7 @@ export function ProfileEditPanel({
     if (cancel) onCancel();
     try {
       await (dialog.current
-        ? profileEntrance(dialog.current, "RISE", true)?.finished
+        ? profileEntrance(dialog.current, true)?.finished
         : undefined);
     } catch {}
     dialog.current?.close();

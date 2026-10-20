@@ -2,34 +2,21 @@
 import { useEffect, useRef } from "react";
 import type { ProfileVisualAppearance } from "@enturma/contracts";
 
-export function profileEntrance(
-  element: HTMLElement,
-  mode = "RISE",
-  closing = false,
-) {
+/** One consistent JavaScript/WAAPI entrance for all public profiles. */
+export function profileEntrance(element: HTMLElement, closing = false) {
   if (
     !element.animate ||
-    mode === "NONE" ||
     matchMedia("(prefers-reduced-motion: reduce)").matches ||
     document.documentElement.dataset.reducedMotion === "true"
   )
     return;
-  const initial =
-    mode === "BOOK"
-      ? "perspective(1200px) rotateY(-18deg) scale(.94)"
-      : mode === "ORBIT"
-        ? "translate(24px,18px) rotate(3deg) scale(.94)"
-        : "translateY(20px) scale(.97)";
   const frames = [
-    { opacity: 0, transform: initial },
-    {
-      opacity: 1,
-      transform: "perspective(1200px) translate(0,0) rotateY(0deg) scale(1)",
-    },
+    { opacity: 0, transform: "translateY(14px) scale(.985)" },
+    { opacity: 1, transform: "translateY(0) scale(1)" },
   ];
   return element.animate(closing ? frames.reverse() : frames, {
-    duration: closing ? 180 : 520,
-    easing: "cubic-bezier(.16,1,.3,1)",
+    duration: closing ? 170 : 310,
+    easing: "cubic-bezier(.2,.85,.22,1)",
     fill: closing ? "forwards" : "none",
   });
 }

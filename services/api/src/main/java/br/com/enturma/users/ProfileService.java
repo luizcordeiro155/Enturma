@@ -29,7 +29,7 @@ public class ProfileService {
     var user =
         db.one(
             "SELECT"
-                + " id,name,username,email,email_verified,role,bio,accent_color,profile_details,credential_version,"
+                + " id,name,username,email,email_verified,role,bio,accent_color,profile_details,credential_version,media_version,"
                 + " avatar_bytes IS NOT NULL has_avatar,banner_bytes IS NOT NULL has_banner FROM"
                 + " app_user WHERE id=?",
             a.id());
@@ -83,7 +83,7 @@ public class ProfileService {
   public void saveAvatar(Actor a, String mime, byte[] bytes) {
     validateImage(mime, bytes, 2 * 1024 * 1024, "avatar");
     db.jdbc.update(
-        "UPDATE app_user SET avatar_mime=?,avatar_bytes=? WHERE id=?", mime, bytes, a.id());
+        "UPDATE app_user SET avatar_mime=?,avatar_bytes=?,media_version=media_version+1 WHERE id=?", mime, bytes, a.id());
     profileChanged();
   }
 
@@ -91,7 +91,7 @@ public class ProfileService {
   public void saveBanner(Actor a, String mime, byte[] bytes) {
     validateImage(mime, bytes, 3 * 1024 * 1024, "banner");
     db.jdbc.update(
-        "UPDATE app_user SET banner_mime=?,banner_bytes=? WHERE id=?", mime, bytes, a.id());
+        "UPDATE app_user SET banner_mime=?,banner_bytes=?,media_version=media_version+1 WHERE id=?", mime, bytes, a.id());
     profileChanged();
   }
 
