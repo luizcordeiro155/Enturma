@@ -93,7 +93,12 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await page
     .getByLabel("Nome exibido", { exact: true })
     .fill("Meu rascunho preservado");
+  await page.getByLabel("Status personalizado").fill("Programação");
   await apply(page);
+  const highlightedStatus = preview.locator(".profile-status");
+  await expect(highlightedStatus).toHaveText("Programação");
+  await expect(highlightedStatus).toHaveCSS("background-color", "rgb(24, 38, 42)");
+  await expect(highlightedStatus).toHaveCSS("color", "rgb(247, 251, 253)");
   await page.getByRole("link", { name: "Salas", exact: true }).first().click();
   await expect(page).toHaveURL(/rooms/);
   await page
@@ -158,12 +163,16 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await page.screenshot({ path: "../../.local/profile-visual-laptop.png" });
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  await expect(highlightedStatus).toHaveCSS("background-color", "rgb(24, 38, 42)");
+  await expect(highlightedStatus).toHaveCSS("color", "rgb(247, 251, 253)");
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(controls).toBeVisible();
   await expect(page.locator(".profile-preview-stage")).toBeHidden();
   await apply(page);
   await page.getByRole("button", { name: "Ver prévia", exact: true }).click();
   await expect(controls).toBeHidden();
+  await page.getByRole("button", { name: "Perfil", exact: true }).click();
+  await expect(highlightedStatus).toBeVisible();
   await page.getByRole("button", { name: "Mural", exact: true }).click();
   await expect(preview.locator(".profile-preview-mural")).toBeVisible();
   // Long custom murals must be reachable by the phone's single scroller.

@@ -1,6 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- authenticated avatars use the same-origin API */
 import { useEffect, useRef, useState, useId, useCallback } from "react";
+import type { ReactNode } from "react";
 import {
   profileColor,
   profileContrast,
@@ -166,9 +167,11 @@ export function Avatar({ user }: { user: PublicProfile }) {
 export function ProfileCard({
   user,
   showcase,
+  actions,
 }: {
   user: PublicProfile;
   showcase?: Showcase;
+  actions?: ReactNode;
 }) {
   const d = user.profileDetails ?? {};
   return (
@@ -220,6 +223,9 @@ export function ProfileCard({
             <ConfirmedLink href={d.website} label="Site pessoal ↗" />
           ) : null}
         </div>
+        {actions ? (
+          <div className="profile-dialog-actions">{actions}</div>
+        ) : null}
       </div>
     </div>
   );

@@ -29,10 +29,7 @@ export function ProfileVisualSurface({
       style={profileStyle(user)}
     >
       <section className="profile-preview-identity profile-public-primary">
-        <ProfileCard user={user} showcase={showcase} />
-        {actions ? (
-          <div className="profile-dialog-actions">{actions}</div>
-        ) : null}
+        <ProfileCard user={user} showcase={showcase} actions={actions} />
       </section>
       <section
         className={`profile-preview-mural profile-public-advanced${mural ? " profile-has-community" : ""}`}

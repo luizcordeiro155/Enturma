@@ -356,6 +356,12 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     page.locator(".user-profile-popover .profile-shared-surface"),
   ).toHaveCSS("background-color", "rgb(24, 63, 54)");
+  await expect(
+    page.locator(".user-profile-popover .public-profile-body > .profile-dialog-actions"),
+  ).toHaveCount(1);
+  await expect(
+    page.locator(".user-profile-popover .profile-preview-identity > .profile-dialog-actions"),
+  ).toHaveCount(0);
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
   await page
@@ -364,6 +370,9 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     .click();
   const mobilePopover = page.getByRole("dialog", { name: `Perfil de ${b}` });
   await expect(mobilePopover).toBeVisible();
+  await expect(
+    mobilePopover.locator(".public-profile-body > .profile-dialog-actions"),
+  ).toBeVisible();
   const mobileBounds = await mobilePopover.boundingBox();
   expect(mobileBounds!.x).toBeGreaterThanOrEqual(0);
   expect(mobileBounds!.x + mobileBounds!.width).toBeLessThanOrEqual(390);

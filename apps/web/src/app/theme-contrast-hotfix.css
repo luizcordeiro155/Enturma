@@ -113,3 +113,72 @@ html button.profile-edit-launch > svg {
   stroke: currentColor !important;
   opacity: 1 !important;
 }
+
+/* The personal status ("Programação", etc.) is a distinct high-contrast
+   highlight, regardless of app theme or the user's chosen profile palette.
+   This covers editor previews, quick-edit dialogs and public profile cards. */
+html .public-profile-card .profile-copy-content .profile-status {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  margin: 14px 0 10px;
+  padding: 14px 16px;
+  border: 1px solid #36484c !important;
+  border-radius: 12px;
+  background: #18262a !important;
+  color: #f7fbfd !important;
+  box-shadow: 0 5px 16px rgb(0 0 0 / 18%);
+  font-weight: 600;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* Put Edit profile / Start conversation inside the very same gradient card.
+   The actions no longer create a separate stripe that breaks custom themes. */
+html .profile-shared-surface .profile-preview-identity > .public-profile-card {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+html .profile-shared-surface .profile-preview-identity .public-profile-body {
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  min-height: 0;
+  background: transparent !important;
+}
+html .profile-shared-surface .profile-preview-identity .public-profile-body > .profile-dialog-actions {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  gap: 10px;
+  box-sizing: border-box;
+  width: 100%;
+  margin: auto 0 0 !important;
+  padding: 20px 0 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+html .profile-shared-surface .profile-preview-identity .public-profile-body > .profile-dialog-actions > :is(a, button) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+}
+@media (max-width: 760px) {
+  /* Keep the full mobile profile themed all the way to its bottom without
+     introducing another scrolling region or covering the phone's safe area. */
+  html .user-profile-popover .profile-shared-surface .profile-preview-identity {
+    display: flex !important;
+    flex-direction: column;
+    min-height: calc(100dvh - max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px))) !important;
+  }
+  html .user-profile-popover .profile-shared-surface .profile-preview-identity > .public-profile-card {
+    flex: 1 0 auto;
+  }
+}
