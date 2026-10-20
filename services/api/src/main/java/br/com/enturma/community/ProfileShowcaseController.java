@@ -16,14 +16,17 @@ public class ProfileShowcaseController {
   private final AchievementService achievements;
   private final org.springframework.context.ApplicationEventPublisher events;
 
-  public ProfileShowcaseController(Db db, AchievementService achievements, org.springframework.context.ApplicationEventPublisher events) {
+  public ProfileShowcaseController(
+      Db db,
+      AchievementService achievements,
+      org.springframework.context.ApplicationEventPublisher events) {
     this.db = db;
     this.achievements = achievements;
     this.events = events;
   }
 
   private static final Set<String> FIELDS =
-      Set.of("ACADEMIC", "STATS", "ACHIEVEMENTS", "JOINED", "WIDGETS");
+      Set.of("ACADEMIC", "STATS", "ACHIEVEMENTS", "JOINED", "WIDGETS", "ACTIVITY");
   private static final Set<String> WIDGETS =
       Set.of(
           "SUBJECTS",
@@ -49,7 +52,7 @@ public class ProfileShowcaseController {
       @NotNull @Size(max = 200) String goal,
       @NotNull @Size(max = 200) String technologies,
       @NotNull @Size(max = 1000) String projects,
-      @NotNull @Size(max = 5) Map<String, Boolean> privacy,
+      @NotNull @Size(max = 6) Map<String, Boolean> privacy,
       @NotNull @Size(max = 8) List<@NotNull @Valid Widget> widgets,
       @NotNull @Size(max = 4) List<@NotBlank String> badges,
       @Pattern(regexp = "PROFILE|DEFAULT|CUSTOM") String muralMode,
@@ -88,8 +91,17 @@ public class ProfileShowcaseController {
         s.technologies(),
         s.projects());
     // Older native clients omit the new fields: retain saved customization on their updates.
-    db.jdbc.update("UPDATE profile_showcase SET mural_mode=COALESCE(?,mural_mode),mural_color=COALESCE(?,mural_color),mural_secondary_color=COALESCE(?,mural_secondary_color),gradient_angle=COALESCE(?,gradient_angle),gradient_flow=COALESCE(?,gradient_flow),entrance=COALESCE(?,entrance) WHERE user_id=?",
-        s.muralMode(), s.muralColor(), s.muralSecondaryColor(), s.gradientAngle(), s.gradientFlow(), s.entrance(), a.id());
+    db.jdbc.update(
+        "UPDATE profile_showcase SET"
+            + " mural_mode=COALESCE(?,mural_mode),mural_color=COALESCE(?,mural_color),mural_secondary_color=COALESCE(?,mural_secondary_color),gradient_angle=COALESCE(?,gradient_angle),gradient_flow=COALESCE(?,gradient_flow),entrance=COALESCE(?,entrance)"
+            + " WHERE user_id=?",
+        s.muralMode(),
+        s.muralColor(),
+        s.muralSecondaryColor(),
+        s.gradientAngle(),
+        s.gradientFlow(),
+        s.entrance(),
+        a.id());
     for (String f : FIELDS)
       db.jdbc.update(
           "INSERT INTO profile_privacy_setting(user_id,field,visible) VALUES (?,?,?) ON"
@@ -121,7 +133,9 @@ public class ProfileShowcaseController {
   }
 
   @GetMapping("/users/me/showcase")
-  public Object own(@AuthenticationPrincipal Actor a) { return get(a, a.id()); }
+  public Object own(@AuthenticationPrincipal Actor a) {
+    return get(a, a.id());
+  }
 
   @GetMapping("/users/{id}/showcase")
   public Object get(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
@@ -146,8 +160,9 @@ public class ProfileShowcaseController {
     var result = new LinkedHashMap<String, Object>();
     var rows =
         db.list(
-            "SELECT secondary_color,theme,effect,layout,goal,technologies,projects,mural_mode,mural_color,mural_secondary_color,gradient_angle,gradient_flow,entrance FROM"
-                + " profile_showcase WHERE user_id=?",
+            "SELECT"
+                + " secondary_color,theme,effect,layout,goal,technologies,projects,mural_mode,mural_color,mural_secondary_color,gradient_angle,gradient_flow,entrance"
+                + " FROM profile_showcase WHERE user_id=?",
             id);
     result.put(
         "appearance",
@@ -172,7 +187,8 @@ public class ProfileShowcaseController {
             : rows.getFirst());
     if (!owner && !privacy.get("WIDGETS") && !rows.isEmpty()) {
       var publicAppearance = new LinkedHashMap<>(rows.getFirst());
-      for (String privateField : List.of("goal", "technologies", "projects")) publicAppearance.remove(privateField);
+      for (String privateField : List.of("goal", "technologies", "projects"))
+        publicAppearance.remove(privateField);
       result.put("appearance", publicAppearance);
     }
     if (owner) result.put("privacy", privacy);

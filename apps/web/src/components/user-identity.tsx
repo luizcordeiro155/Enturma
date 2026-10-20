@@ -14,12 +14,9 @@ import {
 } from "@/lib/use-overlay-history";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { ProfileCommunity } from "./profile-community";
 import { api, post } from "@/lib/api";
-import {
-  FeaturedAchievementBadges,
-  ShowcaseView,
-  type Showcase,
-} from "./profile-showcase";
+import { FeaturedAchievementBadges, type Showcase } from "./profile-showcase";
 import { ConfirmedLink, ForumLinks } from "./forum-links";
 import { useLiveRefresh } from "@/lib/live-updates";
 export type ProfileDetails = {
@@ -27,6 +24,8 @@ export type ProfileDetails = {
   statusText?: string;
   decoration?: string;
   nameFont?: string;
+  nameColor?: string;
+  nameEffect?: string;
   website?: string;
   interests?: string;
 };
@@ -97,24 +96,30 @@ export function profileStyle(user: PublicProfile): React.CSSProperties {
     "--profile-copy": contrast.ink,
     "--profile-copy-panel": contrast.panel,
     "--mural-background":
-      appearance?.muralMode === "DEFAULT"
+      !appearance?.muralMode || appearance.muralMode === "DEFAULT"
         ? "var(--surface)"
         : appearance?.muralMode === "CUSTOM"
           ? `linear-gradient(${angle}deg,${muralPrimary},${muralSecondary})`
           : gradient,
     "--mural-copy":
-      appearance?.muralMode === "DEFAULT"
+      !appearance?.muralMode || appearance.muralMode === "DEFAULT"
         ? "var(--ink)"
         : appearance?.muralMode === "CUSTOM"
           ? muralContrast.ink
           : contrast.ink,
     "--mural-copy-panel":
-      appearance?.muralMode === "DEFAULT"
+      !appearance?.muralMode || appearance.muralMode === "DEFAULT"
         ? "transparent"
         : appearance?.muralMode === "CUSTOM"
           ? muralContrast.panel
           : contrast.panel,
   } as React.CSSProperties;
+}
+export function profileNameStyle(user: PublicProfile): React.CSSProperties {
+  const color = user.profileDetails?.nameColor;
+  return color && /^#[0-9a-f]{6}$/i.test(color)
+    ? ({ "--profile-name-color": color } as React.CSSProperties)
+    : {};
 }
 export function LiveIdentity({ id, name }: { id: string; name: string }) {
   const [user, setUser] = useState<PublicProfile>({ id, name });
@@ -186,7 +191,12 @@ export function ProfileCard({
         <ProfileBackdrop appearance={user.showcaseAppearance} />
         <Avatar user={user} />
         <div className="profile-copy-content">
-          <h2 className={`name-${d.nameFont ?? "SYSTEM"}`}>{user.name}</h2>
+          <h2
+            style={profileNameStyle(user)}
+            className={`name-${d.nameFont ?? "SYSTEM"} name-effect-${d.nameEffect ?? "SOLID"}`}
+          >
+            {user.name}
+          </h2>
           <div className="profile-handle-row">
             <p>
               @{user.username} {d.pronouns ? `· ${d.pronouns}` : ""}
@@ -313,10 +323,7 @@ export function UserIdentity({
     if (closing.current) return;
     closing.current = true;
     const animation = card.current
-      ? profileEntrance(
-          card.current,
-          true,
-        )
+      ? profileEntrance(card.current, true)
       : undefined;
     try {
       await animation?.finished;
@@ -331,9 +338,7 @@ export function UserIdentity({
   useOverlayHistory(() => void close(), open);
   useEffect(() => {
     if (!open || !profile || !card.current) return;
-    const animation = profileEntrance(
-      card.current,
-    );
+    const animation = profileEntrance(card.current);
     return () => animation?.cancel();
   }, [open]);
   useEffect(() => {
@@ -410,7 +415,8 @@ export function UserIdentity({
         {!compact ? (
           <span>
             <strong
-              className={`name-${user.profileDetails?.nameFont ?? "SYSTEM"}`}
+              style={profileNameStyle(user)}
+              className={`name-${user.profileDetails?.nameFont ?? "SYSTEM"} name-effect-${user.profileDetails?.nameEffect ?? "SOLID"}`}
             >
               {user.name}
             </strong>
@@ -441,8 +447,17 @@ export function UserIdentity({
                 <ProfileVisualSurface
                   user={profile}
                   showcase={showcase}
-                  actions={!isOwnProfile ? (
-                    <>
+                  mural={
+                    <ProfileCommunity
+                      userId={profile.id}
+                      showcase={showcase}
+                      own={isOwnProfile}
+                      onNavigate={() => setOpen(false)}
+                    />
+                  }
+                  actions={
+                    !isOwnProfile ? (
+                      <>
                         {friendshipLoading ? (
                           <button type="button" disabled>
                             Verificando amizade…
@@ -496,12 +511,17 @@ export function UserIdentity({
                             Adicionar amizade
                           </button>
                         )}
-                    </>
-                  ) : (
-                    <Link className="button" href="/profile" onClick={() => setOpen(false)}>
-                      Editar perfil
-                    </Link>
-                  )}
+                      </>
+                    ) : (
+                      <Link
+                        className="button"
+                        href="/profile"
+                        onClick={() => setOpen(false)}
+                      >
+                        Editar perfil
+                      </Link>
+                    )
+                  }
                 />
               ) : null}
               {message ? <p role="status">{message}</p> : null}

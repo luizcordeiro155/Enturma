@@ -21,9 +21,7 @@ public class RoomShareController {
   private final SecureRandom random = new SecureRandom();
 
   public RoomShareController(
-      Db db,
-      StudyService study,
-      @Value("$" + "{enturma.app-url}") String appUrl) {
+      Db db, StudyService study, @Value("$" + "{enturma.app-url}") String appUrl) {
     this.db = db;
     this.study = study;
     this.appUrl = appUrl.replaceAll("/+$", "");
@@ -37,12 +35,11 @@ public class RoomShareController {
   }
 
   @GetMapping("/{id}/qr")
-  public ResponseEntity<byte[]> qr(
-      @AuthenticationPrincipal Actor a, @PathVariable UUID id) throws Exception {
+  public ResponseEntity<byte[]> qr(@AuthenticationPrincipal Actor a, @PathVariable UUID id)
+      throws Exception {
     study.member(a, id);
     String code = ensureCode(id);
-    var matrix =
-        new QRCodeWriter().encode(appUrl + "/join/" + code, BarcodeFormat.QR_CODE, 33, 33);
+    var matrix = new QRCodeWriter().encode(appUrl + "/join/" + code, BarcodeFormat.QR_CODE, 33, 33);
     int scale = 8;
     int size = matrix.getWidth() * scale;
     var svg =
@@ -51,7 +48,8 @@ public class RoomShareController {
                 + size
                 + " "
                 + size
-                + "' shape-rendering='crispEdges'><rect width='100%' height='100%' fill='white'/><path d='");
+                + "' shape-rendering='crispEdges'><rect width='100%' height='100%'"
+                + " fill='white'/><path d='");
     for (int y = 0; y < matrix.getHeight(); y++) {
       for (int x = 0; x < matrix.getWidth(); x++) {
         if (matrix.get(x, y))
@@ -75,8 +73,7 @@ public class RoomShareController {
   }
 
   @GetMapping("/join-code/{code}")
-  public Object resolve(
-      @AuthenticationPrincipal Actor a, @PathVariable String code) {
+  public Object resolve(@AuthenticationPrincipal Actor a, @PathVariable String code) {
     return db.one(
         "SELECT r.id,r.title,r.status,r.ends_at,s.name subject_name"
             + " FROM study_room r JOIN academic_entry s ON s.id=r.subject_id"
@@ -85,16 +82,8 @@ public class RoomShareController {
   }
 
   @PostMapping("/join-code/{code}/join")
-  public Object join(
-      @AuthenticationPrincipal Actor a, @PathVariable String code) {
-    UUID id =
-        (UUID)
-            db.one(
-                    "SELECT id FROM study_room WHERE upper(share_code)=upper(?)",
-                    code.strip())
-                .get("id");
-    study.join(a, id);
-    return study.detail(a, id);
+  public Object join(@AuthenticationPrincipal Actor a, @PathVariable String code) {
+    return study.joinByCode(a, code);
   }
 
   private String ensureCode(UUID id) {
@@ -123,8 +112,7 @@ public class RoomShareController {
   private String randomCode() {
     String alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
     var b = new StringBuilder();
-    for (int i = 0; i < 8; i++)
-      b.append(alphabet.charAt(random.nextInt(alphabet.length())));
+    for (int i = 0; i < 8; i++) b.append(alphabet.charAt(random.nextInt(alphabet.length())));
     return b.toString();
   }
 }

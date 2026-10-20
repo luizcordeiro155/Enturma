@@ -168,7 +168,14 @@ export async function api<T>(path: string, options?: RequestInit): Promise<T> {
         readCache.delete(readCache.keys().next().value!);
       readCache.set(path, { value, expiresAt: Date.now() + ttl });
     } else if (method !== "GET") {
-      invalidateApiCache();
+      // Presence heartbeats do not change page content. Invalidating every read
+      // here would defeat preserved navigation while someone types or studies.
+      if (
+        !/^\/(users\/me\/activity|friends\/[^/]+\/typing|rooms\/[^/]+\/presence|study-rooms\/[^/]+\/heartbeat)(\?|$)/.test(
+          path,
+        )
+      )
+        invalidateApiCache();
       if (SESSION_MUTATIONS.has(path)) announceSessionChange(path);
     }
     return value;

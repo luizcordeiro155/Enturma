@@ -1,4 +1,7 @@
 "use client";
+import { usePrivateTyping } from "@/lib/use-private-typing";
+import { TypingIndicator } from "./typing-indicator";
+import { synchronizeAccountIdentity } from "@/lib/account-chat-sync";
 import { ChatImage } from "./chat-image-viewer";
 import { isChatAtLatest } from "@/lib/chat-scroll";
 import { PrivateCallButtons } from "./private-calls";
@@ -37,7 +40,6 @@ import {
   fingerprint,
   importBackup,
   publicFields,
-  readIdentity,
   storeIdentity,
 } from "@/lib/private-chat-crypto";
 import { PrivateKeySync } from "./private-key-sync";
@@ -95,6 +97,7 @@ export function Friends() {
     () => peekApiSnapshot<Friend[]>("/friends") ?? [],
   );
   const [selected, setSelected] = useState<Friend>();
+  const privateTyping = usePrivateTyping(selected?.id);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [username, setUsername] = useState("");
@@ -142,11 +145,16 @@ export function Friends() {
   const previousMessageCount = useRef(0);
   const attachmentUrls = useRef(new Set<string>());
   const loadedPages = useRef(0);
-  const pendingSends = useRef(new Map<string, {
-    friendshipId: string;
-    text: string;
-    payload: Record<string, unknown>;
-  }>());
+  const pendingSends = useRef(
+    new Map<
+      string,
+      {
+        friendshipId: string;
+        text: string;
+        payload: Record<string, unknown>;
+      }
+    >(),
+  );
 
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -163,37 +171,12 @@ export function Friends() {
       .then(async (user) => {
         if (!alive) return;
         setMe(user);
-        const prepare = async () => {
-          let local = await readIdentity(user.id);
-          const stored = await api<{ publicKey: JsonWebKey }[]>(
-            "/private-identity",
-            { signal: AbortSignal.timeout(12000) },
-          );
-          if (!local) {
-            if (stored.length)
-              throw Error(
-                "Desbloqueie as conversas na seção Conversas em todos os dispositivos. Se ainda não ativou a sincronização, ative pelo dispositivo original ou restaure seu backup cifrado.",
-              );
-            local = await createIdentity();
-            await storeIdentity(user.id, local);
-          }
-          await api("/private-identity", {
-            method: "PUT",
-            body: JSON.stringify(publicFields(local.publicKey)),
-            signal: AbortSignal.timeout(12000),
-          });
-          if (alive) {
-            identity.current = local;
-            setReady(true);
-            setIdentityError("");
-          }
-        };
-        if (navigator.locks)
-          await navigator.locks.request(
-            `enturma-private-identity:${user.id}`,
-            prepare,
-          );
-        else await prepare();
+        const result = await synchronizeAccountIdentity(user.id);
+        if (alive) {
+          identity.current = result.identity;
+          setReady(true);
+          setIdentityError("");
+        }
       })
       .catch((e) => {
         if (alive)
@@ -287,11 +270,17 @@ export function Friends() {
           },
         }));
       setMessages((old) => {
-        const incomingClients = new Set(decoded.map((message) => message.clientId));
+        const incomingClients = new Set(
+          decoded.map((message) => message.clientId),
+        );
         const withoutConfirmedPending = old.filter(
           (message) => !incomingClients.has(message.clientId),
         );
-        return [...new Map([...withoutConfirmedPending, ...decoded].map((m) => [m.id, m])).values()]
+        return [
+          ...new Map(
+            [...withoutConfirmedPending, ...decoded].map((m) => [m.id, m]),
+          ).values(),
+        ]
           .filter((m) => !m.hiddenAt)
           .sort(
             (a, b) =>
@@ -651,12 +640,15 @@ export function Friends() {
             : message,
         ),
       );
-      const currentFriend = selected?.id === friendshipId ? selected : undefined;
+      const currentFriend =
+        selected?.id === friendshipId ? selected : undefined;
       if (currentFriend && key.current) {
-        void load(currentFriend, key.current, 0, generation.current).catch(() => {
-          // Server already confirmed delivery; a refresh failure must not mark
-          // the message as undelivered.
-        });
+        void load(currentFriend, key.current, 0, generation.current).catch(
+          () => {
+            // Server already confirmed delivery; a refresh failure must not mark
+            // the message as undelivered.
+          },
+        );
       }
     } catch (error) {
       setMessages((old) =>
@@ -717,6 +709,7 @@ export function Friends() {
     }));
     forceFollowLatest.current = true;
     nearLatest.current = true;
+    privateTyping.stop();
     setDraft("");
     setImage(null);
     setImagePreview(null);
@@ -735,10 +728,16 @@ export function Friends() {
         sender,
         clientId,
       );
-      const preparedImage = selectedImage ? await preparePrivateChatImage(selectedImage) : null;
+      const preparedImage = selectedImage
+        ? await preparePrivateChatImage(selectedImage)
+        : null;
       const attachment = preparedImage
         ? await encryptAttachment(
-            cryptoKey, preparedImage, friend.id, sender, clientId,
+            cryptoKey,
+            preparedImage,
+            friend.id,
+            sender,
+            clientId,
           )
         : {};
       const sendPayload = {
@@ -1174,7 +1173,10 @@ export function Friends() {
                       />
                       <div className="private-message-body">
                         {m.sendStatus ? (
-                          <div className="private-message-send-state" role="status">
+                          <div
+                            className="private-message-send-state"
+                            role="status"
+                          >
                             {m.sendStatus === "sending" ? (
                               <small>Enviando…</small>
                             ) : (
@@ -1289,6 +1291,9 @@ export function Friends() {
                   />
                 ) : null}
 
+                <TypingIndicator
+                  names={privateTyping.users.map((user) => user.name)}
+                />
                 <form
                   onSubmit={send}
                   className="private-composer enturma-message-composer"
@@ -1383,8 +1388,12 @@ export function Friends() {
                         }}
                         onBlur={() => {
                           setNativeChatComposerFocused(false);
+                          privateTyping.stop();
                         }}
-                        onChange={(e) => setDraft(e.target.value)}
+                        onChange={(e) => {
+                          setDraft(e.target.value);
+                          privateTyping.type(e.target.value);
+                        }}
                         maxLength={4000}
                         disabled={!finger}
                         rows={1}

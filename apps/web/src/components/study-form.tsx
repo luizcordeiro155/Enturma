@@ -152,12 +152,18 @@ export function StudyForm() {
                   name="capacity"
                   type="number"
                   min={2}
-                  max={30}
-                  defaultValue={8}
+                  max={longRoom ? 45 : 10}
+                  key={longRoom ? "days" : "hours"}
+                  defaultValue={longRoom ? 45 : 10}
                   required
                 />
               </label>
             </div>
+            <small>
+              Convites por código podem ultrapassar a capacidade, inclusive
+              depois de fechar as entradas. Foto e banner são opcionais e podem
+              ser adicionados em Gerenciar sala.
+            </small>
             <button className="button" disabled={busy || !subject}>
               {busy ? "Encontrando sua turma…" : "Estudar agora"}
             </button>

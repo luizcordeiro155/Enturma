@@ -29,10 +29,7 @@ public class RideService {
   private void changed(UUID ride, boolean publicListing) {
     Set<UUID> users = new HashSet<>();
     users.add((UUID) db.one("SELECT owner_id FROM ride WHERE id=?", ride).get("ownerId"));
-    for (var m :
-        db.list(
-            "SELECT driver_id,passenger_id FROM ride_match WHERE ride_id=?",
-            ride)) {
+    for (var m : db.list("SELECT driver_id,passenger_id FROM ride_match WHERE ride_id=?", ride)) {
       if (m.get("driverId") != null) users.add((UUID) m.get("driverId"));
       if (m.get("passengerId") != null) users.add((UUID) m.get("passengerId"));
     }
@@ -40,15 +37,10 @@ public class RideService {
   }
 
   private void matchChanged(UUID match) {
-    var participants =
-        db.one(
-            "SELECT driver_id,passenger_id FROM ride_match WHERE id=?",
-            match);
+    var participants = db.one("SELECT driver_id,passenger_id FROM ride_match WHERE id=?", match);
     events.publishEvent(
         new RideChanged(
-            Set.of(
-                (UUID) participants.get("driverId"),
-                (UUID) participants.get("passengerId")),
+            Set.of((UUID) participants.get("driverId"), (UUID) participants.get("passengerId")),
             false));
   }
 
@@ -140,8 +132,7 @@ public class RideService {
       throw ApiException.invalid("Confira o tipo, a região, a direção e o horário da carona.");
     if ((areaLat == null) != (areaLng == null))
       throw ApiException.invalid("A localização aproximada está incompleta.");
-    if (areaLat != null
-        && (areaLat < -90 || areaLat > 90 || areaLng < -180 || areaLng > 180))
+    if (areaLat != null && (areaLat < -90 || areaLat > 90 || areaLng < -180 || areaLng > 180))
       throw ApiException.invalid("A localização aproximada é inválida.");
     if (areaAccuracyMeters != null && (areaAccuracyMeters < 0 || areaAccuracyMeters > 50000))
       throw ApiException.invalid("A precisão da localização é inválida.");
@@ -179,8 +170,7 @@ public class RideService {
     boolean offer = "OFFER".equals(r.get("type"));
     if (!offer
         && db.exists(
-            "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED')",
-            ride))
+            "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED')", ride))
       throw ApiException.invalid("Este pedido de carona já encontrou um motorista.");
     UUID driver = offer ? owner : a.id();
     UUID passenger = offer ? a.id() : owner;
@@ -189,7 +179,8 @@ public class RideService {
             "SELECT count(*) FROM ride_match WHERE ride_id=? AND status='ACCEPTED'",
             Integer.class,
             ride);
-    String status = offer && accepted >= ((Number) r.get("seats")).intValue() ? "WAITLISTED" : "PENDING";
+    String status =
+        offer && accepted >= ((Number) r.get("seats")).intValue() ? "WAITLISTED" : "PENDING";
     UUID id = UUID.randomUUID();
     db.jdbc.update(
         "INSERT INTO ride_match(id,ride_id,user_id,status,requested_by,driver_id,passenger_id,"
@@ -230,37 +221,31 @@ public class RideService {
 
   public Object matches(Actor a) {
     return db.list(
-        "SELECT m.id,m.ride_id,m.user_id,m.driver_id,m.passenger_id,m.requested_by,m.request_ride_id,"
-            + " m.status,m.driver_confirmed,m.passenger_confirmed,m.boarding_verified_at,m.boarded_at,m.pickup_order,"
-            + " m.pickup_lat,m.pickup_lng,m.closed_at,m.purge_at,m.deleted_at,"
-            + " CASE WHEN m.status='ACCEPTED' THEN m.meeting_point ELSE NULL END meeting_point,"
-            + " CASE WHEN m.status='ACCEPTED' AND m.passenger_id=? THEN m.boarding_code ELSE NULL END"
+        "SELECT"
+            + " m.id,m.ride_id,m.user_id,m.driver_id,m.passenger_id,m.requested_by,m.request_ride_id,"
+            + " m.status,m.driver_confirmed,m.passenger_confirmed,m.boarding_verified_at,m.boarded_at,m.boarding_attempts,m.boarding_locked_at,m.pickup_order,"
+            + " m.pickup_lat,m.pickup_lng,m.closed_at,m.purge_at,m.deleted_at, CASE WHEN"
+            + " m.status='ACCEPTED' THEN m.meeting_point ELSE NULL END meeting_point, CASE WHEN"
+            + " m.status='ACCEPTED' AND m.passenger_id=? THEN m.boarding_code ELSE NULL END"
             + " boarding_code,r.owner_id,r.origin_area,r.departure_at,r.status ride_status,"
             + " r.trip_status,r.campus_id,c.name campus_name,r.start_label,r.start_lat,r.start_lng,"
-            + " r.end_label,r.end_lat,r.end_lng,"
-            + " pr.start_label passenger_start_label,pr.start_lat passenger_start_lat,"
-            + " pr.start_lng passenger_start_lng,pr.end_label passenger_end_label,"
-            + " pr.end_lat passenger_end_lat,pr.end_lng passenger_end_lng,"
+            + " r.end_label,r.end_lat,r.end_lng, pr.start_label passenger_start_label,pr.start_lat"
+            + " passenger_start_lat, pr.start_lng passenger_start_lng,pr.end_label"
+            + " passenger_end_label, pr.end_lat passenger_end_lat,pr.end_lng passenger_end_lng,"
             + " p.name passenger_name,p.avatar_bytes IS NOT NULL passenger_has_avatar,"
-            + " p.banner_bytes IS NOT NULL passenger_has_banner,"
-            + " d.name driver_name,d.avatar_bytes IS NOT NULL driver_has_avatar,"
-            + " d.banner_bytes IS NOT NULL driver_has_banner,o.name owner_name,"
-            + " v.brand vehicle_brand,v.model vehicle_model,v.color vehicle_color,v.plate_hint,"
-            + " coalesce(rep.rating,0) peer_rating,coalesce(rep.reviews,0) peer_reviews"
-            + " FROM ride_match m"
-            + " JOIN ride r ON r.id=m.ride_id"
-            + " LEFT JOIN ride pr ON pr.id=m.request_ride_id"
-            + " JOIN academic_entry c ON c.id=r.campus_id"
-            + " JOIN app_user p ON p.id=m.passenger_id"
-            + " JOIN app_user d ON d.id=m.driver_id"
-            + " JOIN app_user o ON o.id=r.owner_id"
-            + " LEFT JOIN ride_vehicle_profile v ON v.user_id=m.driver_id"
-            + " LEFT JOIN ride_reputation_summary rep ON rep.reviewee_id="
-            + " CASE WHEN ?=m.driver_id THEN m.passenger_id ELSE m.driver_id END"
-            + " WHERE (?=m.driver_id OR ?=m.passenger_id)"
-            + " AND (m.deleted_at IS NULL OR (m.status='ACCEPTED' AND r.status='OPEN'"
-            + " AND r.departure_at>now()-interval '24 hours'))"
-            + " ORDER BY m.created_at DESC LIMIT 80",
+            + " p.banner_bytes IS NOT NULL passenger_has_banner, d.name driver_name,d.avatar_bytes"
+            + " IS NOT NULL driver_has_avatar, d.banner_bytes IS NOT NULL driver_has_banner,o.name"
+            + " owner_name, v.brand vehicle_brand,v.model vehicle_model,v.color"
+            + " vehicle_color,v.plate_hint, coalesce(rep.rating,0)"
+            + " peer_rating,coalesce(rep.reviews,0) peer_reviews FROM ride_match m JOIN ride r ON"
+            + " r.id=m.ride_id LEFT JOIN ride pr ON pr.id=m.request_ride_id JOIN academic_entry c"
+            + " ON c.id=r.campus_id JOIN app_user p ON p.id=m.passenger_id JOIN app_user d ON"
+            + " d.id=m.driver_id JOIN app_user o ON o.id=r.owner_id LEFT JOIN ride_vehicle_profile"
+            + " v ON v.user_id=m.driver_id LEFT JOIN ride_reputation_summary rep ON"
+            + " rep.reviewee_id= CASE WHEN ?=m.driver_id THEN m.passenger_id ELSE m.driver_id END"
+            + " WHERE (?=m.driver_id OR ?=m.passenger_id) AND (m.deleted_at IS NULL OR"
+            + " (m.status='ACCEPTED' AND r.status='OPEN' AND r.departure_at>now()-interval '24"
+            + " hours')) ORDER BY m.created_at DESC LIMIT 80",
         a.id(),
         a.id(),
         a.id(),
@@ -269,10 +254,7 @@ public class RideService {
 
   @Transactional
   public void accept(Actor a, UUID id) {
-    var match =
-        db.one(
-            "SELECT * FROM ride_match WHERE id=? FOR UPDATE",
-            id);
+    var match = db.one("SELECT * FROM ride_match WHERE id=? FOR UPDATE", id);
     var ride = db.one("SELECT * FROM ride WHERE id=? FOR UPDATE", match.get("rideId"));
     UUID driver = (UUID) match.get("driverId");
     UUID passenger = (UUID) match.get("passengerId");
@@ -293,7 +275,8 @@ public class RideService {
             Long.class,
             ride.get("id"));
     if (count >= ((Number) ride.get("seats")).intValue())
-      throw ApiException.invalid("Esta carona já está lotada. O pedido continua na lista de espera.");
+      throw ApiException.invalid(
+          "Esta carona já está lotada. O pedido continua na lista de espera.");
 
     db.jdbc.update(
         "UPDATE ride_match SET status='ACCEPTED',"
@@ -449,8 +432,7 @@ public class RideService {
     var next = rows.getFirst();
     UUID id = (UUID) next.get("id");
     db.jdbc.update("UPDATE ride_match SET status='PENDING' WHERE id=?", id);
-    for (UUID user :
-        Set.of((UUID) next.get("driverId"), (UUID) next.get("passengerId")))
+    for (UUID user : Set.of((UUID) next.get("driverId"), (UUID) next.get("passengerId")))
       notices.send(
           null,
           user,
@@ -473,10 +455,10 @@ public class RideService {
     db.jdbc.update("DELETE FROM ride_message WHERE match_id=?", id);
     db.jdbc.update("DELETE FROM ride_live_location WHERE match_id=?", id);
     db.jdbc.update(
-        "UPDATE ride_safety_share SET revoked_at=coalesce(revoked_at,now()) WHERE match_id=?",
-        id);
+        "UPDATE ride_safety_share SET revoked_at=coalesce(revoked_at,now()) WHERE match_id=?", id);
     db.jdbc.update(
-        "UPDATE ride_match SET meeting_point=NULL,pickup_lat=NULL,pickup_lng=NULL,boarding_code=NULL,"
+        "UPDATE ride_match SET"
+            + " meeting_point=NULL,pickup_lat=NULL,pickup_lng=NULL,boarding_code=NULL,"
             + " deleted_at=coalesce(deleted_at,now()) WHERE id=?",
         id);
     matchChanged(id);
@@ -580,8 +562,8 @@ public class RideService {
     }
 
     db.jdbc.update(
-        "UPDATE ride SET status=?,trip_status=?,completed_at=CASE WHEN ? THEN completed_at ELSE now() END"
-            + " WHERE id=? AND status='OPEN'",
+        "UPDATE ride SET status=?,trip_status=?,completed_at=CASE WHEN ? THEN completed_at ELSE"
+            + " now() END WHERE id=? AND status='OPEN'",
         cancel ? "CANCELLED" : "COMPLETED",
         cancel ? "CANCELLED" : "COMPLETED",
         cancel,
@@ -632,7 +614,8 @@ public class RideService {
     if (note != null && note.length() > 800)
       throw ApiException.invalid("O comentário da avaliação é muito longo.");
     db.jdbc.update(
-        "INSERT INTO ride_review(match_id,reviewer_id,rating,punctuality,communication,respect,responsible,comment)"
+        "INSERT INTO"
+            + " ride_review(match_id,reviewer_id,rating,punctuality,communication,respect,responsible,comment)"
             + " VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(match_id,reviewer_id) DO UPDATE SET"
             + " rating=EXCLUDED.rating,punctuality=EXCLUDED.punctuality,"
             + " communication=EXCLUDED.communication,respect=EXCLUDED.respect,"

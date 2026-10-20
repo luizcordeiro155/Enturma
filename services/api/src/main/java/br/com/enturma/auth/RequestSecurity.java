@@ -49,17 +49,26 @@ public class RequestSecurity extends OncePerRequestFilter {
                               List.of(new SimpleGrantedAuthority("ROLE_" + actor.role())))));
     var current = SecurityContextHolder.getContext().getAuthentication();
     String route = req.getRequestURI();
-    boolean pendingAllowed = route.startsWith("/api/v1/auth/")
-        || route.matches("/api/v1/account/privacy/deletion(?:/(schedule|cancel|now))?")
-        || ((req.getMethod().equals("GET") || req.getMethod().equals("HEAD"))
-            && (route.equals("/api/v1/users/me") || route.startsWith("/api/v1/catalog/")
-                || route.startsWith("/api/v1/public/") || route.matches("/api/v1/users/[^/]+/(avatar|banner)")))
-        || route.equals("/actuator/health") || route.equals("/ws");
+    boolean pendingAllowed =
+        route.startsWith("/api/v1/auth/")
+            || route.matches("/api/v1/account/privacy/deletion(?:/(schedule|cancel|now))?")
+            || ((req.getMethod().equals("GET") || req.getMethod().equals("HEAD"))
+                && (route.equals("/api/v1/users/me")
+                    || route.startsWith("/api/v1/catalog/")
+                    || route.startsWith("/api/v1/public/")
+                    || route.matches("/api/v1/users/[^/]+/(avatar|banner)")))
+            || route.equals("/actuator/health")
+            || route.equals("/ws");
     if (current != null && !pendingAllowed && !auth.studentAccess((Actor) current.getPrincipal())) {
       res.setStatus(403);
       res.setContentType("application/json");
-      json.writeValue(res.getOutputStream(), Errors.body(403, "ACADEMIC_VERIFICATION_REQUIRED",
-          "Conclua sua verificação acadêmica para acessar a comunidade.", req));
+      json.writeValue(
+          res.getOutputStream(),
+          Errors.body(
+              403,
+              "ACADEMIC_VERIFICATION_REQUIRED",
+              "Conclua sua verificação acadêmica para acessar a comunidade.",
+              req));
       return;
     }
     if (current != null
@@ -135,6 +144,18 @@ public class RequestSecurity extends OncePerRequestFilter {
           || uri.matches("/api/v1/matches/[^/]+/(accept|cancel|cancel-reason|board|review)")) {
         prefix = "ride-action:";
         limit = 30;
+        windowSeconds = 60;
+      } else if (uri.equals("/api/v1/private-account-vault/verify")) {
+        prefix = "private-vault-password:";
+        limit = 5;
+        windowSeconds = 300;
+      } else if (uri.startsWith("/api/v1/study-rooms/join-code/")) {
+        prefix = "room-invite:";
+        limit = 10;
+        windowSeconds = 60;
+      } else if (uri.equals("/api/v1/help")) {
+        prefix = "app-help:";
+        limit = 6;
         windowSeconds = 60;
       } else if (importRoute) {
         prefix = "catalog:";

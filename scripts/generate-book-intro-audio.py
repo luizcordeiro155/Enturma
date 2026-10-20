@@ -84,29 +84,34 @@ def main():
             note=[740,622.25,554.37,466.16,554.37,622.25,740,932.33][step%8]
             add(music,bell(note),at+BEAT*.25,.12*energy)
             add(music,bell(note),at+BEAT*.75,.035*energy)
-    for index,at in enumerate(starts):
-        add(fx,whoosh(),at-.13,.22)
-        add(fx,sine(95,.25,16),at+.05,.12)
-        if index in (0,3,10,15):
-            add(music,kick(),at+.05,.32)
-            add(fx,noise(.4,12),at+.04,.24)
-    # Frame-accurate accents match the dedicated scene actions.
-    for frame in (24,74):
-        for note,freq in enumerate((523.25,659.25,783.99,1046.5)):
-            add(fx,sine(freq,.25,13),starts[4]+frame/24+note*.055,.075)
-    for i in range(6): add(fx,bell(880*2**(i/12)),starts[5]+(65+i*4)/24,.075)
-    for frame in (14,42,70): add(fx,sine(680,.09,32)+sine(940,.09,38)*.4,starts[7]+frame/24,.09)
-    # Engine follows the car's 20..98 frame route. Soft tire noise, no loud rev.
-    t=np.arange(round(SR*78/24))/SR
-    window=np.sin(np.pi*t/(78/24))**2
-    engine=(np.sin(2*np.pi*(52*t+8*t*t))+.24*np.sin(2*np.pi*104*t))*window
-    add(fx,engine,starts[8]+20/24,.065)
-    add(fx,sine(660,.1,20)+sine(990,.1,24)*.5,starts[8]+96/24,.12)
-    for frame in (0,6,12,18): add(fx,sine(520,.075,24),starts[9]+frame/24,.06)
-    add(fx,whoosh(.2),starts[9]+54/24,.12)
-    for index,frame in ((10,48),(11,71),(12,55),(13,36)):
-        add(fx,sine(660,.2,12)+sine(880,.2,15)*.45,starts[index]+frame/24,.13)
-    for j in range(7): add(fx,sine(185,1.6,3)+sine(277,1.6,3)*.5,starts[15]+.1+j*.17,.065*.67**j)
+    # Keep the approved music. Foley is sparse and tied to the actual visual
+    # landing frames, not to every cut or every repeated UI element.
+    cue_sheet = json.loads((STORY.parent/'book/audio-cues.json').read_text(encoding='utf-8'))
+    assert cue_sheet['fps'] == story['fps'] == 24
+    for cue in cue_sheet['cues']:
+        scene = cue['scene']; frame = cue['frame']
+        assert 0 <= frame < story['sceneFrames'][scene+1]-story['sceneFrames'][scene]
+        at = starts[scene] + frame / 24
+        kind = cue['kind']
+        if kind in ('page','paper'):
+            # Low-passed paper swish, with no sharp repeated synthetic ping.
+            raw = whoosh(.24 if kind == 'page' else .13)
+            sample = np.convolve(raw, np.ones(18)/18, mode='same') * 2.5
+        elif kind == 'engine':
+            duration = cue['durationFrames']/24
+            t = np.arange(round(SR*duration))/SR
+            window = np.sin(np.pi*t/duration)**2
+            sample = (np.sin(2*np.pi*(49*t+4*t*t))+.12*np.sin(2*np.pi*98*t))*window
+        elif kind == 'message':
+            sample = sine(390,.10,38) + sine(585,.10,45)*.18
+        elif kind in ('reward','arrival'):
+            sample = sine(440,.23,17) + sine(660,.23,21)*.23
+        else:
+            sample = sine(220,.9,4) + sine(330,.9,5)*.22
+        # One short reflection adds depth without a busy echo tail.
+        add(fx,sample,at,cue['gain'])
+        if kind not in ('engine','message'):
+            add(fx,sample,at+.09,cue['gain']*.1)
     # Pause only the percussion for a single beat; narration stays continuous.
     a=round(starts[14]*SR); b=a+round(BEAT*SR)
     music[a:b]*=.1
@@ -116,7 +121,7 @@ def main():
         duck[a:b]=.36
     size=round(.08*SR); padded=np.pad(duck,(size//2,size-size//2),'edge'); total=np.cumsum(padded,dtype=np.float64)
     duck=((total[size:]-total[:-size])/size).astype(np.float32)
-    bed=music*duck+fx*.55
+    bed=music*duck+fx*(.5+.5*duck)
     bed[-SR:]*=np.linspace(1,.08,SR)
     stereo=np.column_stack((voice*1.3+bed,voice*1.3+bed*.96+np.roll(bed,529)*.04))
     stereo/=max(1,float(np.max(np.abs(stereo)))/.92)
@@ -124,11 +129,11 @@ def main():
     with wave.open(str(work),'wb') as output:
         output.setnchannels(2); output.setsampwidth(2); output.setframerate(SR)
         output.writeframes((np.clip(stereo,-1,1)*32767).astype('<i2').tobytes())
-    name='enturma-book-cinema-90-v1.mp3'
+    name='enturma-book-cinema-90-v2.mp3'
     command('ffmpeg','-v','error','-y','-i',str(work),'-af','loudnorm=I=-16:TP=-1.5:LRA=8,aresample=44100,apad','-t','90','-c:a','libmp3lame','-b:a','192k',str(PUBLIC/name))
     story['audioFile']='intro/comic/'+name
     STORY.write_text(json.dumps(story,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     voice_power=float(np.mean(voice**2)); bed_power=float(np.mean(bed**2))
-    print(json.dumps({'seconds':90,'fps':24,'bpm':138,'voiceUnchanged':True,'musicAndEffectsBelowVoiceDb':round(10*math.log10(voice_power/bed_power),1),'output':name}))
+    print(json.dumps({'seconds':90,'fps':24,'bpm':138,'voiceUnchanged':True,'foleyEvents':len(cue_sheet['cues']),'musicAndEffectsBelowVoiceDb':round(10*math.log10(voice_power/bed_power),1),'output':name}))
 
 if __name__=='__main__': main()

@@ -1,6 +1,26 @@
 import { test } from "./student-fixture";
 import { authenticate } from "./session";
-import { expect } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
+
+async function panel(page: Page, title: string) {
+  const dialog = page.getByRole("dialog");
+  if (await dialog.isVisible()) {
+    await dialog.getByRole("button", { name: "Aplicar", exact: true }).click();
+    await expect(dialog).toBeHidden();
+  }
+  await page.getByRole("button", { name: new RegExp(`^${title}`) }).click();
+  await expect(
+    page.getByRole("dialog", { name: title, exact: true }),
+  ).toBeVisible();
+}
+async function apply(page: Page) {
+  const dialog = page.getByRole("dialog");
+  if (await dialog.isVisible()) {
+    await dialog.getByRole("button", { name: "Aplicar", exact: true }).click();
+    await expect(dialog).toBeHidden();
+  }
+}
+
 import { randomUUID } from "node:crypto";
 
 test("cores vivas, mural independente e rascunho preservado ao trocar de página", async ({
@@ -33,22 +53,26 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
     localStorage.setItem("enturma-intro:v0.3", "seen"),
   );
   await page.goto("/profile");
+  await panel(page, "Mural e movimento");
   await page
     .getByRole("textbox", { name: "Objetivo da semana", exact: true })
     .fill("Atualizar meu projeto e compartilhar materiais com a turma.");
   await page
     .getByRole("textbox", { name: "Tecnologias que estudo", exact: true })
     .fill("Java / JavaScript / TypeScript / PostgreSQL");
+  await panel(page, "Tema e identidade");
   await page.getByLabel("Cor principal do perfil").fill("#ff0044");
+  await panel(page, "Mural e movimento");
   await page.getByLabel("Cor secundária", { exact: true }).fill("#240075");
   await page.getByLabel("Fundo decorativo").selectOption("GRADIENT");
+  await apply(page);
   const preview = page.locator(".profile-preview-combined");
   await expect
     .poll(() =>
-      preview
-        .evaluate((node) => getComputedStyle(node).backgroundImage),
+      preview.evaluate((node) => getComputedStyle(node).backgroundImage),
     )
     .toContain("rgb(255, 0, 68)");
+  await panel(page, "Mural e movimento");
   await page
     .getByRole("combobox", { name: "Fundo do mural", exact: true })
     .selectOption("CUSTOM");
@@ -65,20 +89,25 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
         .evaluate((node) => getComputedStyle(node).backgroundImage),
     )
     .toContain("rgb(0, 85, 204)");
+  await panel(page, "Sobre você");
   await page
     .getByLabel("Nome exibido", { exact: true })
     .fill("Meu rascunho preservado");
+  await apply(page);
   await page.getByRole("link", { name: "Salas", exact: true }).first().click();
   await expect(page).toHaveURL(/rooms/);
   await page
     .getByRole("link", { name: "Abrir meu perfil para editar", exact: true })
     .click();
+  await panel(page, "Sobre você");
   await expect(page.getByLabel("Nome exibido", { exact: true })).toHaveValue(
     "Meu rascunho preservado",
   );
+  await panel(page, "Mural e movimento");
   await expect(
     page.getByLabel("Cor principal do mural", { exact: true }),
   ).toHaveValue("#0055cc");
+  await apply(page);
   await page
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();
@@ -86,9 +115,11 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
     page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   await page.reload();
+  await panel(page, "Mural e movimento");
   await expect(
     page.getByLabel("Cor principal do mural", { exact: true }),
   ).toHaveValue("#0055cc");
+  await apply(page);
   await expect(
     page.getByRole("button", { name: "Reproduzir animação do perfil" }),
   ).toHaveCount(0);
@@ -130,6 +161,7 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(controls).toBeVisible();
   await expect(page.locator(".profile-preview-stage")).toBeHidden();
+  await apply(page);
   await page.getByRole("button", { name: "Ver prévia", exact: true }).click();
   await expect(controls).toBeHidden();
   await page.getByRole("button", { name: "Mural", exact: true }).click();
@@ -150,12 +182,15 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
     ),
   ).toBe(true);
   await page.getByRole("button", { name: "Editar", exact: true }).click();
+  await panel(page, "Sobre você");
   await expect(page.getByLabel("Nome exibido", { exact: true })).toHaveValue(
     "Meu rascunho preservado",
   );
+  await panel(page, "Mural e movimento");
   await page
     .getByRole("combobox", { name: "Fundo do mural", exact: true })
     .selectOption("DEFAULT");
+  await apply(page);
   await page.getByRole("button", { name: "Ver prévia", exact: true }).click();
   await expect
     .poll(() =>
@@ -189,13 +224,18 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
   const user = await registered.json();
   await authenticate(page.context(), user);
   await page.goto("/profile");
+  await panel(page, "Mural e movimento");
   await page
     .getByRole("textbox", { name: "Objetivo da semana", exact: true })
     .fill("Revisar cálculo e compartilhar resumos");
+  await panel(page, "Mural e movimento");
   await page.getByLabel("Cor secundária", { exact: true }).fill("#336699");
   await page.getByLabel("Fundo decorativo").selectOption("GRADIENT");
+  await panel(page, "Widgets do mural");
   await page.getByLabel("Adicionar widget").selectOption("GOAL");
+  await panel(page, "Privacidade");
   await page.getByLabel("Widgets e textos do mural", { exact: true }).check();
+  await apply(page);
   await page
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();
@@ -203,6 +243,7 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
     page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   await page.reload();
+  await panel(page, "Mural e movimento");
   await expect(
     page.getByRole("textbox", { name: "Objetivo da semana", exact: true }),
   ).toBeVisible({ timeout: 20000 });
@@ -213,6 +254,7 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
     "#336699",
   );
   // Re-saving the GET payload used to include read-only widget fields and fail validation.
+  await apply(page);
   await page
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();
@@ -244,7 +286,9 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
       (w: { kind: string }) => w.kind === "GOAL",
     ),
   ).toBe(true);
+  await panel(page, "Privacidade");
   await page.getByLabel("Widgets e textos do mural", { exact: true }).uncheck();
+  await apply(page);
   await page
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();

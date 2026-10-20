@@ -126,7 +126,7 @@ public class AiService {
     };
   }
 
-  private String buildContext(UUID room, UUID user, String question, String mode) {
+  String buildContext(UUID room, UUID user, String question, String mode) {
     StringBuilder context = new StringBuilder();
     context.append("CONHECIMENTO DA SALA\n");
 
@@ -192,7 +192,35 @@ public class AiService {
       if (c.get("page") != null) context.append(" (p. ").append(c.get("page")).append(")");
       context.append("\n").append(c.get("body")).append("\n");
     }
-    return context.substring(0, Math.min(context.length(), 60000));
+    context.append("\nCADERNOS COMPARTILHADOS EXPLICITAMENTE NESTA SALA\n");
+    for (var source :
+        db.list(
+            "SELECT n.title notebook_title,s.title,left(s.content,5000) content FROM"
+                + " room_notebook_share share JOIN study_notebook n ON n.id=share.notebook_id AND"
+                + " n.user_id=share.shared_by JOIN room_participant p ON p.room_id=share.room_id"
+                + " AND p.user_id=share.shared_by AND NOT p.removed JOIN notebook_source s ON"
+                + " s.notebook_id=n.id AND s.status='READY' WHERE share.room_id=? ORDER BY"
+                + " share.created_at DESC,s.created_at LIMIT 8",
+            room)) {
+      context
+          .append("[CADERNO ")
+          .append(source.get("notebookTitle"))
+          .append(" / ")
+          .append(source.get("title"))
+          .append("] ")
+          .append(source.get("content"))
+          .append("\n");
+    }
+    for (var image :
+        db.list(
+            "SELECT d.description FROM room_image_description d JOIN room_message m ON"
+                + " m.attachment_id=d.attachment_id WHERE m.room_id=? AND m.deleted_at IS NULL"
+                + " ORDER BY m.created_at DESC LIMIT 3",
+            room))
+      context
+          .append("\n[DESCRIÇÃO DE IMAGEM, PODE CONTER ERROS] ")
+          .append(image.get("description"));
+    return context.substring(0, Math.min(context.length(), 90000));
   }
 
   private List<Map<String, Object>> relevantChunks(UUID room, String question, String mode) {

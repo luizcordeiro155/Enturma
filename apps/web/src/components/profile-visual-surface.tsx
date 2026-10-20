@@ -11,12 +11,14 @@ export function ProfileVisualSurface({
   actions,
   previewTab,
   preview = false,
+  mural,
 }: {
   user: PublicProfile;
   showcase: Showcase;
   actions?: ReactNode;
   previewTab?: "PROFILE" | "MURAL";
   preview?: boolean;
+  mural?: ReactNode;
 }) {
   const linked = showcase.appearance.muralMode === "PROFILE";
   return (
@@ -28,17 +30,25 @@ export function ProfileVisualSurface({
     >
       <section className="profile-preview-identity profile-public-primary">
         <ProfileCard user={user} showcase={showcase} />
-        {actions ? <div className="profile-dialog-actions">{actions}</div> : null}
-      </section>
-      <section className="profile-preview-mural profile-public-advanced">
-        <ProfileBackdrop appearance={showcase.appearance} mural />
-        <h2 className="profile-mural-title">Seu mural</h2>
-        <ShowcaseView value={showcase} detailed showBadges={false} />
-        {!showcase.widgets.some((widget) => widget.visible) ? (
-          <p className="profile-mural-empty">
-            Escolha os widgets na edição para compor seu mural.
-          </p>
+        {actions ? (
+          <div className="profile-dialog-actions">{actions}</div>
         ) : null}
+      </section>
+      <section
+        className={`profile-preview-mural profile-public-advanced${mural ? " profile-has-community" : ""}`}
+      >
+        <ProfileBackdrop appearance={showcase.appearance} mural />
+        {mural ?? (
+          <>
+            <h2 className="profile-mural-title">Seu mural</h2>
+            <ShowcaseView value={showcase} detailed showBadges={false} />
+            {!showcase.widgets.some((widget) => widget.visible) ? (
+              <p className="profile-mural-empty">
+                Escolha os widgets na edição para compor seu mural.
+              </p>
+            ) : null}
+          </>
+        )}
       </section>
     </div>
   );

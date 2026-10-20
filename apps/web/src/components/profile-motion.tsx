@@ -3,15 +3,13 @@ import { useEffect, useRef } from "react";
 import type { ProfileVisualAppearance } from "@enturma/contracts";
 
 /** One consistent JavaScript/WAAPI entrance for all public profiles. */
-export function profileEntrance(
-  element: HTMLElement,
-  closing = false,
-) {
+export function profileEntrance(element: HTMLElement, closing = false) {
   if (
     !element.animate ||
     matchMedia("(prefers-reduced-motion: reduce)").matches ||
     document.documentElement.dataset.reducedMotion === "true"
-  ) return;
+  )
+    return;
   const frames = [
     { opacity: 0, transform: "translateY(14px) scale(.985)" },
     { opacity: 1, transform: "translateY(0) scale(1)" },
@@ -39,7 +37,8 @@ export function ProfileBackdrop({
     if (
       !node ||
       !flow ||
-      (mural && appearance?.muralMode === "DEFAULT") ||
+      (mural &&
+        (!appearance?.muralMode || appearance.muralMode === "DEFAULT")) ||
       !node.animate
     )
       return;
@@ -87,6 +86,8 @@ export function ProfileBackdrop({
       document.removeEventListener("visibilitychange", sync);
     };
   }, [flow, mural, appearance?.muralMode]);
+  if (mural && (!appearance?.muralMode || appearance.muralMode === "DEFAULT"))
+    return null;
   return (
     <span
       className={`profile-color-layer${mural ? " mural-color-layer" : ""}`}

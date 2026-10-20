@@ -42,16 +42,15 @@ public class StudyService {
     events.publishEvent(new AppChanged("rooms_changed", Set.of()));
   }
 
-  public List<Map<String, Object>> list(
-      Actor a, UUID subject, int page, boolean recommended) {
+  public List<Map<String, Object>> list(Actor a, UUID subject, int page, boolean recommended) {
     if (!recommended)
       return db.list(
           "SELECT r.*,s.name subject_name,(SELECT count(*) FROM room_participant p WHERE"
               + " p.room_id=r.id AND left_at IS NULL) participants FROM study_room r JOIN"
               + " academic_entry s ON s.id=r.subject_id WHERE r.status IN ('OPEN','ACTIVE') AND"
               + " ends_at>now() AND (?::uuid IS NULL OR subject_id=?) AND NOT EXISTS(SELECT 1 FROM"
-              + " room_participant p JOIN user_block b ON (b.user_id=? AND b.blocked_id=p.user_id) OR"
-              + " (b.blocked_id=? AND b.user_id=p.user_id) WHERE p.room_id=r.id AND p.left_at IS"
+              + " room_participant p JOIN user_block b ON (b.user_id=? AND b.blocked_id=p.user_id)"
+              + " OR (b.blocked_id=? AND b.user_id=p.user_id) WHERE p.room_id=r.id AND p.left_at IS"
               + " NULL) ORDER BY r.created_at DESC,r.id LIMIT 30 OFFSET ?",
           subject,
           subject,
@@ -60,30 +59,27 @@ public class StudyService {
           Db.offset(page));
 
     return db.list(
-        "SELECT r.*,s.name subject_name,"
-            + " (SELECT count(*) FROM room_participant p WHERE p.room_id=r.id AND left_at IS NULL)"
-            + " participants,CASE WHEN us.subject_id IS NOT NULL THEN 'SUBJECT' ELSE 'COURSE' END"
-            + " recommendation_reason FROM study_room r JOIN academic_entry s ON s.id=r.subject_id"
-            + " JOIN academic_curriculum_subject rs ON rs.id=r.subject_id"
-            + " JOIN academic_curriculum room_curriculum ON room_curriculum.id=rs.curriculum_id"
-            + " LEFT JOIN user_subject us ON us.user_id=? AND us.subject_id=r.subject_id"
-            + " LEFT JOIN academic_enrollment own ON own.user_id=?"
-            + " WHERE r.status IN ('OPEN','ACTIVE') AND r.ends_at>now()"
-            + " AND (?::uuid IS NULL OR r.subject_id=?)"
-            + " AND (us.subject_id IS NOT NULL"
-            + " OR own.course_offering_id=room_curriculum.course_offering_id)"
-            + " AND NOT EXISTS(SELECT 1 FROM room_participant p JOIN user_block b ON"
-            + " (b.user_id=? AND b.blocked_id=p.user_id) OR (b.blocked_id=? AND b.user_id=p.user_id)"
-            + " WHERE p.room_id=r.id AND p.left_at IS NULL)"
-            + " AND (NOT r.entries_locked OR EXISTS(SELECT 1 FROM room_participant mine"
-            + " WHERE mine.room_id=r.id AND mine.user_id=? AND mine.left_at IS NULL))"
-            + " AND ((SELECT count(*) FROM room_participant p WHERE p.room_id=r.id AND"
-            + " p.left_at IS NULL)<r.max_participants OR EXISTS(SELECT 1 FROM room_participant mine"
-            + " WHERE mine.room_id=r.id AND mine.user_id=? AND mine.left_at IS NULL))"
-            + " ORDER BY CASE WHEN us.subject_id IS NOT NULL THEN 0 ELSE 1 END,"
-            + " CASE WHEN EXISTS(SELECT 1 FROM room_participant mine WHERE mine.room_id=r.id AND"
-            + " mine.user_id=? AND mine.left_at IS NULL) THEN 0 ELSE 1 END,"
-            + " participants DESC,r.created_at DESC,r.id LIMIT 30 OFFSET ?",
+        "SELECT r.*,s.name subject_name, (SELECT count(*) FROM room_participant p WHERE"
+            + " p.room_id=r.id AND left_at IS NULL) participants,CASE WHEN us.subject_id IS NOT"
+            + " NULL THEN 'SUBJECT' ELSE 'COURSE' END recommendation_reason FROM study_room r JOIN"
+            + " academic_entry s ON s.id=r.subject_id JOIN academic_curriculum_subject rs ON"
+            + " rs.id=r.subject_id JOIN academic_curriculum room_curriculum ON"
+            + " room_curriculum.id=rs.curriculum_id LEFT JOIN user_subject us ON us.user_id=? AND"
+            + " us.subject_id=r.subject_id LEFT JOIN academic_enrollment own ON own.user_id=? WHERE"
+            + " r.status IN ('OPEN','ACTIVE') AND r.ends_at>now() AND (?::uuid IS NULL OR"
+            + " r.subject_id=?) AND (us.subject_id IS NOT NULL OR"
+            + " own.course_offering_id=room_curriculum.course_offering_id) AND NOT EXISTS(SELECT 1"
+            + " FROM room_participant p JOIN user_block b ON (b.user_id=? AND"
+            + " b.blocked_id=p.user_id) OR (b.blocked_id=? AND b.user_id=p.user_id) WHERE"
+            + " p.room_id=r.id AND p.left_at IS NULL) AND (NOT r.entries_locked OR EXISTS(SELECT 1"
+            + " FROM room_participant mine WHERE mine.room_id=r.id AND mine.user_id=? AND"
+            + " mine.left_at IS NULL)) AND ((SELECT count(*) FROM room_participant p WHERE"
+            + " p.room_id=r.id AND p.left_at IS NULL)<r.max_participants OR EXISTS(SELECT 1 FROM"
+            + " room_participant mine WHERE mine.room_id=r.id AND mine.user_id=? AND mine.left_at"
+            + " IS NULL)) ORDER BY CASE WHEN us.subject_id IS NOT NULL THEN 0 ELSE 1 END, CASE WHEN"
+            + " EXISTS(SELECT 1 FROM room_participant mine WHERE mine.room_id=r.id AND"
+            + " mine.user_id=? AND mine.left_at IS NULL) THEN 0 ELSE 1 END, participants"
+            + " DESC,r.created_at DESC,r.id LIMIT 30 OFFSET ?",
         a.id(),
         a.id(),
         subject,
@@ -105,7 +101,7 @@ public class StudyService {
   @Transactional
   public Map<String, Object> create(
       Actor a, UUID subject, UUID topic, String title, int minutes, int capacity, int days) {
-    if (days < 0 || days > 5 || capacity < 2 || capacity > 30)
+    if (days < 0 || days > 5 || capacity < 2 || capacity > (days > 0 ? 45 : 10))
       throw ApiException.invalid("Duração ou capacidade inválida.");
     if (days == 0 && (!Set.of(25, 50, 60, 90, 120, 180).contains(minutes) || minutes > maxMinutes))
       throw ApiException.invalid("Duração não permitida.");
@@ -142,15 +138,16 @@ public class StudyService {
     if (!reused)
       db.jdbc.update(
           "INSERT INTO"
-              + " study_room(id,host_id,subject_id,topic_id,title,status,max_participants,ends_at)"
-              + " VALUES (?,?,?,?,?,'OPEN',?,now()+(? * interval '1 minute'))",
+              + " study_room(id,host_id,subject_id,topic_id,title,status,max_participants,ends_at,lifecycle)"
+              + " VALUES (?,?,?,?,?,'OPEN',?,now()+(? * interval '1 minute'),?)",
           id,
           a.id(),
           subject,
           topic,
           title,
           capacity,
-          minutes);
+          minutes,
+          days > 0 ? "MULTIDAY" : "QUICK");
     if (!reused && days > 0)
       db.jdbc.update(
           "UPDATE study_room SET lifecycle='MULTIDAY',ends_at=created_at+(? * interval '1 day')"
@@ -166,6 +163,24 @@ public class StudyService {
 
   @Transactional
   public void join(Actor a, UUID id) {
+    join(a, id, false);
+  }
+
+  @Transactional
+  public Map<String, Object> joinByCode(Actor a, String code) {
+    if (code == null || !code.strip().matches("[A-Za-z2-9]{8}"))
+      throw ApiException.invalid("O código tem 8 letras ou números.");
+    UUID id =
+        (UUID)
+            db.one(
+                    "SELECT id FROM study_room WHERE share_code=?",
+                    code.strip().toUpperCase(Locale.ROOT))
+                .get("id");
+    join(a, id, true);
+    return detail(a, id);
+  }
+
+  private void join(Actor a, UUID id, boolean invited) {
     var room = activeLocked(id);
     if (db.exists(
         "SELECT EXISTS(SELECT 1 FROM room_participant p JOIN user_block b ON (b.user_id=? AND"
@@ -176,7 +191,8 @@ public class StudyService {
         id)) throw ApiException.forbidden();
     var membership =
         db.list("SELECT * FROM room_participant WHERE room_id=? AND user_id=?", id, a.id());
-    if (Boolean.TRUE.equals(room.get("entriesLocked"))
+    if (!invited
+        && Boolean.TRUE.equals(room.get("entriesLocked"))
         && (membership.isEmpty() || membership.getFirst().get("leftAt") != null))
       throw new ApiException(409, "ROOM_LOCKED", "As novas entradas estão fechadas.");
     if (!membership.isEmpty()) {
@@ -191,7 +207,7 @@ public class StudyService {
             "SELECT count(*) FROM room_participant WHERE room_id=? AND left_at IS NULL",
             Long.class,
             id);
-    if (count >= ((Number) room.get("maxParticipants")).intValue())
+    if (!invited && count >= ((Number) room.get("maxParticipants")).intValue())
       throw new ApiException(409, "ROOM_FULL", "Esta turma está completa.");
     db.jdbc.update(
         "INSERT INTO room_participant(room_id,user_id,role) VALUES (?,?,?) ON"
@@ -254,7 +270,7 @@ public class StudyService {
                 + " seconds',false) screen FROM room_participant p JOIN app_user u ON"
                 + " u.id=p.user_id LEFT JOIN room_voice_presence v ON v.room_id=p.room_id AND"
                 + " v.user_id=p.user_id WHERE p.room_id=? AND NOT p.removed ORDER BY p.joined_at"
-                + " LIMIT 30",
+                + "",
             id));
     var mine =
         db.one(

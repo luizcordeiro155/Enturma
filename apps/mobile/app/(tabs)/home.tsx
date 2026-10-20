@@ -53,7 +53,7 @@ export default function Home() {
           title: `Estudar ${title}`,
           minutes: Number(minutes),
           days: Number(days),
-          maxParticipants: 8,
+          maxParticipants: Number(days) > 0 ? 45 : 10,
         }),
       });
       router.push({ pathname: "/rooms/[id]", params: { id: room.id } });
@@ -73,7 +73,11 @@ export default function Home() {
 
       <View style={[styles.card, { gap: 12 }]}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
-          <Ionicons name="sparkles-outline" size={22} color={styles.text.color} />
+          <Ionicons
+            name="sparkles-outline"
+            size={22}
+            color={styles.text.color}
+          />
           <Text style={[styles.label, { marginBottom: 0 }]}>Nova sala</Text>
         </View>
 
@@ -94,12 +98,17 @@ export default function Home() {
         ) : null}
       </View>
 
-      <View style={[styles.card,{gap:12}]}>
-        <View style={{flexDirection:"row",alignItems:"center",gap:10}}>
-          <Ionicons name="book-outline" size={22} color={styles.text.color}/>
-          <Text style={[styles.label,{marginBottom:0}]}>Minhas matérias</Text>
+      <View style={[styles.card, { gap: 12 }]}>
+        <View style={{ flexDirection: "row", alignItems: "center", gap: 10 }}>
+          <Ionicons name="book-outline" size={22} color={styles.text.color} />
+          <Text style={[styles.label, { marginBottom: 0 }]}>
+            Minhas matérias
+          </Text>
         </View>
-        <Text style={styles.muted}>Suas matérias ficam no Início e conectam você a salas, conteúdos e colegas.</Text>
+        <Text style={styles.muted}>
+          Suas matérias ficam no Início e conectam você a salas, conteúdos e
+          colegas.
+        </Text>
         {p?.subjects.map((subject) => (
           <View key={subject.id} style={styles.row}>
             <Text style={styles.label}>{subject.name}</Text>
@@ -119,8 +128,13 @@ export default function Home() {
             />
           </View>
         ))}
-        {!p?.subjects.length ? <Text style={styles.muted}>Nenhuma matéria selecionada ainda.</Text> : null}
-        <Button title="Atualizar minhas matérias" onPress={() => router.push("/onboarding")} />
+        {!p?.subjects.length ? (
+          <Text style={styles.muted}>Nenhuma matéria selecionada ainda.</Text>
+        ) : null}
+        <Button
+          title="Atualizar minhas matérias"
+          onPress={() => router.push("/onboarding")}
+        />
       </View>
 
       <View style={{ gap: 12 }}>

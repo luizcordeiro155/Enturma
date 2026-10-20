@@ -1,4 +1,5 @@
 "use client";
+import { useStudyActivity } from "@/lib/use-study-activity";
 import { useEffect, useRef, useState } from "react";
 import { Brain, Check, Lightbulb, Play, Trophy } from "lucide-react";
 import { api, post } from "@/lib/api";
@@ -50,6 +51,7 @@ export function AcademicLab() {
     [hint, setHint] = useState(false),
     [daily, setDaily] = useState(true),
     [slot, setSlot] = useState(1);
+  useStudyActivity("GAME", Boolean(challenge));
   const stage = useRef<HTMLElement>(null);
   useEffect(() => {
     let active = true;
@@ -187,8 +189,10 @@ export function AcademicLab() {
             {!games.length && (
               <p>
                 Selecione suas matérias verificadas em{" "}
-                <Link href="/home#minhas-materias">Minhas matérias no Início</Link>. As atividades
-                compatíveis aparecerão aqui.
+                <Link href="/home#minhas-materias">
+                  Minhas matérias no Início
+                </Link>
+                . As atividades compatíveis aparecerão aqui.
               </p>
             )}
           </aside>

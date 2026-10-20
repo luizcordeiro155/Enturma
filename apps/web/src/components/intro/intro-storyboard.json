@@ -1,25 +1,10 @@
 {
   "durationInFrames": 2160,
   "fps": 24,
-  "audioFile": "intro/comic/enturma-book-cinema-90-v1.mp3",
+  "audioFile": "intro/comic/enturma-book-cinema-90-v2.mp3",
   "sceneFrames": [
-    0,
-    59,
-    145,
-    260,
-    349,
-    504,
-    691,
-    828,
-    985,
-    1130,
-    1300,
-    1460,
-    1622,
-    1779,
-    1944,
-    2031,
-    2160
+    0, 59, 145, 260, 349, 504, 691, 828, 985, 1130, 1300, 1460, 1622, 1779,
+    1944, 2031, 2160
   ],
   "cues": [
     {

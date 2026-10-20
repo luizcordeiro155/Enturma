@@ -4,6 +4,8 @@ WORKDIR /project
 COPY . .
 
 RUN npm ci
+ARG RAILWAY_GIT_COMMIT_SHA
+RUN node deploy/native-version.cjs desktop
 RUN npm install --prefix /opt/enturma-builder --no-audit --no-fund electron-builder@26.15.3
 RUN node deploy/desktop-download/build-windows.cjs /opt/enturma-builder/node_modules
 
@@ -11,6 +13,7 @@ FROM node:22-alpine
 
 WORKDIR /app
 COPY deploy/desktop-download/server.cjs ./server.cjs
+COPY --from=build /project/deploy/desktop-download/release.json ./release.json
 COPY --from=build /project/apps/desktop/dist/*.zip ./downloads/
 COPY --from=build /project/apps/desktop/dist/*.exe ./downloads/
 

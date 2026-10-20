@@ -1,9 +1,10 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Accessibility, Moon, Sun, MonitorCog, X } from "lucide-react";
+import { Accessibility, X } from "lucide-react";
 import type { ExperiencePreference } from "@enturma/contracts";
 import { api } from "@/lib/api";
 import { applyEnturmaTheme } from "@/lib/theme-motion";
+import { ThemePicker } from "./theme-picker";
 const defaults: ExperiencePreference = {
   theme: "SYSTEM",
   fontScale: 1,
@@ -137,32 +138,12 @@ export function ExperienceControls() {
         );
     }, 400);
   }
-  const Icon =
-    preference.theme === "DARK"
-      ? Moon
-      : preference.theme === "LIGHT"
-        ? Sun
-        : MonitorCog;
   return (
     <div className="experience-controls">
-      <button
-        className="icon-control"
-        type="button"
-        onClick={() =>
-          save({
-            ...preference,
-            theme:
-              preference.theme === "SYSTEM"
-                ? "DARK"
-                : preference.theme === "DARK"
-                  ? "LIGHT"
-                  : "SYSTEM",
-          })
-        }
-        aria-label={`Tema ${preference.theme === "SYSTEM" ? "do sistema" : preference.theme === "DARK" ? "escuro" : "claro"}. Alternar tema`}
-      >
-        <Icon size={20} />
-      </button>
+      <ThemePicker
+        value={preference.theme}
+        onChange={(theme) => save({ ...preference, theme })}
+      />
       <button
         className="accessibility-trigger"
         aria-label="Acessibilidade"

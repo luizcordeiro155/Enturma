@@ -1,4 +1,5 @@
 "use client";
+import { prepareChatAfterLogin } from "@/lib/account-chat-sync";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -477,6 +478,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
             })
           : await post<RecoveryStarted | void>(`/auth/${mode}`, payload);
       if (mode === "login" || mode === "register") {
+        // Derive locally from the successful login; never persist the password.
+        // A storage failure must not destroy a valid session.
+        await prepareChatAfterLogin(String(data.password)).catch(() => {});
         // Credentials are stored by the BFF route handler using Set-Cookie.
         // App Router may still hold a pre-login (unauthenticated) RSC redirect
         // for /home or /onboarding. A document navigation guarantees the newly

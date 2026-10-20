@@ -13,14 +13,18 @@ import {
   Type,
   X,
 } from "lucide-react";
+import { ProfileBackdrop } from "./profile-motion";
+import { ProfileEditPanel } from "./profile-edit-panel";
 import { ProfileImageEditor } from "./profile-image-editor";
 import { api, peekApiSnapshot } from "@/lib/api";
 import {
+  ProfileCard,
   profileStyle,
   type PublicProfile,
   type ProfileDetails,
 } from "./user-identity";
 import {
+  ShowcaseView,
   ShowcaseFields,
   AchievementGrid,
   type Showcase,
@@ -47,7 +51,9 @@ export function ProfileDetailsEditor({
   const [previewTab, setPreviewTab] = useState<"PROFILE" | "MURAL">("PROFILE");
   const [editorView, setEditorView] = useState<"EDIT" | "PREVIEW">("EDIT");
   const [mediaVersion, setMediaVersion] = useState(0);
-  const [uploadedMedia, setUploadedMedia] = useState<"avatar" | "banner" | null>(null);
+  const [uploadedMedia, setUploadedMedia] = useState<
+    "avatar" | "banner" | null
+  >(null);
   const [crop, setCrop] = useState<{ file: File; kind: "avatar" | "banner" }>();
   const [appearance, setAppearance] = useState({
     name: profile.name,
@@ -162,6 +168,30 @@ export function ProfileDetailsEditor({
     }
   }
 
+  const editSnapshot = useRef<
+    | {
+        appearance: typeof appearance;
+        details: ProfileDetails;
+        showcase?: Showcase;
+      }
+    | undefined
+  >(undefined);
+  function beginEdit() {
+    editSnapshot.current = {
+      appearance: { ...appearance },
+      details: { ...details },
+      showcase: showcase ? structuredClone(showcase) : undefined,
+    };
+  }
+  function cancelEdit() {
+    const saved = editSnapshot.current;
+    if (saved) {
+      setAppearance(saved.appearance);
+      setDetails(saved.details);
+      setShowcase(saved.showcase);
+    }
+  }
+
   const previewUser: PublicProfile = {
     ...profile,
     ...appearance,
@@ -260,7 +290,6 @@ export function ProfileDetailsEditor({
               >
                 Mural
               </button>
-
             </div>
             {showcase ? (
               <ProfileVisualSurface
@@ -322,8 +351,14 @@ export function ProfileDetailsEditor({
               </div>
             </section>
 
-            <section className="profile-editor-section">
-              <h2>Sobre você</h2>
+            <ProfileEditPanel
+              title="Sobre você"
+              description="Nome, pronomes, bio e status"
+              thumbnail={<Type size={24} />}
+              preview={<ProfileCard user={previewUser} showcase={showcase} />}
+              onBegin={beginEdit}
+              onCancel={cancelEdit}
+            >
               <label className="profile-discord-field">
                 <span>Nome exibido</span>
                 <input
@@ -376,10 +411,16 @@ export function ProfileDetailsEditor({
                   }
                 />
               </label>
-            </section>
+            </ProfileEditPanel>
 
-            <section className="profile-editor-section">
-              <h2>Tema e identidade</h2>
+            <ProfileEditPanel
+              title="Tema e identidade"
+              description="Escolha cores intensas para o seu perfil"
+              thumbnail={<Palette size={24} />}
+              preview={<ProfileCard user={previewUser} showcase={showcase} />}
+              onBegin={beginEdit}
+              onCancel={cancelEdit}
+            >
               <div
                 className="profile-palette-options"
                 aria-label="Paletas do perfil"
@@ -515,7 +556,16 @@ export function ProfileDetailsEditor({
                   </div>
                 </>
               ) : null}
+            </ProfileEditPanel>
 
+            <ProfileEditPanel
+              title="Decoração do avatar"
+              description="Anel, brilho e degradê"
+              thumbnail={<Sparkles size={24} />}
+              preview={<ProfileCard user={previewUser} showcase={showcase} />}
+              onBegin={beginEdit}
+              onCancel={cancelEdit}
+            >
               <label className="profile-setting-row">
                 <span className="profile-setting-icon">
                   <Sparkles size={21} />
@@ -545,37 +595,87 @@ export function ProfileDetailsEditor({
                   <option value="GRADIENT">Anel degradê</option>
                 </select>
               </label>
+            </ProfileEditPanel>
 
-              <label className="profile-setting-row">
-                <span className="profile-setting-icon">
-                  <Type size={21} />
-                </span>
-                <span>
-                  <strong>Estilo do nome</strong>
-                  <small>
-                    {details.nameFont === "MONO"
-                      ? "Código"
-                      : details.nameFont === "SERIF"
-                        ? "Editorial"
-                        : "Padrão"}
-                  </small>
-                </span>
-                <select
-                  value={details.nameFont}
-                  aria-label="Estilo do nome"
-                  onChange={(event) =>
-                    setDetail("nameFont", event.target.value)
-                  }
-                >
-                  <option value="SYSTEM">Padrão</option>
-                  <option value="MONO">Código</option>
-                  <option value="SERIF">Editorial</option>
-                </select>
+            <ProfileEditPanel
+              title="Estilo do nome"
+              description="Escolha a sua tipografia"
+              thumbnail={<Type size={24} />}
+              preview={<ProfileCard user={previewUser} showcase={showcase} />}
+              onBegin={beginEdit}
+              onCancel={cancelEdit}
+            >
+              <h3>Escolha a fonte</h3>
+              <div className="profile-font-options">
+                {(
+                  [
+                    ["SYSTEM", "Padrão"],
+                    ["MONO", "Código"],
+                    ["SERIF", "Editorial"],
+                    ["ROUNDED", "Redondo"],
+                    ["DISPLAY", "Impacto"],
+                  ] as const
+                ).map(([key, label]) => (
+                  <button
+                    type="button"
+                    key={key}
+                    className={`name-${key}`}
+                    aria-pressed={details.nameFont === key}
+                    onClick={() => setDetail("nameFont", key)}
+                  >
+                    <b>Gg</b>
+                    <small>{label}</small>
+                  </button>
+                ))}
+              </div>
+              <h3>Efeito do nome</h3>
+              <div className="profile-font-options">
+                {(
+                  [
+                    ["SOLID", "Sólido"],
+                    ["GRADIENT", "Gradiente"],
+                    ["NEON", "Neon"],
+                  ] as const
+                ).map(([key, label]) => (
+                  <button
+                    type="button"
+                    key={key}
+                    aria-pressed={(details.nameEffect ?? "SOLID") === key}
+                    onClick={() => setDetail("nameEffect", key)}
+                  >
+                    <span className={`name-effect-${key}`}>{label}</span>
+                  </button>
+                ))}
+              </div>
+              <label>
+                Cor do nome
+                <input
+                  type="color"
+                  aria-label="Cor do nome"
+                  value={details.nameColor ?? "#ffffff"}
+                  onChange={(e) => setDetail("nameColor", e.target.value)}
+                />
               </label>
-            </section>
+              <button
+                type="button"
+                className="button secondary"
+                onClick={() => {
+                  setDetail("nameColor", "");
+                  setDetail("nameEffect", "SOLID");
+                }}
+              >
+                Usar contraste automático
+              </button>
+            </ProfileEditPanel>
 
-            <section className="profile-editor-section">
-              <h2>Mais sobre você</h2>
+            <ProfileEditPanel
+              title="Mais sobre você"
+              description="Interesses e conexões"
+              thumbnail={<Sparkles size={24} />}
+              preview={<ProfileCard user={previewUser} showcase={showcase} />}
+              onBegin={beginEdit}
+              onCancel={cancelEdit}
+            >
               <label className="profile-discord-field">
                 <span>Interesses</span>
                 <input
@@ -597,7 +697,7 @@ export function ProfileDetailsEditor({
                   onChange={(event) => setDetail("website", event.target.value)}
                 />
               </label>
-            </section>
+            </ProfileEditPanel>
 
             {showcase ? (
               <section className="profile-advanced-area">
@@ -608,7 +708,57 @@ export function ProfileDetailsEditor({
                     Veja as mudanças na prévia. Salve quando ficar do seu jeito.
                   </p>
                 </div>
-                <ShowcaseFields value={showcase} onChange={setShowcase} />
+                {(
+                  [
+                    [
+                      "appearance",
+                      "Mural e movimento",
+                      "Fundo, fluxo de cores e animação de entrada",
+                    ],
+                    [
+                      "widgets",
+                      "Widgets do mural",
+                      "Escolha, reordene e destaque seu conteúdo",
+                    ],
+                    ["badges", "Insígnias", "Suas conquistas ao lado do nome"],
+                    ["privacy", "Privacidade", "Escolha o que compartilhar"],
+                  ] as const
+                ).map(([group, title, description]) => (
+                  <ProfileEditPanel
+                    key={group}
+                    title={title}
+                    description={description}
+                    thumbnail={<Sparkles size={24} />}
+                    onBegin={beginEdit}
+                    onCancel={cancelEdit}
+                    preview={
+                      group === "appearance" || group === "widgets" ? (
+                        <div
+                          className="profile-editor-mural-preview"
+                          style={profileStyle(previewUser)}
+                        >
+                          <ProfileBackdrop
+                            appearance={showcase.appearance}
+                            mural
+                          />
+                          <ShowcaseView
+                            value={showcase}
+                            detailed
+                            showBadges={false}
+                          />
+                        </div>
+                      ) : (
+                        <ProfileCard user={previewUser} showcase={showcase} />
+                      )
+                    }
+                  >
+                    <ShowcaseFields
+                      value={showcase}
+                      onChange={setShowcase}
+                      group={group}
+                    />
+                  </ProfileEditPanel>
+                ))}
                 {showcase.achievements ? (
                   <section className="profile-editor-section">
                     <h2>Suas conquistas</h2>

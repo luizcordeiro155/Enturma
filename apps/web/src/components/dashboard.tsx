@@ -1,4 +1,6 @@
 "use client";
+import { RoomArtwork } from "./room-artwork";
+import { RoomCodeEntry } from "./room-code-entry";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -172,6 +174,7 @@ export function Dashboard() {
             </section>
           ) : null}
           <div className="dashboard-community">
+            <RoomCodeEntry />
             <div className="section-heading">
               <h2>Salas acontecendo agora</h2>
               {rooms.length ? (
@@ -212,9 +215,7 @@ export function Dashboard() {
                   )
                   .map((r) => (
                     <article key={r.id} className="room-row">
-                      <div className="subject-mark">
-                        <BookOpen />
-                      </div>
+                      <RoomArtwork room={r} />
                       <div>
                         <h3>{r.subjectName}</h3>
                         <p>{r.title}</p>

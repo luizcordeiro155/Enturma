@@ -89,6 +89,11 @@ const server = http.createServer((req, res) => {
       res.end(
         JSON.stringify({
           version: version(zip),
+          sourceCommit: fs.existsSync(path.join(__dirname, "release.json"))
+            ? JSON.parse(
+                fs.readFileSync(path.join(__dirname, "release.json"), "utf8"),
+              ).sourceCommit
+            : null,
           platform: "win32",
           arch: "x64",
           file: zip,

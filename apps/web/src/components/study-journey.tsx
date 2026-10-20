@@ -1,6 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
+const GuidePlayer = dynamic(() => import("./motion/guide-player"), {
+  ssr: false,
+  loading: () => <div className="guide-film guide-film-loading" />,
+});
 import {
   BookOpen,
   Check,
@@ -322,7 +327,11 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
       >
         <CircleHelp size={17} /> Guia do Enturma
       </button>
-      <button type="button" className="text-button journey-help" onClick={() => window.dispatchEvent(new Event("enturma-intro-replay"))}>
+      <button
+        type="button"
+        className="text-button journey-help"
+        onClick={() => window.dispatchEvent(new Event("enturma-intro-replay"))}
+      >
         Ver apresentação novamente
       </button>
       {guide ? (
@@ -341,8 +350,7 @@ function StudyTutorial({ onClose }: { onClose: () => void }) {
   const dialog = useRef<HTMLDialogElement>(null),
     body = useRef<HTMLDivElement>(null),
     title = useRef<HTMLHeadingElement>(null);
-  const lesson = lessons[step],
-    Icon = lesson.icon;
+  const lesson = lessons[step];
   useEffect(() => {
     const el = dialog.current!,
       previous = document.activeElement as HTMLElement | null;
@@ -403,7 +411,7 @@ function StudyTutorial({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <div ref={body} className="tutorial-body">
-        <Icon size={36} aria-hidden="true" />
+        <GuidePlayer step={step} />
         <p className="tutorial-count">
           Passo {step + 1} de {lessons.length}
         </p>

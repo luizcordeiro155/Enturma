@@ -60,7 +60,10 @@ public class SocialController {
             id);
     var appearance =
         db.list(
-            "SELECT secondary_color,theme,effect,layout,mural_mode,mural_color,mural_secondary_color,gradient_angle,gradient_flow,entrance FROM profile_showcase WHERE user_id=?", id);
+            "SELECT"
+                + " secondary_color,theme,effect,layout,mural_mode,mural_color,mural_secondary_color,gradient_angle,gradient_flow,entrance"
+                + " FROM profile_showcase WHERE user_id=?",
+            id);
     if (!appearance.isEmpty()) profile.put("showcaseAppearance", appearance.getFirst());
     return profile;
   }
@@ -69,9 +72,11 @@ public class SocialController {
       @Size(max = 40) String pronouns,
       @Size(max = 80) String statusText,
       @Pattern(regexp = "NONE|RING|GLOW|GRADIENT") String decoration,
-      @Pattern(regexp = "SYSTEM|MONO|SERIF") String nameFont,
+      @Pattern(regexp = "SYSTEM|MONO|SERIF|ROUNDED|DISPLAY") String nameFont,
       @Size(max = 200) String website,
-      @Size(max = 120) String interests) {}
+      @Size(max = 120) String interests,
+      @Pattern(regexp = "(?:#[0-9a-fA-F]{6})?") String nameColor,
+      @Pattern(regexp = "SOLID|GRADIENT|NEON") String nameEffect) {}
 
   @PutMapping("/users/me/profile-details")
   public void details(@AuthenticationPrincipal Actor a, @Valid @RequestBody Details value)
@@ -87,7 +92,8 @@ public class SocialController {
       }
     }
     db.jdbc.update(
-        "UPDATE app_user SET profile_details=?::jsonb WHERE id=?",
+        "UPDATE app_user SET profile_details=coalesce(profile_details,'{}'::jsonb) ||"
+            + " jsonb_strip_nulls(?::jsonb) WHERE id=?",
         json.writeValueAsString(value),
         a.id());
     profileChanged(a.id());
@@ -149,6 +155,8 @@ public class SocialController {
             peer,
             a.id());
     if (inserted > 0) {
+      db.jdbc.update(
+          "DELETE FROM private_typing_presence WHERE friendship_id=? AND user_id=?", id, a.id());
       UUID friendshipId = (UUID) friendship.get("id");
       notices.send(
           a.id(),
@@ -279,6 +287,49 @@ public class SocialController {
       @RequestParam(defaultValue = "0") int page) {
     access(a, id, true);
     return privateRows(a, id, page, null);
+  }
+
+  public record Typing(boolean typing) {}
+
+  @PostMapping("/friends/{id}/typing")
+  @org.springframework.transaction.annotation.Transactional
+  public void typing(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @RequestBody Typing state) {
+    var friendship = access(a, id, true);
+    int changed =
+        state.typing()
+            ? db.jdbc.update(
+                "INSERT INTO private_typing_presence(friendship_id,user_id,expires_at) VALUES"
+                    + " (?,?,now()+interval '6 seconds') ON CONFLICT(friendship_id,user_id) DO"
+                    + " UPDATE SET expires_at=excluded.expires_at,updated_at=now() WHERE"
+                    + " private_typing_presence.updated_at<now()-interval '1500 milliseconds'",
+                id,
+                a.id())
+            : db.jdbc.update(
+                "DELETE FROM private_typing_presence WHERE friendship_id=? AND user_id=?",
+                id,
+                a.id());
+    UUID peer =
+        a.id().equals(friendship.get("requester"))
+            ? (UUID) friendship.get("recipient")
+            : (UUID) friendship.get("requester");
+    if (changed > 0) events.publishEvent(new AppChanged("private_typing_changed", Set.of(peer)));
+  }
+
+  @GetMapping("/friends/{id}/typing")
+  public Object typing(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    access(a, id, true);
+    return db.list(
+        "SELECT p.user_id,u.name,GREATEST(0,extract(epoch FROM p.expires_at-now())*1000)::int"
+            + " remaining_ms FROM private_typing_presence p JOIN app_user u ON u.id=p.user_id WHERE"
+            + " p.friendship_id=? AND p.user_id<>? AND p.expires_at>now()",
+        id,
+        a.id());
+  }
+
+  @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 60000)
+  public void expireTyping() {
+    db.jdbc.update("DELETE FROM private_typing_presence WHERE expires_at<now()");
   }
 
   @GetMapping("/friends/{id}/messages/target/{target}")

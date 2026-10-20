@@ -54,6 +54,8 @@ export type Match = {
   boardingCode?: string | null;
   boardingVerifiedAt?: string | null;
   boardedAt?: string | null;
+  boardingAttempts?: number;
+  boardingLockedAt?: string | null;
   pickupOrder?: number | null;
   meetingPoint: string | null;
   pickupLat?: number | null;

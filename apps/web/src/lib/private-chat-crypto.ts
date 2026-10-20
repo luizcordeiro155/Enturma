@@ -2,8 +2,7 @@ const enc = new TextEncoder();
 const dec = new TextDecoder();
 export type Identity = { publicKey: JsonWebKey; privateKey: JsonWebKey };
 export function base64(value: ArrayBuffer | Uint8Array) {
-  const bytes =
-    value instanceof Uint8Array ? value : new Uint8Array(value);
+  const bytes = value instanceof Uint8Array ? value : new Uint8Array(value);
   const chunks: string[] = [];
   const chunkSize = 0x8000;
 
@@ -420,6 +419,135 @@ export async function decryptIdentityVault(
   const message = await encryptMessage(
     own,
     "verify-vault",
+    user,
+    user,
+    "vault",
+  );
+  await decryptMessage(peer, { ...message, senderId: user }, user);
+  return identity;
+}
+
+export type AccountIdentityVault = {
+  version: 3;
+  epoch: number;
+  publicKey: ReturnType<typeof publicFields>;
+  iv: string;
+  data: string;
+};
+export type AccountWrappingKey = { epoch: number; key: CryptoKey };
+
+/** The account password is only used in memory. The stored CryptoKey is non-extractable. */
+export async function deriveAccountWrappingKey(
+  password: string,
+  user: string,
+  epoch: number,
+): Promise<AccountWrappingKey> {
+  if (
+    !password ||
+    password.length > 256 ||
+    !Number.isSafeInteger(epoch) ||
+    epoch < 1
+  )
+    throw Error("Credenciais de proteção inválidas.");
+  const salt = new Uint8Array(
+    await crypto.subtle.digest(
+      "SHA-256",
+      enc.encode(`enturma-account-key-v3:${user}:${epoch}`),
+    ),
+  );
+  return { epoch, key: await vaultKey(password, salt) };
+}
+export async function prepareAccountWrappingKey(
+  password: string,
+  user: string,
+  epoch: number,
+) {
+  const wrapping = await deriveAccountWrappingKey(password, user, epoch);
+  await identityTransaction("readwrite", (store) =>
+    store.put(wrapping, `account-key:${user}`),
+  );
+  return wrapping;
+}
+export function readAccountWrappingKey(
+  user: string,
+): Promise<AccountWrappingKey | undefined> {
+  return identityTransaction("readonly", (store) =>
+    store.get(`account-key:${user}`),
+  );
+}
+function accountVaultContext(user: string, epoch: number, key: JsonWebKey) {
+  return enc.encode(
+    JSON.stringify([
+      "enturma-account-vault-v3",
+      user,
+      epoch,
+      publicFields(key),
+    ]),
+  );
+}
+export async function encryptAccountIdentity(
+  identity: Identity,
+  wrapping: AccountWrappingKey,
+  user: string,
+): Promise<AccountIdentityVault> {
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const data = await crypto.subtle.encrypt(
+    {
+      name: "AES-GCM",
+      iv,
+      additionalData: accountVaultContext(
+        user,
+        wrapping.epoch,
+        identity.publicKey,
+      ),
+    },
+    wrapping.key,
+    enc.encode(JSON.stringify(identity)),
+  );
+  return {
+    version: 3,
+    epoch: wrapping.epoch,
+    publicKey: publicFields(identity.publicKey),
+    iv: base64(iv),
+    data: base64(data),
+  };
+}
+export async function decryptAccountIdentity(
+  vault: AccountIdentityVault,
+  wrapping: AccountWrappingKey,
+  user: string,
+): Promise<Identity> {
+  if (
+    vault.version !== 3 ||
+    vault.epoch !== wrapping.epoch ||
+    !/^[A-Za-z0-9+/]{16}$/.test(vault.iv) ||
+    vault.data.length > 12000 ||
+    vault.data.length < 64
+  )
+    throw Error("Proteção da conta desatualizada.");
+  const clear = await crypto.subtle.decrypt(
+    {
+      name: "AES-GCM",
+      iv: bytes(vault.iv),
+      additionalData: accountVaultContext(user, vault.epoch, vault.publicKey),
+    },
+    wrapping.key,
+    bytes(vault.data),
+  );
+  const identity: Identity = JSON.parse(dec.decode(clear));
+  if (
+    JSON.stringify(publicFields(identity.publicKey)) !==
+      JSON.stringify(publicFields(vault.publicKey)) ||
+    JSON.stringify(publicFields(identity.privateKey)) !==
+      JSON.stringify(publicFields(vault.publicKey))
+  )
+    throw Error("A chave não corresponde à conta.");
+  const probe = await createIdentity();
+  const own = await conversationKey(identity, probe.publicKey, user);
+  const peer = await conversationKey(probe, identity.publicKey, user);
+  const message = await encryptMessage(
+    own,
+    "verify-account-vault",
     user,
     user,
     "vault",

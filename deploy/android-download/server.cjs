@@ -69,7 +69,9 @@ const server = http.createServer((req, res) => {
 
     if (pathname === "/latest-android.json") {
       if (!apk) {
-        res.writeHead(503, { "Content-Type": "application/json; charset=utf-8" });
+        res.writeHead(503, {
+          "Content-Type": "application/json; charset=utf-8",
+        });
         res.end("{}");
         return;
       }
@@ -80,20 +82,31 @@ const server = http.createServer((req, res) => {
         "Cache-Control": "no-store,max-age=0",
         "Access-Control-Allow-Origin": "*",
       });
-      res.end(JSON.stringify({
-        version: version(apk),
-        platform: "android",
-        packageName: "br.com.enturma.app",
-        file: apk,
-        size: stat.size,
-        sha256: checksum(apk),
-        downloadUrl: `${base}/${encodeURIComponent(apk)}`,
-        publishedAt: stat.mtime.toISOString(),
-      }));
+      res.end(
+        JSON.stringify({
+          version: version(apk),
+          sourceCommit: fs.existsSync(path.join(__dirname, "release.json"))
+            ? JSON.parse(
+                fs.readFileSync(path.join(__dirname, "release.json"), "utf8"),
+              ).sourceCommit
+            : null,
+          platform: "android",
+          packageName: "br.com.enturma.app",
+          file: apk,
+          size: stat.size,
+          sha256: checksum(apk),
+          downloadUrl: `${base}/${encodeURIComponent(apk)}`,
+          publishedAt: stat.mtime.toISOString(),
+        }),
+      );
       return;
     }
 
-    if (pathname === "/" || pathname === "/download" || pathname === "/Enturma-Android.apk") {
+    if (
+      pathname === "/" ||
+      pathname === "/download" ||
+      pathname === "/Enturma-Android.apk"
+    ) {
       if (!apk) {
         res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" });
         res.end("APK não disponível.");

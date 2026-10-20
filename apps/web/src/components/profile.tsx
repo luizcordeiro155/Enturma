@@ -12,6 +12,7 @@ import { Feedback } from "./feedback";
 import { AppUpdateSettingsCard } from "./desktop-updates";
 
 import { NotificationPreferences } from "./community-feedback";
+import { AppHelp } from "./app-help";
 import { AccountPrivacyCard } from "./account-privacy-card";
 export function ProfileView({
   subjectsOnly = false,
@@ -250,6 +251,7 @@ export function ProfileView({
 
             {settings ? (
               <>
+                <AppHelp />
                 <AppUpdateSettingsCard />
                 <NotificationPreferences />
                 <h2 className="section-heading">Sessões ativas</h2>

@@ -64,8 +64,7 @@ public class RideMobilityService {
       Integer modelYear,
       int seats,
       String plateHint) {
-    if (seats < 1 || seats > 8)
-      throw ApiException.invalid("Informe entre 1 e 8 vagas no veículo.");
+    if (seats < 1 || seats > 8) throw ApiException.invalid("Informe entre 1 e 8 vagas no veículo.");
     String hint = maskPlate(plateHint);
     db.jdbc.update(
         "INSERT INTO ride_vehicle_profile(user_id,brand,model,color,model_year,seats,plate_hint)"
@@ -84,10 +83,7 @@ public class RideMobilityService {
   }
 
   public Object reputation(UUID user) {
-    var rows =
-        db.list(
-            "SELECT * FROM ride_reputation_summary WHERE reviewee_id=?",
-            user);
+    var rows = db.list("SELECT * FROM ride_reputation_summary WHERE reviewee_id=?", user);
     var out = new LinkedHashMap<String, Object>();
     if (!rows.isEmpty()) out.putAll(rows.getFirst());
     else {
@@ -104,6 +100,17 @@ public class RideMobilityService {
             user,
             user));
     out.put(
+        "roles",
+        db.list(
+            "SELECT CASE WHEN m.driver_id=? THEN 'DRIVER' ELSE 'PASSENGER' END role,count(*)"
+                + " reviews,round(avg(v.rating)::numeric,1) rating FROM ride_review v JOIN"
+                + " ride_match m ON m.id=v.match_id WHERE (m.driver_id=? AND"
+                + " v.reviewer_id=m.passenger_id) OR (m.passenger_id=? AND"
+                + " v.reviewer_id=m.driver_id) GROUP BY 1",
+            user,
+            user,
+            user));
+    out.put(
         "noShows",
         db.jdbc.queryForObject(
             "SELECT count(*) FROM ride_match WHERE no_show_user_id=? AND status='NO_SHOW'",
@@ -111,9 +118,7 @@ public class RideMobilityService {
             user));
     out.put(
         "verifiedStudent",
-        db.exists(
-            "SELECT EXISTS(SELECT 1 FROM academic_enrollment WHERE user_id=?)",
-            user));
+        db.exists("SELECT EXISTS(SELECT 1 FROM academic_enrollment WHERE user_id=?)", user));
     return out;
   }
 
@@ -141,9 +146,7 @@ public class RideMobilityService {
         lat,
         lng,
         actor.id());
-    return db.one(
-        "SELECT id,name,description,lat,lng FROM campus_pickup_zone WHERE id=?",
-        id);
+    return db.one("SELECT id,name,description,lat,lng FROM campus_pickup_zone WHERE id=?", id);
   }
 
   @Transactional
@@ -152,8 +155,8 @@ public class RideMobilityService {
     requireActive(match);
     var zone =
         db.one(
-            "SELECT z.id,z.name,z.lat,z.lng FROM campus_pickup_zone z JOIN ride r ON r.campus_id=z.campus_id"
-                + " WHERE z.id=? AND z.active AND r.id=?",
+            "SELECT z.id,z.name,z.lat,z.lng FROM campus_pickup_zone z JOIN ride r ON"
+                + " r.campus_id=z.campus_id WHERE z.id=? AND z.active AND r.id=?",
             zoneId,
             match.get("rideId"));
     db.jdbc.update(
@@ -174,8 +177,7 @@ public class RideMobilityService {
       throw ApiException.invalid("Esta mudança de status da carona não é permitida agora.");
     if (next.equals("IN_PROGRESS")) {
       if (!db.exists(
-          "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED')",
-          rideId))
+          "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED')", rideId))
         throw ApiException.invalid("Confirme pelo menos um passageiro antes de iniciar a viagem.");
       if (db.exists(
           "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND status='ACCEPTED'"
@@ -195,18 +197,14 @@ public class RideMobilityService {
     } else if (next.equals("CANCELLED")) {
       reopenMatchedRequests(rideId);
       db.jdbc.update(
-          "UPDATE ride SET trip_status='CANCELLED',status='CANCELLED' WHERE id=?",
-          rideId);
+          "UPDATE ride SET trip_status='CANCELLED',status='CANCELLED' WHERE id=?", rideId);
       closeRideMatches(rideId);
     } else {
       String timestamp =
           next.equals("IN_PROGRESS")
               ? ",started_at=coalesce(started_at,now())"
               : next.equals("ARRIVED") ? ",arrived_at=coalesce(arrived_at,now())" : "";
-      db.jdbc.update(
-          "UPDATE ride SET trip_status=?" + timestamp + " WHERE id=?",
-          next,
-          rideId);
+      db.jdbc.update("UPDATE ride SET trip_status=?" + timestamp + " WHERE id=?", next, rideId);
     }
 
     String message =
@@ -225,12 +223,7 @@ public class RideMobilityService {
           "UPDATE ride_driver_availability SET enabled=false,status='OFFLINE',offer_ride_id=NULL,"
               + " pending_match_id=NULL,updated_at=now() WHERE offer_ride_id=?",
           rideId);
-    log.info(
-        "ride_status ride={} actor={} from={} to={}",
-        rideId,
-        actor.id(),
-        current,
-        next);
+    log.info("ride_status ride={} actor={} from={} to={}", rideId, actor.id(), current, next);
     notifyRide(actor.id(), rideId, "RIDE_STATUS", message);
     changedRide(rideId, true);
   }
@@ -256,30 +249,95 @@ public class RideMobilityService {
     var match = acceptedMatch(actor, matchId, true);
     requireActive(match);
     if (!actor.id().equals(match.get("passengerId"))) throw ApiException.forbidden();
-    String code = match.get("boardingCode") == null ? boardingCode() : String.valueOf(match.get("boardingCode"));
+    String code =
+        match.get("boardingCode") == null
+            ? boardingCode()
+            : String.valueOf(match.get("boardingCode"));
     if (match.get("boardingCode") == null)
       db.jdbc.update("UPDATE ride_match SET boarding_code=? WHERE id=?", code, matchId);
     return Map.of("code", code);
   }
 
-  @Transactional
+  @Transactional(noRollbackFor = ApiException.class)
   public Object board(Actor actor, UUID matchId, String code) {
+    var access = acceptedMatch(actor, matchId, false);
+    if (!actor.id().equals(access.get("driverId"))) throw ApiException.forbidden();
+    db.one("SELECT id FROM ride WHERE id=? FOR UPDATE", access.get("rideId"));
     var match = acceptedMatch(actor, matchId, true);
     requireActive(match);
-    if (!actor.id().equals(match.get("driverId"))) throw ApiException.forbidden();
-    if (!"WAITING_PASSENGER".equals(match.get("tripStatus")))
-      throw ApiException.invalid("Valide o embarque somente depois de chegar ao ponto de encontro.");
-    String expected = match.get("boardingCode") == null ? "" : String.valueOf(match.get("boardingCode"));
-    if (!expected.equals(code))
-      throw new ApiException(409, "BOARDING_CODE_INVALID", "O código de embarque está incorreto.");
-
+    if (match.get("boardedAt") != null) return Map.of("verified", true, "awaitingPassenger", false);
+    if (!Set.of("WAITING_PASSENGER", "IN_PROGRESS")
+        .contains(String.valueOf(match.get("tripStatus"))))
+      throw ApiException.invalid("Valide o embarque depois de chegar ao ponto de encontro.");
+    int attempts = ((Number) match.get("boardingAttempts")).intValue();
+    if (attempts >= 5)
+      throw new ApiException(
+          429,
+          "BOARDING_LOCKED",
+          "Cinco tentativas usadas. O passageiro pode renovar o código após cinco minutos.");
+    String expected =
+        match.get("boardingCode") == null ? "" : String.valueOf(match.get("boardingCode"));
+    if (expected.isEmpty()
+        || !java.security.MessageDigest.isEqual(
+            expected.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+            code.getBytes(java.nio.charset.StandardCharsets.UTF_8))) {
+      db.jdbc.update(
+          "UPDATE ride_match SET boarding_attempts=boarding_attempts+1,boarding_locked_at=CASE WHEN"
+              + " boarding_attempts=4 THEN now() ELSE boarding_locked_at END WHERE id=?",
+          matchId);
+      throw new ApiException(
+          attempts == 4 ? 429 : 409,
+          attempts == 4 ? "BOARDING_LOCKED" : "BOARDING_CODE_INVALID",
+          attempts == 4
+              ? "Cinco tentativas usadas. Peça ao passageiro para renovar o código após cinco"
+                    + " minutos."
+              : "Código incorreto. Restam " + (4 - attempts) + " tentativas.");
+    }
     db.jdbc.update(
-        "UPDATE ride_match SET boarding_verified_at=coalesce(boarding_verified_at,now()),"
-            + " driver_confirmed=true WHERE id=?",
+        "UPDATE ride_match SET"
+            + " boarding_verified_at=now(),boarded_at=now(),driver_confirmed=true,passenger_confirmed=true"
+            + " WHERE id=?",
         matchId);
-    log.info("ride_boarding_code_verified match={} driver={}", matchId, actor.id());
-    changedMatch(db.one("SELECT * FROM ride_match WHERE id=?", matchId));
-    return Map.of("verified", true, "awaitingPassenger", true);
+    db.jdbc.update(
+        "INSERT INTO ride_safety_event(id,match_id,actor_id,kind) VALUES"
+            + " (?,?,?,'BOARDING_CONFIRMED')",
+        UUID.randomUUID(),
+        matchId,
+        actor.id());
+    db.jdbc.update(
+        "UPDATE ride SET trip_status='IN_PROGRESS',started_at=coalesce(started_at,now()) WHERE id=?"
+            + " AND status='OPEN'",
+        match.get("rideId"));
+    notifyRide(
+        actor.id(),
+        (UUID) match.get("rideId"),
+        "RIDE_STATUS",
+        "Código confirmado. A carona começou. Boa viagem!");
+    changedRide((UUID) match.get("rideId"), true);
+    return Map.of("verified", true, "awaitingPassenger", false);
+  }
+
+  @Transactional
+  public Object renewBoardingCode(Actor actor, UUID matchId) {
+    var match = acceptedMatch(actor, matchId, true);
+    requireActive(match);
+    if (!actor.id().equals(match.get("passengerId"))) throw ApiException.forbidden();
+    if (match.get("boardedAt") != null) throw ApiException.invalid("O embarque já foi confirmado.");
+    if (((Number) match.get("boardingAttempts")).intValue() < 5
+        || match.get("boardingLockedAt") == null
+        || Instant.parse(String.valueOf(match.get("boardingLockedAt")))
+            .plusSeconds(300)
+            .isAfter(Instant.now()))
+      throw ApiException.invalid(
+          "A renovação fica disponível cinco minutos após o bloqueio do código.");
+    String code = boardingCode();
+    db.jdbc.update(
+        "UPDATE ride_match SET boarding_code=?,boarding_attempts=0,boarding_locked_at=NULL WHERE"
+            + " id=?",
+        code,
+        matchId);
+    changedMatch(match);
+    return Map.of("code", code);
   }
 
   @Transactional
@@ -287,17 +345,20 @@ public class RideMobilityService {
     var match = acceptedMatch(actor, matchId, true);
     requireActive(match);
     if (!actor.id().equals(match.get("passengerId"))) throw ApiException.forbidden();
+    if (match.get("boardedAt") != null)
+      return; // Older clients may still confirm after PIN validation.
     if (!"WAITING_PASSENGER".equals(match.get("tripStatus")))
-      throw ApiException.invalid("Confirme o embarque somente quando o motorista estiver no ponto.");
+      throw ApiException.invalid(
+          "Confirme o embarque somente quando o motorista estiver no ponto.");
     if (match.get("boardingVerifiedAt") == null)
       throw ApiException.invalid("O motorista ainda precisa validar o código de embarque.");
 
     if (match.get("boardedAt") == null) {
       db.jdbc.update(
-          "UPDATE ride_match SET boarded_at=now(),passenger_confirmed=true WHERE id=?",
-          matchId);
+          "UPDATE ride_match SET boarded_at=now(),passenger_confirmed=true WHERE id=?", matchId);
       db.jdbc.update(
-          "INSERT INTO ride_safety_event(id,match_id,actor_id,kind) VALUES (?,?,?,'BOARDING_CONFIRMED')",
+          "INSERT INTO ride_safety_event(id,match_id,actor_id,kind) VALUES"
+              + " (?,?,?,'BOARDING_CONFIRMED')",
           UUID.randomUUID(),
           matchId,
           actor.id());
@@ -331,8 +392,7 @@ public class RideMobilityService {
   }
 
   @Transactional
-  public void liveLocation(
-      Actor actor, UUID matchId, double lat, double lng, int accuracyMeters) {
+  public void liveLocation(Actor actor, UUID matchId, double lat, double lng, int accuracyMeters) {
     liveLocation(actor, matchId, lat, lng, accuracyMeters, null, null, null);
   }
 
@@ -366,7 +426,8 @@ public class RideMobilityService {
       throw ApiException.invalid(
           "A localização em tempo real só fica disponível durante o deslocamento.");
     db.jdbc.update(
-        "INSERT INTO ride_live_location(match_id,user_id,lat,lng,accuracy_m,heading,speed_mps,captured_at)"
+        "INSERT INTO"
+            + " ride_live_location(match_id,user_id,lat,lng,accuracy_m,heading,speed_mps,captured_at)"
             + " VALUES (?,?,?,?,?,?,?,?) ON CONFLICT(match_id,user_id) DO UPDATE SET"
             + " lat=EXCLUDED.lat,lng=EXCLUDED.lng,accuracy_m=EXCLUDED.accuracy_m,"
             + " heading=EXCLUDED.heading,speed_mps=EXCLUDED.speed_mps,"
@@ -391,8 +452,9 @@ public class RideMobilityService {
             : (UUID) match.get("driverId");
     var rows =
         db.list(
-            "SELECT lat,lng,accuracy_m,heading,speed_mps,captured_at,updated_at FROM ride_live_location"
-                + " WHERE match_id=? AND user_id=? AND updated_at>now()-interval '2 minutes'",
+            "SELECT lat,lng,accuracy_m,heading,speed_mps,captured_at,updated_at FROM"
+                + " ride_live_location WHERE match_id=? AND user_id=? AND updated_at>now()-interval"
+                + " '2 minutes'",
             matchId,
             peer);
     if (rows.isEmpty()) return Map.of("available", false);
@@ -421,9 +483,7 @@ public class RideMobilityService {
   public void stopLiveLocation(Actor actor, UUID matchId) {
     acceptedMatch(actor, matchId, false);
     db.jdbc.update(
-        "DELETE FROM ride_live_location WHERE match_id=? AND user_id=?",
-        matchId,
-        actor.id());
+        "DELETE FROM ride_live_location WHERE match_id=? AND user_id=?", matchId, actor.id());
     events.publishEvent(new RideChanged(Set.of(actor.id()), false));
   }
 
@@ -434,8 +494,7 @@ public class RideMobilityService {
     UUID token = UUID.randomUUID();
     UUID id = UUID.randomUUID();
     Instant expiry =
-        Instant.parse(String.valueOf(match.get("departureAt")))
-            .plus(Duration.ofHours(24));
+        Instant.parse(String.valueOf(match.get("departureAt"))).plus(Duration.ofHours(24));
     Instant max = Instant.now().plus(Duration.ofHours(12));
     if (expiry.isAfter(max)) expiry = max;
     if (expiry.isBefore(Instant.now().plus(Duration.ofMinutes(30))))
@@ -454,10 +513,14 @@ public class RideMobilityService {
         matchId,
         actor.id());
     return Map.of(
-        "id", id,
-        "token", token,
-        "path", "/caronas/seguranca/" + token,
-        "expiresAt", expiry.toString());
+        "id",
+        id,
+        "token",
+        token,
+        "path",
+        "/caronas/seguranca/" + token,
+        "expiresAt",
+        expiry.toString());
   }
 
   @Transactional
@@ -473,37 +536,61 @@ public class RideMobilityService {
 
   private void retireRoutineTrips(UUID recurrence) {
     // Same row order as booking: a confirmed/started trip remains a real booking.
-    for (var row : db.list("SELECT id,trip_status FROM ride WHERE recurrence_id=? AND status='OPEN' ORDER BY id FOR UPDATE", recurrence)) {
+    for (var row :
+        db.list(
+            "SELECT id,trip_status FROM ride WHERE recurrence_id=? AND status='OPEN' ORDER BY id"
+                + " FOR UPDATE",
+            recurrence)) {
       UUID ride = (UUID) row.get("id");
       if (!Set.of("SCHEDULED", "MATCHING").contains(row.get("tripStatus"))
-          || db.exists("SELECT EXISTS(SELECT 1 FROM ride_match WHERE (ride_id=? OR request_ride_id=?) AND status='ACCEPTED' AND deleted_at IS NULL)", ride, ride)) {
+          || db.exists(
+              "SELECT EXISTS(SELECT 1 FROM ride_match WHERE (ride_id=? OR request_ride_id=?) AND"
+                  + " status='ACCEPTED' AND deleted_at IS NULL)",
+              ride,
+              ride)) {
         db.jdbc.update("UPDATE ride SET recurrence_id=NULL WHERE id=?", ride);
         continue;
       }
       db.jdbc.update("UPDATE ride SET status='CANCELLED',trip_status='CANCELLED' WHERE id=?", ride);
-      for (var match : db.list("SELECT id,driver_id,passenger_id FROM ride_match WHERE (ride_id=? OR request_ride_id=?) AND status IN ('PENDING','WAITLISTED') FOR UPDATE",ride,ride)) {
-        db.jdbc.update("UPDATE ride_match SET status='CANCELLED',closed_at=coalesce(closed_at,now()),purge_at=coalesce(purge_at,now()+interval '24 hours') WHERE id=?",match.get("id"));
+      for (var match :
+          db.list(
+              "SELECT id,driver_id,passenger_id FROM ride_match WHERE (ride_id=? OR"
+                  + " request_ride_id=?) AND status IN ('PENDING','WAITLISTED') FOR UPDATE",
+              ride,
+              ride)) {
+        db.jdbc.update(
+            "UPDATE ride_match SET"
+                + " status='CANCELLED',closed_at=coalesce(closed_at,now()),purge_at=coalesce(purge_at,now()+interval"
+                + " '24 hours') WHERE id=?",
+            match.get("id"));
         changedMatch(match);
       }
       closeRideMatches(ride);
-      db.jdbc.update("DELETE FROM notification WHERE kind='RIDE_REMINDER_30' AND target_id=?", ride);
-      db.jdbc.update("DELETE FROM notification_desktop_push_event WHERE kind='RIDE_REMINDER_30' AND target_id=?", ride);
-      db.jdbc.update("DELETE FROM email_outbox WHERE sent_at IS NULL AND dedupe_key=?", "RIDE_REMINDER_30:" + ride + ":null");
+      db.jdbc.update(
+          "DELETE FROM notification WHERE kind='RIDE_REMINDER_30' AND target_id=?", ride);
+      db.jdbc.update(
+          "DELETE FROM notification_desktop_push_event WHERE kind='RIDE_REMINDER_30' AND"
+              + " target_id=?",
+          ride);
+      db.jdbc.update(
+          "DELETE FROM email_outbox WHERE sent_at IS NULL AND dedupe_key=?",
+          "RIDE_REMINDER_30:" + ride + ":null");
       changedRide(ride, true);
-      notices.changed((UUID) db.one("SELECT owner_id FROM ride WHERE id=?",ride).get("ownerId"));
+      notices.changed((UUID) db.one("SELECT owner_id FROM ride WHERE id=?", ride).get("ownerId"));
     }
   }
 
   public Object publicSafety(UUID token) {
     var share =
         db.one(
-            "SELECT s.shared_by,s.expires_at,m.id match_id,m.meeting_point,m.driver_id,m.passenger_id,"
-                + " r.trip_status,r.origin_area,r.departure_at,c.name campus_name,"
-                + " d.name driver_name,p.name passenger_name"
-                + " FROM ride_safety_share s JOIN ride_match m ON m.id=s.match_id"
-                + " JOIN ride r ON r.id=m.ride_id JOIN academic_entry c ON c.id=r.campus_id"
-                + " JOIN app_user d ON d.id=m.driver_id JOIN app_user p ON p.id=m.passenger_id"
-                + " WHERE s.token=? AND s.revoked_at IS NULL AND s.expires_at>now()",
+            "SELECT s.shared_by,s.expires_at,m.id"
+                + " match_id,m.meeting_point,m.driver_id,m.passenger_id,"
+                + " r.trip_status,r.origin_area,r.departure_at,c.name campus_name, d.name"
+                + " driver_name,p.name passenger_name FROM ride_safety_share s JOIN ride_match m ON"
+                + " m.id=s.match_id JOIN ride r ON r.id=m.ride_id JOIN academic_entry c ON"
+                + " c.id=r.campus_id JOIN app_user d ON d.id=m.driver_id JOIN app_user p ON"
+                + " p.id=m.passenger_id WHERE s.token=? AND s.revoked_at IS NULL AND"
+                + " s.expires_at>now()",
             token);
     if (db.exists(
         "SELECT EXISTS(SELECT 1 FROM user_block WHERE"
@@ -511,8 +598,7 @@ public class RideMobilityService {
         share.get("driverId"),
         share.get("passengerId"),
         share.get("passengerId"),
-        share.get("driverId")))
-      throw ApiException.missing();
+        share.get("driverId"))) throw ApiException.missing();
     var out = new LinkedHashMap<String, Object>();
     out.put("tripStatus", share.get("tripStatus"));
     out.put("originArea", share.get("originArea"));
@@ -521,17 +607,16 @@ public class RideMobilityService {
     out.put("driverName", share.get("driverName"));
     out.put("passengerName", share.get("passengerName"));
     String publicTripStatus = String.valueOf(share.get("tripStatus"));
-    boolean activeTrip =
-        !Set.of("COMPLETED", "CANCELLED").contains(publicTripStatus);
+    boolean activeTrip = !Set.of("COMPLETED", "CANCELLED").contains(publicTripStatus);
     out.put("meetingPoint", activeTrip ? share.get("meetingPoint") : null);
     out.put("expiresAt", share.get("expiresAt"));
     var location =
         activeTrip
             ? db.list(
-            "SELECT lat,lng,accuracy_m,updated_at FROM ride_live_location"
-                + " WHERE match_id=? AND user_id=? AND updated_at>now()-interval '2 minutes'",
-            share.get("matchId"),
-            share.get("sharedBy"))
+                "SELECT lat,lng,accuracy_m,updated_at FROM ride_live_location"
+                    + " WHERE match_id=? AND user_id=? AND updated_at>now()-interval '2 minutes'",
+                share.get("matchId"),
+                share.get("sharedBy"))
             : List.<Map<String, Object>>of();
     out.put("location", location.isEmpty() ? null : location.getFirst());
     return out;
@@ -564,8 +649,7 @@ public class RideMobilityService {
             + " WHERE match_id=? AND revoked_at IS NULL",
         matchId);
     db.jdbc.update(
-        "UPDATE ride_voice SET cleaned=false,updated_at=now() WHERE match_id=?",
-        matchId);
+        "UPDATE ride_voice SET cleaned=false,updated_at=now() WHERE match_id=?", matchId);
     db.jdbc.update(
         "INSERT INTO ride_safety_event(id,match_id,actor_id,kind) VALUES (?,?,?,'NO_SHOW')",
         UUID.randomUUID(),
@@ -611,8 +695,7 @@ public class RideMobilityService {
         || weekdays.isEmpty()
         || weekdays.stream().anyMatch(d -> d < 1 || d > 7)
         || seats < 1
-        || seats > 8)
-      throw ApiException.invalid("Confira a rotina da carona.");
+        || seats > 8) throw ApiException.invalid("Confira a rotina da carona.");
     try {
       ZoneId.of(timezone);
     } catch (DateTimeException invalidTimezone) {
@@ -626,7 +709,12 @@ public class RideMobilityService {
     }
     UUID id = UUID.randomUUID();
     String days =
-        weekdays.stream().distinct().sorted().map(String::valueOf).reduce((a, b) -> a + "," + b).orElseThrow();
+        weekdays.stream()
+            .distinct()
+            .sorted()
+            .map(String::valueOf)
+            .reduce((a, b) -> a + "," + b)
+            .orElseThrow();
     db.jdbc.update(
         "INSERT INTO ride_recurrence(id,owner_id,campus_id,type,origin_area,direction,local_time,"
             + " timezone,weekdays,seats,area_lat,area_lng,area_accuracy_m)"
@@ -652,9 +740,7 @@ public class RideMobilityService {
   public void deleteRecurrence(Actor actor, UUID id) {
     int updated =
         db.jdbc.update(
-            "UPDATE ride_recurrence SET active=false WHERE id=? AND owner_id=?",
-            id,
-            actor.id());
+            "UPDATE ride_recurrence SET active=false WHERE id=? AND owner_id=?", id, actor.id());
     if (updated == 0) throw ApiException.missing();
     retireRoutineTrips(id);
   }
@@ -662,11 +748,14 @@ public class RideMobilityService {
   @Scheduled(fixedDelay = 3600000, initialDelay = 30000)
   @Transactional
   public void materializeRecurrences() {
-    for (var row : db.list("SELECT id FROM ride_recurrence WHERE NOT active AND EXISTS(SELECT 1 FROM ride WHERE recurrence_id=ride_recurrence.id AND status='OPEN') ORDER BY id FOR UPDATE SKIP LOCKED"))
-      retireRoutineTrips((UUID) row.get("id"));
     for (var row :
         db.list(
-            "SELECT id FROM ride_recurrence WHERE active ORDER BY id FOR UPDATE SKIP LOCKED"))
+            "SELECT id FROM ride_recurrence WHERE NOT active AND EXISTS(SELECT 1 FROM ride WHERE"
+                + " recurrence_id=ride_recurrence.id AND status='OPEN') ORDER BY id FOR UPDATE SKIP"
+                + " LOCKED"))
+      retireRoutineTrips((UUID) row.get("id"));
+    for (var row :
+        db.list("SELECT id FROM ride_recurrence WHERE active ORDER BY id FOR UPDATE SKIP LOCKED"))
       materialize((UUID) row.get("id"));
   }
 
@@ -684,7 +773,8 @@ public class RideMobilityService {
       Instant departure = ZonedDateTime.of(date, time, zone).toInstant();
       if (departure.isBefore(Instant.now().plus(Duration.ofMinutes(15)))) continue;
       if (db.exists(
-          "SELECT EXISTS(SELECT 1 FROM ride_recurrence_instance WHERE recurrence_id=? AND service_date=?)",
+          "SELECT EXISTS(SELECT 1 FROM ride_recurrence_instance WHERE recurrence_id=? AND"
+              + " service_date=?)",
           recurrenceId,
           java.sql.Date.valueOf(date))) continue;
       UUID ride = UUID.randomUUID();
@@ -741,9 +831,10 @@ public class RideMobilityService {
   public void upcomingRideReminders() {
     for (var row :
         db.list(
-            "SELECT id FROM ride WHERE status='OPEN' AND (recurrence_id IS NULL OR EXISTS(SELECT 1 FROM ride_recurrence rr WHERE rr.id=ride.recurrence_id AND rr.active)) AND departure_at"
-                + " BETWEEN now()+interval '25 minutes' AND now()+interval '35 minutes'"
-                + " ORDER BY departure_at,id LIMIT 200 FOR UPDATE SKIP LOCKED"))
+            "SELECT id FROM ride WHERE status='OPEN' AND (recurrence_id IS NULL OR EXISTS(SELECT 1"
+                + " FROM ride_recurrence rr WHERE rr.id=ride.recurrence_id AND rr.active)) AND"
+                + " departure_at BETWEEN now()+interval '25 minutes' AND now()+interval '35"
+                + " minutes' ORDER BY departure_at,id LIMIT 200 FOR UPDATE SKIP LOCKED"))
       notifyRide(
           null,
           (UUID) row.get("id"),
@@ -755,7 +846,8 @@ public class RideMobilityService {
   public void cleanupLocationsAndShares() {
     db.jdbc.update("DELETE FROM ride_live_location WHERE updated_at<now()-interval '15 minutes'");
     db.jdbc.update(
-        "UPDATE ride_safety_share SET revoked_at=now() WHERE revoked_at IS NULL AND expires_at<=now()");
+        "UPDATE ride_safety_share SET revoked_at=now() WHERE revoked_at IS NULL AND"
+            + " expires_at<=now()");
   }
 
   private Map<String, Object> acceptedMatch(Actor actor, UUID id, boolean lock) {
@@ -764,7 +856,8 @@ public class RideMobilityService {
         db.one(
             "SELECT m.*,r.owner_id,r.campus_id,r.origin_area,r.departure_at,r.status ride_status,"
                 + " r.trip_status,r.type FROM ride_match m JOIN ride r ON r.id=m.ride_id"
-                + " WHERE m.id=?" + suffix,
+                + " WHERE m.id=?"
+                + suffix,
             id);
     if (!actor.id().equals(m.get("driverId")) && !actor.id().equals(m.get("passengerId")))
       throw ApiException.forbidden();
@@ -776,8 +869,7 @@ public class RideMobilityService {
         m.get("driverId"),
         m.get("passengerId"),
         m.get("passengerId"),
-        m.get("driverId")))
-      throw ApiException.forbidden();
+        m.get("driverId"))) throw ApiException.forbidden();
     return m;
   }
 
@@ -789,7 +881,8 @@ public class RideMobilityService {
   private boolean canDrive(UUID actor, UUID rideId, Map<String, Object> ride) {
     if ("OFFER".equals(ride.get("type")) && actor.equals(ride.get("ownerId"))) return true;
     return db.exists(
-        "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND driver_id=? AND status='ACCEPTED')",
+        "SELECT EXISTS(SELECT 1 FROM ride_match WHERE ride_id=? AND driver_id=? AND"
+            + " status='ACCEPTED')",
         rideId,
         actor);
   }
@@ -841,8 +934,7 @@ public class RideMobilityService {
   private void changedMatch(Map<String, Object> match) {
     events.publishEvent(
         new RideChanged(
-            Set.of((UUID) match.get("driverId"), (UUID) match.get("passengerId")),
-            false));
+            Set.of((UUID) match.get("driverId"), (UUID) match.get("passengerId")), false));
   }
 
   private void changedRide(UUID ride, boolean publicListing) {
@@ -856,7 +948,7 @@ public class RideMobilityService {
   }
 
   private static String boardingCode() {
-    return String.format(Locale.ROOT, "%04d", java.util.concurrent.ThreadLocalRandom.current().nextInt(10000));
+    return String.format(Locale.ROOT, "%04d", new java.security.SecureRandom().nextInt(10000));
   }
 
   private static String maskPlate(String value) {
@@ -870,7 +962,8 @@ public class RideMobilityService {
 
   private static String cleanRequired(String value, int max) {
     String cleaned = clean(value, max);
-    if (cleaned == null || cleaned.isBlank()) throw ApiException.invalid("Preencha todos os campos obrigatórios.");
+    if (cleaned == null || cleaned.isBlank())
+      throw ApiException.invalid("Preencha todos os campos obrigatórios.");
     return cleaned;
   }
 
