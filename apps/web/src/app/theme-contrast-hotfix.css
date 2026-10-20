@@ -1,0 +1,69 @@
+/* Regression fix: theme controls are not primary action buttons.
+   Prevent global dark button ink from making menu labels and icons invisible. */
+html .theme-picker-panel,
+html[data-theme="dark"] .theme-picker-panel {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+html .theme-picker-panel button[role="menuitemradio"],
+html[data-theme="dark"] .theme-picker-panel button[role="menuitemradio"] {
+  background: transparent !important;
+  color: var(--ink) !important;
+  border-color: transparent !important;
+}
+html .theme-picker-panel button[role="menuitemradio"]:is(:hover, :focus-visible, [aria-checked="true"]),
+html[data-theme="dark"] .theme-picker-panel button[role="menuitemradio"]:is(:hover, :focus-visible, [aria-checked="true"]) {
+  background: var(--surface-hover) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
+}
+html .theme-picker-panel button[role="menuitemradio"] > span:nth-child(2),
+html .theme-picker-panel button[role="menuitemradio"] > span:nth-child(2) :is(strong, small),
+html .theme-picker-panel button[role="menuitemradio"] > svg {
+  color: inherit !important;
+}
+html .theme-picker-panel .theme-picker-scene-light,
+html .theme-picker-panel .theme-picker-scene-light > svg { color: #845500 !important; }
+html .theme-picker-panel .theme-picker-scene-dark,
+html .theme-picker-panel .theme-picker-scene-dark > svg { color: #e3e8ff !important; }
+html .theme-picker-panel .theme-picker-scene-system,
+html .theme-picker-panel .theme-picker-scene-system > svg { color: #145a42 !important; }
+html .theme-picker-panel button[role="menuitemradio"][aria-checked="true"] > svg {
+  flex-shrink: 0;
+  color: var(--ink) !important;
+}
+html .theme-picker-panel header :is(strong, small) { color: var(--ink) !important; }
+
+/* User-configured profile hues remain untouched. Only the text and neutral
+   panels follow the contrast chosen for those exact colors. */
+html .profile-shared-surface .profile-copy-content,
+html .profile-shared-surface .profile-copy-content :is(p, strong, a, small),
+html .profile-shared-surface .profile-public-primary .profile-status {
+  color: var(--profile-copy) !important;
+}
+html .profile-shared-surface .profile-public-primary .profile-status {
+  background: var(--profile-copy-panel) !important;
+  border-color: currentColor;
+}
+html .profile-shared-surface .profile-public-primary .profile-main-meta,
+html .profile-shared-surface .profile-public-primary .profile-main-meta :is(strong, small, svg) {
+  color: var(--profile-copy) !important;
+}
+html .profile-shared-surface .profile-preview-mural,
+html .profile-shared-surface .profile-preview-mural > .profile-mural-title,
+html .profile-shared-surface .profile-community {
+  color: var(--mural-copy, var(--ink)) !important;
+}
+html .profile-shared-surface .profile-community-tabs button,
+html[data-theme="dark"] .profile-shared-surface .profile-community-tabs button {
+  color: inherit !important;
+  background: transparent !important;
+}
+html .profile-shared-surface .profile-community-tabs button[aria-selected="true"] {
+  opacity: 1;
+  border-bottom-color: currentColor !important;
+}
+html .profile-shared-surface .profile-community-panel .profile-edit-link {
+  color: inherit !important;
+}
