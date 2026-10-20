@@ -30,6 +30,12 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await expect(page.getByRole("menu", { name: "Escolher tema" })).toBeVisible();
   await page.getByRole("menuitemradio", { name: /Escuro/ }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
+  const editCard = page.getByRole("button", { name: /^Sobre você/ });
+    await expect(editCard).toHaveCSS("background-color", "rgb(22, 30, 33)");
+    await expect(editCard).toHaveCSS("color", "rgb(242, 246, 244)");
+    await expect(editCard.locator(".profile-edit-thumbnail svg")).toHaveCSS("color", "rgb(242, 246, 244)");
+    await expect(editCard.locator("small")).toHaveCSS("opacity", "1");
+
   await theme.click();
   const darkMenu = page.getByRole("menu", { name: "Escolher tema" });
   const selectedDark = darkMenu.getByRole("menuitemradio", { name: /Escuro/ });
@@ -63,6 +69,10 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("/profile");
+  const lightCard = page.getByRole("button", { name: /^Sobre você/ });
+  await expect(lightCard).toHaveCSS("background-color", "rgb(255, 255, 255)");
+  await expect(lightCard).toHaveCSS("color", "rgb(23, 63, 54)");
+  await expect(lightCard.locator(".profile-edit-thumbnail svg")).toHaveCSS("color", "rgb(23, 63, 54)");
   await page.getByRole("button", { name: /^Estilo do nome/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(
