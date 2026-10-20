@@ -362,6 +362,22 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect(
     page.locator(".user-profile-popover .profile-preview-identity > .profile-dialog-actions"),
   ).toHaveCount(0);
+
+  // Check computed styles after the dark-theme CSS cascade, not just classes.
+  const oldTheme = await page.locator("html").getAttribute("data-theme");
+  await page.locator("html").evaluate((node) => {
+    node.setAttribute("data-theme", "dark");
+  });
+  const profileAction = page.locator(
+    ".user-profile-popover .public-profile-body > .profile-dialog-actions > .button:not(.secondary)",
+  );
+  await expect(profileAction).toHaveCSS("background-color", "rgb(217, 245, 109)");
+  await expect(profileAction).toHaveCSS("color", "rgb(16, 42, 36)");
+  await expect(profileAction).toHaveCSS("text-decoration-line", "none");
+  await page.locator("html").evaluate((node, theme) => {
+    if (theme === null) node.removeAttribute("data-theme");
+    else node.setAttribute("data-theme", theme);
+  }, oldTheme);
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
   await page

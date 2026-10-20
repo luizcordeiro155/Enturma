@@ -182,3 +182,18 @@ html .profile-shared-surface .profile-preview-identity .public-profile-body > .p
     flex: 1 0 auto;
   }
 }
+
+/* Readable primary actions on both app themes. The profile's gradient is
+   independent from the Enturma action palette: use the correct dark ink over
+   the lime action surface rather than inheriting white profile copy text.
+   Restrict this to the public profile card so secondary buttons and links
+   elsewhere retain their own semantic colors. */
+html .profile-shared-surface .public-profile-body > .profile-dialog-actions > :is(.button:not(.secondary), button:not(.secondary)) {
+  background: var(--room-accent, #d9f56d) !important;
+  color: var(--room-accent-ink, #163d35) !important;
+  border-color: var(--room-accent, #d9f56d) !important;
+  text-decoration: none !important;
+}
+html .profile-shared-surface .public-profile-body > .profile-dialog-actions > :is(.button:not(.secondary), button:not(.secondary)) :is(span, strong, svg) {
+  color: inherit !important;
+}
