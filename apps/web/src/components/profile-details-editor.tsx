@@ -50,6 +50,21 @@ export function ProfileDetailsEditor({
   const [busy, setBusy] = useState(false);
   const [previewTab, setPreviewTab] = useState<"PROFILE" | "MURAL">("PROFILE");
   const [editorView, setEditorView] = useState<"EDIT" | "PREVIEW">("EDIT");
+  const editorScroller = useRef<HTMLDivElement>(null);
+
+  function changeMobileView(view: "EDIT" | "PREVIEW") {
+    setEditorView(view);
+    // Both screens share the same scroller on mobile. Reusing its scroll
+    // position opens the other screen halfway through the content.
+    if (window.matchMedia("(max-width: 760px)").matches && editorScroller.current)
+      editorScroller.current.scrollTop = 0;
+  }
+
+  function changePreviewTab(tab: "PROFILE" | "MURAL") {
+    setPreviewTab(tab);
+    if (window.matchMedia("(max-width: 760px)").matches && editorScroller.current)
+      editorScroller.current.scrollTop = 0;
+  }
   const [mediaVersion, setMediaVersion] = useState(0);
   const [uploadedMedia, setUploadedMedia] = useState<
     "avatar" | "banner" | null
@@ -212,7 +227,7 @@ export function ProfileDetailsEditor({
         onInvalidCapture={(event) => {
           if (editorView !== "PREVIEW") return;
           event.preventDefault();
-          setEditorView("EDIT");
+          changeMobileView("EDIT");
           const field = event.target as HTMLInputElement;
           requestAnimationFrame(() => field.reportValidity());
         }}
@@ -250,14 +265,14 @@ export function ProfileDetailsEditor({
           <button
             type="button"
             aria-pressed={editorView === "EDIT"}
-            onClick={() => setEditorView("EDIT")}
+            onClick={() => changeMobileView("EDIT")}
           >
             Editar
           </button>
           <button
             type="button"
             aria-pressed={editorView === "PREVIEW"}
-            onClick={() => setEditorView("PREVIEW")}
+            onClick={() => changeMobileView("PREVIEW")}
           >
             Ver prévia
           </button>
@@ -269,7 +284,7 @@ export function ProfileDetailsEditor({
           </p>
         ) : null}
 
-        <div className="profile-editor-scroll">
+        <div className="profile-editor-scroll" ref={editorScroller} tabIndex={0}>
           <section
             className="profile-preview-stage"
             aria-label="Prévia do perfil"
@@ -279,14 +294,14 @@ export function ProfileDetailsEditor({
               <button
                 type="button"
                 aria-pressed={previewTab === "PROFILE"}
-                onClick={() => setPreviewTab("PROFILE")}
+                onClick={() => changePreviewTab("PROFILE")}
               >
                 Perfil
               </button>
               <button
                 type="button"
                 aria-pressed={previewTab === "MURAL"}
-                onClick={() => setPreviewTab("MURAL")}
+                onClick={() => changePreviewTab("MURAL")}
               >
                 Mural
               </button>
