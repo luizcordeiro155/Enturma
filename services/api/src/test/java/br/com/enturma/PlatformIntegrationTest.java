@@ -73,6 +73,134 @@ class PlatformIntegrationTest {
   }
 
   @Autowired br.com.enturma.ai.NotebookService notebooks;
+  @Autowired br.com.enturma.ai.NotebookMediaController notebookMedia;
+
+  @Test
+  void notebookConversationKeepsOrderResearchCitationsAndPrivateArtwork() throws Exception {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(aiProvider.webSearchEnabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(true)))
+        .thenReturn(
+            new br.com.enturma.ai.AiProvider.Answer(
+                "A consistência preserva invariantes [1].",
+                List.of(
+                    new br.com.enturma.ai.AiProvider.ExternalSource(
+                        "Documentação PostgreSQL",
+                        "https://www.postgresql.org/docs/current/tutorial-transactions.html",
+                        0,
+                        10))));
+    UUID notebook = (UUID) ((Map<?, ?>) notebooks.create(host, "Conversa particular")).get("id");
+    UUID source =
+        (UUID)
+            ((Map<?, ?>)
+                    notebooks.add(
+                        host,
+                        notebook,
+                        "Banco de dados",
+                        "TEXT",
+                        "Uma transação agrupa operações relacionadas e preserva a consistência do"
+                            + " banco de dados.",
+                        null,
+                        null))
+                .get("id");
+    UUID first = UUID.randomUUID(), second = UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO"
+            + " notebook_generation(id,notebook_id,question,mode,level,context,citations,answer,status,created_at)"
+            + " VALUES (?,?,'Primeira pergunta','QUESTION','BEGINNER','','[]','Primeira"
+            + " resposta','READY',now()-interval '2 minutes'), (?,?,'Segunda"
+            + " pergunta','QUESTION','BEGINNER','','[]','Segunda resposta','READY',now()-interval"
+            + " '1 minute')",
+        first,
+        notebook,
+        second,
+        notebook);
+    UUID turn = UUID.randomUUID();
+    notebooks.generate(
+        host,
+        notebook,
+        turn,
+        "Continue o segundo exemplo",
+        "QUESTION",
+        "BEGINNER",
+        List.of(source),
+        true);
+    notebooks.generate(
+        host,
+        notebook,
+        turn,
+        "Continue o segundo exemplo",
+        "QUESTION",
+        "BEGINNER",
+        List.of(source),
+        true);
+    String context =
+        (String) db.one("SELECT context FROM notebook_generation WHERE id=?", turn).get("context");
+    assertThat(context.indexOf("Primeira pergunta"))
+        .isLessThan(context.indexOf("Segunda pergunta"));
+    assertThat(context).contains("Primeira resposta", "Segunda resposta", "consistência");
+    org.awaitility.Awaitility.await()
+        .atMost(Duration.ofSeconds(15))
+        .until(
+            () ->
+                "READY"
+                    .equals(
+                        db.one("SELECT status FROM notebook_generation WHERE id=?", turn)
+                            .get("status")));
+    assertThat(
+            db.one("SELECT external_sources FROM notebook_generation WHERE id=?", turn)
+                .get("externalSources")
+                .toString())
+        .contains("postgresql.org");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM notebook_generation WHERE id=?", Integer.class, turn))
+        .isEqualTo(1);
+    var png =
+        new org.springframework.mock.web.MockMultipartFile(
+            "file",
+            "cover.png",
+            "image/png",
+            new byte[] {(byte) 137, 80, 78, 71, 13, 10, 26, 10, 0, 0, 0, 0});
+    notebookMedia.upload(host, notebook, "banner", png);
+    assertThat(notebookMedia.read(host, notebook, "banner").getBody()).isEqualTo(png.getBytes());
+    assertThatThrownBy(() -> notebookMedia.read(outsider, notebook, "banner"))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> notebookMedia.upload(outsider, notebook, "avatar", png))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                notebookMedia.upload(
+                    host,
+                    notebook,
+                    "banner",
+                    new org.springframework.mock.web.MockMultipartFile(
+                        "file", "bad.png", "image/png", "not an image at all".getBytes())))
+        .isInstanceOf(ApiException.class);
+    notebookMedia.remove(host, notebook, "banner");
+    assertThatThrownBy(() -> notebookMedia.read(host, notebook, "banner"))
+        .isInstanceOf(ApiException.class);
+    org.mockito.Mockito.when(aiProvider.webSearchEnabled()).thenReturn(false);
+    assertThatThrownBy(
+            () ->
+                notebooks.generate(
+                    host,
+                    notebook,
+                    UUID.randomUUID(),
+                    "Pesquise",
+                    "QUESTION",
+                    "BEGINNER",
+                    List.of(source),
+                    true))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("indisponível");
+  }
+
   @Autowired br.com.enturma.learning.DailyMissionsController missions;
 
   @Test
@@ -2328,6 +2456,39 @@ class PlatformIntegrationTest {
     db.jdbc.update(
         "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", member.id(), host.id());
     assertThatThrownBy(() -> showcase.get(member, host.id())).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void portfolioWidgetOnlyLinksPublishedPortfolioAndRespectsWidgetPrivacy() {
+    db.jdbc.update(
+        "INSERT INTO portfolio_profile(user_id,public,headline) VALUES (?,false,'Trabalhos"
+            + " acadêmicos') ON CONFLICT(user_id) DO UPDATE SET"
+            + " public=false,headline=EXCLUDED.headline",
+        host.id());
+    db.jdbc.update(
+        "INSERT INTO profile_widget(id,user_id,kind,position,visible,favorite) VALUES"
+            + " (?,?,'PORTFOLIO',0,true,false)",
+        UUID.randomUUID(),
+        host.id());
+    db.jdbc.update(
+        "INSERT INTO profile_privacy_setting(user_id,field,visible) VALUES (?,'WIDGETS',true) ON"
+            + " CONFLICT(user_id,field) DO UPDATE SET visible=true",
+        host.id());
+    var privateResult = (Map<String, Object>) showcase.get(member, host.id());
+    var privateWidgets = (List<Map<String, Object>>) privateResult.get("widgets");
+    assertThat((List<?>) privateWidgets.getFirst().get("content")).isEmpty();
+    db.jdbc.update("UPDATE portfolio_profile SET public=true WHERE user_id=?", host.id());
+    var publicResult = (Map<String, Object>) showcase.get(member, host.id());
+    var widgets = (List<Map<String, Object>>) publicResult.get("widgets");
+    var links = (List<Map<String, Object>>) widgets.getFirst().get("content");
+    assertThat(links).hasSize(1);
+    assertThat(links.getFirst())
+        .containsEntry("title", "Trabalhos acadêmicos")
+        .containsKey("username");
+    db.jdbc.update(
+        "UPDATE profile_privacy_setting SET visible=false WHERE user_id=? AND field='WIDGETS'",
+        host.id());
+    assertThat((List<?>) ((Map<?, ?>) showcase.get(member, host.id())).get("widgets")).isEmpty();
   }
 
   @Test

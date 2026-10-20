@@ -42,15 +42,21 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     await page.request.get(`/api/backend/notebooks/${url.split("/").at(-1)}`)
   ).json();
   if (notebookState.aiEnabled) {
+    await page
+      .getByLabel("Mensagem para o Enturma APP")
+      .fill("Explique algoritmos e suas etapas");
+    await page
+      .getByRole("button", { name: "Enviar mensagem", exact: true })
+      .click();
     await expect(
-      page.getByRole("button", { name: "Baixar material de estudo" }),
+      page.getByRole("button", { name: "Baixar material de estudo" }).last(),
     ).toBeVisible({ timeout: 30000 });
     await page.locator(".citation").first().click();
     await expect(page.getByRole("dialog")).toContainText("sequência finita");
     await page.keyboard.press("Escape");
   } else {
     await expect(
-      page.getByRole("button", { name: "Perguntar", exact: true }),
+      page.getByRole("button", { name: "Enviar mensagem", exact: true }),
     ).toBeDisabled();
   }
   await page.getByRole("button", { name: "Arquivo", exact: true }).click();
@@ -92,16 +98,18 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     ).toBeVisible();
   }
   await page
-    .getByLabel("Pergunte sobre suas fontes")
+    .getByLabel("Mensagem para o Enturma APP")
     .fill("Como aplicar algoritmos na matemática?");
   if (notebookState.aiEnabled) {
-    await page.getByRole("button", { name: "Perguntar", exact: true }).click();
+    await page
+      .getByRole("button", { name: "Enviar mensagem", exact: true })
+      .click();
     await expect(
-      page.getByRole("button", { name: "Baixar material de estudo" }),
+      page.getByRole("button", { name: "Baixar material de estudo" }).last(),
     ).toBeVisible({ timeout: 30000 });
   } else {
     await expect(
-      page.getByRole("button", { name: "Perguntar", exact: true }),
+      page.getByRole("button", { name: "Enviar mensagem", exact: true }),
     ).toBeDisabled();
   }
   await page.getByRole("button", { name: "Link", exact: true }).click();

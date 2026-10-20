@@ -64,7 +64,7 @@ export default defineConfig({
     {
       name: "chromium-experience",
       testMatch:
-        /(?:connected-experience|profile-v3|responsive-shell|study-journey)\.spec\.ts/,
+        /(?:mobile-study-polish|connected-experience|profile-v3|responsive-shell|study-journey)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },

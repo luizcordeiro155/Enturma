@@ -8,6 +8,7 @@ import { useRideUpdates } from "@/lib/use-ride-updates";
 import type { Match } from "@/lib/ride-types";
 import { NotificationsProvider } from "./notifications";
 import { RideMatchCelebration } from "./ride-match-celebration";
+import { RideReviewDialog, type CompletedRide } from "./ride-review-dialog";
 
 type Search = {
   id: string;
@@ -19,6 +20,7 @@ type Search = {
 };
 
 type MobilityActivityState = {
+  recentCompleted?: CompletedRide | null;
   driverAvailability?: {
     userId?: string;
     enabled: boolean;
@@ -65,10 +67,13 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
     seen: string[];
   }>({ mobility: {}, matches: [], me: "", seen: [] });
   const [minimized, setMinimized] = useState(false);
+  const [dismissedReviews, setDismissedReviews] = useState<string[]>([]);
   const [now, setNow] = useState(() => Date.now());
   const live = useRideUpdates(async () => {
     const [mobility, matches, me] = await Promise.all([
-      api<MobilityActivityState>("/rides/mobility/state", { cache: "no-store" }),
+      api<MobilityActivityState>("/rides/mobility/state", {
+        cache: "no-store",
+      }),
       api<Match[]>("/matches", { cache: "no-store" }),
       api<{ id: string }>("/users/me", { cache: "no-store" }),
     ]);
@@ -144,9 +149,12 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
     (m) =>
       m.status === "ACCEPTED" &&
       m.rideStatus === "OPEN" &&
-      ["DRIVER_ON_THE_WAY", "ARRIVING", "WAITING_PASSENGER", "IN_PROGRESS"].includes(
-        m.tripStatus,
-      ) &&
+      [
+        "DRIVER_ON_THE_WAY",
+        "ARRIVING",
+        "WAITING_PASSENGER",
+        "IN_PROGRESS",
+      ].includes(m.tripStatus) &&
       Date.parse(m.departureAt) > now - 24 * 60 * 60 * 1000 &&
       !m.closedAt &&
       !m.deletedAt &&
@@ -166,6 +174,29 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
   return (
     <SearchContext.Provider value={{ searches, live }}>
       <NotificationsProvider>{children}</NotificationsProvider>
+      {data.mobility.recentCompleted &&
+        !data.mobility.recentCompleted.reviewed &&
+        !dismissedReviews.includes(data.mobility.recentCompleted.id) && (
+          <RideReviewDialog
+            key={data.mobility.recentCompleted.id}
+            ride={data.mobility.recentCompleted}
+            me={data.me}
+            onClose={() =>
+              setDismissedReviews((ids) => [
+                ...ids,
+                data.mobility.recentCompleted!.id,
+              ])
+            }
+            onDone={() => {
+              setData((current) => ({
+                ...current,
+                mobility: { ...current.mobility, recentCompleted: null },
+              }));
+              router.replace("/caronas");
+              window.dispatchEvent(new Event("enturma-ride-reviewed"));
+            }}
+          />
+        )}
       {primary && !path.startsWith("/caronas") ? (
         <aside
           className={`ride-search-dock ${minimized ? "is-minimized" : ""}`}

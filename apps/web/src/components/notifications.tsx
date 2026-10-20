@@ -11,6 +11,7 @@ import {
   AtSign,
   Trash2,
 } from "lucide-react";
+import { isMobileApp } from "./desktop-updates";
 import { api, post } from "@/lib/api";
 import { playMotion } from "@/lib/motion";
 import { useAppConnection, useLiveRefresh } from "@/lib/live-updates";
@@ -29,6 +30,7 @@ type Notice = {
 type Inbox = { items: Notice[]; unreadCount: number };
 type DesktopPushNotice = {
   sequence: number;
+  notificationId: string;
   title: string;
   message: string;
   href: string | null;
@@ -48,7 +50,7 @@ type State = Inbox & {
 };
 const Context = createContext<State | undefined>(undefined);
 function activeContexts() {
-  return document.hidden
+  return document.hidden || !document.hasFocus()
     ? []
     : [...document.querySelectorAll<HTMLElement>("[data-notification-context]")]
         .filter((e) => e.getClientRects().length > 0)
@@ -81,7 +83,14 @@ export function NotificationsProvider({
   useAppConnection();
 
   useEffect(() => {
-    if (!window.enturmaDesktop?.showNotification) return;
+    const desktop = !!window.enturmaDesktop?.showNotification;
+    if (
+      !desktop &&
+      (isMobileApp() ||
+        !("Notification" in window) ||
+        !("serviceWorker" in navigator))
+    )
+      return;
 
     let active = true;
     let cursor: number | null = null;
@@ -105,6 +114,24 @@ export function NotificationsProvider({
 
         if (cursor != null) {
           for (const notice of batch.items) {
+            if (!desktop) {
+              if (Notification.permission === "granted") {
+                const registration =
+                  await navigator.serviceWorker.getRegistration();
+                if (!active) return;
+                registration?.active?.postMessage({
+                  type: "ENTURMA_SHOW_NOTIFICATION",
+                  data: {
+                    id: notice.notificationId,
+                    title: notice.title,
+                    body: notice.message,
+                    href: notice.href,
+                    kind: notice.kind,
+                  },
+                });
+              }
+              continue;
+            }
             void window.enturmaDesktop
               ?.showNotification?.({
                 id: `desktop-push-${notice.sequence}`,

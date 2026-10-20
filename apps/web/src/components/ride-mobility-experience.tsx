@@ -653,6 +653,20 @@ export function RideMobilityExperience() {
     pref?.campusAddress ||
     pref?.campusName ||
     "Campus";
+  useEffect(() => {
+    const reviewed = () => {
+      setState((previous) =>
+        previous ? { ...previous, recentCompleted: null } : previous,
+      );
+      setSelected(undefined);
+      setRoute(undefined);
+      setReviewRating(0);
+      setReviewTags([]);
+      void load().catch(() => {});
+    };
+    window.addEventListener("enturma-ride-reviewed", reviewed);
+    return () => window.removeEventListener("enturma-ride-reviewed", reviewed);
+  }, [load]);
   const activeMatch = state?.activeMatch ?? undefined;
   const activeRequest = state?.activeRequest ?? undefined;
   const availability = state?.driverAvailability ?? undefined;
@@ -1032,6 +1046,7 @@ export function RideMobilityExperience() {
       setReviewTags([]);
       setReviewRating(0);
       await load();
+      window.dispatchEvent(new Event("enturma-ride-reviewed"));
     } catch (e) {
       setError((e as Error).message);
     } finally {

@@ -89,8 +89,7 @@ public class NotificationService {
             href,
             message == null ? "Você tem uma nova notificação." : message,
             dedupe);
-        events.publishEvent(
-            new PushRequested(user, actor, category, kind, target, href, message));
+        events.publishEvent(new PushRequested(user, actor, category, kind, target, href, message));
       }
     }
 
@@ -99,9 +98,9 @@ public class NotificationService {
           db.jdbc.update(
               "INSERT INTO"
                   + " notification(id,user_id,actor_id,kind,context_key,target_id,href,message,dedupe_key)"
-                  + " SELECT ?,u.id,?,?,?,?,?,?,? FROM app_user u WHERE u.id=? AND u.status='ACTIVE'"
-                  + " AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
-                  + " b.blocked_id=?) OR (b.user_id=? AND b.blocked_id=?)) ON"
+                  + " SELECT ?,u.id,?,?,?,?,?,?,? FROM app_user u WHERE u.id=? AND"
+                  + " u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b WHERE"
+                  + " (b.user_id=? AND b.blocked_id=?) OR (b.user_id=? AND b.blocked_id=?)) ON"
                   + " CONFLICT(user_id,dedupe_key) DO NOTHING",
               UUID.randomUUID(),
               actor,
@@ -192,8 +191,11 @@ public class NotificationService {
     for (var row : rows) {
       long sequence = ((Number) row.get("sequence")).longValue();
       cursor = Math.max(cursor, sequence);
-      if (!NotificationDeliveryPolicy.current(db, (String) row.get("kind"), (UUID) row.get("targetId"))) continue;
+      if (!NotificationDeliveryPolicy.current(
+          db, (String) row.get("kind"), (UUID) row.get("targetId"))) continue;
+      if (!preferences.pushEnabled(a.id(), (String) row.get("category"))) continue;
       var item = new LinkedHashMap<String, Object>(row);
+      item.put("notificationId", a.id() + ":" + sequence);
       item.put(
           "title",
           NotificationPresentation.title(
@@ -204,9 +206,7 @@ public class NotificationService {
     return Map.of("items", items, "cursor", cursor);
   }
 
-  @org.springframework.scheduling.annotation.Scheduled(
-      fixedDelay = 21600000,
-      initialDelay = 120000)
+  @org.springframework.scheduling.annotation.Scheduled(fixedDelay = 21600000, initialDelay = 120000)
   public void cleanupDesktopPush() {
     db.jdbc.update(
         "DELETE FROM notification_desktop_push_event"

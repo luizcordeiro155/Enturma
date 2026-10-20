@@ -18,6 +18,7 @@ import {
 import { api, post, peekApiSnapshot } from "@/lib/api";
 import { prepareChatImage } from "@/lib/chat-image";
 import { Shell } from "./shell";
+import { NotebookArtwork, NotebookArtworkEditor } from "./notebook-artwork";
 import { Feedback } from "./feedback";
 import { resilientRead, refreshWhenOnline } from "@/lib/offline-data";
 type Source = {
@@ -46,12 +47,22 @@ type Generation = {
   error?: string;
   citations: Citation[];
   createdAt: string;
+  externalSources?: { title: string; url: string }[];
 };
 type Notebook = {
-  notebook: { id: string; title: string };
+  notebook: NotebookIdentity;
+  webSearchEnabled: boolean;
   aiEnabled: boolean;
   sources: Source[];
   generations: Generation[];
+};
+type NotebookIdentity = {
+  id: string;
+  title: string;
+  hasAvatar?: boolean;
+  hasBanner?: boolean;
+  mediaVersion?: number;
+  updatedAt?: string;
 };
 const modes = [
   {
@@ -88,12 +99,10 @@ const modes = [
 export function StudyNotebooks({ id }: { id?: string }) {
   useStudyActivity("NOTEBOOK", Boolean(id));
   const router = useRouter();
-  const [items, setItems] = useState<
-    { id: string; title: string; updatedAt: string }[]
-  >(
+  const [items, setItems] = useState<NotebookIdentity[]>(
     () =>
       peekApiSnapshot<{
-        items: { id: string; title: string; updatedAt: string }[];
+        items: NotebookIdentity[];
       }>("/notebooks")?.items ?? [],
   );
   const [data, setData] = useState<Notebook | undefined>(() =>
@@ -111,12 +120,21 @@ export function StudyNotebooks({ id }: { id?: string }) {
   const [sourceTitle, setSourceTitle] = useState("");
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
+  const [webSearch, setWebSearch] = useState(false);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
   const [question, setQuestion] = useState("");
   const [level, setLevel] = useState("BEGINNER");
   const [excluded, setExcluded] = useState<string[]>([]);
   const [preview, setPreview] = useState<{ title: string; content: string }>();
   const [remove, setRemove] = useState<string>();
   const [activeGeneration, setActiveGeneration] = useState<string>();
+  const conversation = useRef<HTMLDivElement>(null);
+  const followConversation = useRef(true);
+  const lastResponse = data?.generations.at(-1);
+  useEffect(() => {
+    if (followConversation.current && conversation.current)
+      conversation.current.scrollTop = conversation.current.scrollHeight;
+  }, [lastResponse?.id, lastResponse?.status]);
   useEffect(() => {
     const restore = () => {
       const match = location.hash.match(/^#generation-([a-f0-9-]+)$/i);
@@ -130,7 +148,6 @@ export function StudyNotebooks({ id }: { id?: string }) {
     if (activeGeneration)
       history.replaceState(null, "", `#generation-${activeGeneration}`);
   }, [activeGeneration]);
-  const autoRunning = useRef(false);
   const load = useCallback(async () => {
     if (id) {
       const cached = await resilientRead("notebook:" + id, () =>
@@ -156,7 +173,11 @@ export function StudyNotebooks({ id }: { id?: string }) {
         });
     };
     refresh();
-    const timer = id ? setInterval(refresh, 3000) : undefined;
+    const timer = id
+      ? setInterval(() => {
+          if (!document.hidden) refresh();
+        }, 5000)
+      : undefined;
     return () => {
       active = false;
       clearInterval(timer);
@@ -167,37 +188,6 @@ export function StudyNotebooks({ id }: { id?: string }) {
     data?.sources
       .filter((s) => s.status === "READY" && !excluded.includes(s.id))
       .slice(0, 10) ?? [];
-  useEffect(() => {
-    if (
-      autoRunning.current ||
-      !data ||
-      !id ||
-      !data.aiEnabled ||
-      data.generations.length > 0 ||
-      data.sources.some((source) =>
-        ["PENDING", "PROCESSING"].includes(source.status),
-      )
-    )
-      return;
-    const ready = data.sources.filter((s) => s.status === "READY").slice(0, 10);
-    if (!ready.length) return;
-    autoRunning.current = true;
-    post<{ id: string }>(`/notebooks/${id}/generations`, {
-      id: crypto.randomUUID(),
-      question: "Explique o conteúdo das fontes e como estudar este assunto.",
-      mode: "LESSON",
-      level: "BEGINNER",
-      sourceIds: ready.map((s) => s.id),
-    })
-      .then((r) => {
-        setActiveGeneration(r.id);
-        return load();
-      })
-      .catch((e) => setError(e.message))
-      .finally(() => {
-        autoRunning.current = false;
-      });
-  }, [data, id, load]);
   async function persistFlashcards() {
     if (!id) return;
     setBusy(true);
@@ -231,8 +221,10 @@ export function StudyNotebooks({ id }: { id?: string }) {
         mode,
         level,
         sourceIds: selected.map((s) => s.id),
+        webSearch: webSearch && data?.webSearchEnabled,
       });
       setActiveGeneration(r.id);
+      followConversation.current = true;
       await load();
       setQuestion("");
     } catch (e) {
@@ -293,9 +285,11 @@ export function StudyNotebooks({ id }: { id?: string }) {
       setBusy(false);
     }
   }
-  const current =
-    data?.generations.find((g) => g.id === activeGeneration) ??
-    data?.generations.at(-1);
+  const pending = data?.generations.some((g) =>
+    ["PENDING", "PROCESSING"].includes(g.status),
+  );
+  const canSend =
+    !busy && !pending && !offline && !!data?.aiEnabled && selected.length > 0;
   function download(g: Generation) {
     const blob = new Blob(
       [
@@ -312,7 +306,7 @@ export function StudyNotebooks({ id }: { id?: string }) {
   }
   return (
     <Shell>
-      <div className="notebooks-page">
+      <div className={`notebooks-page ${id ? "notebook-detail" : ""}`}>
         <header className="notebooks-heading">
           <div>
             <span className="eyebrow">Enturma AI · seu espaço de estudo</span>
@@ -394,11 +388,11 @@ export function StudyNotebooks({ id }: { id?: string }) {
                     href={`/notebooks/${n.id}`}
                     className="notebook-cover"
                   >
-                    <BookOpen />
+                    <NotebookArtwork notebook={n} />
                     <h2>{n.title}</h2>
                     <span>
                       Atualizado em{" "}
-                      {new Date(n.updatedAt).toLocaleDateString("pt-BR")}
+                      {new Date(n.updatedAt ?? "").toLocaleDateString("pt-BR")}
                     </span>
                   </Link>
                 ))}
@@ -408,8 +402,8 @@ export function StudyNotebooks({ id }: { id?: string }) {
                 <Sparkles />
                 <h2>Comece pelo que você quer aprender.</h2>
                 <p>
-                  Crie um caderno, adicione sua primeira fonte e receba uma aula
-                  explicativa. Tudo fica salvo para revisar depois.
+                  Crie um caderno, adicione sua primeira fonte e converse com o
+                  Enturma APP. Tudo fica salvo para revisar depois.
                 </p>
               </div>
             ) : null}
@@ -418,7 +412,15 @@ export function StudyNotebooks({ id }: { id?: string }) {
           <p role="status">Abrindo caderno…</p>
         ) : (
           <>
+            <NotebookArtwork notebook={data.notebook} />
             <div className="notebook-toolbar">
+              <button
+                className="secondary notebook-sources-toggle"
+                onClick={() => setSourcesOpen((open) => !open)}
+                aria-expanded={sourcesOpen}
+              >
+                Fontes · {data.sources.length}
+              </button>
               <label>
                 Nível de explicação
                 <select
@@ -456,6 +458,11 @@ export function StudyNotebooks({ id }: { id?: string }) {
                   />
                   <button>Salvar nome</button>
                 </form>
+                <NotebookArtworkEditor
+                  notebook={data.notebook}
+                  onChanged={load}
+                  onError={setError}
+                />
                 <button
                   className="secondary"
                   onClick={() => setRemove("notebook")}
@@ -470,7 +477,10 @@ export function StudyNotebooks({ id }: { id?: string }) {
                 links e textos enquanto isso.
               </p>
             ) : null}
-            <div className="notebook-workspace">
+            <div
+              className="notebook-workspace notebook-chat-workspace"
+              data-sources-open={sourcesOpen}
+            >
               <aside className="notebook-sources">
                 <h2>
                   Suas fontes <small>{data.sources.length}/20</small>
@@ -631,80 +641,231 @@ export function StudyNotebooks({ id }: { id?: string }) {
                 <div className="studio-heading">
                   <Sparkles />
                   <div>
-                    <h2>Estúdio de aprendizagem</h2>
+                    <h2>
+                      Enturma APP <small>Seu parceiro de estudo</small>
+                    </h2>
                     <p>
-                      {selected.length} fontes selecionadas · escolha como
-                      estudar
+                      {selected.length} fontes selecionadas · conversa privada e
+                      salva
                     </p>
                   </div>
                 </div>
-                <div className="notebook-smart-actions">
-                  <button
-                    className="secondary"
-                    disabled={busy || !data.aiEnabled || !selected.length}
-                    onClick={() => void persistFlashcards()}
-                  >
-                    <Sparkles size={16} /> Criar flashcards de revisão espaçada
-                  </button>
-                </div>
-                <div className="study-modes">
-                  {modes.map((m) => (
+                <details className="notebook-study-tools">
+                  <summary>Ferramentas de estudo</summary>
+                  <div className="notebook-smart-actions">
                     <button
-                      key={m.id}
                       className="secondary"
-                      disabled={busy || !data.aiEnabled || !selected.length}
-                      onClick={() => void generate(m.id)}
+                      disabled={!canSend}
+                      onClick={() => void persistFlashcards()}
                     >
-                      <strong>{m.title}</strong>
-                      <small>{m.description}</small>
+                      <Sparkles size={16} /> Criar flashcards de revisão
+                      espaçada
                     </button>
+                  </div>
+                  <div className="study-modes">
+                    {modes.map((m) => (
+                      <button
+                        key={m.id}
+                        className="secondary"
+                        disabled={!canSend}
+                        onClick={() => void generate(m.id)}
+                      >
+                        <strong>{m.title}</strong>
+                        <small>{m.description}</small>
+                      </button>
+                    ))}
+                  </div>
+                  <section className="notebook-study-plan">
+                    <h3>Um plano que cabe na sua rotina</h3>
+                    <div>
+                      <label>
+                        Dias de estudo
+                        <input
+                          type="number"
+                          min={1}
+                          max={30}
+                          value={planDays}
+                          onChange={(e) =>
+                            setPlanDays(
+                              Math.max(1, Math.min(30, Number(e.target.value))),
+                            )
+                          }
+                        />
+                      </label>
+                      <label>
+                        Minutos por dia
+                        <input
+                          type="number"
+                          min={10}
+                          max={180}
+                          step={5}
+                          value={planMinutes}
+                          onChange={(e) =>
+                            setPlanMinutes(
+                              Math.max(
+                                10,
+                                Math.min(180, Number(e.target.value)),
+                              ),
+                            )
+                          }
+                        />
+                      </label>
+                    </div>
+                    <button
+                      type="button"
+                      disabled={!canSend}
+                      onClick={() => void generate("STUDY_PLAN")}
+                    >
+                      Criar meu plano de revisão
+                    </button>
+                    <small>
+                      Baseado nas {selected.length} fontes selecionadas. A IA
+                      prepara o plano; você escolhe quando estudar.
+                    </small>
+                  </section>
+                </details>
+                {data.generations.length ? (
+                  <p className="notebook-history-label">
+                    Conversa · {data.generations.length} respostas salvas
+                  </p>
+                ) : (
+                  <div className="notebook-empty">
+                    <BookOpen />
+                    <h3>Seu próximo aprendizado começa aqui.</h3>
+                    <p>
+                      Adicione suas fontes e me diga o que quer entender.
+                      Podemos explorar um conceito, resolver um exercício ou
+                      continuar de onde você parou.
+                    </p>
+                  </div>
+                )}
+                <div
+                  className="notebook-conversation"
+                  aria-label="Conversa com Enturma APP"
+                  ref={conversation}
+                  onScroll={(event) => {
+                    const node = event.currentTarget;
+                    followConversation.current =
+                      node.scrollHeight - node.scrollTop - node.clientHeight <
+                      80;
+                  }}
+                >
+                  {data.generations.map((current) => (
+                    <article
+                      key={current.id}
+                      className="study-generation notebook-chat-turn"
+                      id={`generation-${current.id}`}
+                    >
+                      <div className="notebook-user-message">
+                        <small>Você</small>
+                        <p>
+                          {current.question ||
+                            modes.find((m) => m.id === current.mode)?.title}
+                        </p>
+                      </div>
+                      <div className="notebook-assistant-message">
+                        <strong className="notebook-bot-label">
+                          <BookOpen size={18} /> Enturma APP
+                        </strong>
+                        {current.status === "READY" ? (
+                          <>
+                            <header>
+                              <h2>
+                                {modes.find((m) => m.id === current.mode)
+                                  ?.title ?? "Resposta"}
+                              </h2>
+                              <button
+                                className="secondary"
+                                aria-label="Baixar material de estudo"
+                                onClick={() => download(current)}
+                              >
+                                <Download size={17} />
+                              </button>
+                            </header>
+                            <StudyAnswer
+                              content={current.answer}
+                              onCitation={(n) => {
+                                const c = current.citations.find(
+                                  (c) => c.number === n,
+                                );
+                                if (c)
+                                  setPreview({
+                                    title: `[${n}] ${c.title}`,
+                                    content: c.excerpt,
+                                  });
+                              }}
+                            />
+                            <details className="generation-sources">
+                              <summary>
+                                Conferir fontes utilizadas (
+                                {current.citations.length})
+                              </summary>
+                              {current.citations.map((c) => (
+                                <button
+                                  className="secondary"
+                                  key={c.number}
+                                  onClick={() =>
+                                    setPreview({
+                                      title: `[${c.number}] ${c.title}`,
+                                      content: c.excerpt,
+                                    })
+                                  }
+                                >
+                                  [{c.number}] {c.title}
+                                </button>
+                              ))}
+                            </details>
+                            {current.externalSources?.length ? (
+                              <details className="generation-sources">
+                                <summary>
+                                  Pesquisa na web (
+                                  {current.externalSources.length})
+                                </summary>
+                                {current.externalSources
+                                  .filter((source) =>
+                                    /^https?:\/\//i.test(source.url),
+                                  )
+                                  .map((source, index) => (
+                                    <a
+                                      key={index}
+                                      href={source.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      {source.title || source.url} ↗
+                                    </a>
+                                  ))}
+                              </details>
+                            ) : null}
+                            <p className="muted">
+                              A IA pode cometer erros. Confira as citações e o
+                              material original.
+                            </p>
+                          </>
+                        ) : current.status === "FAILED" ? (
+                          <div role="alert">
+                            <p>{current.error}</p>
+                            <button
+                              disabled={busy || !selected.length}
+                              onClick={() => setQuestion(current.question)}
+                            >
+                              Editar e reenviar
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="generation-loading" role="status">
+                            <LoaderCircle />
+                            <h3>Preparando seu estudo…</h3>
+                            <p>
+                              Você pode sair desta página. O resultado ficará
+                              salvo neste caderno.
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </article>
                   ))}
                 </div>
-                <section className="notebook-study-plan">
-                  <h3>Um plano que cabe na sua rotina</h3>
-                  <div>
-                    <label>
-                      Dias de estudo
-                      <input
-                        type="number"
-                        min={1}
-                        max={30}
-                        value={planDays}
-                        onChange={(e) =>
-                          setPlanDays(
-                            Math.max(1, Math.min(30, Number(e.target.value))),
-                          )
-                        }
-                      />
-                    </label>
-                    <label>
-                      Minutos por dia
-                      <input
-                        type="number"
-                        min={10}
-                        max={180}
-                        step={5}
-                        value={planMinutes}
-                        onChange={(e) =>
-                          setPlanMinutes(
-                            Math.max(10, Math.min(180, Number(e.target.value))),
-                          )
-                        }
-                      />
-                    </label>
-                  </div>
-                  <button
-                    type="button"
-                    disabled={busy || !data.aiEnabled || !selected.length}
-                    onClick={() => void generate("STUDY_PLAN")}
-                  >
-                    Criar meu plano de revisão
-                  </button>
-                  <small>
-                    Baseado nas {selected.length} fontes selecionadas. A IA
-                    prepara o plano; você escolhe quando estudar.
-                  </small>
-                </section>
                 <form
                   className="notebook-question"
                   onSubmit={(e) => {
@@ -713,133 +874,31 @@ export function StudyNotebooks({ id }: { id?: string }) {
                   }}
                 >
                   <label>
-                    Pergunte sobre suas fontes
+                    Mensagem para o Enturma APP
                     <textarea
                       value={question}
                       onChange={(e) => setQuestion(e.target.value)}
                       maxLength={2000}
-                      placeholder="Explique este assunto passo a passo e mostre uma aplicação prática…"
+                      placeholder="Pergunte, peça um exemplo ou continue a conversa…"
                     />
                   </label>
-                  <button
-                    disabled={
-                      busy ||
-                      !question.trim() ||
-                      !selected.length ||
-                      !data.aiEnabled
-                    }
-                  >
+                  <label className="notebook-web-search">
+                    <input
+                      type="checkbox"
+                      checked={webSearch}
+                      disabled={!data.webSearchEnabled}
+                      onChange={(event) => setWebSearch(event.target.checked)}
+                    />
+                    Pesquisar também na web
+                    {!data.webSearchEnabled && (
+                      <small>Indisponível neste momento</small>
+                    )}
+                  </label>
+                  <button disabled={!canSend || !question.trim()}>
                     <Send size={16} />
-                    Perguntar
+                    Enviar mensagem
                   </button>
                 </form>
-                {data.generations.length ? (
-                  <label>
-                    Histórico de estudos
-                    <select
-                      value={current?.id ?? ""}
-                      onChange={(e) => setActiveGeneration(e.target.value)}
-                    >
-                      {data.generations.map((g) => (
-                        <option key={g.id} value={g.id}>
-                          {modes.find((m) => m.id === g.mode)?.title ??
-                            "Pergunta"}{" "}
-                          · {new Date(g.createdAt).toLocaleString("pt-BR")}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                ) : (
-                  <div className="notebook-empty">
-                    <BookOpen />
-                    <h3>Seu próximo aprendizado começa aqui.</h3>
-                    <p>
-                      Adicione uma fonte. A primeira aula será preparada
-                      automaticamente; depois escolha resumos, perguntas e
-                      exercícios.
-                    </p>
-                  </div>
-                )}
-                {current ? (
-                  <article
-                    className="study-generation"
-                    id={`generation-${current.id}`}
-                  >
-                    {current.status === "READY" ? (
-                      <>
-                        <header>
-                          <h2>
-                            {modes.find((m) => m.id === current.mode)?.title ??
-                              current.question}
-                          </h2>
-                          <button
-                            className="secondary"
-                            aria-label="Baixar material de estudo"
-                            onClick={() => download(current)}
-                          >
-                            <Download size={17} />
-                          </button>
-                        </header>
-                        <StudyAnswer
-                          content={current.answer}
-                          onCitation={(n) => {
-                            const c = current.citations.find(
-                              (c) => c.number === n,
-                            );
-                            if (c)
-                              setPreview({
-                                title: `[${n}] ${c.title}`,
-                                content: c.excerpt,
-                              });
-                          }}
-                        />
-                        <details className="generation-sources">
-                          <summary>
-                            Conferir fontes utilizadas (
-                            {current.citations.length})
-                          </summary>
-                          {current.citations.map((c) => (
-                            <button
-                              className="secondary"
-                              key={c.number}
-                              onClick={() =>
-                                setPreview({
-                                  title: `[${c.number}] ${c.title}`,
-                                  content: c.excerpt,
-                                })
-                              }
-                            >
-                              [{c.number}] {c.title}
-                            </button>
-                          ))}
-                        </details>
-                        <p className="muted">
-                          A IA pode cometer erros. Confira as citações e o
-                          material original.
-                        </p>
-                      </>
-                    ) : current.status === "FAILED" ? (
-                      <div role="alert">
-                        <p>{current.error}</p>
-                        <button
-                          disabled={busy || !selected.length}
-                          onClick={() => void generate(current.mode)}
-                        >
-                          Tentar nova geração
-                        </button>
-                      </div>
-                    ) : (
-                      <div className="generation-loading" role="status">
-                        <LoaderCircle />
-                        <h3>Preparando seu estudo…</h3>
-                        <p>
-                          Você pode sair desta página. O resultado ficará salvo
-                          neste caderno.
-                        </p>
-                      </div>
-                    )}
-                  </article>
-                ) : null}
               </section>
             </div>
           </>

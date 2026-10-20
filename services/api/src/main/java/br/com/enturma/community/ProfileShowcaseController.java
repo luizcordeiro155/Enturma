@@ -38,6 +38,7 @@ public class ProfileShowcaseController {
           "ROOMS",
           "HOURS",
           "PROJECTS",
+          "PORTFOLIO",
           "TECHNOLOGIES",
           "ACADEMIC",
           "MINIGAMES");
@@ -233,6 +234,12 @@ public class ProfileShowcaseController {
                     && !privacy.get("ACADEMIC")))) continue;
         Object content =
             switch (kind) {
+              case "PORTFOLIO" ->
+                  db.list(
+                      "SELECT u.username,coalesce(nullif(p.headline,''),'Meu portfólio acadêmico')"
+                          + " title FROM portfolio_profile p JOIN app_user u ON u.id=p.user_id"
+                          + " WHERE p.user_id=? AND p.public AND u.status='ACTIVE'",
+                      id);
               case "SUBJECTS" ->
                   db.list(
                       "SELECT s.name FROM user_subject u JOIN academic_entry s ON s.id=u.subject_id"
