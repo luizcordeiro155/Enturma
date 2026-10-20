@@ -67,3 +67,49 @@ html .profile-shared-surface .profile-community-tabs button[aria-selected="true"
 html .profile-shared-surface .profile-community-panel .profile-edit-link {
   color: inherit !important;
 }
+
+
+/* Profile editor launch cards were inheriting the global primary-action
+   green/white button palette. Their light thumbnails became white-on-white,
+   and description labels were dimmed to near invisibility.
+   Use semantic neutral surfaces in LIGHT and DARK alike. */
+html button.profile-edit-launch,
+html[data-theme="dark"] button.profile-edit-launch {
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  border: 1px solid var(--border) !important;
+  box-shadow: none !important;
+}
+html button.profile-edit-launch:is(:hover, :focus-visible),
+html[data-theme="dark"] button.profile-edit-launch:is(:hover, :focus-visible) {
+  background: var(--surface-hover) !important;
+  color: var(--ink) !important;
+  border-color: var(--ink) !important;
+}
+html button.profile-edit-launch > span:nth-last-child(2),
+html button.profile-edit-launch strong {
+  color: var(--ink) !important;
+}
+html button.profile-edit-launch small {
+  color: var(--muted) !important;
+  opacity: 1 !important;
+}
+html button.profile-edit-launch .profile-edit-thumbnail,
+html .profile-studio .profile-setting-icon,
+html .profile-studio .profile-media-icon {
+  background: color-mix(in srgb, var(--accent) 14%, var(--soft)) !important;
+  color: var(--ink) !important;
+}
+html button.profile-edit-launch .profile-edit-thumbnail svg,
+html .profile-studio .profile-setting-icon svg,
+html .profile-studio .profile-media-icon svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+html button.profile-edit-launch > svg {
+  flex-shrink: 0;
+  color: var(--muted) !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
