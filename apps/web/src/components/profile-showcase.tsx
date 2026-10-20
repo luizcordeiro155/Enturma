@@ -7,26 +7,12 @@ import {
   ArrowDown,
   Star,
   LockKeyhole,
-  Flame,
-  CalendarDays,
-  Brain,
-  Trophy,
-  MessageCircle,
-  TrendingUp,
-  MessagesSquare,
-  GraduationCap,
-  Users,
-  Clock3,
-  BookOpen,
-  Compass,
-  Sparkles,
-  ShieldCheck,
   Target,
   Code2,
   FolderGit2,
   School,
-  type LucideIcon,
 } from "lucide-react";
+import { AchievementArt } from "./achievement-art";
 import { api } from "@/lib/api";
 import type { ProfileVisualAppearance } from "@enturma/contracts";
 export type Achievement = {
@@ -86,28 +72,8 @@ const PRIVACY_NAMES: Record<string, string> = {
   ACHIEVEMENTS: "Conquistas e insígnias",
   JOINED: "Data de entrada",
   WIDGETS: "Widgets e textos do mural",
+  ACTIVITY: "Atividade de estudo e jogos (nunca ligações privadas)",
 };
-
-const ACHIEVEMENT_ICONS: Record<string, LucideIcon> = {
-  Flame,
-  Calendar: CalendarDays,
-  Brain,
-  Trophy,
-  MessageCircle,
-  TrendingUp,
-  MessagesSquare,
-  GraduationCap,
-  Users,
-  Clock: Clock3,
-  BookOpen,
-  Compass,
-  Sparkles,
-  Shield: ShieldCheck,
-};
-
-function achievementIcon(achievement: Achievement) {
-  return ACHIEVEMENT_ICONS[achievement.icon ?? ""] ?? Award;
-}
 
 function achievementTierClass(tier?: string) {
   return `tier-${(tier ?? "BRONZE").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
@@ -134,7 +100,6 @@ export function FeaturedAchievementBadges({
       aria-label="Conquistas em destaque"
     >
       {achievements.map((achievement) => {
-        const Icon = achievementIcon(achievement);
         return (
           <details
             className={`profile-achievement-badge ${achievementTierClass(achievement.tier)}`}
@@ -144,11 +109,11 @@ export function FeaturedAchievementBadges({
               aria-label={`Conquista: ${achievement.name}`}
               data-tooltip={achievement.name}
             >
-              <Icon size={14} strokeWidth={2.2} />
+              <AchievementArt code={achievement.code} size={24} />
             </summary>
             <div className="profile-achievement-popover">
               <span className="profile-achievement-popover-icon">
-                <Icon size={20} />
+                <AchievementArt code={achievement.code} size={48} />
               </span>
               <div>
                 <strong>{achievement.name}</strong>
@@ -174,7 +139,9 @@ export function FeaturedAchievementBadges({
 export function ShowcaseFields({
   value,
   onChange,
+  group,
 }: {
+  group?: "appearance" | "privacy" | "widgets" | "badges";
   value: Showcase;
   onChange: (s: Showcase) => void;
 }) {
@@ -197,274 +164,286 @@ export function ShowcaseFields({
   };
   return (
     <>
-      <fieldset className="showcase-fields">
-        <legend>Tema e mural</legend>
-        <label>
-          Cor secundária
-          <input
-            type="color"
-            value={value.appearance.secondaryColor}
-            onChange={(e) => appearance("secondaryColor", e.target.value)}
-          />
-        </label>
-        <label>
-          Fundo decorativo
-          <select
-            value={value.appearance.theme}
-            onChange={(e) => appearance("theme", e.target.value)}
-          >
-            <option value="SOLID">Cor sólida</option>
-            <option value="GRADIENT">Degradê</option>
-          </select>
-        </label>
-        <label>
-          Efeito
-          <select
-            value={value.appearance.effect}
-            onChange={(e) => appearance("effect", e.target.value)}
-          >
-            <option value="NONE">Sem efeito</option>
-            <option value="AURORA">Aurora</option>
-            <option value="DOTS">Constelação</option>
-          </select>
-        </label>
-        <label>
-          Ordem do perfil
-          <select
-            value={value.appearance.layout}
-            onChange={(e) => appearance("layout", e.target.value)}
-          >
-            <option value="IDENTITY_FIRST">Identidade primeiro</option>
-            <option value="WIDGETS_FIRST">Mural primeiro</option>
-          </select>
-        </label>
-        <label>
-          Fundo do mural
-          <select
-            value={value.appearance.muralMode ?? "PROFILE"}
-            onChange={(e) => appearance("muralMode", e.target.value)}
-          >
-            <option value="PROFILE">Continuar as cores do perfil</option>
-            <option value="DEFAULT">Padrão do aplicativo</option>
-            <option value="CUSTOM">Cores próprias do mural</option>
-          </select>
-        </label>
-        {value.appearance.muralMode === "CUSTOM" ? (
-          <>
-            <label>
-              Cor principal do mural
-              <input
-                type="color"
-                value={value.appearance.muralColor ?? "#18243d"}
-                onChange={(e) => appearance("muralColor", e.target.value)}
-              />
-            </label>
-            <label>
-              Segunda cor do mural
-              <input
-                type="color"
-                value={value.appearance.muralSecondaryColor ?? "#661245"}
-                onChange={(e) =>
-                  appearance("muralSecondaryColor", e.target.value)
-                }
-              />
-            </label>
-          </>
-        ) : null}
-        <label>
-          Direção do degradê · {value.appearance.gradientAngle ?? 155}°
-          <input
-            type="range"
-            min="0"
-            max="360"
-            value={value.appearance.gradientAngle ?? 155}
-            onChange={(e) =>
-              onChange({
-                ...value,
-                appearance: {
-                  ...value.appearance,
-                  gradientAngle: Number(e.target.value),
-                },
-              })
-            }
-          />
-        </label>
-        <label>
-          Movimento das cores
-          <select
-            value={value.appearance.gradientFlow ?? "STILL"}
-            onChange={(e) => appearance("gradientFlow", e.target.value)}
-          >
-            <option value="STILL">Parado</option>
-            <option value="FLOW">Rio de cores</option>
-          </select>
-        </label>
-        <label>
-          Animação ao abrir o perfil
-          <select
-            value={value.appearance.entrance ?? "RISE"}
-            onChange={(e) => appearance("entrance", e.target.value)}
-          >
-            <option value="NONE">Sem animação</option>
-            <option value="RISE">Revelação suave</option>
-            <option value="BOOK">Abrir como um livro</option>
-            <option value="ORBIT">Órbita</option>
-          </select>
-        </label>
-        {(
-          [
-            ["goal", "Objetivo da semana", 200],
-            ["technologies", "Tecnologias que estudo", 200],
-            ["projects", "Projetos e portfólio", 1000],
-          ] as const
-        ).map(([key, label, max]) => (
-          <label key={key}>
-            {label}
-            <textarea
-              aria-label={label}
-              value={value.appearance[key]}
-              maxLength={max}
-              onChange={(e) => appearance(key, e.target.value)}
+      {(!group || group === "appearance") && (
+        <fieldset className="showcase-fields">
+          <legend>Tema e mural</legend>
+          <label>
+            Cor secundária
+            <input
+              type="color"
+              value={value.appearance.secondaryColor}
+              onChange={(e) => appearance("secondaryColor", e.target.value)}
             />
           </label>
-        ))}
-      </fieldset>
-      <fieldset className="showcase-fields">
-        <legend>
-          <LockKeyhole size={18} /> Privacidade do perfil
-        </legend>
-        <p>
-          Você sempre vê seus dados. Escolha o que outras pessoas podem
-          visualizar.
-        </p>
-        {Object.entries(PRIVACY_NAMES).map(([key, label]) => (
-          <label className="check-row" key={key}>
+          <label>
+            Fundo decorativo
+            <select
+              value={value.appearance.theme}
+              onChange={(e) => appearance("theme", e.target.value)}
+            >
+              <option value="SOLID">Cor sólida</option>
+              <option value="GRADIENT">Degradê</option>
+            </select>
+          </label>
+          <label>
+            Efeito
+            <select
+              value={value.appearance.effect}
+              onChange={(e) => appearance("effect", e.target.value)}
+            >
+              <option value="NONE">Sem efeito</option>
+              <option value="AURORA">Aurora</option>
+              <option value="DOTS">Constelação</option>
+            </select>
+          </label>
+          <label>
+            Ordem do perfil
+            <select
+              value={value.appearance.layout}
+              onChange={(e) => appearance("layout", e.target.value)}
+            >
+              <option value="IDENTITY_FIRST">Identidade primeiro</option>
+              <option value="WIDGETS_FIRST">Mural primeiro</option>
+            </select>
+          </label>
+          <label>
+            Fundo do mural
+            <select
+              value={value.appearance.muralMode ?? "DEFAULT"}
+              onChange={(e) => appearance("muralMode", e.target.value)}
+            >
+              <option value="PROFILE">Continuar as cores do perfil</option>
+              <option value="DEFAULT">Padrão do aplicativo</option>
+              <option value="CUSTOM">Cores próprias do mural</option>
+            </select>
+          </label>
+          {value.appearance.muralMode === "CUSTOM" ? (
+            <>
+              <label>
+                Cor principal do mural
+                <input
+                  type="color"
+                  value={value.appearance.muralColor ?? "#18243d"}
+                  onChange={(e) => appearance("muralColor", e.target.value)}
+                />
+              </label>
+              <label>
+                Segunda cor do mural
+                <input
+                  type="color"
+                  value={value.appearance.muralSecondaryColor ?? "#661245"}
+                  onChange={(e) =>
+                    appearance("muralSecondaryColor", e.target.value)
+                  }
+                />
+              </label>
+            </>
+          ) : null}
+          <label>
+            Direção do degradê · {value.appearance.gradientAngle ?? 155}°
             <input
-              type="checkbox"
-              checked={value.privacy?.[key] ?? false}
+              type="range"
+              min="0"
+              max="360"
+              value={value.appearance.gradientAngle ?? 155}
               onChange={(e) =>
                 onChange({
                   ...value,
-                  privacy: { ...value.privacy, [key]: e.target.checked },
+                  appearance: {
+                    ...value.appearance,
+                    gradientAngle: Number(e.target.value),
+                  },
                 })
               }
             />
-            {label}
           </label>
-        ))}
-      </fieldset>
-      <fieldset className="showcase-fields">
-        <legend>Widgets · {value.widgets.length}/8</legend>
-        {value.widgets.map((w, index) => (
-          <div className="widget-editor-row" key={w.kind}>
-            <strong>{WIDGET_NAMES[w.kind]}</strong>
-            <div className="actions">
-              <label>
-                <input
-                  type="checkbox"
-                  checked={w.visible}
-                  onChange={(e) => update(index, { visible: e.target.checked })}
-                />
-                Mostrar
-              </label>
-              <button
-                type="button"
-                className="icon-control"
-                aria-label={`Favoritar ${WIDGET_NAMES[w.kind]}`}
-                aria-pressed={w.favorite}
-                onClick={() => update(index, { favorite: !w.favorite })}
-              >
-                <Star size={16} />
-              </button>
-              <button
-                type="button"
-                className="icon-control"
-                disabled={index === 0}
-                aria-label="Mover para cima"
-                onClick={() => move(index, -1)}
-              >
-                <ArrowUp size={16} />
-              </button>
-              <button
-                type="button"
-                className="icon-control"
-                disabled={index === value.widgets.length - 1}
-                aria-label="Mover para baixo"
-                onClick={() => move(index, 1)}
-              >
-                <ArrowDown size={16} />
-              </button>
-              <button
-                type="button"
-                className="text-button"
-                onClick={() =>
-                  onChange({
-                    ...value,
-                    widgets: value.widgets.filter((_, i) => i !== index),
-                  })
-                }
-              >
-                Remover
-              </button>
-            </div>
-          </div>
-        ))}
-        <label>
-          Adicionar widget
-          <select
-            value=""
-            disabled={value.widgets.length >= 8}
-            onChange={(e) => {
-              if (e.target.value)
-                onChange({
-                  ...value,
-                  widgets: [
-                    ...value.widgets,
-                    { kind: e.target.value, visible: true, favorite: false },
-                  ],
-                });
-            }}
-          >
-            <option value="">Selecione…</option>
-            {Object.entries(WIDGET_NAMES)
-              .filter(([key]) => !value.widgets.some((w) => w.kind === key))
-              .map(([key, name]) => (
-                <option value={key} key={key}>
-                  {name}
-                </option>
-              ))}
-          </select>
-        </label>
-      </fieldset>
-      <fieldset className="showcase-fields">
-        <legend>Insígnias em destaque · {value.badges?.length ?? 0}/4</legend>
-        {value.achievements
-          ?.filter((a) => a.earnedAt)
-          .map((a) => (
-            <label className="check-row" key={a.code}>
+          <label>
+            Movimento das cores
+            <select
+              value={value.appearance.gradientFlow ?? "STILL"}
+              onChange={(e) => appearance("gradientFlow", e.target.value)}
+            >
+              <option value="STILL">Parado</option>
+              <option value="FLOW">Rio de cores</option>
+            </select>
+          </label>
+          <label>
+            Animação ao abrir o perfil
+            <select
+              value={value.appearance.entrance ?? "RISE"}
+              onChange={(e) => appearance("entrance", e.target.value)}
+            >
+              <option value="NONE">Sem animação</option>
+              <option value="RISE">Revelação suave</option>
+              <option value="BOOK">Abrir como um livro</option>
+              <option value="ORBIT">Órbita</option>
+            </select>
+          </label>
+          {(
+            [
+              ["goal", "Objetivo da semana", 200],
+              ["technologies", "Tecnologias que estudo", 200],
+              ["projects", "Projetos e portfólio", 1000],
+            ] as const
+          ).map(([key, label, max]) => (
+            <label key={key}>
+              {label}
+              <textarea
+                aria-label={label}
+                value={value.appearance[key]}
+                maxLength={max}
+                onChange={(e) => appearance(key, e.target.value)}
+              />
+            </label>
+          ))}
+        </fieldset>
+      )}
+      {(!group || group === "privacy") && (
+        <fieldset className="showcase-fields">
+          <legend>
+            <LockKeyhole size={18} /> Privacidade do perfil
+          </legend>
+          <p>
+            Você sempre vê seus dados. Escolha o que outras pessoas podem
+            visualizar.
+          </p>
+          {Object.entries(PRIVACY_NAMES).map(([key, label]) => (
+            <label className="check-row" key={key}>
               <input
                 type="checkbox"
-                checked={value.badges?.some((b) => b.code === a.code) ?? false}
-                disabled={
-                  !value.badges?.some((b) => b.code === a.code) &&
-                  (value.badges?.length ?? 0) >= 4
-                }
+                checked={value.privacy?.[key] ?? false}
                 onChange={(e) =>
                   onChange({
                     ...value,
-                    badges: e.target.checked
-                      ? [...(value.badges ?? []), { code: a.code }]
-                      : (value.badges ?? []).filter((b) => b.code !== a.code),
+                    privacy: { ...value.privacy, [key]: e.target.checked },
                   })
                 }
               />
-              {a.name}
+              {label}
             </label>
           ))}
-        {!value.achievements?.some((a) => a.earnedAt) && (
-          <p>Conclua atividades para desbloquear suas primeiras insígnias.</p>
-        )}
-      </fieldset>
+        </fieldset>
+      )}
+      {(!group || group === "widgets") && (
+        <fieldset className="showcase-fields">
+          <legend>Widgets · {value.widgets.length}/8</legend>
+          {value.widgets.map((w, index) => (
+            <div className="widget-editor-row" key={w.kind}>
+              <strong>{WIDGET_NAMES[w.kind]}</strong>
+              <div className="actions">
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={w.visible}
+                    onChange={(e) =>
+                      update(index, { visible: e.target.checked })
+                    }
+                  />
+                  Mostrar
+                </label>
+                <button
+                  type="button"
+                  className="icon-control"
+                  aria-label={`Favoritar ${WIDGET_NAMES[w.kind]}`}
+                  aria-pressed={w.favorite}
+                  onClick={() => update(index, { favorite: !w.favorite })}
+                >
+                  <Star size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="icon-control"
+                  disabled={index === 0}
+                  aria-label="Mover para cima"
+                  onClick={() => move(index, -1)}
+                >
+                  <ArrowUp size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="icon-control"
+                  disabled={index === value.widgets.length - 1}
+                  aria-label="Mover para baixo"
+                  onClick={() => move(index, 1)}
+                >
+                  <ArrowDown size={16} />
+                </button>
+                <button
+                  type="button"
+                  className="text-button"
+                  onClick={() =>
+                    onChange({
+                      ...value,
+                      widgets: value.widgets.filter((_, i) => i !== index),
+                    })
+                  }
+                >
+                  Remover
+                </button>
+              </div>
+            </div>
+          ))}
+          <label>
+            Adicionar widget
+            <select
+              value=""
+              disabled={value.widgets.length >= 8}
+              onChange={(e) => {
+                if (e.target.value)
+                  onChange({
+                    ...value,
+                    widgets: [
+                      ...value.widgets,
+                      { kind: e.target.value, visible: true, favorite: false },
+                    ],
+                  });
+              }}
+            >
+              <option value="">Selecione…</option>
+              {Object.entries(WIDGET_NAMES)
+                .filter(([key]) => !value.widgets.some((w) => w.kind === key))
+                .map(([key, name]) => (
+                  <option value={key} key={key}>
+                    {name}
+                  </option>
+                ))}
+            </select>
+          </label>
+        </fieldset>
+      )}
+      {(!group || group === "badges") && (
+        <fieldset className="showcase-fields">
+          <legend>Insígnias em destaque · {value.badges?.length ?? 0}/4</legend>
+          {value.achievements
+            ?.filter((a) => a.earnedAt)
+            .map((a) => (
+              <label className="check-row" key={a.code}>
+                <input
+                  type="checkbox"
+                  checked={
+                    value.badges?.some((b) => b.code === a.code) ?? false
+                  }
+                  disabled={
+                    !value.badges?.some((b) => b.code === a.code) &&
+                    (value.badges?.length ?? 0) >= 4
+                  }
+                  onChange={(e) =>
+                    onChange({
+                      ...value,
+                      badges: e.target.checked
+                        ? [...(value.badges ?? []), { code: a.code }]
+                        : (value.badges ?? []).filter((b) => b.code !== a.code),
+                    })
+                  }
+                />
+                {a.name}
+              </label>
+            ))}
+          {!value.achievements?.some((a) => a.earnedAt) && (
+            <p>Conclua atividades para desbloquear suas primeiras insígnias.</p>
+          )}
+        </fieldset>
+      )}
     </>
   );
 }
@@ -521,14 +500,13 @@ export function ShowcaseView({
           {value.badges?.map((b) => {
             const a = value.achievements?.find((a) => a.code === b.code);
             if (!a) return null;
-            const Icon = achievementIcon(a);
             return (
               <details
                 className={`badge-detail ${achievementTierClass(a.tier)}`}
                 key={b.code}
               >
                 <summary>
-                  <Icon size={20} />
+                  <AchievementArt code={a.code} size={32} />
                   {a.name}
                 </summary>
                 <div className="badge-description">
@@ -679,7 +657,6 @@ export function AchievementGrid({
   return (
     <div className="achievement-grid">
       {achievements.map((a) => {
-        const Icon = achievementIcon(a);
         return (
           <details
             className={`achievement-card ${a.earnedAt ? "earned" : ""} ${achievementTierClass(a.tier)}`}
@@ -690,7 +667,7 @@ export function AchievementGrid({
               aria-label={`Ver detalhes da conquista ${a.name}`}
             >
               <span className="achievement-card-icon">
-                <Icon />
+                <AchievementArt code={a.code} />
               </span>
               <span className="achievement-card-heading">
                 <strong>{a.name}</strong>

@@ -1,4 +1,7 @@
 "use client";
+import { usePrivateTyping } from "@/lib/use-private-typing";
+import { TypingIndicator } from "./typing-indicator";
+import { synchronizeAccountIdentity } from "@/lib/account-chat-sync";
 import { ChatImage } from "./chat-image-viewer";
 import { isChatAtLatest } from "@/lib/chat-scroll";
 import { PrivateCallButtons } from "./private-calls";
@@ -37,7 +40,6 @@ import {
   fingerprint,
   importBackup,
   publicFields,
-  readIdentity,
   storeIdentity,
 } from "@/lib/private-chat-crypto";
 import { PrivateKeySync } from "./private-key-sync";
@@ -94,6 +96,7 @@ export function Friends() {
     () => peekApiSnapshot<Friend[]>("/friends") ?? [],
   );
   const [selected, setSelected] = useState<Friend>();
+  const privateTyping = usePrivateTyping(selected?.id);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [username, setUsername] = useState("");
@@ -157,37 +160,12 @@ export function Friends() {
       .then(async (user) => {
         if (!alive) return;
         setMe(user);
-        const prepare = async () => {
-          let local = await readIdentity(user.id);
-          const stored = await api<{ publicKey: JsonWebKey }[]>(
-            "/private-identity",
-            { signal: AbortSignal.timeout(12000) },
-          );
-          if (!local) {
-            if (stored.length)
-              throw Error(
-                "Desbloqueie as conversas na seção Conversas em todos os dispositivos. Se ainda não ativou a sincronização, ative pelo dispositivo original ou restaure seu backup cifrado.",
-              );
-            local = await createIdentity();
-            await storeIdentity(user.id, local);
-          }
-          await api("/private-identity", {
-            method: "PUT",
-            body: JSON.stringify(publicFields(local.publicKey)),
-            signal: AbortSignal.timeout(12000),
-          });
-          if (alive) {
-            identity.current = local;
-            setReady(true);
-            setIdentityError("");
-          }
-        };
-        if (navigator.locks)
-          await navigator.locks.request(
-            `enturma-private-identity:${user.id}`,
-            prepare,
-          );
-        else await prepare();
+        const result = await synchronizeAccountIdentity(user.id);
+        if (alive) {
+          identity.current = result.identity;
+          setReady(true);
+          setIdentityError("");
+        }
       })
       .catch((e) => {
         if (alive)
@@ -661,6 +639,7 @@ export function Friends() {
         mentioned: !!friend.username && mentionsUser(draft, friend.username),
       });
 
+      privateTyping.stop();
       setDraft("");
       setImage(null);
       setImagePreview((old) => {
@@ -1189,6 +1168,9 @@ export function Friends() {
                   />
                 ) : null}
 
+                <TypingIndicator
+                  names={privateTyping.users.map((user) => user.name)}
+                />
                 <form
                   onSubmit={send}
                   className="private-composer enturma-message-composer"
@@ -1283,8 +1265,12 @@ export function Friends() {
                         }}
                         onBlur={() => {
                           setNativeChatComposerFocused(false);
+                          privateTyping.stop();
                         }}
-                        onChange={(e) => setDraft(e.target.value)}
+                        onChange={(e) => {
+                          setDraft(e.target.value);
+                          privateTyping.type(e.target.value);
+                        }}
                         maxLength={4000}
                         disabled={!finger}
                         rows={1}

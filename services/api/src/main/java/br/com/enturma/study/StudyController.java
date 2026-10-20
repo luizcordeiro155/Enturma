@@ -21,7 +21,7 @@ public class StudyController {
       UUID topicId,
       @NotBlank @Size(max = 150) String title,
       @Min(25) @Max(180) int minutes,
-      @Min(2) @Max(30) int maxParticipants,
+      @Min(2) @Max(45) int maxParticipants,
       @Min(0) @Max(5) Integer days) {}
 
   @GetMapping

@@ -88,7 +88,8 @@ public class AuthService {
       throw new ApiException(401, "INVALID_PASSWORD", "A senha informada está incorreta.");
 
     if (!user.status.equals("ACTIVE"))
-      throw new ApiException(403, "ACCOUNT_UNAVAILABLE", "Esta conta não está disponível para login.");
+      throw new ApiException(
+          403, "ACCOUNT_UNAVAILABLE", "Esta conta não está disponível para login.");
 
     return session(user.id, device);
   }
@@ -149,8 +150,10 @@ public class AuthService {
   }
 
   public boolean studentAccess(Actor actor) {
-    return db.exists("SELECT EXISTS(SELECT 1 FROM academic_identity WHERE user_id=?"
-        + " AND status IN ('LEGACY_APPROVED','STUDENT_VERIFIED'))", actor.id());
+    return db.exists(
+        "SELECT EXISTS(SELECT 1 FROM academic_identity WHERE user_id=?"
+            + " AND status IN ('LEGACY_APPROVED','STUDENT_VERIFIED'))",
+        actor.id());
   }
 
   @Transactional
@@ -236,7 +239,9 @@ public class AuthService {
       db.jdbc.update("UPDATE app_user SET email_verified=true WHERE id=?", user);
     else {
       db.jdbc.update(
-          "UPDATE app_user SET password_hash=? WHERE id=?", encoder.encode(password), user);
+          "UPDATE app_user SET password_hash=?,credential_version=credential_version+1 WHERE id=?",
+          encoder.encode(password),
+          user);
       db.jdbc.update("UPDATE user_session SET revoked_at=now() WHERE user_id=?", user);
       db.jdbc.update(
           "UPDATE password_reset_flow SET completed_at=COALESCE(completed_at,now())"

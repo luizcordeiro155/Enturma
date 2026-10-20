@@ -50,7 +50,8 @@ export function ProfileBackdrop({
     if (
       !node ||
       !flow ||
-      (mural && appearance?.muralMode === "DEFAULT") ||
+      (mural &&
+        (!appearance?.muralMode || appearance.muralMode === "DEFAULT")) ||
       !node.animate
     )
       return;
@@ -98,6 +99,8 @@ export function ProfileBackdrop({
       document.removeEventListener("visibilitychange", sync);
     };
   }, [flow, mural, appearance?.muralMode]);
+  if (mural && (!appearance?.muralMode || appearance.muralMode === "DEFAULT"))
+    return null;
   return (
     <span
       className={`profile-color-layer${mural ? " mural-color-layer" : ""}`}

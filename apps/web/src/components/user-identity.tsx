@@ -13,13 +13,10 @@ import {
 } from "@/lib/use-overlay-history";
 import { createPortal } from "react-dom";
 import Link from "next/link";
+import { ProfileCommunity } from "./profile-community";
 import { CalendarDays } from "lucide-react";
 import { api, post } from "@/lib/api";
-import {
-  FeaturedAchievementBadges,
-  ShowcaseView,
-  type Showcase,
-} from "./profile-showcase";
+import { FeaturedAchievementBadges, type Showcase } from "./profile-showcase";
 import { ConfirmedLink, ForumLinks } from "./forum-links";
 import { useLiveRefresh } from "@/lib/live-updates";
 export type ProfileDetails = {
@@ -27,6 +24,8 @@ export type ProfileDetails = {
   statusText?: string;
   decoration?: string;
   nameFont?: string;
+  nameColor?: string;
+  nameEffect?: string;
   website?: string;
   interests?: string;
 };
@@ -97,16 +96,26 @@ export function profileStyle(user: PublicProfile): React.CSSProperties {
     "--profile-copy": contrast.ink,
     "--profile-copy-panel": contrast.panel,
     "--mural-background":
-      appearance?.muralMode === "DEFAULT"
+      !appearance?.muralMode || appearance.muralMode === "DEFAULT"
         ? "var(--surface)"
         : appearance?.muralMode === "CUSTOM"
           ? `linear-gradient(${angle}deg,${muralPrimary},${muralSecondary})`
           : gradient,
     "--mural-copy":
-      appearance?.muralMode === "DEFAULT" ? "var(--ink)" : muralContrast.ink,
+      !appearance?.muralMode || appearance.muralMode === "DEFAULT"
+        ? "var(--ink)"
+        : muralContrast.ink,
     "--mural-copy-panel":
-      appearance?.muralMode === "DEFAULT" ? "transparent" : muralContrast.panel,
+      !appearance?.muralMode || appearance.muralMode === "DEFAULT"
+        ? "transparent"
+        : muralContrast.panel,
   } as React.CSSProperties;
+}
+export function profileNameStyle(user: PublicProfile): React.CSSProperties {
+  const color = user.profileDetails?.nameColor;
+  return color && /^#[0-9a-f]{6}$/i.test(color)
+    ? ({ "--profile-name-color": color } as React.CSSProperties)
+    : {};
 }
 export function LiveIdentity({ id, name }: { id: string; name: string }) {
   const [user, setUser] = useState<PublicProfile>({ id, name });
@@ -178,7 +187,12 @@ export function ProfileCard({
         <ProfileBackdrop appearance={user.showcaseAppearance} />
         <Avatar user={user} />
         <div className="profile-copy-content">
-          <h2 className={`name-${d.nameFont ?? "SYSTEM"}`}>{user.name}</h2>
+          <h2
+            style={profileNameStyle(user)}
+            className={`name-${d.nameFont ?? "SYSTEM"} name-effect-${d.nameEffect ?? "SOLID"}`}
+          >
+            {user.name}
+          </h2>
           <div className="profile-handle-row">
             <p>
               @{user.username} {d.pronouns ? `· ${d.pronouns}` : ""}
@@ -403,7 +417,8 @@ export function UserIdentity({
         {!compact ? (
           <span>
             <strong
-              className={`name-${user.profileDetails?.nameFont ?? "SYSTEM"}`}
+              style={profileNameStyle(user)}
+              className={`name-${user.profileDetails?.nameFont ?? "SYSTEM"} name-effect-${user.profileDetails?.nameEffect ?? "SOLID"}`}
             >
               {user.name}
             </strong>
@@ -517,46 +532,12 @@ export function UserIdentity({
                       appearance={profile.showcaseAppearance}
                       mural
                     />
-                    <div className="profile-public-advanced-heading">
-                      <span>Personalização avançada</span>
-                      <h2>
-                        {isOwnProfile
-                          ? "Seu perfil, como as outras pessoas veem"
-                          : "Mais sobre este perfil"}
-                      </h2>
-                      <p>
-                        {isOwnProfile
-                          ? "Tudo que você configurou no Enturma aparece aqui."
-                          : "Conquistas, estatísticas e widgets compartilhados por este usuário."}
-                      </p>
-                    </div>
-
-                    {isOwnProfile ? (
-                      <div className="profile-owner-actions">
-                        <p>
-                          Este é o seu perfil, do jeito que as outras pessoas
-                          veem.
-                        </p>
-                        <Link
-                          className="button"
-                          href="/profile"
-                          onClick={() => setOpen(false)}
-                        >
-                          Editar perfil
-                        </Link>
-                      </div>
-                    ) : null}
-
-                    {showcase ? (
-                      <ShowcaseView
-                        value={showcase}
-                        showBadges={false}
-                        compact
-                        detailed
-                      />
-                    ) : (
-                      <p className="muted">Carregando personalização…</p>
-                    )}
+                    <ProfileCommunity
+                      userId={profile.id}
+                      showcase={showcase}
+                      own={isOwnProfile}
+                      onNavigate={() => setOpen(false)}
+                    />
                   </section>
                 </div>
               ) : (

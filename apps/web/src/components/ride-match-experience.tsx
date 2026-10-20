@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, post } from "@/lib/api";
+import { RideSafetyCheck } from "./ride-safety-check";
 import { tripStatusLabel } from "@/lib/ride-labels";
 import type { Match, PeerLocation, SafetyShare } from "@/lib/ride-types";
 import {
@@ -269,7 +270,8 @@ export function RideMatchExperience({
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      if (isDriver && liveAllowed && watchId.current == null) startSharing(true);
+      if (isDriver && liveAllowed && watchId.current == null)
+        startSharing(true);
       if (!liveAllowed) stopWatchOnly();
     }, 0);
     return () => window.clearTimeout(timer);
@@ -307,11 +309,11 @@ export function RideMatchExperience({
     point(match.endLat, match.endLng);
 
   const driverPoint = isDriver
-    ? selfLocation ?? driverFallback
-    : peerPoint ?? driverFallback;
+    ? (selfLocation ?? driverFallback)
+    : (peerPoint ?? driverFallback);
   const passengerPoint = isDriver
-    ? peerPoint ?? pickupPoint
-    : selfLocation ?? pickupPoint;
+    ? (peerPoint ?? pickupPoint)
+    : (selfLocation ?? pickupPoint);
 
   const routeTarget = ["IN_PROGRESS", "ARRIVED", "COMPLETED"].includes(
     match.tripStatus,
@@ -321,17 +323,20 @@ export function RideMatchExperience({
   const routeSource = driverPoint;
 
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      if (!routeSource || !routeTarget) {
-        setRoute(undefined);
-        return;
-      }
-      void post<RouteResult>("/rides/map/route", {
-        points: [routeSource, routeTarget],
-      })
-        .then(setRoute)
-        .catch(() => setRoute(undefined));
-    }, routeSource && routeTarget ? 220 : 0);
+    const timer = window.setTimeout(
+      () => {
+        if (!routeSource || !routeTarget) {
+          setRoute(undefined);
+          return;
+        }
+        void post<RouteResult>("/rides/map/route", {
+          points: [routeSource, routeTarget],
+        })
+          .then(setRoute)
+          .catch(() => setRoute(undefined));
+      },
+      routeSource && routeTarget ? 220 : 0,
+    );
     return () => window.clearTimeout(timer);
   }, [
     match.id,
@@ -439,14 +444,13 @@ export function RideMatchExperience({
     setMessage("Validando código e iniciando a corrida…");
     try {
       await post(`/matches/${match.id}/board`, { code });
-      setMessage(
-        "Código correto. Aguardando o passageiro confirmar que já entrou no carro.",
-      );
+      setMessage("Código confirmado. A carona começou. Boa viagem!");
       setBoardingInput("");
       await onRefresh();
     } catch (failure) {
       setMessage("");
       setError((failure as Error).message);
+      await onRefresh().catch(() => {});
     } finally {
       boardingRequest.current = false;
       setBusy(false);
@@ -528,7 +532,8 @@ export function RideMatchExperience({
               </p>
               {!isDriver && match.vehicleBrand ? (
                 <small>
-                  {match.vehicleBrand} {match.vehicleModel} · {match.vehicleColor}
+                  {match.vehicleBrand} {match.vehicleModel} ·{" "}
+                  {match.vehicleColor}
                   {match.plateHint ? ` · ${match.plateHint}` : ""}
                 </small>
               ) : null}
@@ -611,10 +616,7 @@ export function RideMatchExperience({
           "Em viagem",
           "Chegada",
         ].map((label, index) => (
-          <div
-            className={index <= step ? "is-complete" : ""}
-            key={label}
-          >
+          <div className={index <= step ? "is-complete" : ""} key={label}>
             <span>{index < step ? <Check size={14} /> : index + 1}</span>
             <small>{label}</small>
           </div>
@@ -628,8 +630,9 @@ export function RideMatchExperience({
             <div>
               <h3>Confirmação e embarque</h3>
               <p>
-                Motorista {match.driverConfirmed ? "confirmado" : "aguardando"} ·
-                Passageiro {match.passengerConfirmed ? "confirmado" : "aguardando"}
+                Motorista {match.driverConfirmed ? "confirmado" : "aguardando"}{" "}
+                · Passageiro{" "}
+                {match.passengerConfirmed ? "confirmado" : "aguardando"}
               </p>
             </div>
           </div>
@@ -655,9 +658,7 @@ export function RideMatchExperience({
                       { cache: "no-store" },
                     )
                       .then((result) => setBoardingCode(result.code))
-                      .catch((failure) =>
-                        setError((failure as Error).message),
-                      )
+                      .catch((failure) => setError((failure as Error).message))
                   }
                 >
                   Mostrar código de embarque
@@ -671,6 +672,29 @@ export function RideMatchExperience({
                     ))}
                   </div>
                 </div>
+              )}
+              {(match.boardingAttempts ?? 0) >= 5 && !match.boardedAt && (
+                <button
+                  type="button"
+                  disabled={busy}
+                  className="secondary"
+                  onClick={async () => {
+                    setBusy(true);
+                    try {
+                      const result = await post<{ code: string }>(
+                        `/matches/${match.id}/boarding-code/renew`,
+                      );
+                      setBoardingCode(result.code);
+                      await onRefresh();
+                    } catch (e) {
+                      setError((e as Error).message);
+                    } finally {
+                      setBusy(false);
+                    }
+                  }}
+                >
+                  Renovar código bloqueado
+                </button>
               )}
               {match.boardingVerifiedAt && !match.boardedAt ? (
                 <div className="ride-match-passenger-confirm">
@@ -704,7 +728,9 @@ export function RideMatchExperience({
                 placeholder="0000"
                 disabled={busy}
                 onChange={(event) => {
-                  const code = event.target.value.replace(/\D/g, "").slice(0, 4);
+                  const code = event.target.value
+                    .replace(/\D/g, "")
+                    .slice(0, 4);
                   setBoardingInput(code);
                   setError("");
                   if (code.length === 4)
@@ -712,7 +738,8 @@ export function RideMatchExperience({
                 }}
               />
               <small>
-                Ao digitar os 4 números corretos, a corrida começa automaticamente.
+                Ao digitar os 4 números corretos, a corrida começa
+                automaticamente.
               </small>
             </label>
           ) : match.boardedAt ? (
@@ -723,12 +750,15 @@ export function RideMatchExperience({
           ) : null}
         </section>
 
+        <RideSafetyCheck matchId={match.id} passenger={!isDriver} />
         <section className="ride-match-detail-card">
           <div className="ride-match-card-title">
             <MapPin size={20} />
             <div>
               <h3>Ponto de encontro</h3>
-              <p>{match.meetingPoint || "Defina um ponto fácil de identificar."}</p>
+              <p>
+                {match.meetingPoint || "Defina um ponto fácil de identificar."}
+              </p>
             </div>
           </div>
           <label>
@@ -822,8 +852,8 @@ export function RideMatchExperience({
           <span>
             <strong>{companions.length} passageiros confirmados</strong>
             <small>
-              A corrida inicia automaticamente depois que todos os embarques forem
-              validados.
+              A corrida inicia automaticamente depois que todos os embarques
+              forem validados.
             </small>
           </span>
         </div>
@@ -842,7 +872,9 @@ export function RideMatchExperience({
           <Star size={22} />
           <div>
             <strong>Carona concluída</strong>
-            <small>Use a avaliação abaixo para registrar sua experiência.</small>
+            <small>
+              Use a avaliação abaixo para registrar sua experiência.
+            </small>
           </div>
         </div>
       ) : null}

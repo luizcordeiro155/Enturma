@@ -140,10 +140,10 @@ public class RideController {
       Double heading) {}
 
   public record DispatchCancel(
-      @NotBlank @Size(max = 40) String reason,
-      @Size(max = 300) String note) {}
+      @NotBlank @Size(max = 40) String reason, @Size(max = 300) String note) {}
 
   public record RoutePoint(double lat, double lng) {}
+
   public record RouteRequest(@NotEmpty @Size(max = 8) java.util.List<@Valid RoutePoint> points) {}
 
   @GetMapping("/rides/mobility/state")
@@ -262,14 +262,12 @@ public class RideController {
   }
 
   @PostMapping("/rides/driver/requests/{id}/accept")
-  public Object acceptDriverRequest(
-      @AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+  public Object acceptDriverRequest(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
     return dispatch.acceptRequest(a, id);
   }
 
   @PostMapping("/rides/driver/requests/{id}/reject")
-  public void rejectDriverRequest(
-      @AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+  public void rejectDriverRequest(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
     dispatch.rejectRequest(a, id);
   }
 
@@ -313,17 +311,13 @@ public class RideController {
 
   @PostMapping("/rides/{source}/suggestions/{candidate}/connect")
   public Object connect(
-      @AuthenticationPrincipal Actor a,
-      @PathVariable UUID source,
-      @PathVariable UUID candidate) {
+      @AuthenticationPrincipal Actor a, @PathVariable UUID source, @PathVariable UUID candidate) {
     return matching.connect(a, source, candidate);
   }
 
   @PostMapping("/rides/{id}/status")
   public void status(
-      @AuthenticationPrincipal Actor a,
-      @PathVariable UUID id,
-      @Valid @RequestBody Status r) {
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Status r) {
     mobility.tripStatus(a, id, r.status());
   }
 
@@ -333,8 +327,7 @@ public class RideController {
   }
 
   @PutMapping("/rides/vehicle")
-  public Object vehicle(
-      @AuthenticationPrincipal Actor a, @Valid @RequestBody Vehicle r) {
+  public Object vehicle(@AuthenticationPrincipal Actor a, @Valid @RequestBody Vehicle r) {
     return mobility.saveVehicle(
         a, r.brand(), r.model(), r.color(), r.modelYear(), r.seats(), r.plateHint());
   }
@@ -363,8 +356,7 @@ public class RideController {
   }
 
   @PostMapping("/rides/recurrences")
-  public Object recurrence(
-      @AuthenticationPrincipal Actor a, @Valid @RequestBody Recurrence r) {
+  public Object recurrence(@AuthenticationPrincipal Actor a, @Valid @RequestBody Recurrence r) {
     return mobility.createRecurrence(
         a,
         r.campusId(),
@@ -387,9 +379,7 @@ public class RideController {
 
   @PostMapping("/rides/{id}/stops")
   public void stops(
-      @AuthenticationPrincipal Actor a,
-      @PathVariable UUID id,
-      @Valid @RequestBody Stops r) {
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Stops r) {
     mobility.reorderPickups(a, id, r.matchIds());
   }
 
@@ -423,11 +413,14 @@ public class RideController {
     return mobility.boardingCode(a, id);
   }
 
+  @PostMapping("/matches/{id}/boarding-code/renew")
+  public Object renewBoarding(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    return mobility.renewBoardingCode(a, id);
+  }
+
   @PostMapping("/matches/{id}/board")
   public Object board(
-      @AuthenticationPrincipal Actor a,
-      @PathVariable UUID id,
-      @Valid @RequestBody Boarding r) {
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Boarding r) {
     return mobility.board(a, id, r.code());
   }
 
@@ -438,18 +431,9 @@ public class RideController {
 
   @PutMapping("/matches/{id}/location")
   public void location(
-      @AuthenticationPrincipal Actor a,
-      @PathVariable UUID id,
-      @Valid @RequestBody Location r) {
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Location r) {
     mobility.liveLocation(
-        a,
-        id,
-        r.lat(),
-        r.lng(),
-        r.accuracyMeters(),
-        r.speedMps(),
-        r.heading(),
-        r.capturedAt());
+        a, id, r.lat(), r.lng(), r.accuracyMeters(), r.speedMps(), r.heading(), r.capturedAt());
   }
 
   @GetMapping("/matches/{id}/location")

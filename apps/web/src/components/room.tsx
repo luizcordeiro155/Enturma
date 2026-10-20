@@ -1,4 +1,5 @@
 "use client";
+import { useStudyActivity } from "@/lib/use-study-activity";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -26,6 +27,7 @@ import { focusMessage } from "./notifications";
 import { useCallSession } from "./call-session-provider";
 import { RoomChat } from "./room-chat";
 import { RoomSharePanel } from "./room-share-panel";
+import { RoomSettings } from "./room-artwork";
 
 type Section = "chat" | "call" | "materials" | "ai";
 type Upload = {
@@ -42,10 +44,13 @@ export function RoomView({ id }: { id: string }) {
   const [typing, setTyping] = useState<{ id: string; name: string }[]>([]);
   const lastTyping = useRef(0);
   const [room, setRoom] = useState<Room>();
+  useStudyActivity("ROOM", Boolean(room && room.status !== "ENDED"));
   const [me, setMe] = useState<Profile>();
   const [messages, setMessages] = useState<Message[]>([]);
   const [section, setSection] = useState<Section>(
-    params.get("panel") === "call" ? "call" : "chat",
+    ["call", "materials", "ai"].includes(params.get("panel") ?? "")
+      ? (params.get("panel") as Section)
+      : "chat",
   );
   const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
   const [error, setError] = useState("");
@@ -94,8 +99,11 @@ export function RoomView({ id }: { id: string }) {
     };
   }, [id]);
   useEffect(() => {
-    if (requestedPanel === "call") {
-      const t = setTimeout(() => setSection("call"), 0);
+    if (
+      requestedPanel &&
+      ["call", "materials", "ai"].includes(requestedPanel)
+    ) {
+      const t = setTimeout(() => setSection(requestedPanel as Section), 0);
       return () => clearTimeout(t);
     }
   }, [requestedPanel]);
@@ -528,55 +536,7 @@ export function RoomView({ id }: { id: string }) {
                 />
 
                 {me?.id === room.hostId && !ended && (
-                  <details className="room-owner-settings">
-                    <summary>Gerenciar sala</summary>
-                    <form
-                      onSubmit={async (e) => {
-                        e.preventDefault();
-                        const f = new FormData(e.currentTarget);
-                        try {
-                          await api(`/study-rooms/${id}/settings`, {
-                            method: "PUT",
-                            body: JSON.stringify({
-                              title: f.get("title"),
-                              topic: f.get("topic"),
-                              locked: f.get("locked") === "on",
-                            }),
-                          });
-                          await reloadRoom();
-                        } catch (e) {
-                          setError((e as Error).message);
-                        }
-                      }}
-                    >
-                      <label>
-                        Nome
-                        <input
-                          name="title"
-                          defaultValue={room.title}
-                          maxLength={150}
-                          required
-                        />
-                      </label>
-                      <label>
-                        Tópico
-                        <textarea
-                          name="topic"
-                          defaultValue={room.topicText}
-                          maxLength={500}
-                        />
-                      </label>
-                      <label>
-                        <input
-                          type="checkbox"
-                          name="locked"
-                          defaultChecked={room.entriesLocked}
-                        />
-                        Fechar novas entradas
-                      </label>
-                      <button>Salvar sala</button>
-                    </form>
-                  </details>
+                  <RoomSettings room={room} onSaved={reloadRoom} />
                 )}
                 <div className="room-channel-note">
                   <MessageCircle size={17} />
@@ -626,11 +586,17 @@ export function RoomView({ id }: { id: string }) {
                         id={member.userId}
                         name={member.name}
                         subtitle={
-                          member.inCall ? (member.screen ? "Transmitindo tela" : member.camera ? "Na chamada · câmera ligada" : "Na chamada") : member.role === "HOST"
-                            ? "Anfitrião"
-                            : member.leftAt
-                              ? "Saiu da sessão"
-                              : "Estudante"
+                          member.inCall
+                            ? member.screen
+                              ? "Transmitindo tela"
+                              : member.camera
+                                ? "Na chamada · câmera ligada"
+                                : "Na chamada"
+                            : member.role === "HOST"
+                              ? "Anfitrião"
+                              : member.leftAt
+                                ? "Saiu da sessão"
+                                : "Estudante"
                         }
                       />
 
@@ -734,11 +700,17 @@ export function RoomView({ id }: { id: string }) {
                             id={member.userId}
                             name={member.name}
                             subtitle={
-                              member.inCall ? (member.screen ? "Transmitindo tela" : member.camera ? "Na chamada · câmera ligada" : "Na chamada") : member.role === "HOST"
-                                ? "Anfitrião"
-                                : member.leftAt
-                                  ? "Offline"
-                                  : "Estudante"
+                              member.inCall
+                                ? member.screen
+                                  ? "Transmitindo tela"
+                                  : member.camera
+                                    ? "Na chamada · câmera ligada"
+                                    : "Na chamada"
+                                : member.role === "HOST"
+                                  ? "Anfitrião"
+                                  : member.leftAt
+                                    ? "Offline"
+                                    : "Estudante"
                             }
                           />
                         </div>
@@ -746,6 +718,9 @@ export function RoomView({ id }: { id: string }) {
                     </div>
                   </div>
 
+                  {me?.id === room.hostId && !ended && (
+                    <RoomSettings room={room} onSaved={reloadRoom} />
+                  )}
                   <div className="room-mobile-sheet-actions">
                     {me?.id === room.hostId && !ended ? (
                       <button className="secondary" onClick={end}>
@@ -753,7 +728,10 @@ export function RoomView({ id }: { id: string }) {
                       </button>
                     ) : null}
                     {!ended ? (
-                      <button className="text-button leave-room" onClick={leave}>
+                      <button
+                        className="text-button leave-room"
+                        onClick={leave}
+                      >
                         Sair da turma
                       </button>
                     ) : null}

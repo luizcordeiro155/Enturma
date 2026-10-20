@@ -6,6 +6,8 @@ import { Sparkles, FileText, Brain } from "lucide-react";
 import { api } from "@/lib/api";
 import { Feedback } from "./feedback";
 import { MAX_WEB_UPLOAD_BYTES } from "@/lib/upload-limits";
+import { RoomNotebooks } from "./room-notebooks";
+import { useLiveRefresh } from "@/lib/live-updates";
 
 type Material = { id: string; fileName: string; fileSize: number };
 type Artifact = {
@@ -52,6 +54,16 @@ export function RoomTools({
   const [answer, setAnswer] = useState<Answer>();
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  useLiveRefresh(
+    "rooms_changed",
+    async () =>
+      setArtifacts(
+        await api<Artifact[]>(`/study-rooms/${roomId}/ai/artifacts`, {
+          cache: "no-store",
+        }),
+      ),
+    20000,
+  );
 
   useEffect(() => {
     Promise.all([
@@ -171,6 +183,34 @@ export function RoomTools({
             <p className="eyebrow">Biblioteca compartilhada</p>
             <h2>Materiais da turma</h2>
           </div>
+          <RoomNotebooks roomId={roomId} ended={ended} />
+          {artifacts.length > 0 && (
+            <div className="session-artifacts">
+              <h3>Preparados pelo Monitor Enturma</h3>
+              {artifacts.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className="artifact-row"
+                  onClick={() => void openArtifact(item.id)}
+                >
+                  <FileText size={18} />
+                  <span>
+                    {item.title}
+                    <small>
+                      {new Date(item.createdAt).toLocaleString("pt-BR")}
+                    </small>
+                  </span>
+                </button>
+              ))}
+            </div>
+          )}
+          {answer && (
+            <article className="ai-answer">
+              <h3>Material de estudo</h3>
+              <div className="notebook-readable-answer">{answer.answer}</div>
+            </article>
+          )}
           {materials.length ? (
             materials.map((m) => (
               <div className="room-row" key={m.id}>

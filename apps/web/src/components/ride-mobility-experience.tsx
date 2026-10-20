@@ -1,4 +1,7 @@
 "use client";
+import { StarRating } from "./star-rating";
+import { Avatar } from "./user-identity";
+import { RideSafetyCheck } from "./ride-safety-check";
 
 import {
   ArrowLeft,
@@ -12,7 +15,6 @@ import {
   Navigation,
   Route,
   ShieldCheck,
-  Star,
   Users,
   X,
 } from "lucide-react";
@@ -521,6 +523,7 @@ export function RideMobilityExperience() {
   const [cancelReason, setCancelReason] = useState("CHANGE_OF_PLANS");
   const [cancelNote, setCancelNote] = useState("");
   const [driverSeats, setDriverSeats] = useState(1);
+  const [reviewRating, setReviewRating] = useState(0);
   const [reviewTags, setReviewTags] = useState<string[]>([]);
   const mobilityRoot = useRef<HTMLDivElement>(null);
   const modeSwitchRef = useRef<HTMLDivElement>(null);
@@ -1027,6 +1030,7 @@ export function RideMobilityExperience() {
       });
       setNotice("Avaliação registrada. Obrigado por ajudar a comunidade.");
       setReviewTags([]);
+      setReviewRating(0);
       await load();
     } catch (e) {
       setError((e as Error).message);
@@ -1863,6 +1867,10 @@ export function RideMobilityExperience() {
                 </button>
               ) : null}
 
+              <RideSafetyCheck
+                matchId={activeMatch.id}
+                passenger={mode === "PASSENGER"}
+              />
               <div className="ride-safety-strip">
                 <ShieldCheck size={17} />
                 <span>
@@ -1886,19 +1894,47 @@ export function RideMobilityExperience() {
                   : recentCompleted.driverName}{" "}
                 para manter a comunidade útil.
               </p>
-              <div className="ride-review-stars" aria-label="Avaliação">
-                {[1, 2, 3, 4, 5].map((rating) => (
-                  <button
-                    type="button"
-                    key={rating}
-                    disabled={busy}
-                    aria-label={`${rating} estrela${rating > 1 ? "s" : ""}`}
-                    onClick={() => void submitCompletedReview(rating)}
-                  >
-                    <Star size={24} fill="currentColor" /> {rating}
-                  </button>
-                ))}
+              <div className="ride-review-people">
+                <Avatar
+                  user={{
+                    id: recentCompleted.driverId,
+                    name: recentCompleted.driverName,
+                    hasAvatar: recentCompleted.driverHasAvatar,
+                  }}
+                />
+                <span>→</span>
+                <Avatar
+                  user={{
+                    id: recentCompleted.passengerId,
+                    name: recentCompleted.passengerName,
+                    hasAvatar: recentCompleted.passengerHasAvatar,
+                  }}
+                />
               </div>
+              <StarRating
+                value={reviewRating}
+                onChange={setReviewRating}
+                disabled={busy}
+              />
+              <p className="ride-review-caption" aria-live="polite">
+                {
+                  [
+                    "Toque ou deslize pelas estrelas",
+                    "Precisa melhorar",
+                    "Regular",
+                    "Boa",
+                    "Muito boa",
+                    "Excelente!",
+                  ][reviewRating]
+                }
+              </p>
+              <button
+                type="button"
+                disabled={busy || !reviewRating}
+                onClick={() => void submitCompletedReview(reviewRating)}
+              >
+                {busy ? "Enviando…" : "Enviar avaliação"}
+              </button>
               <div className="ride-review-tags">
                 {["Pontual", "Educado", "Boa direção", "Comunicação boa"].map(
                   (tag) => (

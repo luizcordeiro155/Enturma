@@ -10,6 +10,9 @@ import {
   importBackup,
   encryptIdentityVault,
   decryptIdentityVault,
+  deriveAccountWrappingKey,
+  encryptAccountIdentity,
+  decryptAccountIdentity,
 } from "./private-chat-crypto";
 vi.stubGlobal("crypto", webcrypto);
 describe("private chat cryptography", () => {
@@ -117,4 +120,44 @@ it("unlocks the same identity on another device, preserving old messages and rej
   await expect(
     encryptIdentityVault(original, "short", "alice"),
   ).rejects.toThrow();
+});
+
+it("opens the same account identity on a new device without a separate chat password", async () => {
+  const identity = await createIdentity();
+  const first = await deriveAccountWrappingKey(
+    "account-password-123",
+    "alice",
+    1,
+  );
+  const vault = await encryptAccountIdentity(identity, first, "alice");
+  const second = await deriveAccountWrappingKey(
+    "account-password-123",
+    "alice",
+    1,
+  );
+  expect(first.key.extractable).toBe(false);
+  expect(JSON.stringify(vault)).not.toContain(identity.privateKey.d!);
+  expect(await decryptAccountIdentity(vault, second, "alice")).toEqual(
+    identity,
+  );
+  await expect(
+    decryptAccountIdentity(
+      vault,
+      await deriveAccountWrappingKey("wrong-password", "alice", 1),
+      "alice",
+    ),
+  ).rejects.toThrow();
+  await expect(decryptAccountIdentity(vault, first, "bob")).rejects.toThrow();
+  await expect(
+    decryptAccountIdentity({ ...vault, epoch: 2 }, first, "alice"),
+  ).rejects.toThrow();
+  const rotated = await deriveAccountWrappingKey(
+    "new-account-password",
+    "alice",
+    2,
+  );
+  const migrated = await encryptAccountIdentity(identity, rotated, "alice");
+  expect(await decryptAccountIdentity(migrated, rotated, "alice")).toEqual(
+    identity,
+  );
 });

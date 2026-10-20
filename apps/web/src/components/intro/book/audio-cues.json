@@ -1,0 +1,24 @@
+{
+  "fps": 24,
+  "edition": "restrained-foley-v2",
+  "cues": [
+    { "scene": 0, "frame": 20, "kind": "page", "gain": 0.12 },
+    { "scene": 3, "frame": 24, "kind": "page", "gain": 0.09 },
+    { "scene": 4, "frame": 82, "kind": "reward", "gain": 0.055 },
+    { "scene": 5, "frame": 73, "kind": "paper", "gain": 0.07 },
+    { "scene": 7, "frame": 50, "kind": "message", "gain": 0.055 },
+    {
+      "scene": 8,
+      "frame": 20,
+      "durationFrames": 78,
+      "kind": "engine",
+      "gain": 0.035
+    },
+    { "scene": 8, "frame": 98, "kind": "arrival", "gain": 0.055 },
+    { "scene": 9, "frame": 62, "kind": "page", "gain": 0.06 },
+    { "scene": 10, "frame": 56, "kind": "reward", "gain": 0.055 },
+    { "scene": 11, "frame": 76, "kind": "message", "gain": 0.05 },
+    { "scene": 12, "frame": 40, "kind": "paper", "gain": 0.06 },
+    { "scene": 15, "frame": 24, "kind": "resolve", "gain": 0.075 }
+  ]
+}

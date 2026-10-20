@@ -54,7 +54,10 @@ type ActivePenalty = {
   status: string;
 };
 
-function moderationSecondsLeft(penalty: ActivePenalty | undefined, now: number) {
+function moderationSecondsLeft(
+  penalty: ActivePenalty | undefined,
+  now: number,
+) {
   if (!penalty) return 0;
   if (penalty.endsAt)
     return Math.max(
@@ -251,6 +254,13 @@ export function RoomChat(props: Props) {
     }
   }, [messages, compact, scrollRoomToLatest]);
 
+  const latestMonitorTurn = props.systemEvents
+    ?.filter((event) => event.kind.startsWith("MONITOR_"))
+    .at(-1)?.id;
+  useLayoutEffect(() => {
+    if (latestMonitorTurn && nearBottom.current) scrollRoomToLatest("auto");
+  }, [latestMonitorTurn, scrollRoomToLatest]);
+
   function selectImage(file: File | null) {
     if (!file) return;
     if (
@@ -400,6 +410,7 @@ export function RoomChat(props: Props) {
         ) : null}
 
         {(props.systemEvents ?? [])
+          .filter((event) => !event.kind.startsWith("MONITOR_"))
           .slice(0, 4)
           .reverse()
           .map((event) => (
@@ -452,216 +463,272 @@ export function RoomChat(props: Props) {
             <p>Compartilhe sua primeira dúvida com a turma.</p>
           </div>
         ) : (
-          messages.map((message) => {
-            const replied = message.replyTo
-              ? messageMap.get(message.replyTo)
-              : undefined;
-            return (
-              <article
-                className={`message persistent-message ${message.userId === me?.id ? "mine" : ""} ${roomActionMessage?.id === message.id ? "message-action-selected" : ""}`}
-                key={message.id}
-                onPointerDown={(event) => startRoomLongPress(event, message)}
-                onPointerMove={moveRoomLongPress}
-                onPointerUp={cancelRoomLongPress}
-                onPointerCancel={cancelRoomLongPress}
-                onContextMenu={(event) => {
-                  if (
-                    !(event.target as HTMLElement).closest("input,textarea")
-                  ) {
-                    event.preventDefault();
-                    setRoomActionAnchor(
-                      messageActionAnchor(event.currentTarget),
-                    );
-                    setRoomActionMessage(message);
-                  }
-                }}
-              >
-                <button
-                  type="button"
-                  className="message-overflow-trigger"
-                  aria-label="Ações da mensagem"
-                  onClick={(event) => {
-                    setRoomActionAnchor(
-                      messageActionAnchor(
-                        event.currentTarget.closest("article")!,
-                      ),
-                    );
-                    setRoomActionMessage(message);
-                  }}
-                >
-                  <MoreHorizontal size={19} />
-                </button>
-                {message.id === firstUnread && (
-                  <div
-                    className="unread-divider"
-                    role="separator"
-                    aria-label="Mensagens não lidas"
-                  >
-                    Novas mensagens
-                  </div>
-                )}
-                <div className="message-avatar">
-                  <UserIdentity
-                    compact
-                    user={{ ...message, id: message.userId }}
-                  />
-                </div>
-                <div className="message-content">
-                  <header>
-                    <UserIdentity
-                      nameOnly
-                      user={{ ...message, id: message.userId }}
-                    />
-                    <small>
-                      {new Date(message.createdAt).toLocaleString("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </small>
-                  </header>
-
-                  {replied ? (
-                    <button
-                      className="reply-preview"
-                      type="button"
-                      onClick={() => {
-                        const target = document.getElementById(
-                          `message-${replied.id}`,
-                        );
-                        if (target)
-                          revealChatMessage(
-                            target,
-                            document.documentElement.dataset.reducedMotion ===
-                              "true" ||
-                              matchMedia("(prefers-reduced-motion: reduce)")
-                                .matches
-                              ? "instant"
-                              : "smooth",
-                          );
-                      }}
-                    >
-                      <Reply size={13} />
-                      <strong>{replied.name}</strong>
-                      <span>
-                        {replied.deletedAt
-                          ? "Mensagem removida"
-                          : (replied.body ?? "Imagem")}
-                      </span>
-                    </button>
-                  ) : null}
-
-                  <div id={`message-${message.id}`}>
-                    {message.deletedAt ? (
-                      <p className="muted">Mensagem removida.</p>
-                    ) : (
-                      <>
-                        {editing === message.id ? (
-                          <form
-                            onSubmit={async (e) => {
-                              e.preventDefault();
-                              try {
-                                await api(
-                                  `/study-rooms/${roomId}/messages/${message.id}`,
-                                  {
-                                    method: "PUT",
-                                    body: JSON.stringify({ body: editBody }),
-                                  },
-                                );
-                                setEditing(null);
-                                await onReloadMessages();
-                              } catch (e) {
-                                setError((e as Error).message);
-                              }
-                            }}
-                          >
-                            <label>
-                              Editar mensagem
-                              <textarea
-                                value={editBody}
-                                onChange={(e) => setEditBody(e.target.value)}
-                                maxLength={4000}
-                              />
-                            </label>
-                            <button>Salvar edição</button>
-                            <button
-                              type="button"
-                              className="secondary"
-                              onClick={() => setEditing(null)}
-                            >
-                              Cancelar
-                            </button>
-                          </form>
-                        ) : message.body ? (
-                          <RichMessage text={message.body} />
-                        ) : null}
-                        {message.editedAt && (
-                          <small className="muted">editada</small>
-                        )}
-                        {message.attachmentId ? (
-                          <ChatImage
-                            src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
-                            alt={
-                              message.attachmentName ?? "Imagem compartilhada"
-                            }
-                          />
-                        ) : null}
-                      </>
-                    )}
-                  </div>
-
-                  {!message.deletedAt && (
-                    <div className="message-reactions">
-                      {message.reactions?.map((r) => (
+          [
+            ...messages.map((message) => ({
+              id: message.id,
+              createdAt: message.createdAt,
+              message,
+              event: undefined as RoomSystemEvent | undefined,
+            })),
+            ...(props.systemEvents ?? [])
+              .filter((event) => event.kind.startsWith("MONITOR_"))
+              .map((event) => ({
+                id: event.id,
+                createdAt: event.createdAt,
+                message: undefined as Message | undefined,
+                event,
+              })),
+          ]
+            .sort(
+              (a, b) =>
+                a.createdAt.localeCompare(b.createdAt) ||
+                a.id.localeCompare(b.id),
+            )
+            .map((entry) => {
+              if (entry.event)
+                return (
+                  <article className="monitor-conversation-turn" key={entry.id}>
+                    <BookOpen size={24} aria-hidden="true" />
+                    <div>
+                      <strong>
+                        Monitor Enturma <span className="privacy-pill">IA</span>
+                      </strong>
+                      <RichMessage text={entry.event.message} />
+                      {entry.event.kind === "MONITOR_MATERIAL" && (
+                        <a href={`?panel=materials`}>
+                          Abrir materiais da turma
+                        </a>
+                      )}
+                      <small>
+                        {new Date(entry.createdAt).toLocaleTimeString("pt-BR", {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </small>
+                      {!ended && (
                         <button
                           type="button"
-                          key={r.emoji}
-                          aria-pressed={r.mine}
-                          onClick={() =>
-                            void react(message, r.emoji).catch((e) =>
-                              setError(e.message),
-                            )
-                          }
+                          className="secondary"
+                          onClick={() => setDraft("@Monitor Enturma ")}
                         >
-                          <AnimatedEmoji value={r.emoji} /> {r.count}
+                          Responder ao Monitor
                         </button>
-                      ))}
+                      )}
+                    </div>
+                  </article>
+                );
+              const message = entry.message!;
+              const replied = message.replyTo
+                ? messageMap.get(message.replyTo)
+                : undefined;
+              return (
+                <article
+                  className={`message persistent-message ${message.userId === me?.id ? "mine" : ""} ${roomActionMessage?.id === message.id ? "message-action-selected" : ""}`}
+                  key={message.id}
+                  onPointerDown={(event) => startRoomLongPress(event, message)}
+                  onPointerMove={moveRoomLongPress}
+                  onPointerUp={cancelRoomLongPress}
+                  onPointerCancel={cancelRoomLongPress}
+                  onContextMenu={(event) => {
+                    if (
+                      !(event.target as HTMLElement).closest("input,textarea")
+                    ) {
+                      event.preventDefault();
+                      setRoomActionAnchor(
+                        messageActionAnchor(event.currentTarget),
+                      );
+                      setRoomActionMessage(message);
+                    }
+                  }}
+                >
+                  <button
+                    type="button"
+                    className="message-overflow-trigger"
+                    aria-label="Ações da mensagem"
+                    onClick={(event) => {
+                      setRoomActionAnchor(
+                        messageActionAnchor(
+                          event.currentTarget.closest("article")!,
+                        ),
+                      );
+                      setRoomActionMessage(message);
+                    }}
+                  >
+                    <MoreHorizontal size={19} />
+                  </button>
+                  {message.id === firstUnread && (
+                    <div
+                      className="unread-divider"
+                      role="separator"
+                      aria-label="Mensagens não lidas"
+                    >
+                      Novas mensagens
                     </div>
                   )}
-                  {!message.deletedAt ? (
-                    <div className="message-actions">
-                      <button
-                        className="text-button"
-                        type="button"
-                        onClick={() => setReplyTo(message)}
-                      >
-                        <Reply size={14} /> Responder
-                      </button>
+                  <div className="message-avatar">
+                    <UserIdentity
+                      compact
+                      user={{ ...message, id: message.userId }}
+                    />
+                  </div>
+                  <div className="message-content">
+                    <header>
+                      <UserIdentity
+                        nameOnly
+                        user={{ ...message, id: message.userId }}
+                      />
+                      <small>
+                        {new Date(message.createdAt).toLocaleString("pt-BR", {
+                          day: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </small>
+                    </header>
 
-                      <div className="quick-reactions">
-                        {QUICK_EMOJIS.slice(0, compact ? 2 : 4).map((emoji) => (
+                    {replied ? (
+                      <button
+                        className="reply-preview"
+                        type="button"
+                        onClick={() => {
+                          const target = document.getElementById(
+                            `message-${replied.id}`,
+                          );
+                          if (target)
+                            revealChatMessage(
+                              target,
+                              document.documentElement.dataset.reducedMotion ===
+                                "true" ||
+                                matchMedia("(prefers-reduced-motion: reduce)")
+                                  .matches
+                                ? "instant"
+                                : "smooth",
+                            );
+                        }}
+                      >
+                        <Reply size={13} />
+                        <strong>{replied.name}</strong>
+                        <span>
+                          {replied.deletedAt
+                            ? "Mensagem removida"
+                            : (replied.body ?? "Imagem")}
+                        </span>
+                      </button>
+                    ) : null}
+
+                    <div id={`message-${message.id}`}>
+                      {message.deletedAt ? (
+                        <p className="muted">Mensagem removida.</p>
+                      ) : (
+                        <>
+                          {editing === message.id ? (
+                            <form
+                              onSubmit={async (e) => {
+                                e.preventDefault();
+                                try {
+                                  await api(
+                                    `/study-rooms/${roomId}/messages/${message.id}`,
+                                    {
+                                      method: "PUT",
+                                      body: JSON.stringify({ body: editBody }),
+                                    },
+                                  );
+                                  setEditing(null);
+                                  await onReloadMessages();
+                                } catch (e) {
+                                  setError((e as Error).message);
+                                }
+                              }}
+                            >
+                              <label>
+                                Editar mensagem
+                                <textarea
+                                  value={editBody}
+                                  onChange={(e) => setEditBody(e.target.value)}
+                                  maxLength={4000}
+                                />
+                              </label>
+                              <button>Salvar edição</button>
+                              <button
+                                type="button"
+                                className="secondary"
+                                onClick={() => setEditing(null)}
+                              >
+                                Cancelar
+                              </button>
+                            </form>
+                          ) : message.body ? (
+                            <RichMessage text={message.body} />
+                          ) : null}
+                          {message.editedAt && (
+                            <small className="muted">editada</small>
+                          )}
+                          {message.attachmentId ? (
+                            <ChatImage
+                              src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
+                              alt={
+                                message.attachmentName ?? "Imagem compartilhada"
+                              }
+                            />
+                          ) : null}
+                        </>
+                      )}
+                    </div>
+
+                    {!message.deletedAt && (
+                      <div className="message-reactions">
+                        {message.reactions?.map((r) => (
                           <button
                             type="button"
-                            key={emoji}
-                            title={`Reagir com ${emoji}`}
-                            aria-label={`Reagir com ${emoji}`}
+                            key={r.emoji}
+                            aria-pressed={r.mine}
                             onClick={() =>
-                              void react(message, emoji).catch((e) =>
+                              void react(message, r.emoji).catch((e) =>
                                 setError(e.message),
                               )
                             }
                           >
-                            {emoji}
+                            <AnimatedEmoji value={r.emoji} /> {r.count}
                           </button>
                         ))}
                       </div>
-                    </div>
-                  ) : null}
-                </div>
-              </article>
-            );
-          })
+                    )}
+                    {!message.deletedAt ? (
+                      <div className="message-actions">
+                        <button
+                          className="text-button"
+                          type="button"
+                          onClick={() => setReplyTo(message)}
+                        >
+                          <Reply size={14} /> Responder
+                        </button>
+
+                        <div className="quick-reactions">
+                          {QUICK_EMOJIS.slice(0, compact ? 2 : 4).map(
+                            (emoji) => (
+                              <button
+                                type="button"
+                                key={emoji}
+                                title={`Reagir com ${emoji}`}
+                                aria-label={`Reagir com ${emoji}`}
+                                onClick={() =>
+                                  void react(message, emoji).catch((e) =>
+                                    setError(e.message),
+                                  )
+                                }
+                              >
+                                {emoji}
+                              </button>
+                            ),
+                          )}
+                        </div>
+                      </div>
+                    ) : null}
+                  </div>
+                </article>
+              );
+            })
         )}
         <div
           ref={bottomRef}

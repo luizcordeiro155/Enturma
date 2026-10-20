@@ -3,6 +3,7 @@ import { useEffect, useRef } from "react";
 import { api, invalidateApiCache } from "./api";
 
 export type AppEventType =
+  | "private_typing_changed"
   | "private_call_changed"
   | "forum_changed"
   | "notifications_changed"
@@ -72,6 +73,7 @@ export function useAppConnection() {
 
             if (
               [
+                "private_typing_changed",
                 "private_call_changed",
                 "forum_changed",
                 "notifications_changed",

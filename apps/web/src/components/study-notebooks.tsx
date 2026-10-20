@@ -1,4 +1,5 @@
 "use client";
+import { useStudyActivity } from "@/lib/use-study-activity";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -85,6 +86,7 @@ const modes = [
   },
 ];
 export function StudyNotebooks({ id }: { id?: string }) {
+  useStudyActivity("NOTEBOOK", Boolean(id));
   const router = useRouter();
   const [items, setItems] = useState<
     { id: string; title: string; updatedAt: string }[]
@@ -97,6 +99,9 @@ export function StudyNotebooks({ id }: { id?: string }) {
   const [data, setData] = useState<Notebook | undefined>(() =>
     id ? peekApiSnapshot<Notebook>(`/notebooks/${id}`) : undefined,
   );
+  const [search, setSearch] = useState("");
+  const [planDays, setPlanDays] = useState(7);
+  const [planMinutes, setPlanMinutes] = useState(30);
   const [title, setTitle] = useState("");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
@@ -219,7 +224,10 @@ export function StudyNotebooks({ id }: { id?: string }) {
     try {
       const r = await post<{ id: string }>(`/notebooks/${id}/generations`, {
         id: crypto.randomUUID(),
-        question,
+        question:
+          mode === "STUDY_PLAN"
+            ? `Monte um plano de ${planDays} dias com ${planMinutes} minutos por dia usando somente as fontes selecionadas. Inclua revisão e prática de recuperação. ${question}`
+            : question,
         mode,
         level,
         sourceIds: selected.map((s) => s.id),
@@ -364,21 +372,36 @@ export function StudyNotebooks({ id }: { id?: string }) {
                 Criar caderno
               </button>
             </form>
+            <label className="notebook-library-search">
+              Buscar caderno
+              <input
+                type="search"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Nome do caderno…"
+              />
+            </label>
             <div className="notebook-library">
-              {items.map((n) => (
-                <Link
-                  key={n.id}
-                  href={`/notebooks/${n.id}`}
-                  className="notebook-cover"
-                >
-                  <BookOpen />
-                  <h2>{n.title}</h2>
-                  <span>
-                    Atualizado em{" "}
-                    {new Date(n.updatedAt).toLocaleDateString("pt-BR")}
-                  </span>
-                </Link>
-              ))}
+              {items
+                .filter((n) =>
+                  n.title
+                    .toLocaleLowerCase()
+                    .includes(search.toLocaleLowerCase()),
+                )
+                .map((n) => (
+                  <Link
+                    key={n.id}
+                    href={`/notebooks/${n.id}`}
+                    className="notebook-cover"
+                  >
+                    <BookOpen />
+                    <h2>{n.title}</h2>
+                    <span>
+                      Atualizado em{" "}
+                      {new Date(n.updatedAt).toLocaleDateString("pt-BR")}
+                    </span>
+                  </Link>
+                ))}
             </div>
             {!items.length ? (
               <div className="notebook-empty">
@@ -637,6 +660,51 @@ export function StudyNotebooks({ id }: { id?: string }) {
                     </button>
                   ))}
                 </div>
+                <section className="notebook-study-plan">
+                  <h3>Um plano que cabe na sua rotina</h3>
+                  <div>
+                    <label>
+                      Dias de estudo
+                      <input
+                        type="number"
+                        min={1}
+                        max={30}
+                        value={planDays}
+                        onChange={(e) =>
+                          setPlanDays(
+                            Math.max(1, Math.min(30, Number(e.target.value))),
+                          )
+                        }
+                      />
+                    </label>
+                    <label>
+                      Minutos por dia
+                      <input
+                        type="number"
+                        min={10}
+                        max={180}
+                        step={5}
+                        value={planMinutes}
+                        onChange={(e) =>
+                          setPlanMinutes(
+                            Math.max(10, Math.min(180, Number(e.target.value))),
+                          )
+                        }
+                      />
+                    </label>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={busy || !data.aiEnabled || !selected.length}
+                    onClick={() => void generate("STUDY_PLAN")}
+                  >
+                    Criar meu plano de revisão
+                  </button>
+                  <small>
+                    Baseado nas {selected.length} fontes selecionadas. A IA
+                    prepara o plano; você escolhe quando estudar.
+                  </small>
+                </section>
                 <form
                   className="notebook-question"
                   onSubmit={(e) => {

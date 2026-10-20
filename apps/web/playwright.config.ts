@@ -26,7 +26,10 @@ export default defineConfig({
     {
       name: "chromium-academic",
       testMatch: /academic-identity\.spec\.ts/,
-      use: { ...devices["Desktop Chrome"], viewport: { width: 1376, height: 900 } },
+      use: {
+        ...devices["Desktop Chrome"],
+        viewport: { width: 1376, height: 900 },
+      },
     },
     {
       name: "chromium-ux",
@@ -60,7 +63,8 @@ export default defineConfig({
     },
     {
       name: "chromium-experience",
-      testMatch: /(?:profile-v3|responsive-shell|study-journey)\.spec\.ts/,
+      testMatch:
+        /(?:connected-experience|profile-v3|responsive-shell|study-journey)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },

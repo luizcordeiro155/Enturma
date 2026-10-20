@@ -16,6 +16,8 @@ import { api, post, peekApiSnapshot } from "@/lib/api";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { Feedback, Loading } from "./feedback";
 import { Shell } from "./shell";
+import { RoomArtwork } from "./room-artwork";
+import { RoomCodeEntry } from "./room-code-entry";
 
 type RecommendedRoom = Room & {
   recommendationReason?: "SUBJECT" | "COURSE" | "RELATED";
@@ -122,6 +124,7 @@ export function StudyRoomsDiscovery() {
   return (
     <Shell>
       <section className="rooms-discovery">
+        <RoomCodeEntry />
         <header className="rooms-discovery-hero">
           <div>
             <span className="rooms-discovery-kicker">
@@ -202,6 +205,7 @@ export function StudyRoomsDiscovery() {
 
               return (
                 <article className="rooms-discovery-card" key={room.id}>
+                  <RoomArtwork room={room} />
                   <div className="rooms-card-top">
                     <div className="rooms-card-main">
                       <span

@@ -1,5 +1,5 @@
 import { test } from "./student-fixture";
-import { authenticate, authenticateWithPassword } from "./session";
+import { authenticate } from "./session";
 import { expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 test("amizade, perfil público e conversa ponta a ponta entre dois navegadores", async ({
@@ -30,6 +30,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
 
   async function initializeConversationKeys(p: Page) {
     await p.goto("/friends");
+    await expect(p.locator("#private-sync")).toBeVisible();
     await p.getByText("Chaves e backup das conversas").click();
     await expect(
       p.getByRole("button", { name: "Baixar backup cifrado" }),
@@ -91,22 +92,37 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     }, kind);
     expect(dimensions).toEqual([width, height]);
   }
+  await page.getByRole("button", { name: /^Tema e identidade/ }).click();
   await page
     .getByLabel("Cor principal do perfil", { exact: true })
     .fill("#b328ac");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Aplicar", exact: true })
+    .click();
   await expect
     .poll(() =>
       page
-        .locator(".public-profile-card")
+        .locator(".profile-preview-stage .public-profile-card")
         .evaluate((el) =>
           getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
         ),
     )
     .toBe("#b328ac");
+  await page.getByRole("button", { name: /^Sobre você/ }).click();
   await page.getByLabel("Status personalizado").fill("Estudando JavaScript");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Aplicar", exact: true })
+    .click();
+  await page.getByRole("button", { name: /^Decoração do avatar/ }).click();
   await page
     .getByRole("combobox", { name: "Decoração do avatar" })
     .selectOption("RING");
+  await page
+    .getByRole("dialog")
+    .getByRole("button", { name: "Aplicar", exact: true })
+    .click();
   await page.getByRole("button", { name: "Salvar perfil" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
@@ -115,7 +131,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await expect
     .poll(() =>
       page
-        .locator(".public-profile-card")
+        .locator(".profile-preview-stage .public-profile-card")
         .evaluate((el) =>
           getComputedStyle(el).getPropertyValue("--profile-accent").trim(),
         ),
@@ -168,6 +184,14 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await other.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
+  await page.getByLabel("Mensagem privada").fill("Testando digitação");
+  await expect(other.locator(".conversation-typing")).toContainText(a, {
+    timeout: 10000,
+  });
+  await page.getByLabel("Mensagem privada").fill("");
+  await expect(other.locator(".conversation-typing")).toHaveText("", {
+    timeout: 10000,
+  });
   // Incoming refreshes must preserve the established key and the typed draft.
   await page.getByLabel("Mensagem privada").fill("Rascunho preservado");
   await page.evaluate(() =>
@@ -321,7 +345,18 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
       return Math.abs(bounds!.y + bounds!.height / 2 - viewport.height / 2);
     })
     .toBeLessThan(16);
-  await page.screenshot({ path: "../../.local/profile-popover.png" });
+  await expect(page.getByRole("dialog", { name: `Perfil de ${b}` })).toHaveCSS(
+    "opacity",
+    "1",
+  );
+  await page.screenshot({
+    path: "../../.local/profile-popover.png",
+    animations: "disabled",
+  });
+  await expect(page.locator(".profile-public-primary")).toHaveCSS(
+    "background-color",
+    "rgb(24, 63, 54)",
+  );
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
   await page
@@ -352,51 +387,29 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await page.getByRole("button", { name: "Voltar para conversas" }).click();
   const sync = page.locator("#private-sync");
   await sync
-    .getByLabel("Senha das conversas", { exact: true })
-    .fill("conversation-sync-secret-123");
+    .getByLabel("Senha da sua conta", { exact: true })
+    .fill("E2E-password-long-123");
   await sync
-    .getByLabel("Confirmar senha das conversas")
-    .fill("conversation-sync-secret-123");
-  await sync.getByRole("button", { name: "Ativar sincronização" }).click();
-  await expect(sync).toContainText("Sincronização ativa neste dispositivo");
-  const vaultResponse = await page.request.get("/api/backend/private-vault");
-  expect(await vaultResponse.text()).not.toContain(
-    "conversation-sync-secret-123",
+    .getByRole("button", { name: "Vincular conversas à conta" })
+    .click();
+  await expect(sync).toContainText("Seu login abre as conversas");
+  const vaultResponse = await page.request.get(
+    "/api/backend/private-account-vault",
   );
+  expect(await vaultResponse.text()).not.toContain("E2E-password-long-123");
   const clean = await browser.newContext();
   const fresh = await clean.newPage();
-  await authenticateWithPassword(
-    clean,
-    request,
-    `${a}@example.test`,
-    "E2E-password-long-123",
+  await fresh.goto("/login?next=%2Ffriends");
+  await fresh.locator('input[name="email"]').fill(`${a}@example.test`);
+  await fresh.locator('input[name="password"]').fill("E2E-password-long-123");
+  await fresh.getByRole("button", { name: "Entrar", exact: true }).click();
+  await expect(fresh).toHaveURL(/\/friends/);
+  await expect(fresh.locator("#private-sync")).toContainText(
+    "Seu login abre as conversas",
   );
-  await fresh.goto("/friends");
-  await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(
-    fresh.getByText("Sua chave precisa de atenção", { exact: true }),
-  ).toBeVisible();
-  await expect(fresh.getByLabel("Mensagem privada")).toBeDisabled();
-  await fresh
-    .getByRole("button", { name: "Desbloquear neste dispositivo" })
-    .click();
-  const unlock = fresh.locator("#private-sync");
-  await unlock
-    .getByLabel("Senha das conversas", { exact: true })
-    .fill("wrong-conversation-password");
-  await unlock
-    .getByRole("button", { name: "Desbloquear conversas", exact: true })
-    .click();
-  await expect(unlock.getByRole("alert")).toContainText(
-    "Confira a senha das conversas",
-  );
-  await expect(fresh.getByLabel("Mensagem privada")).not.toBeVisible();
-  await unlock
-    .getByLabel("Senha das conversas", { exact: true })
-    .fill("conversation-sync-secret-123");
-  await unlock
-    .getByRole("button", { name: "Desbloquear conversas", exact: true })
-    .click();
+    fresh.getByLabel("Senha da sua conta", { exact: true }),
+  ).toHaveCount(0);
   await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(fresh.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(

@@ -267,6 +267,9 @@ class PlatformIntegrationTest {
   @Autowired CatalogService catalog;
   @Autowired ProfileService profiles;
   @Autowired StudyService study;
+  @Autowired AccountVaultController accountVault;
+  @Autowired br.com.enturma.ai.RoomMonitorService monitor;
+  @Autowired br.com.enturma.ai.RoomNotebookController roomNotebooks;
   @Autowired ChatService chat;
   @Autowired RideService rides;
   @Autowired RideMatchingService rideMatching;
@@ -684,6 +687,59 @@ class PlatformIntegrationTest {
                 .contentType("application/json")
                 .content("{\"version\":2,\"data\":\"invalid\"}"))
         .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  void accountVaultPreservesIdentityAndRejectsStalePasswordEpochs() throws Exception {
+    var key = new SocialController.PublicKey("EC", "P-256", "a".repeat(43), "b".repeat(43));
+    social.identity(host, key);
+    var envelope = new AccountVaultController.Envelope(3, 1, key, "c".repeat(16), "d".repeat(128));
+    accountVault.save(host, envelope);
+    assertThat(((Map<?, ?>) accountVault.get(member)).containsKey("envelope")).isFalse();
+    assertThatThrownBy(() -> accountVault.save(host, envelope)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> accountVault.save(member, envelope)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () -> accountVault.verify(host, new AccountVaultController.Password("wrong-password")))
+        .isInstanceOf(ApiException.class);
+    assertThat(
+            ((Map<?, ?>)
+                    accountVault.verify(
+                        host, new AccountVaultController.Password("test-password-long")))
+                .containsKey("epoch"))
+        .isTrue();
+    db.jdbc.update("UPDATE app_user SET credential_version=2 WHERE id=?", host.id());
+    assertThatThrownBy(() -> accountVault.save(host, envelope)).isInstanceOf(ApiException.class);
+    accountVault.save(
+        host, new AccountVaultController.Envelope(3, 2, key, "c".repeat(16), "e".repeat(128)));
+    assertThat(((Map<?, ?>) accountVault.get(host)).get("epoch")).isEqualTo(2);
+    mvc.perform(get("/api/v1/private-account-vault")).andExpect(status().isUnauthorized());
+  }
+
+  @Test
+  void privateTypingRequiresAcceptedFriendshipExpiresAndStopsImmediately() {
+    UUID id = UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO friendship(id,requester,recipient,status) VALUES (?,?,?,'ACCEPTED')",
+        id,
+        host.id(),
+        member.id());
+    social.typing(host, id, new SocialController.Typing(true));
+    assertThat((List<?>) social.typing(host, id)).isEmpty();
+    assertThat((List<?>) social.typing(member, id)).hasSize(1);
+    assertThatThrownBy(() -> social.typing(outsider, id)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> social.typing(outsider, id, new SocialController.Typing(true)))
+        .isInstanceOf(ApiException.class);
+    social.typing(host, id, new SocialController.Typing(false));
+    assertThat((List<?>) social.typing(member, id)).isEmpty();
+    social.typing(host, id, new SocialController.Typing(true));
+    db.jdbc.update(
+        "UPDATE private_typing_presence SET expires_at=now()-interval '1 second' WHERE"
+            + " friendship_id=?",
+        id);
+    assertThat((List<?>) social.typing(member, id)).isEmpty();
+    db.jdbc.update("INSERT INTO user_block VALUES (?,?)", member.id(), host.id());
+    assertThatThrownBy(() -> social.typing(host, id, new SocialController.Typing(true)))
+        .isInstanceOf(ApiException.class);
   }
 
   @Test
@@ -1123,6 +1179,154 @@ class PlatformIntegrationTest {
   }
 
   Actor host, member, outsider, admin;
+  @Autowired br.com.enturma.community.ProfileCommunityController profileCommunity;
+  @Autowired PortfolioAttachmentController portfolioAssets;
+  @Autowired PortfolioController portfolio;
+  @Autowired RoomMediaController roomMedia;
+  @Autowired RoomShareController roomShare;
+  @Autowired RideSafetyController rideSafety;
+  @Autowired br.com.enturma.ai.AppHelpController appHelp;
+
+  @Test
+  void profileActivityIsOptInAndNeverPublishesPrivateCalls() {
+    profileCommunity.activity(
+        host, new br.com.enturma.community.ProfileCommunityController.Activity("GAME"));
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM profile_activity WHERE user_id=?", Integer.class, host.id()))
+        .isZero();
+    db.jdbc.update(
+        "INSERT INTO profile_privacy_setting(user_id,field,visible) VALUES (?,'ACTIVITY',true) ON"
+            + " CONFLICT(user_id,field) DO UPDATE SET visible=true",
+        host.id());
+    profileCommunity.activity(
+        host, new br.com.enturma.community.ProfileCommunityController.Activity("GAME"));
+    var view = (Map<?, ?>) profileCommunity.community(member, host.id());
+    assertThat((List<?>) view.get("activity")).hasSize(1);
+    assertThat(((Map<?, ?>) ((List<?>) view.get("activity")).getFirst()).get("active"))
+        .isEqualTo(true);
+    profileCommunity.stop(host, "NOTEBOOK");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM profile_activity WHERE user_id=? AND ended_at IS NULL",
+                Integer.class,
+                host.id()))
+        .isEqualTo(1);
+    profileCommunity.stop(host, "GAME");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM profile_activity WHERE user_id=? AND ended_at IS NULL",
+                Integer.class,
+                host.id()))
+        .isZero();
+    db.jdbc.update(
+        "UPDATE profile_privacy_setting SET visible=false WHERE user_id=? AND field='ACTIVITY'",
+        host.id());
+    assertThat(((Map<?, ?>) profileCommunity.community(member, host.id())).containsKey("activity"))
+        .isFalse();
+    db.jdbc.update("INSERT INTO user_block VALUES (?,?)", host.id(), member.id());
+    assertThatThrownBy(() -> profileCommunity.community(member, host.id()))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void portfolioFilesRequireOwnershipAndExplicitPublication() throws Exception {
+    var file =
+        new org.springframework.mock.web.MockMultipartFile(
+            "file",
+            "trabalho.pdf",
+            "application/pdf",
+            "%PDF-1.7\nTest document".getBytes(java.nio.charset.StandardCharsets.UTF_8));
+    UUID asset = (UUID) ((Map<?, ?>) portfolioAssets.upload(host, file)).get("id");
+    assertThat(portfolioAssets.own(host, asset).getHeaders().getFirst("Content-Disposition"))
+        .startsWith("attachment");
+    assertThatThrownBy(() -> portfolioAssets.own(member, asset)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> portfolioAssets.published(asset)).isInstanceOf(ApiException.class);
+    var projects =
+        List.of(
+            new PortfolioController.Project(
+                UUID.randomUUID(),
+                "Pesquisa",
+                "Trabalho acadêmico",
+                "https://example.test",
+                List.of(asset)));
+    assertThatThrownBy(
+            () ->
+                portfolio.save(
+                    member, new PortfolioController.Portfolio(true, "", "", List.of(), projects)))
+        .isInstanceOf(ApiException.class);
+    portfolio.save(host, new PortfolioController.Portfolio(false, "", "", List.of(), projects));
+    assertThatThrownBy(() -> portfolioAssets.published(asset)).isInstanceOf(ApiException.class);
+    portfolio.save(host, new PortfolioController.Portfolio(true, "", "", List.of(), projects));
+    assertThat(portfolioAssets.published(asset).getBody()).isEqualTo(file.getBytes());
+    portfolio.save(host, new PortfolioController.Portfolio(true, "", "", List.of(), List.of()));
+    assertThatThrownBy(() -> portfolioAssets.published(asset)).isInstanceOf(ApiException.class);
+    var html =
+        new org.springframework.mock.web.MockMultipartFile(
+            "file", "fake.png", "image/png", "<script>alert(1)</script>".getBytes());
+    assertThatThrownBy(() -> portfolioAssets.upload(host, html)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                portfolio.save(
+                    host,
+                    new PortfolioController.Portfolio(
+                        true,
+                        "",
+                        "",
+                        List.of(),
+                        List.of(
+                            new PortfolioController.Project(
+                                null, "Unsafe", "", "javascript:alert(1)", List.of())))))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void roomArtworkRequiresHostAndRejectsDisguisedHtml() throws Exception {
+    UUID id = room(8);
+    var image =
+        new org.springframework.mock.web.MockMultipartFile(
+            "file", "banner.gif", "image/gif", "GIF89a123456789".getBytes());
+    assertThatThrownBy(() -> roomMedia.upload(member, id, "banner", image))
+        .isInstanceOf(ApiException.class);
+    roomMedia.upload(host, id, "banner", image);
+    assertThat(roomMedia.read(member, id, "banner").getBody()).isEqualTo(image.getBytes());
+    assertThat(study.detail(host, id).get("hasBanner")).isEqualTo(true);
+    var invalid =
+        new org.springframework.mock.web.MockMultipartFile(
+            "file", "fake.png", "image/png", "<script>fake image</script>".getBytes());
+    assertThatThrownBy(() -> roomMedia.upload(host, id, "avatar", invalid))
+        .isInstanceOf(ApiException.class);
+    roomMedia.remove(host, id, "banner");
+    assertThat(study.detail(host, id).get("hasBanner")).isEqualTo(false);
+  }
+
+  @Test
+  void appHelpUsesOnlyUsageGuideAndFailsHonestlyWhenUnavailable() {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(false);
+    assertThatThrownBy(
+            () ->
+                appHelp.answer(
+                    new br.com.enturma.ai.AppHelpController.Question("Como entro em uma sala?")))
+        .isInstanceOf(ApiException.class);
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.contains("GUIA OFICIAL DE USO"),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq("APP_HELP"),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenReturn(
+            new br.com.enturma.ai.AiProvider.Answer(
+                "Abra Salas e use Entrar por código.", List.of()));
+    assertThat(
+            ((Map<?, ?>)
+                    appHelp.answer(
+                        new br.com.enturma.ai.AppHelpController.Question(
+                            "Como entro em uma sala?")))
+                .containsKey("answer"))
+        .isTrue();
+  }
+
   UUID subject, period, campus;
   AuthService.Credentials hostCredentials;
 
@@ -1180,7 +1384,11 @@ class PlatformIntegrationTest {
   }
 
   void approveFixture(Actor actor) {
-    db.jdbc.update("UPDATE academic_identity SET status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE user_id=?", actor.id());
+    db.jdbc.update(
+        "UPDATE academic_identity SET"
+            + " status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE"
+            + " user_id=?",
+        actor.id());
   }
 
   UUID room(int capacity) {
@@ -1232,6 +1440,130 @@ class PlatformIntegrationTest {
     chat.send(member, id, "Olá", null);
     var history = (List<?>) chat.messages(host, id, 0);
     assertThat(history).hasSize(1);
+  }
+
+  @Test
+  void inviteCodeAllowsClosedAndFullRoomsButNeverRemovedBlockedOrEnded() {
+    UUID id = room(2);
+    String code = (String) ((Map<?, ?>) roomShare.code(host, id)).get("code");
+    study.join(member, id);
+    study.configure(host, id, "Estudo fechado", "Revisão", true);
+    assertThatThrownBy(() -> study.join(outsider, id)).isInstanceOf(ApiException.class);
+    assertThat(study.joinByCode(outsider, code.toLowerCase(Locale.ROOT)).get("id")).isEqualTo(id);
+    study.joinByCode(outsider, code);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM room_participant WHERE room_id=? AND left_at IS NULL",
+                Integer.class,
+                id))
+        .isEqualTo(3);
+    study.remove(host, id, outsider.id());
+    assertThatThrownBy(() -> study.joinByCode(outsider, code)).isInstanceOf(ApiException.class);
+    study.leave(member, id);
+    db.jdbc.update("INSERT INTO user_block VALUES (?,?)", host.id(), member.id());
+    assertThatThrownBy(() -> study.joinByCode(member, code)).isInstanceOf(ApiException.class);
+    study.end(host, id);
+    assertThatThrownBy(() -> study.joinByCode(host, code)).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void roomLimitsDependOnDurationAndAllInvitedMembersRemainVisible() {
+    assertThatThrownBy(() -> study.create(host, subject, null, "Horas", 50, 11, 0))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> study.create(host, subject, null, "Dias", 50, 46, 2))
+        .isInstanceOf(ApiException.class);
+    UUID id = (UUID) study.create(host, subject, null, "Dias", 50, 45, 2).get("id");
+    assertThat(study.detail(host, id).get("maxParticipants")).isEqualTo(45);
+    assertThat(study.detail(host, id).get("lifecycle")).isEqualTo("MULTIDAY");
+    study.end(host, id);
+    assertThat(study.create(host, subject, null, "Horas", 50, 10, 0).get("maxParticipants"))
+        .isEqualTo(10);
+  }
+
+  @Test
+  void monitorRequiresClosedRoomAndHumanContextAndNeverRepeatsAnIgnoredNudge() {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenReturn(
+            new br.com.enturma.ai.AiProvider.Answer(
+                "Como a chave primária ajuda a identificar uma linha?", List.of()));
+    UUID id = room(8);
+    study.configure(host, id, "Estudo", "Banco de dados", true);
+    monitor.processNext();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM room_monitor_turn WHERE room_id=?", Integer.class, id))
+        .isZero();
+    study.configure(host, id, "Estudo", "Banco de dados", false);
+    var message =
+        (Map<?, ?>) chat.send(host, id, "@Monitor Enturma como funciona uma chave primária?", null);
+    monitor.processNext();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM room_monitor_turn WHERE room_id=?", Integer.class, id))
+        .isZero();
+    study.configure(host, id, "Estudo", "Banco de dados", true);
+    monitor.processNext();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM room_monitor_turn WHERE room_id=? AND status='SENT'",
+                Integer.class,
+                id))
+        .isEqualTo(1);
+    monitor.processNext();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM room_monitor_turn WHERE room_id=?", Integer.class, id))
+        .isEqualTo(1);
+    chat.send(host, id, "Entendi a identificação. Podemos revisar os relacionamentos?", null);
+    db.jdbc.update(
+        "UPDATE room_monitor_turn SET created_at=now()-interval '20 minutes' WHERE room_id=?", id);
+    db.jdbc.update(
+        "UPDATE room_message SET created_at=now()-interval '9 minutes' WHERE room_id=?", id);
+    monitor.processNext();
+    monitor.processNext();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM room_monitor_turn WHERE room_id=? AND kind='IDLE' AND"
+                    + " status='SENT'",
+                Integer.class,
+                id))
+        .isEqualTo(1);
+  }
+
+  @Test
+  void sharedNotebooksRequireOwnerAndRoomMembershipAndCanBeRevokedAfterLeaving() {
+    UUID id = room(8);
+    UUID notebook = UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO study_notebook(id,user_id,title) VALUES (?,?,'Caderno privado')",
+        notebook,
+        host.id());
+    db.jdbc.update(
+        "INSERT INTO notebook_source(id,notebook_id,title,kind,content,status) VALUES (?,?,'Fonte"
+            + " privada','TEXT','Conhecimento compartilhado','READY')",
+        UUID.randomUUID(),
+        notebook);
+    assertThatThrownBy(() -> roomNotebooks.share(outsider, id, notebook))
+        .isInstanceOf(ApiException.class);
+    study.join(member, id);
+    assertThatThrownBy(() -> roomNotebooks.share(member, id, notebook))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> roomNotebooks.read(member, id, notebook))
+        .isInstanceOf(ApiException.class);
+    roomNotebooks.share(host, id, notebook);
+    assertThat((List<?>) roomNotebooks.read(member, id, notebook)).hasSize(1);
+    assertThatThrownBy(() -> roomNotebooks.read(outsider, id, notebook))
+        .isInstanceOf(ApiException.class);
+    study.leave(host, id);
+    roomNotebooks.remove(host, id, notebook);
+    assertThatThrownBy(() -> roomNotebooks.read(member, id, notebook))
+        .isInstanceOf(ApiException.class);
   }
 
   @Test
@@ -1462,16 +1794,56 @@ class PlatformIntegrationTest {
     String code =
         String.valueOf(((Map<?, ?>) rideMobility.boardingCode(member, match)).get("code"));
     assertThat(code).matches("[0-9]{4}");
-    rideMobility.board(host, match, code);
+    String wrong = code.equals("0000") ? "1111" : "0000";
+    for (int attempt = 0; attempt < 5; attempt++)
+      assertThatThrownBy(() -> rideMobility.board(host, match, wrong))
+          .isInstanceOf(ApiException.class);
+    assertThat(
+            db.one("SELECT boarding_attempts FROM ride_match WHERE id=?", match)
+                .get("boardingAttempts"))
+        .isEqualTo(5);
+    assertThatThrownBy(() -> rideMobility.board(host, match, code))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> rideMobility.renewBoardingCode(host, match))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> rideMobility.renewBoardingCode(member, match))
+        .isInstanceOf(ApiException.class);
+    db.jdbc.update(
+        "UPDATE ride_match SET boarding_locked_at=now()-interval '6 minutes' WHERE id=?", match);
+    rideMobility.renewBoardingCode(member, match);
+    String renewed =
+        String.valueOf(((Map<?, ?>) rideMobility.boardingCode(member, match)).get("code"));
+    rideMobility.board(host, match, renewed);
     assertThat(
             db.one("SELECT boarding_verified_at FROM ride_match WHERE id=?", match)
                 .get("boardingVerifiedAt"))
         .isNotNull();
     assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
-        .isNull();
+        .isNotNull();
     assertThat(db.one("SELECT trip_status FROM ride WHERE id=?", offer).get("tripStatus"))
-        .isEqualTo("WAITING_PASSENGER");
+        .isEqualTo("IN_PROGRESS");
     rideMobility.confirmBoarding(member, match);
+    assertThatThrownBy(() -> rideSafety.status(outsider, match)).isInstanceOf(ApiException.class);
+    assertThat(((Map<?, ?>) rideSafety.status(member, match)).get("monitoring")).isEqualTo(false);
+    db.jdbc.update("UPDATE ride SET end_lat=-19.92,end_lng=-43.95 WHERE id=?", offer);
+    org.mockito.Mockito.when(rideMapService.route(org.mockito.ArgumentMatchers.anyList()))
+        .thenReturn(
+            Map.of(
+                "geometry",
+                List.of(List.of(-19.911, -43.961), List.of(-19.92, -43.95)),
+                "durationSeconds",
+                600));
+    rideSafety.scan();
+    assertThat(((Map<?, ?>) rideSafety.status(member, match)).get("monitoring")).isEqualTo(true);
+    db.jdbc.update(
+        "UPDATE ride_safety_check SET off_route_since=now()-interval '3 minutes' WHERE match_id=?",
+        match);
+    rideMobility.liveLocation(host, match, -19.80, -43.80, 12);
+    rideSafety.scan();
+    assertThat(((Map<?, ?>) rideSafety.status(member, match)).get("alertKind")).isEqualTo("ROUTE");
+    assertThatThrownBy(() -> rideSafety.okay(host, match)).isInstanceOf(ApiException.class);
+    rideSafety.okay(member, match);
+    assertThat(((Map<?, ?>) rideSafety.status(member, match)).get("pending")).isEqualTo(false);
     assertThat(db.one("SELECT boarded_at FROM ride_match WHERE id=?", match).get("boardedAt"))
         .isNotNull();
     assertThat(db.one("SELECT trip_status FROM ride WHERE id=?", offer).get("tripStatus"))
@@ -1480,6 +1852,9 @@ class PlatformIntegrationTest {
     rideMobility.tripStatus(host, offer, "COMPLETED");
 
     rides.review(member, match, 5, 5, 5, 5, true, "Viagem tranquila");
+    rides.review(host, match, 4, 4, 4, 4, true, "Bom passageiro");
+    assertThat(((List<?>) ((Map<?, ?>) rideMobility.reputation(member.id())).get("roles")))
+        .hasSize(1);
     var reputation = (Map<?, ?>) rideMobility.reputation(host.id());
     assertThat(((Number) reputation.get("rating")).doubleValue()).isEqualTo(5.0);
     assertThat(((Number) reputation.get("completedTrips")).intValue()).isGreaterThanOrEqualTo(1);
@@ -1550,60 +1925,156 @@ class PlatformIntegrationTest {
   }
 
   private UUID recurringFixture(String type) {
-    int weekday = ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).plusDays(1).getDayOfWeek().getValue();
-    return (UUID)((Map<?,?>)rideMobility.createRecurrence(host,campus,type,"Ouro Preto","TO_CAMPUS",LocalTime.of(8,0),"America/Sao_Paulo",List.of(weekday),2,-19.911,-43.961,150)).get("id");
+    int weekday =
+        ZonedDateTime.now(ZoneId.of("America/Sao_Paulo")).plusDays(1).getDayOfWeek().getValue();
+    return (UUID)
+        ((Map<?, ?>)
+                rideMobility.createRecurrence(
+                    host,
+                    campus,
+                    type,
+                    "Ouro Preto",
+                    "TO_CAMPUS",
+                    LocalTime.of(8, 0),
+                    "America/Sao_Paulo",
+                    List.of(weekday),
+                    2,
+                    -19.911,
+                    -43.961,
+                    150))
+            .get("id");
   }
 
   @Test
   void deletingRoutineCancelsUnbookedTripsAndQueuedRemindersImmediately() {
     UUID routine = recurringFixture("OFFER");
-    UUID ride = (UUID)db.one("SELECT id FROM ride WHERE recurrence_id=? ORDER BY departure_at LIMIT 1", routine).get("id");
+    UUID ride =
+        (UUID)
+            db.one(
+                    "SELECT id FROM ride WHERE recurrence_id=? ORDER BY departure_at LIMIT 1",
+                    routine)
+                .get("id");
     db.jdbc.update("UPDATE ride SET departure_at=now()+interval '30 minutes' WHERE id=?", ride);
-    UUID pending = (UUID)((Map<?,?>)rides.interest(member, ride)).get("id");
+    UUID pending = (UUID) ((Map<?, ?>) rides.interest(member, ride)).get("id");
     rideMobility.upcomingRideReminders();
-    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND kind='RIDE_REMINDER_30')",ride)).isTrue();
-    assertThat(br.com.enturma.notifications.NotificationDeliveryPolicy.current(db,"RIDE_REMINDER_30",ride)).isTrue();
-    rideMobility.deleteRecurrence(host,routine);
-    rideMobility.deleteRecurrence(host,routine);
-    assertThat(db.one("SELECT status FROM ride_match WHERE id=?",pending).get("status")).isEqualTo("CANCELLED");
-    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM ride WHERE recurrence_id=? AND status='OPEN')",routine)).isFalse();
-    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND kind='RIDE_REMINDER_30')",ride)).isFalse();
-    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notification_desktop_push_event WHERE target_id=? AND kind='RIDE_REMINDER_30')",ride)).isFalse();
-    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM email_outbox WHERE dedupe_key=? AND sent_at IS NULL)","RIDE_REMINDER_30:"+ride+":null")).isFalse();
-    assertThat(br.com.enturma.notifications.NotificationDeliveryPolicy.currentEmail(db,"RIDE_REMINDER_30:"+ride+":null")).isFalse();
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND"
+                    + " kind='RIDE_REMINDER_30')",
+                ride))
+        .isTrue();
+    assertThat(
+            br.com.enturma.notifications.NotificationDeliveryPolicy.current(
+                db, "RIDE_REMINDER_30", ride))
+        .isTrue();
+    rideMobility.deleteRecurrence(host, routine);
+    rideMobility.deleteRecurrence(host, routine);
+    assertThat(db.one("SELECT status FROM ride_match WHERE id=?", pending).get("status"))
+        .isEqualTo("CANCELLED");
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM ride WHERE recurrence_id=? AND status='OPEN')",
+                routine))
+        .isFalse();
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND"
+                    + " kind='RIDE_REMINDER_30')",
+                ride))
+        .isFalse();
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM notification_desktop_push_event WHERE target_id=? AND"
+                    + " kind='RIDE_REMINDER_30')",
+                ride))
+        .isFalse();
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM email_outbox WHERE dedupe_key=? AND sent_at IS NULL)",
+                "RIDE_REMINDER_30:" + ride + ":null"))
+        .isFalse();
+    assertThat(
+            br.com.enturma.notifications.NotificationDeliveryPolicy.currentEmail(
+                db, "RIDE_REMINDER_30:" + ride + ":null"))
+        .isFalse();
     rideMobility.upcomingRideReminders();
-    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND kind='RIDE_REMINDER_30')",ride)).isFalse();
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM notification WHERE target_id=? AND"
+                    + " kind='RIDE_REMINDER_30')",
+                ride))
+        .isFalse();
   }
 
   @Test
   void deletingRoutinePreservesConfirmedCarpoolAndRepairsPreviouslyDeletedPassengerRoutine() {
     UUID routine = recurringFixture("OFFER");
-    UUID ride = (UUID)db.one("SELECT id FROM ride WHERE recurrence_id=? ORDER BY departure_at LIMIT 1",routine).get("id");
-    UUID match = (UUID)((Map<?,?>)rides.interest(member,ride)).get("id");
-    rides.accept(host,match);
-    rideMobility.deleteRecurrence(host,routine);
-    var kept=db.one("SELECT status,recurrence_id FROM ride WHERE id=?",ride);
+    UUID ride =
+        (UUID)
+            db.one(
+                    "SELECT id FROM ride WHERE recurrence_id=? ORDER BY departure_at LIMIT 1",
+                    routine)
+                .get("id");
+    UUID match = (UUID) ((Map<?, ?>) rides.interest(member, ride)).get("id");
+    rides.accept(host, match);
+    rideMobility.deleteRecurrence(host, routine);
+    var kept = db.one("SELECT status,recurrence_id FROM ride WHERE id=?", ride);
     assertThat(kept.get("status")).isEqualTo("OPEN");
     assertThat(kept.get("recurrenceId")).isNull();
-    assertThat(db.one("SELECT status FROM ride_match WHERE id=?",match).get("status")).isEqualTo("ACCEPTED");
+    assertThat(db.one("SELECT status FROM ride_match WHERE id=?", match).get("status"))
+        .isEqualTo("ACCEPTED");
     UUID removed = recurringFixture("REQUEST");
-    db.jdbc.update("UPDATE ride_recurrence SET active=false WHERE id=?",removed);
+    db.jdbc.update("UPDATE ride_recurrence SET active=false WHERE id=?", removed);
     rideMobility.materializeRecurrences();
-    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM ride WHERE recurrence_id=? AND status='OPEN')",removed)).isFalse();
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM ride WHERE recurrence_id=? AND status='OPEN')",
+                removed))
+        .isFalse();
   }
 
   @Test
   void profileVisualSettingsSurviveOldClientsAndStayPublicWithoutPrivateWidgets() throws Exception {
-    String previous = """
+    String previous =
+        """
         {"secondaryColor":"#b51038","theme":"GRADIENT","effect":"DOTS","layout":"IDENTITY_FIRST","goal":"private goal","technologies":"private tech","projects":"private project","privacy":{},"widgets":[],"badges":[]}
         """;
-    String updated=previous.strip().replace("\"badges\":[]", "\"badges\":[],\"muralMode\":\"CUSTOM\",\"muralColor\":\"#240758\",\"muralSecondaryColor\":\"#007b86\",\"gradientAngle\":220,\"gradientFlow\":\"FLOW\",\"entrance\":\"BOOK\"");
-    mvc.perform(put("/api/v1/users/me/showcase").header("Authorization","Bearer "+hostCredentials.accessToken()).contentType("application/json").content(updated)).andExpect(status().isOk());
-    mvc.perform(put("/api/v1/users/me/showcase").header("Authorization","Bearer "+hostCredentials.accessToken()).contentType("application/json").content(previous)).andExpect(status().isOk());
-    var appearance=(Map<String,Object>)((Map<?,?>)showcase.get(member,host.id())).get("appearance");
-    assertThat(appearance).containsEntry("muralMode","CUSTOM").containsEntry("gradientAngle",220).containsEntry("entrance","BOOK").doesNotContainKeys("goal","technologies","projects");
-    mvc.perform(put("/api/v1/users/me/showcase").header("Authorization","Bearer "+hostCredentials.accessToken()).contentType("application/json").content(updated.replace("#007b86","url(evil)"))).andExpect(status().isBadRequest());
-    mvc.perform(get("/api/v1/users/me/showcase").header("Authorization","Bearer "+hostCredentials.accessToken())).andExpect(status().isOk()).andExpect(jsonPath("$.appearance.muralMode").value("CUSTOM"));
+    String updated =
+        previous
+            .strip()
+            .replace(
+                "\"badges\":[]",
+                "\"badges\":[],\"muralMode\":\"CUSTOM\",\"muralColor\":\"#240758\",\"muralSecondaryColor\":\"#007b86\",\"gradientAngle\":220,\"gradientFlow\":\"FLOW\",\"entrance\":\"BOOK\"");
+    mvc.perform(
+            put("/api/v1/users/me/showcase")
+                .header("Authorization", "Bearer " + hostCredentials.accessToken())
+                .contentType("application/json")
+                .content(updated))
+        .andExpect(status().isOk());
+    mvc.perform(
+            put("/api/v1/users/me/showcase")
+                .header("Authorization", "Bearer " + hostCredentials.accessToken())
+                .contentType("application/json")
+                .content(previous))
+        .andExpect(status().isOk());
+    var appearance =
+        (Map<String, Object>) ((Map<?, ?>) showcase.get(member, host.id())).get("appearance");
+    assertThat(appearance)
+        .containsEntry("muralMode", "CUSTOM")
+        .containsEntry("gradientAngle", 220)
+        .containsEntry("entrance", "BOOK")
+        .doesNotContainKeys("goal", "technologies", "projects");
+    mvc.perform(
+            put("/api/v1/users/me/showcase")
+                .header("Authorization", "Bearer " + hostCredentials.accessToken())
+                .contentType("application/json")
+                .content(updated.replace("#007b86", "url(evil)")))
+        .andExpect(status().isBadRequest());
+    mvc.perform(
+            get("/api/v1/users/me/showcase")
+                .header("Authorization", "Bearer " + hostCredentials.accessToken()))
+        .andExpect(status().isOk())
+        .andExpect(jsonPath("$.appearance.muralMode").value("CUSTOM"));
   }
 
   @Test
@@ -1817,12 +2288,21 @@ class PlatformIntegrationTest {
             Map.of("WIDGETS", true, "STATS", true),
             List.of(
                 new br.com.enturma.community.ProfileShowcaseController.Widget("GOAL", true, true)),
-            List.of(), "CUSTOM", "#b51038", "#240758", 145, "FLOW", "BOOK");
+            List.of(),
+            "CUSTOM",
+            "#b51038",
+            "#240758",
+            145,
+            "FLOW",
+            "BOOK");
     showcase.save(host, input);
     var shown = (Map<String, Object>) showcase.get(member, host.id());
     assertThat(shown).containsKey("stats").doesNotContainKeys("academic", "privacy");
     assertThat((List<?>) shown.get("widgets")).hasSize(1);
-    assertThat((Map<String,Object>)shown.get("appearance")).containsEntry("muralMode", "CUSTOM").containsEntry("muralColor", "#b51038").containsEntry("entrance", "BOOK");
+    assertThat((Map<String, Object>) shown.get("appearance"))
+        .containsEntry("muralMode", "CUSTOM")
+        .containsEntry("muralColor", "#b51038")
+        .containsEntry("entrance", "BOOK");
     assertThatThrownBy(
             () ->
                 showcase.save(
@@ -1837,7 +2317,13 @@ class PlatformIntegrationTest {
                         "",
                         Map.of(),
                         List.of(),
-                        List.of("VETERAN"), null, null, null, null, null, null)))
+                        List.of("VETERAN"),
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null)))
         .isInstanceOf(ApiException.class);
     db.jdbc.update(
         "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", member.id(), host.id());

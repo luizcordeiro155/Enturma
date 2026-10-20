@@ -22,9 +22,11 @@ public class PortfolioController {
   }
 
   public record Project(
+      UUID id,
       @NotBlank @Size(max = 120) String name,
       @Size(max = 500) String description,
-      @Size(max = 300) String url) {}
+      @Size(max = 300) String url,
+      @Size(max = 6) List<UUID> assets) {}
 
   public record Portfolio(
       boolean publicProfile,
@@ -38,6 +40,7 @@ public class PortfolioController {
     return build(a.id(), true);
   }
 
+  @org.springframework.transaction.annotation.Transactional
   @PutMapping("/portfolio/me")
   public void save(@AuthenticationPrincipal Actor a, @Valid @RequestBody Portfolio r)
       throws Exception {
@@ -51,7 +54,25 @@ public class PortfolioController {
                 .distinct()
                 .limit(30)
                 .toList();
-    var projects = r.projects() == null ? List.of() : r.projects();
+    List<Project> projects = r.projects() == null ? List.of() : r.projects();
+    db.one("SELECT id FROM app_user WHERE id=? FOR UPDATE", a.id());
+    for (var project : projects) {
+      if (project.url() != null && !project.url().isBlank()) {
+        try {
+          var uri = java.net.URI.create(project.url());
+          if (!Set.of("http", "https").contains(uri.getScheme())
+              || uri.getHost() == null
+              || uri.getUserInfo() != null) throw new IllegalArgumentException();
+        } catch (IllegalArgumentException e) {
+          throw ApiException.invalid("Use um link HTTP ou HTTPS válido no projeto.");
+        }
+      }
+      for (UUID asset : project.assets() == null ? List.<UUID>of() : project.assets())
+        if (!db.exists(
+            "SELECT EXISTS(SELECT 1 FROM portfolio_attachment WHERE id=? AND user_id=?)",
+            asset,
+            a.id())) throw ApiException.invalid("Um arquivo do projeto não está disponível.");
+    }
     db.jdbc.update(
         "INSERT INTO portfolio_profile(user_id,public,headline,summary,skills,projects,updated_at)"
             + " VALUES (?,?,?,?,?::jsonb,?::jsonb,now()) ON CONFLICT(user_id) DO UPDATE SET"
@@ -73,8 +94,7 @@ public class PortfolioController {
                     "SELECT id FROM app_user WHERE lower(username)=lower(?) AND status='ACTIVE'",
                     username.replaceFirst("^@", ""))
                 .get("id");
-    if (!db.exists(
-        "SELECT EXISTS(SELECT 1 FROM portfolio_profile WHERE user_id=? AND public)", id))
+    if (!db.exists("SELECT EXISTS(SELECT 1 FROM portfolio_profile WHERE user_id=? AND public)", id))
       throw ApiException.missing();
     return build(id, false);
   }
@@ -92,6 +112,15 @@ public class PortfolioController {
     if (!owner && !Boolean.TRUE.equals(base.get("publicProfile"))) throw ApiException.missing();
 
     base.put(
+        "assets",
+        db.list(
+            "SELECT a.id,a.name,a.mime,octet_length(a.data) size FROM portfolio_attachment a WHERE"
+                + " a.user_id=? AND (? OR EXISTS(SELECT 1 FROM portfolio_profile"
+                + " p,jsonb_array_elements(p.projects) project WHERE p.user_id=a.user_id AND"
+                + " project->'assets' @> jsonb_build_array(a.id::text))) ORDER BY a.created_at",
+            user,
+            owner));
+    base.put(
         "subjects",
         db.list(
             "SELECT a.name FROM user_subject us JOIN academic_entry a ON a.id=us.subject_id"
@@ -108,7 +137,8 @@ public class PortfolioController {
         "stats",
         db.one(
             "SELECT coalesce((SELECT total_xp FROM learning_stats WHERE user_id=?),0) total_xp,"
-                + " coalesce((SELECT current_streak FROM learning_stats WHERE user_id=?),0) current_streak",
+                + " coalesce((SELECT current_streak FROM learning_stats WHERE user_id=?),0)"
+                + " current_streak",
             user,
             user));
     base.put(

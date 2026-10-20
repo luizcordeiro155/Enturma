@@ -70,6 +70,8 @@ export interface IdentityStyle {
     statusText?: string;
     decoration?: string;
     nameFont?: string;
+    nameColor?: string;
+    nameEffect?: string;
     website?: string;
     interests?: string;
   };
@@ -115,6 +117,9 @@ export interface Room {
   status: string;
   endsAt: string;
   maxParticipants: number;
+  hasAvatar?: boolean;
+  hasBanner?: boolean;
+  mediaVersion?: number;
   participants: number;
   reused?: boolean;
   joinedAt?: string;

@@ -28,12 +28,17 @@ public class ProfileService {
   public Object me(Actor a) {
     var user =
         db.one(
-            "SELECT id,name,username,email,email_verified,role,bio,accent_color,profile_details,"
-                + " avatar_bytes IS NOT NULL has_avatar,banner_bytes IS NOT NULL has_banner"
-                + " FROM app_user WHERE id=?",
+            "SELECT"
+                + " id,name,username,email,email_verified,role,bio,accent_color,profile_details,credential_version,"
+                + " avatar_bytes IS NOT NULL has_avatar,banner_bytes IS NOT NULL has_banner FROM"
+                + " app_user WHERE id=?",
             a.id());
-    var identity = db.one("SELECT status,method,confidence,institution_id,campus_id,verified_at,"
-        + " status IN ('LEGACY_APPROVED','STUDENT_VERIFIED') access_allowed FROM academic_identity WHERE user_id=?", a.id());
+    var identity =
+        db.one(
+            "SELECT status,method,confidence,institution_id,campus_id,verified_at, status IN"
+                + " ('LEGACY_APPROVED','STUDENT_VERIFIED') access_allowed FROM academic_identity"
+                + " WHERE user_id=?",
+            a.id());
     user.put("academicIdentity", identity);
     user.put("academicAccess", identity.get("accessAllowed"));
     user.put(

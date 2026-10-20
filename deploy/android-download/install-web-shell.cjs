@@ -4,7 +4,9 @@ const path = require("node:path");
 const project = process.cwd();
 const mobile = path.join(project, "apps", "mobile");
 const version = require(path.join(mobile, "package.json")).version;
-const webOrigin = (process.env.ENTURMA_WEB_URL || "https://enturma-flax.vercel.app").replace(/\/$/, "");
+const webOrigin = (
+  process.env.ENTURMA_WEB_URL || "https://enturma-flax.vercel.app"
+).replace(/\/$/, "");
 const firebaseProjectId = process.env.FIREBASE_ANDROID_PROJECT_ID || "";
 const firebaseAppId = process.env.FIREBASE_ANDROID_APP_ID || "";
 const firebaseApiKey = process.env.FIREBASE_ANDROID_API_KEY || "";
@@ -1592,7 +1594,7 @@ class MainActivity : Activity() {
 
     private fun openExternal(uri: Uri): Boolean {
         return try {
-            startActivity(Intent(Intent.ACTION_VIEW, uri))
+            startActivity(Intent(if (uri.scheme == "tel") Intent.ACTION_DIAL else Intent.ACTION_VIEW, uri))
             true
         } catch (_: Exception) {
             Toast.makeText(
@@ -1808,7 +1810,10 @@ if (!appGradle.includes("com.google.firebase:firebase-messaging")) {
     implementation "com.google.firebase:firebase-messaging"`,
   );
 }
-if (firebaseConfigured && !appGradle.includes("com.google.gms.google-services")) {
+if (
+  firebaseConfigured &&
+  !appGradle.includes("com.google.gms.google-services")
+) {
   appGradle = appGradle.replace(
     'apply plugin: "com.android.application"',
     'apply plugin: "com.android.application"\napply plugin: "com.google.gms.google-services"',
