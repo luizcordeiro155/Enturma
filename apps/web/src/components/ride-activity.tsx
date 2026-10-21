@@ -188,6 +188,10 @@ function ActivityProvider({ children }: { children: React.ReactNode }) {
               ])
             }
             onDone={() => {
+              setDismissedReviews((ids) => [
+                ...ids,
+                data.mobility.recentCompleted!.id,
+              ]);
               setData((current) => ({
                 ...current,
                 mobility: { ...current.mobility, recentCompleted: null },

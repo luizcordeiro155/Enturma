@@ -493,7 +493,7 @@ export function GuideComposition({
           filter: "drop-shadow(0 18px 14px #001a1580)",
         }}
       >
-        <BrandBook size={156} frame={reduced ? 20 : frame * 0.4} />
+        <BrandBook size={156} frame={reduced ? 20 : progress * 52} />
       </div>
       <div
         style={{
