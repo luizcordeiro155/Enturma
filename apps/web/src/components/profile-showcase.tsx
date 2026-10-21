@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
   Award,
@@ -11,6 +11,7 @@ import {
   Code2,
   FolderGit2,
   School,
+  Trash2,
 } from "lucide-react";
 import { AchievementArt } from "./achievement-art";
 import { api } from "@/lib/api";
@@ -86,6 +87,57 @@ function achievementTierClass(tier?: string) {
   return `tier-${(tier ?? "BRONZE").toLowerCase().replace(/[^a-z0-9]+/g, "-")}`;
 }
 
+/** One open achievement across the profile, including older WebViews. */
+function AchievementDisclosure({
+  className,
+  children,
+}: {
+  className: string;
+  children: ReactNode;
+}) {
+  const ref = useRef<HTMLDetailsElement>(null);
+  const [open, setOpen] = useState(false);
+  useEffect(() => {
+    if (!open) return;
+    const dismiss = (event: PointerEvent) => {
+      if (ref.current && !ref.current.contains(event.target as Node))
+        ref.current.open = false;
+    };
+    document.addEventListener("pointerdown", dismiss);
+    return () => document.removeEventListener("pointerdown", dismiss);
+  }, [open]);
+  return (
+    <details
+      ref={ref}
+      className={className}
+      name="enturma-achievement"
+      data-achievement-disclosure
+      onToggle={(event) => {
+        const current = event.currentTarget;
+        setOpen(current.open);
+        if (current.open)
+          document
+            .querySelectorAll<HTMLDetailsElement>(
+              "details[data-achievement-disclosure][open]",
+            )
+            .forEach((other) => {
+              if (other !== current) other.open = false;
+            });
+      }}
+      onKeyDown={(event) => {
+        if (event.key === "Escape" && event.currentTarget.open) {
+          event.preventDefault();
+          event.stopPropagation();
+          event.currentTarget.open = false;
+          event.currentTarget.querySelector("summary")?.focus();
+        }
+      }}
+    >
+      {children}
+    </details>
+  );
+}
+
 export function FeaturedAchievementBadges({
   showcase,
 }: {
@@ -108,7 +160,7 @@ export function FeaturedAchievementBadges({
     >
       {achievements.map((achievement) => {
         return (
-          <details
+          <AchievementDisclosure
             className={`profile-achievement-badge ${achievementTierClass(achievement.tier)}`}
             key={achievement.code}
           >
@@ -136,7 +188,7 @@ export function FeaturedAchievementBadges({
                 ) : null}
               </div>
             </div>
-          </details>
+          </AchievementDisclosure>
         );
       })}
     </div>
@@ -365,7 +417,7 @@ export function ShowcaseFields({
                 </button>
                 <button
                   type="button"
-                  className="text-button"
+                  className="profile-remove-button"
                   onClick={() =>
                     onChange({
                       ...value,
@@ -373,7 +425,7 @@ export function ShowcaseFields({
                     })
                   }
                 >
-                  Remover
+                  <Trash2 size={16} /> Remover
                 </button>
               </div>
             </div>
@@ -496,7 +548,7 @@ export function ShowcaseView({
             const a = value.achievements?.find((a) => a.code === b.code);
             if (!a) return null;
             return (
-              <details
+              <AchievementDisclosure
                 className={`badge-detail ${achievementTierClass(a.tier)}`}
                 key={b.code}
               >
@@ -520,7 +572,7 @@ export function ShowcaseView({
                     </small>
                   )}
                 </div>
-              </details>
+              </AchievementDisclosure>
             );
           })}
         </div>
@@ -667,7 +719,7 @@ export function AchievementGrid({
     <div className="achievement-grid">
       {achievements.map((a) => {
         return (
-          <details
+          <AchievementDisclosure
             className={`achievement-card ${a.earnedAt ? "earned" : ""} ${achievementTierClass(a.tier)}`}
             key={a.code}
           >
@@ -703,7 +755,7 @@ export function AchievementGrid({
                 </>
               )}
             </div>
-          </details>
+          </AchievementDisclosure>
         );
       })}
     </div>

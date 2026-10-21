@@ -2,6 +2,8 @@ import { test } from "./student-fixture";
 import { authenticate } from "./session";
 import { expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 test("caderno privado: cadastro acentuado, fontes, aula, citações e persistência", async ({
   page,
   browser,
@@ -49,7 +51,7 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
       .getByRole("button", { name: "Enviar mensagem", exact: true })
       .click();
     await expect(
-      page.getByRole("button", { name: "Baixar material de estudo" }).last(),
+      page.locator(".notebook-assistant-message .study-answer").last(),
     ).toBeVisible({ timeout: 30000 });
     await page.locator(".citation").first().click();
     await expect(page.getByRole("dialog")).toContainText("sequência finita");
@@ -59,6 +61,7 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
       page.getByRole("button", { name: "Enviar mensagem", exact: true }),
     ).toBeDisabled();
   }
+  await page.locator(".notebook-add-source > summary").click();
   await page.getByRole("button", { name: "Arquivo", exact: true }).click();
   await page.getByLabel("Arquivo de estudo").setInputFiles({
     name: "revisao.txt",
@@ -81,6 +84,11 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     x.fillText("Algoritmo", 10, 40);
     return c.toDataURL("image/png").split(",")[1];
   });
+  if (
+    !(await page.locator(".notebook-add-source").getAttribute("open")) &&
+    !(await page.getByLabel("Arquivo de estudo").isVisible())
+  )
+    await page.locator(".notebook-add-source > summary").click();
   await page.getByLabel("Arquivo de estudo").setInputFiles({
     name: "aula.png",
     mimeType: "image/png",
@@ -105,13 +113,17 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
       .getByRole("button", { name: "Enviar mensagem", exact: true })
       .click();
     await expect(
-      page.getByRole("button", { name: "Baixar material de estudo" }).last(),
+      page.locator(".notebook-assistant-message .study-answer").last(),
     ).toBeVisible({ timeout: 30000 });
   } else {
     await expect(
       page.getByRole("button", { name: "Enviar mensagem", exact: true }),
     ).toBeDisabled();
   }
+  if (
+    !(await page.getByRole("button", { name: "Link", exact: true }).isVisible())
+  )
+    await page.locator(".notebook-add-source > summary").click();
   await page.getByRole("button", { name: "Link", exact: true }).click();
   await page.getByLabel("Link público HTTPS").fill("https://127.0.0.1/");
   await page.getByLabel("Título da fonte").fill("Endereço bloqueado");
@@ -123,7 +135,7 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     { timeout: 20000 },
   );
   await page.screenshot({
-    path: "../../.local/notebook-desktop.png",
+    path: join(tmpdir(), "enturma-notebook-sources-desktop.png"),
     fullPage: true,
   });
   await page.setViewportSize({ width: 390, height: 844 });
@@ -133,7 +145,7 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
     ),
   ).toBe(true);
   await page.screenshot({
-    path: "../../.local/notebook-mobile.png",
+    path: join(tmpdir(), "enturma-notebook-sources-mobile.png"),
     fullPage: true,
   });
   const visitor = await browser.newContext();

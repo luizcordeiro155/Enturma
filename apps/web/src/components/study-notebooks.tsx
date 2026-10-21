@@ -11,7 +11,11 @@ import {
   Upload,
   Sparkles,
   Trash2,
-  Download,
+  ArrowLeft,
+  Settings2,
+  PanelLeft,
+  X,
+  Globe,
   Send,
   LoaderCircle,
 } from "lucide-react";
@@ -21,6 +25,10 @@ import { Shell } from "./shell";
 import { NotebookArtwork, NotebookArtworkEditor } from "./notebook-artwork";
 import { Feedback } from "./feedback";
 import { resilientRead, refreshWhenOnline } from "@/lib/offline-data";
+import {
+  useOverlayHistory,
+  waitForOverlayHistory,
+} from "@/lib/use-overlay-history";
 type Source = {
   id: string;
   title: string;
@@ -121,8 +129,26 @@ export function StudyNotebooks({ id }: { id?: string }) {
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [webSearch, setWebSearch] = useState(false);
-  const [sourcesOpen, setSourcesOpen] = useState(false);
   const [question, setQuestion] = useState("");
+  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [compact, setCompact] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [toolsOpen, setToolsOpen] = useState(false);
+  const composer = useRef<HTMLTextAreaElement>(null);
+  useEffect(() => {
+    const media = matchMedia("(max-width: 1100px)");
+    const sync = () => setCompact(media.matches);
+    sync();
+    media.addEventListener("change", sync);
+    return () => media.removeEventListener("change", sync);
+  }, []);
+  useEffect(() => {
+    const input = composer.current;
+    if (!input) return;
+    input.style.height = "auto";
+    input.style.height = `${Math.min(input.scrollHeight, 128)}px`;
+  }, [question]);
+
   const [level, setLevel] = useState("BEGINNER");
   const [excluded, setExcluded] = useState<string[]>([]);
   const [preview, setPreview] = useState<{ title: string; content: string }>();
@@ -145,8 +171,19 @@ export function StudyNotebooks({ id }: { id?: string }) {
     return () => window.removeEventListener("hashchange", restore);
   }, []);
   useEffect(() => {
-    if (activeGeneration)
-      history.replaceState(null, "", `#generation-${activeGeneration}`);
+    if (!activeGeneration) return;
+    let active = true;
+    void waitForOverlayHistory().then(() => {
+      if (active)
+        history.replaceState(
+          history.state,
+          "",
+          `#generation-${activeGeneration}`,
+        );
+    });
+    return () => {
+      active = false;
+    };
   }, [activeGeneration]);
   const load = useCallback(async () => {
     if (id) {
@@ -200,6 +237,7 @@ export function StudyNotebooks({ id }: { id?: string }) {
       setNotice(
         `${out.created} flashcards foram criados e entraram na revisão espaçada do Campus.`,
       );
+      setToolsOpen(false);
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -224,6 +262,7 @@ export function StudyNotebooks({ id }: { id?: string }) {
         webSearch: webSearch && data?.webSearchEnabled,
       });
       setActiveGeneration(r.id);
+      setToolsOpen(false);
       followConversation.current = true;
       await load();
       setQuestion("");
@@ -290,45 +329,230 @@ export function StudyNotebooks({ id }: { id?: string }) {
   );
   const canSend =
     !busy && !pending && !offline && !!data?.aiEnabled && selected.length > 0;
-  function download(g: Generation) {
-    const blob = new Blob(
-      [
-        `# ${data?.notebook.title}\n\n${g.answer}\n\n## Fontes\n${g.citations.map((c) => `[${c.number}] ${c.title}${c.url ? " — " + c.url : ""}\n${c.excerpt}`).join("\n\n")}`,
-      ],
-      { type: "text/markdown;charset=utf-8" },
-    );
-    const href = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = href;
-    a.download = "enturma-estudo.md";
-    a.click();
-    URL.revokeObjectURL(href);
-  }
+
+  const sourcePanel = data && (
+    <div className="notebook-source-content">
+      {compact && <Feedback error={error} />}
+      <header className="notebook-panel-heading">
+        <div>
+          <h2>
+            Suas fontes <small>{data.sources.length}/20</small>
+          </h2>
+          <p>{selected.length} selecionadas para a conversa</p>
+        </div>
+        {compact && (
+          <button
+            type="button"
+            className="icon-control"
+            aria-label="Fechar fontes"
+            onClick={() => setSourcesOpen(false)}
+          >
+            <X size={19} />
+          </button>
+        )}
+      </header>
+      <div className="source-list">
+        {data.sources.map((s) => (
+          <article key={s.id}>
+            <label>
+              <input
+                type="checkbox"
+                aria-label={`Usar ${s.title}`}
+                checked={selected.some((x) => x.id === s.id)}
+                disabled={
+                  s.status !== "READY" ||
+                  (!selected.some((x) => x.id === s.id) &&
+                    selected.length >= 10)
+                }
+                onChange={(e) =>
+                  setExcluded((v) =>
+                    e.target.checked
+                      ? v.filter((x) => x !== s.id)
+                      : [...v, s.id],
+                  )
+                }
+              />
+              {s.kind === "LINK" ? (
+                <LinkIcon size={16} />
+              ) : (
+                <FileText size={16} />
+              )}
+              <strong>{s.title}</strong>
+            </label>
+            <small>
+              {s.status === "READY"
+                ? "Pronta para estudar"
+                : s.status === "FAILED"
+                  ? s.error
+                  : "Lendo sua fonte…"}
+            </small>
+            <div>
+              <button
+                className="text-button"
+                disabled={s.status !== "READY"}
+                onClick={async () => {
+                  try {
+                    const p = await api<Source>(
+                      `/notebooks/${id}/sources/${s.id}`,
+                    );
+                    setPreview({
+                      title: p.title,
+                      content: p.content ?? "",
+                    });
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
+                }}
+              >
+                Ver conteúdo
+              </button>
+              <button
+                className="text-button"
+                aria-label={`Remover ${s.title}`}
+                onClick={() => setRemove(s.id)}
+              >
+                <Trash2 size={14} />
+              </button>
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <details className="notebook-add-source" open={data.sources.length === 0}>
+        <summary>
+          <Plus size={17} /> Adicionar fonte
+        </summary>
+        <div className="source-tabs">
+          {[
+            ["FILE", "Arquivo"],
+            ["LINK", "Link"],
+            ["TEXT", "Texto"],
+          ].map(([value, label]) => (
+            <button
+              className="secondary"
+              key={value}
+              aria-pressed={sourceMode === value}
+              onClick={() => setSourceMode(value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {sourceMode === "FILE" ? (
+          <label className="notebook-upload">
+            <Upload />
+            <strong>Adicionar documento ou imagem</strong>
+            <span>PDF, DOCX, TXT, MD, JPG, PNG ou WEBP · até 3 MB</span>
+            <input
+              aria-label="Arquivo de estudo"
+              type="file"
+              accept=".pdf,.docx,.txt,.md,.jpg,.jpeg,.png,.webp"
+              disabled={busy}
+              onChange={(e) => {
+                void upload(e.target.files?.[0]);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        ) : (
+          <form
+            className="source-form"
+            onSubmit={(e) => {
+              e.preventDefault();
+              void addSource();
+            }}
+          >
+            <label>
+              Título da fonte
+              <input
+                value={sourceTitle}
+                onChange={(e) => setSourceTitle(e.target.value)}
+                maxLength={200}
+                placeholder="Título para identificar nas citações"
+              />
+            </label>
+            {sourceMode === "LINK" ? (
+              <label>
+                Link público HTTPS
+                <input
+                  type="url"
+                  required
+                  value={url}
+                  maxLength={2000}
+                  placeholder="https://…"
+                  onChange={(e) => setUrl(e.target.value)}
+                />
+              </label>
+            ) : (
+              <label>
+                Conteúdo para estudar
+                <textarea
+                  value={text}
+                  required
+                  minLength={20}
+                  maxLength={100000}
+                  onChange={(e) => setText(e.target.value)}
+                  placeholder="Cole suas anotações, um trecho de livro ou o conteúdo da aula…"
+                />
+              </label>
+            )}
+            <button disabled={busy}>Adicionar fonte</button>
+          </form>
+        )}
+      </details>
+      <p className="source-privacy">
+        Caderno privado. As fontes selecionadas são enviadas ao provedor de IA
+        para gerar seu estudo. Imagens são transcritas pela IA; confira a
+        leitura.
+      </p>
+    </div>
+  );
   return (
     <Shell>
       <div className={`notebooks-page ${id ? "notebook-detail" : ""}`}>
-        <header className="notebooks-heading">
-          <div>
-            <span className="eyebrow">Enturma AI · seu espaço de estudo</span>
-            <h1>
-              {data?.notebook.title ??
-                "Transforme suas fontes em conhecimento."}
-            </h1>
-            <p>
-              Documentos, links, imagens e anotações. Aulas e respostas
-              fundamentadas no que você escolheu estudar.
-            </p>
-          </div>
-          {id ? (
-            <Link className="button secondary" href="/notebooks">
-              Meus cadernos
+        {id ? (
+          <header className="notebooks-heading notebook-detail-heading">
+            <Link
+              className="icon-control"
+              href="/notebooks"
+              aria-label="Meus cadernos"
+              title="Meus cadernos"
+            >
+              <ArrowLeft size={20} />
             </Link>
-          ) : (
-            <BookOpen size={44} />
-          )}
-        </header>
+            {data && <NotebookArtwork notebook={data.notebook} />}
+            <div className="notebook-title">
+              <h1>{data?.notebook.title ?? "Abrindo caderno…"}</h1>
+              <span>Seu caderno privado</span>
+            </div>
+            <button
+              type="button"
+              className="icon-control"
+              aria-label="Gerenciar caderno"
+              title="Gerenciar caderno"
+              aria-haspopup="dialog"
+              disabled={!data}
+              onClick={() => setSettingsOpen(true)}
+            >
+              <Settings2 size={20} />
+            </button>
+          </header>
+        ) : (
+          <header className="notebooks-heading">
+            <div>
+              <span className="eyebrow">Seu espaço de estudo</span>
+              <h1>Meus cadernos</h1>
+              <p>Suas fontes e conversas com o Enturma APP, em um só lugar.</p>
+            </div>
+            <BookOpen size={36} />
+          </header>
+        )}
         <Feedback
-          error={error}
+          error={
+            settingsOpen || toolsOpen || (compact && sourcesOpen)
+              ? undefined
+              : error
+          }
           success={
             offline
               ? "Modo offline: mostrando a última cópia sincronizada."
@@ -412,333 +636,57 @@ export function StudyNotebooks({ id }: { id?: string }) {
           <p role="status">Abrindo caderno…</p>
         ) : (
           <>
-            <NotebookArtwork notebook={data.notebook} />
-            <div className="notebook-toolbar">
-              <button
-                className="secondary notebook-sources-toggle"
-                onClick={() => setSourcesOpen((open) => !open)}
-                aria-expanded={sourcesOpen}
-              >
-                Fontes · {data.sources.length}
-              </button>
-              <label>
-                Nível de explicação
-                <select
-                  value={level}
-                  onChange={(e) => setLevel(e.target.value)}
-                >
-                  <option value="BEGINNER">Iniciante</option>
-                  <option value="INTERMEDIATE">Intermediário</option>
-                  <option value="ADVANCED">Avançado</option>
-                </select>
-              </label>
-              <details>
-                <summary>Gerenciar caderno</summary>
-                <form
-                  onSubmit={async (e) => {
-                    e.preventDefault();
-                    const t = new FormData(e.currentTarget).get("title");
-                    try {
-                      await api(`/notebooks/${id}`, {
-                        method: "PUT",
-                        body: JSON.stringify({ title: t }),
-                      });
-                      await load();
-                    } catch (e) {
-                      setError((e as Error).message);
-                    }
-                  }}
-                >
-                  <input
-                    aria-label="Renomear caderno"
-                    name="title"
-                    defaultValue={data.notebook.title}
-                    required
-                    maxLength={120}
-                  />
-                  <button>Salvar nome</button>
-                </form>
-                <NotebookArtworkEditor
-                  notebook={data.notebook}
-                  onChanged={load}
-                  onError={setError}
-                />
-                <button
-                  className="secondary"
-                  onClick={() => setRemove("notebook")}
-                >
-                  Excluir caderno
-                </button>
-              </details>
-            </div>
-            {!data.aiEnabled ? (
-              <p className="feedback error">
-                A IA ainda não está configurada. Você pode guardar documentos,
-                links e textos enquanto isso.
-              </p>
-            ) : null}
             <div
               className="notebook-workspace notebook-chat-workspace"
               data-sources-open={sourcesOpen}
             >
-              <aside className="notebook-sources">
-                <h2>
-                  Suas fontes <small>{data.sources.length}/20</small>
-                </h2>
-                <p className="muted">
-                  Selecione até 10 fontes para a próxima geração.
-                </p>
-                <div className="source-tabs">
-                  {[
-                    ["FILE", "Arquivo"],
-                    ["LINK", "Link"],
-                    ["TEXT", "Texto"],
-                  ].map(([value, label]) => (
-                    <button
-                      className="secondary"
-                      key={value}
-                      aria-pressed={sourceMode === value}
-                      onClick={() => setSourceMode(value)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-                {sourceMode === "FILE" ? (
-                  <label className="notebook-upload">
-                    <Upload />
-                    <strong>Adicionar documento ou imagem</strong>
-                    <span>PDF, DOCX, TXT, MD, JPG, PNG ou WEBP · até 3 MB</span>
-                    <input
-                      aria-label="Arquivo de estudo"
-                      type="file"
-                      accept=".pdf,.docx,.txt,.md,.jpg,.jpeg,.png,.webp"
-                      disabled={busy}
-                      onChange={(e) => {
-                        void upload(e.target.files?.[0]);
-                        e.target.value = "";
-                      }}
-                    />
-                  </label>
-                ) : (
-                  <form
-                    className="source-form"
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      void addSource();
-                    }}
-                  >
-                    <label>
-                      Título da fonte
-                      <input
-                        value={sourceTitle}
-                        onChange={(e) => setSourceTitle(e.target.value)}
-                        maxLength={200}
-                        placeholder="Título para identificar nas citações"
-                      />
-                    </label>
-                    {sourceMode === "LINK" ? (
-                      <label>
-                        Link público HTTPS
-                        <input
-                          type="url"
-                          required
-                          value={url}
-                          maxLength={2000}
-                          placeholder="https://…"
-                          onChange={(e) => setUrl(e.target.value)}
-                        />
-                      </label>
-                    ) : (
-                      <label>
-                        Conteúdo para estudar
-                        <textarea
-                          value={text}
-                          required
-                          minLength={20}
-                          maxLength={100000}
-                          onChange={(e) => setText(e.target.value)}
-                          placeholder="Cole suas anotações, um trecho de livro ou o conteúdo da aula…"
-                        />
-                      </label>
-                    )}
-                    <button disabled={busy}>Adicionar fonte</button>
-                  </form>
-                )}
-                <p className="source-privacy">
-                  Caderno privado. As fontes selecionadas são enviadas ao
-                  provedor de IA para gerar seu estudo. Imagens são transcritas
-                  pela IA; confira a leitura.
-                </p>
-                <div className="source-list">
-                  {data.sources.map((s) => (
-                    <article key={s.id}>
-                      <label>
-                        <input
-                          type="checkbox"
-                          aria-label={`Usar ${s.title}`}
-                          checked={selected.some((x) => x.id === s.id)}
-                          disabled={
-                            s.status !== "READY" ||
-                            (!selected.some((x) => x.id === s.id) &&
-                              selected.length >= 10)
-                          }
-                          onChange={(e) =>
-                            setExcluded((v) =>
-                              e.target.checked
-                                ? v.filter((x) => x !== s.id)
-                                : [...v, s.id],
-                            )
-                          }
-                        />
-                        {s.kind === "LINK" ? (
-                          <LinkIcon size={16} />
-                        ) : (
-                          <FileText size={16} />
-                        )}
-                        <strong>{s.title}</strong>
-                      </label>
-                      <small>
-                        {s.status === "READY"
-                          ? "Pronta para estudar"
-                          : s.status === "FAILED"
-                            ? s.error
-                            : "Lendo sua fonte…"}
-                      </small>
-                      <div>
-                        <button
-                          className="text-button"
-                          disabled={s.status !== "READY"}
-                          onClick={async () => {
-                            try {
-                              const p = await api<Source>(
-                                `/notebooks/${id}/sources/${s.id}`,
-                              );
-                              setPreview({
-                                title: p.title,
-                                content: p.content ?? "",
-                              });
-                            } catch (e) {
-                              setError((e as Error).message);
-                            }
-                          }}
-                        >
-                          Ver conteúdo
-                        </button>
-                        <button
-                          className="text-button"
-                          aria-label={`Remover ${s.title}`}
-                          onClick={() => setRemove(s.id)}
-                        >
-                          <Trash2 size={14} />
-                        </button>
-                      </div>
-                    </article>
-                  ))}
-                </div>
-              </aside>
+              {!compact && (
+                <aside
+                  className="notebook-sources"
+                  aria-label="Fontes do caderno"
+                >
+                  {sourcePanel}
+                </aside>
+              )}
+
               <section className="notebook-studio">
-                <div className="studio-heading">
-                  <Sparkles />
+                <header className="studio-heading">
+                  <span className="notebook-agent-mark">
+                    <BookOpen size={22} />
+                  </span>
                   <div>
-                    <h2>
-                      Enturma APP <small>Seu parceiro de estudo</small>
-                    </h2>
+                    <h2>Enturma APP</h2>
                     <p>
-                      {selected.length} fontes selecionadas · conversa privada e
-                      salva
+                      {pending
+                        ? "Preparando uma resposta…"
+                        : "Conversa privada · histórico salvo"}
                     </p>
                   </div>
-                </div>
-                <details className="notebook-study-tools">
-                  <summary>Ferramentas de estudo</summary>
-                  <div className="notebook-smart-actions">
-                    <button
-                      className="secondary"
-                      disabled={!canSend}
-                      onClick={() => void persistFlashcards()}
-                    >
-                      <Sparkles size={16} /> Criar flashcards de revisão
-                      espaçada
-                    </button>
-                  </div>
-                  <div className="study-modes">
-                    {modes.map((m) => (
+                  <div className="notebook-chat-actions">
+                    {compact && (
                       <button
-                        key={m.id}
-                        className="secondary"
-                        disabled={!canSend}
-                        onClick={() => void generate(m.id)}
+                        type="button"
+                        className="secondary notebook-sources-toggle"
+                        onClick={() => setSourcesOpen(true)}
+                        aria-haspopup="dialog"
                       >
-                        <strong>{m.title}</strong>
-                        <small>{m.description}</small>
+                        <PanelLeft size={17} />
+                        <span>Fontes</span>
+                        <small>{data.sources.length}</small>
                       </button>
-                    ))}
-                  </div>
-                  <section className="notebook-study-plan">
-                    <h3>Um plano que cabe na sua rotina</h3>
-                    <div>
-                      <label>
-                        Dias de estudo
-                        <input
-                          type="number"
-                          min={1}
-                          max={30}
-                          value={planDays}
-                          onChange={(e) =>
-                            setPlanDays(
-                              Math.max(1, Math.min(30, Number(e.target.value))),
-                            )
-                          }
-                        />
-                      </label>
-                      <label>
-                        Minutos por dia
-                        <input
-                          type="number"
-                          min={10}
-                          max={180}
-                          step={5}
-                          value={planMinutes}
-                          onChange={(e) =>
-                            setPlanMinutes(
-                              Math.max(
-                                10,
-                                Math.min(180, Number(e.target.value)),
-                              ),
-                            )
-                          }
-                        />
-                      </label>
-                    </div>
+                    )}
                     <button
                       type="button"
-                      disabled={!canSend}
-                      onClick={() => void generate("STUDY_PLAN")}
+                      className="secondary"
+                      aria-haspopup="dialog"
+                      aria-label="Ferramentas de estudo"
+                      onClick={() => setToolsOpen(true)}
                     >
-                      Criar meu plano de revisão
+                      <Sparkles size={17} />
+                      <span>Estudar</span>
                     </button>
-                    <small>
-                      Baseado nas {selected.length} fontes selecionadas. A IA
-                      prepara o plano; você escolhe quando estudar.
-                    </small>
-                  </section>
-                </details>
-                {data.generations.length ? (
-                  <p className="notebook-history-label">
-                    Conversa · {data.generations.length} respostas salvas
-                  </p>
-                ) : (
-                  <div className="notebook-empty">
-                    <BookOpen />
-                    <h3>Seu próximo aprendizado começa aqui.</h3>
-                    <p>
-                      Adicione suas fontes e me diga o que quer entender.
-                      Podemos explorar um conceito, resolver um exercício ou
-                      continuar de onde você parou.
-                    </p>
                   </div>
-                )}
+                </header>
                 <div
                   className="notebook-conversation"
                   aria-label="Conversa com Enturma APP"
@@ -750,6 +698,37 @@ export function StudyNotebooks({ id }: { id?: string }) {
                       80;
                   }}
                 >
+                  {!data.generations.length && (
+                    <div className="notebook-chat-welcome">
+                      <span className="notebook-welcome-mark">
+                        <BookOpen size={34} />
+                      </span>
+                      <h2>Vamos entender isso juntos?</h2>
+                      <p>
+                        Traga suas fontes, pergunte do seu jeito e continue a
+                        conversa quando quiser.
+                      </p>
+                      <div className="notebook-prompt-ideas">
+                        {[
+                          "Explique o conceito principal",
+                          "Mostre um exemplo prático",
+                          "Me ajude a revisar",
+                        ].map((prompt) => (
+                          <button
+                            type="button"
+                            className="secondary"
+                            key={prompt}
+                            onClick={() => {
+                              setQuestion(prompt);
+                              composer.current?.focus();
+                            }}
+                          >
+                            {prompt}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                   {data.generations.map((current) => (
                     <article
                       key={current.id}
@@ -769,19 +748,12 @@ export function StudyNotebooks({ id }: { id?: string }) {
                         </strong>
                         {current.status === "READY" ? (
                           <>
-                            <header>
-                              <h2>
-                                {modes.find((m) => m.id === current.mode)
-                                  ?.title ?? "Resposta"}
-                              </h2>
-                              <button
-                                className="secondary"
-                                aria-label="Baixar material de estudo"
-                                onClick={() => download(current)}
-                              >
-                                <Download size={17} />
-                              </button>
-                            </header>
+                            {current.mode !== "QUESTION" && (
+                              <h3 className="notebook-response-kind">
+                                {modes.find((mode) => mode.id === current.mode)
+                                  ?.title ?? "Estudo"}
+                              </h3>
+                            )}
                             <StudyAnswer
                               content={current.answer}
                               onCitation={(n) => {
@@ -795,26 +767,28 @@ export function StudyNotebooks({ id }: { id?: string }) {
                                   });
                               }}
                             />
-                            <details className="generation-sources">
-                              <summary>
-                                Conferir fontes utilizadas (
-                                {current.citations.length})
-                              </summary>
-                              {current.citations.map((c) => (
-                                <button
-                                  className="secondary"
-                                  key={c.number}
-                                  onClick={() =>
-                                    setPreview({
-                                      title: `[${c.number}] ${c.title}`,
-                                      content: c.excerpt,
-                                    })
-                                  }
-                                >
-                                  [{c.number}] {c.title}
-                                </button>
-                              ))}
-                            </details>
+                            {current.citations.length > 0 && (
+                              <details className="generation-sources">
+                                <summary>
+                                  Conferir fontes utilizadas (
+                                  {current.citations.length})
+                                </summary>
+                                {current.citations.map((c) => (
+                                  <button
+                                    className="secondary"
+                                    key={c.number}
+                                    onClick={() =>
+                                      setPreview({
+                                        title: `[${c.number}] ${c.title}`,
+                                        content: c.excerpt,
+                                      })
+                                    }
+                                  >
+                                    [{c.number}] {c.title}
+                                  </button>
+                                ))}
+                              </details>
+                            )}
                             {current.externalSources?.length ? (
                               <details className="generation-sources">
                                 <summary>
@@ -837,10 +811,6 @@ export function StudyNotebooks({ id }: { id?: string }) {
                                   ))}
                               </details>
                             ) : null}
-                            <p className="muted">
-                              A IA pode cometer erros. Confira as citações e o
-                              material original.
-                            </p>
                           </>
                         ) : current.status === "FAILED" ? (
                           <div role="alert">
@@ -870,38 +840,228 @@ export function StudyNotebooks({ id }: { id?: string }) {
                   className="notebook-question"
                   onSubmit={(e) => {
                     e.preventDefault();
-                    void generate("QUESTION");
+                    if (canSend && question.trim()) void generate("QUESTION");
                   }}
                 >
                   <label>
-                    Mensagem para o Enturma APP
+                    <span className="sr-only">Mensagem para o Enturma APP</span>
                     <textarea
+                      ref={composer}
+                      rows={1}
+                      onKeyDown={(event) => {
+                        if (
+                          !compact &&
+                          event.key === "Enter" &&
+                          !event.shiftKey &&
+                          !event.nativeEvent.isComposing
+                        ) {
+                          event.preventDefault();
+                          if (canSend && question.trim())
+                            void generate("QUESTION");
+                        }
+                      }}
                       value={question}
                       onChange={(e) => setQuestion(e.target.value)}
                       maxLength={2000}
-                      placeholder="Pergunte, peça um exemplo ou continue a conversa…"
+                      placeholder="Pergunte ao Enturma APP…"
                     />
                   </label>
-                  <label className="notebook-web-search">
-                    <input
-                      type="checkbox"
-                      checked={webSearch}
-                      disabled={!data.webSearchEnabled}
-                      onChange={(event) => setWebSearch(event.target.checked)}
-                    />
-                    Pesquisar também na web
-                    {!data.webSearchEnabled && (
-                      <small>Indisponível neste momento</small>
-                    )}
-                  </label>
-                  <button disabled={!canSend || !question.trim()}>
-                    <Send size={16} />
-                    Enviar mensagem
-                  </button>
+                  <div className="notebook-composer-actions">
+                    <label
+                      className="notebook-web-search"
+                      title={
+                        !data.webSearchEnabled
+                          ? "Pesquisa web indisponível neste momento"
+                          : "Incluir pesquisa na web"
+                      }
+                    >
+                      <input
+                        type="checkbox"
+                        checked={webSearch}
+                        disabled={!data.webSearchEnabled}
+                        onChange={(event) => setWebSearch(event.target.checked)}
+                      />
+                      <Globe size={15} /> <span>Pesquisar também na web</span>
+                    </label>
+                    <button disabled={!canSend || !question.trim()}>
+                      <Send size={16} />
+                      <span>Enviar mensagem</span>
+                    </button>
+                  </div>
+                  <p className="notebook-composer-note">
+                    {!data.aiEnabled
+                      ? "A IA está indisponível. Suas fontes e conversas continuam salvas."
+                      : !selected.length
+                        ? "Adicione e selecione uma fonte para começar."
+                        : "Confira as fontes: a IA pode cometer erros."}
+                  </p>
                 </form>
               </section>
             </div>
           </>
+        )}
+        {compact && sourcesOpen && data && (
+          <StudyDialog
+            title="Fontes do caderno"
+            className="notebook-panel-dialog notebook-sources-dialog"
+            onClose={() => setSourcesOpen(false)}
+          >
+            {sourcePanel}
+          </StudyDialog>
+        )}
+        {settingsOpen && data && (
+          <StudyDialog
+            title="Gerenciar caderno"
+            className="notebook-panel-dialog"
+            onClose={() => setSettingsOpen(false)}
+          >
+            <header className="notebook-panel-heading">
+              <h2>Gerenciar caderno</h2>
+              <button
+                type="button"
+                className="icon-control"
+                aria-label="Fechar configurações"
+                onClick={() => setSettingsOpen(false)}
+              >
+                <X size={20} />
+              </button>
+            </header>
+            <Feedback error={error} />
+            <NotebookArtwork notebook={data.notebook} />
+            <form
+              onSubmit={async (e) => {
+                e.preventDefault();
+                const t = new FormData(e.currentTarget).get("title");
+                try {
+                  await api(`/notebooks/${id}`, {
+                    method: "PUT",
+                    body: JSON.stringify({ title: t }),
+                  });
+                  await load();
+                } catch (e) {
+                  setError((e as Error).message);
+                }
+              }}
+            >
+              <input
+                aria-label="Renomear caderno"
+                name="title"
+                defaultValue={data.notebook.title}
+                required
+                maxLength={120}
+              />
+              <button>Salvar nome</button>
+            </form>
+            <NotebookArtworkEditor
+              notebook={data.notebook}
+              onChanged={load}
+              onError={setError}
+            />
+            <button className="secondary" onClick={() => setRemove("notebook")}>
+              Excluir caderno
+            </button>
+          </StudyDialog>
+        )}
+        {toolsOpen && data && (
+          <StudyDialog
+            title="Ferramentas de estudo"
+            className="notebook-panel-dialog"
+            onClose={() => setToolsOpen(false)}
+          >
+            <header className="notebook-panel-heading">
+              <div>
+                <h2>Como você quer estudar?</h2>
+                <p>Use as fontes selecionadas para explorar o conteúdo.</p>
+              </div>
+              <button
+                type="button"
+                className="icon-control"
+                aria-label="Fechar ferramentas"
+                onClick={() => setToolsOpen(false)}
+              >
+                <X size={20} />
+              </button>
+            </header>
+            <Feedback error={error} />
+            <label>
+              Nível de explicação
+              <select
+                value={level}
+                onChange={(event) => setLevel(event.target.value)}
+              >
+                <option value="BEGINNER">Iniciante</option>
+                <option value="INTERMEDIATE">Intermediário</option>
+                <option value="ADVANCED">Avançado</option>
+              </select>
+            </label>
+            <div className="notebook-smart-actions">
+              <button
+                className="secondary"
+                disabled={!canSend}
+                onClick={() => void persistFlashcards()}
+              >
+                <Sparkles size={16} /> Criar flashcards de revisão espaçada
+              </button>
+            </div>
+            <div className="study-modes">
+              {modes.map((m) => (
+                <button
+                  key={m.id}
+                  className="secondary"
+                  disabled={!canSend}
+                  onClick={() => void generate(m.id)}
+                >
+                  <strong>{m.title}</strong>
+                  <small>{m.description}</small>
+                </button>
+              ))}
+            </div>
+            <section className="notebook-study-plan">
+              <h3>Um plano que cabe na sua rotina</h3>
+              <div>
+                <label>
+                  Dias de estudo
+                  <input
+                    type="number"
+                    min={1}
+                    max={30}
+                    value={planDays}
+                    onChange={(e) =>
+                      setPlanDays(
+                        Math.max(1, Math.min(30, Number(e.target.value))),
+                      )
+                    }
+                  />
+                </label>
+                <label>
+                  Minutos por dia
+                  <input
+                    type="number"
+                    min={10}
+                    max={180}
+                    step={5}
+                    value={planMinutes}
+                    onChange={(e) =>
+                      setPlanMinutes(
+                        Math.max(10, Math.min(180, Number(e.target.value))),
+                      )
+                    }
+                  />
+                </label>
+              </div>
+              <button
+                type="button"
+                disabled={!canSend}
+                onClick={() => void generate("STUDY_PLAN")}
+              >
+                Criar meu plano de revisão
+              </button>
+              <small>
+                Baseado nas {selected.length} fontes selecionadas. A IA prepara
+                o plano; você escolhe quando estudar.
+              </small>
+            </section>
+          </StudyDialog>
         )}
         {preview ? (
           <StudyDialog
@@ -1010,24 +1170,38 @@ function StudyAnswer({
 }
 
 function StudyDialog({
+  className = "",
   title,
   onClose,
   children,
 }: {
   title: string;
+  className?: string;
   onClose: () => void;
   children: React.ReactNode;
 }) {
   const ref = useRef<HTMLDialogElement>(null);
+  useOverlayHistory(onClose, true);
   useEffect(() => {
-    ref.current?.showModal();
+    const node = ref.current;
+    const previous = document.activeElement as HTMLElement | null;
+    node?.showModal();
+    return () => {
+      node?.close();
+      void waitForOverlayHistory().then(() => {
+        if (previous?.isConnected) previous.focus({ preventScroll: true });
+      });
+    };
   }, []);
   return (
     <dialog
       ref={ref}
-      className="study-dialog"
+      className={`study-dialog ${className}`}
       aria-label={title}
-      onCancel={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        onClose();
+      }}
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}

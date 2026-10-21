@@ -1,0 +1,703 @@
+/* Keep the conversation and composer inside the available app viewport. */
+.app-shell:has(.notebook-detail) {
+  height: var(--enturma-visual-viewport-height, 100dvh);
+  min-height: 0;
+  overflow: hidden;
+}
+.workspace:has(.notebook-detail) {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+.workspace:has(.notebook-detail) > .topbar {
+  flex-shrink: 0;
+}
+.workspace:has(.notebook-detail) > main {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 16px 24px;
+}
+.workspace:has(.notebook-detail) > .app-legal-footer {
+  display: none;
+}
+.notebooks-page.notebook-detail {
+  height: 100%;
+  min-height: 0;
+  max-width: none;
+  display: flex;
+  flex-direction: column;
+}
+.notebook-detail .notebooks-heading {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.notebook-detail .notebooks-heading .icon-control {
+  flex: 0 0 42px;
+  width: 42px;
+  height: 42px;
+}
+.notebook-detail .notebook-title {
+  flex: 1;
+  min-width: 0;
+}
+.notebook-detail .notebook-title h1 {
+  font-size: 21px;
+  line-height: 1.3;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.notebook-title > span {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+.notebook-detail-heading .notebook-artwork {
+  width: 52px;
+  height: 52px;
+  flex: 0 0 52px;
+  margin: 0;
+  border-radius: 12px;
+}
+.notebook-detail-heading .notebook-artwork-title {
+  display: none;
+}
+.notebook-detail-heading .notebook-avatar {
+  width: 30px;
+  height: 30px;
+  left: 8px;
+  bottom: 5px;
+  border-width: 2px;
+}
+.notebook-detail .notebook-chat-workspace {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 16px;
+  grid-template-rows: minmax(0, 1fr);
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  margin: 0;
+}
+.notebook-chat-workspace .notebook-sources {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 18px;
+  overscroll-behavior: contain;
+}
+.notebook-panel-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.notebook-panel-heading h2 {
+  font-size: 18px;
+  margin: 0;
+}
+.notebook-panel-heading p {
+  color: var(--muted);
+  font-size: 12px;
+  margin: 6px 0 0;
+}
+.notebook-panel-heading h2 small {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 500;
+  margin-left: 6px;
+}
+.notebook-panel-heading .icon-control {
+  flex-shrink: 0;
+}
+.notebook-source-content .source-list {
+  margin: 18px 0;
+  gap: 10px;
+}
+.notebook-source-content .source-list article {
+  padding: 12px;
+  border-radius: 12px;
+}
+.notebook-source-content .source-list article label {
+  font-size: 13px;
+  min-width: 0;
+}
+.notebook-source-content .source-list article strong {
+  overflow-wrap: anywhere;
+}
+.notebook-source-content .source-list article small {
+  font-size: 11px;
+}
+.notebook-source-content .source-list article > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.notebook-source-content .text-button {
+  color: var(--ink);
+  background: transparent;
+  border: 1px solid transparent;
+  padding: 8px;
+  min-height: 40px;
+  text-decoration: none;
+  font-size: 12px;
+}
+.notebook-source-content .text-button:hover {
+  background: var(--surface-hover);
+}
+.notebook-add-source {
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.notebook-add-source > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 8px 0;
+  font-size: 14px;
+  font-weight: 650;
+}
+.notebook-add-source .source-tabs {
+  display: flex;
+  gap: 6px;
+  margin: 10px 0;
+}
+.notebook-add-source .source-tabs button {
+  flex: 1;
+  padding: 9px 6px;
+  font-size: 12px;
+}
+.notebook-add-source .notebook-upload {
+  padding: 18px 10px;
+  gap: 10px;
+  font-size: 13px;
+}
+.notebook-add-source .notebook-upload span {
+  font-size: 11px;
+  line-height: 1.5;
+}
+.notebook-add-source .notebook-upload {
+  cursor: pointer;
+}
+.notebook-add-source .notebook-upload:focus-within {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
+}
+.notebook-add-source .notebook-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+}
+.notebook-add-source .source-form {
+  font-size: 13px;
+  gap: 12px;
+}
+.notebook-add-source .source-form input,
+.notebook-add-source .source-form textarea {
+  padding: 10px;
+  font-size: 14px;
+}
+.notebook-source-content .source-privacy {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.6;
+  margin-top: 18px;
+}
+.notebook-chat-workspace .notebook-studio {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+}
+.notebook-chat-workspace .studio-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+  margin: 0;
+}
+.notebook-agent-mark,
+.notebook-welcome-mark {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  color: var(--ink);
+  background: var(--surface-hover);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  width: 42px;
+  height: 42px;
+}
+.notebook-chat-workspace .studio-heading h2 {
+  font-size: 16px;
+  margin: 0;
+  white-space: nowrap;
+}
+.notebook-chat-workspace .studio-heading p {
+  font-size: 11px;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+.notebook-chat-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
+.notebook-chat-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 40px;
+  padding: 9px 12px;
+  font-size: 12px;
+}
+.notebook-chat-actions small {
+  font-size: 11px;
+}
+.notebook-chat-workspace .notebook-conversation {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: none;
+  padding: 24px clamp(16px, 3vw, 40px);
+  margin: 0;
+  gap: 28px;
+  overflow-y: auto;
+}
+.notebook-chat-turn {
+  width: 100%;
+  max-width: 780px;
+  margin: 0 auto;
+  flex-shrink: 0;
+}
+.notebook-chat-welcome {
+  margin: auto;
+  max-width: 480px;
+  padding: 20px 0;
+  text-align: center;
+}
+.notebook-welcome-mark {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 20px;
+  border-radius: 20px;
+}
+.notebook-chat-welcome h2 {
+  font-size: clamp(20px, 2vw, 26px);
+  line-height: 1.3;
+  margin: 0 0 12px;
+}
+.notebook-chat-welcome p {
+  color: var(--muted);
+  line-height: 1.6;
+  font-size: 14px;
+}
+.notebook-prompt-ideas {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 24px;
+}
+.notebook-prompt-ideas button {
+  font-size: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+}
+.notebook-assistant-message {
+  border: 0;
+  padding: 6px 0 0;
+}
+.notebook-assistant-message .study-answer {
+  font-size: 15px;
+  line-height: 1.75;
+}
+.notebook-assistant-message .study-answer pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+.notebook-response-kind {
+  font-size: 16px;
+  margin: 16px 0 0;
+}
+.notebook-assistant-message .generation-sources {
+  padding: 8px 0;
+  margin: 10px 0 0;
+  background: transparent;
+  border: 0;
+  font-size: 12px;
+}
+.notebook-assistant-message .generation-sources summary {
+  cursor: pointer;
+  color: var(--muted);
+}
+.notebook-chat-workspace .notebook-question {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin: 0 16px 14px;
+  padding: 10px 12px;
+  border-radius: 16px;
+  background: var(--surface-hover);
+}
+.notebook-question > label:first-child {
+  display: block;
+  flex: none;
+  margin: 0;
+}
+.notebook-chat-workspace .notebook-question textarea {
+  display: block;
+  min-height: 44px;
+  max-height: 128px;
+  padding: 10px 4px;
+  width: 100%;
+  resize: none;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--ink);
+  box-shadow: none;
+  line-height: 1.5;
+  font-size: 15px;
+}
+.notebook-composer-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+}
+.notebook-question .notebook-web-search {
+  display: flex;
+  flex: 0 1 auto;
+  flex-wrap: nowrap;
+  gap: 6px;
+  font-size: 11px;
+  margin: 0;
+}
+.notebook-question .notebook-web-search input {
+  width: 16px;
+  height: 16px;
+  flex: 0 0 16px;
+  margin: 0;
+}
+.notebook-question .notebook-web-search svg {
+  flex-shrink: 0;
+}
+.notebook-composer-actions > button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 14px;
+  font-size: 12px;
+  flex-shrink: 0;
+}
+.notebook-composer-note {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--muted);
+  margin: 0;
+}
+.notebook-panel-dialog {
+  width: min(600px, calc(100vw - 24px));
+  max-height: calc(100dvh - 32px);
+  padding: 0;
+}
+.notebook-panel-dialog > div {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+.notebook-sources-dialog {
+  width: min(420px, calc(100vw - 24px));
+}
+.notebook-panel-dialog .notebook-artwork {
+  height: 160px;
+  margin: 0;
+}
+.notebook-panel-dialog form {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.notebook-panel-dialog form input {
+  flex: 1;
+  min-width: 160px;
+}
+.notebook-panel-dialog .study-modes {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.notebook-panel-dialog .study-modes button {
+  text-align: left;
+  padding: 16px;
+}
+.notebook-panel-dialog .study-modes small {
+  line-height: 1.5;
+}
+.notebook-panel-dialog .notebook-study-plan {
+  margin: 0;
+}
+.notebook-panel-dialog .notebook-study-plan > div {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.notebook-panel-dialog .notebook-study-plan small {
+  display: block;
+  margin-top: 10px;
+}
+
+/* Portal dialogs do not inherit the profile studio's button rules. */
+.profile-edit-dialog .profile-remove-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 42px;
+  padding: 9px 12px;
+  border: 1px solid #d38987;
+  border-radius: 10px;
+  background: #fff1f0;
+  color: #922d32;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+  cursor: pointer;
+}
+[data-theme="dark"] .profile-edit-dialog .profile-remove-button {
+  background: #43272b;
+  color: #ffc1ba;
+  border-color: #97595f;
+}
+.profile-edit-dialog .profile-remove-button:hover {
+  filter: brightness(0.94);
+}
+.profile-edit-dialog .profile-remove-button:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 3px;
+}
+.profile-edit-dialog .widget-editor-row .actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.profile-edit-dialog .widget-editor-row .actions .profile-remove-button {
+  margin-left: auto;
+}
+
+/* Independent color currents move underneath the stationary texture and content. */
+.profile-color-layer {
+  --river-primary: var(--profile-accent);
+  --river-secondary: var(--profile-secondary);
+}
+.profile-color-layer.mural-color-layer {
+  --river-primary: var(--mural-primary);
+  --river-secondary: var(--mural-secondary);
+}
+.profile-color-layer > .profile-river-current {
+  inset: -30%;
+  background:
+    radial-gradient(
+      ellipse at 22% 32%,
+      var(--river-primary) 0%,
+      var(--river-primary) 12%,
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse at 78% 70%,
+      var(--river-secondary) 0%,
+      var(--river-secondary) 18%,
+      transparent 62%
+    );
+}
+.profile-color-layer > .profile-river-return {
+  inset: -30%;
+  background:
+    radial-gradient(
+      ellipse at 65% 18%,
+      var(--river-secondary) 0%,
+      transparent 52%
+    ),
+    radial-gradient(
+      ellipse at 25% 82%,
+      var(--river-primary) 0%,
+      transparent 54%
+    );
+  opacity: 0.85;
+}
+.profile-color-layer > .profile-color-dots {
+  inset: 0;
+  background: transparent;
+  transform: none;
+}
+
+@media (max-width: 1100px) {
+  .notebook-detail .notebook-chat-workspace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 760px) {
+  .profile-shared-surface .profile-handle-row {
+    position: relative;
+  }
+  .profile-shared-surface .profile-handle-achievements,
+  .profile-shared-surface .profile-achievement-badge {
+    position: static;
+  }
+  .profile-shared-surface .profile-achievement-popover {
+    position: absolute;
+    top: calc(100% + 8px);
+    bottom: auto;
+    left: 0;
+    right: auto;
+    width: min(320px, calc(100vw - 64px));
+    max-height: 42dvh;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+  .workspace:has(.notebook-detail) > main {
+    padding: 8px 8px calc(78px + env(safe-area-inset-bottom));
+  }
+  .notebook-detail .notebooks-heading {
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+  .notebook-detail .notebook-title h1 {
+    font-size: 17px;
+  }
+  .notebook-title > span {
+    font-size: 11px;
+  }
+  .notebook-detail-heading .notebook-artwork {
+    width: 40px;
+    height: 40px;
+    flex-basis: 40px;
+  }
+  .notebook-detail-heading .notebook-avatar {
+    width: 26px;
+    height: 26px;
+    left: 6px;
+    bottom: 3px;
+  }
+  .notebook-chat-workspace .notebook-studio {
+    padding: 0;
+    border-radius: 16px;
+  }
+  .notebook-chat-workspace .studio-heading {
+    padding: 10px;
+    gap: 8px;
+  }
+  .notebook-agent-mark {
+    width: 32px;
+    height: 32px;
+    border-radius: 10px;
+  }
+  .notebook-chat-workspace .studio-heading h2 {
+    font-size: 14px;
+  }
+  .notebook-chat-workspace .studio-heading p {
+    display: none;
+  }
+  .notebook-chat-actions {
+    gap: 4px;
+  }
+  .notebook-chat-actions button {
+    padding: 8px;
+    min-height: 40px;
+  }
+  .notebook-chat-actions button[aria-label="Ferramentas de estudo"] span {
+    display: none;
+  }
+  .notebook-chat-workspace .notebook-conversation {
+    padding: 18px 14px;
+    gap: 22px;
+  }
+  .notebook-user-message {
+    max-width: 92%;
+    padding: 10px 14px;
+    font-size: 14px;
+  }
+  .notebook-assistant-message .study-answer {
+    font-size: 14px;
+  }
+  .notebook-chat-workspace .notebook-question {
+    margin: 0 8px 8px;
+    padding: 8px 10px;
+    gap: 6px;
+    border-radius: 12px;
+  }
+  .notebook-chat-workspace .notebook-question textarea {
+    font-size: 16px;
+  }
+  .notebook-composer-actions > button {
+    padding: 10px;
+  }
+  .notebook-composer-actions > button span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .notebook-question .notebook-web-search {
+    flex: 0 1 auto;
+    font-size: 11px;
+  }
+  .notebook-composer-note {
+    font-size: 10px;
+  }
+  .notebook-chat-welcome {
+    padding: 10px 0;
+  }
+  .notebook-chat-welcome p {
+    font-size: 13px;
+  }
+  .notebook-welcome-mark {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 14px;
+  }
+  .notebook-prompt-ideas {
+    margin-top: 16px;
+  }
+  .notebook-prompt-ideas button {
+    width: 100%;
+  }
+  .notebook-panel-dialog > div {
+    padding: 18px;
+    gap: 16px;
+  }
+  .notebook-panel-dialog .study-modes {
+    grid-template-columns: 1fr;
+  }
+  html[data-enturma-text-input="true"]
+    .app-shell:has(.notebook-detail)
+    .mobile-bottom-nav {
+    display: none;
+  }
+  html[data-enturma-text-input="true"] .workspace:has(.notebook-detail) > main {
+    padding-bottom: 8px;
+  }
+}

@@ -126,7 +126,9 @@ test("notebook chat history, private artwork, mobile layout and real QR decoding
     await expect(page.locator(".notebook-conversation")).toContainText(
       "recebe ingredientes",
     );
-    await page.getByText("Gerenciar caderno", { exact: true }).click();
+    await page
+      .getByRole("button", { name: "Gerenciar caderno", exact: true })
+      .click();
     const png = await page.evaluate(() => {
       const c = document.createElement("canvas");
       c.width = 640;
@@ -144,9 +146,14 @@ test("notebook chat history, private artwork, mobile layout and real QR decoding
       mimeType: "image/png",
       buffer: Buffer.from(png, "base64"),
     });
-    await expect(page.locator(".notebook-banner")).toBeVisible();
+    await expect(
+      page.locator(".notebook-detail-heading .notebook-banner"),
+    ).toBeVisible();
+    await page.getByRole("button", { name: "Fechar configurações" }).click();
     await page.reload();
-    await expect(page.locator(".notebook-banner")).toBeVisible();
+    await expect(
+      page.locator(".notebook-detail-heading .notebook-banner"),
+    ).toBeVisible();
     await expect(page.locator(".enturma-launch-overlay")).toHaveCount(0, {
       timeout: 20000,
     });

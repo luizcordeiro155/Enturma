@@ -92,6 +92,8 @@ export function profileStyle(user: PublicProfile): React.CSSProperties {
   return {
     "--profile-accent": primary,
     "--profile-secondary": secondary,
+    "--mural-primary": muralPrimary,
+    "--mural-secondary": muralSecondary,
     "--profile-banner": gradient,
     "--profile-gradient": gradient,
     "--profile-copy": contrast.ink,
