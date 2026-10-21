@@ -35,6 +35,7 @@ import "./profile-visual-editor.css";
 import "./connected-experience.css";
 import "./theme-contrast-hotfix.css";
 import "./mobile-study-polish.css";
+import "./notebook-profile-polish.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";
