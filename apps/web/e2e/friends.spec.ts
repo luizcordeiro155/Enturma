@@ -371,7 +371,8 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   const profileAction = page.locator(
     ".user-profile-popover .public-profile-body > .profile-dialog-actions > .button:not(.secondary)",
   );
-  await expect(profileAction).toHaveCSS("background-color", "rgb(217, 245, 109)");
+  // The shared profile uses the configured Enturma accent, not the CSS fallback.
+  await expect(profileAction).toHaveCSS("background-color", "rgb(216, 239, 121)");
   await expect(profileAction).toHaveCSS("color", "rgb(16, 42, 36)");
   await expect(profileAction).toHaveCSS("text-decoration-line", "none");
   await page.locator("html").evaluate((node, theme) => {

@@ -43,6 +43,9 @@ export function AcademicVerification() {
   const [method, setMethod] = useState<"email" | "document">("email");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [institutionError, setInstitutionError] = useState("");
+  const [campusError, setCampusError] = useState("");
+  const [catalogAttempt, setCatalogAttempt] = useState(0);
   const [file, setFile] = useState<File | null>(null);
   const [now, setNow] = useState(() => Date.now());
   const panel = useRef<HTMLDivElement>(null);
@@ -74,6 +77,16 @@ export function AcademicVerification() {
     return () => clearTimeout(timeout);
   }, [approved, advance]);
 
+  const retryConnection = useCallback(() => {
+    setCatalogAttempt((attempt) => attempt + 1);
+    void refresh();
+  }, [refresh]);
+
+  useEffect(() => {
+    window.addEventListener("online", retryConnection);
+    return () => window.removeEventListener("online", retryConnection);
+  }, [retryConnection]);
+
   useEffect(() => {
     if (!choosing || approved) return;
     const controller = new AbortController();
@@ -84,12 +97,13 @@ export function AcademicVerification() {
         { cache: "no-store", signal: controller.signal },
       )
         .then((data) => {
+          if (controller.signal.aborted) return;
           setInstitutions(data.items);
           setMore(data.hasMore);
-          setError("");
+          setInstitutionError("");
         })
         .catch((e: Error) => {
-          if (!controller.signal.aborted) setError(e.message);
+          if (!controller.signal.aborted) setInstitutionError(e.message);
         })
         .finally(() => {
           if (!controller.signal.aborted) setFinding(false);
@@ -99,20 +113,24 @@ export function AcademicVerification() {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [choosing, approved, search, page]);
+  }, [choosing, approved, search, page, catalogAttempt]);
 
   useEffect(() => {
-    if (!selected) return;
+    if (!selected || !choosing || approved) return;
     const controller = new AbortController();
     api<{ items: Campus[] }>(`/catalog/campuses?parentId=${selected.id}`, {
       signal: controller.signal,
     })
-      .then((data) => setCampuses(data.items))
+      .then((data) => {
+        if (controller.signal.aborted) return;
+        setCampuses(data.items);
+        setCampusError("");
+      })
       .catch((e: Error) => {
-        if (!controller.signal.aborted) setError(e.message);
+        if (!controller.signal.aborted) setCampusError(e.message);
       });
     return () => controller.abort();
-  }, [selected]);
+  }, [selected, choosing, approved, catalogAttempt]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -198,6 +216,10 @@ export function AcademicVerification() {
       )
     : 0;
   const resendWait = Math.max(0, seconds - 29 * 60);
+  const visibleError =
+    error ||
+    (choosing && !approved && (institutionError || (selected && campusError))) ||
+    connectionError;
   return (
     <main className="academic-page">
       <header className="academic-header">
@@ -255,10 +277,10 @@ export function AcademicVerification() {
               </li>
             ))}
           </ol>
-          {(error || connectionError) && (
+          {visibleError && (
             <div className="academic-error" role="alert">
-              {error || connectionError}
-              <button type="button" onClick={() => void refresh()}>
+              {visibleError}
+              <button type="button" onClick={retryConnection}>
                 <RefreshCw size={16} /> Verificar conexão
               </button>
             </div>
@@ -315,6 +337,7 @@ export function AcademicVerification() {
                       setSelected(item);
                       setCampus("");
                       setCampuses([]);
+                      setCampusError("");
                     }}
                   >
                     <GraduationCap size={22} />

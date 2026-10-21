@@ -361,6 +361,13 @@ test("pendente não entra em salas nem caronas; offline e broadcast não aprovam
   );
   expect(sockets).toEqual([1008, 1008, "academic_ready"]);
   await page.context().setOffline(true);
+  // A catalog request can fail independently from the identity status read.
+  // Reconnecting must retry both, rather than leave the catalog error stuck.
+  const failedCatalog = page.waitForEvent("requestfailed", {
+    predicate: (request) => request.url().includes("/auth/academic/institutions?"),
+  });
+  await page.getByLabel("Buscar instituição").fill(institutionName);
+  await failedCatalog;
   await page.evaluate(() =>
     window.dispatchEvent(new Event("enturma-academic-revalidate")),
   );
@@ -370,6 +377,9 @@ test("pendente não entra em salas nem caronas; offline e broadcast não aprovam
   );
   await page.context().setOffline(false);
   await expect(page.locator(".academic-error")).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: new RegExp(institutionName) }),
+  ).toBeVisible();
   await expect(page).toHaveURL(/academic-verification/);
   const denied = await request.get(
     `${backend}/api/v1/admin/academic-verification`,

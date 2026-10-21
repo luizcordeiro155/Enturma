@@ -55,11 +55,7 @@ public class WebPushNotificationService {
 
   @Transactional
   public void register(
-      Actor actor,
-      String installationId,
-      String endpoint,
-      String p256dh,
-      String auth) {
+      Actor actor, String installationId, String endpoint, String p256dh, String auth) {
     if (endpoint == null || !endpoint.startsWith("https://")) {
       throw ApiException.invalid("Endpoint de push inválido.");
     }
@@ -74,9 +70,8 @@ public class WebPushNotificationService {
     db.jdbc.update(
         "INSERT INTO notification_web_push_subscription"
             + "(id,user_id,installation_id,endpoint,p256dh,auth,enabled,created_at,updated_at,last_seen_at)"
-            + " VALUES (?,?,?,?,?,?,true,now(),now(),now())"
-            + " ON CONFLICT(user_id,installation_id) DO UPDATE SET"
-            + " endpoint=EXCLUDED.endpoint,p256dh=EXCLUDED.p256dh,auth=EXCLUDED.auth,"
+            + " VALUES (?,?,?,?,?,?,true,now(),now(),now()) ON CONFLICT(user_id,installation_id) DO"
+            + " UPDATE SET endpoint=EXCLUDED.endpoint,p256dh=EXCLUDED.p256dh,auth=EXCLUDED.auth,"
             + " enabled=true,updated_at=now(),last_seen_at=now()",
         UUID.randomUUID(),
         actor.id(),
@@ -89,8 +84,7 @@ public class WebPushNotificationService {
   @Transactional
   public void unregister(Actor actor, String installationId) {
     db.jdbc.update(
-        "DELETE FROM notification_web_push_subscription"
-            + " WHERE user_id=? AND installation_id=?",
+        "DELETE FROM notification_web_push_subscription" + " WHERE user_id=? AND installation_id=?",
         actor.id(),
         installationId);
   }
@@ -112,10 +106,17 @@ public class WebPushNotificationService {
       PushService service = new PushService(keys.publicKey(), keys.privateKey(), appUrl);
       String title = NotificationPresentation.title(event.kind(), actorName(event.actor()));
       var payload = new LinkedHashMap<String, Object>();
+      var delivery =
+          db.list(
+              "SELECT sequence FROM notification_desktop_push_event WHERE user_id=? AND"
+                  + " dedupe_key=?",
+              event.user(),
+              event.kind() + ":" + event.target() + ":" + event.actor());
+      if (!delivery.isEmpty())
+        payload.put("id", event.user() + ":" + delivery.getFirst().get("sequence"));
       payload.put("title", title);
       payload.put(
-          "body",
-          event.message() == null ? "Você tem uma nova notificação." : event.message());
+          "body", event.message() == null ? "Você tem uma nova notificação." : event.message());
       payload.put("href", safeHref(event.href()));
       payload.put("kind", event.kind() == null ? "SYSTEM" : event.kind());
       payload.put("icon", "/pwa/enturma-mobile-official-v6.png");
@@ -141,8 +142,7 @@ public class WebPushNotificationService {
                 id);
           } else if (status >= 200 && status < 300) {
             db.jdbc.update(
-                "UPDATE notification_web_push_subscription"
-                    + " SET last_seen_at=now() WHERE id=?",
+                "UPDATE notification_web_push_subscription" + " SET last_seen_at=now() WHERE id=?",
                 id);
           }
         } catch (Exception ignored) {
@@ -170,7 +170,6 @@ public class WebPushNotificationService {
     return rows.isEmpty() ? "" : String.valueOf(rows.getFirst().get("name"));
   }
 
-
   private String safeHref(String href) {
     if (href == null || !href.startsWith("/") || href.startsWith("//")) {
       return "/notifications";
@@ -189,8 +188,7 @@ public class WebPushNotificationService {
 
       try {
         var spec = ECNamedCurveTable.getParameterSpec("prime256v1");
-        var generator =
-            KeyPairGenerator.getInstance("ECDH", BouncyCastleProvider.PROVIDER_NAME);
+        var generator = KeyPairGenerator.getInstance("ECDH", BouncyCastleProvider.PROVIDER_NAME);
         generator.initialize(spec);
         KeyPair pair = generator.generateKeyPair();
         String publicKey =

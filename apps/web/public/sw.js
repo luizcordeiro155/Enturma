@@ -1,6 +1,10 @@
-const CACHE = "enturma-pwa-v6";
+const CACHE = "enturma-pwa-v7";
 const STATIC_PREFIX = "/_next/static/";
-const CORE = ["/offline", "/manifest.webmanifest", "/pwa/enturma-mobile-official-v6.png"];
+const CORE = [
+  "/offline",
+  "/manifest.webmanifest",
+  "/pwa/enturma-mobile-official-v6.png",
+];
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -8,9 +12,7 @@ self.addEventListener("install", (event) => {
       .open(CACHE)
       .then((cache) =>
         Promise.allSettled(
-          CORE.map((url) =>
-            cache.add(new Request(url, { cache: "reload" })),
-          ),
+          CORE.map((url) => cache.add(new Request(url, { cache: "reload" }))),
         ),
       )
       .then(() => self.skipWaiting()),
@@ -80,66 +82,112 @@ self.addEventListener("fetch", (event) => {
   }
 });
 
-
-self.addEventListener("push", (event) => {
-  if (!event.data) return;
-  event.waitUntil((async () => {
-    let data = {};
-    try {
-      data = event.data.json();
-    } catch {
-      data = { body: event.data.text() };
-    }
-
-    if (typeof self.navigator?.setAppBadge === "function") {
-      try {
-        const count = Number(data.unreadCount || 0);
-        if (count > 0) await self.navigator.setAppBadge(count);
-        else if (typeof self.navigator.clearAppBadge === "function")
-          await self.navigator.clearAppBadge();
-      } catch {}
-    }
-
-    const windows = await self.clients.matchAll({
-      type: "window",
-      includeUncontrolled: true,
-    });
-    const visible = windows.some(
-      (client) => client.visibilityState === "visible",
-    );
-    if (visible) {
+// Both realtime delivery and Web Push converge here; one receipt per event across tabs.
+let deliveryQueue = Promise.resolve();
+function safeNotificationTarget(href) {
+  try {
+    const url = new URL(href || "/notifications", self.location.origin);
+    if (url.origin === self.location.origin && !url.username && !url.password)
+      return url;
+  } catch {}
+  return new URL("/notifications", self.location.origin);
+}
+function deliverNotification(data) {
+  deliveryQueue = deliveryQueue
+    .catch(() => {})
+    .then(async () => {
+      const target = safeNotificationTarget(data.href);
+      const windows = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
       for (const client of windows)
         client.postMessage({ type: "ENTURMA_PUSH", data });
-      return;
-    }
-
-    await self.registration.showNotification(data.title || "Enturma", {
-      body: data.body || "Você tem uma nova notificação.",
-      icon: data.icon || "/pwa/enturma-mobile-official-v6.png",
-      badge: data.badge || "/pwa/enturma-mobile-official-v6.png",
-      tag: `enturma-${data.kind || "notification"}-${data.href || ""}`,
-      renotify: true,
-      data: { href: data.href || "/notifications" },
+      if (
+        Number.isFinite(data.unreadCount) &&
+        typeof self.navigator?.setAppBadge === "function"
+      ) {
+        if (data.unreadCount > 0)
+          await self.navigator.setAppBadge(data.unreadCount).catch(() => {});
+        else if (typeof self.navigator.clearAppBadge === "function")
+          await self.navigator.clearAppBadge().catch(() => {});
+      }
+      const receipts = await caches.open("enturma-notification-receipts-v1");
+      const key = data.id
+        ? new Request(
+            self.location.origin +
+              "/__notification-receipt/" +
+              encodeURIComponent(data.id),
+          )
+        : null;
+      if (key && (await receipts.match(key))) return;
+      // Only the focused conversation suppresses its alert, not every visible page.
+      const reading = windows.some(
+        (client) =>
+          client.focused &&
+          client.visibilityState === "visible" &&
+          new URL(client.url).pathname + new URL(client.url).search ===
+            target.pathname + target.search,
+      );
+      if (!reading)
+        await self.registration.showNotification(data.title || "Enturma", {
+          body: data.body || "Você tem uma nova notificação.",
+          icon: "/pwa/enturma-mobile-official-v6.png",
+          badge: "/pwa/enturma-mobile-official-v6.png",
+          tag: data.id
+            ? "enturma-" + data.id
+            : "enturma-" + (data.kind || "notification") + target.pathname,
+          data: { href: target.pathname + target.search + target.hash },
+        });
+      if (key) {
+        await receipts.put(key, new Response("1"));
+        const keys = await receipts.keys();
+        await Promise.all(
+          keys
+            .slice(0, Math.max(0, keys.length - 200))
+            .map((old) => receipts.delete(old)),
+        );
+      }
     });
-  })());
+  return deliveryQueue;
+}
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+  let data;
+  try {
+    data = event.data.json();
+  } catch {
+    data = { body: event.data.text() };
+  }
+  event.waitUntil(deliverNotification(data));
+});
+self.addEventListener("message", (event) => {
+  if (
+    event.data?.type === "ENTURMA_SHOW_NOTIFICATION" &&
+    event.source?.url &&
+    new URL(event.source.url).origin === self.location.origin
+  )
+    event.waitUntil(deliverNotification(event.data.data));
 });
 
 self.addEventListener("notificationclick", (event) => {
   event.notification.close();
   const href = event.notification.data?.href || "/notifications";
-  event.waitUntil((async () => {
-    const target = new URL(href, self.location.origin).href;
-    const windows = await self.clients.matchAll({
-      type: "window",
-      includeUncontrolled: true,
-    });
-    for (const client of windows) {
-      if ("navigate" in client) await client.navigate(target);
-      if ("focus" in client) await client.focus();
-      return;
-    }
-    if (self.clients.openWindow) await self.clients.openWindow(target);
-  })());
+  event.waitUntil(
+    (async () => {
+      const target = safeNotificationTarget(href).href;
+      const windows = await self.clients.matchAll({
+        type: "window",
+        includeUncontrolled: true,
+      });
+      for (const client of windows) {
+        if ("navigate" in client) await client.navigate(target);
+        if ("focus" in client) await client.focus();
+        return;
+      }
+      if (self.clients.openWindow) await self.clients.openWindow(target);
+    })(),
+  );
 });
 
 self.addEventListener("message", (event) => {

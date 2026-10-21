@@ -25,22 +25,28 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await authenticate(page.context(), await response.json());
   await page.goto("/profile");
   await expect(page.getByRole("button", { name: /^Sobre você/ })).toBeVisible();
-  const theme = page.getByRole("button", { name: /^Tema .*Escolher tema/ });
+  const theme = page.getByRole("button", { name: /^Tema .*Alternar tema/ });
   await theme.hover();
   await expect(page.getByRole("menu", { name: "Escolher tema" })).toBeVisible();
   await page.getByRole("menuitemradio", { name: /Escuro/ }).click();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   const editCard = page.getByRole("button", { name: /^Sobre você/ });
-    await expect(editCard).toHaveCSS("background-color", "rgb(22, 30, 33)");
-    await expect(editCard).toHaveCSS("color", "rgb(242, 246, 244)");
-    await expect(editCard.locator(".profile-edit-thumbnail svg")).toHaveCSS("color", "rgb(242, 246, 244)");
-    await expect(editCard.locator("small")).toHaveCSS("opacity", "1");
+  await expect(editCard).toHaveCSS("background-color", "rgb(22, 30, 33)");
+  await expect(editCard).toHaveCSS("color", "rgb(242, 246, 244)");
+  await expect(editCard.locator(".profile-edit-thumbnail svg")).toHaveCSS(
+    "color",
+    "rgb(242, 246, 244)",
+  );
+  await expect(editCard.locator("small")).toHaveCSS("opacity", "1");
 
-  await theme.click();
+  await theme.hover();
   const darkMenu = page.getByRole("menu", { name: "Escolher tema" });
   const selectedDark = darkMenu.getByRole("menuitemradio", { name: /Escuro/ });
   await expect(selectedDark).toHaveCSS("color", "rgb(242, 246, 244)");
-  await expect(selectedDark.locator("svg").first()).toHaveCSS("color", "rgb(227, 232, 255)");
+  await expect(selectedDark.locator("svg").first()).toHaveCSS(
+    "color",
+    "rgb(242, 246, 244)",
+  );
   await selectedDark.click();
   await page.getByRole("button", { name: /^Sobre você/ }).click();
   await page
@@ -60,7 +66,8 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
     .click();
   await page.setViewportSize({ width: 360, height: 780 });
   await page.goto("/settings");
-  await theme.click();
+  await theme.focus();
+  await page.keyboard.press("ArrowDown");
   const menu = page.getByRole("menu", { name: "Escolher tema" });
   const bounds = (await menu.boundingBox())!;
   expect(bounds.x).toBeGreaterThanOrEqual(0);
@@ -72,7 +79,10 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   const lightCard = page.getByRole("button", { name: /^Sobre você/ });
   await expect(lightCard).toHaveCSS("background-color", "rgb(255, 255, 255)");
   await expect(lightCard).toHaveCSS("color", "rgb(23, 63, 54)");
-  await expect(lightCard.locator(".profile-edit-thumbnail svg")).toHaveCSS("color", "rgb(23, 63, 54)");
+  await expect(lightCard.locator(".profile-edit-thumbnail svg")).toHaveCSS(
+    "color",
+    "rgb(23, 63, 54)",
+  );
   await page.getByRole("button", { name: /^Estilo do nome/ }).click();
   await expect(page.getByRole("dialog")).toBeVisible();
   expect(
@@ -90,13 +100,11 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await page
     .getByLabel("Nome do projeto 1", { exact: true })
     .fill("Pesquisa acadêmica");
-  await page
-    .locator(".portfolio-upload input")
-    .setInputFiles({
-      name: "pesquisa.pdf",
-      mimeType: "application/pdf",
-      buffer: Buffer.from("%PDF-1.7\nDocumento de teste\n%%EOF"),
-    });
+  await page.locator(".portfolio-upload input").setInputFiles({
+    name: "pesquisa.pdf",
+    mimeType: "application/pdf",
+    buffer: Buffer.from("%PDF-1.7\nDocumento de teste\n%%EOF"),
+  });
   await expect(page.getByRole("link", { name: /pesquisa.pdf/ })).toBeVisible();
   await page
     .getByRole("button", { name: "Salvar portfólio", exact: true })

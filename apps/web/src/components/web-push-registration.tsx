@@ -80,9 +80,10 @@ export function WebPushRegistration() {
     if (isDesktop() || isMobileApp() || !("Notification" in window)) return;
 
     const registerIfAllowed = () => {
-      if (Notification.permission === "granted") void subscribe();
+      if (Notification.permission === "granted")
+        void subscribe().catch(() => false);
     };
-    const onEnable = () => void subscribe();
+    const onEnable = () => void subscribe().catch(() => false);
 
     registerIfAllowed();
     window.addEventListener("enturma-enable-web-push", onEnable);

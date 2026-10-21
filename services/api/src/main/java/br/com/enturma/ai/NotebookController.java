@@ -30,7 +30,8 @@ public class NotebookController {
       @NotNull @Size(max = 2000) String question,
       @NotBlank String mode,
       @NotBlank String level,
-      @NotEmpty @Size(max = 10) List<@NotNull UUID> sourceIds) {}
+      @NotEmpty @Size(max = 10) List<@NotNull UUID> sourceIds,
+      boolean webSearch) {}
 
   @GetMapping
   public Object list(@AuthenticationPrincipal Actor a) {
@@ -92,6 +93,7 @@ public class NotebookController {
   @PostMapping("/{id}/generations")
   public Object generate(
       @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Generation r) {
-    return service.generate(a, id, r.id(), r.question(), r.mode(), r.level(), r.sourceIds());
+    return service.generate(
+        a, id, r.id(), r.question(), r.mode(), r.level(), r.sourceIds(), r.webSearch());
   }
 }

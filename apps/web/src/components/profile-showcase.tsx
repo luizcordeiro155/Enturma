@@ -31,7 +31,13 @@ export type Widget = {
   kind: string;
   visible: boolean;
   favorite: boolean;
-  content?: { name?: string; title?: string; game?: string; id?: string }[];
+  content?: {
+    name?: string;
+    title?: string;
+    game?: string;
+    id?: string;
+    username?: string;
+  }[];
 };
 export type Showcase = {
   appearance: ProfileVisualAppearance & {
@@ -62,6 +68,7 @@ export const WIDGET_NAMES: Record<string, string> = {
   ROOMS: "Salas frequentadas",
   HOURS: "Tempo em companhia",
   PROJECTS: "Projetos",
+  PORTFOLIO: "Portfólio acadêmico",
   TECHNOLOGIES: "Tecnologias",
   ACADEMIC: "Vida acadêmica",
   MINIGAMES: "Desafios concluídos",
@@ -592,7 +599,21 @@ export function ShowcaseView({
               <h3>
                 {w.favorite && <Star size={16} />} {WIDGET_NAMES[w.kind]}
               </h3>
-              {w.kind === "GOAL" ? (
+              {w.kind === "PORTFOLIO" ? (
+                w.content?.[0]?.username ? (
+                  <Link
+                    className="profile-portfolio-link"
+                    href={`/p/${encodeURIComponent(w.content[0].username)}`}
+                  >
+                    <strong>{w.content[0].title}</strong>
+                    <span>Ver projetos, trabalhos e documentos ↗</span>
+                  </Link>
+                ) : (
+                  <p className="muted">
+                    Publique seu portfólio no Enturma para exibi-lo aqui.
+                  </p>
+                )
+              ) : w.kind === "GOAL" ? (
                 <p>{value.appearance.goal || "Objetivo ainda não definido."}</p>
               ) : w.kind === "PROJECTS" ? (
                 <p>
