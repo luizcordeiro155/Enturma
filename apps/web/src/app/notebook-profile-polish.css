@@ -421,7 +421,10 @@
 }
 .notebook-panel-dialog {
   width: min(600px, calc(100vw - 24px));
-  max-height: calc(100dvh - 32px);
+  max-height: calc(
+    var(--enturma-visual-viewport-height, 100dvh) - 32px -
+      var(--enturma-safe-top) - var(--enturma-safe-bottom)
+  );
   padding: 0;
 }
 .notebook-panel-dialog > div {
@@ -578,7 +581,9 @@
     overscroll-behavior: contain;
   }
   .workspace:has(.notebook-detail) > main {
-    padding: 8px 8px calc(78px + env(safe-area-inset-bottom));
+    padding: 8px calc(8px + var(--enturma-safe-right))
+      calc(78px + var(--enturma-safe-bottom))
+      calc(8px + var(--enturma-safe-left));
   }
   .notebook-detail .notebooks-heading {
     gap: 8px;
