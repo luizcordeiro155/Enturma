@@ -48,9 +48,11 @@ public class RequestSecurity extends OncePerRequestFilter {
                               null,
                               List.of(new SimpleGrantedAuthority("ROLE_" + actor.role())))));
     var current = SecurityContextHolder.getContext().getAuthentication();
-    String route = req.getRequestURI();
+    // Match the decoded path used by Spring MVC, including percent-encoded letters.
+    String route = org.springframework.web.util.UriUtils.decode(req.getRequestURI(), java.nio.charset.StandardCharsets.UTF_8);
     boolean pendingAllowed =
         route.startsWith("/api/v1/auth/")
+            || route.equals("/api/v1/account/privacy/export")
             || route.matches("/api/v1/account/privacy/deletion(?:/(schedule|cancel|now))?")
             || ((req.getMethod().equals("GET") || req.getMethod().equals("HEAD"))
                 && (route.equals("/api/v1/users/me")
@@ -74,6 +76,7 @@ public class RequestSecurity extends OncePerRequestFilter {
     if (current != null
         && !route.startsWith("/api/v1/auth/")
         && !route.startsWith("/api/v1/moderation/")
+        && !route.startsWith("/api/v1/account/privacy/")
         && !route.equals("/api/v1/users/me")
         && !route.startsWith("/api/v1/notifications")) {
       Actor actor = (Actor) current.getPrincipal();
@@ -95,20 +98,24 @@ public class RequestSecurity extends OncePerRequestFilter {
         return;
       }
     }
-    if (!Set.of("GET", "HEAD", "OPTIONS").contains(req.getMethod())
-        && req.getRequestURI().startsWith("/api/")) {
+    if ((!Set.of("GET", "HEAD", "OPTIONS").contains(req.getMethod())
+            || route.equals("/api/v1/auth/recovery-status") || route.equals("/api/v1/account/privacy/export"))
+        && route.startsWith("/api/")) {
       var authentication = SecurityContextHolder.getContext().getAuthentication();
       String subject =
           authentication == null
               ? clients.subject(req)
               : ((Actor) authentication.getPrincipal()).id().toString();
-      String uri = req.getRequestURI();
+      String uri = route;
       boolean importRoute = uri.startsWith("/api/v1/admin/catalog/");
       String prefix = "write:";
       int limit = 90;
       int windowSeconds = 60;
 
-      if (uri.equals("/api/v1/auth/login")) {
+      if (uri.equals("/api/v1/account/privacy/export")) {
+        prefix = "privacy-export:";
+        limit = 60;
+      } else if (uri.equals("/api/v1/auth/login")) {
         prefix = "auth-login:";
         limit = 8;
         windowSeconds = 60;
@@ -130,6 +137,9 @@ public class RequestSecurity extends OncePerRequestFilter {
         prefix = "auth-token:";
         limit = 10;
         windowSeconds = 300;
+      } else if (uri.equals("/api/v1/auth/recovery-status")) {
+        prefix = "auth-recovery-status:";
+        limit = 60;
       } else if (uri.startsWith("/api/v1/auth/")) {
         prefix = "auth:";
         limit = 20;
@@ -157,6 +167,15 @@ public class RequestSecurity extends OncePerRequestFilter {
         prefix = "app-help:";
         limit = 6;
         windowSeconds = 60;
+      } else if (uri.equals("/api/v1/chat-media") && req.getMethod().equals("POST")) {
+        prefix = "chat-media-upload:";
+        limit = 8;
+      } else if (uri.equals("/api/v1/notifications/web-push/subscribe")) {
+        prefix = "web-push-subscribe:";
+        limit = 8;
+      } else if (uri.matches("/api/v1/notebooks/[^/]+/(generations|files)")) {
+        prefix = "notebook-work:";
+        limit = 10;
       } else if (importRoute) {
         prefix = "catalog:";
         limit = 20;

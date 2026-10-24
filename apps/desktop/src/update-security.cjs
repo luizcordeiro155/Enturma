@@ -54,4 +54,17 @@ function inside(root, target) {
   const relative = path.relative(path.resolve(root), path.resolve(target));
   return !!relative && !relative.startsWith("..") && !path.isAbsolute(relative);
 }
-module.exports = { validateManifest, trustedSender, inside };
+function deepLinkToWeb(raw, webUrl) {
+  try {
+    const link = new URL(raw);
+    if (link.protocol !== "enturma:") return null;
+    const host = link.hostname ? `/${link.hostname}` : "";
+    const pathname = link.pathname && link.pathname !== "/" ? link.pathname : "";
+    const target = new URL(`${host}${pathname}` || "/home", webUrl);
+    if (target.origin !== new URL(webUrl).origin || pathname.includes("\\")) return null;
+    target.search = link.search;
+    target.hash = link.hash;
+    return target.toString();
+  } catch { return null; }
+}
+module.exports = { validateManifest, trustedSender, inside, deepLinkToWeb };

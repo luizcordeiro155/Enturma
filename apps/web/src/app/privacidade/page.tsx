@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <LegalDocument
       title="Política de Privacidade"
       summary="Esta política explica quais dados o Enturma utiliza, por que eles são necessários e quais controles você possui sobre sua conta, seus conteúdos e sua localização."
-      updatedAt="15 de outubro de 2026"
+      updatedAt="24 de outubro de 2026"
     >
       <section>
         <h2>1. Sobre esta política</h2>
@@ -96,6 +96,8 @@ export default function PrivacyPage() {
 
       <section>
         <h2>5. Inteligência artificial</h2>
+        <p>A biblioteca pessoal de figurinhas e GIFs armazena cópias que você escolher salvar. Ela é privada à sua conta e pode ser removida item a item. Salvar uma imagem de conversa privada cria uma cópia nesta biblioteca; a biblioteca não utiliza a criptografia ponta a ponta das mensagens.</p>
+        <p>Em Perfil, Privacidade, você pode exportar seu cadastro, portfólio, fontes e conversas dos cadernos em JSON. Os arquivos de imagem e documentos são listados na exportação e podem ser baixados nos respectivos recursos. Para solicitar outros dados ou exercer seus direitos, utilize o canal de contato desta política.</p>
         <p>
           Quando você usa um recurso de IA, o conteúdo necessário para atender à
           solicitação pode ser enviado ao provedor de IA configurado pelo

@@ -4,7 +4,7 @@ import { BookOpen } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { api } from "@/lib/api";
-import { launchRemainingMs } from "@/lib/launch-performance";
+import { launchRemainingMs, LAUNCH_FALLBACK_MS } from "@/lib/launch-performance";
 const LaunchPlayer = dynamic(() => import("./motion/launch-player"), {
   ssr: false,
   loading: () => <BookOpen size={76} strokeWidth={1.5} />,
@@ -54,6 +54,7 @@ export function AppLaunch() {
     let active = true;
     let animation: Animation | undefined;
     let timeout: ReturnType<typeof setTimeout>;
+    let fallback: ReturnType<typeof setTimeout>;
     let visibleSince = 0;
     let closed = false;
     const close = () => {
@@ -84,6 +85,7 @@ export function AppLaunch() {
       if (ride) rideVisited.current = true;
       setScene(ride ? "ride" : "app");
       visibleSince = performance.now();
+      fallback = setTimeout(close, LAUNCH_FALLBACK_MS);
       const finish = () => {
         if (!active) return;
         const reduced =
@@ -95,7 +97,7 @@ export function AppLaunch() {
         );
       };
       if (ride) finish();
-      else void api("/users/me", { cache: "no-store" })
+      else void api("/users/me")
         .then(finish)
         .catch(finish);
     }, 0);
@@ -103,6 +105,7 @@ export function AppLaunch() {
       active = false;
       clearTimeout(timer);
       clearTimeout(timeout);
+      clearTimeout(fallback);
       animation?.cancel();
       setScene(null);
     };

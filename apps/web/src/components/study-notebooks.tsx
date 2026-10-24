@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   BookOpen,
   Plus,
+  Paperclip,
   FileText,
   Link as LinkIcon,
   Upload,
@@ -21,6 +22,11 @@ import {
 } from "lucide-react";
 import { api, post, peekApiSnapshot } from "@/lib/api";
 import { prepareChatImage } from "@/lib/chat-image";
+import { ComposerMedia } from "./composer-media";
+import {
+  isMobileTextEntryContext,
+  setNativeChatComposerFocused,
+} from "@/lib/native-chat-ime";
 import { Shell } from "./shell";
 import { NotebookArtwork, NotebookArtworkEditor } from "./notebook-artwork";
 import { Feedback } from "./feedback";
@@ -149,6 +155,7 @@ export function StudyNotebooks({ id }: { id?: string }) {
     input.style.height = `${Math.min(input.scrollHeight, 128)}px`;
   }, [question]);
 
+  useEffect(() => () => setNativeChatComposerFocused(false), []);
   const [level, setLevel] = useState("BEGINNER");
   const [excluded, setExcluded] = useState<string[]>([]);
   const [preview, setPreview] = useState<{ title: string; content: string }>();
@@ -837,55 +844,93 @@ export function StudyNotebooks({ id }: { id?: string }) {
                   ))}
                 </div>
                 <form
-                  className="notebook-question"
+                  className="notebook-question enturma-message-composer"
                   onSubmit={(e) => {
                     e.preventDefault();
                     if (canSend && question.trim()) void generate("QUESTION");
                   }}
                 >
-                  <label>
-                    <span className="sr-only">Mensagem para o Enturma APP</span>
-                    <textarea
-                      ref={composer}
-                      rows={1}
-                      onKeyDown={(event) => {
-                        if (
-                          !compact &&
-                          event.key === "Enter" &&
-                          !event.shiftKey &&
-                          !event.nativeEvent.isComposing
-                        ) {
-                          event.preventDefault();
-                          if (canSend && question.trim())
-                            void generate("QUESTION");
-                        }
-                      }}
-                      value={question}
-                      onChange={(e) => setQuestion(e.target.value)}
-                      maxLength={2000}
-                      placeholder="Pergunte ao Enturma APP…"
-                    />
-                  </label>
-                  <div className="notebook-composer-actions">
+                  <div className="composer-main-row">
                     <label
-                      className="notebook-web-search"
-                      title={
-                        !data.webSearchEnabled
-                          ? "Pesquisa web indisponível neste momento"
-                          : "Incluir pesquisa na web"
-                      }
+                      className="composer-icon-button composer-image-button"
+                      title="Adicionar fonte"
                     >
+                      <Paperclip size={20} />
+                      <span className="sr-only">Adicionar fonte</span>
                       <input
-                        type="checkbox"
-                        checked={webSearch}
-                        disabled={!data.webSearchEnabled}
-                        onChange={(event) => setWebSearch(event.target.checked)}
+                        type="file"
+                        accept=".pdf,.txt,.md,.docx,image/png,image/jpeg,image/webp"
+                        disabled={busy}
+                        onChange={(event) => {
+                          void upload(event.target.files?.[0]);
+                          event.target.value = "";
+                        }}
                       />
-                      <Globe size={15} /> <span>Pesquisar também na web</span>
                     </label>
-                    <button disabled={!canSend || !question.trim()}>
-                      <Send size={16} />
-                      <span>Enviar mensagem</span>
+                    <label className="composer-text-field">
+                      <span className="sr-only">
+                        Mensagem para o Enturma APP
+                      </span>
+                      <textarea
+                        ref={composer}
+                        rows={1}
+                        enterKeyHint="enter"
+                        inputMode="text"
+                        onFocus={() => setNativeChatComposerFocused(true)}
+                        onBlur={() => setNativeChatComposerFocused(false)}
+                        onKeyDown={(event) => {
+                          if (
+                            event.key === "Enter" &&
+                            !event.shiftKey &&
+                            !event.nativeEvent.isComposing &&
+                            !isMobileTextEntryContext()
+                          ) {
+                            event.preventDefault();
+                            event.currentTarget.form?.requestSubmit();
+                          }
+                        }}
+                        value={question}
+                        onChange={(e) => setQuestion(e.target.value)}
+                        maxLength={2000}
+                        placeholder="Pergunte ao Enturma…"
+                      />
+                    </label>
+                    <ComposerMedia
+                      onEmoji={(emoji) => {
+                        setQuestion((value) => (value + emoji).slice(0, 2000));
+                        composer.current?.focus({ preventScroll: true });
+                      }}
+                      disabled={busy}
+                    />
+                    <button
+                      type="button"
+                      className="composer-icon-button notebook-web-toggle"
+                      aria-label="Pesquisar também na web"
+                      aria-pressed={webSearch}
+                      title={
+                        data.webSearchEnabled
+                          ? webSearch
+                            ? "Pesquisa Web ativada"
+                            : "Ativar pesquisa Web"
+                          : "Pesquisa Web indisponível"
+                      }
+                      disabled={!data.webSearchEnabled}
+                      onPointerDown={(event) => event.preventDefault()}
+                      onClick={() => setWebSearch(!webSearch)}
+                    >
+                      <Globe size={20} />
+                    </button>
+                    <button
+                      className="composer-send-button"
+                      aria-label="Enviar mensagem"
+                      disabled={!canSend || !question.trim()}
+                      onPointerDown={(event) => event.preventDefault()}
+                    >
+                      {busy || pending ? (
+                        <LoaderCircle size={20} className="spin" />
+                      ) : (
+                        <Send size={20} />
+                      )}
                     </button>
                   </div>
                   <p className="notebook-composer-note">

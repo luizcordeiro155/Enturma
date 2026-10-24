@@ -1,0 +1,355 @@
+/* One compact message surface; viewport/IME positioning stays in mobile-chat-layout. */
+.navigation-pending-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+  margin-left: auto;
+}
+.mobile-bottom-nav a {
+  position: relative;
+}
+.mobile-bottom-nav .navigation-pending-dot {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+}
+.portfolio-return {
+  display: flex;
+  margin: 0 0 24px;
+}
+.download-progress-dialog {
+  width: min(620px, calc(100vw - 28px));
+  padding: 20px;
+}
+.download-progress-dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+.download-progress-dialog h2 {
+  margin: 0;
+  font-size: 21px;
+}
+.download-progress-dialog p {
+  color: var(--muted);
+  line-height: 1.6;
+}
+.transfer-film {
+  width: 100%;
+  margin: 12px 0;
+}
+.desktop-update-dialog {
+  width: min(600px, calc(100vw - 24px));
+}
+.desktop-titlebar {
+  position: fixed;
+  z-index: 21000;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 140px;
+  background: #101719;
+  color: #edf5f2;
+  border-bottom: 1px solid var(--border);
+  -webkit-app-region: drag;
+  app-region: drag;
+  user-select: none;
+  font-size: 12px;
+  font-weight: 650;
+}
+html[data-theme="light"] .desktop-titlebar {
+  background: #f8faf9;
+  color: #183f36;
+}
+html[data-desktop-chrome="true"] body {
+  padding-top: 32px;
+}
+html[data-desktop-chrome="true"] .app-shell {
+  min-height: calc(100dvh - 32px);
+}
+html[data-desktop-chrome="true"] .app-shell:has(.notebook-detail),
+html[data-desktop-chrome="true"] .room-active-shell {
+  height: calc(100dvh - 32px) !important;
+}
+html[data-desktop-chrome="true"] .enturma-launch-overlay {
+  top: 32px;
+}
+@media print {
+  .portfolio-return {
+    display: none;
+  }
+}
+.enturma-message-composer .composer-main-row {
+  display: flex !important;
+  align-items: flex-end !important;
+  gap: 3px !important;
+  width: 100%;
+  min-width: 0;
+  min-height: 50px;
+  padding: 4px !important;
+  border: 1px solid var(--room-border, var(--border));
+  border-radius: 24px;
+  background: var(--room-subtle, var(--surface-hover));
+}
+.enturma-message-composer .composer-main-row:focus-within {
+  border-color: var(--room-accent, var(--accent));
+}
+.enturma-message-composer .composer-text-field {
+  flex: 1 1 0 !important;
+  min-width: 0 !important;
+  margin: 0 !important;
+}
+.enturma-message-composer .composer-text-field textarea {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 42px !important;
+  max-height: 112px !important;
+  margin: 0 !important;
+  padding: 10px 6px !important;
+  resize: none;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: var(--room-ink, var(--ink)) !important;
+  font-size: 15px;
+  line-height: 1.4;
+  overflow-y: auto;
+}
+.enturma-message-composer .composer-icon-button,
+.enturma-message-composer .composer-send-button {
+  display: grid !important;
+  place-items: center;
+  flex: 0 0 40px !important;
+  width: 40px !important;
+  min-width: 40px !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 50% !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  color: var(--room-ink, var(--ink)) !important;
+}
+.enturma-message-composer .composer-send-button {
+  background: var(--room-accent, var(--accent)) !important;
+  color: var(--room-accent-ink, #173a32) !important;
+}
+.enturma-message-composer .composer-send-button:disabled {
+  opacity: 0.45;
+}
+.enturma-message-composer .composer-icon-button:hover {
+  background: color-mix(in srgb, var(--ink) 9%, transparent) !important;
+}
+.enturma-message-composer .composer-icon-button[aria-pressed="true"] {
+  color: var(--brand) !important;
+  background: color-mix(in srgb, var(--brand) 18%, var(--surface)) !important;
+}
+.composer-media-buttons {
+  display: flex;
+  flex-shrink: 0;
+}
+.composer-image-button {
+  position: relative;
+  cursor: pointer;
+}
+.composer-image-button input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  opacity: 0;
+}
+.notebook-chat-workspace .notebook-question.enturma-message-composer {
+  background: transparent !important;
+  padding: 8px 12px !important;
+  margin: 0 !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  gap: 6px;
+}
+.notebook-question .notebook-composer-note {
+  padding: 0 8px;
+  font-size: 10px;
+}
+.media-library {
+  min-width: 0;
+  color: var(--ink);
+}
+.media-library > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.media-library [role="tablist"] {
+  display: flex;
+  gap: 4px;
+}
+.media-library [role="tab"] {
+  min-height: 36px;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+}
+.media-library [role="tab"][aria-selected="true"] {
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+.media-library-search {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+.media-library-search label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  min-width: 0;
+  flex: 1;
+  padding: 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.media-library-search input {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 14px;
+}
+.media-library-search > button {
+  width: 38px;
+  min-width: 38px;
+  padding: 0;
+  border-radius: 12px;
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+.media-library button[aria-pressed="true"] svg {
+  fill: #f4c74f;
+  color: #8b6200;
+}
+.media-library-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  max-height: min(340px, 42dvh);
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.media-library-grid article {
+  position: relative;
+  min-width: 0;
+  border-radius: 12px;
+  background: var(--surface-hover);
+  overflow: hidden;
+}
+.media-select {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  border-radius: 12px;
+  color: var(--ink);
+  background: transparent;
+  text-align: left;
+}
+.media-select img {
+  display: block;
+  width: 100%;
+  height: 112px;
+  object-fit: contain;
+}
+.media-select span {
+  font-size: 11px;
+  padding: 6px 8px 32px;
+  overflow-wrap: anywhere;
+}
+.media-item-actions {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  display: flex;
+  gap: 4px;
+}
+.media-item-actions button {
+  width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  background: var(--surface);
+  color: var(--ink);
+  border-radius: 8px;
+}
+.media-library-create {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  background: var(--surface-hover);
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+.media-library-create label {
+  margin: 0;
+}
+.media-library-create input {
+  width: 100%;
+}
+.media-library small,
+.media-empty {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.media-library-credit {
+  display: block;
+  padding-top: 8px;
+  text-align: right;
+}
+.media-library > [role="alert"] {
+  font-size: 12px;
+  color: var(--danger, #d04756);
+}
+@media (max-width: 760px) {
+  .enturma-message-composer .composer-text-field textarea {
+    font-size: 16px !important;
+  }
+  /* One entry point opens all three tabs on narrow screens. */
+  .composer-media-buttons .media-trigger-sticker,
+  .composer-media-buttons .media-trigger-gif {
+    display: none !important;
+  }
+  .enturma-message-composer .composer-icon-button,
+  .enturma-message-composer .composer-send-button {
+    flex-basis: 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
+  }
+}
+@media (max-width: 360px) {
+  .enturma-message-composer .composer-main-row {
+    gap: 0 !important;
+  }
+}

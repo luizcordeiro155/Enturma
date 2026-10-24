@@ -21,6 +21,7 @@ const {
   validateManifest,
   trustedSender,
   inside,
+  deepLinkToWeb: safeDeepLink,
 } = require("./update-security.cjs");
 const { Readable, Transform } = require("node:stream");
 const { pipeline } = require("node:stream/promises");
@@ -113,19 +114,7 @@ function isExternalUrl(raw) {
 }
 
 function deepLinkToWeb(raw) {
-  try {
-    const link = new URL(raw);
-    if (link.protocol !== "enturma:") return null;
-    const host = link.hostname ? `/${link.hostname}` : "";
-    const pathname =
-      link.pathname && link.pathname !== "/" ? link.pathname : "";
-    const target = new URL(`${host}${pathname}` || "/home", WEB_URL);
-    target.search = link.search;
-    target.hash = link.hash;
-    return target.toString();
-  } catch {
-    return null;
-  }
+  return safeDeepLink(raw, WEB_URL);
 }
 
 function focusMainWindow() {
@@ -1133,6 +1122,8 @@ function createMainWindow() {
     minHeight: 480,
     show: false,
     title: "Enturma",
+    titleBarStyle: "hidden",
+    ...(process.platform !== "darwin" ? { titleBarOverlay: { color: "#101719", symbolColor: "#edf5f2", height: 32 } } : {}),
     backgroundColor: "#0f1917",
     autoHideMenuBar: true,
     webPreferences: {
@@ -1209,6 +1200,12 @@ ipcMain.handle("desktop:get-info", (event) => {
     platform: process.platform,
     webUrl: WEB_URL,
   };
+});
+
+ipcMain.handle("desktop:set-theme", (event, light) => {
+  requireTrusted(event);
+  if (typeof light !== "boolean") throw TypeError("Theme must be a boolean");
+  if (process.platform !== "darwin") mainWindow.setTitleBarOverlay({ color: light ? "#f8faf9" : "#101719", symbolColor: light ? "#183f36" : "#edf5f2", height: 32 });
 });
 ipcMain.handle("desktop:update-state", (event) => {
   requireTrusted(event);

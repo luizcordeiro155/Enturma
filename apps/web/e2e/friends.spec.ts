@@ -7,7 +7,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   browser,
   request,
 }) => {
-  test.setTimeout(90000);
+  test.setTimeout(120000);
   const tag = randomUUID().slice(0, 8),
     a = `alice_${tag}`,
     b = `bob_${tag}`;
@@ -184,6 +184,63 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await other.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
+  await page.getByRole("button", { name: "GIFs", exact: true }).click();
+  const library = page.getByRole("dialog", {
+    name: "Emojis, figurinhas e GIFs",
+  });
+  await expect(library.getByRole("tab", { name: "GIFs" })).toHaveAttribute(
+    "aria-selected",
+    "true",
+  );
+  await library
+    .getByRole("button", { name: "Favoritar Vamos estudar", exact: true })
+    .click();
+  await expect(library.getByRole("status")).toContainText(
+    "Salvo nos seus favoritos",
+  );
+  await library.getByRole("button", { name: "Mostrar favoritos" }).click();
+  await library
+    .getByRole("button", { name: "Vamos estudar", exact: true })
+    .click();
+  await expect(page.locator(".attachment-preview")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Remover imagem selecionada" })
+    .click();
+  for (const theme of ["light", "dark"] as const) {
+    await page.emulateMedia({ colorScheme: theme });
+    await page.setViewportSize({ width: 390, height: 620 });
+    await page
+      .getByRole("button", { name: "Adicionar emoji", exact: true })
+      .click();
+    await expect(
+      library.getByRole("tab", { name: "Figurinhas" }),
+    ).toBeInViewport();
+    await library.getByRole("tab", { name: "Figurinhas" }).click();
+    await library.getByRole("button", { name: "Criar figurinha" }).click();
+    await library
+      .getByRole("textbox", { name: "Nome", exact: true })
+      .fill("Minha arte " + theme);
+    await library
+      .locator('input[type="file"]')
+      .setInputFiles({
+        name: "arte.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(png, "base64"),
+      });
+    await expect(
+      library.getByRole("button", { name: /Minha arte/, exact: false }).first(),
+    ).toBeVisible();
+    await page.screenshot({
+      path: `../../.local/media-library-${theme}-mobile.png`,
+    });
+    await library.getByRole("button", { name: "Fechar biblioteca" }).click();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  }
+  await page.setViewportSize({ width: 1487, height: 1058 });
   await page.getByLabel("Mensagem privada").fill("Testando digitação");
   await expect(other.locator(".conversation-typing")).toContainText(a, {
     timeout: 10000,
@@ -357,10 +414,14 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     page.locator(".user-profile-popover .profile-shared-surface"),
   ).toHaveCSS("background-color", "rgb(24, 63, 54)");
   await expect(
-    page.locator(".user-profile-popover .public-profile-body > .profile-dialog-actions"),
+    page.locator(
+      ".user-profile-popover .public-profile-body > .profile-dialog-actions",
+    ),
   ).toHaveCount(1);
   await expect(
-    page.locator(".user-profile-popover .profile-preview-identity > .profile-dialog-actions"),
+    page.locator(
+      ".user-profile-popover .profile-preview-identity > .profile-dialog-actions",
+    ),
   ).toHaveCount(0);
 
   // Check computed styles after the dark-theme CSS cascade, not just classes.
@@ -372,7 +433,10 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
     ".user-profile-popover .public-profile-body > .profile-dialog-actions > .button:not(.secondary)",
   );
   // The shared profile uses the configured Enturma accent, not the CSS fallback.
-  await expect(profileAction).toHaveCSS("background-color", "rgb(216, 239, 121)");
+  await expect(profileAction).toHaveCSS(
+    "background-color",
+    "rgb(216, 239, 121)",
+  );
   await expect(profileAction).toHaveCSS("color", "rgb(16, 42, 36)");
   await expect(profileAction).toHaveCSS("text-decoration-line", "none");
   await page.locator("html").evaluate((node, theme) => {

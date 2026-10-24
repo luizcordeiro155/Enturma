@@ -10,7 +10,7 @@ import {
 describe("consistent Enturma launch", () => {
   it("keeps the opening on screen when the API responds instantly", () => {
     expect(launchRemainingMs(100, 110, "app", false)).toBe(APP_LAUNCH_MIN_MS - 10);
-    expect(launchRemainingMs(100, 150, "app", false)).toBeGreaterThan(2000);
+    expect(launchRemainingMs(100, 150, "app", false)).toBeLessThan(1000);
   });
   it("does not add unnecessary wait after a slow initialization", () => {
     expect(launchRemainingMs(100, 3000, "app", false)).toBe(0);

@@ -1,4 +1,5 @@
 "use client";
+import { ComposerMedia } from "./composer-media";
 import { ChatImage } from "./chat-image-viewer";
 
 import {
@@ -14,10 +15,9 @@ import {
   BookOpen,
   MoreHorizontal,
   Hash,
-  ImagePlus,
+  Paperclip,
   Loader2,
   Send,
-  Smile,
   Reply,
   ShieldAlert,
   X,
@@ -34,13 +34,12 @@ import {
 import { RichMessage } from "./rich-message";
 import { isChatAtLatest, revealChatMessage } from "@/lib/chat-scroll";
 import {
-  MessageActionPopover,
   messageActionAnchor,
   type MessageActionAnchor,
 } from "./message-action-popover";
 
 import { MessageMenu } from "./message-menu";
-import { EmojiPicker, AnimatedEmoji } from "./emoji-picker";
+import { AnimatedEmoji } from "./emoji-picker";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
 
@@ -131,10 +130,7 @@ export function RoomChat(props: Props) {
   const [unseen, setUnseen] = useState(0);
   const [firstUnread, setFirstUnread] = useState<string | null>(null);
   const [roomAtLatest, setRoomAtLatest] = useState(true);
-  const [emojiOpen, setEmojiOpen] = useState(false);
-  const [emojiAnchor, setEmojiAnchor] = useState<MessageActionAnchor | null>(
-    null,
-  );
+
   const [roomActionMessage, setRoomActionMessage] = useState<Message | null>(
     null,
   );
@@ -811,7 +807,7 @@ export function RoomChat(props: Props) {
             }
             forceFollowLatest.current = true;
             nearBottom.current = true;
-            setEmojiOpen(false);
+
             await onSubmit(event);
             requestAnimationFrame(() => {
               const viewport = scrollRef.current;
@@ -864,41 +860,9 @@ export function RoomChat(props: Props) {
             </div>
           ) : null}
 
-          {emojiOpen && emojiAnchor ? (
-            <MessageActionPopover
-              anchor={emojiAnchor}
-              label="Emojis"
-              wide
-              onDismiss={() => setEmojiOpen(false)}
-            >
-              <EmojiPicker
-                onSelect={(emoji) => {
-                  setDraft(draft + emoji);
-                  setEmojiOpen(false);
-                  composerRef.current?.focus({ preventScroll: true });
-                }}
-              />
-            </MessageActionPopover>
-          ) : null}
-
           <div className="composer-main-row">
-            <button
-              type="button"
-              className="composer-icon-button"
-              aria-label="Adicionar emoji"
-              aria-expanded={emojiOpen}
-              disabled={composerBlocked}
-              onPointerDown={(event) => event.preventDefault()}
-              onClick={(event) => {
-                setEmojiAnchor(messageActionAnchor(event.currentTarget));
-                setEmojiOpen((open) => !open);
-              }}
-            >
-              <Smile size={22} />
-            </button>
-
             <label className="composer-icon-button composer-image-button">
-              <ImagePlus size={22} />
+              <Paperclip size={20} />
               <span className="sr-only">Adicionar imagem</span>
               <input
                 type="file"
@@ -953,6 +917,14 @@ export function RoomChat(props: Props) {
               />
             </label>
 
+            <ComposerMedia
+              onEmoji={(emoji) => {
+                setDraft((draft + emoji).slice(0, 4000));
+                composerRef.current?.focus({ preventScroll: true });
+              }}
+              onFile={selectImage}
+              disabled={busy || composerBlocked}
+            />
             <button
               className="composer-send-button"
               aria-label="Enviar mensagem"

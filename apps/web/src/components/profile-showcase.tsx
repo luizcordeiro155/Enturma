@@ -1,4 +1,5 @@
 "use client";
+import { PublicPortfolioLink } from "./portfolio-navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
@@ -653,13 +654,13 @@ export function ShowcaseView({
               </h3>
               {w.kind === "PORTFOLIO" ? (
                 w.content?.[0]?.username ? (
-                  <Link
+                    <PublicPortfolioLink
                     className="profile-portfolio-link"
-                    href={`/p/${encodeURIComponent(w.content[0].username)}`}
+                      username={w.content[0].username}
                   >
                     <strong>{w.content[0].title}</strong>
                     <span>Ver projetos, trabalhos e documentos ↗</span>
-                  </Link>
+                    </PublicPortfolioLink>
                 ) : (
                   <p className="muted">
                     Publique seu portfólio no Enturma para exibi-lo aqui.

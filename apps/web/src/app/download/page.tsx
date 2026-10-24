@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DownloadLink } from "@/components/download-link";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
@@ -86,10 +87,10 @@ export default async function DownloadPage() {
                   Use o aplicativo Android para ter notificações do sistema,
                   experiência mobile otimizada e atualizações integradas ao app.
                 </p>
-                <a className={styles.primary} href={ANDROID_DOWNLOAD}>
+                <DownloadLink className={styles.primary} href={ANDROID_DOWNLOAD}>
                   <Download size={18} />
                   Baixar APK para Android
-                </a>
+                </DownloadLink>
               </>
             ) : primaryPlatform === "windows" ? (
               <>
@@ -98,10 +99,10 @@ export default async function DownloadPage() {
                   Use o aplicativo Desktop com notificações nativas, destaque
                   na barra de tarefas e atualizador integrado.
                 </p>
-                <a className={styles.primary} href={WINDOWS_DOWNLOAD}>
+                <DownloadLink className={styles.primary} href={WINDOWS_DOWNLOAD}>
                   <Download size={18} />
                   Baixar EXE para Windows
-                </a>
+                </DownloadLink>
               </>
             ) : (
               <>
@@ -110,14 +111,14 @@ export default async function DownloadPage() {
                   O Enturma possui aplicativo dedicado para Windows e Android.
                   Escolha abaixo a versão do dispositivo que você usa.
                 </p>
-                <a className={styles.primary} href={WINDOWS_DOWNLOAD}>
+                <DownloadLink className={styles.primary} href={WINDOWS_DOWNLOAD}>
                   <Monitor size={18} />
                   Baixar para Windows
-                </a>
-                <a className={styles.secondary} href={ANDROID_DOWNLOAD}>
+                </DownloadLink>
+                <DownloadLink className={styles.secondary} href={ANDROID_DOWNLOAD}>
                   <Smartphone size={18} />
                   Baixar para Android
-                </a>
+                </DownloadLink>
               </>
             )}
 
@@ -157,10 +158,10 @@ export default async function DownloadPage() {
                 de não lidas na barra de tarefas, chamadas e atualizador
                 integrado.
               </p>
-              <a className={styles.betaLink} href={WINDOWS_DOWNLOAD}>
+              <DownloadLink className={styles.betaLink} href={WINDOWS_DOWNLOAD}>
                 <Download size={16} />
                 Baixar Enturma para Windows (.EXE)
-              </a>
+              </DownloadLink>
             </article>
 
             <article className={styles.betaCard}>
@@ -175,10 +176,10 @@ export default async function DownloadPage() {
                 Aplicativo Android com interface mobile completa, notificações
                 do sistema, chamadas, perfis e atualização integrada.
               </p>
-              <a className={styles.betaLink} href={ANDROID_DOWNLOAD}>
+              <DownloadLink className={styles.betaLink} href={ANDROID_DOWNLOAD}>
                 <Download size={16} />
                 Baixar Enturma para Android (.APK)
-              </a>
+              </DownloadLink>
             </article>
           </div>
 

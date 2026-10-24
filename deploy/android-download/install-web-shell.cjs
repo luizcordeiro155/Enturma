@@ -804,6 +804,12 @@ class MainActivity : Activity() {
             override fun onPermissionRequest(request: PermissionRequest?) {
                 if (request == null) return
                 runOnUiThread {
+                    val expected = Uri.parse(WEB_ORIGIN)
+                    val actual = request.origin
+                    if (actual.scheme != expected.scheme || actual.host != expected.host || actual.port != expected.port) {
+                        request.deny()
+                        return@runOnUiThread
+                    }
                     val missing = mutableListOf<String>()
                     val requested = request.resources.toSet()
 

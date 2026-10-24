@@ -11,6 +11,11 @@ import java.security.Security;
 import java.util.Base64;
 import java.util.LinkedHashMap;
 import java.util.UUID;
+import java.net.URI;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+import org.apache.http.impl.nio.client.HttpAsyncClients;
+import org.apache.http.client.config.RequestConfig;
 import nl.martijndwars.webpush.Notification;
 import nl.martijndwars.webpush.PushService;
 import nl.martijndwars.webpush.Utils;
@@ -56,9 +61,19 @@ public class WebPushNotificationService {
   @Transactional
   public void register(
       Actor actor, String installationId, String endpoint, String p256dh, String auth) {
-    if (endpoint == null || !endpoint.startsWith("https://")) {
+    if (!allowedEndpoint(endpoint)) {
       throw ApiException.invalid("Endpoint de push inválido.");
     }
+    try {
+      byte[] key = Base64.getUrlDecoder().decode(p256dh);
+      if (key.length != 65 || key[0] != 4 || Base64.getUrlDecoder().decode(auth).length != 16)
+        throw new IllegalArgumentException();
+    } catch (IllegalArgumentException e) { throw ApiException.invalid("Chaves de push inválidas."); }
+    db.one("SELECT id FROM app_user WHERE id=? FOR UPDATE", actor.id());
+    db.jdbc.update("DELETE FROM notification_web_push_subscription WHERE user_id=? AND (NOT enabled OR last_seen_at<now()-interval '180 days')",actor.id());
+    if (!db.exists("SELECT EXISTS(SELECT 1 FROM notification_web_push_subscription WHERE user_id=? AND installation_id=?)", actor.id(),installationId)
+        && db.jdbc.queryForObject("SELECT count(*) FROM notification_web_push_subscription WHERE user_id=?",Integer.class,actor.id())>=12)
+      throw ApiException.invalid("Limite de dispositivos atingido. Remova uma inscrição antiga.");
 
     db.jdbc.update(
         "DELETE FROM notification_web_push_subscription WHERE endpoint=?"
@@ -126,6 +141,10 @@ public class WebPushNotificationService {
 
       for (var row : subscriptions) {
         UUID id = (UUID) row.get("id");
+        if (!allowedEndpoint(String.valueOf(row.get("endpoint")))) {
+          db.jdbc.update("UPDATE notification_web_push_subscription SET enabled=false WHERE id=?",id);
+          continue;
+        }
         try {
           Notification notification =
               new Notification(
@@ -133,7 +152,11 @@ public class WebPushNotificationService {
                   String.valueOf(row.get("p256dh")),
                   String.valueOf(row.get("auth")),
                   body.getBytes(StandardCharsets.UTF_8));
-          var response = service.send(notification);
+          // Never follow a redirect from a push provider into the backend's private network.
+          try (var client = HttpAsyncClients.custom().setDefaultRequestConfig(
+              RequestConfig.custom().setRedirectsEnabled(false).setConnectTimeout(4000).setSocketTimeout(5000).setConnectionRequestTimeout(4000).build()).build()) {
+          client.start();
+          var response = client.execute(service.preparePost(notification,nl.martijndwars.webpush.Encoding.AES128GCM),null).get(8,TimeUnit.SECONDS);
           int status = response.getStatusLine().getStatusCode();
           if (status == 404 || status == 410) {
             db.jdbc.update(
@@ -145,6 +168,7 @@ public class WebPushNotificationService {
                 "UPDATE notification_web_push_subscription" + " SET last_seen_at=now() WHERE id=?",
                 id);
           }
+          }
         } catch (Exception ignored) {
           // Uma falha de push nunca invalida a notificação criada no Enturma.
         }
@@ -152,6 +176,18 @@ public class WebPushNotificationService {
     } catch (Exception ignored) {
       // Notificações in-app e Android continuam funcionando mesmo se Web Push falhar.
     }
+  }
+
+  public static boolean allowedEndpoint(String endpoint) {
+    if (endpoint == null || endpoint.length()>2048) return false;
+    try {
+      URI uri=URI.create(endpoint);
+      String host=uri.getHost();
+      if (!"https".equals(uri.getScheme()) || host==null || uri.getRawUserInfo()!=null || uri.getRawFragment()!=null
+          || (uri.getPort()!=-1 && uri.getPort()!=443)) return false;
+      return Set.of("fcm.googleapis.com","updates.push.services.mozilla.com","web.push.apple.com").contains(host)
+          || host.matches("[a-z0-9-]+\\.notify\\.windows\\.com");
+    } catch (IllegalArgumentException e) { return false; }
   }
 
   private long unread(UUID user) {
