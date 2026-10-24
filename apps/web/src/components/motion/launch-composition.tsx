@@ -18,9 +18,9 @@ export function LaunchComposition({
 }) {
   const raw = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const frame = reduced ? (ride ? 65 : 24) : raw * 2.2;
+  const frame = reduced ? (ride ? 82 : 24) : raw;
   const morph = ride
-    ? interpolate(frame, [0.8 * fps, 1.8 * fps], [0, 1], {
+    ? interpolate(frame, [0.85 * fps, 2.85 * fps], [0, 1], {
         extrapolateLeft: "clamp",
         extrapolateRight: "clamp",
       })
@@ -115,7 +115,7 @@ export function LaunchComposition({
             strokeLinecap="round"
           />
           {[90, 240].map((x) => (
-            <g key={x} transform={`translate(${x} 165) rotate(${frame * 7})`}>
+            <g key={x} transform={`translate(${x} 165) rotate(${frame * 4})`}>
               <circle r="25" fill="#183f36" />
               <circle r="14" fill="#f1f6dd" />
               <path d="M-10 0H10M0-10V10" stroke="#5bbd8d" strokeWidth="4" />
