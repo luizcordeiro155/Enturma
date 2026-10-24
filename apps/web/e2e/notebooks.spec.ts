@@ -129,6 +129,7 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
   await page.getByLabel("Link público HTTPS").fill("https://127.0.0.1/");
   await page.getByLabel("Título da fonte").fill("Endereço bloqueado");
   await page
+    .getByRole("complementary", { name: "Fontes do caderno" })
     .getByRole("button", { name: "Adicionar fonte", exact: true })
     .click();
   await expect(page.locator(".source-list")).toContainText(
