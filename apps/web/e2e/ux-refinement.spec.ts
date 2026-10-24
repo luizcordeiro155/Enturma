@@ -259,7 +259,7 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
       .getByRole("button", { name: "Adicionar emoji", exact: true })
       .click();
     await expect(
-      other.getByRole("dialog", { name: "Emojis", exact: true }),
+      other.getByRole("dialog", { name: "Emojis, figurinhas e GIFs", exact: true }),
     ).toBeVisible();
     await expect(
       other.getByRole("searchbox", { name: "Pesquisar emoji" }),
@@ -272,7 +272,7 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     });
     await other.goBack();
     await expect(
-      other.getByRole("dialog", { name: "Emojis", exact: true }),
+      other.getByRole("dialog", { name: "Emojis, figurinhas e GIFs", exact: true }),
     ).toHaveCount(0);
     await expect(other).toHaveURL(
       new RegExp(`friends\\?chat=${friendship.id}`),

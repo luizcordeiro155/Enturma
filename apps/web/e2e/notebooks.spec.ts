@@ -37,6 +37,7 @@ test("caderno privado: cadastro acentuado, fontes, aula, citações e persistên
       "Um algoritmo é uma sequência finita de passos para resolver um problema. As etapas são entrada, processamento e saída. A soma recebe dois números, calcula o total e apresenta o resultado.",
     );
   await page
+    .getByRole("complementary", { name: "Fontes do caderno" })
     .getByRole("button", { name: "Adicionar fonte", exact: true })
     .click();
   await expect(page.getByLabel("Usar Anotações da aula")).toBeChecked();
