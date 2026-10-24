@@ -18,7 +18,7 @@ export function LaunchComposition({
 }) {
   const raw = useCurrentFrame();
   const { fps } = useVideoConfig();
-  const frame = reduced ? (ride ? 65 : 24) : raw;
+  const frame = reduced ? (ride ? 65 : 24) : raw * 2.2;
   const morph = ride
     ? interpolate(frame, [0.8 * fps, 1.8 * fps], [0, 1], {
         extrapolateLeft: "clamp",
@@ -58,7 +58,7 @@ export function LaunchComposition({
             height: 240 + i * 76,
             border: "1px solid #5db78030",
             borderRadius: "50%",
-            rotate: `${frame * 0.4}deg`,
+            transform: `perspective(700px) rotateX(${45 + i * 12}deg) rotateZ(${frame * (i % 2 ? -.6 : .6)}deg)`,
             scale: arrive,
             opacity: 0.8 - i * 0.2,
           }}
@@ -70,6 +70,7 @@ export function LaunchComposition({
           width: 320,
           height: 250,
           scale: arrive,
+          perspective: 800,
           translate: `0 ${interpolate(morph, [0, 1], [0, 12])}px`,
         }}
       >

@@ -59,14 +59,19 @@ export async function proxy(req: NextRequest) {
   if (!access) return toPage(req, "/session/restore");
 
   try {
-    const result = await fetch(`${backendUrl()}/api/v1/users/me`, {
+    const options: RequestInit = {
       headers: {
         Authorization: `Bearer ${access}`,
         ...Object.fromEntries(upstreamHeaders(req)),
       },
       cache: "no-store",
       signal: AbortSignal.timeout(8000),
-    });
+    };
+    let result = await fetch(`${backendUrl()}/api/v1/auth/session-view`, options);
+    // Keep authenticated navigation available while the native Git API deployment catches up.
+    // Both endpoints validate the session and academic access on the server.
+    if (result.status === 404)
+      result = await fetch(`${backendUrl()}/api/v1/users/me`, options);
     if (result.ok) {
       const profile = await result.json();
       if (

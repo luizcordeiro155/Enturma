@@ -38,6 +38,8 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
     String typingPrevious = "";
     volatile long typingUntil = 0;
     long lastTyping = 0, lastHeartbeat = 0;
+    long lastValidation = 0, messageWindow = System.currentTimeMillis();
+    int messageCount = 0;
 
     Connection(WebSocketSession socket) {
       this.socket = socket;
@@ -74,17 +76,37 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
 
   @Override
   public void afterConnectionEstablished(WebSocketSession socket) throws Exception {
-    if (connections.size() >= 2000) {
+    synchronized (connections) {
+    long pendingFromAddress = connections.values().stream().filter(c -> c.token == null
+        && Objects.equals(address(c.socket),address(socket))).count();
+    if (connections.size() >= 2000 || pendingFromAddress >= 64) {
       socket.close(CloseStatus.SERVICE_OVERLOAD);
       return;
     }
     socket.setTextMessageSizeLimit(4096);
     connections.put(socket.getId(), new Connection(socket));
+    }
+  }
+
+  private static String address(WebSocketSession socket) {
+    var remote=socket.getRemoteAddress();
+    return remote == null ? "unknown" : remote.getAddress() == null ? remote.getHostString() : remote.getAddress().getHostAddress();
   }
 
   @Override
   protected void handleTextMessage(WebSocketSession socket, TextMessage message) throws Exception {
     var c = connections.get(socket.getId());
+    if (c != null) {
+      synchronized (c) {
+        long now=System.currentTimeMillis();
+        if (now-c.messageWindow>=10000) { c.messageWindow=now; c.messageCount=0; }
+        if (++c.messageCount>24) {
+          connections.remove(socket.getId());
+          socket.close(CloseStatus.POLICY_VIOLATION);
+          return;
+        }
+      }
+    }
     if (c != null && c.token != null) {
       try {
         var data = json.readTree(message.getPayload());
@@ -118,7 +140,12 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
       var data = json.readTree(message.getPayload());
       String token = data.path("token").asText();
       Actor actor = auth.authenticate(token).orElseThrow();
-      c.user = actor.id();
+      synchronized (connections) {
+        if (connections.values().stream().filter(peer -> actor.id().equals(peer.user)).count() >= 24)
+          throw new IllegalStateException("Connection limit");
+        c.user = actor.id();
+        c.lastValidation=System.currentTimeMillis();
+      }
       if ("academic".equals(data.path("scope").asText())) {
         c.academic = true;
         c.token = token;
@@ -170,7 +197,14 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
         // Global activity/ride sockets are event-driven. Authenticating every
         // one of them on the 1.2s room snapshot loop created needless database
         // traffic and slowed the whole API as connected clients increased.
-        if (c.rides || c.activity || c.academic) continue;
+        if (c.rides || c.activity || c.academic) {
+          if (System.currentTimeMillis()-c.lastValidation>=30000) {
+            Actor current=auth.authenticate(c.token).orElseThrow();
+            if (!c.academic && !auth.studentAccess(current)) throw new IllegalStateException("Academic verification required");
+            c.lastValidation=System.currentTimeMillis();
+          }
+          continue;
+        }
         Actor actor = auth.authenticate(c.token).orElseThrow();
         if (!auth.studentAccess(actor))
           throw new IllegalStateException("Academic verification required");

@@ -55,6 +55,19 @@ test("notebook keeps the conversation and composer visible across themes, phone 
         exact: true,
       });
       await expect(send).toBeInViewport();
+      await expect(
+        page.getByRole("button", {
+          name: "Pesquisar também na web",
+          exact: true,
+        }),
+      ).toBeInViewport();
+      await expect(
+        page.getByRole("checkbox", { name: /Pesquisar/ }),
+      ).toHaveCount(0);
+      const composerHeight = await page
+        .locator(".notebook-question .composer-main-row")
+        .evaluate((node) => node.clientHeight);
+      expect(composerHeight).toBeLessThan(85);
       await expect
         .poll(async () => {
           const box = (await send.boundingBox())!;
@@ -110,6 +123,10 @@ test("notebook keeps the conversation and composer visible across themes, phone 
   );
   await page.getByRole("button", { name: "Fechar configurações" }).click();
   const composer = page.getByLabel("Mensagem para o Enturma APP");
+  // Native Android explicitly marks its IME context; a resized desktop pointer is still a desktop.
+  await page.evaluate(() => {
+    document.documentElement.dataset.enturmaMobile = "true";
+  });
   await composer.fill("Como a célula usa essa energia?");
   await page.setViewportSize({ width: 390, height: 500 });
   await expect(page.locator("html")).toHaveAttribute(

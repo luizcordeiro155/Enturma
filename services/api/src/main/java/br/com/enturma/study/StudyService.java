@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StudyService {
+  private static final String DISCOVERY_FIELDS = "r.id,r.host_id,r.subject_id,r.topic_id,r.title,r.status,r.max_participants,r.created_at,r.ends_at,r.ended_at,r.lifecycle,r.entries_locked,r.topic_text,r.canonical_subject_id,r.scope,r.has_avatar,r.has_banner,r.media_version";
   private final Db db;
   private final CatalogService catalog;
   private final int maxMinutes;
@@ -45,7 +46,7 @@ public class StudyService {
   public List<Map<String, Object>> list(Actor a, UUID subject, int page, boolean recommended) {
     if (!recommended)
       return db.list(
-          "SELECT r.*,s.name subject_name,(SELECT count(*) FROM room_participant p WHERE"
+          "SELECT " + DISCOVERY_FIELDS + ",s.name subject_name,(SELECT count(*) FROM room_participant p WHERE"
               + " p.room_id=r.id AND left_at IS NULL) participants FROM study_room r JOIN"
               + " academic_entry s ON s.id=r.subject_id WHERE r.status IN ('OPEN','ACTIVE') AND"
               + " ends_at>now() AND (?::uuid IS NULL OR subject_id=?) AND NOT EXISTS(SELECT 1 FROM"
@@ -59,7 +60,7 @@ public class StudyService {
           Db.offset(page));
 
     return db.list(
-        "SELECT r.*,s.name subject_name, (SELECT count(*) FROM room_participant p WHERE"
+        "SELECT " + DISCOVERY_FIELDS + ",s.name subject_name, (SELECT count(*) FROM room_participant p WHERE"
             + " p.room_id=r.id AND left_at IS NULL) participants,CASE WHEN us.subject_id IS NOT"
             + " NULL THEN 'SUBJECT' ELSE 'COURSE' END recommendation_reason FROM study_room r JOIN"
             + " academic_entry s ON s.id=r.subject_id JOIN academic_curriculum_subject rs ON"

@@ -1,0 +1,5 @@
+# Exact historical fingerprints: synthetic local E2E passwords, not deployed credentials.
+0fb7aa4f0dddbdd3c5d7d867dcbe291db19fb599:apps/web/e2e/mobile-study-polish.spec.ts:generic-api-key:83
+0fb7aa4f0dddbdd3c5d7d867dcbe291db19fb599:apps/web/e2e/mobile-study-polish.spec.ts:generic-api-key:288
+c827c54fb8e6edecc7595ac6c72b0428236f3078:apps/web/e2e/mobile-study-polish.spec.ts:generic-api-key:83
+c827c54fb8e6edecc7595ac6c72b0428236f3078:apps/web/e2e/mobile-study-polish.spec.ts:generic-api-key:288

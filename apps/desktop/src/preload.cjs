@@ -2,6 +2,8 @@ const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("enturmaDesktop", {
   isDesktop: true,
+  windowChrome: true,
+  setTheme: (light) => ipcRenderer.invoke("desktop:set-theme", light),
   getInfo: () => ipcRenderer.invoke("desktop:get-info"),
   getUpdateState: () => ipcRenderer.invoke("desktop:update-state"),
   installUpdate: () => ipcRenderer.invoke("desktop:install-update"),

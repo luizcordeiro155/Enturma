@@ -1503,6 +1503,56 @@ class PlatformIntegrationTest {
       profiles.enroll(a, period, List.of(subject), "EVENING", "");
   }
 
+  @Autowired ChatMediaController chatMedia;
+  @Autowired PersonalDataExport personalExport;
+
+  @Test
+  void databaseRlsDeniesAnUntrustedRoleEvenAfterAnAccidentalSelectGrant() throws Exception {
+    try(var connection=db.jdbc.getDataSource().getConnection()){
+      connection.setAutoCommit(false);
+      String role="rls_probe_"+UUID.randomUUID().toString().replace("-","");
+      try(var statement=connection.createStatement()){
+        statement.execute("CREATE ROLE "+role+" NOLOGIN");
+        statement.execute("GRANT USAGE ON SCHEMA public TO "+role);
+        statement.execute("GRANT SELECT ON public.app_user,public.chat_media TO "+role);
+        statement.execute("SET LOCAL ROLE "+role);
+        try(var result=statement.executeQuery("SELECT count(*) FROM public.app_user")){
+          result.next();assertThat(result.getInt(1)).isZero();
+        }
+      } finally { connection.rollback(); }
+    }
+  }
+
+  @Test
+  void personalMediaAndExportKeepOwnershipAndSecretsPrivate() throws Exception {
+    byte[] png=Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j/aQAAAAASUVORK5CYII=");
+    var upload=new org.springframework.mock.web.MockMultipartFile("file","figurinha.png","image/png",png);
+    var created=(Map<?,?>)chatMedia.save(host,upload,"STICKER","Minha figurinha");
+    UUID id=(UUID)created.get("id");
+    assertThat(chatMedia.file(host,id).getBody()).isEqualTo(png);
+    assertThatThrownBy(()->chatMedia.file(outsider,id)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(()->chatMedia.favorite(outsider,id,new ChatMediaController.Favorite(false))).isInstanceOf(ApiException.class);
+    chatMedia.delete(outsider,id);
+    assertThat(chatMedia.file(host,id).getBody()).isEqualTo(png);
+    assertThat(((Map<?,?>)chatMedia.save(host,upload,"STICKER","Duplicada")).get("id")).isEqualTo(id);
+    assertThatThrownBy(()->chatMedia.save(host,new org.springframework.mock.web.MockMultipartFile("file","evil.png","image/png","<script>".getBytes()),"STICKER","x")).isInstanceOf(ApiException.class);
+    String exported=new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(personalExport.export(host,"account",0).getBody());
+    assertThat(exported).contains(host.id().toString()).doesNotContain("passwordHash","accessHash","refreshHash",outsider.id().toString());
+    assertThatThrownBy(()->personalExport.export(host,"user_session",0)).isInstanceOf(ApiException.class);
+    chatMedia.delete(host,id);
+    assertThatThrownBy(()->chatMedia.file(host,id)).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void discoveryNeverRevealsTheInvitationSecret() {
+    UUID id=room(10);
+    db.jdbc.update("UPDATE study_room SET share_code='ONLYHOST1234',entries_locked=true WHERE id=?",id);
+    var rows=study.list(outsider,subject,0,false);
+    assertThat(rows).anyMatch(row->id.equals(row.get("id")));
+    assertThat(rows).allMatch(row->!row.containsKey("shareCode") && !row.containsKey("share_code"));
+    assertThatThrownBy(()->study.detail(outsider,id)).isInstanceOf(ApiException.class);
+  }
+
   Actor create(String username) {
     var c =
         auth.register("Teste", username, username + "@example.test", "test-password-long", "JUnit");
@@ -2206,22 +2256,22 @@ class PlatformIntegrationTest {
   }
 
   @Test
-  void loginExplainsUnknownEmailAndWrongPasswordSeparately() {
+  void loginDoesNotDiscloseWhetherAnEmailExists() {
     assertThatThrownBy(() -> auth.login("nao-existe@example.test", "qualquer-senha", "JUnit"))
         .isInstanceOf(ApiException.class)
-        .hasMessageContaining("Não encontramos uma conta cadastrada com este e-mail");
+        .hasMessageContaining("E-mail ou senha incorretos.");
 
     String email = (String) db.one("SELECT email FROM app_user WHERE id=?", host.id()).get("email");
     assertThatThrownBy(() -> auth.login(email, "senha-incorreta", "JUnit"))
         .isInstanceOf(ApiException.class)
-        .hasMessageContaining("A senha informada está incorreta");
+        .hasMessageContaining("E-mail ou senha incorretos.");
   }
 
   @Test
-  void passwordRecoveryRejectsUnknownEmailBeforeStartingCountdown() {
-    assertThatThrownBy(() -> auth.recover("nao-existe@example.test"))
-        .isInstanceOf(ApiException.class)
-        .hasMessageContaining("Não encontramos uma conta cadastrada com este e-mail");
+  void passwordRecoveryDoesNotDiscloseUnknownEmail() {
+    var recovery=auth.recover("nao-existe@example.test");
+    assertThat(auth.recoveryStatus(recovery.trackingToken()).status()).isEqualTo("PENDING");
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM email_outbox WHERE recipient=?)","nao-existe@example.test")).isFalse();
   }
 
   @Test

@@ -15,6 +15,7 @@ import {
   type PortfolioAsset,
 } from "./portfolio-attachments";
 import { Shell } from "./shell";
+import { PortfolioBack, PublicPortfolioLink } from "./portfolio-navigation";
 
 type Project = {
   id?: string;
@@ -284,13 +285,12 @@ export function PortfolioEditor() {
               {busy ? "Salvando…" : "Salvar portfólio"}
             </button>
             {data.publicProfile ? (
-              <a
+              <PublicPortfolioLink
                 className="button secondary"
-                href={"/p/" + data.username}
-                target="_blank"
+                username={data.username}
               >
                 <ExternalLink size={16} /> Ver público
-              </a>
+              </PublicPortfolioLink>
             ) : null}
             <button
               type="button"
@@ -319,6 +319,7 @@ export function PublicPortfolio({ username }: { username: string }) {
   if (error)
     return (
       <main className="public-portfolio">
+        <PortfolioBack />
         <h1>Portfólio indisponível</h1>
         <p>{error}</p>
       </main>
@@ -326,6 +327,7 @@ export function PublicPortfolio({ username }: { username: string }) {
   if (!data)
     return (
       <main className="public-portfolio">
+        <PortfolioBack />
         <p>Carregando portfólio…</p>
       </main>
     );
@@ -338,6 +340,7 @@ export function PublicPortfolio({ username }: { username: string }) {
         } as React.CSSProperties
       }
     >
+      <PortfolioBack />
       <header>
         <div>
           {data.hasAvatar ? (

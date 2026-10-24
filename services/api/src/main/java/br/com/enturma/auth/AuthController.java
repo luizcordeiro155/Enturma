@@ -15,6 +15,12 @@ public class AuthController {
     this.auth = auth;
   }
 
+  /** Small, authenticated navigation check. Never builds the full profile/achievement graph. */
+  @GetMapping("/session-view")
+  public Object sessionView(@AuthenticationPrincipal Actor actor) {
+    return java.util.Map.of("academicAccess", auth.studentAccess(actor));
+  }
+
   public record Register(
       @NotBlank @Size(max = 100) String name,
       @NotBlank @Size(max = 80) String username,

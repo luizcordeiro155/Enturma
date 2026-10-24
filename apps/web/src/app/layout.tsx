@@ -36,6 +36,7 @@ import "./connected-experience.css";
 import "./theme-contrast-hotfix.css";
 import "./mobile-study-polish.css";
 import "./notebook-profile-polish.css";
+import "./composer-experience.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";
@@ -44,6 +45,7 @@ import { WebPushRegistration } from "@/components/web-push-registration";
 import { AppShellStateProvider } from "@/components/app-shell-state";
 import { PwaProvider } from "@/components/pwa-install";
 import { AppLaunch } from "@/components/app-launch";
+import { DesktopChrome } from "@/components/desktop-chrome";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
@@ -84,6 +86,7 @@ export default function Layout({
           }
         >
           <Motion />
+          <DesktopChrome />
           <ThemeSync />
           <AppLaunch />
           <MobilePushRegistration />

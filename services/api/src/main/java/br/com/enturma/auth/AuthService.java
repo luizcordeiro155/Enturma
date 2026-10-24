@@ -79,13 +79,9 @@ public class AuthService {
   @Transactional
   public Credentials login(String email, String password, String device) {
     Account user = accounts.findByEmail(email.strip().toLowerCase(Locale.ROOT)).orElse(null);
-    if (user == null)
-      throw new ApiException(
-          404, "EMAIL_NOT_REGISTERED", "Não encontramos uma conta cadastrada com este e-mail.");
-
-    boolean matches = encoder.matches(password, user.passwordHash);
-    if (!matches)
-      throw new ApiException(401, "INVALID_PASSWORD", "A senha informada está incorreta.");
+    boolean matches = encoder.matches(password, user == null ? dummyHash : user.passwordHash);
+    if (user == null || !matches)
+      throw new ApiException(401, "INVALID_CREDENTIALS", "E-mail ou senha incorretos.");
 
     if (!user.status.equals("ACTIVE"))
       throw new ApiException(
@@ -171,22 +167,17 @@ public class AuthService {
         accounts
             .findByEmail(email.strip().toLowerCase(Locale.ROOT))
             .filter(u -> u.status.equals("ACTIVE"))
-            .orElseThrow(
-                () ->
-                    new ApiException(
-                        404,
-                        "EMAIL_NOT_REGISTERED",
-                        "Não encontramos uma conta cadastrada com este e-mail."));
+            .orElse(null);
 
     db.jdbc.update("DELETE FROM password_reset_flow WHERE expires_at<now()-interval '1 day'");
     db.jdbc.update(
         "INSERT INTO password_reset_flow(id,tracking_hash,user_id,expires_at) VALUES (?,?,?,?)",
         UUID.randomUUID(),
         Tokens.hash(trackingToken),
-        user.id,
+        user == null ? null : user.id,
         Timestamp.from(expiresAt));
 
-    issueAccountToken(user, "RESET");
+    if (user != null) issueAccountToken(user, "RESET");
     return new RecoveryStarted(trackingToken, 1800);
   }
 

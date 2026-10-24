@@ -1,4 +1,6 @@
 "use client";
+import dynamic from "next/dynamic";
+const TransferFilm = dynamic(() => import("./motion/transfer-player"), { ssr: false });
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Download, RefreshCw, X } from "lucide-react";
 import { useCallSession } from "./call-session-provider";
@@ -29,6 +31,8 @@ type AndroidRelease = {
 };
 type DesktopBridge = {
   isDesktop: boolean;
+  windowChrome?: boolean;
+  setTheme?: (light: boolean) => Promise<unknown>;
   getInfo: () => Promise<{ version: string; platform: string }>;
   getUpdateState?: () => Promise<UpdateState>;
   onUpdateState?: (callback: (state: UpdateState) => void) => () => void;
@@ -142,8 +146,8 @@ export function DesktopUpdateProvider({
       const receive = (next: UpdateState) => {
         if (!live) return;
         setState(next);
-        if (next.status === "ready" && prompted.current !== next.version) {
-          prompted.current = next.version ?? "";
+        if (["downloading", "ready"].includes(next.status) && prompted.current !== `${next.version}:${next.status}`) {
+          prompted.current = `${next.version}:${next.status}`;
           setOpen(true);
         }
       };
@@ -363,6 +367,7 @@ export function DesktopUpdateProvider({
               <X />
             </button>
           </header>
+          <TransferFilm mode="update" progress={["downloading", "ready"].includes(state.status) ? state.status === "ready" ? 100 : state.progress : undefined} />
           <p>
             Instalada: {state.currentVersion}
             {state.version ? ` · Nova versão: ${state.version}` : ""}

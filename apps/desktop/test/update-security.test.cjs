@@ -4,8 +4,16 @@ const {
   validateManifest,
   trustedSender,
   inside,
+  deepLinkToWeb,
 } = require("../src/update-security.cjs");
 const url = "https://downloads.example/latest.json";
+test("deep links keep the application origin, including network-path inputs", () => {
+  const web = "https://app.example";
+  assert.equal(deepLinkToWeb("enturma://rooms/123?tab=chat", web), web + "/rooms/123?tab=chat");
+  assert.equal(deepLinkToWeb("enturma://verify-email#token=one-time", web), web + "/verify-email#token=one-time");
+  for (const input of ["enturma:////evil.example/login", "enturma://///evil.example/login", "https://evil.example", "enturma:///\\evil.example/login"])
+    assert.equal(deepLinkToWeb(input, web), null);
+});
 const valid = {
   version: "0.3.0",
   sha256: "a".repeat(64),

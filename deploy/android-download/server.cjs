@@ -21,11 +21,19 @@ function version(file) {
   return file?.match(/Enturma-Android-(\d+\.\d+\.\d+)\.apk$/)?.[1] || "0.0.0";
 }
 
-function checksum(file) {
-  return crypto
-    .createHash("sha256")
-    .update(fs.readFileSync(path.join(dir, file)))
-    .digest("hex");
+const checksums = new Map();
+function checksum(file, stat) {
+  const key = `${file}:${stat.size}:${stat.mtimeMs}`;
+  if (!checksums.has(key)) {
+    checksums.clear();
+    checksums.set(key, new Promise((resolve, reject) => {
+      const hash = crypto.createHash("sha256");
+      fs.createReadStream(path.join(dir, file)).on("error", reject)
+        .on("data", chunk => hash.update(chunk))
+        .on("end", () => resolve(hash.digest("hex")));
+    }).catch(error => { checksums.delete(key); throw error; }));
+  }
+  return checksums.get(key);
 }
 
 function origin(req) {
@@ -48,7 +56,7 @@ function send(req, res, file) {
   else fs.createReadStream(full).pipe(res);
 }
 
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
   try {
     if (!["GET", "HEAD"].includes(req.method)) {
       res.writeHead(405);
@@ -77,12 +85,13 @@ const server = http.createServer((req, res) => {
       }
       const stat = fs.statSync(path.join(dir, apk));
       const base = origin(req);
+      const digest = await checksum(apk, stat);
       res.writeHead(200, {
         "Content-Type": "application/json; charset=utf-8",
         "Cache-Control": "no-store,max-age=0",
         "Access-Control-Allow-Origin": "*",
       });
-      res.end(
+      res.end(req.method === "HEAD" ? undefined :
         JSON.stringify({
           version: version(apk),
           sourceCommit: fs.existsSync(path.join(__dirname, "release.json"))
@@ -94,7 +103,7 @@ const server = http.createServer((req, res) => {
           packageName: "br.com.enturma.app",
           file: apk,
           size: stat.size,
-          sha256: checksum(apk),
+          sha256: digest,
           downloadUrl: `${base}/${encodeURIComponent(apk)}`,
           publishedAt: stat.mtime.toISOString(),
         }),

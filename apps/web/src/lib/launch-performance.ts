@@ -1,8 +1,8 @@
 /** Presentation time begins when the Remotion player renders, not when an API returns. */
-export const APP_LAUNCH_MIN_MS = 2250;
-export const RIDE_LAUNCH_MIN_MS = 1900;
+export const APP_LAUNCH_MIN_MS = 850;
+export const RIDE_LAUNCH_MIN_MS = 950;
 export const REDUCED_LAUNCH_MIN_MS = 160;
-export const LAUNCH_FALLBACK_MS = 6500;
+export const LAUNCH_FALLBACK_MS = 3000;
 
 export function launchRemainingMs(
   visibleSince: number,

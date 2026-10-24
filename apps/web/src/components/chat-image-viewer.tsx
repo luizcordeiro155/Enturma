@@ -2,7 +2,8 @@
 /* eslint-disable @next/next/no-img-element -- authenticated or decrypted blob attachments */
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Download, X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { Download, X, ZoomIn, ZoomOut, RotateCcw, Star } from "lucide-react";
+import { saveChatMedia } from "@/lib/chat-media";
 import { playMotion } from "@/lib/motion";
 import {
   useOverlayHistory,
@@ -11,6 +12,28 @@ import {
 
 export function ChatImage({ src, alt }: { src: string; alt: string }) {
   const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const [notice, setNotice] = useState("");
+  async function favorite() {
+    if (saving || saved) return;
+    setSaving(true);
+    try {
+      const response = await fetch(src);
+      if (!response.ok) throw Error("Não foi possível carregar a imagem.");
+      const blob = await response.blob();
+      await saveChatMedia(
+        new File([blob], alt || "Minha figurinha", { type: blob.type }),
+        blob.type === "image/gif" ? "GIF" : "STICKER",
+      );
+      setSaved(true);
+      setNotice("Salvo na sua biblioteca pessoal de favoritos.");
+    } catch (error) {
+      setNotice((error as Error).message);
+    } finally {
+      setSaving(false);
+    }
+  }
   const trigger = useRef<HTMLButtonElement>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const hasOpened = useRef(false);
@@ -205,6 +228,15 @@ export function ChatImage({ src, alt }: { src: string; alt: string }) {
               <span>{alt}</span>
               <button
                 type="button"
+                aria-label="Salvar nos favoritos"
+                aria-pressed={saved}
+                disabled={saving || saved}
+                onClick={() => void favorite()}
+              >
+                <Star size={20} fill={saved ? "currentColor" : "none"} />
+              </button>
+              <button
+                type="button"
                 aria-label="Diminuir imagem"
                 disabled={view.scale <= 1}
                 onClick={() => zoomAt(current.current.scale - 0.5)}
@@ -301,6 +333,7 @@ export function ChatImage({ src, alt }: { src: string; alt: string }) {
               />
             </div>
             <p>
+              {notice && <span role="status">{notice} · </span>}
               <span className="image-zoom-label">
                 {Math.round(view.scale * 100)}%
               </span>{" "}

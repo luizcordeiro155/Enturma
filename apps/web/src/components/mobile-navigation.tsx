@@ -1,5 +1,5 @@
 "use client";
-import Link from "next/link";
+import { NavigationLink as Link } from "./navigation-link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { EnturmaAppIcon } from "./enturma-app-icon";

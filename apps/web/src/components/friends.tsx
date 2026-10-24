@@ -7,14 +7,7 @@ import { isChatAtLatest } from "@/lib/chat-scroll";
 import { PrivateCallButtons } from "./private-calls";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import {
-  ArrowLeft,
-  ImagePlus,
-  MoreHorizontal,
-  Send,
-  Smile,
-  X,
-} from "lucide-react";
+import { ArrowLeft, Paperclip, MoreHorizontal, Send, X } from "lucide-react";
 import { preparePrivateChatImage } from "@/lib/chat-image";
 import {
   isMobileTextEntryContext,
@@ -43,15 +36,15 @@ import {
   storeIdentity,
 } from "@/lib/private-chat-crypto";
 import { PrivateKeySync } from "./private-key-sync";
+import { ComposerMedia } from "./composer-media";
 import { Shell } from "./shell";
 import { UserIdentity, type PublicProfile } from "./user-identity";
 import {
-  MessageActionPopover,
   messageActionAnchor,
   type MessageActionAnchor,
 } from "./message-action-popover";
 import { MessageMenu } from "./message-menu";
-import { EmojiPicker, EmojiText, AnimatedEmoji } from "./emoji-picker";
+import { EmojiText, AnimatedEmoji } from "./emoji-picker";
 type Friend = Omit<PublicProfile, "id"> & {
   id: string;
   userId: string;
@@ -105,10 +98,7 @@ export function Friends() {
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [privateImagesEnabled, setPrivateImagesEnabled] = useState(false);
-  const [emojiOpen, setEmojiOpen] = useState(false);
-  const [emojiAnchor, setEmojiAnchor] = useState<MessageActionAnchor | null>(
-    null,
-  );
+
   const [busy, setBusy] = useState(false);
   const [ready, setReady] = useState(false);
   const [identityError, setIdentityError] = useState("");
@@ -467,7 +457,7 @@ export function Friends() {
         if (old) URL.revokeObjectURL(old);
         return null;
       });
-      setEmojiOpen(false);
+
       setPage(0);
       setFinger("");
       key.current = null;
@@ -621,7 +611,7 @@ export function Friends() {
       if (old) URL.revokeObjectURL(old);
       return URL.createObjectURL(file);
     });
-    setEmojiOpen(false);
+
     setError("");
   }
 
@@ -713,7 +703,7 @@ export function Friends() {
     setDraft("");
     setImage(null);
     setImagePreview(null);
-    setEmojiOpen(false);
+
     setBusy(true);
     setError("");
     requestAnimationFrame(() => {
@@ -1325,43 +1315,10 @@ export function Friends() {
                     </div>
                   ) : null}
 
-                  {emojiOpen && emojiAnchor ? (
-                    <MessageActionPopover
-                      anchor={emojiAnchor}
-                      label="Emojis"
-                      wide
-                      onDismiss={() => setEmojiOpen(false)}
-                    >
-                      <EmojiPicker
-                        onSelect={(emoji) => {
-                          setDraft((value) => value + emoji);
-                          setEmojiOpen(false);
-                          composer.current?.focus({ preventScroll: true });
-                        }}
-                      />
-                    </MessageActionPopover>
-                  ) : null}
-
                   <div className="composer-main-row">
-                    <button
-                      type="button"
-                      className="composer-icon-button"
-                      aria-label="Adicionar emoji"
-                      aria-expanded={emojiOpen}
-                      onPointerDown={(event) => event.preventDefault()}
-                      onClick={(event) => {
-                        setEmojiAnchor(
-                          messageActionAnchor(event.currentTarget),
-                        );
-                        setEmojiOpen((open) => !open);
-                      }}
-                    >
-                      <Smile size={22} />
-                    </button>
-
                     {privateImagesEnabled ? (
                       <label className="composer-icon-button composer-image-button">
-                        <ImagePlus size={22} />
+                        <Paperclip size={20} />
                         <span className="sr-only">Adicionar imagem</span>
                         <input
                           type="file"
@@ -1414,6 +1371,14 @@ export function Friends() {
                       />
                     </label>
 
+                    <ComposerMedia
+                      onEmoji={(emoji) => {
+                        setDraft((value) => (value + emoji).slice(0, 4000));
+                        composer.current?.focus({ preventScroll: true });
+                      }}
+                      onFile={privateImagesEnabled ? selectImage : undefined}
+                      disabled={busy || !finger}
+                    />
                     <button
                       className="composer-send-button"
                       aria-label="Enviar mensagem"
