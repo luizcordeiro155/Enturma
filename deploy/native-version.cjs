@@ -1,13 +1,63 @@
 const fs = require("node:fs");
 const path = require("node:path");
+const os = require("node:os");
+const { execFileSync } = require("node:child_process");
 
-function historyCount(link, entries) {
-  const last = link?.split(",").find((part) => /rel="last"/.test(part));
-  const match = last?.match(/[?&]page=(\d+)/);
-  const count = match ? Number(match[1]) : entries;
+function git(repository, args) {
+  return execFileSync(
+    "git",
+    ["--no-replace-objects", "-C", repository, ...args],
+    {
+      encoding: "utf8",
+      timeout: 180000,
+      windowsHide: true,
+      env: {
+        ...process.env,
+        GIT_TERMINAL_PROMPT: "0",
+        GCM_INTERACTIVE: "never",
+      },
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  ).trim();
+}
+function revisionCount(repository, sha) {
+  if (!/^[a-f0-9]{40}$/.test(sha || "")) throw Error("Invalid source SHA");
+  if (git(repository, ["rev-parse", "--is-shallow-repository"]) !== "false")
+    throw Error("A complete commit history is required for release versions");
+  if (git(repository, ["rev-parse", "--verify", `${sha}^{commit}`]) !== sha)
+    throw Error("Release source mismatch");
+  const count = Number(git(repository, ["rev-list", "--count", sha]));
   if (!Number.isSafeInteger(count) || count < 1 || count > 10000000)
     throw Error("Invalid commit count");
   return count;
+}
+function fetchRevisionCount(sha) {
+  if (!/^[a-f0-9]{40}$/.test(sha || "")) throw Error("Invalid source SHA");
+  const root = path.resolve(os.tmpdir());
+  const directory = fs.mkdtempSync(path.join(root, "enturma-release-"));
+  try {
+    git(directory, ["init", "--bare", "--quiet"]);
+    // Fetch commits/trees over Git, without checking out code or downloading media.
+    // Public GitHub API quotas are shared by builders and can reject healthy builds.
+    git(directory, [
+      "-c",
+      "credential.helper=",
+      "fetch",
+      "--quiet",
+      "--no-tags",
+      "--filter=blob:none",
+      "https://github.com/luizcordeiro155/Enturma.git",
+      sha,
+    ]);
+    return revisionCount(directory, sha);
+  } finally {
+    if (
+      path.dirname(path.resolve(directory)) !== root ||
+      !path.basename(directory).startsWith("enturma-release-")
+    )
+      throw Error("Unexpected release cache directory");
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 }
 async function main(platform) {
   if (!["desktop", "mobile"].includes(platform))
@@ -29,22 +79,7 @@ async function main(platform) {
   // The immutable commit's reachable history grows monotonically on protected main.
   // It gives retries the same version and never publishes two binaries under one
   // version simply because a developer forgot to bump package.json.
-  const response = await fetch(
-    `https://api.github.com/repos/luizcordeiro155/Enturma/commits?sha=${sha}&per_page=1`,
-    {
-      headers: {
-        Accept: "application/vnd.github+json",
-        "User-Agent": "Enturma-native-release",
-      },
-      signal: AbortSignal.timeout(20000),
-    },
-  );
-  if (!response.ok)
-    throw Error(`Could not verify release source (${response.status})`);
-  const commits = await response.json();
-  if (!Array.isArray(commits) || commits[0]?.sha !== sha)
-    throw Error("Release source mismatch");
-  const count = historyCount(response.headers.get("link"), commits.length);
+  const count = fetchRevisionCount(sha);
   const version = `0.4.${count}`;
   const root = path.resolve(__dirname, "..");
   const packagePath = path.join(root, "apps", platform, "package.json");
@@ -67,7 +102,7 @@ async function main(platform) {
   );
   console.log(`Verified ${platform} release ${version} at ${sha}`);
 }
-module.exports = { historyCount };
+module.exports = { revisionCount, fetchRevisionCount };
 if (require.main === module)
   main(process.argv[2]).catch((e) => {
     console.error(e.message);

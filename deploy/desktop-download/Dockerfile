@@ -1,6 +1,6 @@
 FROM node:22-bookworm AS build
 
-RUN apt-get update && apt-get install -y --no-install-recommends mono-mcs libmono-system-windows-forms4.0-cil && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends git ca-certificates mono-mcs libmono-system-windows-forms4.0-cil && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /project
 COPY . .
