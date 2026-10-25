@@ -31,17 +31,14 @@ export function KlipyPicker({ query, onSelect, disabled }: {
   }, [term]);
 
   useEffect(() => {
-    setPage(1);
-    setResults([]);
-    setHasMore(false);
-  }, [debounced]);
-
-  useEffect(() => {
     if (!key) return;
     const ctrl = new AbortController();
-    setBusy(true);
-    setError("");
-    fetch(klipyRequestUrl(key, debounced, page), { signal: ctrl.signal, cache: "no-store" })
+    // Schedule the request asynchronously: React effects should not synchronously
+    // cascade state updates during mount or a query change.
+    const timer = window.setTimeout(() => {
+      setBusy(true);
+      setError("");
+      void fetch(klipyRequestUrl(key, debounced, page), { signal: ctrl.signal, cache: "no-store" })
       .then(r => {
         if (!r.ok) throw Error(r.status === 429
           ? "Limite de buscas da KLIPY atingido. Tente novamente mais tarde."
@@ -60,7 +57,11 @@ export function KlipyPicker({ query, onSelect, disabled }: {
       .finally(() => {
         if (!ctrl.signal.aborted) setBusy(false);
       });
-    return () => ctrl.abort();
+    }, 0);
+    return () => {
+      window.clearTimeout(timer);
+      ctrl.abort();
+    };
   }, [key, debounced, page]);
 
   return <section className="klipy-picker" aria-label="GIFs da KLIPY">
@@ -69,10 +70,22 @@ export function KlipyPicker({ query, onSelect, disabled }: {
         <Search size={18} aria-hidden="true" />
         <input type="search" aria-label="Pesquisar GIFs na KLIPY"
           placeholder="Pesquisar GIFs na KLIPY" value={term}
-          onChange={event => setTerm(event.target.value)} />
+          onChange={event => {
+            setTerm(event.target.value);
+            setPage(1);
+            setResults([]);
+            setHasMore(false);
+            setError("");
+          }} />
       </label>
       {term && <button type="button" aria-label="Limpar pesquisa KLIPY"
-        onClick={() => setTerm("")}><X size={17}/></button>}
+        onClick={() => {
+          setTerm("");
+          setPage(1);
+          setResults([]);
+          setHasMore(false);
+          setError("");
+        }}><X size={17}/></button>}
     </div>
     {!key ? <p className="media-empty">KLIPY indisponível. A coleção do Enturma continua funcionando.</p> : null}
     <div className="media-library-grid" aria-busy={busy}>
