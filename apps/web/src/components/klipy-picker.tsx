@@ -51,7 +51,12 @@ export function KlipyPicker({ query, onSelect, disabled }: {
           </article>
         : <article key={item.gif.id + "-" + i}>
             <button type="button" className="media-select" disabled={disabled || busy}
-              onClick={() => { void onSelect(item.gif).catch(e => setError((e as Error).message)); }}>
+              onClick={() => { void onSelect(item.gif).then(() => {
+                if (item.gif.slug) {
+                  void fetch(`https://api.klipy.com/api/v1/${encodeURIComponent(key)}/gifs/share/${encodeURIComponent(item.gif.slug)}`,
+                    { method: "POST", cache: "no-store" }).catch(() => {});
+                }
+              }).catch(e => setError((e as Error).message)); }}>
               <img src={item.gif.preview} alt={item.gif.title} loading="lazy" />
               <span>{item.gif.title}</span>
             </button>
