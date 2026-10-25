@@ -669,13 +669,9 @@ export function Friends() {
   }
 
   async function sendKlipy(gif: KlipyGif) {
-    // The URL goes through the existing E2EE message encryption.
-    if (!selected || !me || !key.current || busy) return;
-    const previousDraft = draft;
-    setDraft(gif.url);
-    // Preserve the original draft; use the same encrypted transport below.
+    // Only the provider URL is encrypted and transmitted, never the media file.
+    // Do not touch an unsent message or attachment in the composer.
     await sendKlipyUrl(gif.url);
-    setDraft(previousDraft);
   }
 
   async function sendKlipyUrl(url: string) {
