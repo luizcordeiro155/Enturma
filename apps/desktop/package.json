@@ -9,7 +9,7 @@
     "dev": "npx --yes electron@44.5.1 .",
     "start": "npx --yes electron@44.5.1 .",
     "pack": "npx --yes electron-builder@26.15.3 --dir",
-    "dist:win": "npx --yes electron-builder@26.15.3 --win nsis zip --x64 --publish never",
+    "dist:win": "node build/build-setup-ui.cjs && npx --yes electron-builder@26.15.3 --win nsis zip --x64 --publish never",
     "dist:linux": "npx --yes electron-builder@26.15.3 --linux AppImage --x64 --publish never",
     "dist:mac": "npx --yes electron-builder@26.15.3 --mac dmg --publish never",
     "test": "node --test test/*.test.cjs"
@@ -56,9 +56,10 @@
       "icon": "assets/icon.ico"
     },
     "nsis": {
-      "oneClick": false,
+      "oneClick": true,
+      "include": "build/installer.nsh",
       "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
+      "allowToChangeInstallationDirectory": false,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "shortcutName": "Enturma",

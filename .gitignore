@@ -28,3 +28,6 @@ __pycache__/
 /app.jar.pending
 
 test-results-platform/
+apps/desktop/build/EnturmaSetupUX.exe
+deploy/desktop-download/release.json
+deploy/android-download/release.json

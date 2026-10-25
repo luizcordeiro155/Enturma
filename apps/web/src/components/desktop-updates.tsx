@@ -32,6 +32,8 @@ type AndroidRelease = {
 type DesktopBridge = {
   isDesktop: boolean;
   windowChrome?: boolean;
+  nativeUpdater?: boolean;
+  showUpdateWindow?: () => Promise<unknown>;
   setTheme?: (light: boolean) => Promise<unknown>;
   getInfo: () => Promise<{ version: string; platform: string }>;
   getUpdateState?: () => Promise<UpdateState>;
@@ -146,7 +148,7 @@ export function DesktopUpdateProvider({
       const receive = (next: UpdateState) => {
         if (!live) return;
         setState(next);
-        if (["downloading", "ready"].includes(next.status) && prompted.current !== `${next.version}:${next.status}`) {
+        if (!bridge.nativeUpdater && ["downloading", "ready"].includes(next.status) && prompted.current !== `${next.version}:${next.status}`) {
           prompted.current = `${next.version}:${next.status}`;
           setOpen(true);
         }
@@ -301,6 +303,10 @@ export function DesktopUpdateProvider({
       value={{
         state,
         open: () => {
+          if (window.enturmaDesktop?.nativeUpdater && window.enturmaDesktop.showUpdateWindow) {
+            void window.enturmaDesktop.showUpdateWindow().catch(() => setOpen(true));
+            return;
+          }
           if (
             isMobileApp() &&
             state?.status === "available" &&

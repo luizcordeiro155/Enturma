@@ -76,6 +76,21 @@ html .chat-image-thumbnail img {
   max-height: 240px;
   object-fit: contain;
 }
+html .chat-image-thumbnail.chat-sticker,
+html .chat-image-thumbnail.chat-gif {
+  background: transparent !important;
+  box-shadow: none;
+}
+html .chat-image-thumbnail.chat-sticker { border-radius: 0; }
+html .chat-image-thumbnail.chat-sticker img {
+  width: 160px;
+  max-width: min(160px, 100%);
+  max-height: 180px;
+  filter: drop-shadow(0 2px 2px #0002);
+}
+html .chat-image-thumbnail.chat-gif img { max-width: min(280px, 100%); }
+.private-messages > article:has(.chat-sticker),
+.persistent-message:has(.chat-sticker) { background: transparent !important; box-shadow: none !important; }
 .chat-image-viewer {
   width: min(1060px, calc(100vw - 32px));
   height: min(820px, calc(100dvh - 32px));

@@ -47,7 +47,7 @@ public class ChatService {
   private Object messageRows(Actor a, UUID room, int page, UUID target) {
     study.member(a, room);
     return db.list(
-        "SELECT m.id,m.user_id,m.body,m.reply_to,m.created_at,m.edited_at,m.deleted_at,(SELECT"
+        "SELECT m.id,m.user_id,m.body,m.reply_to,m.created_at,m.edited_at,m.deleted_at,m.media_kind,(SELECT"
             + " created_at FROM room_message_hidden h WHERE h.message_id=m.id AND"
             + " h.user_id=?::uuid)"
             + " hidden_at,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS NOT"
@@ -89,8 +89,15 @@ public class ChatService {
 
   @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
   public Object send(Actor a, UUID room, String body, UUID reply, UUID attachment) {
+    return send(a, room, body, reply, attachment, null);
+  }
+
+  @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
+  public Object send(Actor a, UUID room, String body, UUID reply, UUID attachment, String mediaKind) {
     study.activeLocked(room);
     study.member(a, room);
+    if (mediaKind != null && (attachment == null || !Set.of("STICKER", "GIF").contains(mediaKind)))
+      throw ApiException.invalid("Tipo de mídia inválido.");
     String text = body == null ? "" : body.strip();
     if (text.isBlank() && attachment == null)
       throw ApiException.invalid("Escreva uma mensagem ou anexe uma imagem.");
@@ -110,14 +117,15 @@ public class ChatService {
     automod.inspect(a, room, text);
     UUID id = UUID.randomUUID();
     db.jdbc.update(
-        "INSERT INTO room_message(id,room_id,user_id,body,reply_to,attachment_id) VALUES"
-            + " (?,?,?,?,?,?)",
+        "INSERT INTO room_message(id,room_id,user_id,body,reply_to,attachment_id,media_kind) VALUES"
+            + " (?,?,?,?,?,?,?)",
         id,
         room,
         a.id(),
         text.isBlank() ? null : text,
         reply,
-        attachment);
+        attachment,
+        mediaKind);
     var mentions = notices.mentions(text);
     for (var member :
         db.list(

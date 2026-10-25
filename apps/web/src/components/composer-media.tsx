@@ -30,10 +30,12 @@ type Tab = "EMOJI" | "STICKER" | "GIF";
 export function ComposerMedia({
   onEmoji,
   onFile,
+  onMedia,
   disabled = false,
 }: {
   onEmoji: (emoji: string) => void;
   onFile?: (file: File) => void;
+  onMedia?: (file: File, kind: ChatMedia["kind"]) => Promise<void>;
   disabled?: boolean;
 }) {
   const [anchor, setAnchor] = useState<MessageActionAnchor>();
@@ -46,11 +48,15 @@ export function ComposerMedia({
   const [notice, setNotice] = useState("");
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [directSend, setDirectSend] = useState<boolean | null>(null);
   const input = useRef<HTMLInputElement>(null);
-  const mediaEnabled = Boolean(onFile);
+  const mediaEnabled = Boolean(onFile || onMedia);
   useEffect(() => {
     if (!anchor || !mediaEnabled) return;
     let active = true;
+    api<{ directSend: boolean }>("/chat-media/capabilities")
+      .then(value => { if (active) setDirectSend(value.directSend === true); })
+      .catch(() => { if (active) setDirectSend(false); });
     api<ChatMedia[]>("/chat-media")
       .then((data) => {
         if (active) setItems(data);
@@ -89,7 +95,7 @@ export function ComposerMedia({
   return (
     <>
       <div className="composer-media-buttons">
-        {(["EMOJI", ...(onFile ? ["STICKER", "GIF"] : [])] as Tab[]).map(
+        {(["EMOJI", ...(mediaEnabled ? ["STICKER", "GIF"] : [])] as Tab[]).map(
           (kind) => {
             const Icon =
               kind === "EMOJI"
@@ -140,7 +146,7 @@ export function ComposerMedia({
             <header>
               <div role="tablist" aria-label="Tipo de mídia">
                 {(
-                  ["EMOJI", ...(onFile ? ["STICKER", "GIF"] : [])] as Tab[]
+                  ["EMOJI", ...(mediaEnabled ? ["STICKER", "GIF"] : [])] as Tab[]
                 ).map((kind) => (
                   <button
                     key={kind}
@@ -278,10 +284,12 @@ export function ComposerMedia({
                         className="media-select"
                         aria-label={item.name}
                         title={item.name}
-                        disabled={busy}
+                        disabled={busy || disabled || (Boolean(onMedia) && directSend === null)}
                         onClick={() =>
                           void run(async () => {
-                            onFile?.(await chatMediaFile(item));
+                            const file = await chatMediaFile(item);
+                            if (onMedia && directSend) await onMedia(file, item.kind);
+                            else onFile?.(file);
                             setAnchor(undefined);
                           })
                         }
@@ -361,7 +369,7 @@ export function ComposerMedia({
                 <small className="media-library-credit">
                   {tab === "GIF"
                     ? "Coleção original Enturma · Seus GIFs"
-                    : "Sua biblioteca pessoal · Toque para anexar"}
+                    : `Sua biblioteca pessoal · Toque para ${onMedia && directSend ? 'enviar' : 'anexar'}`}
                 </small>
               </>
             )}

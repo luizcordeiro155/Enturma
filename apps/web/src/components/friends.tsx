@@ -71,6 +71,7 @@ type Envelope = {
   attachmentIv?: string | null;
   attachmentMime?: string | null;
   attachmentName?: string | null;
+  mediaKind?: "STICKER" | "GIF" | null;
   attachmentSize?: number | null;
 };
 type PrivateMessage = Envelope & {
@@ -666,19 +667,19 @@ export function Friends() {
     void deliverPending(pending.friendshipId, clientId, pending.payload);
   }
 
-  async function send(e: React.FormEvent) {
-    e.preventDefault();
-    if (!selected || !me || !key.current || busy || (!draft.trim() && !image))
+  async function send(e?: React.FormEvent, media?: { file: File; kind: "STICKER" | "GIF" }) {
+    e?.preventDefault();
+    if (!selected || !me || !key.current || busy || (!media && !draft.trim() && !image))
       return;
 
     const friend = selected;
     const sender = me.id;
-    const text = draft.trim();
-    const selectedImage = image;
+    const text = media ? "" : draft.trim();
+    const selectedImage = media?.file ?? image;
     const cryptoKey = key.current;
     const clientId = crypto.randomUUID();
     const now = new Date().toISOString();
-    const preview = imagePreview;
+    const preview = media ? URL.createObjectURL(media.file) : imagePreview;
     if (preview) attachmentUrls.current.add(preview);
     // Show the outgoing bubble before encryption and the server round trip.
     const optimistic: PrivateMessage = {
@@ -690,6 +691,8 @@ export function Friends() {
       ciphertext: "",
       createdAt: now,
       attachmentUrl: preview ?? undefined,
+      attachmentName: selectedImage?.name,
+      mediaKind: media?.kind,
       sendStatus: "sending",
     };
     setMessages((old) => [...old, optimistic]);
@@ -699,10 +702,12 @@ export function Friends() {
     }));
     forceFollowLatest.current = true;
     nearLatest.current = true;
-    privateTyping.stop();
-    setDraft("");
-    setImage(null);
-    setImagePreview(null);
+    if (!media) {
+      privateTyping.stop();
+      setDraft("");
+      setImage(null);
+      setImagePreview(null);
+    }
 
     setBusy(true);
     setError("");
@@ -733,6 +738,7 @@ export function Friends() {
       const sendPayload = {
         ...payload,
         ...attachment,
+        ...(media ? { mediaKind: media.kind } : {}),
         mentioned: !!friend.username && mentionsUser(text, friend.username),
       };
       pendingSends.current.set(clientId, {
@@ -749,7 +755,8 @@ export function Friends() {
       setError((error as Error).message);
       // Encryption errors have no retryable envelope; restore the original draft.
       setDraft((current) => current || text);
-      if (selectedImage) setImage(selectedImage);
+      if (selectedImage && !media) setImage(selectedImage);
+      if (media) throw error;
     } finally {
       setBusy(false);
     }
@@ -1185,6 +1192,7 @@ export function Friends() {
                         ) : null}
                         {!m.deletedAt && m.attachmentUrl ? (
                           <ChatImage
+                            kind={m.mediaKind}
                             src={m.attachmentUrl}
                             alt={m.attachmentName ?? "Imagem privada"}
                           />
@@ -1377,6 +1385,7 @@ export function Friends() {
                         composer.current?.focus({ preventScroll: true });
                       }}
                       onFile={privateImagesEnabled ? selectImage : undefined}
+                      onMedia={privateImagesEnabled ? (file, kind) => send(undefined, { file, kind }) : undefined}
                       disabled={busy || !finger}
                     />
                     <button

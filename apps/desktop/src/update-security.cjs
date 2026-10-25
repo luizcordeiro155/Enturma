@@ -54,6 +54,13 @@ function inside(root, target) {
   const relative = path.relative(path.resolve(root), path.resolve(target));
   return !!relative && !relative.startsWith("..") && !path.isAbsolute(relative);
 }
+function trustedLocalSender(event, window, filename) {
+  try {
+    return !!window && !window.isDestroyed() && event.sender === window.webContents &&
+      event.senderFrame === window.webContents.mainFrame &&
+      event.senderFrame.url === require('node:url').pathToFileURL(filename).href;
+  } catch { return false; }
+}
 function deepLinkToWeb(raw, webUrl) {
   try {
     const link = new URL(raw);
@@ -67,4 +74,4 @@ function deepLinkToWeb(raw, webUrl) {
     return target.toString();
   } catch { return null; }
 }
-module.exports = { validateManifest, trustedSender, inside, deepLinkToWeb };
+module.exports = { validateManifest, trustedSender, trustedLocalSender, inside, deepLinkToWeb };

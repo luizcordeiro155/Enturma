@@ -3,10 +3,28 @@ const assert = require("node:assert/strict");
 const {
   validateManifest,
   trustedSender,
+  trustedLocalSender,
   inside,
   deepLinkToWeb,
 } = require("../src/update-security.cjs");
 const url = "https://downloads.example/latest.json";
+test('local updater IPC rejects remote pages, sibling files, subframes and other windows', () => {
+  const file = require('node:path').resolve(__dirname, '../src/updater.html');
+  const mainFrame = { url: require('node:url').pathToFileURL(file).href };
+  const webContents = { mainFrame };
+  const window = { webContents, isDestroyed: () => false };
+  const event = { sender: webContents, senderFrame: mainFrame };
+  assert.equal(trustedLocalSender(event, window, file), true);
+  assert.equal(trustedLocalSender({ ...event, sender: {} }, window, file), false);
+  assert.equal(trustedLocalSender({ ...event, senderFrame: { ...mainFrame } }, window, file), false);
+  for (const input of ['https://enturma-flax.vercel.app', 'file:///tmp/updater.html', mainFrame.url + '?fake=1']) {
+    const original = mainFrame.url; mainFrame.url = input;
+    assert.equal(trustedLocalSender(event, window, file), false);
+    mainFrame.url = original;
+  }
+  assert.equal(trustedLocalSender(event, null, file), false);
+  assert.equal(trustedLocalSender(event, { ...window, isDestroyed: () => true }, file), false);
+});
 test("deep links keep the application origin, including network-path inputs", () => {
   const web = "https://app.example";
   assert.equal(deepLinkToWeb("enturma://rooms/123?tab=chat", web), web + "/rooms/123?tab=chat");

@@ -300,11 +300,11 @@ export function RoomView({ id }: { id: string }) {
     }
   }
 
-  async function uploadImage() {
-    if (!image) return null;
+  async function uploadImage(file = image) {
+    if (!file) return null;
     await api("/users/me");
     const form = new FormData();
-    form.set("file", await prepareChatImage(image));
+    form.set("file", await prepareChatImage(file));
     const response = await fetch(
       `/api/backend/study-rooms/${id}/messages/attachments`,
       { method: "POST", body: form, signal: AbortSignal.timeout(45000) },
@@ -353,6 +353,17 @@ export function RoomView({ id }: { id: string }) {
     }
   }
 
+  async function sendMedia(file: File, mediaKind: "STICKER" | "GIF") {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      const attachment = await uploadImage(file);
+      await post(`/study-rooms/${id}/messages`, { attachmentId: attachment?.id, mediaKind });
+      await loadMessages();
+    } finally { setBusy(false); }
+  }
+
   async function leave() {
     try {
       await post(`/study-rooms/${id}/leave`);
@@ -391,6 +402,7 @@ export function RoomView({ id }: { id: string }) {
     replyTo,
     onLoadOlder: loadOlder,
     onSubmit: send,
+    onSendMedia: sendMedia,
     onReloadMessages: loadMessages,
     setDraft: changeDraft,
     typing,

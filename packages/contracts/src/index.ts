@@ -156,6 +156,7 @@ export interface Message extends IdentityStyle {
   attachmentId?: string | null;
   attachmentName?: string | null;
   attachmentMime?: string | null;
+  mediaKind?: "STICKER" | "GIF" | null;
   attachmentSize?: number | null;
 }
 export interface RoomArtifact {

@@ -20,6 +20,7 @@ const { spawn } = require("node:child_process");
 const {
   validateManifest,
   trustedSender,
+  trustedLocalSender,
   inside,
   deepLinkToWeb: safeDeepLink,
 } = require("./update-security.cjs");
@@ -63,6 +64,8 @@ const ALLOWED_PERMISSIONS = new Set([
 ]);
 
 let mainWindow = null;
+let updateWindow = null;
+let promptedNativeUpdate = '';
 let tray = null;
 let quitting = false;
 let updateReadyNotifiedVersion = "";
@@ -87,6 +90,41 @@ function updateStatus(status, details = {}) {
     isEnturmaUrl(mainWindow.webContents.getURL())
   )
     mainWindow.webContents.send("desktop:update-state", updateState);
+  if (['downloading', 'ready'].includes(status) && promptedNativeUpdate !== `${updateState.version}:${status}`) {
+    promptedNativeUpdate = `${updateState.version}:${status}`;
+    showUpdateWindow(false);
+  }
+  if (updateWindow && !updateWindow.isDestroyed()) {
+    updateWindow.webContents.send('desktop:update-state', updateState);
+    updateWindow.setProgressBar(status === 'downloading' ? updateState.progress / 100 : -1);
+  }
+}
+function showUpdateWindow(focus = true) {
+  if (!app.isReady()) return;
+  if (updateWindow && !updateWindow.isDestroyed()) {
+    if (focus) { updateWindow.show(); updateWindow.focus(); }
+    return;
+  }
+  updateWindow = new BrowserWindow({
+    width: 540, height: 570, resizable: false, maximizable: false,
+    frame: false, show: false, title: 'Atualização do Enturma',
+    backgroundColor: '#0c1c19', icon: path.join(__dirname, '../assets/icon.ico'),
+    webPreferences: { preload: path.join(__dirname, 'updater-preload.cjs'),
+      contextIsolation: true, nodeIntegration: false, sandbox: true,
+      partition: 'enturma-updater', webSecurity: true },
+  });
+  const local = updateWindow;
+  local.webContents.session.setPermissionRequestHandler((_web, _permission, callback) => callback(false));
+  local.webContents.session.setPermissionCheckHandler(() => false);
+  local.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  local.webContents.on('will-navigate', (event) => event.preventDefault());
+  local.once('ready-to-show', () => focus ? local.show() : local.showInactive());
+  local.on('closed', () => { if (updateWindow === local) updateWindow = null; });
+  void local.loadFile(path.join(__dirname, 'updater.html'));
+}
+function requireNativeUpdate(event) {
+  if (!trustedLocalSender(event, updateWindow, path.join(__dirname, 'updater.html')))
+    throw Error('Origem do atualizador não autorizada.');
 }
 function requireTrusted(event) {
   if (!trustedSender(event, mainWindow, WEB_ORIGIN))
@@ -228,12 +266,7 @@ function notifyUpdateReady(version) {
     icon: path.join(__dirname, "..", "assets", "icon.ico"),
   });
   notice.on("click", () => {
-    if (mainWindow && !mainWindow.isDestroyed()) {
-      void mainWindow.loadURL(
-        new URL("/settings?update=1", WEB_URL).toString(),
-      );
-    }
-    focusMainWindow();
+    showUpdateWindow();
   });
   notice.show();
 }
@@ -791,6 +824,7 @@ async function fetchUpdateManifest() {
   return validateManifest(manifest, UPDATE_MANIFEST_URL);
 }
 async function checkForUpdates(force = false) {
+  if (force) showUpdateWindow();
   if (updateInProgress) {
     if (!force) return updateState;
     return updateState;
@@ -1153,7 +1187,7 @@ function createMainWindow() {
   });
 
   mainWindow.webContents.on("will-navigate", (event, url) => {
-    if (url.startsWith("file://") || isEnturmaUrl(url)) return;
+    if (isEnturmaUrl(url)) return;
     event.preventDefault();
     if (isExternalUrl(url)) void shell.openExternal(url);
   });
@@ -1219,6 +1253,14 @@ ipcMain.handle("desktop:install-update", (event) => {
   requireTrusted(event);
   return installUpdate();
 });
+ipcMain.handle('desktop:show-update-window', (event) => {
+  requireTrusted(event);
+  showUpdateWindow();
+});
+ipcMain.handle('native-update:state', (event) => { requireNativeUpdate(event); return updateState; });
+ipcMain.handle('native-update:check', (event) => { requireNativeUpdate(event); return checkForUpdates(true); });
+ipcMain.handle('native-update:install', (event) => { requireNativeUpdate(event); return installUpdate(); });
+ipcMain.handle('native-update:close', (event) => { requireNativeUpdate(event); updateWindow.close(); });
 ipcMain.handle("desktop:open-external", (event, url) => {
   requireTrusted(event);
   if (typeof url === "string" && url.length < 4096 && isExternalUrl(url))

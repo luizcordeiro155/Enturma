@@ -1504,6 +1504,20 @@ class PlatformIntegrationTest {
   }
 
   @Autowired ChatMediaController chatMedia;
+  @Test
+  void mediaPresentationPersistsWithoutBypassingAttachmentOwnership() {
+    UUID roomId = room(8);
+    byte[] png = Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j/aQAAAAASUVORK5CYII=");
+    UUID attachment = (UUID)((Map<?,?>) chat.upload(host, roomId, "figurinha.png", "image/png", png)).get("id");
+    UUID message = (UUID)((Map<?,?>) chat.send(host, roomId, null, null, attachment, "STICKER")).get("id");
+    assertThat(db.one("SELECT media_kind FROM room_message WHERE id=?", message).get("mediaKind")).isEqualTo("STICKER");
+    assertThatThrownBy(() -> chat.send(host, roomId, "x", null, null, "STICKER")).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> chat.send(host, roomId, "x", null, attachment, "HTML")).isInstanceOf(ApiException.class);
+    study.join(member, roomId);
+    assertThatThrownBy(() -> chat.send(member, roomId, null, null, attachment, "GIF")).isInstanceOf(ApiException.class);
+    var plain = (Map<?,?>)chat.send(host, roomId, "Texto normal", null);
+    assertThat(db.one("SELECT media_kind FROM room_message WHERE id=?", plain.get("id")).get("mediaKind")).isNull();
+  }
   @Autowired PersonalDataExport personalExport;
 
   @Test
@@ -1546,7 +1560,7 @@ class PlatformIntegrationTest {
   @Test
   void discoveryNeverRevealsTheInvitationSecret() {
     UUID id=room(10);
-    db.jdbc.update("UPDATE study_room SET share_code='ONLYHOST1234',entries_locked=true WHERE id=?",id);
+    db.jdbc.update("UPDATE study_room SET share_code=?,entries_locked=true WHERE id=?",UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase(Locale.ROOT),id);
     var rows=study.list(outsider,subject,0,false);
     assertThat(rows).anyMatch(row->id.equals(row.get("id")));
     assertThat(rows).allMatch(row->!row.containsKey("shareCode") && !row.containsKey("share_code"));

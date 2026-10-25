@@ -19,6 +19,9 @@ public class ChatMediaController {
   private final Db db;
   public ChatMediaController(Db db) { this.db = db; }
 
+  @GetMapping("/capabilities")
+  public Object capabilities() { return Map.of("directSend", true, "externalGifs", false); }
+
   @GetMapping
   public Object list(@AuthenticationPrincipal Actor actor) {
     return db.jdbc.queryForList("SELECT id,name,kind,favorite FROM chat_media WHERE user_id=? ORDER BY created_at DESC LIMIT 60", actor.id());
