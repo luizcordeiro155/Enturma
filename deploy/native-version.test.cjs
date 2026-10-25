@@ -1,20 +1,66 @@
 const test = require("node:test");
 const assert = require("node:assert/strict");
-const { historyCount } = require("./native-version.cjs");
-test("release version uses immutable history length, not page size or next-page link", () => {
-  assert.equal(
-    historyCount(
-      '<https://api.github.com/commits?per_page=1&page=2>; rel="next", <https://api.github.com/commits?per_page=1&page=184>; rel="last"',
-      1,
-    ),
-    184,
-  );
-  assert.equal(historyCount(null, 1), 1);
-  assert.throws(() => historyCount(null, 0));
-  assert.throws(() =>
-    historyCount(
-      '<https://api.github.com/commits?page=999999999999>; rel="last"',
-      1,
-    ),
-  );
+const fs = require("node:fs");
+const os = require("node:os");
+const path = require("node:path");
+const { execFileSync } = require("node:child_process");
+const { pathToFileURL } = require("node:url");
+const { revisionCount } = require("./native-version.cjs");
+
+test("release counts the exact revision, remains stable on retry and rejects incomplete history", () => {
+  const root = path.resolve(os.tmpdir());
+  const directory = fs.mkdtempSync(path.join(root, "enturma-version-test-"));
+  const repository = path.join(directory, "repo");
+  fs.mkdirSync(repository);
+  const git = (args) =>
+    execFileSync("git", ["-C", repository, ...args], {
+      encoding: "utf8",
+      windowsHide: true,
+      stdio: ["ignore", "pipe", "pipe"],
+    }).trim();
+  try {
+    git(["init", "--quiet"]);
+    const commit = () =>
+      git([
+        "-c",
+        "user.name=Enturma test",
+        "-c",
+        "user.email=test@example.test",
+        "-c",
+        "commit.gpgsign=false",
+        "commit",
+        "--allow-empty",
+        "--quiet",
+        "-m",
+        "test",
+      ]);
+    commit();
+    const first = git(["rev-parse", "HEAD"]);
+    commit();
+    const second = git(["rev-parse", "HEAD"]);
+    assert.equal(revisionCount(repository, second), 2);
+    assert.equal(revisionCount(repository, first), 1);
+    assert.equal(revisionCount(repository, second), 2);
+    assert.throws(() => revisionCount(repository, "main"), /Invalid source/);
+    assert.throws(() => revisionCount(repository, "0".repeat(40)));
+    const shallow = path.join(directory, "shallow");
+    git([
+      "clone",
+      "--quiet",
+      "--depth=1",
+      pathToFileURL(repository).href,
+      shallow,
+    ]);
+    assert.throws(
+      () => revisionCount(shallow, second),
+      /complete commit history/,
+    );
+  } finally {
+    if (
+      path.dirname(path.resolve(directory)) !== root ||
+      !path.basename(directory).startsWith("enturma-version-test-")
+    )
+      throw Error("Unexpected test directory");
+    fs.rmSync(directory, { recursive: true, force: true });
+  }
 });

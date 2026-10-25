@@ -28,7 +28,7 @@ ENV ANDROID_SDK_ROOT=/opt/android-sdk
 ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 ENV PATH=$PATH:$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools
 
-RUN apt-get update && apt-get install -y --no-install-recommends openjdk-17-jdk-headless curl unzip ca-certificates && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends git openjdk-17-jdk-headless curl unzip ca-certificates && rm -rf /var/lib/apt/lists/*
 RUN mkdir -p $ANDROID_HOME/cmdline-tools && curl -fsSL -o /tmp/android-tools.zip https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip && unzip -q /tmp/android-tools.zip -d /tmp/android-tools && mv /tmp/android-tools/cmdline-tools $ANDROID_HOME/cmdline-tools/latest && rm -rf /tmp/android-tools.zip /tmp/android-tools
 RUN yes | sdkmanager --licenses >/dev/null && sdkmanager "platform-tools" "platforms;android-36" "build-tools;36.0.0" "ndk;27.1.12297006"
 
