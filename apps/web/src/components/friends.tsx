@@ -37,6 +37,7 @@ import {
 } from "@/lib/private-chat-crypto";
 import { PrivateKeySync } from "./private-key-sync";
 import { ComposerMedia } from "./composer-media";
+import { providerMessageUrl, type KlipyGif } from "@/lib/klipy";
 import { Shell } from "./shell";
 import { UserIdentity, type PublicProfile } from "./user-identity";
 import {
@@ -667,6 +668,43 @@ export function Friends() {
     void deliverPending(pending.friendshipId, clientId, pending.payload);
   }
 
+  async function sendKlipy(gif: KlipyGif) {
+    // The URL goes through the existing E2EE message encryption.
+    if (!selected || !me || !key.current || busy) return;
+    const previousDraft = draft;
+    setDraft(gif.url);
+    // Preserve the original draft; use the same encrypted transport below.
+    await sendKlipyUrl(gif.url);
+    setDraft(previousDraft);
+  }
+
+  async function sendKlipyUrl(url: string) {
+    if (!selected || !me || !key.current || busy) return;
+    const friend = selected;
+    const sender = me.id;
+    const clientId = crypto.randomUUID();
+    const now = new Date().toISOString();
+    const cryptoKey = key.current;
+    const optimistic: PrivateMessage = {
+      id: clientId, clientId, senderId: sender, text: url,
+      iv: "", ciphertext: "", createdAt: now, sendStatus: "sending",
+    };
+    setMessages(old => [...old, optimistic]);
+    forceFollowLatest.current = true;
+    nearLatest.current = true;
+    setBusy(true);
+    try {
+      const payload = await encryptMessage(cryptoKey, url, friend.id, sender, clientId);
+      const sendPayload = { ...payload, mentioned: false };
+      pendingSends.current.set(clientId, {
+        friendshipId: friend.id, text: url, payload: sendPayload,
+      });
+      await deliverPending(friend.id, clientId, sendPayload);
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function send(e?: React.FormEvent, media?: { file: File; kind: "STICKER" | "GIF" }) {
     e?.preventDefault();
     if (!selected || !me || !key.current || busy || (!media && !draft.trim() && !image))
@@ -1225,9 +1263,13 @@ export function Friends() {
                             </div>
                           </form>
                         ) : m.text ? (
-                          <p>
-                            <EmojiText text={m.text} />
-                          </p>
+                          providerMessageUrl(m.text)
+                            ? <figure className="klipy-message" aria-label="GIF compartilhado pela KLIPY">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={providerMessageUrl(m.text)!} alt="GIF da KLIPY" loading="lazy" />
+                                <figcaption>GIF via KLIPY</figcaption>
+                              </figure>
+                            : <p><EmojiText text={m.text} /></p>
                         ) : null}
                         <small>
                           {new Date(m.createdAt).toLocaleString("pt-BR")}
@@ -1386,6 +1428,7 @@ export function Friends() {
                       }}
                       onFile={privateImagesEnabled ? selectImage : undefined}
                       onMedia={privateImagesEnabled ? (file, kind) => send(undefined, { file, kind }) : undefined}
+                      onKlipy={sendKlipy}
                       disabled={busy || !finger}
                     />
                     <button
