@@ -38,6 +38,7 @@ it("keeps the text input focused when opening and pressing emoji controls", () =
   expect(input).toHaveFocus();
   expect(screen.getByRole("dialog")).not.toHaveAttribute("aria-modal", "true");
   expect(fireEvent.pointerDown(screen.getByText("Sorriso"))).toBe(false);
+  expect(fireEvent.pointerDown(screen.getByRole("dialog"))).toBe(false);
   expect(fireEvent.pointerDown(screen.getByLabelText("Pesquisar"))).toBe(true);
   fireEvent.keyDown(input, { key: "Escape" });
   expect(screen.queryByRole("dialog")).toBeNull();

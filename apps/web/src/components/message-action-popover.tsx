@@ -159,7 +159,8 @@ export function MessageActionPopover({
   }, [anchor, wide, composer]);
   const preserveTextFocus = (event: PointerEvent) => {
     if (composer && isTextEntryControl(document.activeElement) &&
-        event.target instanceof Element && event.target.closest("button")) {
+        event.target instanceof Element &&
+        !event.target.closest("input,textarea,select,label,[contenteditable='true']")) {
       event.preventDefault();
     }
   };
