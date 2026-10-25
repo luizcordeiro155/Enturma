@@ -25,6 +25,96 @@ async function register(page: Page, request: APIRequestContext) {
   return username;
 }
 
+test("emoji picker follows the mobile keyboard viewport without blurring the composer", async ({ browser, request, baseURL }) => {
+  const context = await browser.newContext({ baseURL, viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+  const page = await context.newPage();
+  const errors: string[] = [];
+  page.on("pageerror", error => errors.push(error.message));
+  try {
+    await register(page, request);
+    await page.goto("/notebooks");
+    await page.getByLabel("Nome do caderno").fill("Emojis e teclado");
+    await page.getByRole("button", { name: "Criar caderno", exact: true }).click();
+    await expect(page).toHaveURL(/notebooks\/[a-f0-9-]+/);
+    await expect(page.locator(".enturma-launch-overlay")).toHaveCount(0);
+    await page.evaluate(() => {
+      document.documentElement.style.setProperty("--native-safe-top", "24px");
+    });
+    const input = page.getByLabel("Mensagem para o Enturma APP");
+    await input.fill("Estudando ");
+    await input.evaluate(node => {
+      node.dataset.blurCount = "0";
+      node.addEventListener("blur", () => { node.dataset.blurCount = String(Number(node.dataset.blurCount) + 1); });
+    });
+    // Headless browsers have no software keyboard. Exercise Android's resized
+    // viewport geometry and real touch/focus events, without pretending to test an IME.
+    await page.setViewportSize({ width: 390, height: 480 });
+    await page.getByRole("button", { name: "Adicionar emoji" }).tap();
+    const picker = page.getByRole("dialog", { name: "Emojis, figurinhas e GIFs" });
+    await expect(picker).toBeVisible();
+    await expect(input).toBeFocused();
+    await expect(input).toHaveAttribute("data-blur-count", "0");
+    const fits = async () => {
+      const panel = await picker.boundingBox();
+      const composer = await page.locator(".notebook-question").boundingBox();
+      return !!panel && !!composer && panel.y >= 35 && panel.y + panel.height <= composer.y - 6 && panel.x >= 0 && panel.x + panel.width <= page.viewportSize()!.width;
+    };
+    await expect.poll(fits).toBe(true);
+    await page.emulateMedia({ colorScheme: "dark" });
+    await page.screenshot({ path: join(tmpdir(), "enturma-emoji-mobile-dark.png") });
+    await page.setViewportSize({ width: 360, height: 420 });
+    await expect.poll(fits).toBe(true);
+    await expect(input).toBeFocused();
+    const grid = picker.locator(".emoji-grid");
+    const box = (await grid.boundingBox())!;
+    const touch = await context.newCDPSession(page);
+    const x = box.x + 24, startY = box.y + box.height - 8;
+    await touch.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x, y: startY }] });
+    for (let step = 1; step <= 5; step++) {
+      await touch.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [{ x, y: startY - step * 10 }] });
+      await page.waitForTimeout(20);
+    }
+    await touch.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    await expect.poll(() => grid.evaluate(node => node.scrollTop)).toBeGreaterThan(0);
+    await expect(input).toBeFocused();
+    await touch.detach();
+    await picker.getByRole("button", { name: "Animais e natureza", exact: true }).tap();
+    await expect(input).toBeFocused();
+    await picker.locator(".emoji-grid button").first().tap();
+    await expect(picker).toHaveCount(0);
+    await expect(input).toBeFocused();
+    await expect(input).not.toHaveValue("Estudando ");
+    await expect(input).toHaveAttribute("data-blur-count", "0");
+    await page.getByRole("button", { name: "Adicionar emoji" }).tap();
+    const search = picker.getByRole("searchbox", { name: "Pesquisar emoji" });
+    await search.fill("sorriso");
+    await expect(search).toBeFocused();
+    await picker.getByRole("button", { name: "Fechar biblioteca" }).tap();
+    await expect(input).toBeFocused();
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.getByRole("button", { name: "Adicionar emoji" }).tap();
+    await expect.poll(fits).toBe(true);
+    await page.emulateMedia({ colorScheme: "light" });
+    await page.screenshot({ path: join(tmpdir(), "enturma-emoji-mobile-light.png") });
+    await page.keyboard.press("Escape");
+    await expect(picker).toHaveCount(0);
+    await expect(input).toBeFocused();
+    await page.setViewportSize({ width: 1376, height: 900 });
+    await page.getByRole("button", { name: "Adicionar emoji" }).focus();
+    await page.keyboard.press("Enter");
+    await expect(picker).toBeFocused();
+    await expect.poll(fits).toBe(true);
+    await page.keyboard.press("Tab");
+    await expect(picker.getByRole("tab", { name: "Emoji", exact: true })).toBeFocused();
+    await page.screenshot({ path: join(tmpdir(), "enturma-emoji-desktop.png") });
+    await page.keyboard.press("Escape");
+    await expect(picker).toHaveCount(0);
+    expect(errors).toEqual([]);
+  } finally {
+    await context.close();
+  }
+});
+
 test("notebook keeps the conversation and composer visible across themes, phone and keyboard", async ({
   page,
   request,

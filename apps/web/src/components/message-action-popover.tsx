@@ -1,7 +1,8 @@
 "use client";
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, type PointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { playMotion } from "@/lib/motion";
+import { isTextEntryControl } from "@/lib/native-chat-ime";
 import {
   useOverlayHistory,
   waitForOverlayHistory,
@@ -13,10 +14,11 @@ export type MessageActionAnchor = {
   right: number;
   bottom: number;
   width: number;
+  element?: HTMLElement;
 };
 export function messageActionAnchor(element: HTMLElement): MessageActionAnchor {
   const { top, left, right, bottom, width } = element.getBoundingClientRect();
-  return { top, left, right, bottom, width };
+  return { top, left, right, bottom, width, element };
 }
 export function MessageActionPopover({
   anchor,
@@ -24,12 +26,14 @@ export function MessageActionPopover({
   children,
   label = "Ações da mensagem",
   wide = false,
+  composer = false,
 }: {
   anchor: MessageActionAnchor;
   onDismiss: () => void;
   children: ReactNode;
   label?: string;
   wide?: boolean;
+  composer?: boolean;
 }) {
   const panel = useRef<HTMLDivElement>(null);
   const close = useRef(onDismiss);
@@ -37,34 +41,56 @@ export function MessageActionPopover({
     close.current = onDismiss;
   }, [onDismiss]);
   useOverlayHistory(onDismiss);
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = panel.current;
     if (!el) return;
     const previous = document.activeElement as HTMLElement | null;
+    let frame = 0;
     const place = () => {
       const viewport = window.visualViewport;
       const height = viewport?.height ?? innerHeight;
       const offset = viewport?.offsetTop ?? 0;
-      const width = Math.min(wide ? 408 : 296, innerWidth - 24);
+      const viewportWidth = viewport?.width ?? innerWidth;
+      const offsetLeft = viewport?.offsetLeft ?? 0;
+      const current = anchor.element?.isConnected
+        ? anchor.element.getBoundingClientRect()
+        : anchor;
+      const nativeTop = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--native-safe-top")) || 0;
+      const visibleTop = Math.max(offset, nativeTop) + 12;
+      const visibleBottom = offset + height - 12;
+      const composerTop = composer
+        ? anchor.element?.closest(".enturma-message-composer")?.getBoundingClientRect().top ?? current.top
+        : current.top;
+      const aboveBottom = Math.min(composerTop - 8, visibleBottom);
+      const width = Math.min(wide ? 408 : 296, viewportWidth - 24);
       el.style.width = `${width}px`;
-      el.style.maxHeight = `${height - 24}px`;
+      el.style.maxHeight = `${Math.max(0, (composer ? aboveBottom : visibleBottom) - visibleTop)}px`;
       const left = Math.max(
-        12,
-        Math.min(innerWidth - width - 12, anchor.right - width),
+        offsetLeft + 12,
+        Math.min(offsetLeft + viewportWidth - width - 12, current.right - width),
       );
-      const below = anchor.bottom + 8;
+      const below = current.bottom + 8;
       const top =
-        below + el.offsetHeight < height + offset - 12
+        !composer && below + el.offsetHeight < visibleBottom
           ? below
-          : anchor.top - el.offsetHeight - 8;
+          : aboveBottom - el.offsetHeight;
       el.style.left = `${left}px`;
-      el.style.top = `${Math.max(offset + 12, Math.min(top, height + offset - el.offsetHeight - 12))}px`;
+      el.style.top = `${Math.max(visibleTop, Math.min(top, visibleBottom - el.offsetHeight))}px`;
+    };
+    const schedulePlace = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(place);
     };
     place();
-    const resize = new ResizeObserver(place);
+    const resize = new ResizeObserver(schedulePlace);
     resize.observe(el);
-    window.visualViewport?.addEventListener("resize", place);
-    window.addEventListener("resize", place);
+    if (anchor.element) resize.observe(anchor.element);
+    const owner = anchor.element?.closest(".enturma-message-composer");
+    if (owner) resize.observe(owner);
+    window.visualViewport?.addEventListener("resize", schedulePlace);
+    window.visualViewport?.addEventListener("scroll", schedulePlace, { passive: true });
+    window.addEventListener("resize", schedulePlace);
+    window.addEventListener("scroll", schedulePlace, { capture: true, passive: true });
     const animation = playMotion(
       el,
       [
@@ -73,14 +99,15 @@ export function MessageActionPopover({
       ],
       { duration: 210 },
     );
-    el.focus({ preventScroll: true });
+    // Moving focus to a dialog hides Android/iOS's software keyboard.
+    if (!composer || !isTextEntryControl(previous)) el.focus({ preventScroll: true });
     const keys = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
         e.stopPropagation();
         close.current();
       }
-      if (e.key !== "Tab") return;
+      if (e.key !== "Tab" || composer) return;
       const focusable = Array.from(
         el.querySelectorAll<HTMLElement>(
           'button:not(:disabled),input,select,textarea,[tabindex="0"]',
@@ -102,13 +129,22 @@ export function MessageActionPopover({
         first?.focus();
       }
     };
-    el.addEventListener("keydown", keys);
+    const keyTarget = composer ? document : el;
+    keyTarget.addEventListener("keydown", keys as EventListener);
     return () => {
       animation?.cancel();
+      cancelAnimationFrame(frame);
       resize.disconnect();
-      window.removeEventListener("resize", place);
-      window.visualViewport?.removeEventListener("resize", place);
-      el.removeEventListener("keydown", keys);
+      window.removeEventListener("resize", schedulePlace);
+      window.removeEventListener("scroll", schedulePlace, true);
+      window.visualViewport?.removeEventListener("resize", schedulePlace);
+      window.visualViewport?.removeEventListener("scroll", schedulePlace);
+      keyTarget.removeEventListener("keydown", keys as EventListener);
+      // Restore the composer before a focused search field is unmounted.
+      if (composer && previous?.isConnected && isTextEntryControl(previous) &&
+          (el.contains(document.activeElement) || document.activeElement === document.body)) {
+        previous.focus({ preventScroll: true });
+      }
       void waitForOverlayHistory().then(() =>
         requestAnimationFrame(() => {
           if (
@@ -120,7 +156,14 @@ export function MessageActionPopover({
         }),
       );
     };
-  }, [anchor, wide]);
+  }, [anchor, wide, composer]);
+  const preserveTextFocus = (event: PointerEvent) => {
+    if (composer && isTextEntryControl(document.activeElement) &&
+        event.target instanceof Element &&
+        !event.target.closest("input,textarea,select,label,[contenteditable='true']")) {
+      event.preventDefault();
+    }
+  };
   return createPortal(
     <div className="message-overlay-root">
       <button
@@ -128,15 +171,17 @@ export function MessageActionPopover({
         className="message-action-scrim"
         tabIndex={-1}
         aria-label="Fechar ações da mensagem"
+        onPointerDown={preserveTextFocus}
         onClick={onDismiss}
       />
       <div
         ref={panel}
-        className="message-action-popover"
+        className={`message-action-popover${composer ? " composer-media-popover" : ""}`}
         role="dialog"
-        aria-modal="true"
+        aria-modal={composer ? undefined : true}
         aria-label={label}
         tabIndex={-1}
+        onPointerDown={preserveTextFocus}
       >
         {children}
       </div>
