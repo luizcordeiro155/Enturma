@@ -189,6 +189,27 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
   min-width: 0;
   color: var(--ink);
 }
+.composer-media-popover {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+.composer-media-popover .media-library,
+.composer-media-popover .enturma-emoji-picker {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.composer-media-popover .media-library > header,
+.composer-media-popover .emoji-categories,
+.composer-media-popover .emoji-search,
+.composer-media-popover .emoji-picker-heading {
+  flex-shrink: 0;
+}
+.composer-media-popover .emoji-grid {
+  flex-shrink: 1;
+  min-height: 44px;
+}
 .media-library > header {
   display: flex;
   align-items: center;

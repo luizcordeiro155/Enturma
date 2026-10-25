@@ -140,6 +140,7 @@ export function ComposerMedia({
           anchor={anchor}
           label="Emojis, figurinhas e GIFs"
           wide
+          composer
           onDismiss={() => setAnchor(undefined)}
         >
           <div className="media-library">
