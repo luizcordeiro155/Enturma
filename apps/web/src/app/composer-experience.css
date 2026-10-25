@@ -374,3 +374,35 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
     gap: 0 !important;
   }
 }
+
+/* KLIPY keeps an independent gallery from the Enturma media library. */
+.media-library-sources {
+  display: flex;
+  gap: 6px;
+  margin: 8px 0 12px;
+}
+.media-library-sources button {
+  flex: 1;
+  min-height: 36px;
+  border-radius: 9px;
+  background: var(--surface-hover);
+  color: var(--ink);
+}
+.media-library-sources button[aria-pressed="true"] {
+  background: var(--room-accent, #d9f56d);
+  color: #173b32;
+}
+.klipy-message {
+  width: min(300px, 100%);
+  margin: 6px 0;
+}
+.klipy-message img {
+  max-width: 100%;
+  max-height: 250px;
+  border-radius: 12px;
+  object-fit: contain;
+}
+.klipy-message figcaption {
+  color: var(--muted);
+  font-size: 11px;
+}

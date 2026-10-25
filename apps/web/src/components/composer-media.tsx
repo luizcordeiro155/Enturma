@@ -12,6 +12,8 @@ import {
   X,
 } from "lucide-react";
 import { EmojiPicker } from "./emoji-picker";
+import { KlipyPicker } from "./klipy-picker";
+import type { KlipyGif } from "@/lib/klipy";
 import {
   MessageActionPopover,
   messageActionAnchor,
@@ -31,15 +33,18 @@ export function ComposerMedia({
   onEmoji,
   onFile,
   onMedia,
+  onKlipy,
   disabled = false,
 }: {
   onEmoji: (emoji: string) => void;
   onFile?: (file: File) => void;
   onMedia?: (file: File, kind: ChatMedia["kind"]) => Promise<void>;
+  onKlipy?: (gif: KlipyGif) => Promise<void>;
   disabled?: boolean;
 }) {
   const [anchor, setAnchor] = useState<MessageActionAnchor>();
   const [tab, setTab] = useState<Tab>("EMOJI");
+  const [gifSource, setGifSource] = useState<"enturma" | "klipy">("enturma");
   const [items, setItems] = useState<ChatMedia[]>([]);
   const [query, setQuery] = useState("");
   const [favorites, setFavorites] = useState(false);
@@ -185,6 +190,21 @@ export function ComposerMedia({
               />
             ) : (
               <>
+                {tab === "GIF" && (
+                  <div className="media-library-sources" aria-label="Origem dos GIFs">
+                    <button type="button" aria-pressed={gifSource === "enturma"} onClick={() => setGifSource("enturma")}>Minha coleção</button>
+                    <button type="button" aria-pressed={gifSource === "klipy"} onClick={() => setGifSource("klipy")}>KLIPY</button>
+                  </div>
+                )}
+                {tab === "GIF" && gifSource === "klipy" ? (
+                  <KlipyPicker query={query} disabled={disabled || busy}
+                    onSelect={async (gif) => {
+                      if (!onKlipy) throw Error("O envio de GIFs não está disponível neste chat.");
+                      await onKlipy(gif);
+                      setAnchor(undefined);
+                    }} />
+                ) : (
+                <>
                 <div className="media-library-search">
                   <label>
                     <Search size={17} />
@@ -372,6 +392,8 @@ export function ComposerMedia({
                     ? "Coleção original Enturma · Seus GIFs"
                     : `Sua biblioteca pessoal · Toque para ${onMedia && directSend ? 'enviar' : 'anexar'}`}
                 </small>
+                </>
+                )}
               </>
             )}
             {error && <p role="alert">{error}</p>}

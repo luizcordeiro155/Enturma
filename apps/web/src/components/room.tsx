@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { prepareChatImage } from "@/lib/chat-image";
+import type { KlipyGif } from "@/lib/klipy";
 import { api, post } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback, Loading } from "./feedback";
@@ -353,6 +354,21 @@ export function RoomView({ id }: { id: string }) {
     }
   }
 
+  async function sendKlipy(gif: KlipyGif) {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      await post(`/study-rooms/${id}/messages`, { body: gif.url });
+      await loadMessages();
+    } catch (error) {
+      setError((error as Error).message);
+      throw error;
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function sendMedia(file: File, mediaKind: "STICKER" | "GIF") {
     if (busy) return;
     setBusy(true);
@@ -403,6 +419,7 @@ export function RoomView({ id }: { id: string }) {
     onLoadOlder: loadOlder,
     onSubmit: send,
     onSendMedia: sendMedia,
+    onSendKlipy: sendKlipy,
     onReloadMessages: loadMessages,
     setDraft: changeDraft,
     typing,
