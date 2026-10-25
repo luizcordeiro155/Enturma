@@ -61,3 +61,42 @@ export function parseKlipyItems(payload: unknown): KlipyItem[] {
   }
   return results;
 }
+
+/** KLIPY supports a maximum of 50 items per page. Larger pages avoid a sparse gallery. */
+export const KLIPY_PAGE_SIZE = 40;
+
+export function klipyRequestUrl(key: string, search: string, page: number): string {
+  const searching = search.trim().length > 0;
+  const endpoint = searching ? "search" : "trending";
+  const url = new URL(
+    `https://api.klipy.com/api/v1/${encodeURIComponent(key)}/gifs/${endpoint}`,
+  );
+  url.searchParams.set("page", String(Math.max(1, Math.floor(page))));
+  url.searchParams.set("per_page", String(KLIPY_PAGE_SIZE));
+  url.searchParams.set("locale", "br");
+  if (searching) url.searchParams.set("q", search);
+  return url.toString();
+}
+
+/** Look at provider pagination metadata before falling back to the page size. */
+export function klipyHasMore(payload: unknown, page: number): boolean {
+  const root = object(payload);
+  const data = object(root?.data);
+  const metadata = object(data?.pagination) ?? object(data?.meta)
+    ?? object(root?.pagination) ?? object(root?.meta) ?? data;
+  if (typeof metadata?.has_more === "boolean") return metadata.has_more;
+  if (typeof metadata?.has_next === "boolean") return metadata.has_next;
+  if (typeof metadata?.hasMore === "boolean") return metadata.hasMore;
+  const nextPage = metadata?.next_page ?? metadata?.nextPage;
+  if (typeof nextPage === "number") return nextPage > page;
+  if (typeof nextPage === "string" && nextPage) return Number(nextPage) > page;
+  const last = metadata?.last_page ?? metadata?.lastPage ?? metadata?.total_pages;
+  if (typeof last === "number") return page < last;
+  const total = metadata?.total ?? metadata?.total_count;
+  if (typeof total === "number") return page * KLIPY_PAGE_SIZE < total;
+  const collection = root?.data;
+  const entries = Array.isArray(collection) ? collection
+    : Array.isArray(data?.data) ? data.data
+    : Array.isArray(data?.items) ? data.items : [];
+  return entries.length >= KLIPY_PAGE_SIZE;
+}
