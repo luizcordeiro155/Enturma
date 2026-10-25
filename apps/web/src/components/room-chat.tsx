@@ -1,5 +1,6 @@
 "use client";
 import { ComposerMedia } from "./composer-media";
+import { providerMessageUrl, type KlipyGif } from "@/lib/klipy";
 import { ChatImage } from "./chat-image-viewer";
 
 import {
@@ -90,6 +91,7 @@ type Props = {
   onLoadOlder: () => Promise<void>;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
   onSendMedia?: (file: File, kind: "STICKER" | "GIF") => Promise<void>;
+  onSendKlipy?: (gif: KlipyGif) => Promise<void>;
   onReloadMessages: () => Promise<void>;
   setDraft: (value: string) => void;
   setImage: (value: File | null) => void;
@@ -656,7 +658,13 @@ export function RoomChat(props: Props) {
                               </button>
                             </form>
                           ) : message.body ? (
-                            <RichMessage text={message.body} />
+                            providerMessageUrl(message.body) ? (
+                              <figure className="klipy-message" aria-label="GIF compartilhado pela KLIPY">
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img src={providerMessageUrl(message.body)!} alt="GIF da KLIPY" loading="lazy" />
+                                <figcaption>GIF via KLIPY</figcaption>
+                              </figure>
+                            ) : <RichMessage text={message.body} />
                           ) : null}
                           {message.editedAt && (
                             <small className="muted">editada</small>
@@ -926,6 +934,7 @@ export function RoomChat(props: Props) {
               }}
               onFile={selectImage}
               onMedia={props.onSendMedia}
+              onKlipy={props.onSendKlipy}
               disabled={busy || composerBlocked}
             />
             <button
