@@ -10,6 +10,7 @@ import {
   Users,
   Video,
   VideoOff,
+  SwitchCamera,
   Headphones,
 } from "lucide-react";
 import { LiveMemberIdentityCard } from "./user-identity";
@@ -43,6 +44,18 @@ export default function VoiceSession({
   const [deafened, setDeafened] = useState(false);
   const [muted, setMuted] = useState(false);
   const [camera, setCamera] = useState(false);
+  const [cameraSwitchBusy, setCameraSwitchBusy] = useState(false);
+  const [cameraCount, setCameraCount] = useState(0);
+  useEffect(() => {
+    if (!camera) return;
+    let live = true;
+    const scan = () => navigator.mediaDevices.enumerateDevices().then(devices => {
+      if (live) setCameraCount(devices.filter(d => d.kind === 'videoinput').length);
+    }).catch(() => {});
+    void scan();
+    navigator.mediaDevices.addEventListener('devicechange', scan);
+    return () => { live = false; navigator.mediaDevices.removeEventListener('devicechange', scan); };
+  }, [camera]);
   const [screen, setScreen] = useState(false);
   const [activeScreenShare, setActiveScreenShare] = useState<string | null>(
     null,
@@ -480,6 +493,25 @@ export default function VoiceSession({
     }
   }
 
+  async function switchCamera() {
+    const call = room.current;
+    if (!call || !camera || cameraSwitchBusy) return;
+    setCameraSwitchBusy(true);
+    setDeviceNotice('');
+    try {
+      const { Track } = await import('livekit-client');
+      const track = call.localParticipant.getTrackPublication(Track.Source.Camera)?.videoTrack;
+      if (!track) return;
+      const devices = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
+      if (devices.length < 2) { setDeviceNotice('Nenhuma outra câmera disponível.'); return; }
+      const current = track.mediaStreamTrack.getSettings().deviceId;
+      const next = devices[(devices.findIndex(d => d.deviceId === current) + 1) % devices.length];
+      await track.restartTrack({ deviceId: { exact: next.deviceId } });
+      refreshMembers(call);
+    } catch (cause) { setDeviceNotice(mediaDeviceMessage(cause, 'camera')); }
+    finally { setCameraSwitchBusy(false); }
+  }
+
   const startRef = useRef(join);
   useEffect(() => {
     const timer = setTimeout(() => void startRef.current(), 0);
@@ -707,11 +739,15 @@ export default function VoiceSession({
               type="button"
               className={camera ? "call-control active" : "call-control"}
               onClick={() => void toggleCamera()}
+              disabled={cameraSwitchBusy}
               title={camera ? "Desligar câmera" : "Ligar câmera"}
             >
               {camera ? <Video size={20} /> : <VideoOff size={20} />}
               <span>Câmera</span>
             </button>
+            {camera && cameraCount > 1 && <button type="button" className="call-control" disabled={cameraSwitchBusy} onClick={() => void switchCamera()} title="Alternar câmera frontal, traseira ou conectada">
+              <SwitchCamera size={20} /><span>{cameraSwitchBusy ? 'Trocando…' : 'Virar câmera'}</span>
+            </button>}
             <button
               type="button"
               className={screen ? "call-control active" : "call-control"}

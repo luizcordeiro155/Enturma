@@ -89,6 +89,7 @@ type Props = {
   compact?: boolean;
   onLoadOlder: () => Promise<void>;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
+  onSendMedia?: (file: File, kind: "STICKER" | "GIF") => Promise<void>;
   onReloadMessages: () => Promise<void>;
   setDraft: (value: string) => void;
   setImage: (value: File | null) => void;
@@ -662,6 +663,7 @@ export function RoomChat(props: Props) {
                           )}
                           {message.attachmentId ? (
                             <ChatImage
+                              kind={message.mediaKind}
                               src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
                               alt={
                                 message.attachmentName ?? "Imagem compartilhada"
@@ -923,6 +925,7 @@ export function RoomChat(props: Props) {
                 composerRef.current?.focus({ preventScroll: true });
               }}
               onFile={selectImage}
+              onMedia={props.onSendMedia}
               disabled={busy || composerBlocked}
             />
             <button

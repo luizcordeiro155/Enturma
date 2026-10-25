@@ -343,7 +343,7 @@ public class SocialController {
     return db.list(
         "SELECT"
             + " m.id,m.sender_id,m.ciphertext,m.iv,m.client_id,m.created_at,m.edited_at,m.deleted_at,"
-            + " m.attachment_ciphertext,m.attachment_iv,m.attachment_mime,m.attachment_name,m.attachment_size,h.created_at"
+            + " m.attachment_ciphertext,m.attachment_iv,m.attachment_mime,m.attachment_name,m.attachment_size,m.media_kind,h.created_at"
             + " hidden_at, COALESCE((SELECT jsonb_agg(r) FROM (SELECT emoji,count(*)"
             + " count,bool_or(user_id=?::uuid) mine FROM private_message_reaction WHERE"
             + " message_id=m.id GROUP BY emoji ORDER BY min(created_at)) r),'[]'::jsonb) reactions"
@@ -433,9 +433,10 @@ public class SocialController {
       @Pattern(regexp = "[A-Za-z0-9+/]{16}") String attachmentIv,
       @Pattern(regexp = "image/(jpeg|png|webp|gif)") String attachmentMime,
       @Size(max = 200) String attachmentName,
-      @Min(1) @Max(1433600) Integer attachmentSize) {
+      @Min(1) @Max(1433600) Integer attachmentSize,
+      @Pattern(regexp = "STICKER|GIF") String mediaKind) {
     public Envelope(UUID clientId, String ciphertext, String iv) {
-      this(clientId, ciphertext, iv, false, null, null, null, null, null);
+      this(clientId, ciphertext, iv, false, null, null, null, null, null, null);
     }
 
     boolean hasAttachment() {
@@ -447,7 +448,7 @@ public class SocialController {
     }
 
     boolean validAttachment() {
-      return !hasAttachment()
+      return (!hasAttachment() && mediaKind == null)
           || (attachmentCiphertext != null
               && attachmentIv != null
               && attachmentMime != null
@@ -468,8 +469,8 @@ public class SocialController {
     int inserted =
         db.jdbc.update(
             "INSERT INTO private_message(id,friendship_id,sender_id,ciphertext,iv,client_id,"
-                + "attachment_ciphertext,attachment_iv,attachment_mime,attachment_name,attachment_size)"
-                + " VALUES (?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(sender_id,client_id) DO NOTHING",
+                + "attachment_ciphertext,attachment_iv,attachment_mime,attachment_name,attachment_size,media_kind)"
+                + " VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(sender_id,client_id) DO NOTHING",
             message,
             id,
             a.id(),
@@ -480,7 +481,8 @@ public class SocialController {
             body.attachmentIv(),
             body.attachmentMime(),
             body.attachmentName(),
-            body.attachmentSize());
+            body.attachmentSize(),
+            body.mediaKind());
     if (inserted > 0) {
       UUID peer =
           (UUID)

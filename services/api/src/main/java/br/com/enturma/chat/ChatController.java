@@ -19,7 +19,8 @@ public class ChatController {
     this.chat = chat;
   }
 
-  public record Message(@Size(max = 4000) String body, UUID replyTo, UUID attachmentId) {}
+  public record Message(@Size(max = 4000) String body, UUID replyTo, UUID attachmentId,
+      @jakarta.validation.constraints.Pattern(regexp = "STICKER|GIF") String mediaKind) {}
 
   @GetMapping
   public Object list(
@@ -38,7 +39,7 @@ public class ChatController {
   @PostMapping
   public Object send(
       @AuthenticationPrincipal Actor a, @PathVariable UUID room, @Valid @RequestBody Message r) {
-    return chat.send(a, room, r.body(), r.replyTo(), r.attachmentId());
+    return chat.send(a, room, r.body(), r.replyTo(), r.attachmentId(), r.mediaKind());
   }
 
   @PutMapping("/{id}")

@@ -51,6 +51,18 @@ afterEach(() => {
   sessionStorage.clear();
 });
 describe("Desktop update UI", () => {
+  it('opens the local updater instead of duplicating the hosted dialog', async () => {
+    const show = vi.fn().mockResolvedValue(undefined);
+    window.enturmaDesktop!.nativeUpdater = true;
+    window.enturmaDesktop!.showUpdateWindow = show;
+    render(<DesktopUpdateProvider><DesktopUpdateButton /></DesktopUpdateProvider>);
+    await screen.findByRole('button', { name: 'Atualizações: Você está atualizado' });
+    act(() => receive({ status: 'ready', currentVersion: '0.4.356', version: '0.4.357', progress: 100 }));
+    expect(screen.queryByRole('dialog')).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'Atualizações: Atualização pronta' }));
+    expect(show).toHaveBeenCalledOnce();
+    expect(install).not.toHaveBeenCalled();
+  });
   it("offers official installer recovery to the old bridge without invoking the failing updater", async () => {
     const external = vi.fn().mockResolvedValue(undefined);
     const oldCheck = vi.fn();

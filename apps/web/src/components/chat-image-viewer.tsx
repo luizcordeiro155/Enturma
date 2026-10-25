@@ -10,7 +10,7 @@ import {
   waitForOverlayHistory,
 } from "@/lib/use-overlay-history";
 
-export function ChatImage({ src, alt }: { src: string; alt: string }) {
+export function ChatImage({ src, alt, kind }: { src: string; alt: string; kind?: "STICKER" | "GIF" | null }) {
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
@@ -167,7 +167,7 @@ export function ChatImage({ src, alt }: { src: string; alt: string }) {
     <>
       <button
         ref={trigger}
-        className="chat-image-thumbnail"
+        className={`chat-image-thumbnail ${kind === 'STICKER' ? 'chat-sticker' : kind === 'GIF' ? 'chat-gif' : ''}`}
         type="button"
         aria-label={`Ampliar imagem: ${alt}`}
         onClick={show}
