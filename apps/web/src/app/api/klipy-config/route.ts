@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-export const dynamic = "force-dynamic";
 /** Browser-to-KLIPY is required by the provider. An app key is client-visible by design. */
 export async function GET(request: NextRequest) {
   const headers = { "Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff" };
