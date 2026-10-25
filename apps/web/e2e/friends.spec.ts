@@ -184,6 +184,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await other.getByRole("button", { name: "Conversar", exact: true }).click();
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
+  await page.getByLabel("Mensagem privada").fill("Rascunho durante o GIF");
   await page.getByRole("button", { name: "GIFs", exact: true }).click();
   const library = page.getByRole("dialog", {
     name: "Emojis, figurinhas e GIFs",
@@ -202,10 +203,13 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await library
     .getByRole("button", { name: "Vamos estudar", exact: true })
     .click();
-  await expect(page.locator(".attachment-preview")).toBeVisible();
-  await page
-    .getByRole("button", { name: "Remover imagem selecionada" })
-    .click();
+  await expect(library).not.toBeVisible();
+  await expect(page.locator(".attachment-preview")).toHaveCount(0);
+  await expect(page.getByLabel("Mensagem privada")).toHaveValue(
+    "Rascunho durante o GIF",
+  );
+  await expect(page.locator(".private-messages .chat-gif")).toHaveCount(1);
+  await expect(other.locator(".private-messages .chat-gif")).toHaveCount(1);
   for (const theme of ["light", "dark"] as const) {
     await page.emulateMedia({ colorScheme: theme });
     await page.setViewportSize({ width: 390, height: 620 });
@@ -216,24 +220,33 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
       library.getByRole("tab", { name: "Figurinhas" }),
     ).toBeInViewport();
     await library.getByRole("tab", { name: "Figurinhas" }).click();
-    await library.getByRole("button", { name: "Criar figurinha" }).click();
-    await library
-      .getByRole("textbox", { name: "Nome", exact: true })
-      .fill("Minha arte " + theme);
-    await library
-      .locator('input[type="file"]')
-      .setInputFiles({
+    if (theme === "light") {
+      await library.getByRole("button", { name: "Criar figurinha" }).click();
+      await library
+        .getByRole("textbox", { name: "Nome", exact: true })
+        .fill("Minha arte");
+      await library.locator('input[type="file"]').setInputFiles({
         name: "arte.png",
         mimeType: "image/png",
         buffer: Buffer.from(png, "base64"),
       });
+    }
     await expect(
       library.getByRole("button", { name: /Minha arte/, exact: false }).first(),
     ).toBeVisible();
     await page.screenshot({
       path: `../../.local/media-library-${theme}-mobile.png`,
     });
-    await library.getByRole("button", { name: "Fechar biblioteca" }).click();
+    await library
+      .getByRole("button", { name: "Minha arte", exact: true })
+      .click();
+    await expect(library).not.toBeVisible();
+    await expect(page.getByLabel("Mensagem privada")).toHaveValue(
+      "Rascunho durante o GIF",
+    );
+    await expect(other.locator(".private-messages .chat-sticker")).toHaveCount(
+      theme === "light" ? 1 : 2,
+    );
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth,
@@ -325,6 +338,16 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   ).json();
   expect(JSON.stringify(stored)).not.toContain("Resposta protegida");
   expect(stored[0].ciphertext).toBeTruthy();
+  expect(
+    stored.filter(
+      (message: { mediaKind?: string }) => message.mediaKind === "GIF",
+    ),
+  ).toHaveLength(1);
+  expect(
+    stored.filter(
+      (message: { mediaKind?: string }) => message.mediaKind === "STICKER",
+    ),
+  ).toHaveLength(2);
   // Authenticated encrypted attachments use a bounded thumbnail and a Back-aware viewer.
   await page.locator('.private-composer input[type="file"]').setInputFiles({
     name: "anotacoes.png",
@@ -506,6 +529,8 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
       .locator(".private-messages")
       .getByText("Resposta protegida", { exact: true }),
   ).toBeVisible();
+  await expect(fresh.locator(".private-messages .chat-gif")).toHaveCount(1);
+  await expect(fresh.locator(".private-messages .chat-sticker")).toHaveCount(2);
   await fresh.getByText("Código de segurança", { exact: true }).click();
   expect(await fresh.locator(".safety-code").textContent()).toEqual(
     await other.locator(".safety-code").textContent(),
