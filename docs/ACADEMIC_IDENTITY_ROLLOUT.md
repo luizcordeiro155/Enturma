@@ -63,3 +63,9 @@ Backup de produção restaurado em banco local isolado: 14 contas e 164 sessões
 6. Monitorar erros 401/403, falhas de e-mail, fila de revisão e notificações de caronas. Em reversão, manter o bloqueio de novos cadastros/contas pendentes e a API que aplica o controle; não voltar cegamente a uma API anterior nem apagar o snapshot. Restaurar backup só como procedimento explicitamente autorizado.
 
 Redis não foi necessário: PostgreSQL já fornece transações, limites, filas e consistência. O relay WebSocket existente é por instância; o polling autenticado garante convergência entre instâncias. Antes de escalar várias réplicas com entrega instantânea, adicionar um barramento compartilhado conforme [REALTIME.md](REALTIME.md). Nenhum serviço pago foi provisionado.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.
