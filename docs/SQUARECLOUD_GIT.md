@@ -41,3 +41,9 @@ Referências: [START e runtime](https://docs.squarecloud.app/en/getting-started/
 ## Deploy trigger
 
 A integração automática deve iniciar um deploy a cada novo push na branch `main`.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.
