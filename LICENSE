@@ -24,3 +24,24 @@ of the project unless an explicit written license change is published by the
 repository owner.
 
 The repository owner may adopt a different license in a future revision.
+
+Scope clarification (October 2026)
+
+The rights reservation above applies to the original Enturma software and
+materials across its Web, Android and Desktop applications, Java API, academic
+modules, graphics, interfaces, original animations, installation/update media,
+documentation, and other original assets, to the extent owned by their
+respective rights holders. Public availability of hosted interfaces, app
+installers or GitHub source files does not create any license for others to
+republish, repackage, host, or commercialize Enturma.
+
+Libraries, icons, fonts, audio components, GIFs, external media catalogs,
+cloud services, and other third-party components remain governed by their own
+licensing agreements or provider terms; no rights over them are granted here.
+Secrets, user content, and personal information are not licensed by this
+notice.
+
+This clarification does not grant new rights, change the ownership of any
+contribution, or replace third-party license notices. Written permission from
+the applicable rights holders is required for uses not authorized by law,
+GitHub's platform terms, or a separate written agreement.

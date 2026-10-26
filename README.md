@@ -6,7 +6,7 @@ O **Enturma** é um ecossistema acadêmico multiplataforma construído para apro
 
 O projeto é um monorepo com **Java 21 / Spring Boot**, **Next.js / React**, **React Native / Expo** e **Electron**, com aplicações para **Web, Android e Desktop**.
 
-> **Estado atual — outubro de 2026:** desenvolvimento ativo, com os principais módulos já implementados e um ciclo forte de estabilização, paridade entre plataformas e polimento. As mudanças mais recentes em `main` estão concentradas na experiência de **Enturma Caronas**, incluindo busca de locais, mapa, fluxo passageiro/motorista e matching por rota. O projeto ainda não deve ser apresentado como totalmente homologado em todos os dispositivos e cenários de produção.
+> **Estado atual — outubro de 2026:** plataforma funcional em desenvolvimento ativo e estabilização. Além de Caronas, os ciclos recentes incluem chat, biblioteca de mídia e GIFs KLIPY, personalização, Cadernos IA, animações, instalador/atualizador e experiências móveis. Builds e deploys não substituem testes em dispositivos reais nem certificam homologação integral em produção.
 
 ## A proposta
 
@@ -21,7 +21,7 @@ A direção do produto é simples: **menos troca de aplicativos, mais contexto e
 | Área | Situação atual |
 | --- | --- |
 | Web | Implementação principal em Next.js, em uso como referência visual e funcional do ecossistema |
-| Android | Aplicativo Expo/React Native funcional, atualmente com versão de pacote **0.3.26**, em evolução de paridade e validação |
+| Android | Aplicativo Expo/React Native funcional, atualmente com versão de pacote **0.3.30**, em evolução de paridade e validação |
 | Desktop | Aplicativo Electron com instalador e fluxo próprio de atualização; pacote atual **0.3.15** |
 | Backend | API Java 21 / Spring Boot com PostgreSQL, Flyway, autenticação, tempo real e integrações externas |
 | Salas e colaboração | Implementadas: salas, chat, presença, voz, câmera e compartilhamento de tela |
@@ -30,7 +30,7 @@ A direção do produto é simples: **menos troca de aplicativos, mais contexto e
 | Caronas | Fluxo universitário em evolução avançada, atualmente recebendo o maior ciclo de refinamento |
 | Produção | Existem builds e deploys reais, mas ainda há validações de dispositivo, escala e homologação a concluir |
 
-As versões acima são as versões declaradas atualmente nos pacotes do repositório e não representam, por si só, uma certificação de release final.
+As versões declaradas são Web **0.3.0**, Android **0.3.30** e Desktop **0.3.15**, com ciclos independentes. Os builders de download podem calcular números de release a partir do histórico de commits: confira os manifests de distribuição antes de anunciar uma versão. Existe estrutura iOS no repositório, mas não há publicação ou homologação oficial confirmada.
 
 ## Principais experiências
 
@@ -45,7 +45,7 @@ O Enturma organiza a vida do estudante em torno do contexto acadêmico real:
 - jornada e portfólio acadêmico;
 - missões, XP, conquistas e desafios de programação.
 
-O catálogo acadêmico não deve inventar dados oficiais. Fontes acadêmicas precisam ser verificadas antes de serem tratadas como oficiais no produto.
+O catálogo acadêmico separa instituições, campi, ofertas de cursos, grades versionadas, períodos e disciplinas e acompanha fontes e estados de verificação. O onboarding usa informações verificadas; não se deve inventar faculdades, grades ou matérias. A identidade acadêmica inclui validação e revisão. A cobertura depende de fontes oficiais disponíveis. Veja [Catálogo](docs/ACADEMIC_CATALOG.md), [Modelo acadêmico](docs/ACADEMIC_DATA_MODEL.md) e [Verificação](docs/ACADEMIC_VERIFICATION.md).
 
 ### Salas, chat e chamadas
 
@@ -58,22 +58,15 @@ As salas são ambientes de estudo colaborativo com:
 - materiais associados ao contexto da sala;
 - experiências Web e Mobile integradas ao mesmo backend.
 
-### Enturma IA
+### Enturma AI e Cadernos
 
-A camada de IA foi criada para apoiar o aprendizado, não para substituir o estudante.
+A Enturma AI é uma ferramenta de apoio acadêmico, não substitui professores nem fontes oficiais. O backend utiliza a OpenAI Responses API com os materiais autorizados e pesquisa web opcional, somente quando habilitada. Os **Cadernos IA** organizam fontes, conversas contextualizadas, resumos, explicações, flashcards, quizzes, planos e citações. O histórico pode ser persistido, sem prometer memória ilimitada do modelo. A disponibilidade depende das credenciais, limites e provedores. Veja [IA](docs/AI.md) e [Cadernos](docs/STUDY_NOTEBOOKS.md).
 
-Ela pode trabalhar com o contexto acadêmico e materiais autorizados, gerar explicações e apoiar sessões de estudo. A integração de backend utiliza a OpenAI Responses API, com pesquisa web opcional quando habilitada pelo ambiente.
+### Perfil, comunidade, turmas e portfólio
 
-### Perfil, comunidade e portfólio
+Um perfil conecta amigos, mural, foto e banner, cores e gradientes, conquistas, privacidade e interações do fórum. A comunidade inclui posts, comentários, reações e notificações. O projeto também oferece turmas, modo professor, jornada e portfólio acadêmico com visibilidade controlada. A experiência deve preservar o mesmo perfil autorizado nas plataformas e oferecer interface responsiva, inclusive no tema escuro.
 
-O estudante possui uma identidade única dentro do Enturma, conectando:
-
-- perfil e personalização;
-- amigos e comunidade;
-- fórum;
-- conquistas;
-- histórico de participação;
-- portfólio e evolução acadêmica.
+Notificações no aplicativo, Web Push, Android e Desktop dependem de permissões, configurações e suporte do dispositivo; um pedido de permissão exibido no navegador não comprova a entrega de notificações.
 
 ### Enturma Caronas
 
@@ -98,6 +91,23 @@ O fluxo atual já trabalha com:
 - pontos de embarque e recursos de segurança.
 
 A localização exata não deve ser exposta como dado público de descoberta. O compartilhamento ao vivo é temporário e restrito aos participantes autorizados da viagem.
+
+## Chats, GIFs, aplicativos e Motion Design
+
+### Mensagens e mídia
+
+As conversas privadas oferecem criptografia ponta a ponta de conteúdo suportado, diferente das mensagens das salas, que não são E2EE de conteúdo. O compositor compartilhado inclui emojis, respostas, reações, figurinhas, anexos, biblioteca pessoal de mídias e favoritos. A **KLIPY** é uma fonte separada de GIFs com lupa de pesquisa, resultados paginados e botão para carregar mais; as mídias são requisitadas diretamente do provedor, não copiadas para o backend do Enturma. As funcionalidades dependem de disponibilidade e configuração da API. Consulte [Interações](docs/CHAT_INTERACTIONS.md) e [Privacidade do chat](docs/CHAT_PRIVACY.md).
+
+### Web, Android e Windows
+
+- **Web:** Next.js/React, BFF com cookies de sessão e publicação pela Vercel.
+- **Android:** projeto Expo/React Native e distribuição APK; a versão Android oficial inclui experiência Web integrada em um shell WebView e rotinas nativas de instalação/atualização. Verificar teclado, safe areas, câmera, permissões, notificações e instalação em aparelho real; a confirmação de instalação depende do Android.
+- **Windows:** aplicativo Electron com preload/IPC restritos, instalador NSIS, atualização própria e notificações. Downloads e arquivos de atualização exigem validação de origem e integridade. Não anunciar assinatura de código que não esteja configurada.
+- **UI/UX:** temas claro, escuro e sistema; navegação responsiva, visualização de perfis, chats, caronas e transições com respeito a movimentos reduzidos.
+
+### Animações
+
+A abertura do Enturma utiliza apresentação com livro animado, cenas de recursos e **Remotion**. O Guia oferece composições curtas; há movimentos específicos em perfis, temas, chat e Caronas. O Windows utiliza animações próprias para instalação, atualização e desinstalação, mantendo o processo real sob controle do instalador. Indicadores percentuais devem refletir eventos reais, nunca progresso inventado. Veja [Introdução](docs/INTRO_EXPERIENCE.md), [Mobile](docs/MOBILE.md), [Desktop](docs/DESKTOP.md) e [Instalador](docs/RELEASE_NATIVE_INSTALLER.md); documentos de releases anteriores podem registrar limitações já superadas.
 
 ## Arquitetura
 
@@ -127,7 +137,7 @@ Integrações utilizadas pelo projeto incluem:
 - Vercel para a interface Web;
 - infraestrutura de backend/deploy configurada pelo projeto.
 
-Segredos devem permanecer somente no backend ou nos ambientes apropriados. Nunca adicione tokens, chaves ou credenciais reais ao repositório.
+Segredos devem permanecer somente no backend ou nos ambientes apropriados. Nunca adicione tokens, chaves ou credenciais reais ao repositório. Chaves de aplicativo usadas diretamente no navegador por exigência de provedores, como KLIPY, não devem ser confundidas com tokens privilegiados de backend. Permissões de banco, RLS e autorização por recurso exigem revisão independente. O projeto não declara conformidade integral certificada com a LGPD. Consulte [Segurança](SECURITY.md) e [Proteção do release](docs/RELEASE_CHAT_SECURITY.md).
 
 ## Executar localmente
 
@@ -188,7 +198,7 @@ npm test
 npm run build
 ```
 
-Mudanças de UI também devem ser verificadas em tamanhos mobile e desktop. Mudanças de integração devem ser testadas contra serviços e bancos de teste, nunca contra dados de produção.
+Mudanças de UI também devem ser verificadas em tamanhos mobile e desktop, temas claro/escuro e com redução de movimento. Mudanças de integração devem ser testadas contra serviços e bancos de teste, nunca contra dados de produção. Os testes E2E/Playwright e as verificações de APK, instalador Windows, chamadas, teclado e notificações devem acompanhar os módulos afetados; CI verde não substitui homologação em aparelhos reais.
 
 ## Documentação técnica
 
@@ -208,6 +218,12 @@ Pontos de entrada:
 - [Segurança](docs/SECURITY.md)
 - [Deploy](docs/DEPLOYMENT.md)
 - [Desktop](docs/DESKTOP.md)
+- [Mobile](docs/MOBILE.md)
+- [Catálogo acadêmico](docs/ACADEMIC_CATALOG.md)
+- [Cadernos IA](docs/STUDY_NOTEBOOKS.md)
+- [Apresentação animada](docs/INTRO_EXPERIENCE.md)
+- [Instalador e mídias](docs/RELEASE_NATIVE_INSTALLER.md)
+- [Segurança e privacidade do chat](docs/RELEASE_CHAT_SECURITY.md)
 
 ## Contribuindo
 
