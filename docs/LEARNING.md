@@ -44,3 +44,11 @@ Os quatro jogos de TI (incluindo Termo Dev) permanecem em /learn. /challenges us
 Elegibilidade exige matéria REAL selecionada e toda hierarquia VERIFIED. Assignment associa disciplina ao template por nome normalizado específico; curso sem grade confirmada não recebe disciplinas inventadas. Casos clínicos são educativos, não orientação de atendimento.
 
 GET /learning/academic lista atividades; POST /start recebe subjectId/game/daily/slot (1..5). A definição/resposta correta permanece no servidor; o cliente recebe contexto, enunciado e dica. POST /{id}/answer contabiliza tentativas. Cinco missões diárias por jogo/matéria, prática limitada e XP idempotente. Dificuldade sobe a cada dois dias com atividades concluídas, até 10. Progressão alimenta conquistas.
+
+---
+
+### Revisão 25/10/2026 — cadernos, missões e jogos
+
+A API possui `LearningController`, `AdvancedLearningController`, `AdaptivePracticeController`, `DailyMissionsController` e `StudyJourneyController`. O aprendizado se conecta a Cadernos IA, sessões, atividades, portfólio e XP, com ledger idempotente, metas de progresso e anti-farm. Jogos incluem Rota do Algoritmo, Laboratório Binário, Detetive de Código e Termo Dev nos fluxos elegíveis. O desenho do Guia contém cenas curtas específicas por recurso, construídas em Remotion e com redução de movimento.
+
+Os contadores ilustrativos da apresentação não são estatísticas reais do serviço. Testes devem verificar concessão única de XP, renovação de desafios, elegibilidade e comportamento offline.
