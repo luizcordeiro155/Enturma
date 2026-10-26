@@ -17,7 +17,10 @@ Neste momento, prefira contribuições que melhorem o que já existe:
 - consistência visual;
 - testes e segurança;
 - qualidade dos fluxos acadêmicos;
-- refinamento da experiência de Enturma Caronas.
+- refinamento da experiência de Enturma Caronas;
+- chats, emojis, GIFs, anexos e biblioteca pessoal;
+- Motion Design, intro, guias, instaladores e atualizações;
+- notificações e proteção de integrações externas.
 
 Evite adicionar novos módulos grandes sem alinhamento prévio. A prioridade atual é **polimento e confiabilidade do produto existente**.
 
@@ -119,6 +122,34 @@ Quando uma contribuição depender de dados acadêmicos:
 - trate dado desconhecido como desconhecido;
 - não complete lacunas por suposição.
 
+## Fluxos recentes: chats, mídias e integrações
+
+Ao mexer no compositor, preserve rascunho, posição de rolagem, foco do teclado, anexos e seleção de emojis/figurinhas. Teste salas, mensagens privadas, layouts estreitos e desktop. **Não re-hospede conteúdo de KLIPY ou de outro provedor** sem direitos e aprovação adequados. Resultados externos precisam de atribuição e devem permanecer separados da biblioteca pessoal. Confirme o comportamento criptográfico existente: o texto privado é cifrado; conteúdo de sala e mídia de chamadas têm garantias diferentes.
+
+## Animações, vídeos e experiência de aplicativos
+
+- Use o motor e os componentes já presentes, evitando duplicar Remotion Player, arquivos de áudio ou loops concorrentes.
+- A intro, o Guia, as animações de abertura, perfis e caronas devem pausar/cancelar quando necessário e respeitar `prefers-reduced-motion`.
+- Componentes de motion não devem causar piscadas de páginas, foco perdido, rolagem involuntária ou travamento do teclado.
+- Alterações do Windows devem considerar Electron, preload, sandbox, IPC, NSIS, atualização/rollback e arquivos de animação locais.
+- Alterações do Android exigem revisão de WebView, safe area, IME, links, lifecycle, permissões e instalador APK.
+- Não renderize porcentagens inventadas para downloads/atualizações; utilize progresso real do sistema.
+
+## Segurança e proteção de dados
+
+- Revise sessões, permissões, endpoints administrativos, rate limits, uploads e URLs externas com risco de SSRF.
+- Uma política RLS não substitui autorização server-side; confirme qual papel PostgreSQL faz cada operação.
+- Não inclua tokens de backend em um `NEXT_PUBLIC_` ou bundle do navegador. Distingua chaves de cliente de segredos privados.
+- Considere vazamento por notificações, logs, prévias, portfólios e localização de caronas.
+- Testes de vulnerabilidade devem ocorrer em ambiente autorizado; não faça varreduras agressivas em produção.
+- Atualizações de documentos de privacidade e licenciamento precisam preservar os direitos já existentes e ser revisadas pelos mantenedores.
+
+## Publicação e documentação
+
+O fluxo de publicação deve preservar compatibilidade com migrações Flyway, validar **Maven, lint, TypeScript, testes Web, E2E e builds das plataformas afetadas**, e confirmar o SHA implantado. Frontend na Vercel, API e serviços de distribuição possuem ciclos distintos; não declarar produção concluída só porque a PR foi integrada. Para fluxos que dependem de aparelhos reais, registrar explicitamente o que foi e o que não foi homologado.
+
+Documentos do diretório `docs/` podem conter registros históricos de versões específicas. Ao corrigir documentação de referência, não transforme notas de releases antigos em afirmações atuais. Atualize os links do README e preserve as orientações de [Segurança](SECURITY.md) e [Licença](LICENSE).
+
 ## Privacidade e segurança
 
 Nunca faça commit de:
@@ -151,6 +182,11 @@ Testes E2E devem usar ambiente e banco exclusivos para testes. Nunca execute sui
 ## Pull requests
 
 Um bom PR deve responder claramente:
+
+- Foi alterado o esquema do banco, a API ou a criptografia?
+- O fluxo foi testado nos temas claro/escuro, desktop e teclado mobile, quando aplicável?
+- Há impacto em GIFs externos, voz, câmera, notificações, mapas ou atualização nativa?
+- A documentação informa corretamente se o deploy e os testes reais foram concluídos?
 
 - Qual problema está sendo resolvido?
 - O que mudou?

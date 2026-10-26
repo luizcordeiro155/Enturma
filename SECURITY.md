@@ -41,6 +41,26 @@ Não existe SLA público de resposta. Relatórios são priorizados de acordo com
 - APIs administrativas;
 - exposição de segredos ou variáveis de ambiente.
 
+## Controles implementados e limites conhecidos
+
+A documentação de segurança precisa distinguir proteções existentes de riscos residuais:
+
+- **Autenticação e sessão:** autorização e validação devem ocorrer no backend, com cookies e tokens protegidos. Nenhuma checagem somente visual no frontend é suficiente.
+- **E2EE:** o conteúdo compatível das conversas privadas é criptografado ponta a ponta, mas reações, identificadores e outros metadados podem ter tratamento diferente. O chat das salas **não** recebe a mesma garantia de E2EE.
+- **Chamadas:** LiveKit/WebRTC protege o transporte; não se deve alegar E2EE de conteúdo de voz/vídeo sem implementação e testes específicos.
+- **Banco de dados e RLS:** migrations recentes adicionaram políticas de negação por padrão para papéis comuns, mas proprietário, superusuário e papéis `BYPASSRLS` podem ignorar RLS. Manter autorização por usuário no backend e planejar papéis separados para runtime/migrations.
+- **KLIPY:** a integração usa requisições e mídia do navegador ao provedor. A chave de aplicativo entregue ao cliente não pode ser tratada como segredo de backend e jamais deve conceder privilégios administrativos.
+- **Atualizações e instaladores:** proteger origem, checksum/hash, downloads, IPC e permissões. A ausência de assinatura Authenticode reconhecida no Windows é uma limitação operacional, não algo a ocultar.
+- **Caronas:** endereço e localização não devem ser exibidos publicamente; a posição ao vivo e o PIN exigem controles de autorização, expiração e limpeza.
+- **Cadernos e IA:** dados e arquivos devem seguir as permissões do proprietário; URLs de importação e uploads precisam de validação contra SSRF e conteúdo malicioso. Entradas de usuário não podem alterar privilégios do modelo.
+- **LGPD:** funcionalidades de exportação e exclusão e medidas técnicas de proteção não constituem certificação legal de conformidade. São necessárias revisão de bases legais, retenção, backups, fornecedores, incidentes e direitos dos titulares.
+
+Consulte [Segurança do release](docs/RELEASE_CHAT_SECURITY.md),
+[Privacidade do chat](docs/CHAT_PRIVACY.md),
+[Política de privacidade](apps/web/src/app/privacidade/page.tsx)
+e [Documentação de Caronas](docs/CARPOOL.md). Notas de release podem se referir
+a uma versão anterior e não substituem inspeção do código e configuração atual.
+
 ## Teste responsável
 
 Ao investigar um possível problema:
@@ -52,6 +72,16 @@ Ao investigar um possível problema:
 - não faça engenharia social;
 - não publique credenciais encontradas;
 - interrompa o teste se houver risco de perda ou exposição real de dados.
+
+## Proteção de APIs e recursos críticos
+
+Qualquer alteração em login, recuperação de senha, convites, mensagens,
+importação acadêmica, notificações, IA, uploads e caronas deve incluir
+análise de rate limit, autorização por objeto, validação server-side,
+consulta parametrizada, tratamento de erros sem vazamento de dados e testes
+de regressão. Inspecione CSP, HSTS, origem WebSocket, armazenamento,
+permissões do Android WebView e contexto isolado do Electron antes de liberar
+um novo release.
 
 ## Segredos expostos
 
