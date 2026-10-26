@@ -11,3 +11,9 @@ O seletor carrega o catálogo Emojibase 17 em português somente ao abrir. Ofere
 Voltar fecha o menu/seletor ou a imagem antes de sair da conversa. Escape fecha no desktop, Tab permanece dentro do menu, e o foco retorna à origem. O visualizador oferece pinça e arraste, roda do mouse, duplo clique e atalhos `+`, `-`, `0` e setas. O zoom fica entre 1× e 5×. A viewport móvel evita zoom da página e dos campos; o zoom de imagens é independente. Navegadores que ignoram a restrição da viewport podem manter seus recursos de acessibilidade.
 
 Web, Electron e o WebView móvel usam estes componentes compartilhados. Não há alteração do binário nativo nesta entrega. A verificação automatizada cobre Chromium desktop e emulação com toque (incluindo eventos reais de pinça via CDP); a emulação não substitui uma rodada manual em aparelhos Android/iOS e no aplicativo desktop instalado.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.
