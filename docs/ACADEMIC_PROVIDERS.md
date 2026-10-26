@@ -11,3 +11,9 @@ e-MEC não é tratado como API livre para scraping. `EmecAcademicProvider` aceit
 Coleta operacional usa `AcademicHttpClient`: HTTPS, allowlist institucional, validação de DNS, bloqueio de endereços privados, timeout, até 8 MB, controle por host, retry limitado para 429/502/503/504, robots.txt e redirecionamentos no mesmo domínio. Mudanças de domínio exigem revisão da fonte. Falhas não produzem dados substitutos. Parser PDF mede confiança e nunca publica sozinho.
 
 Novos providers podem ser adicionados sem mudar onboarding ou matrícula: produzem CatalogRecord.Document e passam pelo mesmo pipeline. Evitar fusão de instituições, ofertas ou disciplinas somente por nome; códigos oficiais e evidência da associação devem orientar a revisão.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.
