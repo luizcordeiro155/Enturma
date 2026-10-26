@@ -28,3 +28,9 @@ Base main `937a3be`; branch `codex/enturma-v0.3.0`. Um único PR, squash somente
 - Android/iOS: configuração e bundles preparados. Assinatura, lojas e homologação em aparelhos físicos permanecem etapas próprias; downloads não anunciados sem artefato.
 
 Nenhuma credencial, banco de teste ou binário local entra no Git.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.
