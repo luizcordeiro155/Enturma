@@ -29,3 +29,9 @@ Catálogo não equivale a confirmação de matrícula institucional. Não armaze
 ## Ampliação 0.3.0 — UFMG
 
 43 optativas adicionais vêm das tabelas já arquivadas do relatório oficial BSI de 02/01/2025, percurso N-2019/9. Mesmo campus/oferta/versão/URL/hash; nomes, cargas, conteúdo variável e pré-requisitos preservados. Não se atribui semestre: grupo ELECTIVES “Optativas · sem semestre definido”, número nulo. Agora 78 disciplinas no snapshot UFMG. Não foram promovidas grades pendentes de outras instituições.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.
