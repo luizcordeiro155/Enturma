@@ -27,3 +27,9 @@ V6 preenche `academic_enrollment.course_offering_id/curriculum_id` e preserva `p
 `academic_migration_report` registra contagens de backfill; a migration inteira falha se um vínculo não puder ser migrado. Índices cobrem hierarquia, provider/identidade, normalização, fila e auditoria. A função imutável `academic_normalize` dispensa extensões PostgreSQL. Pesquisa parcial ainda usa LIKE e deve ser medida antes de adicionar índices especializados para escala nacional.
 
 Backup antes de produção: use snapshot do PostgreSQL. A reversão da aplicação pode manter V6/V7, compatíveis com o modelo anterior; não executar DROP de tabelas para rollback.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.

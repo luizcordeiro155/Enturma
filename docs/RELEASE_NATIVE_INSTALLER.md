@@ -24,9 +24,15 @@ Faça backup PostgreSQL antes da implantação. Publique a API com V63 e o Web; 
 
 ## Dependências e limites explícitos
 
-- **KLIPY ainda não ativada:** o proprietário informou que não tem chave. As [regras de integração](https://docs.klipy.com/integration-requirements) exigem chamadas e mídia diretamente do cliente, resultados separados e aprovação prévia para proxy/cache/re-hospedagem. A proposta inicial de chave secreta no backend precisa dessa aprovação; não foi criado um proxy incompatível nem cadastrada uma conta em nome do usuário. A coleção Enturma e favoritos pessoais seguem disponíveis.
+- **Situação na data original deste release (superada pelas PRs #103 e #104): KLIPY ainda não ativada:** o proprietário informou que não tem chave. As [regras de integração](https://docs.klipy.com/integration-requirements) exigem chamadas e mídia diretamente do cliente, resultados separados e aprovação prévia para proxy/cache/re-hospedagem. A proposta inicial de chave secreta no backend precisa dessa aprovação; não foi criado um proxy incompatível nem cadastrada uma conta em nome do usuário. A coleção Enturma e favoritos pessoais seguem disponíveis.
 - **Celular como câmera via QR:** não incluído nesta versão; precisa de pareamento com expiração, autorização no PC, publicação de câmera limitada e revogação no serviço de chamadas.
 - **Compartilhar a tela inteira pelo APK:** continua limitado à capacidade do WebView. A captura nativa com MediaProjection não foi implementada. O Desktop mantém o seletor nativo de tela/janela e o Web usa a API suportada pelo navegador.
 - Não houve teste com câmera física Android nem instalação/remoção real na conta Windows do usuário. O pacote foi compilado e a janela local validada em processo de teste sem alterar a instalação existente.
 - Não há certificado Authenticode configurado. Compilar e verificar SHA-256 não substitui assinatura reconhecida pelo Windows.
 - Permanecem os limites operacionais registrados em `RELEASE_CHAT_SECURITY.md`, incluindo o papel privilegiado do banco, dependências Expo e procedimentos organizacionais da LGPD. Esta entrega não representa certificação jurídica de conformidade.
+
+---
+
+## Correção de contexto: KLIPY habilitada em release posterior
+
+A observação histórica acima "KLIPY ainda não ativada" se refere ao release da instalação nativa original. As PRs **#103** e **#104** adicionaram o seletor KLIPY com pesquisa/trending no navegador, lupa, **40 resultados por página**, paginação e mídia direta do provedor. O catálogo KLIPY aparece separado da biblioteca pessoal/favoritos. O backend não deve re-hospedar essa mídia; a app key pode ser acessível ao cliente autenticado, conforme o contrato do provedor. A disponibilidade externa precisa ser testada com a chave e o domínio reais.

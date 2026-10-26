@@ -1,10 +1,10 @@
-# Enturma Desktop 0.3.0
+# Enturma Desktop — versão declarada 0.3.15
 
 Electron 44 abre a aplicação oficial Next.js/BFF, compartilhando API, conta e dados com o Web. O renderer mantém contextIsolation e sandbox, sem Node. IPC valida o frame/origem; links externos passam pelo fluxo de confirmação do Enturma. O protocolo é `enturma://`.
 
 ## Build e distribuição
 
-No Windows, execute `scripts/build-desktop-windows.ps1 -SkipInstall` após `npm ci`. O electron-builder gera `apps/desktop/dist/Enturma-Setup-0.3.0.exe` (NSIS por usuário, atalhos, desinstalador e protocolo) e `Enturma-0.3.0-win-x64.zip` (atualizações). Não há assinatura Code Signing configurada; o instalador pode receber aviso do Windows.
+No Windows, execute `scripts/build-desktop-windows.ps1 -SkipInstall` após `npm ci`. O electron-builder gera `apps/desktop/dist/Enturma-Setup-<versao>.exe` (NSIS por usuário, atalhos, desinstalador e protocolo) e `Enturma-<versao>-win-x64.zip` (atualizações). Não há assinatura Code Signing configurada; o instalador pode receber aviso do Windows.
 
 A página Web `/download` oferece o executável, não o ZIP. Dentro do Desktop, a bridge/UA ocultam Download e a rota redireciona para Início. Android aparece disponível apenas quando existe uma URL HTTPS de APK configurada; iOS permanece em preparação.
 
@@ -31,3 +31,13 @@ Testes Node cobrem manifesto, origem, nomes de arquivo, IPC e servidor HTTP. A v
 Atualizações somente do Web não exigem trocar o binário. macOS/Linux ainda precisam de build e homologação próprios antes de oferecer download público.
 
 Validação final do novo iniciador em 02/10/2026: um manifesto e um download HTTPS, SHA-256 `84465771468944056b17c3e960565eb8b8f69d391fbadd5cb9c83e46fa16bbf3`, ZIP 152868743 bytes. A cópia isolada passou de 0.2.9 (bridge nova) para 0.3.0 e preservou arquivo alheio ao pacote. Essa prova cobre a bridge nova, não o iniciador antigo 0.2.0.
+
+---
+
+## Atualização Windows 0.3.15 — 25/10/2026
+
+A versão do pacote `apps/desktop/package.json` é **0.3.15**, não 0.3.0. O projeto utiliza Electron 44, `electron-builder`/NSIS e um auxiliar WinForms para apresentar vídeos locais gerados em Remotion. Os arquivos de Motion em `apps/desktop/assets/motion` são diferentes para **instalar**, **atualizar** e **desinstalar**. Eles não controlam o processo NSIS, que continua responsável pelas operações reais.
+
+`npm run dist:win -w @enturma/desktop` prepara o instalador Windows e ZIP; o serviço `deploy/desktop-download` distribui artefatos e `/latest.json`. O versionamento derivado de commit usa `deploy/native-version.cjs`, evitando quota pública GitHub na fase de build. Manter compatibilidade legada do updater, verificação HTTPS, tamanho/SHA-256, rollback e autenticação da bridge.
+
+**Não anunciar assinatura Authenticode**, atualização totalmente silenciosa nem homologação Windows físico sem evidências; o progresso mostrado deve refletir bytes reais e fases do instalador.

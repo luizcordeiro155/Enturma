@@ -1,4 +1,4 @@
-# Estado atual do Enturma — 06/10/2026
+# Histórico do Enturma — 06/10/2026 (ver atualização abaixo)
 
 Este documento resume o estado observado atualmente na branch `main`. Ele substitui descrições antigas baseadas em branches intermediárias de implementação.
 
@@ -13,7 +13,7 @@ As mudanças mais recentes de `main` em 06/10/2026 refinam **Enturma Caronas**, 
 | Plataforma | Estado |
 | --- | --- |
 | Web | Aplicação principal Next.js/React, com os fluxos mais completos do produto |
-| Android | Expo/React Native, pacote 0.3.26; funcional e em evolução de paridade/validação |
+| Android | Expo/React Native, pacote 0.3.30; funcional e em evolução de paridade/validação |
 | Desktop | Electron, pacote 0.3.15; utiliza a experiência Web oficial com integrações nativas |
 | iOS | Estrutura técnica existe no projeto mobile, mas não há distribuição/homologação oficial declarada |
 
@@ -93,3 +93,17 @@ Ao apresentar o Enturma publicamente:
 - funcionalidades em refinamento devem ser apresentadas como tal.
 
 Para detalhes técnicos, consulte [ARCHITECTURE.md](ARCHITECTURE.md), [CARPOOL.md](CARPOOL.md), [DEPLOYMENT.md](DEPLOYMENT.md) e [SECURITY.md](SECURITY.md).
+
+---
+
+## Revisão geral em 25/10/2026
+
+**Referência:** `main` em `8d234a9`; código original até o release #104. Os registros de 06/10 acima são históricos, não o estado mais recente.
+
+- **Web:** Next.js 16 / React, pacote 0.3.0, publicação Vercel.
+- **Android:** Expo/React Native, pacote **0.3.30**, `versionCode=33`; shell WebView oficial em fluxos compartilhados e rotas nativas Expo Router. Exige homologação de aparelho físico.
+- **Desktop:** Electron 44, pacote **0.3.15**, NSIS/WinForms e atualização com manifesto assinado por hash. A versão distribuída pode diferir, pois `deploy/native-version.cjs` gera números a partir do commit.
+- **Novidades:** biblioteca pessoal V60, emojis, figurinhas, GIFs KLIPY com lupa/paginação de 40 itens, Cadernos IA em formato de conversa, perfil/mural e portfólio, identidade acadêmica, QR de sala, notificações Web, caronas e segurança de rota.
+- **Motion:** livro de abertura/guia Remotion, animação de inicialização e caronas, transição entre temas e filmes distintos de instalação, atualização e desinstalação Windows.
+- **Backend:** controllers de privacidade, identidade acadêmica, Cadernos, segurança das caronas, chamadas privadas e mídias; Flyway até V63.
+- **Limites:** não confundir código implementado com homologação. iOS não possui release confirmado. Chat privado com E2EE de conteúdo compatível; chat de salas não é E2EE. RLS V62 não protege de papéis com `BYPASSRLS`. Não anunciar conformidade LGPD certificada.

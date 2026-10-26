@@ -25,3 +25,9 @@ Em **Amigos → Conversas em todos os dispositivos**, o usuário ativa a sincron
 O cofre v2 usa PBKDF2-SHA256 com 600 mil iterações, salt aleatório de 32 bytes, AES-GCM-256 e IV aleatório de 12 bytes. O AAD vincula versão, ID da conta e chave pública. A senha e a chave privada em claro nunca são enviadas à API. GET/PUT `/api/v1/private-vault` operam exclusivamente sobre o usuário autenticado. A API valida a chave pública contra a identidade existente e permite apenas a criação do cofre, recusando substituições (inclusive simultâneas). Migration V21; nenhuma variável de ambiente nova.
 
 Contas anteriores precisam ativar a sincronização uma vez no dispositivo original ou restaurar um backup cifrado compatível. O sistema não cria outra identidade por cima da existente. A senha de login ou sua recuperação não desbloqueiam o cofre. Troca da senha das conversas/revogação de dispositivos não estão implementadas; o backup cifrado continua disponível como recuperação independente. Dispositivos desbloqueados mantêm acesso enquanto possuem a chave e uma sessão válida.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.

@@ -37,3 +37,11 @@ A conexão activity emite invalidações privadas achievement_unlocked, moderati
 Typing usa frames da conexão da sala com throttle de 2s e validade de 5s. Não há tabela de digitação. Reconexão recupera snapshot e histórico autorizado. Heartbeat/presença continuam independentes da digitação.
 
 CallSessionProvider reside no layout raiz e preserva a instância LiveKit entre rotas. Logout, saída explícita, perda irrecuperável ou encerramento terminam mídia. Trocar abas/rotas move a visualização, sem reconectar ou recriar os elementos de mídia.
+
+---
+
+### Revisão 25/10/2026 — mensagens privadas, chamadas e mídias
+
+O projeto mantém WebSocket de eventos autenticados, estado de presença e reconciliação de histórico. `PrivateCallController` gerencia convites, aceite/recusa, tokens LiveKit e heartbeat por dispositivo; chamados encerrados não devem reaparecer após reinício. A sala permanece com chat persistente **não E2EE**; conversas privadas de amigos têm criptografia no cliente para conteúdo compatível. Metadados de reações e presença não recebem necessariamente o mesmo nível de cifragem.
+
+O compositor compartilhado inclui emojis, reações, mídia pessoal e GIFs KLIPY (pesquisa direta/paginação); mensagens remotas KLIPY usam URL original, não upload local. Na Web e no APK, validar foco do teclado, scroll até as últimas mensagens sem ocultá-las, transições para chamadas, cancelamento de sessões e supressão correta de notificações.

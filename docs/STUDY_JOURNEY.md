@@ -7,3 +7,9 @@ O tutorial opcional tem nove passos, atalhos para os recursos reais, navegação
 “Limpar notificações” remove os avisos da caixa de entrada do próprio usuário, inclusive os não lidos. A marca de descarte fica no banco para preservar a deduplicação; novos avisos continuam chegando. O cliente ignora consultas antigas que terminem depois da limpeza.
 
 As novas animações usam a Web Animations API. A preferência do sistema ou a opção “Reduzir animações” desabilita movimentos e cancela as animações registradas em andamento. O conteúdo permanece legível e utilizável sem animação. Os testes cobrem concessão concorrente de XP, isolamento da limpeza, persistência, tutorial, foco e movimento reduzido em desktop e celular.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.

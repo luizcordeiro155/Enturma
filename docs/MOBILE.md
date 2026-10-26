@@ -1,4 +1,4 @@
-# Mobile 0.3.8
+# Mobile — Android 0.3.30 (com histórico 0.3.8–0.3.16)
 
 A versão Android usa a aplicação Web responsiva oficial dentro de um shell Android seguro. Com isso, Web, Desktop e Android passam a compartilhar as mesmas páginas e a mesma implementação de salas, chamadas, fórum, perfil, cadernos, caronas, configurações e recursos futuros.
 
@@ -132,3 +132,13 @@ A API precisa de `FCM_SERVICE_ACCOUNT_BASE64`, contendo em Base64 o JSON da serv
 - Links externos publicados na bio ou em **Site ou GitHub** usam a mesma confirmação de segurança do fórum.
 - A notificação nativa de nova versão permanece disponível até ser tocada. Ao tocar, abre **Configurações** com o card de atualização destacado.
 - O agendador Android continua verificando novas versões em segundo plano sem baixar o APK automaticamente.
+
+---
+
+## Estado Android 0.3.30 — 25/10/2026
+
+A versão atual declarada em `apps/mobile/package.json` e `apps/mobile/app.json` é **0.3.30**, com Android `versionCode=33`. O monorepo contém shell WebView com UI Web compartilhada **e páginas React Native via Expo Router**; a afirmação antiga "não existe segunda interface Android" não representa toda a estrutura atual.
+
+Rotas nativas incluem Home, Salas, Fórum/Comunidade, Amigos, Cadernos, Perfil, Caronas, Verificação Acadêmica, Portfólio, Notificações, Privacidade e Configurações. `apps/mobile/src/experience-motion.tsx` oferece animações nativas de tema e caronas. A Web compartilha composição Remotion da intro/guia, emojis e GIFs KLIPY em suas superfícies.
+
+Critérios de QA: safe area sem conflitar com status bar, IME não ocultando o texto, scroll do chat seguindo últimas mensagens sem salto de página, chamadas/câmera, localização autorizada, push/FCM, persistência da sessão e processo de download/atualização APK real. O Android é responsável pela confirmação de instalação; o fluxo não pode alegar instalação silenciosa. O iOS permanece sem publicação oficial confirmada.

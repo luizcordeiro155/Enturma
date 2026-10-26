@@ -27,3 +27,9 @@ Repositório remoto: https://github.com/luizcordeiro155/Enturma. A main continha
 12. Produção: E2E, observabilidade, Railway/Vercel, backups e revisão operacional.
 
 Cada fase exige implementação, integração, testes e documentação. Ver docs/STATUS.md para evidências reais e limitações; este plano não declara funcionalidades concluídas.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.

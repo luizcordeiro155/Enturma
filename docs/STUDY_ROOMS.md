@@ -35,3 +35,9 @@ POST /study-rooms aceita days=1..5 para MULTIDAY; days=0/ausente mantém QUICK e
 Heartbeat atualiza last_seen_at e tempo de presença. Ausência por 90 segundos deixa de contar como presença online. Sala rápida vazia inicia empty_since; retorno cancela a contagem. Grace configurável por ENTURMA_ROOM_EMPTY_GRACE_SECONDS (300, mínimo 30). Sala longa não encerra por vazio. Avisos de 24h, 1h e fechamento usam eventos únicos e preferências/outbox.
 
 A interface alterna conversa/chamada/materiais/IA sem destruir a chamada global. O dock mantém controles e retorno à sala. Chat lateral da chamada tem tokens próprios para contraste em ambos os temas.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.

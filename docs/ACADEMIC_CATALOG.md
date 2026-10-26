@@ -33,3 +33,11 @@ Uma grade ausente mostra “Esta grade ainda está sendo verificada” e permite
 Animações usam Web Animations API, IntersectionObserver e transformações; respeitam `prefers-reduced-motion`. Conteúdo permanece visível se animação falhar. Teclado, toque e visualização móvel são suportados.
 
 Veja [modelo](ACADEMIC_DATA_MODEL.md), [importações](ACADEMIC_IMPORTS.md), [providers](ACADEMIC_PROVIDERS.md), [verificação](ACADEMIC_VERIFICATION.md) e [fontes com hashes](academic-source-manifest.json).
+
+---
+
+### Revisão 25/10/2026 — matrícula e identidade
+
+A estrutura de catálogo permanece normalizada, com compatibilidade de `academic_entry`, fontes verificadas e matrizes versionadas. `AcademicIdentityController` acrescenta verificação institucional, suporte e revisão administrativa. A matrícula seleciona universidade, campus, curso/oferta, grade, período e UCs disponíveis, **sem criar grade fictícia** para preencher lacunas. Fontes devem ser rastreadas e não se deve confundir uma ocorrência curricular com disciplina canônica.
+
+Não inferir que todos os cursos de instituições cadastradas possuem matriz verificada. Dados de fonte pendente/antiga não devem ser oferecidos como oficiais.

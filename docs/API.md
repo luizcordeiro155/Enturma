@@ -111,3 +111,20 @@ Os exemplos de testes não representam nenhuma universidade real. Não use as fi
 - `POST /matches/{id}/no-show`: registra não comparecimento após tolerância.
 - `POST /rides/{id}/stops`: ordena paradas dos passageiros aceitos.
 - `PUT /matches/{id}/meeting-zone`: seleciona ponto oficial do campus.
+
+---
+
+## Rotas recentes verificadas no backend Java
+
+| Categoria | Exemplos de rotas |
+|---|---|
+| Conta | `GET /auth/session-view`; `GET /auth/sessions`; `DELETE /auth/sessions/{id}` |
+| Identidade acadêmica | `GET /auth/academic/status`; `GET /auth/academic/institutions`; `POST /auth/academic/email`, `/confirm`, `/document`, `/support` |
+| Privacidade | `GET /account/privacy/deletion`; `POST /account/privacy/deletion/schedule`, `/cancel`; `DELETE /account/privacy/deletion/now` |
+| Cadernos | `GET/POST /notebooks`; `GET/PUT/DELETE /notebooks/{id}`; `POST /notebooks/{id}/sources`, `/files`, `/generations` |
+| Mídias | `GET /chat-media/capabilities`, `GET/POST /chat-media`, `PATCH/DELETE /chat-media/{id}` |
+| Chamadas privadas | `GET/POST /calls/private`; `POST /calls/private/{id}/accept|decline|cancel|end|ring`; `POST /calls/private/{id}/voice`, `/heartbeat` |
+| Caronas | `/rides/map/search`, `/rides/map/address-search`, `/rides/map/reverse`, `/rides/map/route`, `/rides/dispatch/search`, `/rides/driver/availability`, `/matches/{id}/...` |
+| Notificações | `/notifications/preferences`, `/notifications/inbox`, `/notifications/web-push/public-key`, `/notifications/desktop-push` |
+
+Todas as rotas seguem o prefixo `/api/v1` e autorizam conforme a identidade e o recurso. A rota `GET /api/klipy-config` é exclusiva do frontend Next.js; a pesquisa KLIPY ocorre diretamente no navegador, não no Java.

@@ -39,3 +39,13 @@ O módulo `learning` registra progresso por desafio, ledger idempotente de XP, n
 - LiveKit: voz, câmera e compartilhamento de tela no Web.
 - S3/R2/MinIO: materiais persistentes enviados explicitamente para estudo.
 - Firebase Cloud Messaging: push Android para mensagens, menções, fórum e demais categorias escolhidas pelo usuário.
+
+---
+
+## Revisão da arquitetura — 25/10/2026
+
+A arquitetura do catálogo acadêmico é normalizada (com compatibilidade de `academic_entry`), não exclusivamente uma árvore simples. Os módulos de API atuais incluem `AcademicIdentityController`, `AccountPrivacyController`, `NotebookController`, `AppHelpController`, `ChatMediaController`, `PrivateCallController`, `RideController` e `RideSafetyController`. O banco evoluiu até **V63**.
+
+Web: Next.js com BFF, WebSocket, Remotion e GIFs KLIPY via cliente; Mobile: Expo Router e shell WebView compartilhado; Desktop: Electron, NSIS, preload e IPC restritos. Armazenamento, IA, voz, notificações e mapas são serviços externos separados e demandam configuração e autorização própria.
+
+Não declarar E2EE em salas ou mídia de chamadas. E2EE aplica-se ao conteúdo das conversas privadas suportadas. RLS de V62 exige papel de runtime sem `BYPASSRLS` para isolamento efetivo. Ver [Estado atual](STATUS.md), [Banco](DATABASE.md) e [Segurança](SECURITY.md).

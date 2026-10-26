@@ -23,3 +23,27 @@ Antes de modificar uma migration já aplicada, criar uma nova versão. Testar re
 V23 acrescenta ciclo de salas/presença/eventos, preferências de notificação/outbox, definições/progresso/concessões de conquistas, perfil/widgets/privacidade, casos/ações/evidências de moderação e registry/assignments/progresso acadêmico. Constraints e ledger garantem idempotência. V24 cria fila exclusiva de revisão de room_message, sem tocar mensagens privadas cifradas. V25 representa pools oficiais de optativas sem semestre, com organization ELECTIVES e número nulo; demais períodos continuam numerados.
 
 Os snapshots oficiais UNA/PUC/UFMG são importados por jobs em lotes, com validação, revisão/auditoria e retomada. Não são fixtures fictícias. Migrations V1–V22 foram preservadas. Validar migração em banco vazio e atualização do banco existente antes da publicação.
+
+---
+
+## Inventário completo das migrations — atualizado em 25/10/2026
+
+O repositório contém migrations **V1 a V63**. A presença do arquivo não comprova a aplicação no banco de produção: conferir `flyway_schema_history` antes de divulgar a versão do schema.
+
+| Versões | Principais mudanças |
+|---|---|
+| V1–V5 | Contas, catálogo legado, salas, chat, caronas, documentos e IA |
+| V6–V22 | Catálogo normalizado, aprendizagem, vínculos, segurança e persistência |
+| V23–V29 | Comunidade, moderação, optativas, push Android/Web/Desktop e realtime |
+| V30–V34 | Campus, privacidade, modo professor e tutor adaptativo |
+| V35–V39 | Dispatch e mobilidade universitária, GPS e embarque |
+| V40–V44 | Imagens e chamadas privadas, presença, reações e penalidades |
+| V45–V49 | Identidade acadêmica e suporte, perfil, fontes e rotinas |
+| V50–V54 | Mural, mídia de perfil, convites, Monitor e cofre da conta |
+| V55–V59 | Digitação privada, atividade, segurança de caronas, portfólio e Cadernos IA |
+| V60 | Biblioteca pessoal de GIFs/figurinhas |
+| V61 | Invalidação de convites previamente divulgados |
+| V62 | RLS default-deny para papéis comuns, sem restringir superusuário/BYPASSRLS |
+| V63 | `media_kind` opcional para mensagens com anexo |
+
+Não modificar migrations históricas. Antes de qualquer atualização, fazer backup, simular restauração, validar foreign keys e testes com banco isolado. Publicar o backend compatível antes dos clientes que usem novas colunas.

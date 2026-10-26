@@ -22,3 +22,9 @@ O transporte de caronas no Web/Desktop/WebView usa uma única conexão WebSocket
 A abertura de WebSocket força validação sem cache de `/users/me`, então a renovação de access token acontece antes de autenticar o canal em tempo real. Isso evita janelas de reconexão com token expirado. O app nativo também fecha o socket ao ir para segundo plano e cria uma conexão limpa ao voltar.
 
 No backend, conexões globais de atividades/caronas deixaram de consultar a sessão no loop de snapshot das salas a cada 1,2 s. Eventos de conversa de uma carona agora são direcionados somente aos dois participantes daquele match, reduzindo fan-out e refetches desnecessários. A migração V29 adiciona índices para as consultas quentes de caronas e matches.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.

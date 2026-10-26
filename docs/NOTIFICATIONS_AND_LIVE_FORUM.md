@@ -15,3 +15,9 @@ As animações de entrada, sino e destaque usam JavaScript e respeitam a prefer�
 ## Preferências 0.3.0
 
 Configurações → Notificações oferece in-app e e-mail independentes por ROOM_MESSAGE, ROOM_NOTICE, FORUM, ACHIEVEMENT, RIDE, FRIEND. E-mail inicia desabilitado. A outbox registra categoria/dedupe e o worker confere opt-out novamente antes do envio. Confirmação, recuperação e segurança não entram no opt-out. Ver [COMMUNITY_V03](COMMUNITY_V03.md).
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.

@@ -15,3 +15,9 @@ Prioridade: UNA Aimorés, ADS, ingresso em fevereiro de 2026. Usar somente fonte
 Estado: catálogo, importações, APIs, painel, onboarding web/mobile, animações e minigames implementados. Validação local: 34 testes Java, 13 testes web, 4 mobile, 2 de empacotamento e 2 fluxos Playwright passaram; lint, tipos, build web e exportações Android/iOS concluídos. Pacote SquareCloud validado contra PostgreSQL isolado. As novas migrations ainda não foram aplicadas ao banco de produção: serão executadas no upload do novo JAR. As versões oficiais não foram renomeadas como “2026” sem comprovação da vigência; cada captura registra fonte, SHA-256 e data.
 
 Limites explícitos desta carga: três instituições com matrizes publicadas; e-MEC por exportação oficial manual; demais providers nacionais entram progressivamente conforme fontes verificadas. Tópicos sem fonte não foram inventados. A captura UNA organiza níveis, não a sequência individual dos semestres de cada aluno.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.

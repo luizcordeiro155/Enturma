@@ -61,3 +61,11 @@ Login continua retornando a mesma mensagem para e-mail inexistente e senha errad
 - A recuperação de senha mostra uma tela animada informando que o link foi enviado e o tempo restante de 30 minutos.
 - Após definir uma nova senha, todas as sessões existentes são revogadas no backend e os cookies da sessão atual também são apagados pelo BFF Web.
 - A tela de sucesso da redefinição mantém o usuário informado por 30 segundos e então o envia ao login. Recarregar a página não restaura a sessão anterior.
+
+---
+
+### Revisão 25/10/2026 — identidade acadêmica e privacidade
+
+O `AuthController` inclui `/auth/session-view`, gestão de sessões, recuperação e verificação de e-mail. `AcademicIdentityController` implementa status institucional, e-mail, documento, suporte, revisão e domínios verificados; contas pendentes não devem se fazer passar por `VERIFIED`. `AccountPrivacyController` permite consultar exclusão, agendá-la para **cinco dias**, cancelar o pedido e excluir imediatamente, anonimizando a conta e expurgando dados específicos; não dizer que o registro físico desaparece integralmente. Mudanças de senha e cofre E2EE merecem revisão separada, pois recuperar senha da conta não equivale necessariamente a recuperar a chave privada da conversa.
+
+Mantenha cookies e tokens fora de URLs/logs. Revisar autorização servidor e CORS, rate limiting, sessão persistente e novos fluxos de verificação. A aplicação Web usa BFF; não confundir com SecureStore Expo.

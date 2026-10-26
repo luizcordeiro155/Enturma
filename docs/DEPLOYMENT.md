@@ -171,3 +171,13 @@ Após o redeploy, `GET /api/v1/capabilities` deve retornar `voice=true`. Teste e
 Novas migrations V23–V25 acrescentam comunidade/perfil/salas, fila opcional de revisão e grupos de optativas oficiais sem semestre artificial. Nenhuma migration antiga foi alterada. O catálogo UFMG passa a incluir 43 optativas da fonte verificada.
 
 Publicação por um PR/squash na main, seguida das integrações nativas Vercel/SquareCloud/Railway. Não usar Actions para deploy. Desktop 0.2.0 dispõe de recuperação assistida pelo instalador oficial; as próximas atualizações usam o iniciador corrigido. Consulte `V0_3_IMPLEMENTATION.md`. Verificar saúde Web/API e manifesto/EXE/ZIP Railway após uma publicação autorizada.
+
+---
+
+## Atualizações de infraestrutura e releases — 25/10/2026
+
+Além de `API_URL` e `BFF_PROXY_SECRET`, a Web usa opcionalmente `KLIPY_API_KEY` para GIFs. Esta chave é uma **app key entregue ao cliente autenticado**, pois as chamadas devem sair diretamente do navegador. Não a reutilizar como segredo privilegiado; chamadas e URLs de mídia não são proxy/cópias no Enturma.
+
+A API Java/SquareCloud é separada do build da Web/Vercel, e os serviços Railway `deploy/android-download` / `deploy/desktop-download` geram/servem artefatos nativos. `deploy/native-version.cjs` busca o commit e calcula número de versão pelo histórico local, sem quota de API pública. Confirme `sourceCommit` e SHA do deploy em cada plataforma; merge na main não comprova distribuição do APK/EXE.
+
+Se houver nova migration, aplicar backend com backup e migração antes de habilitar o frontend. Exigir CI, testes de integração, preview/production READY, health, manifestos HTTPS, checksum e smoke tests. Mudanças documentais não exigem reconstruir app nativo. Segredos `OPENAI_API_KEY`, `BFF_PROXY_SECRET`, credenciais DB/FCM secret permanecem server-side.

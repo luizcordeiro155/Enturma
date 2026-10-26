@@ -15,3 +15,11 @@ As migrações V15 e V16 são aplicadas automaticamente na inicialização da AP
 ## Validação
 
 Os testes de integração PostgreSQL cobrem propriedade dos cadernos, citações, persistência, idempotência, vinte missões, progressão e nomes com acentos. Os testes de extração cobrem TXT/MD/DOCX e bloqueio de URLs privadas. O E2E de cadernos exige IA habilitada; no ambiente de teste, use um provedor Responses local controlado para validar geração e transcrição sem custos. Esse provedor não faz parte da configuração de produção. O E2E também verifica mobile, desktop, teclado, imagens e citações.
+
+---
+
+### Revisão 25/10/2026 — conversas contínuas e capas
+
+Os Cadernos IA possuem conversa persistida com histórico e seleção limitada de contexto, respostas com referência a fontes, compartilhamento autorizado quando aplicável e mídias de capa/perfil do caderno. Componentes relevantes: `NotebookController`, `NotebookService`, `NotebookMediaController` e `RoomNotebookController`. O chat apresenta respostas sem obrigatoriedade de nova pergunta imediata; continua disponível para interação posterior.
+
+Permissão de pesquisa externa depende de `AI_WEB_SEARCH_ENABLED`; não atribuir pesquisa Web ao backend sem configuração. Imagens/fontes precisam de validação, limites e permissão por proprietário. Apagar uma fonte ou caderno deve seguir a semântica de retenção informada pelo backend.

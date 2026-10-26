@@ -52,3 +52,11 @@ npx --package @remotion/cli@4.0.530 remotion render src/remotion/index.tsx Entur
 A entrega Web usa o Player e o MP3 versionado, não depende de MP4. Exports antigos não se atualizam sozinhos. `--scale=2` permite renderizar com o dobro da resolução mantendo a proporção.
 
 Testes verificam duração/FPS, nove recursos, ausência da personagem, movimento do livro entre frames, confetes somente no disparo, limites de título/arte/legenda, formatos mobile/desktop, áudio, avanço, pausa, replay, minimização e redução de movimento. Frames foram inspecionados visualmente. A fonte Archivo Black permanece com a licença OFL no diretório público.
+
+---
+
+### Revisão 25/10/2026 — abertura, Guia e aplicativos
+
+A apresentação oficial de 90 segundos é separada das **animações curtas de abertura do app** em `components/motion/launch-player.tsx`, que têm 120 frames para caronas ou 144 frames para a abertura geral na composição vigente. `components/motion/guide-scenes.tsx` oferece cenas distintas de recursos em loop, com duração de 180 frames por composição. `theme-motion.ts` implementa transição visual responsiva com suporte a `prefers-reduced-motion`.
+
+O Android também dispõe de efeitos nativos de tema e carona em `apps/mobile/src/experience-motion.tsx`; os filmes do instalador NSIS ficam em `apps/desktop/assets/motion`. **Não misturar** intro de 90s, abertura do aplicativo, Guia e animações de instalação em uma única peça. Cada elemento deve pausar no background, não provocar recarregamento ou deslocamento de chat e respeitar acessibilidade.

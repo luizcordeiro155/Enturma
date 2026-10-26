@@ -36,3 +36,9 @@ Snapshots em `services/api/src/main/resources/catalog` são instalados automatic
 `POST /documents/inspect` recebe `{url}` oficial; `/documents/pdf` recebe multipart `file` e `source`. Parser PDF retorna candidatos, confiança, avisos e status PENDING_VERIFICATION; não publica automaticamente. Limites: 8 MB na API direta, 4 MB pelo web, 150 páginas, 200 mil caracteres extraídos. `POST /sources/{id}/check` compara hash e gera SOURCE_CHANGED, preservando a versão publicada.
 
 Configuração opcional Spring: `enturma.catalog.sync-enabled=true`, `enturma.catalog.sync-days=14` (mínimo 7). Desligada por padrão; confere até três fontes por execução e registra falhas. Não requer novas variáveis no `.env` para usar o catálogo e os jogos. Bootstrap pode ser desativado com `enturma.catalog.bootstrap=false` em ambientes de teste controlados.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento preserva o contexto técnico do release em que foi escrito. Para funcionalidades atuais até a PR #104 e migrations V63, use [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile](MOBILE.md) e [Desktop](DESKTOP.md). Entre as atualizações posteriores estão identidade acadêmica, Caronas, chats/figurinhas, KLIPY com busca, Cadernos IA, animações Remotion e melhorias em instaladores. A existência de código não comprova homologação em produção/aparelhos físicos.

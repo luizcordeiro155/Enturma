@@ -6,7 +6,7 @@ Interesse gera pedido PENDING único por usuário/carona. Somente dono aceita, c
 
 Somente dono conclui/cancela. Conclusão exige ter chegado o horário da saída. Avaliação 1–5 só após conclusão, uma por avaliador/match. Há testes para privacidade e lotação. O sistema não faz verificação de motorista nem oferece garantia de segurança.
 
-Ainda pendentes: ranking por proximidade/horário, filtros geográficos, telas equivalentes no app nativo, notificações completas de ciclo de vida, perfis de veículo e reputação agregada. Não há porcentagem de compatibilidade inventada.
+O módulo foi ampliado com dispatch, busca de locais, rotas, perfis de veículo, reputação e telas mobile; o código precisa de homologação adicional em dispositivos reais.
 
 ## Encerramento e retenção das conversas
 
@@ -30,3 +30,13 @@ Depois do aceite existem confirmação independente de motorista/passageiro, PIN
 Localização aproximada da origem não é devolvida na descoberta. Localização ao vivo só funciona durante estados ativos da viagem, entre participantes aceitos, mantém apenas a última posição e é apagada ao parar, cancelar, encerrar, bloquear ou registrar no-show. O link de segurança usa token temporário e revogável para um contato de confiança.
 
 As animações novas de carona são controladas por JavaScript. Web/Desktop usam Web Animations API; React Native usa `Animated`. A preferência de reduzir movimento continua sendo respeitada.
+
+---
+
+## Estado atual — 25/10/2026
+
+A frase antiga "Ainda pendentes: ranking, filtros, veículo, reputação e telas mobile" descrevia um release anterior. O código atual já inclui `RideDispatchService`, `RideMatchingService`, `RideMobilityService`, `RideMapService` e `RideSafetyController`. A Web possui páginas de Caronas/matches/configurações; o Expo inclui `app/rides.tsx` e `app/ride/[id].tsx`.
+
+**Fluxos:** escolha entre motorista/passageiro, ida à universidade ou retorno para casa, campus fixo, endereço e POI, cálculo de rota, disponibilidade, pedidos, aceite/rejeição, dispatch, estado da viagem, PIN, posição temporária, cancelamento, conversa, segurança e avaliação. A API inclui `/rides/map/search`, `/rides/map/address-search`, `/rides/map/reverse`, `/rides/map/route`, `/rides/dispatch/search`, `/rides/driver/availability` e `/matches/{id}/...`.
+
+A tela deve voltar ao mapa após concluir a avaliação; contraste das estrelas em tema claro/escuro deve ser testado. Nenhuma descoberta pública deve revelar endereço residencial exato. Sem GPS ou provedor de rota, mostrar falha real, não posição simulada. Testes em dispositivos físicos, tracking e notificações ainda requerem homologação separada.

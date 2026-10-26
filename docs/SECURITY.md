@@ -25,3 +25,13 @@ A UI administrativa permite revisar evidências, registrar sanção com requestI
 Electron mantém contextIsolation/sandbox, sem nodeIntegration. IPC exige main frame da janela/origem autorizada. Manifesto/ZIP exigem HTTPS, origem idêntica, tamanho limitado e SHA-256; sem redirects. Instalador valida caminhos, entrada ZIP e junções, preserva arquivos não substituídos e mantém backup para rollback. ENTURMA_PORTABLE=1 evita registrar protocolo em execução portátil/testes. Nenhuma chave privada é embutida no app.
 
 Audit de dependências do Expo ainda aponta advisories transitivos em node-forge (ferramenta de assinatura do CLI; versão publicada 1.4.0 sem correção para GHSA-86w9-cpqp-85rv) e decode-uri-component/query-string (GHSA-vcc3-ghjq-m6fr). Não se aplicou downgrade inseguro do Expo sugerido por audit --force. uuid de xcode foi atualizado via override compatível 11.1.1. Reavaliar patches upstream antes da distribuição nativa pública; não anunciar ausência de vulnerabilidades.
+
+---
+
+### Revisão 25/10/2026 — limites demonstráveis
+
+Além de controles de autenticação, rate limits, queries parametrizadas e verificações de upload, o código introduziu RLS default-deny em V62 **para papéis comuns**. Um runtime com papel proprietário/superusuário ou `BYPASSRLS` pode ignorar RLS; é necessário separar papéis e auditar permissões para obter isolamento pelo banco. A autorização por objeto continua obrigatória na API.
+
+Conversas privadas têm E2EE de conteúdo suportado; chat das salas e mídia LiveKit não devem ser descritos como E2EE. `KLIPY_API_KEY` é chave de app acessível ao browser autenticado; não deve ser reutilizada como segredo privilegiado. GIFs externos são servidos pelo provedor. Validar atualização Windows com hash/URL, armazenamento seguro, push, localização temporária e segregação de sessões.
+
+A exportação/exclusão de dados e medidas técnicas não são certificação LGPD. Não prometer ausência absoluta de vazamentos, malware, bugs ou observabilidade completa. Consulte `SECURITY.md` da raiz para reportar vulnerabilidades.
