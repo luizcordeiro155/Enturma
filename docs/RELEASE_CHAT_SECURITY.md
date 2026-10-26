@@ -30,3 +30,11 @@ Esses controles técnicos não constituem certificação de conformidade com a L
 Next e dependências compatíveis foram atualizados com base no audit; jose4j e Bouncy Castle foram atualizados para versões mantidas. Restam alertas transitivos do ferramental Expo para os quais o resolvedor propõe mudanças incompatíveis (decode-uri-component, node-forge e zod da CLI). A distribuição Android oficial usa a WebView gerada e a Web hospedada; esses utilitários Expo não são o servidor público. Manter entradas de build confiáveis e acompanhar correções compatíveis; não usar `npm audit fix --force` para mascarar os alertas.
 
 Gitleaks verificou todo o histórico disponível. As quatro ocorrências eram senhas sintéticas em duas revisões de um teste E2E; somente seus fingerprints exatos foram dispensados. Nenhuma credencial real foi encontrada nessa verificação. O workflow de secrets impede novas ocorrências no Git; o resultado não substitui rotação de qualquer segredo que venha a ser identificado por outros meios.
+
+---
+
+### Atualização posterior — mídia KLIPY e continuidade da proteção
+
+As PRs #103 e #104 acrescentaram mídia KLIPY direto do navegador, fonte de resultados separada da biblioteca pessoal e busca com lupa/paginação (40 por página). O cliente usa app key específica e URLs externas do provedor; evitar re-hospedagem sem permissão. Essas mudanças não convertem mensagens de salas em E2EE e não alteram o cofre criptográfico das mensagens privadas. O número de migrations permanece V63 na análise de 25/10/2026.
+
+Aplique o plano de segurança de RLS com cautela: políticas default-deny não restringem papéis privilegiados. Controles e testes locais não constituem certificação LGPD nem auditoria independente.
