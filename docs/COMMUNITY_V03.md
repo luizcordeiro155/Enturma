@@ -19,3 +19,9 @@ Cards WELCOME/FAREWELL/encerramento mostram contexto acadêmico, avatar, host e 
 ## Preferências
 
 ROOM_MESSAGE, ROOM_NOTICE, FORUM, ACHIEVEMENT, RIDE, FRIEND têm flags inApp/email independentes. Padrão: in-app habilitado, e-mail desabilitado. Outbox recebe categoria; EmailWorker confere novamente antes de enviar. E-mails de segurança não recebem categoria de comunidade e permanecem ativos.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.
