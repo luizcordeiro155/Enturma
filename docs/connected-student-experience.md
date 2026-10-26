@@ -32,3 +32,9 @@ Configuração externa: provedor de IA/visão, SMTP, LiveKit e roteamento já us
 ## Reversão
 
 Reverter aplicação para o release anterior se necessário, preservando tabelas e envelopes novos. Não executar down migrations destrutivas. Os clientes anteriores continuam usando o cofre legado e os endpoints de confirmação de embarque idempotentes. Repor o deployment anterior dos downloads mantém os binários disponíveis; não publicar uma versão Android menor sobre uma maior já instalada.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.
