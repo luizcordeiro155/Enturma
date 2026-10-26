@@ -26,3 +26,9 @@ Rollback: reverter a aplicação preservando V59 e seus dados. O schema é compa
 Testes de integração cobrem conversa, ordem do contexto, pesquisa real do provedor, idempotência, mídia privada, formatos inválidos e privacidade do portfólio. Testes de frontend cobrem gestos do tema, estrelas, convites e deduplicação/supressão de notificações. Playwright percorre notebook, persistência de banner, câmera com frames de um QR gerado pelo backend, confirmação de entrada e avaliação com volta ao mapa.
 
 O teste de notificações usa navegador completo em modo headless: o Chromium Headless Shell não implementa entrega nativa de notificações. Verificação em navegador e export dos apps não substituem homologação de câmera, teclado e notificações em aparelhos físicos.
+
+---
+
+## Nota de atualização — 25/10/2026
+
+Este documento é preservado como registro histórico da implementação original. Para o estado atual da branch `main` até a PR #104, ver [Estado atual](STATUS.md), [Arquitetura](ARCHITECTURE.md), [Banco V1–V63](DATABASE.md), [API](API.md), [Segurança](SECURITY.md), [Mobile 0.3.30](MOBILE.md) e [Desktop 0.3.15](DESKTOP.md). Versões, limites e pendências registrados nesta entrega podem ter sido atualizados posteriormente (KLIPY, Caronas, perfis, chats, Cadernos IA, animações e instaladores). Não interpretar validação de código como homologação completa em produção.
