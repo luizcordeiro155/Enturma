@@ -7,3 +7,9 @@ Componentes: Shell, Button, Field, EmptyState, RoomList, AcademicPicker, Feedbac
 Texto da primeira tela: Seu próximo estudo começa em boa companhia. / Encontre sua matéria, entre em uma turma e aprenda junto. / Vamos encontrar a sua turma / Complete seu perfil acadêmico para começar. / Completar perfil / Salas acontecendo agora / Ainda não há salas abertas. / Escolha uma matéria para começar a primeira turma. / Estudar agora / Seu espaço de estudo.
 
 Desvios funcionais deliberados: esconder convite de onboarding quando concluído; mostrar erros de rede em vez de vazio; links para autenticação em sessão ausente; não renderizar o telefone decorativo da referência dentro da aplicação. Estado vazio é real, não demonstração.
+
+---
+
+## Nota histórica — 25/10/2026
+
+A identidade inicial e a inspeção visual desta etapa permanecem registradas aqui. Para o design/UX atual, considerar temas claro/escuro/sistema, perfis com mural e capa, componentes compartilhados de chat, GIFs KLIPY, animações do livro/Guia em Remotion, Motion de tema/caronas e instalador Windows. As especificações e imagens históricas deste diretório não descrevem por completo o resultado atual; consultar [Estado atual](../STATUS.md), [Arquitetura](../ARCHITECTURE.md), [Mobile](../MOBILE.md) e [Desktop](../DESKTOP.md). Validar contraste, teclado, safe areas e redução de movimento com dispositivos reais.
