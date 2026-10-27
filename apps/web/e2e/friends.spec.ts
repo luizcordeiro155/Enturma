@@ -498,7 +498,7 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   await page.getByRole("button", { name: "Voltar para conversas" }).click();
   await expect(page.locator("#private-sync")).toHaveCount(0);
   const vaultResponse = await page.request.post(
-    "/api/backend/private-account-vault/session", { data: {} },
+    "/api/backend/private-account-vault/session", { data: {}, headers: { Origin: new URL(page.url()).origin } },
   );
   expect(vaultResponse.ok()).toBeTruthy();
   expect(await vaultResponse.text()).not.toContain("E2E-password-long-123");
