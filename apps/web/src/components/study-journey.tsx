@@ -107,7 +107,7 @@ const lessons = [
     title: "Mantenha seus colegas por perto",
     icon: Car,
     body: "Em Amigos, adicione colegas e converse no privado. Em Caronas, ofereça ou solicite uma viagem e acompanhe a busca enquanto navega pelo app.",
-    tip: "Depois do aceite da carona, combine os detalhes na conversa do match. Os chats privados entre amigos usam criptografia de ponta a ponta.",
+    tip: "Depois do aceite da carona, combine os detalhes na conversa do match. As conversas privadas entre amigos são cifradas e sincronizadas pela sua conta.",
     action: "Encontrar amigos",
     href: "/friends",
   },

@@ -1118,10 +1118,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
           </button>
           {mode === "login" ? (
             <>
-              <Link href="/forgot-password">Esqueci minha senha</Link>
+              <Link className="auth-action-link" href="/forgot-password">
+                Esqueci minha senha
+              </Link>
               <p>
                 Ainda não faz parte?{" "}
-                <Link href="/register">Crie sua conta</Link>
+                <Link className="auth-action-link" href="/register">
+                  Crie sua conta <ArrowRight size={15} />
+                </Link>
               </p>
             </>
           ) : (

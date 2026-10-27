@@ -1,3 +1,5 @@
+> Atualização 27/10/2026: conversas privadas usam custódia cifrada por conta para sincronização automática; não anunciar E2EE inacessível ao servidor. A implementação e os limites atuais estão em [Privacidade do chat](CHAT_PRIVACY.md) e [Revisão desta entrega](RELEASE_PUBLIC_START_SECURITY.md).
+
 # Conversas, emojis e navegação
 
 As mensagens de amigos e salas usam o mesmo menu: clique com o botão direito ou nas reticências no computador; toque prolongado ou reticências no celular. O menu oferece cópia, reação, edição da própria mensagem e exclusão. Nas salas também permite responder. Editar e excluir para todos seguem as permissões da API; a moderação da sala mantém sua autorização existente.

@@ -18,8 +18,13 @@ export function backendUrl() {
     throw new Error(
       "API_URL deve ser a origem da API, sem caminho ou credenciais.",
     );
-  if (process.env.VERCEL === "1" && url.protocol !== "https:")
-    throw new Error("API_URL precisa usar HTTPS na Vercel.");
+  const loopback = ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname);
+  if (
+    (process.env.VERCEL === "1" ||
+      (process.env.NODE_ENV === "production" && !loopback)) &&
+    url.protocol !== "https:"
+  )
+    throw new Error("API_URL precisa usar HTTPS em produção.");
   return url.origin;
 }
 

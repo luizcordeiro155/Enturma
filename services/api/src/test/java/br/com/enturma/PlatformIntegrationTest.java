@@ -20,7 +20,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
+@SpringBootTest(properties = "CHAT_ACCOUNT_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 @AutoConfigureMockMvc
 @org.springframework.test.annotation.DirtiesContext(
     classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
@@ -396,6 +396,90 @@ class PlatformIntegrationTest {
   @Autowired ProfileService profiles;
   @Autowired StudyService study;
   @Autowired AccountVaultController accountVault;
+  @Autowired AccountSessionVault accountSessionVault;
+  @Autowired AbandonedAttachmentCleanup abandonedAttachments;
+
+  @Test
+  void accountSessionSyncSurvivesPasswordEpochAndPreservesIdentity() throws Exception {
+    var key = new SocialController.PublicKey("EC", "P-256", "a".repeat(43), "b".repeat(43));
+    social.identity(host, key);
+    var first = (Map<?, ?>) accountSessionVault.session(host);
+    var other = (Map<?, ?>) accountSessionVault.session(member);
+    assertThat(first.get("key")).isNotEqualTo(other.get("key"));
+    var envelope = new AccountVaultController.Envelope(3, 1, key, "c".repeat(16), "d".repeat(128));
+    accountSessionVault.save(host, envelope);
+    assertThatThrownBy(() -> accountSessionVault.save(member, envelope))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> accountSessionVault.save(host, envelope))
+        .isInstanceOf(ApiException.class);
+    db.jdbc.update(
+        "UPDATE app_user SET credential_version=credential_version+1 WHERE id=?", host.id());
+    var restored = (Map<?, ?>) accountSessionVault.session(host);
+    assertThat(restored.get("key")).isEqualTo(first.get("key"));
+    assertThat(restored.get("envelope")).isNotNull();
+    assertThat(((Map<?, ?>) accountSessionVault.session(member)).containsKey("envelope")).isFalse();
+    assertThat(
+            db.one("SELECT sealed_key FROM private_account_session_key WHERE user_id=?", host.id())
+                .get("sealedKey"))
+        .isNotEqualTo(first.get("key"));
+    mvc.perform(post("/api/v1/private-account-vault/session")).andExpect(status().isUnauthorized());
+    db.jdbc.update("UPDATE app_user SET status='DELETED' WHERE id=?", member.id());
+    db.jdbc.update("DELETE FROM private_account_session_key WHERE user_id=?", member.id());
+    assertThatThrownBy(() -> accountSessionVault.session(member)).isInstanceOf(ApiException.class);
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM private_account_session_key WHERE user_id=?)",
+                member.id()))
+        .isFalse();
+  }
+
+  @Test
+  void unpublishedUploadsAreBoundedAndPublishedHistorySurvivesCleanup() {
+    UUID id = room(8);
+    byte[] image = new byte[] {1, 2, 3};
+    UUID used =
+        (UUID) ((Map<?, ?>) chat.upload(host, id, "test.png", "image/png", image)).get("id");
+    chat.send(host, id, "Anexo publicado", null, used);
+    for (int i = 0; i < 10; i++) chat.upload(host, id, "pending.png", "image/png", image);
+    assertThatThrownBy(() -> chat.upload(host, id, "overflow.png", "image/png", image))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("limite de anexos");
+    db.jdbc.update(
+        "UPDATE room_attachment SET created_at=now()-interval '25 hours' WHERE room_id=?", id);
+    abandonedAttachments.clean();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM room_attachment WHERE room_id=?", Integer.class, id))
+        .isEqualTo(1);
+    assertThat(chat.download(host, id, used).body()).isEqualTo(image);
+  }
+
+  @Test
+  void practiceSessionBudgetCannotBeExceededAndExpiredPracticeIsPruned() {
+    db.jdbc.update(
+        "UPDATE academic_entry SET attributes=attributes||'{\"learningArea\":\"IT\"}'::jsonb WHERE"
+            + " id=?",
+        subject);
+    db.jdbc.update(
+        "INSERT INTO word_game_session(user_id,challenge_key,mode,difficulty,daily) SELECT ?,"
+            + " 'practice-limit-'||s,'SOLO',1,false FROM generate_series(1,300) s",
+        host.id());
+    assertThatThrownBy(() -> advanced.wordChallenge(host, "SOLO", 1, false))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("limite de treinos");
+    db.jdbc.update(
+        "UPDATE word_game_session SET created_at=now()-interval '31 days' WHERE user_id=? AND NOT"
+            + " daily",
+        host.id());
+    advanced.wordChallenge(host, "SOLO", 1, false);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM word_game_session WHERE user_id=? AND NOT daily",
+                Integer.class,
+                host.id()))
+        .isEqualTo(1);
+  }
+
   @Autowired br.com.enturma.ai.RoomMonitorService monitor;
   @Autowired br.com.enturma.ai.RoomNotebookController roomNotebooks;
   @Autowired ChatService chat;
@@ -1504,67 +1588,109 @@ class PlatformIntegrationTest {
   }
 
   @Autowired ChatMediaController chatMedia;
+
   @Test
   void mediaPresentationPersistsWithoutBypassingAttachmentOwnership() {
     UUID roomId = room(8);
-    byte[] png = Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j/aQAAAAASUVORK5CYII=");
-    UUID attachment = (UUID)((Map<?,?>) chat.upload(host, roomId, "figurinha.png", "image/png", png)).get("id");
-    UUID message = (UUID)((Map<?,?>) chat.send(host, roomId, null, null, attachment, "STICKER")).get("id");
-    assertThat(db.one("SELECT media_kind FROM room_message WHERE id=?", message).get("mediaKind")).isEqualTo("STICKER");
-    assertThatThrownBy(() -> chat.send(host, roomId, "x", null, null, "STICKER")).isInstanceOf(ApiException.class);
-    assertThatThrownBy(() -> chat.send(host, roomId, "x", null, attachment, "HTML")).isInstanceOf(ApiException.class);
+    byte[] png =
+        Base64.getDecoder()
+            .decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j/aQAAAAASUVORK5CYII=");
+    UUID attachment =
+        (UUID) ((Map<?, ?>) chat.upload(host, roomId, "figurinha.png", "image/png", png)).get("id");
+    UUID message =
+        (UUID) ((Map<?, ?>) chat.send(host, roomId, null, null, attachment, "STICKER")).get("id");
+    assertThat(db.one("SELECT media_kind FROM room_message WHERE id=?", message).get("mediaKind"))
+        .isEqualTo("STICKER");
+    assertThatThrownBy(() -> chat.send(host, roomId, "x", null, null, "STICKER"))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> chat.send(host, roomId, "x", null, attachment, "HTML"))
+        .isInstanceOf(ApiException.class);
     study.join(member, roomId);
-    assertThatThrownBy(() -> chat.send(member, roomId, null, null, attachment, "GIF")).isInstanceOf(ApiException.class);
-    var plain = (Map<?,?>)chat.send(host, roomId, "Texto normal", null);
-    assertThat(db.one("SELECT media_kind FROM room_message WHERE id=?", plain.get("id")).get("mediaKind")).isNull();
+    assertThatThrownBy(() -> chat.send(member, roomId, null, null, attachment, "GIF"))
+        .isInstanceOf(ApiException.class);
+    var plain = (Map<?, ?>) chat.send(host, roomId, "Texto normal", null);
+    assertThat(
+            db.one("SELECT media_kind FROM room_message WHERE id=?", plain.get("id"))
+                .get("mediaKind"))
+        .isNull();
   }
+
   @Autowired PersonalDataExport personalExport;
 
   @Test
   void databaseRlsDeniesAnUntrustedRoleEvenAfterAnAccidentalSelectGrant() throws Exception {
-    try(var connection=db.jdbc.getDataSource().getConnection()){
+    try (var connection = db.jdbc.getDataSource().getConnection()) {
       connection.setAutoCommit(false);
-      String role="rls_probe_"+UUID.randomUUID().toString().replace("-","");
-      try(var statement=connection.createStatement()){
-        statement.execute("CREATE ROLE "+role+" NOLOGIN");
-        statement.execute("GRANT USAGE ON SCHEMA public TO "+role);
-        statement.execute("GRANT SELECT ON public.app_user,public.chat_media TO "+role);
-        statement.execute("SET LOCAL ROLE "+role);
-        try(var result=statement.executeQuery("SELECT count(*) FROM public.app_user")){
-          result.next();assertThat(result.getInt(1)).isZero();
+      String role = "rls_probe_" + UUID.randomUUID().toString().replace("-", "");
+      try (var statement = connection.createStatement()) {
+        statement.execute("CREATE ROLE " + role + " NOLOGIN");
+        statement.execute("GRANT USAGE ON SCHEMA public TO " + role);
+        statement.execute("GRANT SELECT ON public.app_user,public.chat_media TO " + role);
+        statement.execute("SET LOCAL ROLE " + role);
+        try (var result = statement.executeQuery("SELECT count(*) FROM public.app_user")) {
+          result.next();
+          assertThat(result.getInt(1)).isZero();
         }
-      } finally { connection.rollback(); }
+      } finally {
+        connection.rollback();
+      }
     }
   }
 
   @Test
   void personalMediaAndExportKeepOwnershipAndSecretsPrivate() throws Exception {
-    byte[] png=Base64.getDecoder().decode("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j/aQAAAAASUVORK5CYII=");
-    var upload=new org.springframework.mock.web.MockMultipartFile("file","figurinha.png","image/png",png);
-    var created=(Map<?,?>)chatMedia.save(host,upload,"STICKER","Minha figurinha");
-    UUID id=(UUID)created.get("id");
-    assertThat(chatMedia.file(host,id).getBody()).isEqualTo(png);
-    assertThatThrownBy(()->chatMedia.file(outsider,id)).isInstanceOf(ApiException.class);
-    assertThatThrownBy(()->chatMedia.favorite(outsider,id,new ChatMediaController.Favorite(false))).isInstanceOf(ApiException.class);
-    chatMedia.delete(outsider,id);
-    assertThat(chatMedia.file(host,id).getBody()).isEqualTo(png);
-    assertThat(((Map<?,?>)chatMedia.save(host,upload,"STICKER","Duplicada")).get("id")).isEqualTo(id);
-    assertThatThrownBy(()->chatMedia.save(host,new org.springframework.mock.web.MockMultipartFile("file","evil.png","image/png","<script>".getBytes()),"STICKER","x")).isInstanceOf(ApiException.class);
-    String exported=new com.fasterxml.jackson.databind.ObjectMapper().writeValueAsString(personalExport.export(host,"account",0).getBody());
-    assertThat(exported).contains(host.id().toString()).doesNotContain("passwordHash","accessHash","refreshHash",outsider.id().toString());
-    assertThatThrownBy(()->personalExport.export(host,"user_session",0)).isInstanceOf(ApiException.class);
-    chatMedia.delete(host,id);
-    assertThatThrownBy(()->chatMedia.file(host,id)).isInstanceOf(ApiException.class);
+    byte[] png =
+        Base64.getDecoder()
+            .decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+j/aQAAAAASUVORK5CYII=");
+    var upload =
+        new org.springframework.mock.web.MockMultipartFile(
+            "file", "figurinha.png", "image/png", png);
+    var created = (Map<?, ?>) chatMedia.save(host, upload, "STICKER", "Minha figurinha");
+    UUID id = (UUID) created.get("id");
+    assertThat(chatMedia.file(host, id).getBody()).isEqualTo(png);
+    assertThatThrownBy(() -> chatMedia.file(outsider, id)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () -> chatMedia.favorite(outsider, id, new ChatMediaController.Favorite(false)))
+        .isInstanceOf(ApiException.class);
+    chatMedia.delete(outsider, id);
+    assertThat(chatMedia.file(host, id).getBody()).isEqualTo(png);
+    assertThat(((Map<?, ?>) chatMedia.save(host, upload, "STICKER", "Duplicada")).get("id"))
+        .isEqualTo(id);
+    assertThatThrownBy(
+            () ->
+                chatMedia.save(
+                    host,
+                    new org.springframework.mock.web.MockMultipartFile(
+                        "file", "evil.png", "image/png", "<script>".getBytes()),
+                    "STICKER",
+                    "x"))
+        .isInstanceOf(ApiException.class);
+    String exported =
+        new com.fasterxml.jackson.databind.ObjectMapper()
+            .writeValueAsString(personalExport.export(host, "account", 0).getBody());
+    assertThat(exported)
+        .contains(host.id().toString())
+        .doesNotContain("passwordHash", "accessHash", "refreshHash", outsider.id().toString());
+    assertThatThrownBy(() -> personalExport.export(host, "user_session", 0))
+        .isInstanceOf(ApiException.class);
+    chatMedia.delete(host, id);
+    assertThatThrownBy(() -> chatMedia.file(host, id)).isInstanceOf(ApiException.class);
   }
 
   @Test
   void discoveryNeverRevealsTheInvitationSecret() {
-    UUID id=room(10);
-    db.jdbc.update("UPDATE study_room SET share_code=?,entries_locked=true WHERE id=?",UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase(Locale.ROOT),id);
-    var rows=study.list(outsider,subject,0,false);
-    assertThat(rows).anyMatch(row->id.equals(row.get("id")));
-    assertThat(rows).allMatch(row->!row.containsKey("shareCode") && !row.containsKey("share_code"));
-    assertThatThrownBy(()->study.detail(outsider,id)).isInstanceOf(ApiException.class);
+    UUID id = room(10);
+    db.jdbc.update(
+        "UPDATE study_room SET share_code=?,entries_locked=true WHERE id=?",
+        UUID.randomUUID().toString().replace("-", "").substring(0, 12).toUpperCase(Locale.ROOT),
+        id);
+    var rows = study.list(outsider, subject, 0, false);
+    assertThat(rows).anyMatch(row -> id.equals(row.get("id")));
+    assertThat(rows)
+        .allMatch(row -> !row.containsKey("shareCode") && !row.containsKey("share_code"));
+    assertThatThrownBy(() -> study.detail(outsider, id)).isInstanceOf(ApiException.class);
   }
 
   Actor create(String username) {
@@ -2283,9 +2409,13 @@ class PlatformIntegrationTest {
 
   @Test
   void passwordRecoveryDoesNotDiscloseUnknownEmail() {
-    var recovery=auth.recover("nao-existe@example.test");
+    var recovery = auth.recover("nao-existe@example.test");
     assertThat(auth.recoveryStatus(recovery.trackingToken()).status()).isEqualTo("PENDING");
-    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM email_outbox WHERE recipient=?)","nao-existe@example.test")).isFalse();
+    assertThat(
+            db.exists(
+                "SELECT EXISTS(SELECT 1 FROM email_outbox WHERE recipient=?)",
+                "nao-existe@example.test"))
+        .isFalse();
   }
 
   @Test

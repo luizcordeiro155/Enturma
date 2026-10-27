@@ -1,3 +1,5 @@
+> Atualização 27/10/2026: conversas privadas usam custódia cifrada por conta para sincronização automática; não anunciar E2EE inacessível ao servidor. A implementação e os limites atuais estão em [Privacidade do chat](CHAT_PRIVACY.md) e [Revisão desta entrega](RELEASE_PUBLIC_START_SECURITY.md).
+
 # Histórico do Enturma — 06/10/2026 (ver atualização abaixo)
 
 Este documento resume o estado observado atualmente na branch `main`. Ele substitui descrições antigas baseadas em branches intermediárias de implementação.

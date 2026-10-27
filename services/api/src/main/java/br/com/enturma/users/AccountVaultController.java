@@ -17,11 +17,30 @@ public class AccountVaultController {
   private final Db db;
   private final ObjectMapper json;
   private final PasswordEncoder passwords;
+  private final AccountSessionVault sessionVault;
 
-  public AccountVaultController(Db db, ObjectMapper json, PasswordEncoder passwords) {
+  public AccountVaultController(
+      Db db, ObjectMapper json, PasswordEncoder passwords, AccountSessionVault sessionVault) {
     this.db = db;
     this.json = json;
     this.passwords = passwords;
+    this.sessionVault = sessionVault;
+  }
+
+  @GetMapping("/capabilities")
+  public Object capabilities() {
+    return Map.of("accountSessionSync", sessionVault.enabled());
+  }
+
+  @PostMapping("/session")
+  public Object session(@AuthenticationPrincipal Actor actor) {
+    return sessionVault.session(actor);
+  }
+
+  @PutMapping("/session")
+  public void session(@AuthenticationPrincipal Actor actor, @Valid @RequestBody Envelope envelope)
+      throws Exception {
+    sessionVault.save(actor, envelope);
   }
 
   public record Envelope(
