@@ -12,7 +12,7 @@ test("public presentation has a share image and enters login with an animated CT
   ).toBeVisible();
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    /\/start\/poster\.png$/,
+    /\/start\/poster\.png\?v=2$/,
   );
   const poster = await request.get("/start/poster.png");
   expect(poster.status()).toBe(200);
@@ -20,6 +20,26 @@ test("public presentation has a share image and enters login with an animated CT
   const png = await poster.body();
   expect(png.readUInt32BE(16)).toBe(1200);
   expect(png.readUInt32BE(20)).toBe(630);
+  await expect(
+    page.getByRole("img", { name: /Livro aberto com páginas/ }),
+  ).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .getByRole("img", { name: /Livro aberto com páginas/ })
+        .evaluate((image: HTMLImageElement) => image.naturalWidth),
+    )
+    .toBeGreaterThan(0);
+  const tabs = page.getByRole("tablist", { name: "Conheça os recursos" });
+  await tabs.getByRole("tab", { name: "Cadernos IA" }).click();
+  await expect(page.getByRole("tabpanel")).toContainText("Dê espaço às ideias");
+  await page.keyboard.press("ArrowRight");
+  await expect(tabs.getByRole("tab", { name: "Vida acadêmica" })).toBeFocused();
+  await expect(page.getByRole("tabpanel")).toContainText("Vá além da aula");
+  await page.keyboard.press("Home");
+  await expect(
+    tabs.getByRole("tab", { name: "Salas de estudo" }),
+  ).toHaveAttribute("aria-selected", "true");
   await page.screenshot({
     path: info.outputPath("start-desktop.png"),
     fullPage: true,

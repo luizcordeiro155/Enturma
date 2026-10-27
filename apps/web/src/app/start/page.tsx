@@ -1,5 +1,13 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { StartExperience } from "@/components/start-experience";
+
+const display = localFont({
+  src: "../../../public/intro/comic/ArchivoBlack-Regular.ttf",
+  variable: "--start-display",
+  display: "swap",
+  weight: "400",
+});
 
 export const metadata: Metadata = {
   title: "Enturma — sua faculdade, em companhia",
@@ -15,7 +23,7 @@ export const metadata: Metadata = {
     description: "Sua turma. Seus estudos. Seu Enturma.",
     images: [
       {
-        url: "https://enturma-flax.vercel.app/start/poster.png",
+        url: "https://enturma-flax.vercel.app/start/poster.png?v=2",
         width: 1200,
         height: 630,
         alt: "Enturma — sua faculdade, em companhia",
@@ -24,10 +32,10 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: "summary_large_image",
-    images: ["https://enturma-flax.vercel.app/start/poster.png"],
+    images: ["https://enturma-flax.vercel.app/start/poster.png?v=2"],
   },
 };
 
 export default function StartPage() {
-  return <StartExperience />;
+  return <StartExperience displayClassName={display.variable} />;
 }
