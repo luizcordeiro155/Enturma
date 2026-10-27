@@ -18,6 +18,8 @@ A direção do produto é simples: **menos troca de aplicativos, mais contexto e
 
 ## Estado atual do projeto
 
+A apresentação pública fica em [`/start`](https://enturma-flax.vercel.app/start), com imagem própria para compartilhamento. A [revisão da PR #107](docs/RELEASE_PUBLIC_START_SECURITY.md) registra testes, correções de interface e limites da auditoria. Conversas privadas usam sincronização automática com custódia cifrada na API; consulte o [modelo de privacidade](docs/CHAT_PRIVACY.md), incluindo a recuperação de históricos antigos.
+
 | Área | Situação atual |
 | --- | --- |
 | Web | Implementação principal em Next.js, em uso como referência visual e funcional do ecossistema |

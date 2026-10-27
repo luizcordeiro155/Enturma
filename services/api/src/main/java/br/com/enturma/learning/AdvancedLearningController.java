@@ -67,6 +67,24 @@ public class AdvancedLearningController {
     require(a);
     String normalizedMode = normalizeMode(mode);
     int d = Math.clamp(difficulty, 1, 5);
+    // Serialize allocations per student and bound retained practice state. Scores
+    // and achievements live in separate tables and are not removed here.
+    db.one("SELECT id FROM app_user WHERE id=? FOR UPDATE", a.id());
+    db.jdbc.update(
+        "DELETE FROM word_game_session WHERE user_id=? AND NOT daily AND created_at<now()-interval"
+            + " '30 days'",
+        a.id());
+    if (!daily
+        && db.jdbc.queryForObject(
+                "SELECT count(*) FROM word_game_session WHERE user_id=? AND NOT daily",
+                Integer.class,
+                a.id())
+            >= 300)
+      throw new ApiException(
+          429,
+          "PRACTICE_LIMIT",
+          "Você atingiu o limite de treinos recentes. Continue uma partida aberta ou tente em outro"
+              + " dia.");
     String seed =
         (daily ? LocalDate.now(ZoneOffset.UTC).toString() : "practice-" + UUID.randomUUID())
             + ":"

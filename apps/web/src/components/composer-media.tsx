@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- bounded authenticated media and local GIF assets */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import {
   Smile,
   Sticker,
@@ -55,6 +55,7 @@ export function ComposerMedia({
   const [creating, setCreating] = useState(false);
   const [directSend, setDirectSend] = useState<boolean | null>(null);
   const input = useRef<HTMLInputElement>(null);
+  const panelId = useId();
   const mediaEnabled = Boolean(onFile || onMedia);
   useEffect(() => {
     if (!anchor || !mediaEnabled) return;
@@ -158,7 +159,18 @@ export function ComposerMedia({
                     key={kind}
                     type="button"
                     role="tab"
+                    id={`${panelId}-${kind}`}
+                    aria-controls={panelId}
+                    tabIndex={tab === kind ? 0 : -1}
                     aria-selected={tab === kind}
+                    onKeyDown={(event) => {
+                      if (!["ArrowLeft", "ArrowRight", "Home", "End"].includes(event.key)) return;
+                      event.preventDefault();
+                      const tabs = Array.from(event.currentTarget.parentElement!.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+                      const index = tabs.indexOf(event.currentTarget);
+                      const next = event.key === "Home" ? 0 : event.key === "End" ? tabs.length - 1 : (index + (event.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+                      tabs[next].click(); tabs[next].focus();
+                    }}
                     onClick={() => {
                       setTab(kind);
                       setCreating(false);
@@ -181,6 +193,7 @@ export function ComposerMedia({
                 <X size={18} />
               </button>
             </header>
+            <div className="media-library-panel" role="tabpanel" id={panelId} aria-labelledby={`${panelId}-${tab}`}>
             {tab === "EMOJI" ? (
               <EmojiPicker
                 onSelect={(emoji) => {
@@ -398,6 +411,7 @@ export function ComposerMedia({
             )}
             {error && <p role="alert">{error}</p>}
             {notice && <p role="status">{notice}</p>}
+            </div>
           </div>
         </MessageActionPopover>
       )}

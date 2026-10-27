@@ -96,8 +96,28 @@ export default function PrivacyPage() {
 
       <section>
         <h2>5. Inteligência artificial</h2>
-        <p>A biblioteca pessoal de figurinhas e GIFs armazena cópias que você escolher salvar. Ela é privada à sua conta e pode ser removida item a item. Salvar uma imagem de conversa privada cria uma cópia nesta biblioteca; a biblioteca não utiliza a criptografia ponta a ponta das mensagens.</p>
-        <p>Em Perfil, Privacidade, você pode exportar seu cadastro, portfólio, fontes e conversas dos cadernos em JSON. Os arquivos de imagem e documentos são listados na exportação e podem ser baixados nos respectivos recursos. Para solicitar outros dados ou exercer seus direitos, utilize o canal de contato desta política.</p>
+        <p>
+          A biblioteca pessoal de figurinhas e GIFs armazena cópias que você
+          escolher salvar. Ela é privada à sua conta e pode ser removida item a
+          item. Salvar uma imagem de conversa privada cria uma cópia nesta
+          biblioteca, fora do envelope cifrado da mensagem.
+        </p>
+        <p>
+          As conversas privadas são cifradas no dispositivo. Para abri-las após
+          login em outros aparelhos, inclusive após recuperação de senha, o
+          serviço mantém uma cópia cifrada da identidade das conversas e protege
+          sua chave com uma chave própria da API. O serviço pode recuperar essa
+          proteção para a conta autenticada; esse modelo não oferece
+          criptografia ponta a ponta inacessível ao servidor. A IA não recebe as
+          conversas privadas entre amigos.
+        </p>
+        <p>
+          Em Perfil, Privacidade, você pode exportar seu cadastro, portfólio,
+          fontes e conversas dos cadernos em JSON. Os arquivos de imagem e
+          documentos são listados na exportação e podem ser baixados nos
+          respectivos recursos. Para solicitar outros dados ou exercer seus
+          direitos, utilize o canal de contato desta política.
+        </p>
         <p>
           Quando você usa um recurso de IA, o conteúdo necessário para atender à
           solicitação pode ser enviado ao provedor de IA configurado pelo

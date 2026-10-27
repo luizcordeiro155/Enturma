@@ -30,6 +30,7 @@ export function ExperienceControls() {
   const dialog = useRef<HTMLDialogElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const changed = useRef(false);
+  useEffect(() => () => clearTimeout(timer.current), []);
   useEffect(() => {
     let active = true;
     let cached = defaults;

@@ -49,7 +49,9 @@ public class RequestSecurity extends OncePerRequestFilter {
                               List.of(new SimpleGrantedAuthority("ROLE_" + actor.role())))));
     var current = SecurityContextHolder.getContext().getAuthentication();
     // Match the decoded path used by Spring MVC, including percent-encoded letters.
-    String route = org.springframework.web.util.UriUtils.decode(req.getRequestURI(), java.nio.charset.StandardCharsets.UTF_8);
+    String route =
+        org.springframework.web.util.UriUtils.decode(
+            req.getRequestURI(), java.nio.charset.StandardCharsets.UTF_8);
     boolean pendingAllowed =
         route.startsWith("/api/v1/auth/")
             || route.equals("/api/v1/account/privacy/export")
@@ -99,7 +101,9 @@ public class RequestSecurity extends OncePerRequestFilter {
       }
     }
     if ((!Set.of("GET", "HEAD", "OPTIONS").contains(req.getMethod())
-            || route.equals("/api/v1/auth/recovery-status") || route.equals("/api/v1/account/privacy/export"))
+            || route.equals("/api/v1/auth/recovery-status")
+            || route.equals("/api/v1/account/privacy/export")
+            || route.equals("/api/v1/learning/advanced/words/challenge"))
         && route.startsWith("/api/")) {
       var authentication = SecurityContextHolder.getContext().getAuthentication();
       String subject =
@@ -112,7 +116,16 @@ public class RequestSecurity extends OncePerRequestFilter {
       int limit = 90;
       int windowSeconds = 60;
 
-      if (uri.equals("/api/v1/account/privacy/export")) {
+      if (uri.equals("/api/v1/learning/advanced/words/challenge")) {
+        prefix = "word-challenge:";
+        limit = 20;
+      } else if (uri.matches("/api/v1/study-rooms/[^/]+/messages/attachments")) {
+        prefix = "room-chat-upload:";
+        limit = 8;
+      } else if (uri.equals("/api/v1/private-account-vault/session")) {
+        prefix = "account-chat-sync:";
+        limit = 20;
+      } else if (uri.equals("/api/v1/account/privacy/export")) {
         prefix = "privacy-export:";
         limit = 60;
       } else if (uri.equals("/api/v1/auth/login")) {

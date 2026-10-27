@@ -3,7 +3,10 @@ import dynamic from "next/dynamic";
 import { BookOpen } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { launchRemainingMs, LAUNCH_FALLBACK_MS } from "@/lib/launch-performance";
+import {
+  launchRemainingMs,
+  LAUNCH_FALLBACK_MS,
+} from "@/lib/launch-performance";
 
 type Scene = "app" | "ride";
 
@@ -32,7 +35,9 @@ export function LaunchSplash({
     <div className="enturma-launch-scene" role="status">
       <LaunchPlayer ride={ride} onReady={onReady} />
       <strong>{ride ? "Seu próximo trajeto começa junto." : "enturma."}</strong>
-      <span>{ride ? "Caronas da sua comunidade" : "Sua faculdade. Seu universo."}</span>
+      <span>
+        {ride ? "Caronas da sua comunidade" : "Sua faculdade. Seu universo."}
+      </span>
       {children}
     </div>
   );
@@ -49,14 +54,21 @@ export function AppLaunch() {
   const visibleFrom = useRef<number | null>(null);
   const closing = useRef(false);
   const mounted = useRef(true);
-  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
-  const fallbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const closeTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
+  const fallbackTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const fade = useRef<Animation | undefined>(undefined);
   const [scene, setScene] = useState<Scene | null>(null);
 
   const finish = useCallback(() => {
     clearTimeout(closeTimer.current);
     clearTimeout(fallbackTimer.current);
+    // Retain the final transparent frame until React removes the layer. Canceling
+    // a forwards-filled animation first briefly repaints its opaque base style.
+    if (layer.current) layer.current.style.opacity = "0";
     fade.current?.cancel();
     fade.current = undefined;
     activeScene.current = null;
@@ -83,9 +95,11 @@ export function AppLaunch() {
       ],
       { duration: 340, easing: "ease-out", fill: "forwards" },
     );
-    void fade.current.finished.then(() => {
-      if (mounted.current) finish();
-    }).catch(() => {});
+    void fade.current.finished
+      .then(() => {
+        if (mounted.current) finish();
+      })
+      .catch(() => {});
   }, [finish]);
 
   const pauseClock = useCallback(() => {
@@ -101,7 +115,13 @@ export function AppLaunch() {
   }, []);
 
   const scheduleClose = useCallback(() => {
-    if (!ready.current || closing.current || !activeScene.current || document.hidden) return;
+    if (
+      !ready.current ||
+      closing.current ||
+      !activeScene.current ||
+      document.hidden
+    )
+      return;
     clearTimeout(closeTimer.current);
     visibleFrom.current = performance.now();
     closeTimer.current = setTimeout(close, remaining.current);
@@ -116,8 +136,11 @@ export function AppLaunch() {
   // Navigating between protected pages must never unmount an opening mid-frame.
   useEffect(() => {
     if (
-      !/^\/(home|rooms|profile|settings|friends|notebooks|caronas|forum|portfolio|onboarding|admin|challenges)(\/|$)/.test(path)
-    ) return;
+      !/^\/(home|rooms|profile|settings|friends|notebooks|caronas|forum|portfolio|onboarding|admin|challenges)(\/|$)/.test(
+        path,
+      )
+    )
+      return;
     const timer = setTimeout(() => {
       if (activeScene.current) return;
       const start = (kind: Scene) => {
@@ -178,13 +201,14 @@ export function AppLaunch() {
 
   if (!scene) return null;
   return (
-    <div ref={layer} className="enturma-launch-overlay" data-launch-scene={scene}>
+    <div
+      key={scene}
+      ref={layer}
+      className="enturma-launch-overlay"
+      data-launch-scene={scene}
+    >
       <LaunchSplash ride={scene === "ride"} onReady={playerReady} />
-      <button
-        type="button"
-        className="enturma-launch-skip"
-        onClick={close}
-      >
+      <button type="button" className="enturma-launch-skip" onClick={close}>
         Continuar
       </button>
     </div>

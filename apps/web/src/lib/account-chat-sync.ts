@@ -2,6 +2,7 @@ import { api } from "./api";
 import {
   createIdentity,
   decryptAccountIdentity,
+  decryptIdentityVault,
   encryptAccountIdentity,
   prepareAccountWrappingKey,
   publicFields,
@@ -10,6 +11,7 @@ import {
   storeIdentity,
   type AccountIdentityVault,
   type Identity,
+  type IdentityVault,
 } from "./private-chat-crypto";
 
 export type AccountVaultState = {
@@ -24,9 +26,24 @@ export async function prepareChatAfterLogin(password: string) {
   );
   if (user.credentialVersion)
     await prepareAccountWrappingKey(password, user.id, user.credentialVersion);
+  // Try the old vault with this successful login only. Never replace lost keys.
+  if (!(await readIdentity(user.id))) {
+    const old = await api<{ envelope: IdentityVault }[]>("/private-vault", {
+      cache: "no-store",
+    });
+    if (old[0]?.envelope) {
+      const recovered = await decryptIdentityVault(
+        old[0].envelope,
+        password,
+        user.id,
+      ).catch(() => undefined);
+      if (recovered) await storeIdentity(user.id, recovered);
+    }
+  }
+  await synchronizeAccountIdentity(user.id);
 }
 
-export async function synchronizeAccountIdentity(
+async function synchronizePasswordIdentity(
   user: string,
 ): Promise<{ identity: Identity; synced: boolean }> {
   const prepare = async () => {
@@ -65,7 +82,7 @@ export async function synchronizeAccountIdentity(
     if (!local) {
       if (registered.length)
         throw Error(
-          "Conclua a migração das conversas abaixo usando o dispositivo original, sua antiga senha das conversas ou um backup cifrado.",
+          "O histórico antigo ainda não possui uma cópia sincronizada. Sua identidade e suas mensagens foram preservadas; restaure uma cópia de segurança para recuperar esse histórico.",
         );
       local = await createIdentity();
       await api("/private-identity", {
@@ -103,7 +120,102 @@ export async function synchronizeAccountIdentity(
     }
     return { identity: local, synced: false };
   };
-  return navigator.locks
-    ? navigator.locks.request(`enturma-private-identity:${user}`, prepare)
-    : prepare();
+  return prepare();
+}
+
+type SessionVault = {
+  epoch: number;
+  key: string;
+  envelope?: AccountIdentityVault;
+};
+const pending = new Map<
+  string,
+  Promise<{ identity: Identity; synced: boolean }>
+>();
+
+export function synchronizeAccountIdentity(
+  user: string,
+): Promise<{ identity: Identity; synced: boolean }> {
+  const existing = pending.get(user);
+  if (existing) return existing;
+  const prepare = async () => {
+    const capabilities = await api<{ accountSessionSync: boolean }>(
+      "/private-account-vault/capabilities",
+      { cache: "no-store" },
+    ).catch((error) => {
+      if ((error as { status?: number }).status === 404)
+        return { accountSessionSync: false };
+      throw error;
+    });
+    if (!capabilities.accountSessionSync)
+      return synchronizePasswordIdentity(user);
+    const state = await api<SessionVault>("/private-account-vault/session", {
+      method: "POST",
+      body: "{}",
+    });
+    const keyBytes = Uint8Array.from(atob(state.key), (c) => c.charCodeAt(0));
+    if (keyBytes.length !== 32 || state.epoch !== 1)
+      throw Error("Proteção de sincronização inválida.");
+    const wrapping = {
+      epoch: 1,
+      key: await crypto.subtle.importKey("raw", keyBytes, "AES-GCM", false, [
+        "encrypt",
+        "decrypt",
+      ]),
+    };
+    keyBytes.fill(0);
+    const registered = await api<{ publicKey: JsonWebKey }[]>(
+      "/private-identity",
+      { cache: "no-store" },
+    );
+    const verify = (identity: Identity) => {
+      if (
+        registered.length &&
+        JSON.stringify(publicFields(identity.publicKey)) !==
+          JSON.stringify(publicFields(registered[0].publicKey))
+      )
+        throw Error(
+          "A identidade sincronizada não corresponde à sua conta. O histórico foi preservado.",
+        );
+      return identity;
+    };
+    if (state.envelope) {
+      const restored = verify(
+        await decryptAccountIdentity(state.envelope, wrapping, user),
+      );
+      await storeIdentity(user, restored);
+      return { identity: restored, synced: true };
+    }
+    let local = await readIdentity(user);
+    if (!local) local = (await synchronizePasswordIdentity(user)).identity;
+    verify(local);
+    const envelope = await encryptAccountIdentity(local, wrapping, user);
+    try {
+      await api("/private-account-vault/session", {
+        method: "PUT",
+        body: JSON.stringify(envelope),
+      });
+    } catch (error) {
+      if ((error as { status?: number }).status !== 409) throw error;
+      const current = await api<SessionVault>(
+        "/private-account-vault/session",
+        { method: "POST", body: "{}" },
+      );
+      if (!current.envelope) throw error;
+      local = verify(
+        await decryptAccountIdentity(current.envelope, wrapping, user),
+      );
+      await storeIdentity(user, local);
+    }
+    return { identity: local, synced: true };
+  };
+  const task = (async () =>
+    navigator.locks
+      ? await navigator.locks.request(
+          `enturma-private-identity:${user}`,
+          prepare,
+        )
+      : await prepare())().finally(() => pending.delete(user));
+  pending.set(user, task);
+  return task;
 }

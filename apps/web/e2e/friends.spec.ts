@@ -2,7 +2,7 @@ import { test } from "./student-fixture";
 import { authenticate } from "./session";
 import { expect, type Page } from "@playwright/test";
 import { randomUUID } from "node:crypto";
-test("amizade, perfil público e conversa ponta a ponta entre dois navegadores", async ({
+test("amizade, perfil público e conversa cifrada sincronizada entre navegadores", async ({
   page,
   browser,
   request,
@@ -30,7 +30,6 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
 
   async function initializeConversationKeys(p: Page) {
     await p.goto("/friends");
-    await expect(p.locator("#private-sync")).toBeVisible();
     await p.getByText("Chaves e backup das conversas").click();
     await expect(
       p.getByRole("button", { name: "Baixar backup cifrado" }),
@@ -497,17 +496,11 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
       .getByText("Resposta protegida", { exact: true }),
   ).toBeVisible();
   await page.getByRole("button", { name: "Voltar para conversas" }).click();
-  const sync = page.locator("#private-sync");
-  await sync
-    .getByLabel("Senha da sua conta", { exact: true })
-    .fill("E2E-password-long-123");
-  await sync
-    .getByRole("button", { name: "Vincular conversas à conta" })
-    .click();
-  await expect(sync).toContainText("Seu login abre as conversas");
-  const vaultResponse = await page.request.get(
-    "/api/backend/private-account-vault",
+  await expect(page.locator("#private-sync")).toHaveCount(0);
+  const vaultResponse = await page.request.post(
+    "/api/backend/private-account-vault/session", { data: {}, headers: { Origin: new URL(page.url()).origin } },
   );
+  expect(vaultResponse.ok()).toBeTruthy();
   expect(await vaultResponse.text()).not.toContain("E2E-password-long-123");
   const clean = await browser.newContext();
   const fresh = await clean.newPage();
@@ -516,9 +509,7 @@ test("amizade, perfil público e conversa ponta a ponta entre dois navegadores",
   await fresh.locator('input[name="password"]').fill("E2E-password-long-123");
   await fresh.getByRole("button", { name: "Entrar", exact: true }).click();
   await expect(fresh).toHaveURL(/\/friends/);
-  await expect(fresh.locator("#private-sync")).toContainText(
-    "Seu login abre as conversas",
-  );
+  await expect(fresh.locator("#private-sync")).toHaveCount(0);
   await expect(
     fresh.getByLabel("Senha da sua conta", { exact: true }),
   ).toHaveCount(0);

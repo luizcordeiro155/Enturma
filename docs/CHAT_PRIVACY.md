@@ -20,11 +20,13 @@ Remover uma amizade exige confirmação e remove o histórico cifrado daquela co
 
 ## Sincronização entre navegadores e dispositivos
 
-Em **Amigos → Conversas em todos os dispositivos**, o usuário ativa a sincronização uma vez no navegador que já tem sua chave. Cria uma senha exclusiva das conversas (12–256 caracteres), diferente da senha de login. Em outro dispositivo, entra na mesma conta e usa **Desbloquear conversas** com essa senha. O histórico, a identidade e o código de segurança continuam iguais. Após desbloquear, a chave fica no IndexedDB do novo navegador e não precisa ser digitada a cada página.
+Com `CHAT_ACCOUNT_MASTER_KEY`, a sincronização ocorre automaticamente após login ou abertura de Amigos, sem senha adicional. `POST /api/v1/private-account-vault/session` libera a proteção exclusivamente para o ator autenticado, sem cache. V64 guarda uma chave aleatória por conta sob AES-GCM, com IV aleatório e AAD vinculado ao ID da conta; a identidade privada continua cifrada no envelope. O serviço pode recuperar essa proteção: **não anunciar E2EE inacessível ao servidor**. Troca/recuperação da senha preserva a chave. A IA não consulta mensagens privadas.
 
 O cofre v2 usa PBKDF2-SHA256 com 600 mil iterações, salt aleatório de 32 bytes, AES-GCM-256 e IV aleatório de 12 bytes. O AAD vincula versão, ID da conta e chave pública. A senha e a chave privada em claro nunca são enviadas à API. GET/PUT `/api/v1/private-vault` operam exclusivamente sobre o usuário autenticado. A API valida a chave pública contra a identidade existente e permite apenas a criação do cofre, recusando substituições (inclusive simultâneas). Migration V21; nenhuma variável de ambiente nova.
 
-Contas anteriores precisam ativar a sincronização uma vez no dispositivo original ou restaurar um backup cifrado compatível. O sistema não cria outra identidade por cima da existente. A senha de login ou sua recuperação não desbloqueiam o cofre. Troca da senha das conversas/revogação de dispositivos não estão implementadas; o backup cifrado continua disponível como recuperação independente. Dispositivos desbloqueados mantêm acesso enquanto possuem a chave e uma sessão válida.
+V2 descrito acima e V3 (derivado da senha de login) permanecem para compatibilidade. Uma chave local válida ou um cofre antigo que o login consegue abrir migra automaticamente sem recriar a identidade. Se a chave privada antiga nunca foi sincronizada e foi perdida, o servidor não consegue reconstruí-la: preserva histórico/identidade e permite restaurar backup existente. Não simular recuperação ou substituir silenciosamente a chave. O backup manual continua opcional.
+
+Guardar cópia segura de `CHAT_ACCOUNT_MASTER_KEY` somente na API. Alterá-la sem recifrar os registros torna-os ilegíveis; a API falha explicitamente, sem substituir chaves. Rotação requer procedimento de recifragem e restauração testado. Exclusão de conta apaga a chave e serializa requisições concorrentes. Logout não remove cópias já obtidas por um dispositivo autorizado.
 
 ---
 

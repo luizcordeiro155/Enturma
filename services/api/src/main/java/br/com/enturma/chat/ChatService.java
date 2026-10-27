@@ -47,7 +47,8 @@ public class ChatService {
   private Object messageRows(Actor a, UUID room, int page, UUID target) {
     study.member(a, room);
     return db.list(
-        "SELECT m.id,m.user_id,m.body,m.reply_to,m.created_at,m.edited_at,m.deleted_at,m.media_kind,(SELECT"
+        "SELECT"
+            + " m.id,m.user_id,m.body,m.reply_to,m.created_at,m.edited_at,m.deleted_at,m.media_kind,(SELECT"
             + " created_at FROM room_message_hidden h WHERE h.message_id=m.id AND"
             + " h.user_id=?::uuid)"
             + " hidden_at,u.name,u.username,u.accent_color,u.profile_details,u.avatar_bytes IS NOT"
@@ -93,7 +94,8 @@ public class ChatService {
   }
 
   @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
-  public Object send(Actor a, UUID room, String body, UUID reply, UUID attachment, String mediaKind) {
+  public Object send(
+      Actor a, UUID room, String body, UUID reply, UUID attachment, String mediaKind) {
     study.activeLocked(room);
     study.member(a, room);
     if (mediaKind != null && (attachment == null || !Set.of("STICKER", "GIF").contains(mediaKind)))
@@ -108,12 +110,13 @@ public class ChatService {
             "SELECT EXISTS(SELECT 1 FROM room_message WHERE id=? AND room_id=?)", reply, room))
       throw ApiException.invalid("Mensagem de referência inválida.");
     if (attachment != null
-        && !db.exists(
-            "SELECT EXISTS(SELECT 1 FROM room_attachment WHERE id=? AND room_id=? AND"
-                + " uploaded_by=?)",
-            attachment,
-            room,
-            a.id())) throw ApiException.invalid("Anexo inválido.");
+        && db.list(
+                "SELECT id FROM room_attachment WHERE id=? AND room_id=? AND"
+                    + " uploaded_by=? FOR KEY SHARE",
+                attachment,
+                room,
+                a.id())
+            .isEmpty()) throw ApiException.invalid("Anexo inválido.");
     automod.inspect(a, room, text);
     UUID id = UUID.randomUUID();
     db.jdbc.update(
@@ -207,6 +210,35 @@ public class ChatService {
       throw ApiException.invalid("A imagem deve ter no máximo 8 MB.");
     if (!Set.of("image/jpeg", "image/png", "image/webp", "image/gif").contains(mime))
       throw ApiException.invalid("Use JPG, PNG, WEBP ou GIF.");
+    // A transaction-scoped user lock serializes this budget across different rooms.
+    db.jdbc.queryForObject(
+        "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))",
+        Object.class,
+        "room-upload:" + a.id());
+    long owned =
+        db.jdbc.queryForObject(
+            "SELECT COALESCE(sum(file_size),0) FROM room_attachment WHERE uploaded_by=?",
+            Long.class,
+            a.id());
+    long inRoom =
+        db.jdbc.queryForObject(
+            "SELECT COALESCE(sum(file_size),0) FROM room_attachment WHERE room_id=?",
+            Long.class,
+            room);
+    int pending =
+        db.jdbc.queryForObject(
+            "SELECT count(*) FROM room_attachment a WHERE uploaded_by=? AND NOT EXISTS(SELECT 1"
+                + " FROM room_message m WHERE m.attachment_id=a.id)",
+            Integer.class,
+            a.id());
+    if (owned + bytes.length > 256L * 1024 * 1024
+        || inRoom + bytes.length > 512L * 1024 * 1024
+        || pending >= 10)
+      throw new ApiException(
+          429,
+          "ATTACHMENT_QUOTA",
+          "O limite de anexos foi atingido. Envie os anexos pendentes ou aguarde a limpeza dos"
+              + " envios não publicados.");
     String name = fileName == null ? "imagem" : fileName.replaceAll("[\\\\/\\r\\n]", "_");
     if (name.length() > 200) name = name.substring(name.length() - 200);
     UUID id = UUID.randomUUID();

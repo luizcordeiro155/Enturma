@@ -45,6 +45,14 @@ describe("configuração Vercel/SquareCloud", () => {
       false,
     );
   });
+  it("exige HTTPS fora da Vercel também, preservando testes em loopback", () => {
+    vi.stubEnv("NODE_ENV", "production");
+    vi.stubEnv("VERCEL", "");
+    vi.stubEnv("API_URL", "http://api.example.test");
+    expect(backendUrl).toThrow("HTTPS");
+    vi.stubEnv("API_URL", "http://localhost:8080");
+    expect(backendUrl()).toBe("http://localhost:8080");
+  });
   it("só assina o IP de plataforma quando está na Vercel", () => {
     const key = "test-only-proxy-key-not-a-real-secret";
     vi.stubEnv("BFF_PROXY_SECRET", key);
