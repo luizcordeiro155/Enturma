@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
 import {
@@ -9,21 +10,68 @@ import {
   BookOpen,
   Car,
   Check,
-  GraduationCap,
-  MessageCircle,
-  Mic,
-  Plus,
-  Sparkles,
+  Globe,
+  Monitor,
+  Smartphone,
   Users,
 } from "lucide-react";
 import styles from "@/app/start/start.module.css";
 
 /** The public presentation uses local geometry and WAAPI; no video download blocks entry. */
-export function StartExperience() {
+const features = [
+  {
+    id: "salas",
+    label: "Salas de estudo",
+    Icon: Users,
+    title: "Encontre sua turma",
+    text: "Salas por matéria, conversas e chamadas para construir conhecimento em conjunto.",
+    details: ["Conversas", "Chamadas", "Materiais"],
+  },
+  {
+    id: "cadernos",
+    label: "Cadernos IA",
+    Icon: BookOpen,
+    title: "Dê espaço às ideias",
+    text: "Reúna fontes nos Cadernos IA, tire dúvidas e apresente seus próprios projetos no portfólio.",
+    details: ["Suas fontes", "Suas perguntas", "Novas descobertas"],
+  },
+  {
+    id: "comunidade",
+    label: "Vida acadêmica",
+    Icon: Car,
+    title: "Vá além da aula",
+    text: "Conheça estudantes, compartilhe conquistas e combine caronas com sua comunidade.",
+    details: ["Amizades", "Conquistas", "Caronas"],
+  },
+] as const;
+
+export function StartExperience({
+  displayClassName = "",
+}: {
+  displayClassName?: string;
+}) {
   const router = useRouter();
   const root = useRef<HTMLElement>(null);
   const transition = useRef<Animation | null>(null);
   const [entering, setEntering] = useState(false);
+  const [selected, setSelected] = useState(0);
+  const featurePanel = useRef<HTMLDivElement>(null);
+  const feature = features[selected];
+  useEffect(() => {
+    if (
+      matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.reducedMotion === "true"
+    )
+      return;
+    const animation = featurePanel.current?.animate(
+      [
+        { opacity: 0.55, transform: "translateY(8px)" },
+        { opacity: 1, transform: "translateY(0)" },
+      ],
+      { duration: 240, easing: "cubic-bezier(.22,1,.36,1)" },
+    );
+    return () => animation?.cancel();
+  }, [selected]);
   const [, navigate] = useTransition();
   useEffect(() => {
     const media = matchMedia("(prefers-reduced-motion: reduce)");
@@ -47,7 +95,7 @@ export function StartExperience() {
             element.animate(
               [
                 { transform: "translateY(0)" },
-                { transform: `translateY(${i % 2 ? -9 : 9}px)` },
+                { transform: `translateY(${i % 2 ? -4 : 4}px)` },
                 { transform: "translateY(0)" },
               ],
               {
@@ -108,7 +156,7 @@ export function StartExperience() {
   }
 
   return (
-    <main ref={root} className={styles.page}>
+    <main ref={root} className={`${styles.page} ${displayClassName}`}>
       <header className={styles.header}>
         <Link
           href="/start"
@@ -158,68 +206,39 @@ export function StartExperience() {
               </Link>
             </div>
             <div className={styles.platforms}>
-              <span>Web</span>
-              <i />
-              <span>Windows</span>
-              <i />
-              <span>Android</span>
-            </div>
-          </div>
-          <div
-            className={styles.world}
-            aria-label="Estudar, conversar e compartilhar no Enturma"
-          >
-            <div className={styles.orbit} aria-hidden="true" />
-            <div className={styles.study} data-float>
-              <header>
-                <span className={styles.roomIcon}>
-                  <GraduationCap size={23} />
-                </span>
-                <div>
-                  <strong>Uma matéria. Várias ideias.</strong>
-                  <small>Seu espaço para aprender junto</small>
-                </div>
-                <span className={styles.liveDot} />
-              </header>
-              <div className={styles.book} aria-hidden="true">
-                <div>
-                  <BookOpen size={110} strokeWidth={1} />
-                </div>
-                <span className={styles.bookTab}>enturma.</span>
-              </div>
-              <div className={styles.roomPeople}>
-                <span>Você</span>
-                <span>Sua turma</span>
-                <span>
-                  <Plus size={14} />
-                </span>
-                <Mic size={17} />
-              </div>
-              <footer>
-                <MessageCircle size={17} />
-                <span>Onde as boas perguntas encontram companhia.</span>
-              </footer>
-            </div>
-            <div className={styles.note} data-float>
-              <Sparkles size={22} />
-              <div>
-                <strong>Seu caderno. Sua conversa.</strong>
-                <span>Entenda suas fontes com o Enturma APP.</span>
-              </div>
-            </div>
-            <div className={styles.ride} data-float>
-              <Car size={23} />
               <span>
-                O caminho também
-                <br />
-                <strong>pode ser junto.</strong>
+                <Globe size={15} aria-hidden="true" /> Web
               </span>
-              <ArrowRight size={19} />
-            </div>
-            <div className={styles.bookmark} aria-hidden="true">
-              <BookOpen size={25} />
+              <span>
+                <Monitor size={15} aria-hidden="true" /> Windows
+              </span>
+              <span>
+                <Smartphone size={15} aria-hidden="true" /> Android
+              </span>
             </div>
           </div>
+          <figure className={styles.world}>
+            <div className={styles.artMotion} data-float>
+              <Image
+                src="/start/book-world.webp"
+                alt="Livro aberto com páginas que se encontram, lápis e balão de conversa em uma composição verde e lima."
+                fill
+                sizes="(max-width: 760px) 100vw, 50vw"
+                preload
+                className={styles.art}
+              />
+            </div>
+            <div className={styles.artBrand} aria-hidden="true">
+              <BookOpen size={23} strokeWidth={1.7} /> enturma.
+            </div>
+            <figcaption className={styles.artCaption}>
+              <span>
+                <strong>Uma matéria. Várias ideias.</strong>
+                <span>Seu espaço para aprender junto.</span>
+              </span>
+              <BookOpen size={28} strokeWidth={1.4} aria-hidden="true" />
+            </figcaption>
+          </figure>
         </section>
         <section
           id="descobrir"
@@ -234,31 +253,72 @@ export function StartExperience() {
             </h2>
             <ArrowDown size={28} aria-hidden="true" />
           </div>
-          <div className={styles.features}>
-            <article>
-              <Users size={24} />
-              <h3>Encontre sua turma</h3>
-              <p>
-                Salas por matéria, conversas e chamadas para construir
-                conhecimento em conjunto.
-              </p>
-            </article>
-            <article>
-              <BookOpen size={24} />
-              <h3>Dê espaço às ideias</h3>
-              <p>
-                Reúna fontes nos Cadernos IA, tire dúvidas e apresente seus
-                projetos no portfólio.
-              </p>
-            </article>
-            <article>
-              <Car size={24} />
-              <h3>Vá além da aula</h3>
-              <p>
-                Conheça estudantes, compartilhe conquistas e combine caronas com
-                sua comunidade.
-              </p>
-            </article>
+          <div
+            className={styles.featureTabs}
+            role="tablist"
+            aria-label="Conheça os recursos"
+          >
+            {features.map(({ id, label, Icon }, index) => (
+              <button
+                key={id}
+                id={`start-tab-${id}`}
+                type="button"
+                role="tab"
+                aria-selected={selected === index}
+                aria-controls="start-feature-panel"
+                tabIndex={selected === index ? 0 : -1}
+                onClick={() => setSelected(index)}
+                onKeyDown={(event) => {
+                  const offset =
+                    event.key === "ArrowRight"
+                      ? 1
+                      : event.key === "ArrowLeft"
+                        ? -1
+                        : 0;
+                  if (!offset && event.key !== "Home" && event.key !== "End")
+                    return;
+                  event.preventDefault();
+                  const next =
+                    event.key === "Home"
+                      ? 0
+                      : event.key === "End"
+                        ? features.length - 1
+                        : (index + offset + features.length) % features.length;
+                  setSelected(next);
+                  document
+                    .getElementById(`start-tab-${features[next].id}`)
+                    ?.focus();
+                }}
+              >
+                <Icon size={20} aria-hidden="true" />
+                <span>{label}</span>
+                <ArrowRight size={18} aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+          <div
+            ref={featurePanel}
+            id="start-feature-panel"
+            className={styles.featurePanel}
+            role="tabpanel"
+            aria-labelledby={`start-tab-${feature.id}`}
+            tabIndex={0}
+          >
+            <h3>
+              {feature.title}
+              <span className={styles.dot}>.</span>
+            </h3>
+            <div>
+              <p>{feature.text}</p>
+              <ul>
+                {feature.details.map((detail) => (
+                  <li key={detail}>
+                    <Check size={15} aria-hidden="true" />
+                    {detail}
+                  </li>
+                ))}
+              </ul>
+            </div>
           </div>
           <div className={styles.community}>
             <span>
@@ -277,7 +337,7 @@ export function StartExperience() {
         <nav aria-label="Informações">
           <Link href="/privacidade">Privacidade</Link>
           <Link href="/termos">Termos de uso</Link>
-          <a href="/start/poster.png" target="_blank" rel="noreferrer">
+          <a href="/start/poster.png?v=2" target="_blank" rel="noreferrer">
             Imagem de apresentação
           </a>
         </nav>
