@@ -26,7 +26,13 @@ Base revisada: `7146d3e`. Revisão estática de fronteiras críticas, com 71 arq
 
 ## Validação e implantação
 
-Testes novos: migração, dispositivo sem chave local, adulteração, isolamento, troca da versão da senha, imutabilidade do envelope, exclusão, limites de armazenamento/treinos e preservação de anexos publicados. Playwright cobre apresentação, PNG, login, shell mobile, redução de movimento e temas. O check do commit executa Maven, lint, TypeScript, testes unitários, build, export Android/iOS e E2E; os resultados finais serão registrados antes da entrega.
+Testes novos: migração, dispositivo sem chave local, adulteração, isolamento, troca da versão da senha, imutabilidade do envelope, exclusão, limites de armazenamento/treinos e preservação de anexos publicados. Playwright cobre apresentação, PNG, login, shell mobile, redução de movimento e temas.
+
+Validação local: Maven com 119 testes aprovados; 74 testes Web, 14 Desktop, 4 de contratos e 9 do atualizador aprovados; lint, TypeScript e build Web aprovados. Prévia Vercel `bb8a92e`: PNG real 1200 × 630, CTA chegando ao login, nenhuma exceção JavaScript ou rolagem horizontal em 1440 px e 390 px. Inspeção visual identificou sobreposição entre cartões ilustrados, corrigida com fluxo flexível e espaçamento entre eles.
+
+Os resultados de Maven, lint, TypeScript, testes unitários, build, export Android/iOS e E2E no commit de entrega ficam nos checks da [PR #107](https://github.com/luizcordeiro155/Enturma/pull/107). Os checks remotos, e não a existência de testes no código, são a evidência de aprovação do commit. Não houve homologação física Android/Windows nesta entrega.
+
+CI `bb8a92e`, [execução 40438293903](https://github.com/luizcordeiro155/Enturma/actions/runs/40438293903): **aprovado**, incluindo 119 testes Java sem falhas, 32 E2E aprovados, lint, TypeScript, unitários, build Web, exports Android/iOS e empacotamento SquareCloud. O commit seguinte altera somente o espaçamento da apresentação e a documentação; seus checks ficam na mesma PR.
 
 Backup anterior às migrations com baseline de usuários/sessões/status. Configurar `CHAT_ACCOUNT_MASTER_KEY` (32 bytes aleatórios em base64) apenas na SquareCloud, com cópia segura. Publicar API/V64/V65, conferir health e depois Web. Cliente antigo permanece compatível; novo faz fallback se a capacidade ainda não estiver disponível. Shells Android/Desktop recebem a atualização Web sem novo instalador.
 

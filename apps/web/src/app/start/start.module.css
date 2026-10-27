@@ -122,8 +122,10 @@
 }
 .world {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
   min-width: 0;
-  height: 490px;
   padding: 34px 20px 0 15px;
 }
 .orbit {
@@ -253,9 +255,8 @@
   font-size: 11px;
 }
 .note {
-  position: absolute;
+  position: relative;
   left: -8px;
-  top: 322px;
   display: flex;
   align-items: center;
   gap: 14px;
@@ -276,9 +277,9 @@
   color: #53694c;
 }
 .ride {
-  position: absolute;
+  position: relative;
+  align-self: flex-end;
   right: -10px;
-  bottom: 4px;
   display: flex;
   gap: 18px;
   align-items: center;
@@ -423,7 +424,6 @@
     width: 100%;
     max-width: 500px;
     margin: auto;
-    height: 460px;
     transform: none;
     padding: 20px 15px 0 0;
   }
@@ -431,13 +431,11 @@
     margin-left: 8px;
   }
   .note {
-    top: 305px;
     left: 0;
     width: calc(100% - 22px);
   }
   .ride {
     right: 0;
-    bottom: 0;
   }
   .bookmark {
     right: 0;
