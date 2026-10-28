@@ -1,5 +1,9 @@
 # Chat, chamadas e tempo real
 
+## Limite de escala observado em 28/10/2026
+
+As conexões e a digitação ficam em memória da instância. A reconciliação periódica consulta snapshots; comparar o JSON antes de enviar economiza rede, mas não elimina o trabalho SQL de reconstrução. Os limites de 2.000 conexões por processo, 24 por usuário e 24 quadros/10s são controles de abuso, não benchmark de capacidade. Fanout, revogação e reconexão entre réplicas ainda exigem ensaio distribuído. O [runbook](OPERATIONS_READINESS.md) define métricas e os limites de evidência desta revisão.
+
 ## Chat Web persistente
 
 Mensagens são enviadas via REST autenticado. O WebSocket envia snapshots autorizados para sincronizar participantes; reconexão recupera o histórico no banco. Texto, respostas, imagens e reações não usam E2EE neste fluxo. Ver [privacidade do chat](CHAT_PRIVACY.md).

@@ -1,6 +1,6 @@
 # API v1
 
-Base `/api/v1`. Todos os endpoints, exceto autenticação inicial, health e leitura GET `/catalog/**`, exigem `Authorization: Bearer <access>`. Erros: `timestamp`, `status`, `code`, `message`, `path`, `requestId`.
+Base `/api/v1`. Rotas protegidas exigem `Authorization: Bearer <access>`. As exceções explícitas de `SecurityConfig` incluem autenticação/recuperação/confirmação, health, handshake `/ws` e GET de catálogo, conteúdo público, avatar e banner. O handshake público não autoriza inscrições: o WebSocket autentica a primeira mensagem e valida o escopo. Rotas administrativas exigem ADMIN/SUPER_ADMIN; cada serviço continua responsável pela propriedade/membership do recurso. Erros: `timestamp`, `status`, `code`, `message`, `path`, `requestId`. Esta tabela é uma referência de rotas, não um inventário exaustivo de permissões.
 
 ## Catálogo V2 e aprendizagem
 

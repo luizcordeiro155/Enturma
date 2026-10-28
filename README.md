@@ -18,12 +18,14 @@ A direção do produto é simples: **menos troca de aplicativos, mais contexto e
 
 ## Estado atual do projeto
 
+[Release Candidate e gates](docs/PRODUCTION_READINESS.md) · [Auditoria de dependências](docs/DEPENDENCY_AUDIT.md) · [Operação e rollback](docs/OPERATIONS_READINESS.md) · [Inventário documental](docs/DOCUMENTATION_INDEX.md)
+
 A apresentação pública fica em [`/start`](https://enturma-flax.vercel.app/start), com imagem própria para compartilhamento. A [revisão da PR #107](docs/RELEASE_PUBLIC_START_SECURITY.md) registra testes, correções de interface e limites da auditoria. Conversas privadas usam sincronização automática com custódia cifrada na API; consulte o [modelo de privacidade](docs/CHAT_PRIVACY.md), incluindo a recuperação de históricos antigos.
 
 | Área | Situação atual |
 | --- | --- |
 | Web | Implementação principal em Next.js, em uso como referência visual e funcional do ecossistema |
-| Android | Aplicativo Expo/React Native funcional, atualmente com versão de pacote **0.3.30**, em evolução de paridade e validação |
+| Android | APK distribuído com shell WebView; projeto Expo/React Native **0.3.30** também serve ao builder, com homologação física pendente |
 | Desktop | Aplicativo Electron com instalador e fluxo próprio de atualização; pacote atual **0.3.15** |
 | Backend | API Java 21 / Spring Boot com PostgreSQL, Flyway, autenticação, tempo real e integrações externas |
 | Salas e colaboração | Implementadas: salas, chat, presença, voz, câmera e compartilhamento de tela |
@@ -98,7 +100,7 @@ A localização exata não deve ser exposta como dado público de descoberta. O 
 
 ### Mensagens e mídia
 
-As conversas privadas oferecem criptografia ponta a ponta de conteúdo suportado, diferente das mensagens das salas, que não são E2EE de conteúdo. O compositor compartilhado inclui emojis, respostas, reações, figurinhas, anexos, biblioteca pessoal de mídias e favoritos. A **KLIPY** é uma fonte separada de GIFs com lupa de pesquisa, resultados paginados e botão para carregar mais; as mídias são requisitadas diretamente do provedor, não copiadas para o backend do Enturma. As funcionalidades dependem de disponibilidade e configuração da API. Consulte [Interações](docs/CHAT_INTERACTIONS.md) e [Privacidade do chat](docs/CHAT_PRIVACY.md).
+As conversas privadas cifram o conteúdo no cliente e sincronizam a identidade por custódia cifrada na API. O serviço consegue recuperar as chaves com sua chave mestre; esse modo não é E2EE inacessível ao servidor. Salas e chamadas têm garantias distintas. O compositor compartilhado inclui emojis, respostas, reações, figurinhas, anexos, biblioteca pessoal de mídias e favoritos. A **KLIPY** é uma fonte separada de GIFs com lupa de pesquisa, resultados paginados e botão para carregar mais; as mídias são requisitadas diretamente do provedor, não copiadas para o backend do Enturma. As funcionalidades dependem de disponibilidade e configuração da API. Consulte [Interações](docs/CHAT_INTERACTIONS.md) e [Privacidade do chat](docs/CHAT_PRIVACY.md).
 
 ### Web, Android e Windows
 

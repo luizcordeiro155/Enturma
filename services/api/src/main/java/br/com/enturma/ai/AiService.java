@@ -10,11 +10,13 @@ import org.springframework.stereotype.Service;
 @Service
 public class AiService {
   private final Db db;
+  private final AiQuota quota;
   private final StudyService study;
   private final AiProvider provider;
 
-  public AiService(Db db, StudyService study, AiProvider provider) {
+  public AiService(Db db, StudyService study, AiProvider provider, AiQuota quota) {
     this.db = db;
+    this.quota = quota;
     this.study = study;
     this.provider = provider;
   }
@@ -43,7 +45,7 @@ public class AiService {
     boolean ended =
         db.exists("SELECT EXISTS(SELECT 1 FROM study_room WHERE id=? AND status='ENDED')", room);
 
-    rateLimit(a);
+    quota.consume(a);
     if (!ended
         && mode.equals("QUESTION")
         && !db.exists(
@@ -90,19 +92,6 @@ public class AiService {
             + " id=?",
         room,
         id);
-  }
-
-  private void rateLimit(Actor a) {
-    int used =
-        db.jdbc.queryForObject(
-            "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,1,now()+interval '1 day') ON"
-                + " CONFLICT(bucket) DO UPDATE SET hits=CASE WHEN rate_limit.resets_at<now() THEN 1"
-                + " ELSE rate_limit.hits+1 END,resets_at=CASE WHEN rate_limit.resets_at<now() THEN"
-                + " now()+interval '1 day' ELSE rate_limit.resets_at END RETURNING hits",
-            Integer.class,
-            "ai:" + a.id());
-    if (used > 40)
-      throw new ApiException(429, "AI_LIMIT", "Você atingiu o limite diário da Enturma AI.");
   }
 
   private String promptFor(String question, String mode) {

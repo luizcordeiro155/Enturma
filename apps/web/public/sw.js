@@ -129,11 +129,17 @@ function deliverNotification(data) {
           new URL(client.url).pathname + new URL(client.url).search ===
             target.pathname + target.search,
       );
+      const foreground = windows.find(
+        (client) => client.focused && client.visibilityState === "visible",
+      );
+      if (!reading && foreground)
+        foreground.postMessage({ type: "ENTURMA_NOTIFICATION_SOUND", id: data.id });
       if (!reading)
         await self.registration.showNotification(data.title || "Enturma", {
           body: data.body || "Você tem uma nova notificação.",
           icon: "/pwa/enturma-mobile-official-v6.png",
           badge: "/pwa/enturma-mobile-official-v6.png",
+          silent: Boolean(foreground),
           tag: data.id
             ? "enturma-" + data.id
             : "enturma-" + (data.kind || "notification") + target.pathname,

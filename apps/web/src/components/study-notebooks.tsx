@@ -111,6 +111,10 @@ const modes = [
   },
 ];
 export function StudyNotebooks({ id }: { id?: string }) {
+  return <NotebookWorkspace key={id ?? "list"} id={id} />;
+}
+
+function NotebookWorkspace({ id }: { id?: string }) {
   useStudyActivity("NOTEBOOK", Boolean(id));
   const router = useRouter();
   const [items, setItems] = useState<NotebookIdentity[]>(
@@ -135,6 +139,11 @@ export function StudyNotebooks({ id }: { id?: string }) {
   const [text, setText] = useState("");
   const [url, setUrl] = useState("");
   const [webSearch, setWebSearch] = useState(false);
+  const webSearchLabel = !data?.webSearchEnabled
+    ? "Pesquisa na Web indisponível"
+    : webSearch
+      ? "Pesquisa na Web ativada"
+      : "Ativar pesquisa na Web";
   const [question, setQuestion] = useState("");
   const [sourcesOpen, setSourcesOpen] = useState(false);
   const [compact, setCompact] = useState(false);
@@ -192,18 +201,23 @@ export function StudyNotebooks({ id }: { id?: string }) {
       active = false;
     };
   }, [activeGeneration]);
+  const loadRevision = useRef(0);
   const load = useCallback(async () => {
+    const requested = ++loadRevision.current;
     if (id) {
       const cached = await resilientRead("notebook:" + id, () =>
         api<Notebook>(`/notebooks/${id}`, { cache: "no-store" }),
       );
+      if (requested !== loadRevision.current) return;
       setData(cached.value);
+      if (!cached.value.webSearchEnabled) setWebSearch(false);
       setOffline(cached.offline);
     } else {
       const cached = await resilientRead<{ items: typeof items }>(
         "notebooks:list",
         () => api<{ items: typeof items }>("/notebooks", { cache: "no-store" }),
       );
+      if (requested !== loadRevision.current) return;
       setItems(cached.value.items);
       setOffline(cached.offline);
     }
@@ -224,6 +238,7 @@ export function StudyNotebooks({ id }: { id?: string }) {
       : undefined;
     return () => {
       active = false;
+      loadRevision.current++;
       clearInterval(timer);
     };
   }, [id, load]);
@@ -266,7 +281,7 @@ export function StudyNotebooks({ id }: { id?: string }) {
         mode,
         level,
         sourceIds: selected.map((s) => s.id),
-        webSearch: webSearch && data?.webSearchEnabled,
+        webSearch: Boolean(webSearch && data?.webSearchEnabled),
       });
       setActiveGeneration(r.id);
       setToolsOpen(false);
@@ -905,15 +920,9 @@ export function StudyNotebooks({ id }: { id?: string }) {
                     <button
                       type="button"
                       className="composer-icon-button notebook-web-toggle"
-                      aria-label="Pesquisar também na web"
-                      aria-pressed={webSearch}
-                      title={
-                        data.webSearchEnabled
-                          ? webSearch
-                            ? "Pesquisa Web ativada"
-                            : "Ativar pesquisa Web"
-                          : "Pesquisa Web indisponível"
-                      }
+                      aria-label={webSearchLabel}
+                      aria-pressed={Boolean(webSearch && data.webSearchEnabled)}
+                      title={webSearchLabel}
                       disabled={!data.webSearchEnabled}
                       onPointerDown={(event) => event.preventDefault()}
                       onClick={() => setWebSearch(!webSearch)}

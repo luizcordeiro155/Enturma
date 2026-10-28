@@ -1,5 +1,11 @@
 "use client";
 import { revealChatMessage } from "@/lib/chat-scroll";
+import { watchNotificationBadge } from "@/lib/notification-presentation";
+import {
+  notificationSoundEnabled,
+  playNotificationSound,
+  unlockNotificationSound,
+} from "@/lib/notification-sound";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -78,9 +84,52 @@ export function NotificationsProvider({
   const [inline, setInline] = useState<Notice[]>([]);
   const [error, setError] = useState("");
   const revision = useRef(0);
+  const [sessionEpoch, setSessionEpoch] = useState(0);
   const pending = useRef(false),
     seen = useRef(new Set<string>());
   useAppConnection();
+  useEffect(() => {
+    const reset = () => {
+      revision.current++;
+      pending.current = false;
+      seen.current.clear();
+      setInbox({ items: [], unreadCount: 0 });
+      setInline([]);
+      setError("");
+      setSessionEpoch((value) => value + 1);
+    };
+    window.addEventListener("enturma-session-changed", reset);
+    return () => {
+      revision.current++;
+      window.removeEventListener("enturma-session-changed", reset);
+    };
+  }, []);
+  useEffect(() => {
+    if (isMobileApp() || window.enturmaDesktop) return;
+    const unlock = () => {
+      if (notificationSoundEnabled()) void unlockNotificationSound();
+    };
+    const receive = (event: MessageEvent) => {
+      if (
+        event.data?.type === "ENTURMA_NOTIFICATION_SOUND" &&
+        !document.hidden &&
+        document.hasFocus()
+      )
+        playNotificationSound();
+    };
+    window.addEventListener("pointerdown", unlock);
+    window.addEventListener("keydown", unlock);
+    navigator.serviceWorker?.addEventListener("message", receive);
+    return () => {
+      window.removeEventListener("pointerdown", unlock);
+      window.removeEventListener("keydown", unlock);
+      navigator.serviceWorker?.removeEventListener("message", receive);
+    };
+  }, []);
+  useEffect(
+    () => watchNotificationBadge(inbox.unreadCount),
+    [inbox.unreadCount],
+  );
 
   useEffect(() => {
     const desktop = !!window.enturmaDesktop?.showNotification;
@@ -170,7 +219,7 @@ export function NotificationsProvider({
       window.removeEventListener("focus", refreshNow);
       document.removeEventListener("visibilitychange", refreshNow);
     };
-  }, []);
+  }, [sessionEpoch]);
 
   async function refresh() {
     if (pending.current) return;
@@ -214,9 +263,10 @@ export function NotificationsProvider({
       setInbox(data);
       setError("");
     } catch {
-      setError("Não foi possível atualizar suas notificações.");
+      if (requested === revision.current)
+        setError("Não foi possível atualizar suas notificações.");
     } finally {
-      pending.current = false;
+      if (requested === revision.current) pending.current = false;
     }
   }
   useEffect(() => {
@@ -239,10 +289,12 @@ export function NotificationsProvider({
   useEffect(() => {
     const timer = setTimeout(() => void refresh(), 0);
     return () => clearTimeout(timer);
-  }, []);
+  }, [sessionEpoch]);
   async function read(ids?: string[], all = false) {
+    const requested = revision.current;
     try {
       await post("/notifications/read", { ids, all });
+      if (requested !== revision.current) return;
       setInbox((old) => ({
         ...old,
         items: old.items.map((n) =>
@@ -260,13 +312,17 @@ export function NotificationsProvider({
             ),
       }));
     } catch {
-      setError("Não foi possível marcar como lida. Tente novamente.");
+      if (requested === revision.current)
+        setError("Não foi possível marcar como lida. Tente novamente.");
     }
   }
   async function clear() {
+    const requested = revision.current;
     try {
       await post("/notifications/clear");
+      if (requested !== revision.current) return false;
       revision.current++;
+      pending.current = false;
       setInbox({ items: [], unreadCount: 0 });
       setInline([]);
       setError("");

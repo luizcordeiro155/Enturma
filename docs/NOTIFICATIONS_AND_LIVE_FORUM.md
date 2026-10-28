@@ -1,5 +1,13 @@
 # Links, fórum ao vivo e notificações
 
+## Revisão de 28/10/2026
+
+O título `(n) Enturma` usa a contagem de não lidas da API; zero remove o prefixo. O favicon limita apenas o desenho a 99+, sem inventar números. O contador nativo existente continua separado. Mudanças de metadata da navegação não apagam o badge e troca de sessão limpa o estado anterior.
+
+O som Web é original, opcional e local ao navegador, com teste em Configurações. O AudioContext só é desbloqueado por gesto; não há tentativa de burlar autoplay. O service worker deduplica o evento entre push e realtime e escolhe uma janela visível/focada. Quando ela está lendo a conversa, não há alerta. Em segundo plano, o som depende do sistema/navegador; não há promessa de som customizado com aplicativo fechado. Android/Desktop preservam o mecanismo nativo.
+
+Testes automatizados cobrem contagem, metadata, deduplicação, supressão e áudio sem gesto. Push físico, DND e permissões do SO continuam nos gates de homologação.
+
 Links HTTP/HTTPS e `www.` em textos do fórum, comentários e prévias do início são clicáveis. Links para outro domínio abrem um diálogo com o endereço completo e uma confirmação obrigatória antes da abertura em outra aba. HTML continua sendo tratado como texto e blocos de código não são transformados em links. Esquemas executáveis e URLs com credenciais não viram links.
 
 O WebSocket autenticado aceita o escopo `activity`. Os eventos `forum_changed` e `notifications_changed` contêm somente invalidações e são publicados após commit; notificações são enviadas somente ao destinatário. Cada cliente busca novamente os dados pelos endpoints autenticados. Há reconexão progressiva e consulta periódica de contingência, sem recarregar a página. O fórum preserva o texto em edição e atualiza as páginas já carregadas; a prévia da página inicial também acompanha as mudanças.

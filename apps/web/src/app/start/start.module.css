@@ -1,6 +1,11 @@
 .page {
   --start-ink: #173f35;
   --start-paper: #f8f9f3;
+  --start-muted: #4c6258;
+  --start-accent: #4f6c20;
+  --start-line: #d0dacb;
+  --start-soft: #e5edda;
+  --start-hover: #edf1e6;
   background: var(--start-paper);
   color: var(--start-ink);
   min-height: 100dvh;
@@ -26,7 +31,7 @@
   align-items: center;
   min-height: 100px;
   gap: 24px;
-  border-bottom: 1px solid #dce3d7;
+  border-bottom: 1px solid var(--start-line);
 }
 .brand {
   display: flex;
@@ -62,7 +67,7 @@
   border-radius: 10px;
 }
 .login:hover {
-  background: #eaf0e5;
+  background: var(--start-hover);
 }
 .hero {
   display: grid;
@@ -84,14 +89,14 @@
   margin: 0;
 }
 .copy h1 span {
-  color: #4f6c20;
+  color: var(--start-accent);
 }
 .copy > p {
   font-size: 18px;
   line-height: 1.7;
   max-width: 460px;
   margin: 30px 0;
-  color: #4c6258;
+  color: var(--start-muted);
 }
 .actions {
   display: flex;
@@ -99,7 +104,7 @@
   align-items: center;
   gap: 22px;
 }
-.participate {
+.page .participate {
   display: inline-flex;
   justify-content: space-between;
   align-items: center;
@@ -144,7 +149,7 @@
   align-items: center;
   gap: 22px;
   margin-top: 28px;
-  color: #53675c;
+  color: var(--start-muted);
   font-size: 12px;
 }
 .platforms > span {
@@ -211,7 +216,7 @@
 }
 .discover {
   padding: 54px 0 48px;
-  border-top: 1px solid #dce3d7;
+  border-top: 1px solid var(--start-line);
   scroll-margin-top: 24px;
 }
 .discoverHeading {
@@ -236,7 +241,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
   margin-top: 40px;
-  border-bottom: 1px solid #d0dacb;
+  border-bottom: 1px solid var(--start-line);
   padding-bottom: 12px;
 }
 .featureTabs button {
@@ -250,7 +255,7 @@
   border: 0;
   border-radius: 10px;
   padding: 16px 20px;
-  color: #173f35 !important;
+  color: var(--start-ink) !important;
   background: var(--tab-surface) !important;
   text-align: left;
   font-size: 15px;
@@ -261,10 +266,10 @@
     transform 0.2s;
 }
 .featureTabs button[aria-selected="true"] {
-  --tab-surface: #e5edda;
+  --tab-surface: var(--start-soft);
 }
 .featureTabs button:hover {
-  --tab-surface: #edf1e6;
+  --tab-surface: var(--start-hover);
 }
 .featureTabs button > svg {
   flex: none;
@@ -299,7 +304,7 @@
   max-width: 420px;
 }
 .featurePanel p {
-  color: #4c6258;
+  color: var(--start-muted);
   font-size: 17px;
   line-height: 1.65;
   margin: 0 0 20px;
@@ -318,7 +323,7 @@
   align-items: center;
   gap: 6px;
   font-size: 12px;
-  color: #426342;
+  color: var(--start-muted);
 }
 .community {
   display: flex;
@@ -361,16 +366,16 @@
   justify-content: space-between;
   gap: 24px;
   font-size: 12px;
-  color: #53675c;
+  color: var(--start-muted);
 }
 .footer > span {
   font-weight: 750;
-  color: #173f35;
+  color: var(--start-ink);
 }
 .footer > span > span {
   margin-left: 12px;
   font-weight: 400;
-  color: #53675c;
+  color: var(--start-muted);
 }
 .footer nav {
   display: flex;
@@ -418,7 +423,7 @@
     display: none;
   }
   .header nav {
-    gap: 0;
+    gap: 10px;
   }
   .login {
     gap: 18px;
@@ -585,4 +590,25 @@
   .discover {
     break-inside: avoid;
   }
+}
+
+/* Match the global main/footer specificity so each surface stays in its palette. */
+:global(html[data-theme="dark"]) .page {
+  --start-ink: #edf5ee;
+  --start-paper: #0e1915;
+  --start-muted: #b6cbbd;
+  --start-accent: #d8ef79;
+  --start-line: #344c3d;
+  --start-soft: #263f31;
+  --start-hover: #304c3b;
+  color-scheme: dark;
+  background: var(--start-paper);
+  color: var(--start-ink);
+}
+:global(html[data-theme="dark"]) .page .footer {
+  background: var(--start-paper);
+  color: var(--start-muted);
+}
+.page .community a {
+  color: #173f35;
 }

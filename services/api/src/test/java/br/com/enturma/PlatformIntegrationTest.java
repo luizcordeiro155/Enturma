@@ -72,6 +72,117 @@ class PlatformIntegrationTest {
             org.mockito.ArgumentMatchers.eq(false));
   }
 
+  @Autowired br.com.enturma.learning.AdaptivePracticeController practice;
+  @Autowired br.com.enturma.ai.AiQuota aiQuota;
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
+
+  @Test
+  void adaptivePracticeCannotBypassTheSharedBudget() {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    UUID notebook = (UUID) ((Map<?, ?>) notebooks.create(host, "Fontes de teste")).get("id");
+    notebooks.add(
+        host,
+        notebook,
+        "Fonte",
+        "TEXT",
+        "Uma transação mantém a consistência do banco de dados e agrupa operações atômicas.",
+        null,
+        null);
+    db.jdbc.update(
+        "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,40,now()+interval '1 day')",
+        "ai:" + host.id());
+    assertThatThrownBy(
+            () ->
+                practice.generate(
+                    host,
+                    new br.com.enturma.learning.AdaptivePracticeController.Generate(
+                        null, "Banco de dados", 3)))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("diário");
+    assertThatThrownBy(() -> practice.notebookFlashcards(host, notebook))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("diário");
+    org.mockito.Mockito.verify(aiProvider, org.mockito.Mockito.never())
+        .answer(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyBoolean());
+  }
+
+  @Test
+  void failedPaidPracticeAttemptKeepsItsBudgetAndReleasesItsSlot() {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq("ADAPTIVE_QUIZ"),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenAnswer(
+            invocation -> {
+              assertThat(
+                      org.springframework.transaction.support.TransactionSynchronizationManager
+                          .isActualTransactionActive())
+                  .isFalse();
+              throw new ApiException(503, "AI_UNAVAILABLE", "Falha sintética de provedor");
+            });
+    for (int i = 0; i < 3; i++)
+      assertThatThrownBy(
+              () ->
+                  practice.generate(
+                      host,
+                      new br.com.enturma.learning.AdaptivePracticeController.Generate(
+                          null, "Banco de dados", 3)))
+          .hasMessageContaining("sintética");
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT hits FROM rate_limit WHERE bucket=?", Integer.class, "ai:" + host.id()))
+        .isEqualTo(3);
+  }
+
+  @Test
+  void sharedAiBudgetIsAtomicAcrossConcurrentRequests() throws Exception {
+    db.jdbc.update(
+        "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,39,now()+interval '1 day')",
+        "ai:" + host.id());
+    try (var pool = Executors.newFixedThreadPool(8)) {
+      var tasks = new ArrayList<Callable<Boolean>>();
+      for (int i = 0; i < 8; i++)
+        tasks.add(
+            () -> {
+              try {
+                aiQuota.consume(host);
+                return true;
+              } catch (ApiException e) {
+                return false;
+              }
+            });
+      int accepted = 0;
+      for (var result : pool.invokeAll(tasks)) if (result.get()) accepted++;
+      assertThat(accepted).isEqualTo(1);
+    }
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT hits FROM rate_limit WHERE bucket=?", Integer.class, "ai:" + host.id()))
+        .isEqualTo(40);
+  }
+
+  @Test
+  void queuedBudgetRollsBackIfQueueInsertionCannotCommit() {
+    var template =
+        new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+    template.executeWithoutResult(
+        status -> {
+          aiQuota.reserveQueued(host);
+          status.setRollbackOnly();
+        });
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM rate_limit WHERE bucket=?", Integer.class, "ai:" + host.id()))
+        .isZero();
+  }
+
   @Autowired br.com.enturma.ai.NotebookService notebooks;
   @Autowired br.com.enturma.ai.NotebookMediaController notebookMedia;
 

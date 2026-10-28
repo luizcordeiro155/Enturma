@@ -6,7 +6,7 @@ Senha: BCrypt custo 12, mínimo de 12 caracteres no cadastro, máximo de 72 byte
 
 Web: BFF em `/api/backend` transforma cookies HttpOnly em Authorization Bearer para a API. Cookies têm SameSite=Lax e Secure em produção. Mutações exigem Origin igual a APP_URL. Renovação é serializada no cliente e entre abas por Web Locks quando disponível. `/api/session` GET entrega somente o access token de curta duração para autenticar o WebSocket em memória. Refresh nunca é exposto ao JavaScript da página. Não se usa localStorage para credenciais.
 
-Mobile: SecureStore armazena o par de tokens, e renovação usa uma promise compartilhada. API só aceita Bearer, não cookies; CSRF fica no BFF. CORS e origens de WebSocket são restritos a CORS_ORIGINS.
+No cliente Expo, SecureStore armazena o par de tokens e a renovação usa uma promise compartilhada. O APK WebView distribuído usa cookies e BFF como a Web. A API recebe Bearer; o controle de origem das mutações com cookies fica no BFF. CORS e origens de WebSocket são restritos a CORS_ORIGINS.
 
 ## Primeiro administrador
 
@@ -66,8 +66,8 @@ Login continua retornando a mesma mensagem para e-mail inexistente e senha errad
 
 ---
 
-### Revisão 25/10/2026 — identidade acadêmica e privacidade
+### Revisão 28/10/2026 — identidade acadêmica e privacidade
 
-O `AuthController` inclui `/auth/session-view`, gestão de sessões, recuperação e verificação de e-mail. `AcademicIdentityController` implementa status institucional, e-mail, documento, suporte, revisão e domínios verificados; contas pendentes não devem se fazer passar por `VERIFIED`. `AccountPrivacyController` permite consultar exclusão, agendá-la para **cinco dias**, cancelar o pedido e excluir imediatamente, anonimizando a conta e expurgando dados específicos; não dizer que o registro físico desaparece integralmente. Mudanças de senha e cofre E2EE merecem revisão separada, pois recuperar senha da conta não equivale necessariamente a recuperar a chave privada da conversa.
+O `AuthController` inclui `/auth/session-view`, gestão de sessões, recuperação e verificação de e-mail. `AcademicIdentityController` implementa status institucional, e-mail, documento, suporte, revisão e domínios verificados; contas pendentes não devem se fazer passar por `VERIFIED`. `AccountPrivacyController` permite consultar exclusão, agendá-la para **cinco dias**, cancelar o pedido e excluir imediatamente, anonimizando a conta e expurgando dados específicos; não dizer que o registro físico desaparece integralmente. No modo de custódia por conta, trocar/recuperar a senha preserva a chave sincronizada. Isso depende da chave mestre e do envelope já existentes: identidades antigas nunca sincronizadas e perdidas não podem ser reconstruídas pelo servidor. Não recriar identidade para esconder falha de recuperação; ver [Privacidade do chat](CHAT_PRIVACY.md).
 
 Mantenha cookies e tokens fora de URLs/logs. Revisar autorização servidor e CORS, rate limiting, sessão persistente e novos fluxos de verificação. A aplicação Web usa BFF; não confundir com SecureStore Expo.

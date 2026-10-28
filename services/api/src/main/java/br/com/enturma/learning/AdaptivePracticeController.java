@@ -1,6 +1,7 @@
 package br.com.enturma.learning;
 
 import br.com.enturma.ai.AiProvider;
+import br.com.enturma.ai.AiQuota;
 import br.com.enturma.auth.Actor;
 import br.com.enturma.common.ApiException;
 import br.com.enturma.common.Db;
@@ -9,25 +10,39 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
+import java.util.function.Supplier;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/practice")
 public class AdaptivePracticeController {
   private final Db db;
+  private final AiQuota quota;
+  private final TransactionTemplate transactions;
+  private final Semaphore slots = new Semaphore(2);
+  private final Set<UUID> activeUsers = ConcurrentHashMap.newKeySet();
   private final AiProvider ai;
   private final ObjectMapper json;
 
-  public AdaptivePracticeController(Db db, AiProvider ai, ObjectMapper json) {
+  public AdaptivePracticeController(
+      Db db, AiProvider ai, ObjectMapper json, AiQuota quota, TransactionTemplate transactions) {
     this.db = db;
+    this.quota = quota;
+    this.transactions = transactions;
     this.ai = ai;
     this.json = json;
   }
 
-  public record Generate(UUID subjectId, @Size(max = 160) String topic, @Min(3) @Max(10) int questions) {}
+  public record Generate(
+      UUID subjectId, @Size(max = 160) String topic, @Min(3) @Max(10) int questions) {}
+
   public record AnswerItem(@NotNull UUID questionId, @Min(0) @Max(7) int selectedIndex) {}
+
   public record Submit(@NotEmpty @Size(max = 10) List<@Valid AnswerItem> answers) {}
 
   @GetMapping("/diagnostic")
@@ -36,8 +51,8 @@ public class AdaptivePracticeController {
         db.list(
             "SELECT q.topic,count(*) attempts,count(*) FILTER(WHERE x.correct) correct,"
                 + " round(100.0*count(*) FILTER(WHERE x.correct)/greatest(count(*),1),1) accuracy"
-                + " FROM practice_attempt x JOIN practice_question q ON q.id=x.question_id"
-                + " WHERE x.user_id=? GROUP BY q.topic ORDER BY accuracy ASC,attempts DESC LIMIT 12",
+                + " FROM practice_attempt x JOIN practice_question q ON q.id=x.question_id WHERE"
+                + " x.user_id=? GROUP BY q.topic ORDER BY accuracy ASC,attempts DESC LIMIT 12",
             a.id());
     var totals =
         db.one(
@@ -48,7 +63,6 @@ public class AdaptivePracticeController {
   }
 
   @PostMapping("/generate")
-  @Transactional
   public Object generate(@AuthenticationPrincipal Actor a, @Valid @RequestBody Generate r) {
     if (!ai.enabled())
       throw new ApiException(503, "AI_UNAVAILABLE", "A Enturma AI ainda não está disponível.");
@@ -67,9 +81,10 @@ public class AdaptivePracticeController {
                 "estudos gerais");
     var weak =
         db.list(
-            "SELECT q.topic,round(100.0*count(*) FILTER(WHERE x.correct)/greatest(count(*),1),1) accuracy"
-                + " FROM practice_attempt x JOIN practice_question q ON q.id=x.question_id"
-                + " WHERE x.user_id=? GROUP BY q.topic HAVING count(*)>=2 ORDER BY accuracy ASC LIMIT 4",
+            "SELECT q.topic,round(100.0*count(*) FILTER(WHERE x.correct)/greatest(count(*),1),1)"
+                + " accuracy FROM practice_attempt x JOIN practice_question q ON q.id=x.question_id"
+                + " WHERE x.user_id=? GROUP BY q.topic HAVING count(*)>=2 ORDER BY accuracy ASC"
+                + " LIMIT 4",
             a.id());
     String weakText =
         weak.stream()
@@ -91,76 +106,79 @@ public class AdaptivePracticeController {
             + "\"options\":[\"A\",\"B\",\"C\",\"D\"],\"answerIndex\":0,"
             + "\"explanation\":\"...\",\"difficulty\":1}]}. Sem markdown.";
 
-    String raw = ai.answer("", prompt, "ADAPTIVE_QUIZ", false).text().strip();
-    try {
-      JsonNode root = json.readTree(raw);
-      JsonNode questions = root.path("questions");
-      if (!questions.isArray() || questions.isEmpty()) throw new IllegalArgumentException();
+    String raw =
+        generateBounded(a, () -> ai.answer("", prompt, "ADAPTIVE_QUIZ", false)).text().strip();
+    return transactions.execute(
+        status -> {
+          try {
+            JsonNode root = json.readTree(raw);
+            JsonNode questions = root.path("questions");
+            if (!questions.isArray() || questions.isEmpty()) throw new IllegalArgumentException();
 
-      UUID session = UUID.randomUUID();
-      String title = root.path("title").asText("Prática adaptativa").strip();
-      if (title.length() > 180) title = title.substring(0, 180);
-      db.jdbc.update(
-          "INSERT INTO practice_session(id,user_id,subject_id,title,focus_topics)"
-              + " VALUES (?,?,?,?,?::jsonb)",
-          session,
-          a.id(),
-          r.subjectId(),
-          title,
-          json.writeValueAsString(weak));
+            UUID session = UUID.randomUUID();
+            String title = root.path("title").asText("Prática adaptativa").strip();
+            if (title.length() > 180) title = title.substring(0, 180);
+            db.jdbc.update(
+                "INSERT INTO practice_session(id,user_id,subject_id,title,focus_topics)"
+                    + " VALUES (?,?,?,?,?::jsonb)",
+                session,
+                a.id(),
+                r.subjectId(),
+                title,
+                json.writeValueAsString(weak));
 
-      List<Map<String, Object>> publicQuestions = new ArrayList<>();
-      int added = 0;
-      for (JsonNode q : questions) {
-        if (added >= count) break;
-        JsonNode opts = q.path("options");
-        int answer = q.path("answerIndex").asInt(-1);
-        if (!opts.isArray()
-            || opts.size() < 2
-            || opts.size() > 8
-            || answer < 0
-            || answer >= opts.size()) continue;
-        String qp = q.path("prompt").asText("").strip();
-        String explanation = q.path("explanation").asText("").strip();
-        String qt = q.path("topic").asText("Geral").strip();
-        int difficulty = Math.clamp(q.path("difficulty").asInt(2), 1, 5);
-        if (qp.isBlank() || explanation.isBlank()) continue;
+            List<Map<String, Object>> publicQuestions = new ArrayList<>();
+            int added = 0;
+            for (JsonNode q : questions) {
+              if (added >= count) break;
+              JsonNode opts = q.path("options");
+              int answer = q.path("answerIndex").asInt(-1);
+              if (!opts.isArray()
+                  || opts.size() < 2
+                  || opts.size() > 8
+                  || answer < 0
+                  || answer >= opts.size()) continue;
+              String qp = q.path("prompt").asText("").strip();
+              String explanation = q.path("explanation").asText("").strip();
+              String qt = q.path("topic").asText("Geral").strip();
+              int difficulty = Math.clamp(q.path("difficulty").asInt(2), 1, 5);
+              if (qp.isBlank() || explanation.isBlank()) continue;
 
-        UUID id = UUID.randomUUID();
-        db.jdbc.update(
-            "INSERT INTO practice_question(id,session_id,topic,prompt,options,answer_index,explanation,difficulty)"
-                + " VALUES (?,?,?,?,?::jsonb,?,?,?)",
-            id,
-            session,
-            qt.substring(0, Math.min(qt.length(), 120)),
-            qp.substring(0, Math.min(qp.length(), 1800)),
-            json.writeValueAsString(opts),
-            answer,
-            explanation.substring(0, Math.min(explanation.length(), 2400)),
-            difficulty);
-        publicQuestions.add(
-            Map.of(
-                "id", id,
-                "topic", qt,
-                "prompt", qp,
-                "options", json.convertValue(opts, List.class),
-                "difficulty", difficulty));
-        added++;
-      }
-      if (publicQuestions.size() < 3) throw new IllegalArgumentException();
-      return Map.of("id", session, "title", title, "questions", publicQuestions);
-    } catch (Exception e) {
-      throw new ApiException(
-          503, "AI_FORMAT", "A IA não conseguiu montar um simulado válido. Tente novamente.");
-    }
+              UUID id = UUID.randomUUID();
+              db.jdbc.update(
+                  "INSERT INTO"
+                      + " practice_question(id,session_id,topic,prompt,options,answer_index,explanation,difficulty)"
+                      + " VALUES (?,?,?,?,?::jsonb,?,?,?)",
+                  id,
+                  session,
+                  qt.substring(0, Math.min(qt.length(), 120)),
+                  qp.substring(0, Math.min(qp.length(), 1800)),
+                  json.writeValueAsString(opts),
+                  answer,
+                  explanation.substring(0, Math.min(explanation.length(), 2400)),
+                  difficulty);
+              publicQuestions.add(
+                  Map.of(
+                      "id", id,
+                      "topic", qt,
+                      "prompt", qp,
+                      "options", json.convertValue(opts, List.class),
+                      "difficulty", difficulty));
+              added++;
+            }
+            if (publicQuestions.size() < 3) throw new IllegalArgumentException();
+            return Map.of("id", session, "title", title, "questions", publicQuestions);
+          } catch (Exception e) {
+            throw new ApiException(
+                503, "AI_FORMAT", "A IA não conseguiu montar um simulado válido. Tente novamente.");
+          }
+        });
   }
 
   @PostMapping("/{session}/submit")
   @Transactional
   public Object submit(
-      @AuthenticationPrincipal Actor a,
-      @PathVariable UUID session,
-      @Valid @RequestBody Submit r) {
+      @AuthenticationPrincipal Actor a, @PathVariable UUID session, @Valid @RequestBody Submit r) {
     db.one("SELECT id FROM practice_session WHERE id=? AND user_id=?", session, a.id());
     List<Map<String, Object>> results = new ArrayList<>();
     int correct = 0;
@@ -204,9 +222,7 @@ public class AdaptivePracticeController {
   }
 
   @PostMapping("/notebooks/{notebook}/flashcards")
-  @Transactional
-  public Object notebookFlashcards(
-      @AuthenticationPrincipal Actor a, @PathVariable UUID notebook) {
+  public Object notebookFlashcards(@AuthenticationPrincipal Actor a, @PathVariable UUID notebook) {
     db.one("SELECT id FROM study_notebook WHERE id=? AND user_id=?", notebook, a.id());
     var sources =
         db.list(
@@ -223,40 +239,64 @@ public class AdaptivePracticeController {
       if (context.length() > 30000) break;
     }
     String raw =
-        ai.answer(
-                context.toString(),
-                "Crie entre 8 e 15 flashcards de recuperação ativa. Retorne SOMENTE JSON válido"
-                    + " como {\"cards\":[{\"front\":\"pergunta\",\"back\":\"resposta objetiva\"}]}"
-                    + ". Sem markdown.",
-                "FLASHCARDS_STRUCTURED",
-                false)
+        generateBounded(
+                a,
+                () ->
+                    ai.answer(
+                        context.toString(),
+                        "Crie entre 8 e 15 flashcards de recuperação ativa. Retorne SOMENTE JSON"
+                            + " válido como {\"cards\":[{\"front\":\"pergunta\",\"back\":\"resposta"
+                            + " objetiva\"}]}. Sem markdown.",
+                        "FLASHCARDS_STRUCTURED",
+                        false))
             .text()
             .strip();
+    return transactions.execute(
+        status -> {
+          db.one("SELECT id FROM study_notebook WHERE id=? AND user_id=?", notebook, a.id());
+          try {
+            JsonNode cards = json.readTree(raw).path("cards");
+            if (!cards.isArray() || cards.isEmpty()) throw new IllegalArgumentException();
+            int count = 0;
+            for (JsonNode card : cards) {
+              if (count >= 15) break;
+              String front = card.path("front").asText("").strip();
+              String back = card.path("back").asText("").strip();
+              if (front.isBlank() || back.isBlank()) continue;
+              db.jdbc.update(
+                  "INSERT INTO study_flashcard(id,user_id,notebook_id,front,back) VALUES"
+                      + " (?,?,?,?,?)",
+                  UUID.randomUUID(),
+                  a.id(),
+                  notebook,
+                  front.substring(0, Math.min(front.length(), 1200)),
+                  back.substring(0, Math.min(back.length(), 2400)));
+              count++;
+            }
+            if (count == 0) throw new IllegalArgumentException();
+            return Map.of("created", count);
+          } catch (Exception e) {
+            throw new ApiException(
+                503, "AI_FORMAT", "Não foi possível transformar este caderno em flashcards agora.");
+          }
+        });
+  }
+
+  private AiProvider.Answer generateBounded(Actor actor, Supplier<AiProvider.Answer> work) {
+    if (!ai.enabled())
+      throw new ApiException(503, "AI_UNAVAILABLE", "A Enturma AI ainda não está disponível.");
+    if (!slots.tryAcquire())
+      throw new ApiException(429, "AI_BUSY", "A IA está ocupada. Tente novamente em instantes.");
+    boolean registered = false;
     try {
-      JsonNode cards = json.readTree(raw).path("cards");
-      if (!cards.isArray() || cards.isEmpty()) throw new IllegalArgumentException();
-      int count = 0;
-      for (JsonNode card : cards) {
-        if (count >= 15) break;
-        String front = card.path("front").asText("").strip();
-        String back = card.path("back").asText("").strip();
-        if (front.isBlank() || back.isBlank()) continue;
-        db.jdbc.update(
-            "INSERT INTO study_flashcard(id,user_id,notebook_id,front,back) VALUES (?,?,?,?,?)",
-            UUID.randomUUID(),
-            a.id(),
-            notebook,
-            front.substring(0, Math.min(front.length(), 1200)),
-            back.substring(0, Math.min(back.length(), 2400)));
-        count++;
-      }
-      if (count == 0) throw new IllegalArgumentException();
-      return Map.of("created", count);
-    } catch (Exception e) {
-      throw new ApiException(
-          503,
-          "AI_FORMAT",
-          "Não foi possível transformar este caderno em flashcards agora.");
+      registered = activeUsers.add(actor.id());
+      if (!registered)
+        throw new ApiException(429, "AI_PENDING", "Aguarde sua geração atual terminar.");
+      quota.consume(actor);
+      return work.get();
+    } finally {
+      if (registered) activeUsers.remove(actor.id());
+      slots.release();
     }
   }
 }
