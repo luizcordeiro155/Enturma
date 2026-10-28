@@ -149,10 +149,15 @@ export function synchronizeAccountIdentity(
     });
     if (!capabilities.accountSessionSync)
       return synchronizePasswordIdentity(user);
-    const state = await api<SessionVault>("/private-account-vault/session", {
-      method: "POST",
-      body: "{}",
-    });
+    const [state, registered] = await Promise.all([
+      api<SessionVault>("/private-account-vault/session", {
+        method: "POST",
+        body: "{}",
+      }),
+      api<{ publicKey: JsonWebKey }[]>("/private-identity", {
+        cache: "no-store",
+      }),
+    ]);
     const keyBytes = Uint8Array.from(atob(state.key), (c) => c.charCodeAt(0));
     if (keyBytes.length !== 32 || state.epoch !== 1)
       throw Error("Proteção de sincronização inválida.");
@@ -164,10 +169,6 @@ export function synchronizeAccountIdentity(
       ]),
     };
     keyBytes.fill(0);
-    const registered = await api<{ publicKey: JsonWebKey }[]>(
-      "/private-identity",
-      { cache: "no-store" },
-    );
     const verify = (identity: Identity) => {
       if (
         registered.length &&

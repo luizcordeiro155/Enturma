@@ -15,6 +15,7 @@ import {
   Smartphone,
   Users,
 } from "lucide-react";
+import { PublicThemeControl } from "./public-theme-control";
 import styles from "@/app/start/start.module.css";
 
 /** The public presentation uses local geometry and WAAPI; no video download blocks entry. */
@@ -169,6 +170,7 @@ export function StartExperience({
           </span>
         </Link>
         <nav aria-label="Apresentação">
+          <PublicThemeControl compact />
           <a href="#descobrir" className={styles.discoverLink}>
             Conheça o Enturma
           </a>

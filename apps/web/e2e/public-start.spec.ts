@@ -1,5 +1,69 @@
 import { test, expect } from "@playwright/test";
 
+test("Start keeps readable palettes and the latest theme after rapid switching", async ({
+  page,
+}, info) => {
+  await page.goto("/start");
+  const trigger = page.locator(".theme-quick-toggle");
+  for (const [theme, label] of [
+    ["dark", "Escuro"],
+    ["light", "Claro"],
+  ]) {
+    await trigger.hover();
+    await page.getByRole("menuitemradio", { name: label, exact: true }).click();
+    await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
+    await expect(page.locator("html")).not.toHaveClass(
+      /enturma-theme-transition/,
+    );
+    const contrast = await page.locator("#start-title + p").evaluate((node) => {
+      const rgb = (value: string) =>
+        (value.match(/[\d.]+/g) ?? [])
+          .slice(0, 3)
+          .map(Number)
+          .map((v) => {
+            v /= 255;
+            return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+          });
+      const luminance = (value: string) =>
+        rgb(value).reduce(
+          (sum, n, i) => sum + n * [0.2126, 0.7152, 0.0722][i],
+          0,
+        );
+      const fg = luminance(getComputedStyle(node).color);
+      const bg = luminance(
+        getComputedStyle(node.closest("main")!).backgroundColor,
+      );
+      return (Math.max(fg, bg) + 0.05) / (Math.min(fg, bg) + 0.05);
+    });
+    expect(contrast).toBeGreaterThanOrEqual(4.5);
+    await expect(
+      page.getByRole("link", { name: "Quero participar" }),
+    ).toHaveCSS("color", "rgb(23, 63, 53)");
+    await page.screenshot({
+      path: info.outputPath(`start-${theme}.png`),
+      fullPage: true,
+    });
+  }
+  for (const count of [10, 20, 30, 50]) {
+    await trigger.hover();
+    await page.evaluate((count) => {
+      const choices = document.querySelectorAll<HTMLButtonElement>(
+        '[role="menuitemradio"]',
+      );
+      for (let i = 0; i < count; i++)
+        setTimeout(() => choices[i % 2 ? 0 : 1].click(), i * 12);
+    }, count);
+    await page.waitForTimeout(count * 12 + 1600);
+    await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await expect(page.locator("html")).not.toHaveClass(
+      /enturma-theme-transition/,
+    );
+    await expect(page.locator("#start-title")).toBeVisible();
+  }
+  await page.reload();
+  await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+});
+
 test("public presentation has a share image and enters login with an animated CTA", async ({
   page,
   request,

@@ -43,7 +43,11 @@ jobs:
           node-version: '24'
           cache: npm
       - run: mvn -B -f services/api/pom.xml verify
+      - name: Resolved Java dependency audit (OSV)
+        run: node scripts/audit-java-dependencies.mjs
       - run: npm ci
+      - name: Capture npm dependency advisories
+        run: npm audit --json > dist/security/npm-audit.json || test -s dist/security/npm-audit.json
       - run: npm run lint
       - run: npm run typecheck
       - run: npm test
@@ -86,7 +90,10 @@ jobs:
         if: always()
         with:
           name: interface-evidence
-          path: apps/web/test-results/**/*.png
+          path: |
+            apps/web/test-results/**/*.png
+            apps/web/test-results/**/*.json
+            dist/security/
           if-no-files-found: ignore
       - uses: actions/upload-artifact@v4
         if: failure()

@@ -4,6 +4,12 @@ import Link from "next/link";
 import { Award, ShieldAlert, X } from "lucide-react";
 import { api, post } from "@/lib/api";
 import type { Achievement } from "./profile-showcase";
+import {
+  notificationSoundEnabled,
+  setNotificationSoundEnabled,
+  unlockNotificationSound,
+  playNotificationSound,
+} from "@/lib/notification-sound";
 
 type Penalty = {
   id: string;
@@ -199,65 +205,64 @@ export function CommunityFeedback() {
                 ? "aguardando análise da Enturma AI"
                 : visiblePenalty.status === "CONFIRMED"
                   ? "penalidade mantida"
-                  : visiblePenalty.status}.
-              {visiblePenalty.reviewNote
-                ? ` ${visiblePenalty.reviewNote}`
-                : ""}
+                  : visiblePenalty.status}
+              .
+              {visiblePenalty.reviewNote ? ` ${visiblePenalty.reviewNote}` : ""}
             </p>
           ) : null}
 
           {!visiblePenalty.appeal ? (
-                      <form
-                        onSubmit={async (event) => {
-                          event.preventDefault();
-                          const reason = String(
-                            new FormData(event.currentTarget).get("reason") ?? "",
-                          ).trim();
-                          try {
-                            const result = await post<AppealDecision>(
-                              `/moderation/${visiblePenalty.id}/appeal`,
-                              { reason },
-                            );
-                            setStatus(
-                              result.revoked
-                                ? "Recurso aceito pela Enturma AI. Penalidade removida."
-                                : result.analysis,
-                            );
-                            if (result.revoked) {
-                              setPenalties((old) =>
-                                old.filter((item) => item.id !== visiblePenalty.id),
-                              );
-                            } else {
-                              setPenalties((old) =>
-                                old.map((item) =>
-                                  item.id === visiblePenalty.id
-                                    ? {
-                                        ...item,
-                                        appeal: reason,
-                                        status: result.status,
-                                        reviewNote: result.analysis,
-                                      }
-                                    : item,
-                                ),
-                              );
+            <form
+              onSubmit={async (event) => {
+                event.preventDefault();
+                const reason = String(
+                  new FormData(event.currentTarget).get("reason") ?? "",
+                ).trim();
+                try {
+                  const result = await post<AppealDecision>(
+                    `/moderation/${visiblePenalty.id}/appeal`,
+                    { reason },
+                  );
+                  setStatus(
+                    result.revoked
+                      ? "Recurso aceito pela Enturma AI. Penalidade removida."
+                      : result.analysis,
+                  );
+                  if (result.revoked) {
+                    setPenalties((old) =>
+                      old.filter((item) => item.id !== visiblePenalty.id),
+                    );
+                  } else {
+                    setPenalties((old) =>
+                      old.map((item) =>
+                        item.id === visiblePenalty.id
+                          ? {
+                              ...item,
+                              appeal: reason,
+                              status: result.status,
+                              reviewNote: result.analysis,
                             }
-                          } catch (error) {
-                            setStatus((error as Error).message);
-                          }
-                        }}
-                      >
-                        <label>
-                          Recorrer da penalidade
-                          <textarea
-                            name="reason"
-                            required
-                            minLength={20}
-                            maxLength={2000}
-                            placeholder="Explique claramente o contexto e por que a penalidade deve ser removida."
-                          />
-                        </label>
-                        <button>Enviar para análise da Enturma AI</button>
-                      </form>
+                          : item,
+                      ),
+                    );
+                  }
+                } catch (error) {
+                  setStatus((error as Error).message);
+                }
+              }}
+            >
+              <label>
+                Recorrer da penalidade
+                <textarea
+                  name="reason"
+                  required
+                  minLength={20}
+                  maxLength={2000}
+                  placeholder="Explique claramente o contexto e por que a penalidade deve ser removida."
+                />
+              </label>
+              <button>Enviar para análise da Enturma AI</button>
+            </form>
           ) : (
             <p className="penalty-appeal-closed">
               Você já utilizou o recurso desta penalidade.
@@ -270,7 +275,6 @@ export function CommunityFeedback() {
           )}
 
           <p role="status">{status}</p>
-
         </section>
       ) : null}
     </>
@@ -297,10 +301,12 @@ type Preference = {
 
 export function NotificationPreferences() {
   const [items, setItems] = useState<Preference[]>([]);
+  const [sound, setSound] = useState(false);
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
 
   useEffect(() => {
+    queueMicrotask(() => setSound(notificationSoundEnabled()));
     api<Preference[]>("/notifications/preferences")
       .then(setItems)
       .catch((e) => setStatus(e.message));
@@ -327,6 +333,40 @@ export function NotificationPreferences() {
   return (
     <section className="notification-preferences">
       <h2>Como você recebe novidades</h2>
+      <fieldset>
+        <legend>Som neste navegador</legend>
+        <label className="check-row">
+          <input
+            type="checkbox"
+            checked={sound}
+            onChange={(event) => {
+              const enabled = event.target.checked;
+              setSound(enabled);
+              setNotificationSoundEnabled(enabled);
+              if (enabled) void unlockNotificationSound();
+            }}
+          />
+          Toque breve quando uma notificação chegar com o Enturma em foco
+        </label>
+        <button
+          type="button"
+          className="secondary"
+          onClick={async () => {
+            const ready = await unlockNotificationSound();
+            setStatus(
+              ready && playNotificationSound(true)
+                ? "Som de teste reproduzido."
+                : "O navegador não liberou o áudio. Verifique as permissões de som.",
+            );
+          }}
+        >
+          Testar som
+        </button>
+        <small>
+          Em segundo plano e nos aplicativos, o som segue as configurações do
+          sistema.
+        </small>
+      </fieldset>
       <p>
         Escolha separadamente o que aparece dentro do Enturma, chega por push no
         celular ou PC ou é enviado por e-mail. E-mails de segurança, confirmação

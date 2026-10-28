@@ -6,6 +6,7 @@ function worker(
 ) {
   const handlers: Record<string, ((e: unknown) => void)[]> = {};
   const stored = new Map<string, unknown>();
+  const windows = clients.map((c) => ({ ...c, postMessage: vi.fn() }));
   const showNotification = vi.fn(async (_title: string, _options: unknown) => {
     void _title;
     void _options;
@@ -26,8 +27,7 @@ function worker(
         (handlers[name] ??= []).push(fn);
       },
       clients: {
-        matchAll: async () =>
-          clients.map((c) => ({ ...c, postMessage: vi.fn() })),
+        matchAll: async () => windows,
       },
       registration: { showNotification },
     },
@@ -44,7 +44,7 @@ function worker(
       fn({ ...event, waitUntil: (p: Promise<unknown>) => tasks.push(p) });
     await Promise.all(tasks);
   }
-  return { showNotification, send };
+  return { showNotification, send, windows };
 }
 test("Web Push displays with an unrelated focused page and deduplicates across realtime and push", async () => {
   const w = worker([
@@ -66,6 +66,12 @@ test("Web Push displays with an unrelated focused page and deduplicates across r
     data: { type: "ENTURMA_SHOW_NOTIFICATION", data },
   });
   expect(w.showNotification).toHaveBeenCalledTimes(1);
+  expect(
+    w.windows[0].postMessage.mock.calls.filter(
+      ([message]) => message.type === "ENTURMA_NOTIFICATION_SOUND",
+    ),
+  ).toHaveLength(1);
+  expect(w.showNotification.mock.calls[0]?.[1]).toMatchObject({ silent: true });
 });
 test("focused conversation suppresses its alert; unfocused visible tab does not", async () => {
   const data = { id: "account:124", href: "/friends?chat=123" };
@@ -78,6 +84,11 @@ test("focused conversation suppresses its alert; unfocused visible tab does not"
   ]);
   await focused.send("push", { data: { json: () => data } });
   expect(focused.showNotification).not.toHaveBeenCalled();
+  expect(
+    focused.windows[0].postMessage.mock.calls.filter(
+      ([message]) => message.type === "ENTURMA_NOTIFICATION_SOUND",
+    ),
+  ).toHaveLength(0);
   const unfocused = worker([
     {
       url: "https://enturma.test/friends?chat=123",
@@ -87,6 +98,9 @@ test("focused conversation suppresses its alert; unfocused visible tab does not"
   ]);
   await unfocused.send("push", { data: { json: () => data } });
   expect(unfocused.showNotification).toHaveBeenCalledTimes(1);
+  expect(unfocused.showNotification.mock.calls[0]?.[1]).toMatchObject({
+    silent: false,
+  });
 });
 test("notification links cannot navigate to another site", async () => {
   const w = worker();

@@ -13,14 +13,17 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class NotebookService {
   private final Db db;
+  private final AiQuota quota;
   private final AiProvider ai;
   private final NotebookSources sources;
   private final ObjectMapper json;
   private final ExecutorService workers = Executors.newFixedThreadPool(2);
   private final Semaphore slots = new Semaphore(2);
 
-  public NotebookService(Db db, AiProvider ai, NotebookSources sources, ObjectMapper json) {
+  public NotebookService(
+      Db db, AiProvider ai, NotebookSources sources, ObjectMapper json, AiQuota quota) {
     this.db = db;
+    this.quota = quota;
     this.ai = ai;
     this.sources = sources;
     this.json = json;
@@ -136,7 +139,7 @@ public class NotebookService {
         if (!ai.enabled())
           throw new ApiException(
               503, "AI_UNAVAILABLE", "A leitura de imagens precisa da IA configurada.");
-        quota(a);
+        quota.consume(a);
       } else if (!title.toLowerCase(Locale.ROOT).matches(".*\\.(pdf|txt|md|docx)$"))
         throw ApiException.invalid("Use PDF, DOCX, TXT, MD, JPG, PNG ou WEBP.");
       long stored =
@@ -282,7 +285,7 @@ public class NotebookService {
           .append("\nEnturma APP: ")
           .append(excerpt(limit((String) g.get("answer"), recent ? 6000 : 1800), question));
     }
-    quota(a);
+    quota.consume(a);
     db.jdbc.update(
         "INSERT INTO"
             + " notebook_generation(id,notebook_id,question,mode,level,context,citations,web_search)"
@@ -297,19 +300,6 @@ public class NotebookService {
         webSearch);
     db.jdbc.update("UPDATE study_notebook SET updated_at=now() WHERE id=?", notebook);
     return Map.of("id", id);
-  }
-
-  private void quota(Actor a) {
-    int used =
-        db.jdbc.queryForObject(
-            "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,1,now()+interval '1 day') ON"
-                + " CONFLICT(bucket) DO UPDATE SET hits=CASE WHEN rate_limit.resets_at<now() THEN 1"
-                + " ELSE rate_limit.hits+1 END,resets_at=CASE WHEN rate_limit.resets_at<now() THEN"
-                + " now()+interval '1 day' ELSE rate_limit.resets_at END RETURNING hits",
-            Integer.class,
-            "ai:" + a.id());
-    if (used > 40)
-      throw new ApiException(429, "AI_LIMIT", "Limite diário de 40 solicitações de IA atingido.");
   }
 
   private String encode(Object value) {

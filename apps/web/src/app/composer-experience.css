@@ -479,3 +479,17 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+.enturma-message-composer
+  .notebook-web-toggle[aria-pressed="true"]:not(:disabled) {
+  color: #173f35 !important;
+  background: #d8ef79 !important;
+  box-shadow: inset 0 0 0 2px #8cac3e;
+}
+.enturma-message-composer .notebook-web-toggle:focus-visible {
+  outline: 2px solid var(--room-ink);
+  outline-offset: 3px;
+}
+.enturma-message-composer .notebook-web-toggle:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
