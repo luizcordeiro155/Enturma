@@ -1,5 +1,6 @@
 "use client";
 import { useStudyActivity } from "@/lib/use-study-activity";
+import { useRoomBrowserViewport } from "@/lib/use-room-browser-viewport";
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -54,6 +55,7 @@ export function RoomView({ id }: { id: string }) {
       : "chat",
   );
   const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
+  useRoomBrowserViewport(section === "chat");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [connected, setConnected] = useState(false);
