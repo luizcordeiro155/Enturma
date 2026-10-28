@@ -100,7 +100,7 @@ A localização exata não deve ser exposta como dado público de descoberta. O 
 
 ### Mensagens e mídia
 
-As conversas privadas oferecem criptografia ponta a ponta de conteúdo suportado, diferente das mensagens das salas, que não são E2EE de conteúdo. O compositor compartilhado inclui emojis, respostas, reações, figurinhas, anexos, biblioteca pessoal de mídias e favoritos. A **KLIPY** é uma fonte separada de GIFs com lupa de pesquisa, resultados paginados e botão para carregar mais; as mídias são requisitadas diretamente do provedor, não copiadas para o backend do Enturma. As funcionalidades dependem de disponibilidade e configuração da API. Consulte [Interações](docs/CHAT_INTERACTIONS.md) e [Privacidade do chat](docs/CHAT_PRIVACY.md).
+As conversas privadas cifram o conteúdo no cliente e sincronizam a identidade por custódia cifrada na API. O serviço consegue recuperar as chaves com sua chave mestre; esse modo não é E2EE inacessível ao servidor. Salas e chamadas têm garantias distintas. O compositor compartilhado inclui emojis, respostas, reações, figurinhas, anexos, biblioteca pessoal de mídias e favoritos. A **KLIPY** é uma fonte separada de GIFs com lupa de pesquisa, resultados paginados e botão para carregar mais; as mídias são requisitadas diretamente do provedor, não copiadas para o backend do Enturma. As funcionalidades dependem de disponibilidade e configuração da API. Consulte [Interações](docs/CHAT_INTERACTIONS.md) e [Privacidade do chat](docs/CHAT_PRIVACY.md).
 
 ### Web, Android e Windows
 

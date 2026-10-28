@@ -4,7 +4,7 @@ Cobertura de inventário e links locais; não é homologação funcional de todo
 
 | Arquivo | Tratamento nesta revisão |
 | --- | --- |
-| [CONTRIBUTING.md](../CONTRIBUTING.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | Revisado e atualizado com evidências atuais |
 | [README.md](../README.md) | Revisado e atualizado com evidências atuais |
 | [SECURITY.md](../SECURITY.md) | Revisado e atualizado com evidências atuais |
 | [apps/desktop/README.md](../apps/desktop/README.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
@@ -20,28 +20,28 @@ Cobertura de inventário e links locais; não é homologação funcional de todo
 | [docs/ACADEMIC_IMPORTS.md](ACADEMIC_IMPORTS.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/ACADEMIC_PROVIDERS.md](ACADEMIC_PROVIDERS.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/ACADEMIC_VERIFICATION.md](ACADEMIC_VERIFICATION.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
-| [docs/AI.md](AI.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
-| [docs/API.md](API.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
-| [docs/ARCHITECTURE.md](ARCHITECTURE.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
-| [docs/AUTHENTICATION.md](AUTHENTICATION.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
+| [docs/AI.md](AI.md) | Revisado e atualizado com evidências atuais |
+| [docs/API.md](API.md) | Revisado e atualizado com evidências atuais |
+| [docs/ARCHITECTURE.md](ARCHITECTURE.md) | Revisado e atualizado com evidências atuais |
+| [docs/AUTHENTICATION.md](AUTHENTICATION.md) | Revisado e atualizado com evidências atuais |
 | [docs/CARPOOL.md](CARPOOL.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
-| [docs/CHAT_INTERACTIONS.md](CHAT_INTERACTIONS.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
+| [docs/CHAT_INTERACTIONS.md](CHAT_INTERACTIONS.md) | Revisado e atualizado com evidências atuais |
 | [docs/CHAT_PRIVACY.md](CHAT_PRIVACY.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/COMMUNITY_AND_RIDE_UPDATES.md](COMMUNITY_AND_RIDE_UPDATES.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/COMMUNITY_V03.md](COMMUNITY_V03.md) | Histórico preservado; escopo e data próprios |
 | [docs/DATABASE.md](DATABASE.md) | Revisado e atualizado com evidências atuais |
 | [docs/DEPENDENCY_AUDIT.md](DEPENDENCY_AUDIT.md) | Revisado e atualizado com evidências atuais |
-| [docs/DEPLOYMENT.md](DEPLOYMENT.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
+| [docs/DEPLOYMENT.md](DEPLOYMENT.md) | Revisado e atualizado com evidências atuais |
 | [docs/DESKTOP.md](DESKTOP.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/IMPLEMENTATION_PLAN.md](IMPLEMENTATION_PLAN.md) | Histórico preservado; escopo e data próprios |
 | [docs/INTRO_EXPERIENCE.md](INTRO_EXPERIENCE.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/LEARNING.md](LEARNING.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/MOBILE.md](MOBILE.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
-| [docs/NOTIFICATIONS_AND_LIVE_FORUM.md](NOTIFICATIONS_AND_LIVE_FORUM.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
+| [docs/NOTIFICATIONS_AND_LIVE_FORUM.md](NOTIFICATIONS_AND_LIVE_FORUM.md) | Revisado e atualizado com evidências atuais |
 | [docs/OPERATIONS_READINESS.md](OPERATIONS_READINESS.md) | Revisado e atualizado com evidências atuais |
 | [docs/PRODUCTION_READINESS.md](PRODUCTION_READINESS.md) | Revisado e atualizado com evidências atuais |
 | [docs/PWA.md](PWA.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
-| [docs/REALTIME.md](REALTIME.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
+| [docs/REALTIME.md](REALTIME.md) | Revisado e atualizado com evidências atuais |
 | [docs/RELEASE_CHAT_SECURITY.md](RELEASE_CHAT_SECURITY.md) | Histórico preservado; escopo e data próprios |
 | [docs/RELEASE_NATIVE_INSTALLER.md](RELEASE_NATIVE_INSTALLER.md) | Histórico preservado; escopo e data próprios |
 | [docs/RELEASE_PUBLIC_START_SECURITY.md](RELEASE_PUBLIC_START_SECURITY.md) | Histórico preservado; escopo e data próprios |
@@ -49,7 +49,7 @@ Cobertura de inventário e links locais; não é homologação funcional de todo
 | [docs/SQUARECLOUD_GIT.md](SQUARECLOUD_GIT.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/STATUS.md](STATUS.md) | Revisado e atualizado com evidências atuais |
 | [docs/STUDY_JOURNEY.md](STUDY_JOURNEY.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
-| [docs/STUDY_NOTEBOOKS.md](STUDY_NOTEBOOKS.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
+| [docs/STUDY_NOTEBOOKS.md](STUDY_NOTEBOOKS.md) | Revisado e atualizado com evidências atuais |
 | [docs/STUDY_ROOMS.md](STUDY_ROOMS.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/UX_CHAT_CALLS_REFINEMENT.md](UX_CHAT_CALLS_REFINEMENT.md) | Inventariado; revisão funcional limitada ao escopo desta PR |
 | [docs/V0_3_IMPLEMENTATION.md](V0_3_IMPLEMENTATION.md) | Histórico preservado; escopo e data próprios |

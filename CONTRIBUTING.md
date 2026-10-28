@@ -87,7 +87,7 @@ Ao alterar UI:
 
 ## Android
 
-A aplicação nativa fica em `apps/mobile`.
+O workspace Expo fica em `apps/mobile`. O APK distribuído usa a Activity WebView gerada por `deploy/android-download/install-web-shell.cjs`; exportar o workspace Expo não homologa esse APK. As duas rotas de execução exigem configuração e testes próprios, conforme [Mobile](docs/MOBILE.md).
 
 Mudanças devem considerar:
 
@@ -178,6 +178,20 @@ npm run build
 ```
 
 Testes E2E devem usar ambiente e banco exclusivos para testes. Nunca execute suites destrutivas contra produção.
+
+Comandos adicionais usados pela CI, a partir da raiz:
+
+```text
+npm ci
+node scripts/check-doc-links.mjs
+npm run test:e2e -w @enturma/web
+npm run test:updaters
+node scripts/audit-java-dependencies.mjs
+```
+
+A auditoria Java requer Maven no PATH; em Windows pode receber o inventário Maven por `AUDIT_DEPENDENCIES_FILE`. Os E2E exigem API, Web, SMTP de teste e `E2E_DATABASE_URL`; use o provisionamento de `.github/workflows/ci.yml` como referência. O ensaio de restore é restrito ao PostgreSQL sintético de CI. Não reutilize credenciais de produção.
+
+Em `apps/mobile`, `npx expo export --platform android` e `npx expo export --platform ios` validam bundles. Na raiz, `npm run dist:desktop:win` gera o instalador sem publicar; instalação, upgrade, rollback e assinatura precisam de homologação separada. Não há script que certifique capacidade de produção: a medição BFF da suíte é sequencial, com um usuário sintético. Consulte [readiness](docs/PRODUCTION_READINESS.md) e [operação](docs/OPERATIONS_READINESS.md) antes de promover uma release.
 
 ## Pull requests
 
