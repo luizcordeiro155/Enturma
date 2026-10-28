@@ -285,7 +285,7 @@ public class NotebookService {
           .append("\nEnturma APP: ")
           .append(excerpt(limit((String) g.get("answer"), recent ? 6000 : 1800), question));
     }
-    quota.consume(a);
+    quota.reserveQueued(a);
     db.jdbc.update(
         "INSERT INTO"
             + " notebook_generation(id,notebook_id,question,mode,level,context,citations,web_search)"

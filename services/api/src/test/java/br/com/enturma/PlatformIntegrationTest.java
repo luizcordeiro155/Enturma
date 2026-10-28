@@ -74,6 +74,7 @@ class PlatformIntegrationTest {
 
   @Autowired br.com.enturma.learning.AdaptivePracticeController practice;
   @Autowired br.com.enturma.ai.AiQuota aiQuota;
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
 
   @Test
   void adaptivePracticeCannotBypassTheSharedBudget() {
@@ -165,6 +166,21 @@ class PlatformIntegrationTest {
             db.jdbc.queryForObject(
                 "SELECT hits FROM rate_limit WHERE bucket=?", Integer.class, "ai:" + host.id()))
         .isEqualTo(40);
+  }
+
+  @Test
+  void queuedBudgetRollsBackIfQueueInsertionCannotCommit() {
+    var template =
+        new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+    template.executeWithoutResult(
+        status -> {
+          aiQuota.reserveQueued(host);
+          status.setRollbackOnly();
+        });
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM rate_limit WHERE bucket=?", Integer.class, "ai:" + host.id()))
+        .isZero();
   }
 
   @Autowired br.com.enturma.ai.NotebookService notebooks;

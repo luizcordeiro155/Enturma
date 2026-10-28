@@ -26,9 +26,9 @@ Os snapshots oficiais UNA/PUC/UFMG são importados por jobs em lotes, com valida
 
 ---
 
-## Inventário completo das migrations — atualizado em 25/10/2026
+## Inventário completo das migrations — atualizado em 28/10/2026
 
-O repositório contém migrations **V1 a V63**. A presença do arquivo não comprova a aplicação no banco de produção: conferir `flyway_schema_history` antes de divulgar a versão do schema.
+O repositório contém migrations **V1 a V65**. A presença do arquivo não comprova a aplicação no banco de produção: conferir `flyway_schema_history` antes de divulgar a versão do schema.
 
 | Versões | Principais mudanças |
 |---|---|
@@ -45,5 +45,9 @@ O repositório contém migrations **V1 a V63**. A presença do arquivo não comp
 | V61 | Invalidação de convites previamente divulgados |
 | V62 | RLS default-deny para papéis comuns, sem restringir superusuário/BYPASSRLS |
 | V63 | `media_kind` opcional para mensagens com anexo |
+| V64 | Custódia cifrada da chave de sincronização da conta |
+| V65 | Índices de proprietário e referência de anexos de salas |
 
 Não modificar migrations históricas. Antes de qualquer atualização, fazer backup, simular restauração, validar foreign keys e testes com banco isolado. Publicar o backend compatível antes dos clientes que usem novas colunas.
+
+A consulta somente de leitura de 28/10 confirmou Flyway V65. A credencial do pacote disponível ignora RLS; a role efetiva da API em execução ainda deve ser comprovada. [Separação de permissões e restore](OPERATIONS_READINESS.md).

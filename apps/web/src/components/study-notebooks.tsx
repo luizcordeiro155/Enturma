@@ -111,6 +111,10 @@ const modes = [
   },
 ];
 export function StudyNotebooks({ id }: { id?: string }) {
+  return <NotebookWorkspace key={id ?? "list"} id={id} />;
+}
+
+function NotebookWorkspace({ id }: { id?: string }) {
   useStudyActivity("NOTEBOOK", Boolean(id));
   const router = useRouter();
   const [items, setItems] = useState<NotebookIdentity[]>(
@@ -220,8 +224,6 @@ export function StudyNotebooks({ id }: { id?: string }) {
   }, [id]);
   useEffect(() => {
     let active = true;
-    setWebSearch(false);
-    setData(id ? peekApiSnapshot<Notebook>(`/notebooks/${id}`) : undefined);
     const refresh = () => {
       if (active)
         void load().catch((e) => {

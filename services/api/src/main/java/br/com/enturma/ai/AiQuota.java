@@ -18,6 +18,16 @@ public class AiQuota {
 
   @Transactional(propagation = Propagation.REQUIRES_NEW)
   public void consume(Actor actor) {
+    increment(actor);
+  }
+
+  /** Queue insertion and reservation commit together; no second pool connection is needed. */
+  @Transactional(propagation = Propagation.MANDATORY)
+  public void reserveQueued(Actor actor) {
+    increment(actor);
+  }
+
+  private void increment(Actor actor) {
     var hits =
         db.jdbc.queryForList(
             "INSERT INTO rate_limit(bucket,hits,resets_at) VALUES (?,1,now()+interval '1 day')"

@@ -17,6 +17,10 @@ spring:
       ddl-auto: validate
     properties:
       hibernate.jdbc.time_zone: UTC
+  flyway:
+    url: ${FLYWAY_DATABASE_URL:${spring.datasource.url}}
+    user: ${FLYWAY_DATABASE_USERNAME:${spring.datasource.username}}
+    password: ${FLYWAY_DATABASE_PASSWORD:${spring.datasource.password}}
   jackson:
     deserialization:
       fail-on-unknown-properties: true

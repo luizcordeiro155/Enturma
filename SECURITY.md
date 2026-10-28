@@ -46,7 +46,7 @@ Não existe SLA público de resposta. Relatórios são priorizados de acordo com
 A documentação de segurança precisa distinguir proteções existentes de riscos residuais:
 
 - **Autenticação e sessão:** autorização e validação devem ocorrer no backend, com cookies e tokens protegidos. Nenhuma checagem somente visual no frontend é suficiente.
-- **E2EE:** o conteúdo compatível das conversas privadas é criptografado ponta a ponta, mas reações, identificadores e outros metadados podem ter tratamento diferente. O chat das salas **não** recebe a mesma garantia de E2EE.
+- **Conversas privadas:** conteúdo cifrado no cliente com custódia protegida por conta na API para recuperação entre dispositivos. O serviço consegue recuperar chaves com sua chave mestre; portanto não é E2EE inacessível ao servidor. Reações e metadados têm tratamento distinto. Veja [CHAT_PRIVACY](docs/CHAT_PRIVACY.md).
 - **Chamadas:** LiveKit/WebRTC protege o transporte; não se deve alegar E2EE de conteúdo de voz/vídeo sem implementação e testes específicos.
 - **Banco de dados e RLS:** migrations recentes adicionaram políticas de negação por padrão para papéis comuns, mas proprietário, superusuário e papéis `BYPASSRLS` podem ignorar RLS. Manter autorização por usuário no backend e planejar papéis separados para runtime/migrations.
 - **KLIPY:** a integração usa requisições e mídia do navegador ao provedor. A chave de aplicativo entregue ao cliente não pode ser tratada como segredo de backend e jamais deve conceder privilégios administrativos.

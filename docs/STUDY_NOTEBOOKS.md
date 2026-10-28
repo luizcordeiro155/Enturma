@@ -1,5 +1,9 @@
 # Cadernos de estudo e missões diárias
 
+O botão Pesquisa na Web tem estado neutro desligado, verde ligado e indisponível quando o backend não autoriza. `aria-pressed`, título, nome acessível e payload derivam desse mesmo estado. Perder a capacidade ou trocar de caderno desliga a seleção; não há envio de `webSearch=true` sem autorização. O teste de interface substitui apenas a capacidade e intercepta a tentativa de geração com 503, sem simular resposta de IA ou consumir provedor pago. Captura temas claro/escuro e larguras 390/1487.
+
+A reserva de cota e o job de geração são gravados na mesma transação; processamento externo ocorre no worker após commit. A cota diária é compartilhada com salas e exercícios adaptativos. Consultar [auditoria e gates](PRODUCTION_READINESS.md).
+
 `/notebooks` oferece cadernos privados e persistidos, acessíveis a qualquer estudante. Aceita texto, links HTTPS públicos, PDF, DOCX, TXT, MD e imagens JPG/PNG/WEBP. Cada arquivo tem limite de 3 MB; são até 20 fontes por caderno e 20 cadernos por usuário. O conteúdo extraído permanece salvo; os bytes originais são descartados após a extração. PDFs digitalizados sem texto precisam ser enviados como imagens.
 
 O estudante seleciona até dez fontes e pede aulas, resumos, explicações simples, flashcards, quizzes comentados, planos de estudo ou respostas. A primeira fonte pronta inicia uma aula quando o caderno está aberto. As respostas mantêm citações com os trechos usados, histórico, identificador na URL e exportação Markdown. Textos extensos usam uma seleção de trechos; a interface permite consultar o conteúdo extraído completo. Apagar uma fonte não apaga citações já salvas; apagar o caderno remove tudo.

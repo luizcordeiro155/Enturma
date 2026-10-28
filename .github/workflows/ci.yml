@@ -43,9 +43,17 @@ jobs:
           node-version: '24'
           cache: npm
       - run: mvn -B -f services/api/pom.xml verify
+      - name: Rehearse backup restoration on synthetic database
+        env:
+          PGHOST: 127.0.0.1
+          PGUSER: enturma
+          PGPASSWORD: ci-ephemeral-only
+          PGDATABASE: enturma_test
+        run: bash scripts/verify-isolated-restore.sh
       - name: Resolved Java dependency audit (OSV)
         run: node scripts/audit-java-dependencies.mjs
       - run: npm ci
+      - run: node scripts/check-doc-links.mjs
       - name: Capture npm dependency advisories
         run: npm audit --json > dist/security/npm-audit.json || test -s dist/security/npm-audit.json
       - run: npm run lint

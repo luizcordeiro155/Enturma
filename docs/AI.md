@@ -1,5 +1,7 @@
 # Materiais e Enturma AI
 
+Revisão de 28/10: salas, Cadernos e geração adaptativa usam a mesma cota atômica PostgreSQL de 40 solicitações/dia por conta. Na chamada adaptativa direta, a tentativa é confirmada antes do provedor e não é devolvida após falha; o limite é uma execução por usuário e duas por processo. Na fila dos Cadernos, reserva e inserção do job são atômicas. Não há trava global de concorrência adaptativa entre réplicas; não anunciar escalabilidade distribuída comprovada.
+
 A Enturma AI é um tutor acadêmico orientado por fontes. Ela combina materiais privados da sala com a OpenAI Responses API e, opcionalmente, pesquisa na web.
 
 ## Materiais da sala
