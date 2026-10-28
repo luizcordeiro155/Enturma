@@ -147,8 +147,7 @@ test("notebook keeps the conversation and composer visible across themes, phone 
       await expect(send).toBeInViewport();
       await expect(
         page.getByRole("button", {
-          name: "Pesquisar também na web",
-          exact: true,
+          name: /^(Ativar pesquisa na Web|Pesquisa na Web ativada|Pesquisa na Web indisponível)$/,
         }),
       ).toBeInViewport();
       await expect(
