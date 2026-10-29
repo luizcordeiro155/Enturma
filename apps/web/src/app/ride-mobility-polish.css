@@ -1385,3 +1385,39 @@ html[data-enhanced-focus="true"] .ride-unified-search-box:focus-within {
     top: 76px !important;
   }
 }
+
+
+/* Desktop Caronas: profiles, ride history and older ride pages scroll inside
+   their content panel. Keep the navigation fixed, and leave the map untouched. */
+@media (min-width: 761px) {
+  .ride-active-shell > .workspace:has(.ride-profile-page, .ride-page) {
+    min-height: 0 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+  }
+  .ride-active-shell > .workspace > main:has(.ride-profile-page, .ride-page) {
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ride-border) transparent;
+    scroll-padding-bottom: 32px;
+  }
+  .ride-active-shell > .workspace > main:has(.ride-profile-page, .ride-page)::-webkit-scrollbar {
+    width: 6px;
+  }
+  .ride-active-shell > .workspace > main:has(.ride-profile-page, .ride-page)::-webkit-scrollbar-thumb {
+    background: var(--ride-border);
+    border-radius: 99px;
+  }
+  .ride-active-shell > .workspace > main:has(.ride-profile-page, .ride-page)::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .ride-active-shell .ride-profile-page,
+  .ride-active-shell .ride-page {
+    padding-bottom: 68px;
+  }
+}
