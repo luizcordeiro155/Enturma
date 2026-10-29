@@ -79,6 +79,30 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
       );
       await expect(p.getByLabel("Mensagem privada")).toBeEnabled();
     }
+    await page.setViewportSize({ width: 1376, height: 768 });
+    await expect(page.locator(".private-chat")).toBeVisible();
+    const shellMetrics = await page.evaluate(() => {
+      const workspace = document.querySelector(".workspace")!;
+      const chat = document.querySelector(".private-chat")!;
+      const main = document.querySelector(".workspace > main")!;
+      const messageList = document.querySelector(".private-messages")!;
+      const composer = document.querySelector(".private-composer")!;
+      const wr = workspace.getBoundingClientRect(), cr = chat.getBoundingClientRect();
+      return {
+        leftGap: Math.abs(cr.left - wr.left),
+        rightGap: Math.abs(cr.right - wr.right),
+        documentOverflow: document.documentElement.scrollHeight - window.innerHeight,
+        mainOverflow: main.scrollHeight - main.clientHeight,
+        composerWithinChat: composer.getBoundingClientRect().bottom <= cr.bottom + 1,
+        messageScroll: getComputedStyle(messageList).overflowY,
+      };
+    });
+    expect(shellMetrics.leftGap).toBeLessThan(2);
+    expect(shellMetrics.rightGap).toBeLessThan(2);
+    expect(shellMetrics.documentOverflow).toBeLessThanOrEqual(2);
+    expect(shellMetrics.mainOverflow).toBeLessThanOrEqual(2);
+    expect(shellMetrics.composerWithinChat).toBe(true);
+    expect(shellMetrics.messageScroll).toBe("auto");
     const send = async (text: string) => {
       await page.getByLabel("Mensagem privada").fill(text);
       await page
