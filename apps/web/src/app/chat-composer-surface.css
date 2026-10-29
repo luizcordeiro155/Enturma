@@ -1,0 +1,63 @@
+/* Chat composer surface polish
+ * One quiet surface in every client: desktop Web, desktop app, mobile Web
+ * and Android WebView. The rounded inner row is the ONLY framed control.
+ * Intentionally avoid position, bottom, height, transform and IME variables:
+ * the existing browser/native keyboard positioning is already approved. */
+
+/* Strip the external frame/raised panel, not the actual input border. */
+.room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
+.room-active-shell .room-section-call .call-chat-pane .persistent-composer.enturma-message-composer,
+.private-chat .private-composer.enturma-message-composer,
+html[data-enturma-ime="true"] .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
+html[data-enturma-ime="true"] .private-chat .private-composer.enturma-message-composer {
+  box-sizing: border-box !important;
+  border: 0 !important;
+  border-radius: 0 !important;
+  outline: 0 !important;
+  box-shadow: none !important;
+  background: transparent !important;
+  background-image: none !important;
+}
+
+/* Desktop used to have a tall rectangular footer with a border line above
+ * the input. Give both room and private chats the same compact footprint. */
+@media (min-width: 761px) {
+  .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer.enturma-message-composer,
+  .private-chat .private-composer.enturma-message-composer {
+    padding: 8px clamp(12px, 1.6vw, 22px) 11px !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-composer .composer-main-row,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer .composer-main-row,
+  .private-chat .private-composer .composer-main-row {
+    min-height: 52px !important;
+    border: 1px solid color-mix(
+      in srgb, var(--room-accent, var(--accent)) 38%,
+      var(--room-border, var(--border))
+    ) !important;
+    border-radius: 26px !important;
+    background: var(--room-subtle, var(--soft)) !important;
+    box-shadow: none !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-composer .composer-main-row:focus-within,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer .composer-main-row:focus-within,
+  .private-chat .private-composer .composer-main-row:focus-within {
+    border-color: var(--room-accent, var(--accent)) !important;
+    box-shadow: 0 0 0 1px color-mix(
+      in srgb, var(--room-accent, var(--accent)) 18%, transparent
+    ) !important;
+  }
+}
+
+/* Mobile room composer already has the desired dimensions. Only the private
+ * conversation needs its outer spacing brought in line with the room. */
+@media (max-width: 760px) {
+  .private-chat .private-composer.enturma-message-composer {
+    padding-top: 6px !important;
+    padding-right: 8px !important;
+    padding-left: 8px !important;
+    gap: 6px !important;
+  }
+}
