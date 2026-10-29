@@ -103,6 +103,14 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     expect(shellMetrics.mainOverflow).toBeLessThanOrEqual(2);
     expect(shellMetrics.composerWithinChat).toBe(true);
     expect(shellMetrics.messageScroll).toBe("auto");
+    const header = page.locator(".private-chat-header");
+    await expect(header).toBeVisible();
+    const headerBounds = await header.boundingBox();
+    expect(headerBounds!.height).toBeLessThanOrEqual(65);
+    const back = header.getByRole("button", { name: "Voltar para conversas" });
+    await expect(back).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    await expect(header.locator(".private-call-buttons button")).toHaveCount(2);
+
     const send = async (text: string) => {
       await page.getByLabel("Mensagem privada").fill(text);
       await page
