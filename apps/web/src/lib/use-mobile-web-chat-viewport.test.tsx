@@ -10,12 +10,14 @@ let originalViewport: PropertyDescriptor | undefined;
 function PrivateChatFixture({ kind = "private" }: { kind?: "private" | "room" }) {
   useMobileWebChatViewport(true, kind);
   return (
-    <div className={kind === "private" ? "mobile-private-chat-open" : "room-section-chat"}>
+    <div className={kind === "room" ? "room-active-shell" : "private-chat-fixture"}>
+      <div className={kind === "private" ? "mobile-private-chat-open" : "room-section-chat"}>
       <form className={kind === "private" ? "private-composer enturma-message-composer" : "persistent-composer enturma-message-composer"}>
         <textarea aria-label={kind === "private" ? "Mensagem privada" : "Mensagem"} />
       </form>
       <div className="private-messages" />
       {kind === "room" ? <nav aria-label="Navegação da turma" className="room-mobile-nav" /> : null}
+      </div>
     </div>
   );
 }
