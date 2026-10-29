@@ -189,3 +189,26 @@ test("Desktop Caronas keeps the entire left navigation visible without page scro
     expect(metrics.shellHeight).toBeLessThanOrEqual(height + 1);
   }
 });
+
+
+test("Desktop Caronas keeps current map position visible beside the planner", async ({ page, request }) => {
+  test.setTimeout(90000);
+  const tag = randomUUID().slice(0, 8);
+  const registered = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    { data: { name: "Ride Dock", username: `dock_${tag}`, email: `dock-${tag}@example.test`, password: "E2E-password-long-123", device: "E2E" } },
+  );
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
+  await page.setViewportSize({ width: 1376, height: 768 });
+  await page.goto("/caronas");
+  const dock = page.locator(".ride-bottom-sheet");
+  const map = page.locator(".ride-real-map");
+  await expect(dock).toBeVisible({ timeout: 20000 });
+  await expect(map).toBeVisible();
+  const rect = await dock.boundingBox(), mapRect = await map.boundingBox();
+  expect(rect!.x).toBeGreaterThanOrEqual(mapRect!.x + mapRect!.width);
+  expect(rect!.height).toBeGreaterThan(500);
+  expect(rect!.width).toBeGreaterThan(340);
+  expect(await page.evaluate(() => document.documentElement.scrollHeight - innerHeight)).toBeLessThanOrEqual(2);
+});

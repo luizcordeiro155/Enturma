@@ -1281,3 +1281,107 @@ html[data-enhanced-focus="true"] .ride-unified-search-box:focus-within {
 @media (min-width: 761px) and (prefers-reduced-motion: reduce) {
   html .ride-active-shell .ride-direction-grid > button { transition: none; transform: none !important; }
 }
+
+
+/* Desktop Caronas: permanent free map viewport and usable side planner.
+   Never overlay the map's center / current-location pin. Mobile untouched. */
+@media (min-width: 761px) {
+  .ride-active-shell .ride-mobility-app {
+    --ride-planner-width: clamp(340px, 35%, 465px);
+    --ride-planner-gap: 16px;
+  }
+  .ride-active-shell .ride-real-map {
+    right: calc(var(--ride-planner-width) + var(--ride-planner-gap) * 2) !important;
+    width: auto !important;
+    border-right: 1px solid var(--ride-border);
+  }
+  .ride-active-shell .ride-bottom-sheet {
+    left: auto !important;
+    right: var(--ride-planner-gap) !important;
+    top: var(--ride-planner-gap) !important;
+    bottom: var(--ride-planner-gap) !important;
+    transform: none !important;
+    width: var(--ride-planner-width) !important;
+    max-height: none !important;
+    border-radius: 19px !important;
+    box-shadow: 0 16px 38px rgb(0 0 0 / 14%) !important;
+  }
+  .ride-active-shell .ride-sheet-content {
+    height: 100% !important;
+    max-height: 100% !important;
+    padding: 22px 20px 26px !important;
+  }
+  .ride-active-shell .ride-map-top {
+    right: calc(var(--ride-planner-width) + 2 * var(--ride-planner-gap) + 12px) !important;
+  }
+  .ride-active-shell .ride-map-top .ride-mode-switch { min-width: 0; }
+  .ride-active-shell .ride-recenter {
+    right: calc(var(--ride-planner-width) + 2 * var(--ride-planner-gap) + 12px) !important;
+    bottom: 28px !important;
+  }
+  .ride-active-shell .ride-direction-grid {
+    grid-template-columns: 1fr !important;
+    gap: 9px;
+  }
+  html .ride-active-shell .ride-direction-grid > button {
+    min-height: 67px;
+    padding: 12px !important;
+  }
+  .ride-active-shell .ride-campus-mini { max-width: 138px; }
+}
+/* Light mode: a cohesive light navigation panel, not a dark slab against the map. */
+@media (min-width: 761px) {
+  html[data-theme="light"] .ride-active-shell > .ride-hub-sidebar {
+    border-color: #d5e0d9;
+    background: #f9fbf9;
+    color: #17382e;
+  }
+  html[data-theme="light"] .ride-active-shell .ride-hub-brand strong,
+  html[data-theme="light"] .ride-active-shell .ride-hub-safety strong {
+    color: #17382e;
+  }
+  html[data-theme="light"] .ride-active-shell :is(.ride-hub-brand small, .ride-hub-safety small) {
+    color: #526f62;
+  }
+  html[data-theme="light"] .ride-active-shell :is(.ride-hub-sidebar nav a, .ride-hub-safety, .ride-hub-back) {
+    color: #33594b;
+  }
+  html[data-theme="light"] .ride-active-shell .ride-hub-sidebar nav a[aria-current="page"] {
+    background: #e5f0e7;
+    color: #123d2e;
+  }
+  @media (hover: hover) {
+    html[data-theme="light"] .ride-active-shell :is(.ride-hub-sidebar nav a, .ride-hub-safety, .ride-hub-back):hover {
+      background: #eaf3eb;
+      color: #174936;
+    }
+  }
+}
+/* Short desktop viewport: keep the planner and all sidebar actions in view. */
+@media (min-width: 761px) and (max-height: 680px) {
+  .ride-active-shell .ride-mobility-app { --ride-planner-gap: 10px; }
+  .ride-active-shell .ride-sheet-content { padding: 13px 16px 20px !important; }
+  .ride-active-shell .ride-sheet-heading { margin-bottom: 9px; }
+}
+/* Respect reduced motion while retaining all existing accessible interactions. */
+@media (prefers-reduced-motion: reduce) and (min-width: 761px) {
+  .ride-active-shell .ride-bottom-sheet { transition: none !important; }
+}
+
+/* Keep mode switch inside the real map region even on compact laptops. */
+@media (min-width: 761px) {
+  .ride-active-shell .ride-map-top {
+    left: 10px !important;
+    grid-template-columns: 42px minmax(0, 1fr) 42px !important;
+    gap: 8px !important;
+  }
+  .ride-active-shell .ride-mode-switch > button {
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: clamp(.65rem, 1vw, .83rem);
+  }
+  .ride-active-shell .ride-map-controls {
+    right: 10px !important;
+    top: 76px !important;
+  }
+}
