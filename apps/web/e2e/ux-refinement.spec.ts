@@ -1021,6 +1021,18 @@ test.describe("touch chat", () => {
       );
       const box = await composer.boundingBox();
       expect(box!.y + box!.height).toBeLessThanOrEqual(480);
+      // Regression: keyboard-open Chrome had a 300-450px empty gap below
+      // the composer because both block chat containers were height:auto.
+      // Visibility alone passed while the input floated under the header.
+      await expect.poll(async () => {
+        const bottom = await page.locator(".persistent-composer").evaluate(
+          (node) => node.getBoundingClientRect().bottom,
+        );
+        const visualBottom = await page.evaluate(
+          () => (visualViewport?.offsetTop ?? 0) + (visualViewport?.height ?? innerHeight),
+        );
+        return Math.abs(visualBottom - bottom);
+      }).toBeLessThanOrEqual(14);
       await composer.fill("Minha resposta");
       await composer.press("Enter");
       await expect(composer).toHaveValue("Minha resposta\n");
