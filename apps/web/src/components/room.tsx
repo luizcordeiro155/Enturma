@@ -14,7 +14,6 @@ import {
   FileText,
   Hash,
   MessageCircle,
-  MoreHorizontal,
   Phone,
   Sparkles,
   Users,
@@ -32,6 +31,7 @@ import { useCallSession } from "./call-session-provider";
 import { RoomChat } from "./room-chat";
 import { RoomSharePanel } from "./room-share-panel";
 import { RoomSettings } from "./room-artwork";
+import { RoomParticipantActions } from "./room-participant-actions";
 
 type Section = "chat" | "call" | "materials" | "ai";
 type Upload = {
@@ -57,6 +57,7 @@ export function RoomView({ id }: { id: string }) {
       : "chat",
   );
   const [mobileDetailsOpen, setMobileDetailsOpen] = useState(false);
+  const [contextNoticeHidden, setContextNoticeHidden] = useState(false);
   useRoomBrowserViewport(section === "chat");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
@@ -400,6 +401,12 @@ export function RoomView({ id }: { id: string }) {
   const ended = room?.status === "ENDED" || seconds === 0;
   const activeMemberCount =
     room?.members?.filter((member) => !member.leftAt).length ?? 0;
+  const roomAvatar = room?.hasAvatar
+    ? `/api/backend/study-rooms/${id}/media/avatar?v=${room.mediaVersion ?? 0}`
+    : null;
+  const roomBanner = room?.hasBanner
+    ? `/api/backend/study-rooms/${id}/media/banner?v=${room.mediaVersion ?? 0}`
+    : null;
 
   if (!room && !error)
     return (
@@ -452,7 +459,12 @@ export function RoomView({ id }: { id: string }) {
 
               <div className="room-mobile-title">
                 <span className="room-mobile-channel-mark">
-                  <Hash size={19} />
+                  {roomAvatar ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={roomAvatar} alt="" className="room-mobile-artwork-avatar" />
+                  ) : (
+                    <Hash size={19} />
+                  )}
                 </span>
                 <div>
                   <strong>{room.title}</strong>
@@ -471,7 +483,7 @@ export function RoomView({ id }: { id: string }) {
               </button>
             </header>
 
-            <header className="study-room-header">
+            <header className={`study-room-header ${roomBanner ? "has-room-banner" : ""}`} style={roomBanner ? { backgroundImage: `linear-gradient(90deg,rgba(10,18,19,.90),rgba(10,18,19,.63)),url("${roomBanner}")` } : undefined}>
               <div className="room-header-intro">
                 <button
                   type="button"
@@ -483,7 +495,10 @@ export function RoomView({ id }: { id: string }) {
                 </button>
                 <div className="room-header-identity">
                   <span className="room-header-identity-mark" aria-hidden="true">
-                    {/\b(sql|banco de dados|database)\b/i.test(
+                    {roomAvatar ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img className="room-header-avatar" src={roomAvatar} alt="" />
+                    ) : /\b(sql|banco de dados|database)\b/i.test(
                       room.title + " " + room.subjectName,
                     ) ? (
                       <Database size={29} />
@@ -535,7 +550,7 @@ export function RoomView({ id }: { id: string }) {
               </div>
             </header>
 
-            {room.hasEarlierHistory && section === "chat" ? (
+            {room.hasEarlierHistory && section === "chat" && !contextNoticeHidden ? (
               <div className="late-join-banner">
                 <Sparkles size={20} />
                 <div>
@@ -545,9 +560,14 @@ export function RoomView({ id }: { id: string }) {
                     contexto anterior.
                   </span>
                 </div>
-                <button onClick={() => setSection("ai")}>
-                  Me atualizar com IA
-                </button>
+                <div className="late-join-actions">
+                  <button type="button" onClick={() => { setContextNoticeHidden(true); setSection("ai"); }}>
+                    Me atualizar com IA
+                  </button>
+                  <button type="button" className="late-join-later" onClick={() => setContextNoticeHidden(true)}>
+                    Atualizar depois
+                  </button>
+                </div>
               </div>
             ) : null}
 
@@ -661,24 +681,7 @@ export function RoomView({ id }: { id: string }) {
                       member.userId !== me.id &&
                       !ended &&
                       !member.leftAt ? (
-                        <button
-                          className="icon-control"
-                          aria-label={`Opções de ${member.name}`}
-                          title="Remover participante"
-                          onClick={async () => {
-                            try {
-                              await api(
-                                `/study-rooms/${id}/participants/${member.userId}`,
-                                { method: "DELETE" },
-                              );
-                              await reloadRoom();
-                            } catch (e) {
-                              setError((e as Error).message);
-                            }
-                          }}
-                        >
-                          <MoreHorizontal size={17} />
-                        </button>
+                        <RoomParticipantActions roomId={id} memberId={member.userId} memberName={member.name} onRemoved={reloadRoom} />
                       ) : null}
                     </div>
                   ))}
@@ -770,6 +773,9 @@ export function RoomView({ id }: { id: string }) {
                                     : "Estudante"
                             }
                           />
+                          {me?.id === room.hostId && member.userId !== me.id && !ended && !member.leftAt ? (
+                            <RoomParticipantActions roomId={id} memberId={member.userId} memberName={member.name} onRemoved={reloadRoom} />
+                          ) : null}
                         </div>
                       ))}
                     </div>

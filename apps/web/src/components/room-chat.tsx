@@ -792,13 +792,13 @@ export function RoomChat(props: Props) {
         />
       ) : null}
 
-      <div className="typing-status" role="status">
-        {composerBlocked
-          ? `Envio temporariamente bloqueado · ${moderationCountdown(penaltySeconds)}`
-          : props.typing?.length
-            ? `${props.typing.map((p) => p.name).join(", ")} ${props.typing.length === 1 ? "está digitando" : "estão digitando"}…`
-            : ""}
-      </div>
+      {(composerBlocked || Boolean(props.typing?.length)) ? (
+        <div className="typing-status" role="status">
+          {composerBlocked
+            ? `Envio temporariamente bloqueado · ${moderationCountdown(penaltySeconds)}`
+            : `${props.typing?.map((p) => p.name).join(", ")} ${props.typing?.length === 1 ? "está digitando" : "estão digitando"}…`}
+        </div>
+      ) : null}
       {composerBlocked ? (
         <div className="room-penalty-timer" role="status" aria-live="polite">
           <ShieldAlert size={17} />
