@@ -1,3 +1,4 @@
+import { VideoPreset, VideoPresets } from "livekit-client";
 import type {
   AudioCaptureOptions,
   RoomOptions,
@@ -56,10 +57,7 @@ export const callRoomOptions: RoomOptions = {
   publishDefaults: {
     simulcast: true,
     videoEncoding: { maxBitrate: 3_500_000, maxFramerate: 30 },
-    videoSimulcastLayers: [
-      { resolution: { width: 640, height: 360 }, encoding: { maxBitrate: 450_000, maxFramerate: 30 } },
-      { resolution: { width: 1280, height: 720 }, encoding: { maxBitrate: 1_700_000, maxFramerate: 30 } },
-    ],
+    videoSimulcastLayers: [VideoPresets.h360, VideoPresets.h720],
     screenShareEncoding: { maxBitrate: 4_000_000, maxFramerate: 30 },
   },
 };
@@ -86,7 +84,7 @@ export function screenShareOptions(resolution: ScreenResolution, fps: ScreenFram
       simulcast: true,
       screenShareEncoding: { maxBitrate: bitrate, maxFramerate: fps },
       screenShareSimulcastLayers: resolution === "720p" ? [] : [
-        { resolution: { width: 1280, height: 720 }, encoding: { maxBitrate: Math.min(1_800_000, bitrate), maxFramerate: fps } },
+        new VideoPreset(1280, 720, Math.min(1_800_000, bitrate), fps),
       ],
       degradationPreference: fps === 60 ? "balanced" : "maintain-resolution",
     },
