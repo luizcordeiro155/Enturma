@@ -114,3 +114,42 @@ test("login contrast and navigation remain accessible at every viewport", async 
   ).toBe(true);
   await settingsPage.close();
 });
+
+
+test("Electron desktop scroll isolates content from stationary sidebar and logo", async ({ page, request }) => {
+  test.setTimeout(90000);
+  const tag = randomUUID().slice(0, 8);
+  const registered = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    { data: { name: "Desktop Sidebar", username: `desk_${tag}`, email: `desk-${tag}@example.test`, password: "E2E-password-long-123", device: "E2E" } },
+  );
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "enturmaDesktop", {
+      configurable: true,
+      value: {
+        isDesktop: true, windowChrome: true, nativeUpdater: true,
+        setTheme: async () => {}, getInfo: async () => ({ version: "0.4.1", platform: "win32" }),
+        getUpdateState: async () => ({ status: "current", progress: 100, currentVersion: "0.4.1" }),
+        onUpdateState: () => () => {}, checkForUpdates: async () => {},
+        openExternal: async () => {},
+      },
+    });
+  });
+  await page.setViewportSize({ width: 1376, height: 768 });
+  await page.goto("/home");
+  const sidebar = page.locator(".app-shell > .sidebar");
+  const brand = sidebar.locator(".brand");
+  const workspace = page.locator(".app-shell > .workspace");
+  await expect(page.locator("html")).toHaveAttribute("data-desktop-chrome", "true");
+  await expect(brand).toBeVisible();
+  const initial = await brand.boundingBox();
+  await workspace.evaluate((element) => { element.scrollTop = element.scrollHeight; });
+  await expect.poll(async () => workspace.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+  const after = await brand.boundingBox();
+  expect(Math.abs(after!.y - initial!.y)).toBeLessThan(1);
+  expect(after!.y).toBeGreaterThanOrEqual(32);
+  expect(await page.evaluate(() => document.scrollingElement?.scrollTop ?? 0)).toBe(0);
+  await expect(sidebar).toBeInViewport();
+});
