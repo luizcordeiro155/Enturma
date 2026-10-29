@@ -1033,6 +1033,24 @@ test.describe("touch chat", () => {
         );
         return Math.abs(visualBottom - bottom);
       }).toBeLessThanOrEqual(14);
+      const navigation = page.locator(".room-section-chat .room-mobile-nav");
+      // The keyboard should cover the existing navigation instead of
+      // removing the tabs or lifting them above the message composer.
+      await expect(navigation).toHaveCSS("display", "grid");
+      await expect(navigation).toHaveCSS("position", "fixed");
+      await expect.poll(async () => navigation.evaluate((node) => {
+        const viewport = window.visualViewport;
+        const bottom = (viewport?.offsetTop ?? 0) + (viewport?.height ?? innerHeight);
+        return node.getBoundingClientRect().top - bottom;
+      })).toBeGreaterThanOrEqual(0);
+
+      // Android Back closes the keyboard but can leave its textbox focused.
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect(navigation).toHaveCSS("position", "relative");
+      await expect(navigation).toBeVisible();
+      await expect(composer).toBeFocused();
+      await page.setViewportSize({ width: 390, height: 480 });
+      await expect(navigation).toHaveCSS("position", "fixed");
       await composer.fill("Minha resposta");
       await composer.press("Enter");
       await expect(composer).toHaveValue("Minha resposta\n");

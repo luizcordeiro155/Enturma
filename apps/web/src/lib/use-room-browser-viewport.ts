@@ -93,8 +93,29 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     const viewport = window.visualViewport;
     let baselineHeight = viewport?.height ?? window.innerHeight;
     let wasOpen = false;
+    // Tracks an actual keyboard, not simply a focused textarea. Android
+    // back can close the IME without blurring the input.
+    let keyboardWasVisible = false;
+    let focusArmedUntil = 0;
     let frame = 0;
     const timers: number[] = [];
+
+    const captureRoomNavigationPosition = () => {
+      if (kind !== "room") return;
+      const navigation = document.querySelector<HTMLElement>(
+        ".room-active-shell .room-section-chat .room-mobile-nav",
+      );
+      if (!navigation) return;
+      const rect = navigation.getBoundingClientRect();
+      if (rect.height > 20 && Number.isFinite(rect.top)) {
+        // Preserve its RESTING position while the browser draws the keyboard
+        // over it; do not consume any height from the shortened chat panel.
+        root.style.setProperty(
+          "--room-mobile-nav-rest-top",
+          String(Math.round(rect.top)) + "px",
+        );
+      }
+    };
 
     const clearKeyboard = () => {
       if (root.dataset.mobileWebChatKeyboard === kind) {
@@ -106,6 +127,8 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         root.style.removeProperty("--mobile-web-chat-adjust");
         root.style.removeProperty("--mobile-web-chat-messages-height");
       }
+      if (kind === "room")
+        root.style.removeProperty("--room-mobile-nav-rest-top");
       delete root.dataset.roomBrowserKeyboard;
       root.style.removeProperty("--room-visible-height");
       root.style.removeProperty("--room-visible-top");
@@ -120,6 +143,8 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     };
 
     const pinConversation = () => {
+      if (kind === "room" && !wasOpen)
+        captureRoomNavigationPosition();
       const { height, top } = geometry();
       root.dataset.mobileWebChatKeyboard = kind;
       root.style.setProperty("--mobile-web-chat-visible-top", String(top) + "px");
@@ -148,18 +173,25 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         } else if (height > baselineHeight) {
           baselineHeight = height;
         }
-
-        // Keep the screen anchored while an unfocused IME animates closed,
-        // but never confuse a browser address-bar change with an open IME.
-        const keyboardClosing = wasOpen && isRoomKeyboardVisible(
+        const keyboardVisible = isRoomKeyboardVisible(
           baselineHeight,
           height,
-          true,
+          focused || wasOpen,
         );
-        if (!focused && !keyboardClosing) {
+        if (keyboardVisible) keyboardWasVisible = true;
+
+        // Samsung/Chrome can dismiss the IME with the Android Back button
+        // while the textarea stays focused. Release the keyboard layout so
+        // the four navigation tabs return to their original in-flow position.
+        const recovered = keyboardWasVisible && !keyboardVisible &&
+          height >= baselineHeight - 40;
+        const opening = focused && !keyboardWasVisible &&
+          performance.now() < focusArmedUntil;
+        if (recovered || (!keyboardVisible && !opening)) {
           clearKeyboard();
           return;
         }
+
         pinConversation();
       });
     };
@@ -172,6 +204,8 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         event.target.closest(composerSelector)
       ) {
         // Apply synchronously, before Chrome starts panning the input.
+        focusArmedUntil = performance.now() + 900;
+        keyboardWasVisible = false;
         pinConversation();
       }
       sync();
@@ -189,11 +223,16 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         !element.closest(composerSelector)
       ) return;
       const textarea = element.closest(composerSelector)?.querySelector("textarea");
-      if (textarea instanceof HTMLTextAreaElement && !textarea.disabled)
+      if (textarea instanceof HTMLTextAreaElement && !textarea.disabled) {
+        focusArmedUntil = performance.now() + 900;
+        keyboardWasVisible = false;
         pinConversation();
+      }
     };
     const onOrientationChange = () => {
       clearKeyboard();
+      keyboardWasVisible = false;
+      focusArmedUntil = 0;
       baselineHeight = viewport?.height ?? window.innerHeight;
       sync();
     };
