@@ -30,6 +30,11 @@ export function mobileWebKeyboardInset(
   );
 }
 
+/** The visible bottom remains the source of truth even if Chrome pans its visual viewport. */
+export function mobileWebVisibleBottom(visibleHeight: number, offsetTop = 0): number {
+  return Math.max(0, Math.round(Math.max(0, offsetTop) + Math.max(0, visibleHeight)));
+}
+
 /** Compensate after layout rather than trusting how a browser anchors fixed. */
 export function mobileWebComposerCorrection(
   visibleBottom: number,
@@ -101,6 +106,7 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         root.style.removeProperty("--mobile-web-chat-bottom");
         root.style.removeProperty("--mobile-web-chat-adjust");
         root.style.removeProperty("--mobile-web-chat-messages-height");
+        root.style.removeProperty("--mobile-web-chat-visible-bottom");
       }
       delete root.dataset.roomBrowserKeyboard;
       root.style.removeProperty("--room-visible-height");
@@ -122,7 +128,7 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
 
         const visibleHeight = viewport?.height ?? window.innerHeight;
         const visibleTop = Math.max(0, viewport?.offsetTop ?? 0);
-        const visibleBottom = visibleTop + visibleHeight;
+        const visibleBottom = mobileWebVisibleBottom(visibleHeight, visibleTop);
         const input = document.activeElement;
         const focused =
           input instanceof HTMLElement && Boolean(input.closest(composerSelector));
@@ -143,7 +149,9 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
           visibleHeight,
           visibleTop,
         );
-        const keyboardOpen = shrunk || (focused && inset > 120);
+        // Arm immediately on first focus, before Chrome emits its first IME resize.
+        // Waiting for a 120px drop briefly hid the private composer behind the keyboard.
+        const keyboardOpen = focused || shrunk;
         if (!keyboardOpen) {
           clearKeyboard();
           return;
@@ -151,6 +159,17 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
 
         wasOpen = true;
         root.dataset.mobileWebChatKeyboard = kind;
+        if (kind === "private") {
+          // Private conversations have a full-height flex layout. Resize that
+          // conversation to the visual viewport instead of detaching its input
+          // with position:fixed, which fails on the first Chrome IME animation.
+          // The header stays put; only the messages flex and composer follow IME.
+          root.style.setProperty(
+            "--mobile-web-chat-visible-bottom",
+            `${visibleBottom}px`,
+          );
+          return;
+        }
         root.style.setProperty("--mobile-web-chat-bottom", `${inset}px`);
         // Reset before measuring so each frame corrects the actual new
         // viewport instead of accumulating previous transforms.
@@ -192,7 +211,22 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
       });
     };
 
-    const onFocus = () => {
+    const onFocus = (event: FocusEvent) => {
+      // Apply the private chat's viewport constraint during focusin itself,
+      // before Android Chrome's browser-driven scroll/focus adjustment.
+      if (
+        kind === "private" &&
+        isBrowserMobile() &&
+        event.type === "focusin" &&
+        event.target instanceof HTMLElement &&
+        event.target.closest(composerSelector)
+      ) {
+        root.dataset.mobileWebChatKeyboard = kind;
+        root.style.setProperty(
+          "--mobile-web-chat-visible-bottom",
+          `${mobileWebVisibleBottom(viewport?.height ?? window.innerHeight, viewport?.offsetTop ?? 0)}px`,
+        );
+      }
       sync();
       for (const delay of [80, 220, 400]) {
         timers.push(window.setTimeout(sync, delay));

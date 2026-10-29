@@ -51,6 +51,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
 import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -534,6 +535,7 @@ class MainActivity : Activity() {
     private var safeLeftCssPx = 0
     private var keyboardBottomCssPx = 0
     private var keyboardVisible = false
+    private var lastSafeAreaSnapshot = ""
     private var chatComposerFocused = false
     private var updateDownloadId: Long? = null
     private var updateReceiverRegistered = false
@@ -694,7 +696,17 @@ class MainActivity : Activity() {
                 if (keyboardVisible && !resizeChatForIme)
                     (imeInsets.bottom / density).toInt()
                 else 0
-            syncSafeAreaCss()
+            // The Android IME dispatches intermediate insets every animation
+            // frame. Do not reinject the full WebView JS bootstrap when only
+            // the WebView's native margin has changed: that can visibly flash.
+            val snapshot = listOf(
+                safeTopCssPx, safeRightCssPx, safeBottomCssPx, safeLeftCssPx,
+                keyboardBottomCssPx, keyboardVisible,
+            ).joinToString("|")
+            if (snapshot != lastSafeAreaSnapshot) {
+                lastSafeAreaSnapshot = snapshot
+                syncSafeAreaCss()
+            }
             insets
         }
         ViewCompat.requestApplyInsets(rootLayout)
@@ -1244,6 +1256,14 @@ class MainActivity : Activity() {
     }
 
     private fun applySystemBarTheme(light: Boolean) {
+        // Manual IME resize temporarily exposes the native content window
+        // below the WebView. Match its background to the active app theme so
+        // Android never reveals the default white launch/window surface.
+        val appBackground = Color.parseColor(if (light) "#ffffff" else "#0f1917")
+        window.setBackgroundDrawable(ColorDrawable(appBackground))
+        window.decorView.setBackgroundColor(appBackground)
+        if (::rootLayout.isInitialized) rootLayout.setBackgroundColor(appBackground)
+        if (::webView.isInitialized) webView.setBackgroundColor(appBackground)
         WindowInsetsControllerCompat(window, window.decorView).apply {
             isAppearanceLightStatusBars = light
             isAppearanceLightNavigationBars = light

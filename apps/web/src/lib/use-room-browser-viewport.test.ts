@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isRoomKeyboardVisible, mobileWebKeyboardInset, mobileWebComposerCorrection, mobileWebMessageHeight } from "./use-room-browser-viewport";
+import { isRoomKeyboardVisible, mobileWebKeyboardInset, mobileWebComposerCorrection, mobileWebMessageHeight, mobileWebVisibleBottom } from "./use-room-browser-viewport";
 
 describe("mobile study-room keyboard detection", () => {
   it("does not confuse browser chrome or small viewport changes with the keyboard", () => {
@@ -26,6 +26,12 @@ describe("shared mobile browser keyboard geometry", () => {
   });
   it("does not double-count keyboard height when Chrome resizes the layout viewport", () => {
     expect(mobileWebKeyboardInset(400, 400, 0)).toBe(0);
+  });
+  it("uses the current visual bottom for the private conversation on first focus and during IME animation", () => {
+    expect(mobileWebVisibleBottom(760, 0)).toBe(760);
+    expect(mobileWebVisibleBottom(510, 0)).toBe(510);
+    expect(mobileWebVisibleBottom(395, 24)).toBe(419);
+    expect(mobileWebVisibleBottom(-1, -4)).toBe(0);
   });
   it("handles viewport top offsets and provides scrollable message space", () => {
     expect(mobileWebKeyboardInset(760, 410, 30)).toBe(320);
