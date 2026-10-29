@@ -6,6 +6,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import type { Message, Profile, Room } from "@enturma/contracts";
 import {
+  BookOpen,
+  Database,
   Bot,
   ChevronLeft,
   Clock,
@@ -470,22 +472,45 @@ export function RoomView({ id }: { id: string }) {
             </header>
 
             <header className="study-room-header">
-              <div>
+              <div className="room-header-intro">
                 <button
+                  type="button"
                   className="text-button room-back"
                   onClick={() => router.push("/rooms")}
                 >
-                  ← Minhas turmas
+                  <ChevronLeft size={16} aria-hidden="true" />
+                  Minhas turmas
                 </button>
-                <h1>{room.title}</h1>
-                {room.topicText && <p>{room.topicText}</p>}
-                {room.lifecycle === "MULTIDAY" && (
-                  <small>
-                    Sala de vários dias · sua vaga permanece reservada enquanto
-                    estiver vinculado.
-                  </small>
-                )}
-                <p>{room.subjectName}</p>
+                <div className="room-header-identity">
+                  <span className="room-header-identity-mark" aria-hidden="true">
+                    {/\b(sql|banco de dados|database)\b/i.test(
+                      room.title + " " + room.subjectName,
+                    ) ? (
+                      <Database size={29} />
+                    ) : (
+                      <BookOpen size={29} />
+                    )}
+                  </span>
+                  <div className="room-header-copy">
+                    <h1>{room.title}</h1>
+                    <p className="room-header-caption">
+                      {room.lifecycle === "MULTIDAY"
+                        ? "Sala de vários dias · sua vaga permanece reservada"
+                        : "Sala de estudos"}
+                      {room.topicText ? <> · {room.topicText}</> : null}
+                    </p>
+                    <div className="room-header-tags">
+                      <span>
+                        <BookOpen size={14} aria-hidden="true" />
+                        {room.subjectName}
+                      </span>
+                      <span>
+                        <Users size={14} aria-hidden="true" />
+                        {activeMemberCount} participantes
+                      </span>
+                    </div>
+                  </div>
+                </div>
               </div>
 
               <div className="study-room-status">
@@ -578,12 +603,13 @@ export function RoomView({ id }: { id: string }) {
                 </div>
               </nav>
 
-              <main
+              <section
                 className={
                   section === "call"
                     ? "room-main-panel call-mode"
                     : "room-main-panel"
                 }
+                aria-label="Conteúdo da turma"
               >
                 {section === "chat" ? <RoomChat {...chatProps} /> : null}
 
@@ -599,7 +625,7 @@ export function RoomView({ id }: { id: string }) {
                 {section === "materials" || section === "ai" ? (
                   <RoomTools roomId={id} ended={ended} view={section} />
                 ) : null}
-              </main>
+              </section>
 
               {section !== "call" ? (
                 <aside className="room-members-panel">
