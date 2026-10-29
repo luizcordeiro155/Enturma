@@ -153,3 +153,39 @@ test("Electron desktop scroll isolates content from stationary sidebar and logo"
   expect(await page.evaluate(() => document.scrollingElement?.scrollTop ?? 0)).toBe(0);
   await expect(sidebar).toBeInViewport();
 });
+
+
+test("Desktop Caronas keeps the entire left navigation visible without page scrolling", async ({ page, request }) => {
+  test.setTimeout(90000);
+  const tag = randomUUID().slice(0, 8);
+  const registered = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    { data: { name: "Ride Desktop", username: `ride_${tag}`, email: `ride-${tag}@example.test`, password: "E2E-password-long-123", device: "E2E" } },
+  );
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
+  for (const [width, height] of [[1376, 768], [1024, 600]]) {
+    await page.setViewportSize({ width, height });
+    await page.goto("/caronas");
+    const nav = page.getByRole("complementary", { name: "Navegação de Caronas" });
+    const back = nav.getByRole("link", { name: "Voltar ao Enturma" });
+    await expect(nav).toBeVisible();
+    await expect(back).toBeInViewport();
+    const metrics = await page.evaluate(() => {
+      const sidebar = document.querySelector(".ride-hub-sidebar")!;
+      const shell = document.querySelector(".ride-active-shell")!;
+      const backLink = document.querySelector(".ride-hub-back")!;
+      const bounds = backLink.getBoundingClientRect();
+      return {
+        sidebarOverflow: sidebar.scrollHeight - sidebar.clientHeight,
+        bodyOverflow: document.documentElement.scrollHeight - innerHeight,
+        shellHeight: shell.getBoundingClientRect().height,
+        backBottom: bounds.bottom,
+      };
+    });
+    expect(metrics.sidebarOverflow).toBeLessThanOrEqual(2);
+    expect(metrics.bodyOverflow).toBeLessThanOrEqual(2);
+    expect(metrics.backBottom).toBeLessThanOrEqual(height);
+    expect(metrics.shellHeight).toBeLessThanOrEqual(height + 1);
+  }
+});
