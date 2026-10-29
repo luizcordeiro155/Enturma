@@ -38,18 +38,45 @@
     padding-bottom: 0 !important;
   }
 
+  /* The keyboard covers the four tabs in their existing bottom location.
+     They stay mounted and keep their normal position when the IME closes,
+     rather than being display:none or consuming space above the composer. */
   html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .room-mobile-nav {
-    display: none !important;
+    display: grid !important;
+    position: fixed !important;
+    inset: auto 0 auto 0 !important;
+    top: var(--room-mobile-nav-rest-top, 100dvh) !important;
+    bottom: auto !important;
+    width: 100% !important;
+    flex: none !important;
+    transform: none !important;
+    transition: none !important;
+    pointer-events: none !important;
   }
 
-  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .study-room-shell,
-  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .room-main-panel,
-  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-chat {
+  /* The study-room shell is the ONLY flex-growing layer. Its children
+     are ordinary block/flex containers, so height:auto would shrink-wrap the
+     composer and leave a keyboard-sized gap beneath it. */
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .study-room-shell {
+    display: block !important;
     flex: 1 1 0 !important;
-    height: auto !important;
+    height: 0 !important;
     max-height: none !important;
     min-height: 0 !important;
     overflow: hidden !important;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .room-main-panel,
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-chat {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-chat {
+    display: flex !important;
+    flex-direction: column !important;
   }
 
   html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-messages,
