@@ -137,8 +137,8 @@ export function RoomParticipantActions({
       setFriendState(created.status === "ACCEPTED" ? "accepted" : "pending");
       setMessage(created.status === "ACCEPTED" ? "Vocês já são amigos." : "Solicitação de amizade enviada.");
     } catch (error) {
-      setMessage((error as Error).message || "Não foi possível enviar a solicitação.");
       await checkFriendship();
+      setMessage((error as Error).message || "Não foi possível enviar a solicitação.");
     } finally {
       setWorking(false);
     }
@@ -241,7 +241,6 @@ export function RoomParticipantActions({
                     {working ? "Removendo…" : "Confirmar expulsão"}
                   </button>
                 </div>
-              </>
           </section>
         </div>,
         document.body,
