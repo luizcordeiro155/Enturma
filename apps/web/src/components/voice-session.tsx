@@ -12,11 +12,13 @@ import {
   VideoOff,
   SwitchCamera,
   Headphones,
+  Settings2,
 } from "lucide-react";
 import { LiveMemberIdentityCard } from "./user-identity";
 import { post } from "@/lib/api";
 import { Feedback } from "./feedback";
 import { callDevice } from "@/lib/call-device";
+import { callRoomOptions, cameraCapture, cameraCaptureFallback, microphoneCapture, screenShareOptions, screenResolutions, screenFrameRates, cameraResolutionNotSupported, type ScreenResolution, type ScreenFrameRate } from "@/lib/call-media-quality";
 type CallMember = {
   identity: string;
   name: string;
@@ -57,6 +59,10 @@ export default function VoiceSession({
     return () => { live = false; navigator.mediaDevices.removeEventListener('devicechange', scan); };
   }, [camera]);
   const [screen, setScreen] = useState(false);
+  const [screenSettingsOpen, setScreenSettingsOpen] = useState(false);
+  const [screenResolution, setScreenResolution] = useState<ScreenResolution>("1080p");
+  const [screenFps, setScreenFps] = useState<ScreenFrameRate>(30);
+  const [noiseSuppression, setNoiseSuppression] = useState(true);
   const [activeScreenShare, setActiveScreenShare] = useState<string | null>(
     null,
   );
@@ -307,10 +313,7 @@ export default function VoiceSession({
           : {},
       );
       if (cancelled()) return;
-      const call = (joining = new Room({
-        adaptiveStream: true,
-        dynacast: true,
-      }));
+      const call = (joining = new Room(callRoomOptions));
       room.current = call;
 
       const refresh = () => refreshMembers(call);
@@ -384,7 +387,7 @@ export default function VoiceSession({
       });
 
       await call.connect(credentials.url, credentials.token, {
-        autoSubscribe: false,
+        autoSubscribe: true,
       });
 
       if (cancelled()) {
@@ -421,7 +424,7 @@ export default function VoiceSession({
           await call.disconnect();
           return;
         }
-        await call.localParticipant.setMicrophoneEnabled(true);
+        await call.localParticipant.setMicrophoneEnabled(true, microphoneCapture(noiseSuppression));
         if (cancelled()) {
           await call.disconnect();
           return;
@@ -435,7 +438,7 @@ export default function VoiceSession({
       refresh();
       if (initialCamera && !cancelled()) {
         try {
-          await call.localParticipant.setCameraEnabled(true);
+          await enableCamera(call);
           refresh();
         } catch (cause) {
           setDeviceNotice(mediaDeviceMessage(cause, "camera"));
@@ -455,12 +458,21 @@ export default function VoiceSession({
     try {
       setError("");
       setDeviceNotice("");
-      await call.localParticipant.setMicrophoneEnabled(muted);
+      await call.localParticipant.setMicrophoneEnabled(muted, microphoneCapture(noiseSuppression));
       setMuted(!muted);
       refreshMembers(call);
     } catch (e) {
       setMuted(true);
       setDeviceNotice(mediaDeviceMessage(e, "microphone"));
+    }
+  }
+
+  async function enableCamera(call: import("livekit-client").Room) {
+    try {
+      await call.localParticipant.setCameraEnabled(true, cameraCapture);
+    } catch (cause) {
+      if (!cameraResolutionNotSupported(cause)) throw cause;
+      await call.localParticipant.setCameraEnabled(true, cameraCaptureFallback);
     }
   }
 
@@ -471,7 +483,8 @@ export default function VoiceSession({
       setError("");
       setDeviceNotice("");
       const next = !camera;
-      await call.localParticipant.setCameraEnabled(next);
+      if (next) await enableCamera(call);
+      else await call.localParticipant.setCameraEnabled(false);
       setCamera(next);
       refreshMembers(call);
     } catch (e) {
@@ -485,7 +498,11 @@ export default function VoiceSession({
     if (!call) return;
     try {
       const next = !screen;
-      await call.localParticipant.setScreenShareEnabled(next);
+      if (next) {
+        const { capture, publish } = screenShareOptions(screenResolution, screenFps);
+        await call.localParticipant.setScreenShareEnabled(true, capture, publish);
+        setScreenSettingsOpen(false);
+      } else await call.localParticipant.setScreenShareEnabled(false);
       setScreen(next);
       refreshMembers(call);
     } catch (e) {
@@ -506,7 +523,7 @@ export default function VoiceSession({
       if (devices.length < 2) { setDeviceNotice('Nenhuma outra câmera disponível.'); return; }
       const current = track.mediaStreamTrack.getSettings().deviceId;
       const next = devices[(devices.findIndex(d => d.deviceId === current) + 1) % devices.length];
-      await track.restartTrack({ deviceId: { exact: next.deviceId } });
+      await track.restartTrack({ ...cameraCapture, deviceId: { exact: next.deviceId } });
       refreshMembers(call);
     } catch (cause) { setDeviceNotice(mediaDeviceMessage(cause, 'camera')); }
     finally { setCameraSwitchBusy(false); }
@@ -748,6 +765,7 @@ export default function VoiceSession({
             {camera && cameraCount > 1 && <button type="button" className="call-control" disabled={cameraSwitchBusy} onClick={() => void switchCamera()} title="Alternar câmera frontal, traseira ou conectada">
               <SwitchCamera size={20} /><span>{cameraSwitchBusy ? 'Trocando…' : 'Virar câmera'}</span>
             </button>}
+            <button type="button" className="call-control" aria-expanded={screenSettingsOpen} onClick={() => setScreenSettingsOpen(!screenSettingsOpen)} title="Qualidade da transmissão"><Settings2 size={20} /><span>Qualidade</span></button>
             <button
               type="button"
               className={screen ? "call-control active" : "call-control"}
@@ -781,6 +799,14 @@ export default function VoiceSession({
             </button>
           </div>
 
+          {screenSettingsOpen ? <section className="call-quality-settings" aria-label="Qualidade de transmissão">
+            <strong>Qualidade do compartilhamento</strong>
+            <p>Defina a resolução e os quadros por segundo antes de compartilhar. O resultado depende do dispositivo e da conexão.</p>
+            <label>Resolução <select value={screenResolution} disabled={screen} onChange={(e) => setScreenResolution(e.target.value as ScreenResolution)}>{screenResolutions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
+            <label>Fluidez <select value={screenFps} disabled={screen} onChange={(e) => setScreenFps(Number(e.target.value) as ScreenFrameRate)}>{screenFrameRates.map((fps) => <option key={fps} value={fps}>{fps} FPS</option>)}</select></label>
+            <label className="call-noise-setting"><input type="checkbox" checked={noiseSuppression} onChange={(e) => setNoiseSuppression(e.target.checked)} /> Supressão de ruído do microfone (ativa na próxima ativação)</label>
+            {screen ? <small>Encerre a transmissão para alterar sua qualidade.</small> : null}
+          </section> : null}
           <small className="call-privacy-note">
             <Users size={14} />
             Todos na chamada aparecem acima. Quem estiver falando recebe
