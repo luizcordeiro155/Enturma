@@ -8,6 +8,7 @@ import {
 } from "@testing-library/react";
 import {
   DesktopUpdateButton,
+  DesktopUpdateTitlebarAction,
   DesktopUpdateProvider,
   isDesktop,
   type UpdateState,
@@ -51,6 +52,22 @@ afterEach(() => {
   sessionStorage.clear();
 });
 describe("Desktop update UI", () => {
+  it("only exposes titlebar download after availability and keeps progress", async () => {
+    const show = vi.fn().mockResolvedValue(undefined);
+    window.enturmaDesktop!.nativeUpdater = true;
+    window.enturmaDesktop!.showUpdateWindow = show;
+    render(<DesktopUpdateProvider><DesktopUpdateTitlebarAction /></DesktopUpdateProvider>);
+    expect(screen.queryByRole("button", { name: /Baixar atualização do Enturma/ })).toBeNull();
+    await act(async () => { await Promise.resolve(); });
+    act(() => receive({ status: "available", currentVersion: "0.4.380", version: "0.4.381", progress: 0 }));
+    fireEvent.click(screen.getByRole("button", { name: "Baixar atualização do Enturma" }));
+    expect(show).toHaveBeenCalledTimes(1);
+    act(() => receive({ status: "downloading", currentVersion: "0.4.380", version: "0.4.381", progress: 58 }));
+    expect(screen.getByText("58%")).toBeTruthy();
+    act(() => receive({ status: "ready", currentVersion: "0.4.380", version: "0.4.381", progress: 100 }));
+    expect(screen.getByRole("button", { name: "Instalar atualização do Enturma" })).toBeTruthy();
+  });
+
   it("never opens the legacy dialog automatically for a native ready update", async () => {
     const show = vi.fn().mockResolvedValue(undefined);
     window.enturmaDesktop!.nativeUpdater = true;
