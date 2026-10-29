@@ -1232,6 +1232,9 @@ ipcMain.handle("desktop:install-update", (event) => {
 ipcMain.handle('desktop:show-update-window', (event) => {
   requireTrusted(event);
   showUpdateWindow();
+  if (updateState.status === "available" || updateState.status === "error")
+    return checkForUpdates(true);
+  return updateState;
 });
 ipcMain.handle('native-update:state', (event) => { requireNativeUpdate(event); return updateState; });
 ipcMain.handle('native-update:check', (event) => { requireNativeUpdate(event); return checkForUpdates(true); });
