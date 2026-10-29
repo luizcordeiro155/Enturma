@@ -49,6 +49,7 @@ export function useRoomBrowserViewport(active: boolean) {
       delete root.dataset.roomBrowserKeyboard;
       root.style.removeProperty("--room-visible-height");
       root.style.removeProperty("--room-visible-top");
+      root.style.removeProperty("--room-viewport-bottom");
       wasOpen = false;
     };
 
@@ -85,6 +86,7 @@ export function useRoomBrowserViewport(active: boolean) {
           delete root.dataset.roomBrowserKeyboard;
           root.style.removeProperty("--room-visible-height");
           root.style.removeProperty("--room-visible-top");
+          root.style.removeProperty("--room-viewport-bottom");
           return;
         }
 
@@ -93,10 +95,9 @@ export function useRoomBrowserViewport(active: boolean) {
           "--room-visible-height",
           `${Math.round(visibleHeight)}px`,
         );
-        root.style.setProperty(
-          "--room-visible-top",
-          `${Math.max(0, Math.round(viewport?.offsetTop ?? 0))}px`,
-        );
+        const top = Math.max(0, viewport?.offsetTop ?? 0);
+        root.style.setProperty("--room-visible-top", `${Math.round(top)}px`);
+        root.style.setProperty("--room-viewport-bottom", `${Math.max(0, Math.round(window.innerHeight - top - visibleHeight))}px`);
       });
     };
 
