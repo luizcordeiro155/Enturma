@@ -425,3 +425,166 @@
     display: none !important;
   }
 }
+
+
+/* Room geometry: one scroll container per panel, no nested-main padding. */
+@media (min-width: 761px) {
+  .room-active-shell .study-room-page { background: var(--room-bg); }
+  .room-active-shell .study-room-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(14px, 2vw, 30px);
+    min-height: 166px;
+    padding: 20px clamp(20px, 2.3vw, 36px);
+    border: 1px solid var(--room-border);
+    border-radius: 18px 18px 0 0;
+    background: linear-gradient(105deg,var(--room-panel) 42%,color-mix(in srgb,var(--room-accent) 11%,var(--room-panel)));
+  }
+  .room-active-shell .room-header-intro { min-width: 0; flex: 1 1 auto; }
+  .room-active-shell .room-back { display: inline-flex; align-items: center; gap: 6px; min-height: 24px; }
+  .room-active-shell .room-header-identity { margin-top: 13px; }
+  .room-active-shell .room-header-identity-mark { flex-shrink: 0; }
+  .room-active-shell .room-header-copy { min-width: 0; }
+  .room-active-shell .room-header-caption { margin: 0 0 7px; color: var(--room-muted); font-size: .88rem; }
+  .room-active-shell .room-header-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+  .room-active-shell .room-header-tags > span {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 5px 10px; border: 1px solid var(--room-border);
+    border-radius: 999px; color: var(--room-muted); font-size: .78rem;
+    background: var(--room-subtle);
+  }
+  .room-active-shell .study-room-status { flex: 0 1 auto; }
+  .room-active-shell .study-room-shell {
+    grid-template-columns: clamp(185px,16vw,230px) minmax(0,1fr) clamp(205px,19vw,280px);
+    border: 1px solid var(--room-border);
+    border-top: 0;
+    border-radius: 0 0 16px 16px;
+    overflow: hidden;
+  }
+  .room-active-shell .room-main-panel {
+    display: block;
+    height: 100%;
+    min-height: 0 !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 0 !important;
+    background: var(--room-panel);
+  }
+  .room-active-shell .room-main-panel > .persistent-chat,
+  .room-active-shell .room-main-panel > .room-channel-content {
+    width: 100%; height: 100%; min-height: 0; margin: 0;
+  }
+  .room-active-shell .room-section-chat .persistent-composer {
+    flex-shrink: 0; margin: 0 !important;
+    padding: 12px clamp(14px,2vw,24px) !important;
+    border-top: 1px solid var(--room-border);
+    background: var(--room-panel) !important;
+    box-shadow: none !important;
+  }
+  .room-active-shell .room-section-chat .composer-main-row {
+    width: 100%; margin: 0; border-radius: 24px;
+  }
+  .room-active-shell .room-section-chat .typing-status:empty {
+    flex: 0 0 0 !important; height: 0 !important; min-height: 0 !important;
+    padding: 0 !important; border: 0 !important; overflow: hidden;
+  }
+  /* Compact participant rows: no clipped profile banners or forced width. */
+  .room-active-shell .room-members-panel .participant-row {
+    grid-template-columns: minmax(0,1fr) auto;
+    min-width: 0; gap: 5px; padding: 7px;
+  }
+  .room-active-shell .room-members-panel .member-profile-strip {
+    min-width: 0; width: 100%;
+  }
+  .room-active-shell .room-members-panel .member-profile-strip-content {
+    min-width: 0; padding: 7px;
+  }
+  .room-active-shell .room-members-panel .identity-trigger { min-width: 0; }
+  /* Materials and AI use the central column, not a narrow floating card. */
+  .room-active-shell .room-section-materials .room-main-panel,
+  .room-active-shell .room-section-ai .room-main-panel { overflow: hidden; }
+  .room-active-shell .room-section-materials .room-channel-content,
+  .room-active-shell .room-section-ai .room-channel-content {
+    display: block; height: 100%; min-height: 0;
+    width: 100%; max-width: none; margin: 0 !important;
+    padding: clamp(16px,2vw,28px) !important;
+    box-sizing: border-box; overflow-x: hidden; overflow-y: auto;
+    overscroll-behavior-y: contain; scrollbar-width: thin;
+  }
+  .room-active-shell .room-section-materials .room-tool-card,
+  .room-active-shell .room-section-ai .room-tool-card {
+    box-sizing: border-box; width: 100%; max-width: none;
+    min-width: 0; margin: 0; padding: clamp(18px,2vw,28px);
+    background: var(--room-subtle); border: 1px solid var(--room-border);
+    border-radius: 16px;
+  }
+  .room-active-shell .room-section-materials .room-tools form,
+  .room-active-shell .room-section-ai .room-tools form { width: 100%; max-width: none; }
+  /* Call stage and companion chat fill the available panel in parallel. */
+  .room-active-shell .study-room-shell.call-active {
+    grid-template-columns: clamp(185px,16vw,230px) minmax(0,1fr);
+  }
+  .room-active-shell .room-section-call .room-main-panel { overflow: hidden; }
+  .room-active-shell .room-section-call .call-chat-layout {
+    display: grid !important; grid-template-columns: minmax(0,1fr) clamp(310px,31%,390px);
+    height: 100% !important; min-height: 0 !important; max-height: 100%;
+    overflow: hidden; background: var(--room-panel);
+  }
+  .room-active-shell .room-section-call .call-stage {
+    width: 100%; height: 100%; min-width: 0; min-height: 0 !important;
+    padding: 16px !important; overflow-x: hidden; overflow-y: auto;
+    overscroll-behavior-y: contain; box-sizing: border-box;
+  }
+  .room-active-shell .room-section-call .call-stage .room-channel-content {
+    display: block; max-width: none; min-width: 0; width: 100%;
+    margin: 0 !important; padding: 0 !important;
+  }
+  .room-active-shell .room-section-call .call-stage .room-tool-card {
+    width: 100%; min-width: 0; margin: 0; padding: 0 !important;
+    border: 0; background: transparent; box-sizing: border-box;
+  }
+  .room-active-shell .room-section-call .call-stage .room-tool-card > div:first-child:not(.call-panel) {
+    padding: 6px 12px 14px; box-sizing: border-box;
+  }
+  .room-active-shell .room-section-call .call-stage .discord-call {
+    min-height: 0; height: auto; width: 100%; max-width: 100%;
+  }
+  .room-active-shell .room-section-call .call-chat-pane {
+    display: flex; flex-direction: column; width: 100%;
+    height: 100% !important; min-width: 0; min-height: 0 !important;
+    max-height: none !important; overflow: hidden;
+    border-left: 1px solid var(--room-border);
+  }
+  .room-active-shell .room-section-call .call-chat-pane .persistent-heading,
+  .room-active-shell .room-section-call .call-chat-pane .conversation-notice,
+  .room-active-shell .room-section-call .call-chat-pane .chat-unread,
+  .room-active-shell .room-section-call .call-chat-pane .typing-status,
+  .room-active-shell .room-section-call .call-chat-pane .room-penalty-timer,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer {
+    flex: 0 0 auto;
+  }
+  .room-active-shell .room-section-call .call-chat-pane .persistent-messages {
+    flex: 1 1 0; min-height: 0 !important; max-height: none !important;
+    overflow-y: auto; overflow-x: hidden; scrollbar-width: thin;
+  }
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer {
+    position: relative; inset: auto; margin: 0;
+    padding: 12px !important; box-shadow: none;
+  }
+  .room-active-shell .room-section-call .call-chat-pane .typing-status:empty {
+    min-height: 0; height: 0; padding: 0; flex-basis: 0; overflow: hidden;
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .room-active-shell .study-room-shell:not(.call-active) {
+    grid-template-columns: 185px minmax(0,1fr);
+  }
+  .room-active-shell .study-room-shell.call-active {
+    grid-template-columns: 185px minmax(0,1fr);
+  }
+  .room-active-shell .study-room-header { min-height: 140px; flex-wrap: wrap; }
+  .room-active-shell .room-section-call .call-chat-layout {
+    grid-template-columns: minmax(0,1fr) minmax(230px,34%);
+  }
+}
