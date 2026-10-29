@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { useMobileWebChatViewport } from "./use-room-browser-viewport";
 
@@ -7,12 +7,12 @@ let visualTop = 0;
 let onViewportResize: (() => void) | undefined;
 let originalViewport: PropertyDescriptor | undefined;
 
-function PrivateChatFixture() {
-  useMobileWebChatViewport(true, "private");
+function PrivateChatFixture({ kind = "private" }: { kind?: "private" | "room" }) {
+  useMobileWebChatViewport(true, kind);
   return (
-    <div className="mobile-private-chat-open">
-      <form className="private-composer enturma-message-composer">
-        <textarea aria-label="Mensagem privada" />
+    <div className={kind === "private" ? "mobile-private-chat-open" : "room-section-chat"}>
+      <form className={kind === "private" ? "private-composer enturma-message-composer" : "persistent-composer enturma-message-composer"}>
+        <textarea aria-label={kind === "private" ? "Mensagem privada" : "Mensagem"} />
       </form>
       <div className="private-messages" />
     </div>
@@ -64,6 +64,9 @@ afterEach(() => {
   delete root.dataset.enturmaMobile;
   delete root.dataset.mobileWebChatKeyboard;
   root.style.removeProperty("--mobile-web-chat-visible-bottom");
+  root.style.removeProperty("--mobile-web-chat-visible-top");
+  root.style.removeProperty("--mobile-web-chat-visible-height");
+  delete root.dataset.roomBrowserLayout;
 });
 
 describe("private mobile browser IME", () => {
@@ -74,6 +77,8 @@ describe("private mobile browser IME", () => {
     const root = document.documentElement;
     expect(root.dataset.mobileWebChatKeyboard).toBe("private");
     expect(root.style.getPropertyValue("--mobile-web-chat-visible-bottom")).toBe("780px");
+    expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe("0px");
+    expect(root.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("780px");
 
     visualHeight = 420;
     onViewportResize?.();
@@ -83,6 +88,8 @@ describe("private mobile browser IME", () => {
     visualHeight = 400;
     onViewportResize?.();
     expect(root.style.getPropertyValue("--mobile-web-chat-visible-bottom")).toBe("412px");
+    expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe("12px");
+    expect(root.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("400px");
 
     field.blur();
     expect(root.dataset.mobileWebChatKeyboard).toBe("private");
@@ -90,6 +97,26 @@ describe("private mobile browser IME", () => {
     visualTop = 0;
     onViewportResize?.();
     expect(root.dataset.mobileWebChatKeyboard).toBeUndefined();
+  });
+
+  it("anchors before focus on the first pointer press", () => {
+    render(<PrivateChatFixture />);
+    const field = screen.getByRole("textbox", { name: "Mensagem privada" });
+    fireEvent.pointerDown(field);
+    expect(document.documentElement.dataset.mobileWebChatKeyboard).toBe("private");
+    expect(document.documentElement.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("780px");
+  });
+
+  it("uses the same flex-screen geometry for study-room chats", () => {
+    render(<PrivateChatFixture kind="room" />);
+    const field = screen.getByRole("textbox", { name: "Mensagem" });
+    field.focus();
+    expect(document.documentElement.dataset.mobileWebChatKeyboard).toBe("room");
+    visualHeight = 380;
+    visualTop = 18;
+    onViewportResize?.();
+    expect(document.documentElement.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe("18px");
+    expect(document.documentElement.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("380px");
   });
 
   it("does not install browser keyboard styles inside the Android APK bridge", () => {

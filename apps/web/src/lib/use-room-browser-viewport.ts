@@ -66,9 +66,10 @@ export function mobileWebMessageHeight(
  * Shared Web Mobile keyboard anchor for both room and private conversations.
  * Never runs inside the Android APK; its EnturmaNative bridge controls the IME.
  *
- * Instead of shrinking the entire application shell (a source of blank space
- * on Samsung Internet/Chrome), we pin only the focused composer to the
- * visualViewport bottom and limit scrolling to the message history.
+ * The visual viewport is the one geometry source for the active conversation:
+ * resize the chat screen (never the document or an independently floating
+ * composer), and let its flex message list absorb the keyboard animation.
+ * A pointer-down pre-arms the layout before the browser focuses the input.
  */
 export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
   useEffect(() => {
@@ -89,11 +90,6 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
       kind === "room"
         ? ".room-section-chat .persistent-composer.enturma-message-composer"
         : ".mobile-private-chat-open .private-composer.enturma-message-composer";
-    const messagesSelector =
-      kind === "room"
-        ? ".room-section-chat .persistent-messages"
-        : ".mobile-private-chat-open .private-messages";
-
     const viewport = window.visualViewport;
     let baselineHeight = viewport?.height ?? window.innerHeight;
     let wasOpen = false;
@@ -103,16 +99,33 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     const clearKeyboard = () => {
       if (root.dataset.mobileWebChatKeyboard === kind) {
         delete root.dataset.mobileWebChatKeyboard;
+        root.style.removeProperty("--mobile-web-chat-visible-top");
+        root.style.removeProperty("--mobile-web-chat-visible-height");
+        root.style.removeProperty("--mobile-web-chat-visible-bottom");
         root.style.removeProperty("--mobile-web-chat-bottom");
         root.style.removeProperty("--mobile-web-chat-adjust");
         root.style.removeProperty("--mobile-web-chat-messages-height");
-        root.style.removeProperty("--mobile-web-chat-visible-bottom");
       }
       delete root.dataset.roomBrowserKeyboard;
       root.style.removeProperty("--room-visible-height");
       root.style.removeProperty("--room-visible-top");
       root.style.removeProperty("--room-viewport-bottom");
       wasOpen = false;
+    };
+
+    const geometry = () => {
+      const height = Math.max(1, Math.round(viewport?.height || window.innerHeight));
+      const top = Math.max(0, Math.round(viewport?.offsetTop ?? 0));
+      return { height, top };
+    };
+
+    const pinConversation = () => {
+      const { height, top } = geometry();
+      root.dataset.mobileWebChatKeyboard = kind;
+      root.style.setProperty("--mobile-web-chat-visible-top", String(top) + "px");
+      root.style.setProperty("--mobile-web-chat-visible-height", String(height) + "px");
+      root.style.setProperty("--mobile-web-chat-visible-bottom", String(top + height) + "px");
+      wasOpen = true;
     };
 
     const sync = () => {
@@ -125,112 +138,59 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         }
 
         if (kind === "room") root.dataset.roomBrowserLayout = "true";
-
-        const visibleHeight = viewport?.height ?? window.innerHeight;
-        const visibleTop = Math.max(0, viewport?.offsetTop ?? 0);
-        const visibleBottom = mobileWebVisibleBottom(visibleHeight, visibleTop);
+        const { height } = geometry();
         const input = document.activeElement;
         const focused =
           input instanceof HTMLElement && Boolean(input.closest(composerSelector));
 
         if (!focused && !wasOpen) {
-          baselineHeight = Math.max(baselineHeight, visibleHeight);
-        } else if (visibleHeight > baselineHeight) {
-          baselineHeight = visibleHeight;
+          baselineHeight = Math.max(baselineHeight, height);
+        } else if (height > baselineHeight) {
+          baselineHeight = height;
         }
 
-        const shrunk = isRoomKeyboardVisible(
+        // Keep the screen anchored while an unfocused IME animates closed,
+        // but never confuse a browser address-bar change with an open IME.
+        const keyboardClosing = wasOpen && isRoomKeyboardVisible(
           baselineHeight,
-          visibleHeight,
-          focused || wasOpen,
+          height,
+          true,
         );
-        const inset = mobileWebKeyboardInset(
-          window.innerHeight,
-          visibleHeight,
-          visibleTop,
-        );
-        // Arm immediately on first focus, before Chrome emits its first IME resize.
-        // Waiting for a 120px drop briefly hid the private composer behind the keyboard.
-        const keyboardOpen = shrunk || (focused && (kind === "private" || inset > 120));
-        if (!keyboardOpen) {
+        if (!focused && !keyboardClosing) {
           clearKeyboard();
           return;
         }
-
-        wasOpen = true;
-        root.dataset.mobileWebChatKeyboard = kind;
-        if (kind === "private") {
-          // Private conversations have a full-height flex layout. Resize that
-          // conversation to the visual viewport instead of detaching its input
-          // with position:fixed, which fails on the first Chrome IME animation.
-          // The header stays put; only the messages flex and composer follow IME.
-          root.style.setProperty(
-            "--mobile-web-chat-visible-bottom",
-            `${visibleBottom}px`,
-          );
-          return;
-        }
-        root.style.setProperty("--mobile-web-chat-bottom", `${inset}px`);
-        // Reset before measuring so each frame corrects the actual new
-        // viewport instead of accumulating previous transforms.
-        root.style.setProperty("--mobile-web-chat-adjust", "0px");
-
-        const composer = document.querySelector<HTMLElement>(composerSelector);
-        const messages = document.querySelector<HTMLElement>(messagesSelector);
-        if (!composer) return;
-
-        // Measuring after setting data attributes forces the keyboard-specific
-        // CSS to take effect before the correction is calculated.
-        const composerRect = composer.getBoundingClientRect();
-        root.style.setProperty(
-          "--mobile-web-chat-adjust",
-          `${mobileWebComposerCorrection(visibleBottom, composerRect.bottom)}px`,
-        );
-
-        if (messages) {
-          const rect = messages.getBoundingClientRect();
-          const typing = kind === "room"
-            ? document.querySelector<HTMLElement>(
-                ".room-section-chat .typing-status",
-              )
-            : document.querySelector<HTMLElement>(
-                ".mobile-private-chat-open .typing-status",
-              );
-          const height = mobileWebMessageHeight(
-            visibleTop,
-            visibleBottom,
-            rect.top,
-            composerRect.height,
-            typing?.getBoundingClientRect().height ?? 0,
-          );
-          root.style.setProperty(
-            "--mobile-web-chat-messages-height",
-            `${height}px`,
-          );
-        }
+        pinConversation();
       });
     };
 
     const onFocus = (event: FocusEvent) => {
-      // Apply the private chat's viewport constraint during focusin itself,
-      // before Android Chrome's browser-driven scroll/focus adjustment.
       if (
-        kind === "private" &&
-        isBrowserMobile() &&
         event.type === "focusin" &&
+        isBrowserMobile() &&
         event.target instanceof HTMLElement &&
         event.target.closest(composerSelector)
       ) {
-        root.dataset.mobileWebChatKeyboard = kind;
-        root.style.setProperty(
-          "--mobile-web-chat-visible-bottom",
-          `${mobileWebVisibleBottom(viewport?.height ?? window.innerHeight, viewport?.offsetTop ?? 0)}px`,
-        );
+        // Apply synchronously, before Chrome starts panning the input.
+        pinConversation();
       }
       sync();
-      for (const delay of [80, 220, 400]) {
+      for (const delay of [80, 180, 300, 450]) {
         timers.push(window.setTimeout(sync, delay));
       }
+    };
+
+    const onPointerDown = (event: PointerEvent) => {
+      const element = event.target;
+      if (
+        !isBrowserMobile() ||
+        !(element instanceof HTMLElement) ||
+        !(element.matches("textarea") || element.closest(".composer-text-field")) ||
+        !element.closest(composerSelector)
+      ) return;
+      const textarea = element.closest(composerSelector)?.querySelector("textarea");
+      if (textarea instanceof HTMLTextAreaElement && !textarea.disabled)
+        pinConversation();
     };
     const onOrientationChange = () => {
       clearKeyboard();
@@ -245,10 +205,11 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     window.addEventListener("orientationchange", onOrientationChange);
     document.addEventListener("focusin", onFocus);
     document.addEventListener("focusout", onFocus);
+    document.addEventListener("pointerdown", onPointerDown, true);
     mobile.addEventListener("change", sync);
 
-    // Expanding the textarea/reply preview must not move the field away from
-    // the keyboard; bottom anchoring stays constant while height grows upward.
+    // Composer height changes consume message space within the flex column
+    // without moving its bottom edge independently of the visual viewport.
     const composer = document.querySelector<HTMLElement>(composerSelector);
     const observer =
       composer && typeof ResizeObserver !== "undefined"
@@ -266,6 +227,7 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
       window.removeEventListener("orientationchange", onOrientationChange);
       document.removeEventListener("focusin", onFocus);
       document.removeEventListener("focusout", onFocus);
+      document.removeEventListener("pointerdown", onPointerDown, true);
       mobile.removeEventListener("change", sync);
       clearKeyboard();
       if (kind === "room") delete root.dataset.roomBrowserLayout;

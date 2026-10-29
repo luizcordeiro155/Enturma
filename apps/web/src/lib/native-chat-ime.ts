@@ -3,6 +3,7 @@
 type NativeTextInputWindow = Window & {
   EnturmaNative?: {
     setChatComposerFocused?: (focused: boolean) => void;
+    setChatSurfaceFocused?: (focused: boolean) => void;
   };
 };
 
@@ -23,7 +24,17 @@ export function setNativeTextInputFocused(focused: boolean) {
 /**
  * Backwards-compatible alias used by the room and private-message composers.
  */
-export const setNativeChatComposerFocused = setNativeTextInputFocused;
+export function setNativeChatComposerFocused(focused: boolean) {
+  setNativeTextInputFocused(focused);
+  try {
+    // Optional for earlier installed APKs; new APKs keep WebView full-height.
+    (window as NativeTextInputWindow).EnturmaNative?.setChatSurfaceFocused?.(
+      focused,
+    );
+  } catch {
+    // No native bridge in browsers and PWAs.
+  }
+}
 
 export function isTextEntryControl(
   target: EventTarget | Element | null,

@@ -537,6 +537,7 @@ class MainActivity : Activity() {
     private var keyboardVisible = false
     private var lastSafeAreaSnapshot = ""
     private var chatComposerFocused = false
+    private var chatSurfaceFocused = false
     private var updateDownloadId: Long? = null
     private var updateReceiverRegistered = false
     private var pendingUpdateUrl: String? = null
@@ -619,6 +620,14 @@ class MainActivity : Activity() {
                 ViewCompat.requestApplyInsets(rootLayout)
             }
         }
+
+        @JavascriptInterface
+        fun setChatSurfaceFocused(focused: Boolean) {
+            runOnUiThread {
+                chatSurfaceFocused = focused
+                ViewCompat.requestApplyInsets(rootLayout)
+            }
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -682,7 +691,10 @@ class MainActivity : Activity() {
             // the top of the IME. The message list then flexes above the
             // composer without scrolling the whole app or floating controls.
             val params = webView.layoutParams as FrameLayout.LayoutParams
-            val resizeChatForIme = keyboardVisible && chatComposerFocused
+            // Keep the WebView full height in chats, preserving its drawing
+            // surface during IME animation; only flex chat panels shrink.
+            val chatImeActive = keyboardVisible && chatSurfaceFocused
+            val resizeChatForIme = keyboardVisible && chatComposerFocused && !chatSurfaceFocused
             val targetBottomMargin = if (resizeChatForIme) imeInsets.bottom else 0
             if (params.bottomMargin != targetBottomMargin) {
                 params.bottomMargin = targetBottomMargin
@@ -701,7 +713,7 @@ class MainActivity : Activity() {
             // the WebView's native margin has changed: that can visibly flash.
             val snapshot = listOf(
                 safeTopCssPx, safeRightCssPx, safeBottomCssPx, safeLeftCssPx,
-                keyboardBottomCssPx, keyboardVisible,
+                keyboardBottomCssPx, keyboardVisible, chatImeActive,
             ).joinToString("|")
             if (snapshot != lastSafeAreaSnapshot) {
                 lastSafeAreaSnapshot = snapshot
@@ -1276,6 +1288,7 @@ class MainActivity : Activity() {
         if (!::webView.isInitialized) return
 
         val keyboardState = if (keyboardVisible) "true" else "false"
+        val nativeChatIme = if (keyboardVisible && chatSurfaceFocused) "true" else "false"
         val script = """
             (function() {
               var root = document.documentElement;
@@ -1288,6 +1301,7 @@ class MainActivity : Activity() {
               root.style.setProperty("--native-safe-left", "\${safeLeftCssPx}px");
               root.style.setProperty("--native-keyboard-bottom", "\${keyboardBottomCssPx}px");
               root.dataset.enturmaIme = "\${keyboardState}";
+              root.dataset.enturmaNativeChatIme = "\${nativeChatIme}";
 
               var styleId = "enturma-native-safe-area";
               var style = document.getElementById(styleId);
