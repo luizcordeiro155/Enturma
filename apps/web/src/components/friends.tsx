@@ -1,5 +1,6 @@
 "use client";
 import { usePrivateTyping } from "@/lib/use-private-typing";
+import { useMobileWebChatViewport } from "@/lib/use-room-browser-viewport";
 import { TypingIndicator } from "./typing-indicator";
 import { synchronizeAccountIdentity } from "@/lib/account-chat-sync";
 import { ChatImage } from "./chat-image-viewer";
@@ -93,6 +94,7 @@ export function Friends() {
   );
   const [selected, setSelected] = useState<Friend>();
   const privateTyping = usePrivateTyping(selected?.id);
+  useMobileWebChatViewport(Boolean(selected), "private");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [username, setUsername] = useState("");
