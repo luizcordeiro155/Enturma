@@ -94,7 +94,7 @@ export function Friends() {
   );
   const [selected, setSelected] = useState<Friend>();
   const privateTyping = usePrivateTyping(selected?.id);
-  useMobileWebChatViewport(Boolean(selected), "private");
+  useMobileWebChatViewport(Boolean(selected || requestedChat), "private");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [username, setUsername] = useState("");

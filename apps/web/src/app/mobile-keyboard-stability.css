@@ -1,0 +1,125 @@
+/* Mobile IME: one visual viewport, one flex message list, one composer.
+   Never animate the document or float a composer independently. */
+@media (max-width: 760px) and (pointer: coarse) {
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .workspace {
+    position: fixed !important;
+    inset: var(--mobile-web-chat-visible-top, 0px) 0 auto 0 !important;
+    width: 100% !important;
+    height: var(--mobile-web-chat-visible-height, 100dvh) !important;
+    max-height: var(--mobile-web-chat-visible-height, 100dvh) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell {
+    position: fixed !important;
+    inset: var(--mobile-web-chat-visible-top, 0px) 0 auto 0 !important;
+    width: 100% !important;
+    height: var(--mobile-web-chat-visible-height, 100dvh) !important;
+    max-height: var(--mobile-web-chat-visible-height, 100dvh) !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    transform: none !important;
+    transition: none !important;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell > .workspace,
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell > .workspace > main,
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat {
+    padding-bottom: 0 !important;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .room-mobile-nav {
+    display: none !important;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .study-room-shell,
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .room-main-panel,
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-chat {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-messages,
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .mobile-private-chat-open .private-messages {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    scroll-padding-bottom: 12px;
+  }
+
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .mobile-private-chat-open .private-composer.enturma-message-composer {
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    flex: 0 0 auto !important;
+    transform: none !important;
+    transition: none !important;
+    margin: 0 !important;
+    padding-bottom: 5px !important;
+  }
+}
+
+/* Android native: leave the WebView behind the keyboard at full height.
+   Only the focused chat flex surface subtracts IME insets; ordinary form
+   inputs still use the pre-existing native resizing path. */
+@media (max-width: 760px) {
+  html[data-enturma-mobile="true"][data-enturma-native-chat-ime="true"][data-enturma-private-chat="true"] .workspace {
+    height: calc(100dvh - var(--native-keyboard-bottom, 0px)) !important;
+    max-height: calc(100dvh - var(--native-keyboard-bottom, 0px)) !important;
+    min-height: 0 !important;
+  }
+
+  html[data-enturma-mobile="true"][data-enturma-native-chat-ime="true"] .room-active-shell .room-section-chat {
+    height: calc(100dvh - var(--native-keyboard-bottom, 0px)) !important;
+    max-height: calc(100dvh - var(--native-keyboard-bottom, 0px)) !important;
+    min-height: 0 !important;
+    padding-bottom: 0 !important;
+  }
+
+  html[data-enturma-mobile="true"][data-enturma-native-chat-ime="true"] .room-active-shell .room-section-chat .room-mobile-nav {
+    display: none !important;
+  }
+
+  html[data-enturma-mobile="true"][data-enturma-native-chat-ime="true"] .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
+  html[data-enturma-mobile="true"][data-enturma-native-chat-ime="true"][data-enturma-private-chat="true"] .mobile-private-chat-open .private-composer.enturma-message-composer {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    transform: none !important;
+    flex: 0 0 auto !important;
+    margin: 0 !important;
+    padding-bottom: 5px !important;
+    transition: none !important;
+  }
+
+  html[data-enturma-mobile="true"][data-enturma-native-chat-ime="true"] .room-active-shell .room-section-chat .persistent-messages,
+  html[data-enturma-mobile="true"][data-enturma-native-chat-ime="true"][data-enturma-private-chat="true"] .mobile-private-chat-open .private-messages {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding-bottom: 12px !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+  }
+}
