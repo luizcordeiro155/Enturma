@@ -493,3 +493,30 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
   opacity: 0.45;
   cursor: not-allowed;
 }
+
+/* Native Electron controls stay fixed while only the content pane scrolls. */
+html[data-desktop-chrome="true"] .desktop-titlebar-update {
+  position: absolute;
+  right: 150px;
+  top: 2px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 26px;
+  min-width: 30px;
+  padding: 2px 6px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: #c8ec76;
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  transition: background 160ms ease, transform 160ms ease;
+}
+html[data-desktop-chrome="true"] .desktop-titlebar-update:hover { background: #b4dc6730; transform: translateY(-1px); }
+html[data-desktop-chrome="true"] .desktop-titlebar-update:focus-visible { outline: 2px solid #c8ec76; }
+html[data-desktop-chrome="true"] .desktop-titlebar-update span { font-size: 10px; }
+html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar-update { color: #436b2c; }
+@media (prefers-reduced-motion: reduce) { .desktop-titlebar-update { transition: none !important; } }
