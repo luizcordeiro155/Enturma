@@ -19,19 +19,23 @@ html[data-enturma-ime="true"] .private-chat .private-composer.enturma-message-co
   background-image: none !important;
 }
 
-/* Desktop used to have a tall rectangular footer with a border line above
- * the input. Give both room and private chats the same compact footprint. */
+/* Root cause of the remaining desktop "thick background": older styles
+ * reserved 30px below the room history and 14px in private history, then
+ * another 19-28px outside the pill. That leaves a visible footer slab.
+ * Match the compact mobile composer footprint, not just its border color. */
 @media (min-width: 761px) {
   .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
   .room-active-shell .room-section-call .call-chat-pane .persistent-composer.enturma-message-composer,
   .private-chat .private-composer.enturma-message-composer {
-    padding: 8px clamp(12px, 1.6vw, 22px) 11px !important;
+    padding: 4px clamp(10px, 1.2vw, 16px) 4px !important;
   }
 
   .room-active-shell .room-section-chat .persistent-composer .composer-main-row,
   .room-active-shell .room-section-call .call-chat-pane .persistent-composer .composer-main-row,
   .private-chat .private-composer .composer-main-row {
-    min-height: 52px !important;
+    min-height: 50px !important;
+    box-sizing: border-box !important;
+    padding: 1px 4px !important;
     border: 1px solid color-mix(
       in srgb, var(--room-accent, var(--accent)) 38%,
       var(--room-border, var(--border))
@@ -39,6 +43,37 @@ html[data-enturma-ime="true"] .private-chat .private-composer.enturma-message-co
     border-radius: 26px !important;
     background: var(--room-subtle, var(--soft)) !important;
     box-shadow: none !important;
+  }
+
+  /* Remove the wasted history-to-input gap, without moving the pinned
+   * composer or changing any IME/safe-area calculations. */
+  .room-active-shell .room-section-chat .persistent-messages {
+    padding-bottom: 6px !important;
+  }
+  html[data-enturma-private-chat="true"] .private-chat .private-messages {
+    padding-bottom: 6px !important;
+  }
+
+  /* 46px expanding text field + 1px/4px pill chrome = a 50px row.
+   * Avoid fixing the textarea height: room chats auto-grow up to 112px. */
+  .room-active-shell .room-section-chat .persistent-composer .composer-text-field textarea,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer .composer-text-field textarea,
+  .private-chat .private-composer .composer-text-field textarea {
+    min-height: 46px !important;
+    padding: 9px 6px !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-composer .composer-icon-button,
+  .room-active-shell .room-section-chat .persistent-composer .composer-send-button,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer .composer-icon-button,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer .composer-send-button,
+  .private-chat .private-composer .composer-icon-button,
+  .private-chat .private-composer .composer-send-button {
+    width: 40px !important;
+    min-width: 40px !important;
+    height: 40px !important;
+    min-height: 40px !important;
+    flex-basis: 40px !important;
   }
 
   .room-active-shell .room-section-chat .persistent-composer .composer-main-row:focus-within,
