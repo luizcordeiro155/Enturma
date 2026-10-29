@@ -1,0 +1,427 @@
+/* Final study-room surface. Kept separate from legacy room/mobile recovery
+   styles so the chat remains stable across Desktop, mobile Web and WebView. */
+
+/* Desktop and roomy tablets: clearer visual hierarchy without changing data. */
+@media (min-width: 761px) {
+  .room-active-shell .study-room-page {
+    background: var(--room-bg);
+  }
+  .room-active-shell .study-room-header {
+    padding: clamp(18px, 2vw, 30px);
+    gap: 20px;
+    background: linear-gradient(116deg, var(--room-panel) 62%, color-mix(in srgb, var(--room-accent) 12%, var(--room-panel)));
+  }
+  .room-active-shell .study-room-header h1 {
+    font-size: clamp(1.55rem, 2.1vw, 2rem);
+    letter-spacing: -0.04em;
+    line-height: 1.16;
+  }
+  .room-active-shell .study-room-shell {
+    grid-template-columns: clamp(178px, 16vw, 230px) minmax(0, 1fr) clamp(210px, 19vw, 280px);
+    gap: 1px;
+    background: var(--room-border);
+  }
+  .room-active-shell .room-channel-nav {
+    gap: 9px;
+    padding: 22px 14px;
+  }
+  .room-active-shell .room-channel {
+    border-radius: 12px !important;
+    min-height: 48px;
+    transition: background 150ms ease, border-color 150ms ease;
+  }
+  .room-active-shell .room-channel.active {
+    background: var(--room-accent) !important;
+    color: var(--room-accent-ink) !important;
+    border-color: transparent !important;
+    font-weight: 700;
+  }
+  .room-active-shell .room-channel:focus-visible,
+  .room-active-shell .participant-row button:focus-visible {
+    outline: 2px solid var(--room-accent);
+    outline-offset: 2px;
+  }
+  .room-active-shell .room-main-panel,
+  .room-active-shell .persistent-chat {
+    min-width: 0;
+    min-height: 0;
+  }
+  .room-active-shell .persistent-heading {
+    padding: 16px clamp(16px, 2vw, 26px);
+  }
+  .room-active-shell .persistent-messages {
+    padding-inline: clamp(12px, 2vw, 26px);
+    scrollbar-gutter: stable;
+  }
+  .room-active-shell .room-members-panel {
+    padding: 22px 14px;
+    min-width: 0;
+  }
+  .room-active-shell .room-members-panel .participant-row {
+    padding: 10px 9px;
+    margin-bottom: 6px;
+    border: 1px solid var(--room-border);
+    border-radius: 13px;
+    background: var(--room-panel);
+  }
+  .room-active-shell .room-members-panel .leave-room {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 16px;
+    border: 1px solid var(--room-border);
+    border-radius: 12px;
+  }
+  .room-active-shell .persistent-composer.enturma-message-composer {
+    background: var(--room-panel);
+    border-top: 1px solid var(--room-border);
+    padding: 12px clamp(14px, 2vw, 26px);
+  }
+  .room-active-shell .persistent-composer .composer-main-row {
+    border-radius: 23px;
+  }
+}
+
+/* Intermediate windows: preserve participants access through the existing
+   mobile details sheet and favor a usable message width. */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .room-active-shell .study-room-shell {
+    grid-template-columns: 185px minmax(0, 1fr);
+  }
+}
+
+/* Mobile browser keyboard state is produced by useRoomBrowserViewport.
+   The document never moves to chase the caret. Only the message viewport
+   shrinks while the compositor stays immediately above the keyboard. */
+@media (max-width: 760px) and (pointer: coarse) {
+  html[data-room-browser-layout="true"],
+  html[data-room-browser-layout="true"] body {
+    overscroll-behavior: none;
+    overflow: hidden !important;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell,
+  html[data-room-browser-layout="true"] .room-active-shell .workspace,
+  html[data-room-browser-layout="true"] .room-active-shell .workspace > main,
+  html[data-room-browser-layout="true"] .room-active-shell .study-room-page {
+    height: 100dvh !important;
+    min-height: 0 !important;
+    max-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .study-room-page {
+    display: flex !important;
+    flex-direction: column;
+    margin: 0 !important;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .room-mobile-toolbar {
+    flex: 0 0 auto;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .study-room-shell {
+    flex: 1 1 0 !important;
+    height: 0 !important;
+    max-height: none !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .room-main-panel,
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .persistent-chat {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden !important;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .persistent-chat {
+    display: flex !important;
+    flex-direction: column;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .persistent-messages {
+    flex: 1 1 0 !important;
+    min-height: 0 !important;
+    height: auto !important;
+    max-height: none !important;
+    padding: 10px 10px 14px !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .typing-status {
+    flex: 0 0 auto !important;
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer {
+    flex: 0 0 auto !important;
+    position: relative !important;
+    inset: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 6px 8px !important;
+    margin: 0 !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .persistent-messages .persistent-message {
+    max-width: 100%;
+  }
+
+  /* The browser's own visualViewport is the visible area above the IME.
+     Resize the conversation shell, not the full document, and never promote
+     the room tab bar above the keyboard. */
+  html[data-room-browser-keyboard="true"] .room-active-shell,
+  html[data-room-browser-keyboard="true"] .room-active-shell .workspace,
+  html[data-room-browser-keyboard="true"] .room-active-shell .workspace > main,
+  html[data-room-browser-keyboard="true"] .room-active-shell .room-section-chat {
+    height: var(--room-visible-height, 100dvh) !important;
+    max-height: var(--room-visible-height, 100dvh) !important;
+    min-height: 0 !important;
+  }
+
+  html[data-room-browser-keyboard="true"] .room-active-shell .room-section-chat {
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  html[data-room-browser-keyboard="true"] .room-active-shell .room-section-chat .room-mobile-nav {
+    display: none !important;
+  }
+
+  html[data-room-browser-keyboard="true"] .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer {
+    padding-bottom: 5px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room-active-shell .room-channel {
+    transition: none;
+  }
+}
+
+
+/* Desktop room viewport containment (release fix) */
+/* Keep the outer page, topbar, header, sidebar and composer stationary.
+   Only message/history and participant panes should scroll. */
+@media (min-width: 761px) {
+  html:has(.room-active-shell),
+  html:has(.room-active-shell) body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  .room-active-shell {
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+  html[data-desktop-chrome="true"] .room-active-shell {
+    height: calc(100dvh - 32px) !important;
+  }
+  .room-active-shell > .sidebar {
+    height: 100%;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+  .room-active-shell > .workspace {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  .room-active-shell > .workspace > .topbar {
+    flex: 0 0 auto;
+  }
+  .room-active-shell > .workspace > main {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+  .room-active-shell > .workspace > main > .study-room-page {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow: hidden;
+  }
+  /* Hide the general legal footer only in a full-screen study room. */
+  .room-active-shell > .workspace > footer {
+    display: none !important;
+  }
+  .room-active-shell .study-room-header,
+  .room-active-shell .late-join-banner {
+    flex: 0 0 auto;
+  }
+  .room-active-shell .study-room-header {
+    min-height: clamp(128px, 18dvh, 176px);
+  }
+  .room-active-shell .study-room-shell {
+    display: grid;
+    flex: 1 1 0;
+    height: 0 !important;
+    min-height: 0 !important;
+    overflow: hidden;
+  }
+  .room-active-shell .room-channel-nav,
+  .room-active-shell .room-members-panel {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+  }
+  .room-active-shell .room-main-panel {
+    min-width: 0;
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .room-active-shell .room-section-chat .room-main-panel,
+  .room-active-shell .room-section-call .room-main-panel {
+    overflow: hidden;
+  }
+  .room-active-shell .room-section-chat .persistent-chat {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: hidden;
+  }
+  .room-active-shell .room-section-chat .persistent-heading,
+  .room-active-shell .room-section-chat .conversation-notice,
+  .room-active-shell .room-section-chat .chat-unread,
+  .room-active-shell .room-section-chat .typing-status,
+  .room-active-shell .room-section-chat .room-penalty-timer,
+  .room-active-shell .room-section-chat .persistent-composer,
+  .room-active-shell .room-section-chat .ended-chat-note {
+    flex: 0 0 auto;
+  }
+  .room-active-shell .room-section-chat .persistent-messages {
+    flex: 1 1 0;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow-y: auto;
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+    scrollbar-width: thin;
+    scroll-padding-bottom: 16px;
+  }
+  .room-active-shell .room-section-chat .persistent-composer {
+    position: relative;
+    inset: auto;
+    width: 100%;
+    box-shadow: 0 -10px 24px color-mix(in srgb, var(--room-bg) 65%, transparent);
+  }
+  .room-active-shell .room-section-chat .composer-main-row {
+    border-color: color-mix(in srgb, var(--room-accent) 72%, var(--room-border));
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--room-accent) 16%, transparent);
+  }
+  .room-active-shell .room-members-panel .participant-row {
+    min-height: 70px;
+    margin-bottom: 10px;
+  }
+  .room-active-shell .room-section-chat .persistent-messages > .persistent-message {
+    box-sizing: border-box;
+    width: fit-content;
+    max-width: min(100%, 590px);
+    margin: 12px 0 !important;
+    padding: 14px 16px !important;
+    border: 1px solid var(--room-border) !important;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--room-subtle) 72%, var(--room-panel)) !important;
+  }
+  .room-active-shell .room-section-chat .persistent-messages > .persistent-message.mine {
+    margin-left: auto !important;
+    border-color: color-mix(in srgb, var(--room-accent) 34%, var(--room-border)) !important;
+    background: color-mix(in srgb, var(--room-accent) 16%, var(--room-panel)) !important;
+  }
+  .room-active-shell .room-header-identity {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    min-width: 0;
+    margin-top: 12px;
+  }
+  .room-active-shell .room-header-identity-mark {
+    display: grid;
+    flex: 0 0 62px;
+    place-items: center;
+    width: 62px;
+    height: 62px;
+    border: 1px solid color-mix(in srgb, var(--room-accent) 35%, var(--room-border));
+    border-radius: 17px;
+    background: color-mix(in srgb, var(--room-accent) 14%, var(--room-panel));
+    color: var(--room-accent);
+  }
+  .room-active-shell .room-header-copy,
+  .room-active-shell .room-header-identity > div {
+    min-width: 0;
+  }
+  .room-active-shell .room-header-identity h1 {
+    margin: 0 0 5px;
+  }
+}
+@media (min-width: 761px) and (max-width: 1100px) {
+  .room-active-shell .study-room-shell {
+    grid-template-columns: 185px minmax(0, 1fr);
+  }
+  .room-active-shell .room-members-panel {
+    display: none;
+  }
+  .room-active-shell .study-room-header {
+    min-height: 118px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+}
+/* Web keyboard: when IME opens, release the reserved navigation space.
+   The Android native bridge does not receive these data attributes. */
+@media (max-width: 760px) and (pointer: coarse) {
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .persistent-messages > .persistent-message {
+    box-sizing: border-box;
+    max-width: calc(100% - 6px);
+    margin: 8px 3px !important;
+    padding: 10px !important;
+    border: 1px solid var(--room-border) !important;
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--room-subtle) 75%, var(--room-panel)) !important;
+  }
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .persistent-messages > .persistent-message.mine {
+    margin-left: auto !important;
+    max-width: 93%;
+    border-color: color-mix(in srgb, var(--room-accent) 35%, var(--room-border)) !important;
+    background: color-mix(in srgb, var(--room-accent) 17%, var(--room-panel)) !important;
+  }
+  html[data-room-browser-layout="true"] .room-active-shell .room-section-chat .composer-main-row {
+    border-color: color-mix(in srgb, var(--room-accent) 75%, var(--room-border));
+  }
+  html[data-room-browser-keyboard="true"] .room-active-shell .room-section-chat {
+    padding-bottom: 0 !important;
+  }
+  html[data-room-browser-keyboard="true"] .room-active-shell .room-section-chat .room-mobile-nav {
+    display: none !important;
+  }
+}
