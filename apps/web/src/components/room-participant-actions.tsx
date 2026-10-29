@@ -225,7 +225,6 @@ export function RoomParticipantActions({
               ><X size={20} /></button>
             </header>
 
-              <>
                 <h2 id="room-member-dialog-title">Expulsar participante?</h2>
                 <p id="room-member-dialog-description">
                   Você está prestes a remover <strong>{memberName}</strong> da sala.
