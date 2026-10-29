@@ -65,10 +65,8 @@ const ALLOWED_PERMISSIONS = new Set([
 
 let mainWindow = null;
 let updateWindow = null;
-let promptedNativeUpdate = '';
 let tray = null;
 let quitting = false;
-let updateReadyNotifiedVersion = "";
 let pendingDeepLink =
   process.argv.find((arg) => arg.startsWith("enturma://")) || null;
 let updateTimer = null;
@@ -90,10 +88,6 @@ function updateStatus(status, details = {}) {
     isEnturmaUrl(mainWindow.webContents.getURL())
   )
     mainWindow.webContents.send("desktop:update-state", updateState);
-  if (['downloading', 'ready'].includes(status) && promptedNativeUpdate !== `${updateState.version}:${status}`) {
-    promptedNativeUpdate = `${updateState.version}:${status}`;
-    showUpdateWindow(false);
-  }
   if (updateWindow && !updateWindow.isDestroyed()) {
     updateWindow.webContents.send('desktop:update-state', updateState);
     updateWindow.setProgressBar(status === 'downloading' ? updateState.progress / 100 : -1);
@@ -249,26 +243,6 @@ function rememberNativeNotice(id) {
     if (oldest) nativeNoticeIds.delete(oldest);
   }
   return true;
-}
-
-function notifyUpdateReady(version) {
-  if (
-    !version ||
-    updateReadyNotifiedVersion === version ||
-    !Notification.isSupported()
-  )
-    return;
-  updateReadyNotifiedVersion = version;
-  const notice = new Notification({
-    title: `Enturma ${version} está pronto`,
-    body:
-      "A atualização foi baixada e verificada. Abra o Enturma para concluir quando quiser.",
-    icon: path.join(__dirname, "..", "assets", "icon.ico"),
-  });
-  notice.on("click", () => {
-    showUpdateWindow();
-  });
-  notice.show();
 }
 
 function showDesktopNotification(payload) {
@@ -859,6 +833,9 @@ async function checkForUpdates(force = false) {
       return updateState;
     }
     updateStatus("available", { version: manifest.version });
+    // Automatic checks only advertise updates through the title-bar icon.
+    // Never download or open a second window without a user click.
+    if (!force) return updateState;
     if (
       manifest.installerUrl &&
       manifest.installerSha256 &&
@@ -877,7 +854,6 @@ async function checkForUpdates(force = false) {
       message:
         "Atualização baixada automaticamente. Reinicie o Enturma quando for conveniente.",
     });
-    notifyUpdateReady(manifest.version);
   } catch (error) {
     updateStatus("error", {
       message:
