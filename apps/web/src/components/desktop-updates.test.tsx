@@ -51,6 +51,17 @@ afterEach(() => {
   sessionStorage.clear();
 });
 describe("Desktop update UI", () => {
+  it("never opens the legacy dialog automatically for a native ready update", async () => {
+    const show = vi.fn().mockResolvedValue(undefined);
+    window.enturmaDesktop!.nativeUpdater = true;
+    window.enturmaDesktop!.showUpdateWindow = show;
+    render(<DesktopUpdateProvider><DesktopUpdateButton /></DesktopUpdateProvider>);
+    await screen.findByRole("button", { name: "Atualizações: Você está atualizado" });
+    act(() => receive({ status: "available", currentVersion: "0.4.360", version: "0.4.361", progress: 0 }));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(show).not.toHaveBeenCalled();
+  });
+
   it('opens the local updater instead of duplicating the hosted dialog', async () => {
     const show = vi.fn().mockResolvedValue(undefined);
     window.enturmaDesktop!.nativeUpdater = true;
@@ -115,6 +126,8 @@ describe("Desktop update UI", () => {
         version: "0.3.4",
       }),
     );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Atualizações: Atualização pronta" }));
     expect(screen.getByRole("dialog")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Depois" }));
     expect(screen.queryByRole("dialog")).toBeNull();

@@ -87,7 +87,6 @@ export default function Layout({
           }
         >
           <Motion />
-          <DesktopChrome />
           <ThemeSync />
           <AppLaunch />
           <MobilePushRegistration />
@@ -96,6 +95,7 @@ export default function Layout({
             <CallSessionProvider>
               <PrivateCallsProvider>
                 <DesktopUpdateProvider>
+                  <DesktopChrome />
                   <AppShellStateProvider>
                     <RideActivity>{children}</RideActivity>
                   </AppShellStateProvider>

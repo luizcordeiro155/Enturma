@@ -138,7 +138,6 @@ export function DesktopUpdateProvider({
     [open, setOpen] = useState(false);
   const [legacyWindows, setLegacyWindows] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
-  const prompted = useRef("");
   const { session } = useCallSession();
   useEffect(() => {
     const bridge = window.enturmaDesktop;
@@ -148,10 +147,6 @@ export function DesktopUpdateProvider({
       const receive = (next: UpdateState) => {
         if (!live) return;
         setState(next);
-        if (!bridge.nativeUpdater && ["downloading", "ready"].includes(next.status) && prompted.current !== `${next.version}:${next.status}`) {
-          prompted.current = `${next.version}:${next.status}`;
-          setOpen(true);
-        }
       };
 
       void bridge
@@ -525,6 +520,23 @@ export function DesktopUpdateProvider({
     </Context.Provider>
   );
 }
+export function DesktopUpdateTitlebarAction() {
+  const { state, open } = useContext(Context);
+  if (!isDesktop() || !state || !["available", "downloading", "ready"].includes(state.status)) return null;
+  return (
+    <button
+      className={`desktop-titlebar-update ${state.status}`}
+      type="button"
+      title={state.status === "ready" ? "Atualização pronta para instalar" : "Baixar atualização do Enturma"}
+      aria-label={state.status === "ready" ? "Instalar atualização do Enturma" : "Baixar atualização do Enturma"}
+      onClick={open}
+    >
+      <Download size={17} aria-hidden="true" />
+      {state.status === "downloading" ? <span>{Math.round(state.progress)}%</span> : null}
+    </button>
+  );
+}
+
 export function DesktopUpdateButton() {
   const { state, open } = useContext(Context);
   const label = state

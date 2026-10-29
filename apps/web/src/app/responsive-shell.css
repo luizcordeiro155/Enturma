@@ -177,3 +177,35 @@ body {
     transform: none !important;
   }
 }
+
+/* Installed desktop: constrain the sidebar to the app viewport, independently
+   from document scroll. The brand stays visible; only nav scrolls on short PCs. */
+@media (min-width: 761px) {
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) {
+   align-items: start;
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .sidebar {
+   position: sticky !important;
+   top: 0 !important;
+   align-self: start;
+   box-sizing: border-box;
+   height: calc(100dvh - 32px) !important;
+   max-height: calc(100dvh - 32px) !important;
+   min-height: 0 !important;
+   display: flex;
+   flex-direction: column;
+   overflow: hidden;
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .sidebar > .brand {
+   flex: 0 0 auto;
+   align-self: stretch;
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .sidebar > nav {
+   min-height: 0;
+   flex: 1 1 auto;
+   overflow-y: auto;
+   overflow-x: hidden;
+   overscroll-behavior: contain;
+   scrollbar-width: thin;
+ }
+}
