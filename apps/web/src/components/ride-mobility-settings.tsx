@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useRideMode, type RideMode } from "@/lib/ride-mode";
 import type { AcademicEntry } from "@enturma/contracts";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
@@ -11,29 +13,15 @@ import { Shell } from "./shell";
 export function RideMobilitySettings() {
   const [campuses, setCampuses] = useState<AcademicEntry[]>([]);
   const [error, setError] = useState("");
-  const [mode, setMode] = useState<"PASSENGER" | "DRIVER">(() => {
-    if (typeof window === "undefined") return "PASSENGER";
-    return localStorage.getItem("enturma-ride-mode") === "DRIVER"
-      ? "DRIVER"
-      : "PASSENGER";
-  });
+  const storedMode = useRideMode();
+  const params = useSearchParams();
+  const requested = params.get("mode");
+  const mode: RideMode = requested === "driver" ? "DRIVER" : requested === "passenger" ? "PASSENGER" : storedMode;
 
   useEffect(() => {
     api<AcademicEntry[]>("/academics?kind=CAMPUS")
       .then(setCampuses)
       .catch((e) => setError(e.message));
-
-    const syncMode = () => {
-      const saved = localStorage.getItem("enturma-ride-mode");
-      setMode(saved === "DRIVER" ? "DRIVER" : "PASSENGER");
-    };
-    const custom = (event: Event) => {
-      const next = (event as CustomEvent<"PASSENGER" | "DRIVER">).detail;
-      if (next === "PASSENGER" || next === "DRIVER") setMode(next);
-      else syncMode();
-    };
-    window.addEventListener("enturma-ride-mode-change", custom);
-    return () => window.removeEventListener("enturma-ride-mode-change", custom);
   }, []);
 
   return (

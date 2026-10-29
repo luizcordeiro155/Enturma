@@ -1,4 +1,5 @@
 "use client";
+import { readRideMode, saveRideMode } from "@/lib/ride-mode";
 import { StarRating } from "./star-rating";
 import { Avatar } from "./user-identity";
 import { RideSafetyCheck } from "./ride-safety-check";
@@ -497,7 +498,7 @@ export function RideMobilityExperience() {
   const [campuses, setCampuses] = useState<AcademicEntry[]>(
     () => peekApiSnapshot<AcademicEntry[]>("/academics?kind=CAMPUS") ?? [],
   );
-  const [mode, setMode] = useState<Mode>("PASSENGER");
+  const [mode, setMode] = useState<Mode>(() => readRideMode());
   const [direction, setDirection] = useState<Direction>("TO_CAMPUS");
   const [selected, setSelected] = useState<LocationResult>();
   const [route, setRoute] = useState<RouteResult>();
@@ -613,17 +614,7 @@ export function RideMobilityExperience() {
     return () => window.clearTimeout(timer);
   }, [load]);
   useEffect(() => {
-    const timer = window.setTimeout(() => {
-      const saved = localStorage.getItem("enturma-ride-mode");
-      if (saved === "PASSENGER" || saved === "DRIVER") setMode(saved);
-    }, 0);
-    return () => window.clearTimeout(timer);
-  }, []);
-  useEffect(() => {
-    localStorage.setItem("enturma-ride-mode", mode);
-    window.dispatchEvent(
-      new CustomEvent<Mode>("enturma-ride-mode-change", { detail: mode }),
-    );
+    saveRideMode(mode);
   }, [mode]);
 
   const live = useRideUpdates(async () => {
@@ -689,6 +680,7 @@ export function RideMobilityExperience() {
         setDriverRequests([]);
       }
 
+      saveRideMode(nextMode);
       setMode(nextMode);
       const animationDirection = nextMode === "DRIVER" ? 1 : -1;
       requestAnimationFrame(() => {

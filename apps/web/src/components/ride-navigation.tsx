@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useRideMode, type RideMode } from "@/lib/ride-mode";
 import {
   ArrowLeft,
   Car,
@@ -12,46 +12,12 @@ import {
   UserRound,
 } from "lucide-react";
 
-type RideMode = "PASSENGER" | "DRIVER";
-
-function useRideMode() {
-  const [mode, setMode] = useState<RideMode>(() => {
-    if (typeof window === "undefined") return "PASSENGER";
-    return localStorage.getItem("enturma-ride-mode") === "DRIVER"
-      ? "DRIVER"
-      : "PASSENGER";
-  });
-
-  useEffect(() => {
-    const read = () => {
-      const saved = localStorage.getItem("enturma-ride-mode");
-      setMode(saved === "DRIVER" ? "DRIVER" : "PASSENGER");
-    };
-    const custom = (event: Event) => {
-      const next = (event as CustomEvent<RideMode>).detail;
-      if (next === "PASSENGER" || next === "DRIVER") setMode(next);
-      else read();
-    };
-    const storage = (event: StorageEvent) => {
-      if (event.key === "enturma-ride-mode") read();
-    };
-    window.addEventListener("enturma-ride-mode-change", custom);
-    window.addEventListener("storage", storage);
-    return () => {
-      window.removeEventListener("enturma-ride-mode-change", custom);
-      window.removeEventListener("storage", storage);
-    };
-  }, []);
-
-  return mode;
-}
-
 function items(mode: RideMode) {
   return [
     { href: "/caronas", label: "Mapa", icon: Map },
     { href: "/caronas/matches", label: "Corridas", icon: History },
     {
-      href: "/caronas/configuracoes",
+      href: `/caronas/configuracoes?mode=${mode.toLowerCase()}`,
       label: mode === "DRIVER" ? "Perfil do motorista" : "Perfil do passageiro",
       icon: mode === "DRIVER" ? Car : UserRound,
     },
@@ -76,7 +42,7 @@ export function RideDesktopNavigation() {
           <Link
             key={href}
             href={href}
-            aria-current={path === href || (href !== "/caronas" && path.startsWith(href)) ? "page" : undefined}
+            aria-current={path === href.split("?")[0] || (href !== "/caronas" && path.startsWith(href.split("?")[0])) ? "page" : undefined}
           >
             <Icon size={20} />
             <span>{label}</span>
