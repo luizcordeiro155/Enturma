@@ -1049,6 +1049,8 @@ test.describe("touch chat", () => {
       await expect(navigation).toHaveCSS("position", "relative");
       await expect(navigation).toBeVisible();
       await expect(composer).toBeFocused();
+      // A new pointer gesture reopens the keyboard without a focusin event.
+      await composer.dispatchEvent("pointerdown", { pointerType: "touch" });
       await page.setViewportSize({ width: 390, height: 480 });
       await expect(navigation).toHaveCSS("position", "fixed");
       await composer.fill("Minha resposta");
