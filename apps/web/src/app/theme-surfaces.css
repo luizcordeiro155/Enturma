@@ -182,3 +182,102 @@ html[data-high-contrast="true"] .ride-mobility-app {
     flex: 0 0 auto;
   }
 }
+
+/* Desktop-only immersive DM: one scrollable message list, no outer page scroll.
+   Mobile IME and compact chat stay governed by mobile-chat-layout.css. */
+@media (min-width: 761px) {
+  html[data-enturma-private-chat="true"] {
+    height: 100%;
+    overflow: hidden !important;
+    scrollbar-gutter: auto !important;
+  }
+  html[data-enturma-private-chat="true"] body {
+    height: 100dvh;
+    overflow: hidden !important;
+    scrollbar-gutter: auto !important;
+  }
+  html[data-enturma-private-chat="true"] .app-shell:not(.ride-active-shell) {
+    height: calc(100dvh - var(--private-desktop-titlebar, 0px)) !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - var(--private-desktop-titlebar, 0px)) !important;
+    overflow: hidden !important;
+  }
+  html[data-desktop-chrome="true"][data-enturma-private-chat="true"] {
+    --private-desktop-titlebar: 32px;
+  }
+  html[data-enturma-private-chat="true"] .app-shell > .workspace {
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+  html[data-enturma-private-chat="true"] .workspace > .app-legal-footer {
+    display: none !important;
+  }
+  html[data-enturma-private-chat="true"] .workspace > main {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  html[data-enturma-private-chat="true"] .friends-page.mobile-private-chat-open,
+  html[data-enturma-private-chat="true"] .friends-page.mobile-private-chat-open .friends-workspace {
+    display: block !important;
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+  html[data-enturma-private-chat="true"] .friends-page.mobile-private-chat-open .private-chat {
+    display: flex !important;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    min-width: 0 !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+  }
+  html[data-enturma-private-chat="true"] .private-chat-header {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+  html[data-enturma-private-chat="true"] .private-chat > details,
+  html[data-enturma-private-chat="true"] .private-chat > .private-connection-status,
+  html[data-enturma-private-chat="true"] .private-chat > .conversation-notice {
+    flex: 0 0 auto;
+    margin-inline: 24px;
+  }
+  html[data-enturma-private-chat="true"] .private-messages {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 14px 24px !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+  }
+  html[data-enturma-private-chat="true"] .private-composer.enturma-message-composer {
+    flex: 0 0 auto !important;
+    min-width: 0;
+    margin: 0 !important;
+    padding: 12px 24px 16px !important;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+  }
+}
