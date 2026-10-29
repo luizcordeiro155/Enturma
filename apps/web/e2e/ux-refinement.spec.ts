@@ -988,7 +988,30 @@ test.describe("touch chat", () => {
           ),
         )
         .toBeLessThan(24);
+      const navigation = page.locator(".room-section-chat .room-mobile-nav");
+      await expect(navigation).toHaveCSS("position", "relative");
+      const restingComposerBottom = await page.locator(".persistent-composer").evaluate(
+        (node) => node.getBoundingClientRect().bottom,
+      );
+      const restingNavTop = await navigation.evaluate(
+        (node) => node.getBoundingClientRect().top,
+      );
+      expect(Math.abs(restingNavTop - restingComposerBottom)).toBeLessThanOrEqual(20);
+
+      // Touching and focusing before IME resize must NOT lower the composer
+      // onto the navigation tabs. The visible viewport still has full height.
+      await composer.dispatchEvent("pointerdown", { pointerType: "touch" });
       await composer.focus();
+      await expect(navigation).toHaveCSS("position", "relative");
+      await expect.poll(async () => {
+        const inputBottom = await page.locator(".persistent-composer").evaluate(
+          (node) => node.getBoundingClientRect().bottom,
+        );
+        const tabsTop = await navigation.evaluate(
+          (node) => node.getBoundingClientRect().top,
+        );
+        return Math.abs(tabsTop - inputBottom);
+      }).toBeLessThanOrEqual(20);
       await viewport.evaluate((el) => {
         el.scrollTop = 100;
         el.dispatchEvent(new Event("scroll", { bubbles: true }));
@@ -1033,7 +1056,6 @@ test.describe("touch chat", () => {
         );
         return Math.abs(visualBottom - bottom);
       }).toBeLessThanOrEqual(14);
-      const navigation = page.locator(".room-section-chat .room-mobile-nav");
       // The keyboard should cover the existing navigation instead of
       // removing the tabs or lifting them above the message composer.
       await expect(navigation).toHaveCSS("display", "grid");
@@ -1051,6 +1073,7 @@ test.describe("touch chat", () => {
       await expect(composer).toBeFocused();
       // A new pointer gesture reopens the keyboard without a focusin event.
       await composer.dispatchEvent("pointerdown", { pointerType: "touch" });
+      await expect(navigation).toHaveCSS("position", "relative");
       await page.setViewportSize({ width: 390, height: 480 });
       await expect(navigation).toHaveCSS("position", "fixed");
       await composer.fill("Minha resposta");

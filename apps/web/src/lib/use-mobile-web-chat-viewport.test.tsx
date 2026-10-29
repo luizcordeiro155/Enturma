@@ -119,14 +119,19 @@ describe("private mobile browser IME", () => {
       top: 714, height: 66,
     } as DOMRect);
     const field = screen.getByRole("textbox", { name: "Mensagem" });
+    // First touch and focus must preserve the original composer + navbar
+    // layout; the keyboard has not reported a reduced visual viewport yet.
     fireEvent.pointerDown(field);
+    expect(root.dataset.mobileWebChatKeyboard).toBeUndefined();
+    expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe("");
     field.focus();
-    expect(root.dataset.mobileWebChatKeyboard).toBe("room");
-    expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe("714px");
+    expect(root.dataset.mobileWebChatKeyboard).toBeUndefined();
+    expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe("");
 
     visualHeight = 380;
     visualTop = 18;
     onViewportResize?.();
+    expect(root.dataset.mobileWebChatKeyboard).toBe("room");
     expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe("18px");
     expect(root.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("380px");
     expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe("714px");
@@ -142,6 +147,9 @@ describe("private mobile browser IME", () => {
 
     // Tapping the still-focused textbox again opens IME without a focusin.
     fireEvent.pointerDown(field);
+    expect(root.dataset.mobileWebChatKeyboard).toBeUndefined();
+    visualHeight = 380;
+    onViewportResize?.();
     expect(root.dataset.mobileWebChatKeyboard).toBe("room");
     expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe("714px");
   });

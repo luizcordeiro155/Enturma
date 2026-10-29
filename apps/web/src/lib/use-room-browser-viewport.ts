@@ -69,7 +69,8 @@ export function mobileWebMessageHeight(
  * The visual viewport is the one geometry source for the active conversation:
  * resize the chat screen (never the document or an independently floating
  * composer), and let its flex message list absorb the keyboard animation.
- * A pointer-down pre-arms the layout before the browser focuses the input.
+ * The room only switches to its IME layout AFTER the visual viewport shrinks;
+ * focusing or touching the textarea alone must never cover the room tabs.
  */
 export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
   useEffect(() => {
@@ -97,6 +98,7 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     // back can close the IME without blurring the input.
     let keyboardWasVisible = false;
     let focusArmedUntil = 0;
+    let roomNavRestTop: number | null = null;
     let frame = 0;
     const timers: number[] = [];
 
@@ -107,18 +109,16 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
       );
       if (!navigation) return;
       const rect = navigation.getBoundingClientRect();
-      if (rect.height > 20 && Number.isFinite(rect.top)) {
-        // Preserve its RESTING position while the browser draws the keyboard
-        // over it; do not consume any height from the shortened chat panel.
-        root.style.setProperty(
-          "--room-mobile-nav-rest-top",
-          String(Math.round(rect.top)) + "px",
-        );
+      if (rect.height > 20 && Number.isFinite(rect.top) && !wasOpen) {
+        // Capture its original location before the browser starts the IME
+        // animation; do not change ANY styling on pointerdown/focusin.
+        roomNavRestTop = Math.round(rect.top);
       }
     };
 
     const clearKeyboard = () => {
-      if (root.dataset.mobileWebChatKeyboard === kind) {
+      const hadKeyboardLayout = root.dataset.mobileWebChatKeyboard === kind;
+      if (hadKeyboardLayout) {
         delete root.dataset.mobileWebChatKeyboard;
         root.style.removeProperty("--mobile-web-chat-visible-top");
         root.style.removeProperty("--mobile-web-chat-visible-height");
@@ -127,8 +127,10 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         root.style.removeProperty("--mobile-web-chat-adjust");
         root.style.removeProperty("--mobile-web-chat-messages-height");
       }
-      if (kind === "room")
+      if (kind === "room") {
         root.style.removeProperty("--room-mobile-nav-rest-top");
+        if (hadKeyboardLayout) roomNavRestTop = null;
+      }
       delete root.dataset.roomBrowserKeyboard;
       root.style.removeProperty("--room-visible-height");
       root.style.removeProperty("--room-visible-top");
@@ -143,8 +145,11 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     };
 
     const pinConversation = () => {
-      if (kind === "room" && !wasOpen)
-        captureRoomNavigationPosition();
+      if (kind === "room" && !wasOpen) {
+        if (roomNavRestTop === null) captureRoomNavigationPosition();
+        if (roomNavRestTop !== null)
+          root.style.setProperty("--room-mobile-nav-rest-top", String(roomNavRestTop) + "px");
+      }
       const { height, top } = geometry();
       root.dataset.mobileWebChatKeyboard = kind;
       root.style.setProperty("--mobile-web-chat-visible-top", String(top) + "px");
@@ -185,9 +190,12 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         // the four navigation tabs return to their original in-flow position.
         const recovered = keyboardWasVisible && !keyboardVisible &&
           height >= baselineHeight - 40;
-        const opening = focused && !keyboardWasVisible &&
-          performance.now() < focusArmedUntil;
-        if (recovered || (!keyboardVisible && !opening)) {
+        // Private chats retain their first-focus behavior. In study rooms,
+        // activation before a real viewport shrink makes the composer leap
+        // down over Chat/Chamada/Materiais/AI before the IME even appears.
+        const openingPrivateChat = kind === "private" && focused &&
+          !keyboardWasVisible && performance.now() < focusArmedUntil;
+        if (recovered || (!keyboardVisible && !openingPrivateChat)) {
           clearKeyboard();
           return;
         }
@@ -203,10 +211,12 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         event.target instanceof HTMLElement &&
         event.target.closest(composerSelector)
       ) {
-        // Apply synchronously, before Chrome starts panning the input.
         focusArmedUntil = performance.now() + 900;
         keyboardWasVisible = false;
-        pinConversation();
+        if (kind === "room")
+          captureRoomNavigationPosition();
+        else
+          pinConversation();
       }
       sync();
       for (const delay of [80, 180, 300, 450]) {
@@ -226,7 +236,10 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
       if (textarea instanceof HTMLTextAreaElement && !textarea.disabled) {
         focusArmedUntil = performance.now() + 900;
         keyboardWasVisible = false;
-        pinConversation();
+        if (kind === "room")
+          captureRoomNavigationPosition();
+        else
+          pinConversation();
       }
     };
     const onOrientationChange = () => {
