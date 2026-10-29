@@ -654,21 +654,141 @@
  .room-active-shell .room-mobile-members-list .member-profile-strip { min-width:0; }
  .room-active-shell .room-owner-settings > summary { min-height:52px; }
 }
-.room-member-menu {
-  position:fixed; z-index:2400; display:grid; gap:4px; width:252px;
-  padding:6px; border:1px solid var(--room-border,var(--border)); border-radius:13px;
-  background:var(--room-panel,var(--surface)); color:var(--room-ink,var(--ink));
-  box-shadow:0 18px 55px #0008;
+/* The menu is portaled directly under <body>, outside .room-active-shell.
+   Give it its own theme tokens and specific styles so global button rules never
+   turn a moderation action into a lime button or wash out the description. */
+html .room-member-menu {
+  --member-menu-bg: #ffffff;
+  --member-menu-border: #d7e2dc;
+  --member-menu-ink: #193d34;
+  --member-menu-muted: #526a61;
+  --member-menu-icon: #286b4e;
+  --member-menu-hover: #eaf4ed;
+  --member-menu-hover-border: #b9d8c4;
+  --member-menu-danger: #963046;
+  --member-menu-danger-muted: #79535d;
+  --member-menu-danger-hover: #fff0f2;
+  --member-menu-danger-border: #efc6cf;
+  --member-menu-focus: #417f63;
+  position: fixed;
+  z-index: 2400;
+  display: grid;
+  gap: 4px;
+  box-sizing: border-box;
+  width: 252px;
+  max-width: calc(100vw - 20px);
+  padding: 6px;
+  border: 1px solid var(--member-menu-border);
+  border-radius: 14px;
+  background: var(--member-menu-bg);
+  color: var(--member-menu-ink);
+  box-shadow: 0 18px 48px rgb(12 27 23 / 19%);
+  isolation: isolate;
 }
-.room-member-menu > button {
-  display:flex; gap:10px; align-items:center; width:100%; min-height:54px;
-  padding:9px; text-align:left; border:0; border-radius:9px;
-  background:transparent; color:inherit; cursor:pointer;
+html[data-theme="dark"] .room-member-menu {
+  --member-menu-bg: #1b292c;
+  --member-menu-border: #42565a;
+  --member-menu-ink: #f2f8f4;
+  --member-menu-muted: #bdcdc6;
+  --member-menu-icon: #abd8bf;
+  --member-menu-hover: #29433c;
+  --member-menu-hover-border: #4d7060;
+  --member-menu-danger: #ffc5c8;
+  --member-menu-danger-muted: #e8bcc0;
+  --member-menu-danger-hover: #453138;
+  --member-menu-danger-border: #79505a;
+  --member-menu-focus: #a6e6c0;
+  box-shadow: 0 18px 52px rgb(0 0 0 / 52%);
 }
-.room-member-menu > button:hover,.room-member-menu > button:focus-visible { background:var(--room-subtle,var(--soft)); outline:0; }
-.room-member-menu > button span { min-width:0; display:grid; gap:3px; }
-.room-member-menu > button small { font-size:.69rem; color:var(--room-muted,var(--muted)); }
-.room-member-menu > button.room-member-danger { color:#f17d7d; }
+html .room-member-menu > button[role="menuitem"] {
+  display: grid;
+  grid-template-columns: 20px minmax(0, 1fr);
+  align-items: center;
+  justify-content: start;
+  gap: 11px;
+  width: 100%;
+  min-height: 61px;
+  margin: 0;
+  padding: 10px 11px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent !important;
+  color: var(--member-menu-ink) !important;
+  text-align: left;
+  text-decoration: none;
+  filter: none !important;
+  box-shadow: none;
+  transform: translateX(0);
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease,
+    box-shadow 160ms ease, transform 160ms cubic-bezier(.2, .8, .2, 1);
+}
+html .room-member-menu > button[role="menuitem"] > svg {
+  width: 19px;
+  height: 19px;
+  flex: none;
+  color: var(--member-menu-icon) !important;
+  stroke: currentColor;
+}
+html .room-member-menu > button[role="menuitem"] > span {
+  display: grid;
+  min-width: 0;
+  gap: 3px;
+}
+html .room-member-menu > button[role="menuitem"] strong {
+  color: inherit !important;
+  font-size: .84rem;
+  font-weight: 700;
+  line-height: 1.24;
+}
+html .room-member-menu > button[role="menuitem"] small {
+  display: block;
+  color: var(--member-menu-muted) !important;
+  font-size: .71rem;
+  font-weight: 450;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+html .room-member-menu > button[role="menuitem"]:is(:hover, :focus-visible) {
+  background: var(--member-menu-hover) !important;
+  border-color: var(--member-menu-hover-border);
+  color: var(--member-menu-ink) !important;
+  filter: none !important;
+  box-shadow: inset 3px 0 0 var(--member-menu-icon);
+  transform: translateX(2px);
+}
+html .room-member-menu > button[role="menuitem"]:focus-visible {
+  outline: 2px solid var(--member-menu-focus);
+  outline-offset: -2px;
+}
+html .room-member-menu > button[role="menuitem"]:active {
+  transform: translateX(1px) scale(.99);
+}
+html .room-member-menu > button.room-member-danger[role="menuitem"] {
+  color: var(--member-menu-danger) !important;
+}
+html .room-member-menu > button.room-member-danger[role="menuitem"] > svg {
+  color: var(--member-menu-danger) !important;
+}
+html .room-member-menu > button.room-member-danger[role="menuitem"] small {
+  color: var(--member-menu-danger-muted) !important;
+}
+html .room-member-menu > button.room-member-danger[role="menuitem"]:is(:hover, :focus-visible) {
+  background: var(--member-menu-danger-hover) !important;
+  border-color: var(--member-menu-danger-border);
+  color: var(--member-menu-danger) !important;
+  box-shadow: inset 3px 0 0 var(--member-menu-danger);
+}
+@media (prefers-reduced-motion: reduce) {
+  html .room-member-menu > button[role="menuitem"] {
+    transition: none;
+    transform: none !important;
+  }
+}
+html[data-reduced-motion="true"] .room-member-menu > button[role="menuitem"] {
+  transition: none;
+  transform: none !important;
+}
 .room-member-overlay { position:fixed; inset:0; z-index:2500; display:grid; place-items:center; padding:16px; background:#000a; backdrop-filter:blur(4px); }
 .room-member-dialog {
   box-sizing:border-box; width:min(440px,100%); max-height:calc(100dvh - 32px);
