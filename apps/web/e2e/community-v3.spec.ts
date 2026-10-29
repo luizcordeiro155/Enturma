@@ -102,6 +102,14 @@ test("sala longa, typing e chamada persistente com mídia LiveKit", async ({
     await login(page, users[0]);
     await login(peer, users[1]);
     await expect(page.getByText(/Sala de vários dias/)).toBeVisible();
+    await page.setViewportSize({ width: 1364, height: 768 });
+    const roomHeader = page.locator(".study-room-header");
+    await expect(roomHeader).toBeVisible();
+    const headerHeight = (await roomHeader.boundingBox())!.height;
+    expect(headerHeight).toBeLessThan(185);
+    const statusActions = roomHeader.locator(".study-room-status");
+    expect(await statusActions.evaluate((node) => node.scrollWidth - node.clientWidth)).toBeLessThanOrEqual(2);
+
     await page
       .getByLabel("Mensagem", { exact: true })
       .fill("Uma dúvida de algoritmos");
