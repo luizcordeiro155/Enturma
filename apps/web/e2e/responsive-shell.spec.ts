@@ -201,10 +201,22 @@ test("Desktop Caronas keeps current map position visible beside the planner", as
   expect(registered.ok()).toBe(true);
   await authenticate(page.context(), await registered.json());
   await page.setViewportSize({ width: 1376, height: 768 });
+  await page.context().setGeolocation({
+    // Synthetic E2E position, never saved as a real user's location.
+    latitude: -19.925,
+    longitude: -43.938,
+    accuracy: 20,
+  });
   await page.goto("/caronas");
   const dock = page.locator(".ride-bottom-sheet");
   const map = page.locator(".ride-real-map");
   await expect(dock).toBeVisible({ timeout: 20000 });
+  // A new student has no campus or device position yet: the empty map state
+  // is intentional until consent is given. Request a real browser geolocation
+  // through the same 'Recentralizar mapa' action available in production.
+  await expect(page.locator(".ride-map-empty")).toBeVisible();
+  await page.context().grantPermissions(["geolocation"], { origin: new URL(page.url()).origin });
+  await page.getByRole("button", { name: "Recentralizar mapa" }).click();
   await expect(map).toBeVisible();
   const rect = await dock.boundingBox(), mapRect = await map.boundingBox();
   expect(rect!.x).toBeGreaterThanOrEqual(mapRect!.x + mapRect!.width);

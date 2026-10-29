@@ -151,7 +151,7 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         );
         // Arm immediately on first focus, before Chrome emits its first IME resize.
         // Waiting for a 120px drop briefly hid the private composer behind the keyboard.
-        const keyboardOpen = focused || shrunk;
+        const keyboardOpen = shrunk || (focused && (kind === "private" || inset > 120));
         if (!keyboardOpen) {
           clearKeyboard();
           return;
