@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { BookOpen } from "lucide-react";
+import { DesktopUpdateTitlebarAction } from "./desktop-updates";
 export function DesktopChrome() {
   const [active, setActive] = useState(false);
   useEffect(() => {
@@ -26,6 +27,7 @@ export function DesktopChrome() {
     <div className="desktop-titlebar" aria-label="Enturma">
       <BookOpen size={14} />
       <span>enturma.</span>
+      <DesktopUpdateTitlebarAction />
     </div>
   ) : null;
 }
