@@ -507,25 +507,41 @@
 }
 
 
-/* Chrome Mobile DM: keep the input attached to the visual keyboard.
-   Do not affect the native Android WebView (which manages its own IME). */
+/* Chrome Android mobile Web only: anchor the *conversation* to visualViewport.
+   The private composer remains inside the flex column, so it tracks the
+   keyboard from the first focus without a fixed-position jump or double inset.
+   The installed Android WebView keeps its own native IME resize path. */
 @media (max-width: 760px) and (pointer: coarse) {
-  html[data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .mobile-private-chat-open .private-composer.enturma-message-composer {
-    position: fixed !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: var(--mobile-web-chat-bottom, 0px) !important;
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .workspace {
+    height: var(--mobile-web-chat-visible-bottom, 100dvh) !important;
+    max-height: var(--mobile-web-chat-visible-bottom, 100dvh) !important;
+  }
+
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .workspace > main,
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .friends-page.mobile-private-chat-open,
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .friends-workspace,
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .private-chat {
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .mobile-private-chat-open .private-composer.enturma-message-composer {
+    position: relative !important;
+    inset: auto !important;
     width: 100% !important;
-    z-index: 290 !important;
-    transform: translateY(var(--mobile-web-chat-adjust, 0px)) !important;
+    transform: none !important;
+    flex: 0 0 auto !important;
     margin: 0 !important;
     padding-bottom: 5px !important;
     transition: none !important;
   }
-  html[data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .mobile-private-chat-open .private-messages {
-    flex: 0 1 auto !important;
-    height: var(--mobile-web-chat-messages-height, 180px) !important;
-    max-height: var(--mobile-web-chat-messages-height, 180px) !important;
+
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .mobile-private-chat-open .private-messages {
+    flex: 1 1 0 !important;
+    height: auto !important;
+    max-height: none !important;
     min-height: 0 !important;
     overflow-y: auto !important;
     padding-bottom: 12px !important;
