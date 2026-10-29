@@ -209,3 +209,51 @@ body {
    scrollbar-width: thin;
  }
 }
+
+/* Electron viewport: scroll only the workspace, never the document/sidebar.
+   Keep this below the common responsive rules, and leave browser behavior alone. */
+@media (min-width: 761px) {
+  html[data-desktop-chrome="true"]:not(:has(.ride-active-shell)) {
+    height: 100%;
+    overflow: hidden !important;
+  }
+  html[data-desktop-chrome="true"]:not(:has(.ride-active-shell)) body {
+    height: 100dvh;
+    max-height: 100dvh;
+    overflow: hidden !important;
+    padding-top: 32px;
+  }
+  html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) {
+    height: calc(100dvh - 32px) !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - 32px) !important;
+    overflow: hidden !important;
+    align-items: stretch;
+  }
+  html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .sidebar {
+    position: relative !important;
+    top: auto !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    align-self: stretch;
+  }
+  html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .sidebar > .brand {
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+  html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .sidebar > nav {
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+  html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .workspace {
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow-x: clip;
+    overflow-y: auto;
+    overscroll-behavior-y: contain;
+  }
+}
