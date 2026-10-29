@@ -107,9 +107,17 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     const privateComposer = page.locator(".private-composer.enturma-message-composer");
     await expect(privateComposer).toHaveCSS("border-top-width", "0px");
     await expect(privateComposer).toHaveCSS("box-shadow", "none");
-    await expect(privateComposer.locator(".composer-main-row")).toHaveCSS(
-      "border-top-style", "solid",
-    );
+    await expect(privateComposer).toHaveCSS("padding-top", "4px");
+    await expect(privateComposer).toHaveCSS("padding-bottom", "4px");
+    await expect(page.locator(".private-messages")).toHaveCSS("padding-bottom", "6px");
+    const privatePill = privateComposer.locator(".composer-main-row");
+    await expect(privatePill).toHaveCSS("border-top-style", "solid");
+    const privateChrome = await privateComposer.evaluate((element) => {
+      const form = element.getBoundingClientRect();
+      const pill = element.querySelector(".composer-main-row")!.getBoundingClientRect();
+      return form.height - pill.height;
+    });
+    expect(privateChrome).toBeLessThanOrEqual(10);
     const header = page.locator(".private-chat-header");
     await expect(header).toBeVisible();
     const headerBounds = await header.boundingBox();
@@ -1138,9 +1146,20 @@ test.describe("touch chat", () => {
       await expect(page).toHaveURL(new RegExp(`/rooms/${room.id}`));
       await page.setViewportSize({ width: 1376, height: 768 });
       await expect(roomComposer).toHaveCSS("border-top-width", "0px");
+      await expect(roomComposer).toHaveCSS("padding-top", "4px");
+      await expect(roomComposer).toHaveCSS("padding-bottom", "4px");
+      await expect(page.locator(".room-section-chat .persistent-messages")).toHaveCSS(
+        "padding-bottom", "6px",
+      );
       await expect(roomComposer.locator(".composer-main-row")).toHaveCSS(
         "border-top-style", "solid",
       );
+      const roomChrome = await roomComposer.evaluate((element) => {
+        const form = element.getBoundingClientRect();
+        const pill = element.querySelector(".composer-main-row")!.getBoundingClientRect();
+        return form.height - pill.height;
+      });
+      expect(roomChrome).toBeLessThanOrEqual(10);
       await own.click({ button: "right" });
       await page
         .getByRole("button", { name: "Excluir mensagem", exact: true })
