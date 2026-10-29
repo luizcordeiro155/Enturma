@@ -839,3 +839,131 @@ html[data-theme="dark"] .room-active-shell button.room-member-action-trigger:foc
   outline: 2px solid #fff !important;
   outline-offset: 2px;
 }
+
+/* Compact desktop study-room heading: maximize chat height and prevent controls
+   wrapping into an accidental third row. Mobile uses its own toolbar. */
+@media (min-width: 761px) {
+  .room-active-shell .study-room-header {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 16px;
+    row-gap: 7px;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 11px clamp(14px, 1.7vw, 24px) !important;
+    flex: 0 0 auto;
+  }
+  .room-active-shell .room-header-intro {
+    min-width: 0;
+    display: grid;
+    gap: 5px;
+  }
+  .room-active-shell .room-back {
+    width: fit-content;
+    min-height: 19px !important;
+    padding: 0 !important;
+    font-size: .75rem;
+    line-height: 1.1;
+  }
+  .room-active-shell .room-header-identity {
+    min-width: 0;
+    margin: 0 !important;
+    gap: 11px;
+  }
+  .room-active-shell .room-header-identity-mark {
+    width: 46px;
+    height: 46px;
+    flex: 0 0 46px;
+    border-radius: 12px;
+  }
+  .room-active-shell .room-header-identity-mark > svg {
+    width: 24px;
+    height: 24px;
+  }
+  .room-active-shell .room-header-identity h1 {
+    font-size: clamp(1.1rem, 1.7vw, 1.45rem);
+    line-height: 1.16;
+    margin: 0 0 2px !important;
+    overflow-wrap: anywhere;
+  }
+  .room-active-shell .room-header-caption {
+    font-size: .72rem;
+    line-height: 1.28;
+    margin: 0 0 4px !important;
+  }
+  .room-active-shell .room-header-tags {
+    gap: 5px;
+  }
+  .room-active-shell .room-header-tags > span {
+    min-height: 23px;
+    padding: 3px 7px;
+    font-size: .68rem;
+    line-height: 1.2;
+  }
+  .room-active-shell .room-header-tags > span svg {
+    width: 12px;
+    height: 12px;
+  }
+  .room-active-shell .study-room-status {
+    flex: none;
+    display: flex;
+    flex-wrap: nowrap !important;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+  }
+  .room-active-shell .study-room-status > span,
+  .room-active-shell .study-room-status > button,
+  .room-active-shell .study-room-status .room-share-control > button {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 36px !important;
+    height: 36px;
+    padding: 7px 9px !important;
+    font-size: .73rem;
+    white-space: nowrap;
+    border-radius: 9px;
+  }
+  .room-active-shell .study-room-status > span svg,
+  .room-active-shell .study-room-status > button svg,
+  .room-active-shell .study-room-status .room-share-control > button svg {
+    width: 14px;
+    height: 14px;
+    flex: none;
+  }
+}
+@media (min-width: 761px) and (max-width: 1350px) {
+  .room-active-shell .study-room-header {
+    grid-template-columns: minmax(0, 1fr);
+    row-gap: 7px;
+  }
+  .room-active-shell .room-header-intro {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    column-gap: 9px;
+  }
+  .room-active-shell .room-back {
+    grid-column: 1 / -1;
+  }
+  .room-active-shell .study-room-status {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+  .room-active-shell .study-room-status > span {
+    min-height: 32px !important;
+    height: 32px;
+  }
+  .room-active-shell .study-room-header {
+    padding-block: 9px !important;
+  }
+}
+@media (min-width: 761px) and (max-width: 950px) {
+  .room-active-shell .study-room-status {
+    flex-wrap: wrap !important;
+  }
+}
