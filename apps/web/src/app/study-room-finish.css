@@ -691,3 +691,6 @@
 .room-member-dialog button:disabled { opacity:.55; cursor:not-allowed; }
 .room-member-dialog .room-member-feedback { color:var(--room-ink,var(--ink)); font-size:.82rem; }
 @media (prefers-reduced-motion:reduce) { .room-active-shell .room-owner-chevron,.room-active-shell .room-owner-settings > summary { transition:none; } }
+
+.room-active-shell .room-mobile-channel-mark { overflow:hidden; }
+.room-active-shell .room-mobile-artwork-avatar { display:block; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
