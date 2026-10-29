@@ -459,7 +459,12 @@ export function RoomView({ id }: { id: string }) {
 
               <div className="room-mobile-title">
                 <span className="room-mobile-channel-mark">
-                  <Hash size={19} />
+                  {roomAvatar ? (
+                    /* eslint-disable-next-line @next/next/no-img-element */
+                    <img src={roomAvatar} alt="" className="room-mobile-artwork-avatar" />
+                  ) : (
+                    <Hash size={19} />
+                  )}
                 </span>
                 <div>
                   <strong>{room.title}</strong>
