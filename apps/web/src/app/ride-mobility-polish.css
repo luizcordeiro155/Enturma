@@ -1367,3 +1367,20 @@ html[data-enhanced-focus="true"] .ride-unified-search-box:focus-within {
 @media (prefers-reduced-motion: reduce) and (min-width: 761px) {
   .ride-active-shell .ride-bottom-sheet { transition: none !important; }
 }
+
+/* Keep mode switch inside the real map region even on compact laptops. */
+@media (min-width: 761px) {
+  .ride-active-shell .ride-map-top {
+    left: 10px !important;
+    grid-template-columns: 42px minmax(0, 1fr) 42px !important;
+    gap: 8px !important;
+  }
+  .ride-active-shell .ride-mode-switch > button {
+    min-width: 0;
+    padding-inline: 6px;
+    font-size: clamp(.65rem, 1vw, .83rem);
+  }
+  .ride-active-shell .ride-map-controls {
+    right: calc(var(--ride-planner-width) + 2 * var(--ride-planner-gap) + 10px) !important;
+  }
+}
