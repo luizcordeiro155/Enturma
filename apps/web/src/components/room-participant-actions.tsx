@@ -2,11 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Copy, MoreHorizontal, UserPlus, UserRoundX, X } from "lucide-react";
+import { Check, MoreHorizontal, UserPlus, UserRoundX, X } from "lucide-react";
 import { api, post } from "@/lib/api";
 
-type Invitation = { code: string; url: string };
-type Dialog = "closed" | "invite" | "remove";
+type Friendship = { id: string; userId: string; status: "PENDING" | "ACCEPTED" };
+type Dialog = "closed" | "remove";
 
 /**
  * The room host can send a real invitation or remove an existing participant.
@@ -18,11 +18,13 @@ export function RoomParticipantActions({
   roomId,
   memberId,
   memberName,
+  canRemove,
   onRemoved,
 }: {
   roomId: string;
   memberId: string;
   memberName: string;
+  canRemove: boolean;
   onRemoved: () => Promise<void>;
 }) {
   const trigger = useRef<HTMLButtonElement>(null);
@@ -30,7 +32,8 @@ export function RoomParticipantActions({
   const dialogElement = useRef<HTMLElement>(null);
   const [position, setPosition] = useState<{ top: number; left: number } | null>(null);
   const [dialog, setDialog] = useState<Dialog>("closed");
-  const [invite, setInvite] = useState<Invitation>();
+
+  const [friendState, setFriendState] = useState<"unknown" | "checking" | "none" | "pending" | "accepted">("unknown");
   const [message, setMessage] = useState("");
   const [working, setWorking] = useState(false);
 
@@ -50,6 +53,7 @@ export function RoomParticipantActions({
     if (!rect) return;
     const width = 252;
     const above = rect.bottom + 170 > window.innerHeight && rect.top > 180;
+    if (friendState === "unknown") void checkFriendship();
     setPosition({
       left: Math.max(10, Math.min(window.innerWidth - width - 10, rect.right - width)),
       top: above ? rect.top - 156 : rect.bottom + 7,
@@ -109,28 +113,34 @@ export function RoomParticipantActions({
     }
   }, [dialog]);
 
-  async function openInvitation() {
-    setPosition(null);
-    setDialog("invite");
-    setMessage("");
-    if (invite) return;
-    setWorking(true);
+  async function checkFriendship() {
+    setFriendState("checking");
     try {
-      setInvite(await post<Invitation>("/study-rooms/" + roomId + "/share-code"));
+      const friends = await api<Friendship[]>("/friends", { cache: "no-store" });
+      const existing = friends.find((friend) => friend.userId === memberId);
+      setFriendState(existing?.status === "ACCEPTED" ? "accepted" : existing ? "pending" : "none");
     } catch (error) {
-      setMessage((error as Error).message || "Não foi possível gerar o convite.");
-    } finally {
-      setWorking(false);
+      setFriendState("unknown");
+      setMessage((error as Error).message || "Não foi possível consultar suas amizades.");
     }
   }
 
-  async function copyInvitation() {
-    if (!invite) return;
+  async function addFriend() {
+    if (working || friendState === "checking" || friendState === "pending" || friendState === "accepted") return;
+    setWorking(true);
+    setMessage("");
     try {
-      await navigator.clipboard.writeText(invite.url);
-      setMessage("Link de convite copiado.");
-    } catch {
-      setMessage("Selecione e copie o link de convite abaixo.");
+      const profile = await api<{ username: string }>(`/users/${memberId}/profile`, { cache: "no-store" });
+      const created = await post<{ id: string; status: "PENDING" | "ACCEPTED" }>("/friends", {
+        username: profile.username,
+      });
+      setFriendState(created.status === "ACCEPTED" ? "accepted" : "pending");
+      setMessage(created.status === "ACCEPTED" ? "Vocês já são amigos." : "Solicitação de amizade enviada.");
+    } catch (error) {
+      await checkFriendship();
+      setMessage((error as Error).message || "Não foi possível enviar a solicitação.");
+    } finally {
+      setWorking(false);
     }
   }
 
@@ -171,11 +181,12 @@ export function RoomParticipantActions({
           aria-label={"Ações de " + memberName}
           style={{ top: position.top, left: position.left }}
         >
-          <button type="button" role="menuitem" onClick={() => void openInvitation()}>
-            <UserPlus size={18} aria-hidden="true" />
-            <span><strong>Adicionar usuário</strong><small>Enviar convite para entrar na sala</small></span>
+          <button type="button" role="menuitem" disabled={working || friendState === "checking" || friendState === "pending" || friendState === "accepted"} onClick={() => void addFriend()}>
+            {friendState === "accepted" || friendState === "pending" ? <Check size={18} aria-hidden="true" /> : <UserPlus size={18} aria-hidden="true" />}
+            <span><strong>{friendState === "accepted" ? "Já são amigos" : friendState === "pending" ? "Solicitação pendente" : friendState === "checking" ? "Verificando amizade…" : "Adicionar amigo"}</strong><small>{friendState === "accepted" ? "Vocês já estão conectados" : friendState === "pending" ? "Aguarde a resposta da solicitação" : "Enviar solicitação de amizade"}</small></span>
           </button>
-          <button
+          {message ? <p className="room-member-feedback" role="status">{message}</p> : null}
+          {canRemove ? <button
             type="button"
             role="menuitem"
             className="room-member-danger"
@@ -183,7 +194,7 @@ export function RoomParticipantActions({
           >
             <UserRoundX size={18} aria-hidden="true" />
             <span><strong>Expulsar da sala</strong><small>Solicita confirmação antes de remover</small></span>
-          </button>
+          </button> : null}
         </div>,
         document.body,
       ) : null}
@@ -203,7 +214,7 @@ export function RoomParticipantActions({
           >
             <header>
               <div className="room-member-dialog-icon" aria-hidden="true">
-                {dialog === "invite" ? <UserPlus size={24} /> : <UserRoundX size={24} />}
+                <UserRoundX size={24} />
               </div>
               <button
                 className="room-member-dialog-close"
@@ -214,27 +225,6 @@ export function RoomParticipantActions({
               ><X size={20} /></button>
             </header>
 
-            {dialog === "invite" ? (
-              <>
-                <h2 id="room-member-dialog-title">Adicionar usuário à sala</h2>
-                <p id="room-member-dialog-description">
-                  Convide um colega pelo link ou código. O participante precisa aceitar o convite e entrar na turma.
-                </p>
-                {invite ? (
-                  <div className="room-member-invite">
-                    <label htmlFor="room-member-invite-link">Link de convite</label>
-                    <input id="room-member-invite-link" readOnly value={invite.url} onFocus={(event) => event.currentTarget.select()} />
-                    <small>Código da sala: <strong>{invite.code}</strong></small>
-                    <button className="room-member-primary" type="button" onClick={() => void copyInvitation()}>
-                      {message === "Link de convite copiado." ? <Check size={17} /> : <Copy size={17} />}
-                      {message === "Link de convite copiado." ? "Link copiado" : "Copiar convite"}
-                    </button>
-                  </div>
-                ) : working ? <p role="status">Preparando convite…</p> : null}
-                {message && <p className="room-member-feedback" role="status">{message}</p>}
-              </>
-            ) : (
-              <>
                 <h2 id="room-member-dialog-title">Expulsar participante?</h2>
                 <p id="room-member-dialog-description">
                   Você está prestes a remover <strong>{memberName}</strong> da sala.
@@ -250,8 +240,6 @@ export function RoomParticipantActions({
                     {working ? "Removendo…" : "Confirmar expulsão"}
                   </button>
                 </div>
-              </>
-            )}
           </section>
         </div>,
         document.body,

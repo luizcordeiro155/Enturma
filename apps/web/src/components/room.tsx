@@ -677,11 +677,9 @@ export function RoomView({ id }: { id: string }) {
                         }
                       />
 
-                      {me?.id === room.hostId &&
-                      member.userId !== me.id &&
-                      !ended &&
+                      {member.userId !== me?.id &&
                       !member.leftAt ? (
-                        <RoomParticipantActions roomId={id} memberId={member.userId} memberName={member.name} onRemoved={reloadRoom} />
+                        <RoomParticipantActions roomId={id} memberId={member.userId} memberName={member.name} canRemove={me?.id === room.hostId} onRemoved={reloadRoom} />
                       ) : null}
                     </div>
                   ))}
@@ -773,8 +771,8 @@ export function RoomView({ id }: { id: string }) {
                                     : "Estudante"
                             }
                           />
-                          {me?.id === room.hostId && member.userId !== me.id && !ended && !member.leftAt ? (
-                            <RoomParticipantActions roomId={id} memberId={member.userId} memberName={member.name} onRemoved={reloadRoom} />
+                          {member.userId !== me?.id && !member.leftAt ? (
+                            <RoomParticipantActions roomId={id} memberId={member.userId} memberName={member.name} canRemove={me?.id === room.hostId} onRemoved={reloadRoom} />
                           ) : null}
                         </div>
                       ))}
