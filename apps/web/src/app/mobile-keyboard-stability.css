@@ -150,3 +150,21 @@
     overscroll-behavior-y: contain;
   }
 }
+
+
+/* Composer chrome cleanup across browser, desktop app and Android WebView.
+   Remove the extra horizontal rule above the rounded message input without
+   touching the input border, keyboard anchoring or message history. */
+.enturma-message-composer:is(.persistent-composer, .private-composer) {
+  border-top: 0 !important;
+  box-shadow: none !important;
+  background-image: none !important;
+}
+@media (max-width: 760px) {
+  .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
+  .room-active-shell .room-section-call .persistent-composer.enturma-message-composer,
+  .mobile-private-chat-open .private-composer.enturma-message-composer {
+    border-top: 0 !important;
+    padding-top: 3px !important;
+  }
+}
