@@ -251,3 +251,13 @@
     gap: 3px;
   }
 }
+
+/* Unified call quality controls for study rooms and private calls. */
+.discord-call .call-quality-settings { display:flex; flex-wrap:wrap; align-items:end; gap:12px; padding:14px; margin:6px 0; border:1px solid var(--border); border-radius:13px; background:var(--surface); color:var(--ink); }
+.discord-call .call-quality-settings > strong,.discord-call .call-quality-settings > p { width:100%; margin:0; }
+.discord-call .call-quality-settings > p { color:var(--muted); font-size:.83rem; line-height:1.45; }
+.discord-call .call-quality-settings label { display:grid; gap:5px; flex:1 1 150px; font-size:.83rem; }
+.discord-call .call-quality-settings select { width:100%; min-height:42px; border:1px solid var(--border); border-radius:9px; background:var(--surface); color:var(--ink); padding:8px; }
+.discord-call .call-quality-settings .call-noise-setting { display:flex; align-items:center; gap:10px; flex:1 1 100%; }
+.discord-call .call-quality-settings .call-noise-setting input { width:18px; height:18px; accent-color:var(--accent); }
+.discord-call .call-quality-settings small { color:var(--muted); width:100%; }
