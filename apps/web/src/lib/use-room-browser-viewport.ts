@@ -93,7 +93,6 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     let baselineHeight = viewport?.height ?? window.innerHeight;
     let wasOpen = false;
     let frame = 0;
-    let followUpFrame = 0;
     const timers: number[] = [];
 
     const clearKeyboard = () => {
@@ -112,7 +111,6 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
 
     const sync = () => {
       cancelAnimationFrame(frame);
-      cancelAnimationFrame(followUpFrame);
       frame = requestAnimationFrame(() => {
         if (!isBrowserMobile()) {
           clearKeyboard();
@@ -226,7 +224,6 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
 
     return () => {
       cancelAnimationFrame(frame);
-      cancelAnimationFrame(followUpFrame);
       for (const timer of timers) clearTimeout(timer);
       observer?.disconnect();
       viewport?.removeEventListener("resize", sync);
