@@ -814,3 +814,28 @@ html[data-reduced-motion="true"] .room-member-menu > button[role="menuitem"] {
 
 .room-active-shell .room-mobile-channel-mark { overflow:hidden; }
 .room-active-shell .room-mobile-artwork-avatar { display:block; width:100%; height:100%; object-fit:cover; border-radius:inherit; }
+
+/* Dark mode only: visible three-dot control on participant banners. */
+html[data-theme="dark"] .room-active-shell button.room-member-action-trigger {
+  color: #fff !important;
+  border: 1px solid #8fa4a8 !important;
+  background: #1c2b30 !important;
+  opacity: 1 !important;
+  filter: none !important;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 7%);
+}
+html[data-theme="dark"] .room-active-shell button.room-member-action-trigger svg {
+  color: #fff !important;
+  stroke: currentColor !important;
+  opacity: 1 !important;
+}
+html[data-theme="dark"] .room-active-shell button.room-member-action-trigger:is(:hover,[aria-expanded="true"]) {
+  background: #31434b !important;
+  border-color: #e2eeee !important;
+  color: #fff !important;
+  filter: none !important;
+}
+html[data-theme="dark"] .room-active-shell button.room-member-action-trigger:focus-visible {
+  outline: 2px solid #fff !important;
+  outline-offset: 2px;
+}

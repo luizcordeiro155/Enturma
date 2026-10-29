@@ -835,7 +835,7 @@ async function checkForUpdates(force = false) {
     updateStatus("available", { version: manifest.version });
     // Only announce update availability during automatic checks.
     // The explicitly clicked titlebar action opens the existing animated updater
-    // and starts the verified download; theme and scrollbar changes are in web UI.
+    // and starts the verified download; contrast styling lives in web UI.
     if (!force) return updateState;
     if (
       manifest.installerUrl &&

@@ -560,3 +560,32 @@ html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar-update:fo
 @media (prefers-reduced-motion: reduce) {
   html[data-desktop-chrome="true"] .desktop-titlebar-update { transition: none; }
 }
+
+/* Final native update control: override broad dark-theme button rules. */
+html[data-theme="dark"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update,
+html[data-theme="dark"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update:is(:hover,:focus-visible) {
+  color: #fff !important;
+  border: 1px solid #dce8e5 !important;
+  background: #172124 !important;
+  box-shadow: none !important;
+  opacity: 1;
+  filter: none !important;
+}
+html[data-theme="dark"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update:hover { background: #253239 !important; }
+html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update {
+  color: #174935 !important;
+  border: 1px solid #53776a !important;
+  background: #f8faf9 !important;
+  box-shadow: none !important;
+  opacity: 1;
+  filter: none !important;
+}
+html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update:hover { background: #e8f2ed !important; }
+html[data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update :is(svg,span) {
+  color: inherit !important;
+  opacity: 1 !important;
+  stroke: currentColor;
+}
+html[data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update {
+  min-height: 28px; height: 28px; border-radius: 9px; padding: 3px 8px;
+}
