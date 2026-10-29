@@ -126,6 +126,8 @@ describe("Desktop update UI", () => {
         version: "0.3.4",
       }),
     );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "Atualizações: Atualização pronta" }));
     expect(screen.getByRole("dialog")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Depois" }));
     expect(screen.queryByRole("dialog")).toBeNull();
