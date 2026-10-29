@@ -58,7 +58,7 @@ afterEach(() => {
   if (originalViewport) {
     Object.defineProperty(window, "visualViewport", originalViewport);
   } else {
-    delete (window as Window & { visualViewport?: VisualViewport }).visualViewport;
+    Reflect.deleteProperty(window, "visualViewport");
   }
   const root = document.documentElement;
   delete root.dataset.enturmaMobile;
