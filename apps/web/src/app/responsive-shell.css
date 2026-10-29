@@ -257,3 +257,47 @@ body {
     overscroll-behavior-y: contain;
   }
 }
+
+
+/* Electron only: scrollbar belongs to the far edge of the app viewport.
+   Remove browser-style gutter reservation, preserving separate sidebar scroll. */
+@media (min-width: 761px) {
+ html[data-desktop-chrome="true"] {
+   scrollbar-gutter: auto !important;
+   overflow-x: hidden !important;
+ }
+ html[data-desktop-chrome="true"] body {
+   scrollbar-gutter: auto !important;
+   overflow-x: hidden !important;
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) {
+   width: 100% !important;
+   scrollbar-gutter: auto !important;
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .workspace {
+   scrollbar-gutter: auto !important;
+   overflow-x: hidden !important;
+   scrollbar-width: thin;
+   scrollbar-color: rgb(180 193 190 / 32%) transparent;
+ }
+ html[data-theme="light"][data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .workspace {
+   scrollbar-color: rgb(58 89 79 / 34%) transparent;
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .workspace::-webkit-scrollbar {
+   width: 6px;
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .workspace::-webkit-scrollbar-track {
+   background: transparent;
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .workspace::-webkit-scrollbar-thumb {
+   border-radius: 999px;
+   background: rgb(180 193 190 / 32%);
+ }
+ html[data-theme="light"][data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .workspace::-webkit-scrollbar-thumb {
+   background: rgb(58 89 79 / 34%);
+ }
+ html[data-desktop-chrome="true"] .app-shell:not(.ride-active-shell) > .sidebar nav {
+   scrollbar-width: thin;
+   scrollbar-color: rgb(180 193 190 / 28%) transparent;
+ }
+}

@@ -833,8 +833,9 @@ async function checkForUpdates(force = false) {
       return updateState;
     }
     updateStatus("available", { version: manifest.version });
-    // Automatic checks only advertise updates through the title-bar icon.
-    // Never download or open a second window without a user click.
+    // Only announce update availability during automatic checks.
+    // The explicitly clicked titlebar action opens the existing animated updater
+    // and starts the verified download; theme and scrollbar changes are in web UI.
     if (!force) return updateState;
     if (
       manifest.installerUrl &&
