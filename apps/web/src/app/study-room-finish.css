@@ -1017,3 +1017,40 @@ html[data-theme="dark"] .room-active-shell button.room-member-action-trigger:foc
     padding-bottom: 5px !important;
   }
 }
+
+
+/* Web Chrome only: anchor the focused composer to the visual viewport.
+   Native Android and desktop layouts are excluded. */
+@media (max-width: 760px) and (pointer: coarse) {
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat,
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .study-room-shell,
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .room-main-panel,
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-chat {
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+  }
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .room-mobile-nav {
+    display: none !important;
+  }
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer {
+    position: fixed !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: var(--mobile-web-chat-bottom, 0px) !important;
+    width: 100% !important;
+    z-index: 290 !important;
+    transform: translateY(var(--mobile-web-chat-adjust, 0px)) !important;
+    margin: 0 !important;
+    padding-bottom: 5px !important;
+    transition: none !important;
+  }
+  html[data-mobile-web-chat-keyboard="room"]:not([data-enturma-mobile="true"]) .room-active-shell .room-section-chat .persistent-messages {
+    flex: 0 1 auto !important;
+    height: var(--mobile-web-chat-messages-height, 180px) !important;
+    max-height: var(--mobile-web-chat-messages-height, 180px) !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding-bottom: 12px !important;
+  }
+}
