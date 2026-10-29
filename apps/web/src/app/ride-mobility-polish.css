@@ -1381,6 +1381,7 @@ html[data-enhanced-focus="true"] .ride-unified-search-box:focus-within {
     font-size: clamp(.65rem, 1vw, .83rem);
   }
   .ride-active-shell .ride-map-controls {
-    right: calc(var(--ride-planner-width) + 2 * var(--ride-planner-gap) + 10px) !important;
+    right: 10px !important;
+    top: 76px !important;
   }
 }
