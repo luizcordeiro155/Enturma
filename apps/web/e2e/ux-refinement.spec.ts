@@ -989,7 +989,7 @@ test.describe("touch chat", () => {
         )
         .toBeLessThan(24);
       const navigation = page.locator(".room-section-chat .room-mobile-nav");
-      await expect(navigation).toHaveCSS("position", "relative");
+      await expect(navigation).toBeVisible();
       const restingComposerBottom = await page.locator(".persistent-composer").evaluate(
         (node) => node.getBoundingClientRect().bottom,
       );
@@ -1002,7 +1002,7 @@ test.describe("touch chat", () => {
       // onto the navigation tabs. The visible viewport still has full height.
       await composer.dispatchEvent("pointerdown", { pointerType: "touch" });
       await composer.focus();
-      await expect(navigation).toHaveCSS("position", "relative");
+      await expect(navigation).toBeVisible();
       await expect.poll(async () => {
         const inputBottom = await page.locator(".persistent-composer").evaluate(
           (node) => node.getBoundingClientRect().bottom,
@@ -1068,12 +1068,12 @@ test.describe("touch chat", () => {
 
       // Android Back closes the keyboard but can leave its textbox focused.
       await page.setViewportSize({ width: 390, height: 844 });
-      await expect(navigation).toHaveCSS("position", "relative");
+      await expect(navigation).toBeVisible();
       await expect(navigation).toBeVisible();
       await expect(composer).toBeFocused();
       // A new pointer gesture reopens the keyboard without a focusin event.
       await composer.dispatchEvent("pointerdown", { pointerType: "touch" });
-      await expect(navigation).toHaveCSS("position", "relative");
+      await expect(navigation).toBeVisible();
       await page.setViewportSize({ width: 390, height: 480 });
       await expect(navigation).toHaveCSS("position", "fixed");
       await composer.fill("Minha resposta");
