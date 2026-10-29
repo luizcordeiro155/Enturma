@@ -1,7 +1,7 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- authenticated room artwork */
 import { useState } from "react";
-import { BookOpen, Camera, ImagePlus, Trash2 } from "lucide-react";
+import { BookOpen, Camera, ChevronDown, ImagePlus, Settings2, Trash2 } from "lucide-react";
 import type { Room } from "@enturma/contracts";
 import { api } from "@/lib/api";
 
@@ -132,7 +132,7 @@ export function RoomSettings({
   const [busy, setBusy] = useState(false);
   return (
     <details className="room-owner-settings">
-      <summary>Gerenciar sala</summary>
+      <summary><Settings2 size={18} aria-hidden="true" /><span><strong>Gerenciar sala</strong><small>Foto, banner e configurações</small></span><ChevronDown className="room-owner-chevron" size={17} aria-hidden="true" /></summary>
       <RoomArtworkEditor room={room} onSaved={onSaved} />
       <form
         onSubmit={async (event) => {
