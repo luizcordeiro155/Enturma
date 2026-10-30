@@ -1167,6 +1167,34 @@ test.describe("touch chat", () => {
         if (!history || !pill) return 999;
         return Math.round(pill.getBoundingClientRect().top - history.getBoundingClientRect().bottom);
       })).toBeLessThanOrEqual(10);
+
+      // Calls render the same RoomChat inside a dedicated .call-chat-pane.
+      // Its own scrollport used to stop above a thick footer separator.
+      await page.locator(".room-channel-nav").getByRole("button", { name: "Chamada" }).click();
+      const callPane = page.locator(".room-section-call .call-chat-pane");
+      await expect(callPane).toBeVisible();
+      const callComposer = callPane.locator(":scope > .persistent-composer.enturma-message-composer");
+      const callPill = callComposer.locator(":scope > .composer-main-row");
+      await expect(callComposer).toHaveCSS("border-top-width", "0px");
+      await expect(callComposer).toHaveCSS("box-shadow", "none");
+      await expect(callComposer).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(callPill).toHaveCSS("min-height", "56px");
+      await expect(callPill).toHaveCSS("border-radius", "28px");
+      await expect(callPill).toHaveCSS("border-top-width", "1px");
+      await expect(callPane.locator(":scope > .persistent-messages")).toHaveCSS(
+        "margin-bottom", "-32px",
+      );
+      await expect.poll(() => callPane.evaluate((pane) => {
+        const messages = pane.querySelector(".persistent-messages");
+        const pill = pane.querySelector(".composer-main-row");
+        if (!messages || !pill) return 999;
+        return Math.round(
+          pill.getBoundingClientRect().top - messages.getBoundingClientRect().bottom,
+        );
+      })).toBeLessThanOrEqual(10);
+      await expect(callComposer.getByRole("textbox", { name: "Mensagem" })).toBeEnabled();
+      await page.locator(".room-channel-nav").getByRole("button", { name: "Conversa" }).click();
+      await expect(page.locator(".room-section-chat .persistent-messages")).toBeVisible();
       await own.click({ button: "right" });
       await page
         .getByRole("button", { name: "Excluir mensagem", exact: true })

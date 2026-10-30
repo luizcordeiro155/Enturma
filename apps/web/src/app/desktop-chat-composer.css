@@ -50,3 +50,29 @@ html[data-enturma-ime="true"] .private-chat .private-composer.enturma-message-co
   border-bottom: 0 !important;
   box-shadow: none !important;
 }
+
+/* Desktop CALLS: compact RoomChat shares the pill above, but its own
+ * call-chat-pane retained a scrollport/footer seam that was already fixed
+ * in the full-size room chat. Extend only this pane's scroll area into the
+ * unused 32px footer strip. The rounded field remains in its original place. */
+@media (min-width: 761px) {
+  .room-active-shell .room-section-call .call-chat-pane > .persistent-messages {
+    margin-bottom: -32px !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .room-active-shell .room-section-call .call-chat-pane > .persistent-composer.enturma-message-composer {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+  }
+
+  /* Keep attachments, emoji, input and send button interactive while
+   * the transparent footer itself no longer blocks message actions. */
+  .room-active-shell .room-section-call .call-chat-pane > .persistent-composer.enturma-message-composer > * {
+    pointer-events: auto !important;
+  }
+}
