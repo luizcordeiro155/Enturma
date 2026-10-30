@@ -1,4 +1,5 @@
 "use client";
+import { TypingIndicator } from "./typing-indicator";
 import { ComposerMedia } from "./composer-media";
 import { providerMessageUrl, type KlipyGif } from "@/lib/klipy";
 import { ChatImage } from "./chat-image-viewer";
@@ -659,12 +660,21 @@ export function RoomChat(props: Props) {
                             </form>
                           ) : message.body ? (
                             providerMessageUrl(message.body) ? (
-                              <figure className="klipy-message" aria-label="GIF compartilhado pela KLIPY">
+                              <figure
+                                className="klipy-message"
+                                aria-label="GIF compartilhado pela KLIPY"
+                              >
                                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={providerMessageUrl(message.body)!} alt="GIF da KLIPY" loading="lazy" />
+                                <img
+                                  src={providerMessageUrl(message.body)!}
+                                  alt="GIF da KLIPY"
+                                  loading="lazy"
+                                />
                                 <figcaption>GIF via KLIPY</figcaption>
                               </figure>
-                            ) : <RichMessage text={message.body} />
+                            ) : (
+                              <RichMessage text={message.body} />
+                            )
                           ) : null}
                           {message.editedAt && (
                             <small className="muted">editada</small>
@@ -747,6 +757,11 @@ export function RoomChat(props: Props) {
         <button
           type="button"
           className="chat-unread"
+          onPointerDown={(event) => {
+            // Jumping to new messages must not dismiss an already open IME.
+            if (document.activeElement?.closest(".persistent-composer"))
+              event.preventDefault();
+          }}
           onClick={() => {
             scrollRoomToLatest("smooth");
           }}
@@ -792,11 +807,9 @@ export function RoomChat(props: Props) {
         />
       ) : null}
 
-      {(composerBlocked || Boolean(props.typing?.length)) ? (
-        <div className="typing-status" role="status">
-          {composerBlocked
-            ? `Envio temporariamente bloqueado · ${moderationCountdown(penaltySeconds)}`
-            : `${props.typing?.map((p) => p.name).join(", ")} ${props.typing?.length === 1 ? "está digitando" : "estão digitando"}…`}
+      {props.typing?.length && !composerBlocked ? (
+        <div className="typing-status">
+          <TypingIndicator names={props.typing.map((p) => p.name)} />
         </div>
       ) : null}
       {composerBlocked ? (
@@ -930,7 +943,6 @@ export function RoomChat(props: Props) {
             <ComposerMedia
               onEmoji={(emoji) => {
                 setDraft((draft + emoji).slice(0, 4000));
-                composerRef.current?.focus({ preventScroll: true });
               }}
               onFile={selectImage}
               onMedia={props.onSendMedia}

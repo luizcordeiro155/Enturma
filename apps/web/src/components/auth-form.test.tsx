@@ -62,14 +62,19 @@ describe("autenticação", () => {
     fireEvent.click(remember);
     expect(remember.checked).toBe(false);
   });
-  it("exige senha longa para criação de conta", () => {
+  it("aceita de 6 a 30 caracteres para criação de conta", () => {
     render(<AuthForm mode="register" />);
     expect((screen.getByLabelText("Senha") as HTMLInputElement).minLength).toBe(
-      12,
+      6,
     );
     expect(
       (screen.getByLabelText("Confirmar senha") as HTMLInputElement).minLength,
-    ).toBe(12);
+    ).toBe(6);
+    expect((screen.getByLabelText("Senha") as HTMLInputElement).maxLength).toBe(30);
     expect(screen.getByLabelText("Nome de usuário")).toBeTruthy();
+  });
+  it("preserva senhas anteriores maiores no login", () => {
+    render(<AuthForm mode="login" />);
+    expect((screen.getByLabelText("Senha") as HTMLInputElement).maxLength).toBe(72);
   });
 });

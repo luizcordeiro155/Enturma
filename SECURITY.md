@@ -43,6 +43,8 @@ Não existe SLA público de resposta. Relatórios são priorizados de acordo com
 
 ## Controles implementados e limites conhecidos
 
+O ciclo de [30/10/2026](docs/RELEASE_EXPERIENCE_STABILIZATION.md) mantém autorização privada no backend ao introduzir o visitante Web e revalida destinatários dos eventos de digitação. O teste de carga usa somente banco/contas sintéticas em loopback; não produz uma certificação geral de segurança.
+
 A documentação de segurança precisa distinguir proteções existentes de riscos residuais:
 
 - **Autenticação e sessão:** autorização e validação devem ocorrer no backend, com cookies e tokens protegidos. Nenhuma checagem somente visual no frontend é suficiente.

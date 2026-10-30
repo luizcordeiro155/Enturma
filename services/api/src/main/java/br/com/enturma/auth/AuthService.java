@@ -249,6 +249,8 @@ public class AuthService {
   }
 
   private void validatePassword(String password) {
+    if (password == null || password.length() < 6 || password.length() > 30)
+      throw ApiException.invalid("A senha deve ter de 6 a 30 caracteres.");
     if (password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
       throw ApiException.invalid("A senha pode ter até 72 bytes em UTF-8.");
   }

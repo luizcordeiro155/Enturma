@@ -1,5 +1,7 @@
 # Dependências — revisão de 28/10/2026
 
+Revalidação de 30/10/2026 na PR #133: `npm audit` retorna 11 entradas, agora **6 altas e 5 baixas, sem críticas** (metapacotes incluídos). O advisory novo `GHSA-qr28-fpjm-wq7f` eleva decode-uri-component e a cadeia do router. A recomendação automática continua exigindo mudanças incompatíveis de Expo/router; não foi aplicado downgrade nem override que quebre CommonJS/ESM. O relatório JSON da execução fica na CI. A contagem anterior abaixo é histórica, não a condição atual.
+
 Inventário resolvido, não somente versões declaradas. Comandos: `npm audit --json` e `node scripts/audit-java-dependencies.mjs`. A CI guarda os relatórios em `interface-evidence`. Falha de consulta não equivale a ausência de alertas. Os alertas são triados abaixo; o job de inventário não é um gate automático de ausência de vulnerabilidades.
 
 ## Java

@@ -99,6 +99,12 @@ async function renew() {
     : run();
 }
 
+/** Share the same refresh lock with API calls before requesting private RSC. */
+export async function prepareSessionNavigation() {
+  if (!renewing) renewing = renew().finally(() => { renewing = null; });
+  return renewing;
+}
+
 async function requestWithRenewal<T>(
   path: string,
   options?: RequestInit,
@@ -115,11 +121,7 @@ async function requestWithRenewal<T>(
       (path.startsWith("/auth/") && !path.startsWith("/auth/academic/"))
     )
       throw e;
-    if (!renewing)
-      renewing = renew().finally(() => {
-        renewing = null;
-      });
-    const renewed = await renewing;
+    const renewed = await prepareSessionNavigation();
     if (generation !== sessionGeneration)
       throw new DOMException("A sessão mudou.", "AbortError");
     if (renewed) return request<T>("/api/backend", path, options);

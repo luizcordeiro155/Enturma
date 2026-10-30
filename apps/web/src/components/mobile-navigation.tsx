@@ -22,10 +22,11 @@ const tabs = [
   ["/rooms", "Salas", Users],
   ["/forum", "Comunidade", MessagesSquare],
   ["/notebooks", "Cadernos", BookOpen],
-  ["/profile", "Perfil", UserRound],
+  ["/friends", "Amigos", Users],
 ] as const;
 export function MobileNavigation() {
-  const path = usePathname();
+  const pathname = usePathname();
+  const path = pathname === "/visitante" ? "/home" : pathname;
   const updateState = useAppUpdateState();
   const updatePending =
     isMobileApp() &&
@@ -95,13 +96,13 @@ export function MobileNavigation() {
           </header>
           {(
             [
-              ["/friends", "Amigos", Users],
-              ["/portfolio", "Portfólio acadêmico", BriefcaseBusiness],
-              ["/caronas", "Caronas", Car],
-              ["/settings", "Configurações", Settings],
               ["/challenges", "Desafios acadêmicos", Gamepad2],
               ["/learn", "Programação", Gamepad2],
+              ["/caronas", "Caronas", Car],
+              ["/portfolio", "Portfólio acadêmico", BriefcaseBusiness],
+              ["/profile", "Perfil", UserRound],
               ["/download", "Baixar o Enturma", EnturmaAppIcon],
+              ["/settings", "Configurações", Settings],
             ] as const
           ).filter(([href])=>!(href==="/download"&&installedApp)).map(([href, label, Icon]) => (
               <Link

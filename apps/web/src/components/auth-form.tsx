@@ -1,10 +1,12 @@
 "use client";
+import dynamic from "next/dynamic";
 import { prepareChatAfterLogin } from "@/lib/account-chat-sync";
 import Link from "next/link";
+import { EnturmaAppIcon } from "./enturma-app-icon";
+import { VisitorLink } from "./visitor-experience";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
-  BookOpen,
   ArrowRight,
   Check,
   KeyRound,
@@ -18,6 +20,7 @@ import { api, post } from "@/lib/api";
 import { authDestination } from "@/lib/auth-navigation";
 import { PublicThemeControl } from "./public-theme-control";
 import { Feedback } from "./feedback";
+const AuthFilm = dynamic(() => import("./motion/guide-player"), { ssr: false });
 type Mode =
   "login" | "register" | "forgot-password" | "reset-password" | "verify-email";
 type RecoveryStarted = { trackingToken: string; expiresIn: number };
@@ -38,7 +41,7 @@ function AuthStoryHeader() {
   return (
     <header className="auth-story-top">
       <Link href="/" className="brand">
-        <BookOpen size={40} />
+        <EnturmaAppIcon size={44} />
         enturma.
       </Link>
       <PublicThemeControl />
@@ -300,8 +303,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
     if (["login", "register", "reset-password"].includes(mode)) {
       if (!password) errors.password = "Informe sua senha.";
-      else if (mode !== "login" && password.length < 12)
-        errors.password = "A senha precisa ter pelo menos 12 caracteres.";
+      else if (mode !== "login" && (password.length < 6 || password.length > 30))
+        errors.password = "A senha deve ter de 6 a 30 caracteres.";
     }
 
     if (["register", "reset-password"].includes(mode)) {
@@ -746,7 +749,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }
 
   return (
-    <div className="auth-layout">
+    <div
+      className={`auth-layout ${mode === "login" || mode === "register" ? "auth-entry" : ""}`}
+    >
       <section className="auth-story">
         <AuthStoryHeader />
         <div>
@@ -763,6 +768,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
             Uma turma para chamar de sua.
           </p>
         </div>
+        {(mode === "login" || mode === "register") && (
+          <div className="auth-entry-art" aria-hidden="true">
+            <AuthFilm step={3} />
+          </div>
+        )}
         <footer className="auth-story-footer">
           <span>Seu espaço de estudo e conexão.</span>
           <nav aria-label="Informações legais">
@@ -929,8 +939,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   mode === "login" ? "current-password" : "new-password"
                 }
                 required
-                minLength={mode === "login" ? 1 : 12}
-                maxLength={72}
+                minLength={mode === "login" ? 1 : 6}
+                maxLength={mode === "login" ? 72 : 30}
                 onChange={() =>
                   setFieldErrors((current) => {
                     const next = { ...current };
@@ -948,7 +958,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   {fieldErrors.password}
                 </small>
               ) : mode !== "login" ? (
-                <small>Use pelo menos 12 caracteres.</small>
+                <small>Use de 6 a 30 caracteres.</small>
               ) : null}
             </label>
           ) : null}
@@ -970,8 +980,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 type="password"
                 autoComplete="new-password"
                 required
-                minLength={12}
-                maxLength={72}
+                minLength={6}
+                maxLength={30}
                 onChange={() =>
                   setFieldErrors((current) => {
                     const next = { ...current };
@@ -1036,6 +1046,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
             <p>
               Já tem acesso? <Link href="/login">Entrar na minha conta</Link>
             </p>
+          )}
+          {(mode === "login" || mode === "register") && (
+            <VisitorLink className="auth-action-link auth-visitor-link" />
           )}
           {(mode === "login" || mode === "register") && (
             <div className="auth-app-downloads">

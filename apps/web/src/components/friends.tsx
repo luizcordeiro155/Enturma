@@ -1422,7 +1422,6 @@ export function Friends() {
                     <ComposerMedia
                       onEmoji={(emoji) => {
                         setDraft((value) => (value + emoji).slice(0, 4000));
-                        composer.current?.focus({ preventScroll: true });
                       }}
                       onFile={privateImagesEnabled ? selectImage : undefined}
                       onMedia={privateImagesEnabled ? (file, kind) => send(undefined, { file, kind }) : undefined}

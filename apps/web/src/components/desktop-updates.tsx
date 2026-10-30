@@ -1,6 +1,10 @@
 "use client";
 import dynamic from "next/dynamic";
-const TransferFilm = dynamic(() => import("./motion/transfer-player"), { ssr: false });
+import { playMotion } from "@/lib/motion";
+import { DesktopReleaseNotes } from "./desktop-release-notes";
+const TransferFilm = dynamic(() => import("./motion/transfer-player"), {
+  ssr: false,
+});
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Download, RefreshCw, X } from "lucide-react";
 import { useCallSession } from "./call-session-provider";
@@ -35,7 +39,11 @@ type DesktopBridge = {
   nativeUpdater?: boolean;
   showUpdateWindow?: () => Promise<unknown>;
   setTheme?: (light: boolean) => Promise<unknown>;
-  getInfo: () => Promise<{ version: string; platform: string }>;
+  getInfo: () => Promise<{
+    version: string;
+    platform: string;
+    releaseNotes?: string[];
+  }>;
   getUpdateState?: () => Promise<UpdateState>;
   onUpdateState?: (callback: (state: UpdateState) => void) => () => void;
   checkForUpdates: () => Promise<unknown>;
@@ -65,8 +73,7 @@ export function isDesktop() {
 
 export function isMobileApp() {
   return (
-    typeof window !== "undefined" &&
-    /EnturmaMobile\//.test(navigator.userAgent)
+    typeof window !== "undefined" && /EnturmaMobile\//.test(navigator.userAgent)
   );
 }
 
@@ -88,8 +95,7 @@ const androidUpdateOrigin =
 function mobileVersion() {
   if (typeof window === "undefined") return "0.0.0";
   return (
-    navigator.userAgent.match(/EnturmaMobile\/(\d+\.\d+\.\d+)/)?.[1] ??
-    "0.0.0"
+    navigator.userAgent.match(/EnturmaMobile\/(\d+\.\d+\.\d+)/)?.[1] ?? "0.0.0"
   );
 }
 function isNewer(remote: string, current: string) {
@@ -187,7 +193,10 @@ export function DesktopUpdateProvider({
           }
 
           if (bridge.getUpdateState)
-            void bridge.getUpdateState().then(receive).catch(() => {});
+            void bridge
+              .getUpdateState()
+              .then(receive)
+              .catch(() => {});
           unsubscribe = bridge.onUpdateState?.(receive);
         })
         .catch(() => {});
@@ -257,7 +266,10 @@ export function DesktopUpdateProvider({
     };
     const onCheck = () => void check(true);
     void check();
-    const interval = window.setInterval(() => void check(false), 15 * 60 * 1000);
+    const interval = window.setInterval(
+      () => void check(false),
+      15 * 60 * 1000,
+    );
     const onVisible = () => {
       if (document.visibilityState === "visible") void check(true);
     };
@@ -298,8 +310,13 @@ export function DesktopUpdateProvider({
       value={{
         state,
         open: () => {
-          if (window.enturmaDesktop?.nativeUpdater && window.enturmaDesktop.showUpdateWindow) {
-            void window.enturmaDesktop.showUpdateWindow().catch(() => setOpen(true));
+          if (
+            window.enturmaDesktop?.nativeUpdater &&
+            window.enturmaDesktop.showUpdateWindow
+          ) {
+            void window.enturmaDesktop
+              .showUpdateWindow()
+              .catch(() => setOpen(true));
             return;
           }
           if (
@@ -350,6 +367,9 @@ export function DesktopUpdateProvider({
       }}
     >
       {children}
+      {isDesktop() && state?.currentVersion && (
+        <DesktopReleaseNotes version={state.currentVersion} />
+      )}
       {open && state && !isMobileApp() && (
         <dialog
           ref={dialog}
@@ -368,7 +388,16 @@ export function DesktopUpdateProvider({
               <X />
             </button>
           </header>
-          <TransferFilm mode="update" progress={["downloading", "ready"].includes(state.status) ? state.status === "ready" ? 100 : state.progress : undefined} />
+          <TransferFilm
+            mode="update"
+            progress={
+              ["downloading", "ready"].includes(state.status)
+                ? state.status === "ready"
+                  ? 100
+                  : state.progress
+                : undefined
+            }
+          />
           <p>
             Instalada: {state.currentVersion}
             {state.version ? ` · Nova versão: ${state.version}` : ""}
@@ -383,8 +412,9 @@ export function DesktopUpdateProvider({
           {isMobileApp() && state.status === "available" ? (
             <>
               <p>
-                Atualização Android {state.version} disponível. Recomendamos manter
-                o Enturma atualizado para receber correções e novos recursos.
+                Atualização Android {state.version} disponível. Recomendamos
+                manter o Enturma atualizado para receber correções e novos
+                recursos.
               </p>
               <div className="actions">
                 <button
@@ -413,8 +443,8 @@ export function DesktopUpdateProvider({
           ) : isMobileApp() && state.status === "downloading" ? (
             <>
               <p>
-                O Android baixa a atualização em segundo plano. Ao concluir,
-                o instalador é aberto automaticamente. Se você cancelar a
+                O Android baixa a atualização em segundo plano. Ao concluir, o
+                instalador é aberto automaticamente. Se você cancelar a
                 confirmação do sistema, toque em “Continuar instalação” nas
                 Configurações para reabrir o mesmo APK sem baixar novamente.
               </p>
@@ -435,9 +465,9 @@ export function DesktopUpdateProvider({
           ) : legacyWindows ? (
             <>
               <p>
-                Identificamos o problema que faz esta versão fechar sem
-                aplicar a atualização. Não clique novamente no atualizador
-                antigo: instale a correção oficial uma única vez.
+                Identificamos o problema que faz esta versão fechar sem aplicar
+                a atualização. Não clique novamente no atualizador antigo:
+                instale a correção oficial uma única vez.
               </p>
               <ol>
                 <li>Baixe o instalador oficial 0.3.3 abaixo.</li>
@@ -502,7 +532,9 @@ export function DesktopUpdateProvider({
               )}
               onClick={() => {
                 if (isMobileApp()) {
-                  window.dispatchEvent(new Event("enturma-mobile-update-check"));
+                  window.dispatchEvent(
+                    new Event("enturma-mobile-update-check"),
+                  );
                   return;
                 }
                 void window.enturmaDesktop
@@ -522,18 +554,72 @@ export function DesktopUpdateProvider({
 }
 export function DesktopUpdateTitlebarAction() {
   const { state, open } = useContext(Context);
-  if (!isDesktop() || !state || !["available", "downloading", "ready"].includes(state.status)) return null;
+  const button = useRef<HTMLButtonElement>(null);
+  const tipElement = useRef<HTMLSpanElement>(null);
+  const [tip, setTip] = useState(false);
+  const [dismissedVersion, setDismissedVersion] = useState<string>();
+  const available = state?.status === "available";
+  const version = state?.version;
+  const dismissed = !!version && dismissedVersion === version;
+  useEffect(() => {
+    if (!tip || !tipElement.current) return;
+    const animation = playMotion(tipElement.current, [
+      { opacity: 0, transform: "translateY(-6px)" },
+      { opacity: 1, transform: "none" },
+    ]);
+    return () => animation?.cancel();
+  }, [tip]);
+  useEffect(() => {
+    if (!available || dismissed || !isDesktop()) return;
+    const element = button.current;
+    const animation =
+      element &&
+      playMotion(element, [{ opacity: 1 }, { opacity: 0.45 }, { opacity: 1 }], {
+        duration: 850,
+        iterations: 3,
+      });
+    const show = setTimeout(() => setTip(true), 5500);
+    const hide = setTimeout(() => setTip(false), 10500);
+    return () => {
+      animation?.cancel();
+      clearTimeout(show);
+      clearTimeout(hide);
+    };
+  }, [available, version, dismissed]);
+  if (
+    !isDesktop() ||
+    !state ||
+    !["available", "downloading", "ready"].includes(state.status)
+  )
+    return null;
+  const label =
+    state.status === "ready"
+      ? "Instalar atualização do Enturma"
+      : state.status === "downloading"
+        ? "Baixando atualização: " + Math.round(state.progress) + "%"
+        : "Baixar atualização do Enturma";
   return (
-    <button
-      className={`desktop-titlebar-update ${state.status}`}
-      type="button"
-      title={state.status === "ready" ? "Atualização pronta para instalar" : "Baixar atualização do Enturma"}
-      aria-label={state.status === "ready" ? "Instalar atualização do Enturma" : "Baixar atualização do Enturma"}
-      onClick={open}
-    >
-      <Download size={17} aria-hidden="true" />
-      {state.status === "downloading" ? <span>{Math.round(state.progress)}%</span> : null}
-    </button>
+    <>
+      <button
+        ref={button}
+        className={"desktop-titlebar-update " + state.status}
+        type="button"
+        title={label}
+        aria-label={label}
+        onClick={() => {
+          setDismissedVersion(version);
+          setTip(false);
+          open();
+        }}
+      >
+        <Download size={17} aria-hidden="true" />
+      </button>
+      {tip && available && !dismissed && (
+        <span ref={tipElement} className="desktop-update-tip" role="status">
+          Uma atualização está disponível. Toque na seta para baixar.
+        </span>
+      )}
+    </>
   );
 }
 
@@ -617,7 +703,10 @@ export function AppUpdateSettingsCard() {
   const ready = state?.status === "ready";
   const current = state?.status === "current";
   const error = state?.status === "error";
-  const busy = state?.status === "checking" || downloading || state?.status === "installing";
+  const busy =
+    state?.status === "checking" ||
+    downloading ||
+    state?.status === "installing";
 
   return (
     <section
@@ -634,9 +723,7 @@ export function AppUpdateSettingsCard() {
       <div className="app-update-settings-copy">
         <strong>Atualização do aplicativo</strong>
         <span>
-          {state
-            ? labels[state.status]
-            : "Verificando se há uma nova versão…"}
+          {state ? labels[state.status] : "Verificando se há uma nova versão…"}
         </span>
         {state?.currentVersion ? (
           <small>
@@ -668,7 +755,12 @@ export function AppUpdateSettingsCard() {
             Tentar novamente
           </button>
         ) : (
-          <button type="button" className="secondary" disabled={busy} onClick={check}>
+          <button
+            type="button"
+            className="secondary"
+            disabled={busy}
+            onClick={check}
+          >
             {busy ? "Verificando…" : "Verificar atualização"}
           </button>
         )}

@@ -21,12 +21,13 @@ import {
   BriefcaseBusiness,
 } from "lucide-react";
 import { CommunityFeedback } from "./community-feedback";
-import { isDesktop, isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
-import { MobileNavigation } from "./mobile-navigation";
 import {
-  RideDesktopNavigation,
-  RideMobileNavigation,
-} from "./ride-navigation";
+  isInstalledApp,
+  isMobileApp,
+  useAppUpdateState,
+} from "./desktop-updates";
+import { MobileNavigation } from "./mobile-navigation";
+import { RideDesktopNavigation, RideMobileNavigation } from "./ride-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
   { href: "/rooms", label: "Salas", icon: Users },
@@ -39,13 +40,14 @@ const links = [
   { href: "/settings", label: "Configurações", icon: Settings },
   { href: "/download", label: "Baixar o Enturma", icon: EnturmaAppIcon },
 ];
-export function Shell({ children }: { children: React.ReactNode }) {
-  const path = usePathname();
+export function Shell({ children, visitor = false }: { children: React.ReactNode; visitor?: boolean }) {
+  const pathname = usePathname();
+  const path = visitor ? "/home" : pathname;
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
   const inRideHub = path.startsWith("/caronas");
   const updateState = useAppUpdateState();
   const updatePending =
-    (isMobileApp() || isDesktop()) &&
+    isMobileApp() &&
     ["available", "downloading", "ready"].includes(updateState?.status ?? "");
   const { learning, profileShortcut } = useAppShellState();
   const [, setEmailVerified] = useState<boolean | null>(null);
@@ -57,6 +59,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     return () => window.clearTimeout(timer);
   }, []);
   useEffect(() => {
+    if (visitor) return;
     let active = true;
     let previous: boolean | null = null;
 
@@ -108,7 +111,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
       window.removeEventListener("focus", refreshVerification);
       document.removeEventListener("visibilitychange", onVisible);
     };
-  }, []);
+  }, [visitor]);
 
   useEffect(() => {
     if (!emailCelebration) return;
@@ -134,75 +137,79 @@ export function Shell({ children }: { children: React.ReactNode }) {
       <a className="skip" href="#content">
         Pular para o conteúdo
       </a>
-      {inRideHub ? <RideDesktopNavigation /> : (
-      <aside className="sidebar">
-        <Link href="/home" className="brand">
-          <BookOpen size={40} />
-          <span>
-            enturma<span className="dot">.</span>
-          </span>
-        </Link>
-        <nav aria-label="Principal">
-          {learning ? (
-            <Link
-              href="/learn"
-              aria-current={path === "/learn" ? "page" : undefined}
-            >
-              <Gamepad2 size={21} />
-              Praticar programação
-            </Link>
-          ) : null}
-          {links.filter(({href})=>!(href==="/download"&&installedApp)).map(({ href, label, icon: Icon }) => (
+      {inRideHub ? (
+        <RideDesktopNavigation />
+      ) : (
+        <aside className="sidebar">
+          <Link href="/home" className="brand">
+            <BookOpen size={40} />
+            <span>
+              enturma<span className="dot">.</span>
+            </span>
+          </Link>
+          <nav aria-label="Principal">
+            {learning ? (
               <Link
-                key={href}
-                href={href}
-                className={
-                  updatePending && href === "/settings"
-                    ? "app-update-pending-link"
-                    : undefined
-                }
-                aria-current={path === href ? "page" : undefined}
+                href="/learn"
+                aria-current={path === "/learn" ? "page" : undefined}
               >
-                <Icon size={21} />
-                {label}
-                {updatePending && href === "/settings" ? (
-                  <span className="app-update-badge">Atualização</span>
-                ) : null}
+                <Gamepad2 size={21} />
+                Praticar programação
               </Link>
-            ))}
-        </nav>
-      </aside>
+            ) : null}
+            {links
+              .filter(({ href }) => !(href === "/download" && installedApp))
+              .map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={
+                    updatePending && href === "/settings"
+                      ? "app-update-pending-link"
+                      : undefined
+                  }
+                  aria-current={path === href ? "page" : undefined}
+                >
+                  <Icon size={21} />
+                  {label}
+                  {updatePending && href === "/settings" ? (
+                    <span className="app-update-badge">Atualização</span>
+                  ) : null}
+                </Link>
+              ))}
+          </nav>
+        </aside>
       )}
       <div className="workspace">
         {!inRideHub ? (
-        <header className="topbar">
-          <span>
-            {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
-          </span>
-          <div className="topbar-actions">
-            <NotificationBell />
-            <ExperienceControls />
-            <Link
-              className="topbar-profile-link"
-              href="/profile"
-              aria-label="Abrir meu perfil para editar"
-              title="Meu perfil"
-              aria-current={path === "/profile" ? "page" : undefined}
-            >
-              {profileShortcut?.hasAvatar ? (
-                <Image
-                  src={`/api/backend/users/${profileShortcut.id}/avatar?v=${profileShortcut.version}`}
-                  width={44}
-                  height={44}
-                  alt=""
-                  unoptimized
-                />
-              ) : (
-                <UserRound size={22} aria-hidden="true" />
-              )}
-            </Link>
-          </div>
-        </header>
+          <header className="topbar">
+            <span>
+              {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
+            </span>
+            <div className="topbar-actions">
+              {visitor ? <Link href="/login" className="text-button">Entrar</Link> : <NotificationBell />}
+              <ExperienceControls />
+              <Link
+                className="topbar-profile-link"
+                href="/profile"
+                aria-label="Abrir meu perfil para editar"
+                title="Meu perfil"
+                aria-current={path === "/profile" ? "page" : undefined}
+              >
+                {profileShortcut?.hasAvatar ? (
+                  <Image
+                    src={`/api/backend/users/${profileShortcut.id}/avatar?v=${profileShortcut.version}`}
+                    width={44}
+                    height={44}
+                    alt=""
+                    unoptimized
+                  />
+                ) : (
+                  <UserRound size={22} aria-hidden="true" />
+                )}
+              </Link>
+            </div>
+          </header>
         ) : null}
         <main id="content">
           {path.startsWith("/rooms") ? <CommunityFeedback /> : null}

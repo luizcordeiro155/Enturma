@@ -1,5 +1,7 @@
 # Operação, recuperação e liberação
 
+**Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
+
 Complemento do [relatório de readiness](PRODUCTION_READINESS.md). Este runbook não declara tarefas externas executadas.
 
 ## Banco: migração separada de runtime
@@ -14,6 +16,8 @@ Após novas tabelas, reaplicar os grants/políticas revisados; omissões de RLS 
 
 ## Backup e restauração
 
+**Decisão do responsável em 28/10/2026:** não existem backups externos e sua configuração foi dispensada nesta entrega. As orientações abaixo permanecem como referência para adoção futura, não como condição de publicação. Recuperação real continua não comprovada; nenhum backup foi criado ou removido por esta decisão.
+
 - Definir RPO, RTO e retenção com o responsável pela operação. Valores ainda não aprovados.
 - Backup precisa cobrir PostgreSQL, objetos privados e chave `CHAT_ACCOUNT_MASTER_KEY`, com controles separados. Um dump sem a chave pode preservar ciphertext sem permitir recuperação.
 - Armazenar cópias cifradas fora do volume principal; restringir acesso, registrar execução e testar restauração numa rede isolada sem envios de e-mail/push/IA.
@@ -24,7 +28,7 @@ Após novas tabelas, reaplicar os grants/políticas revisados; omissões de RLS 
 ## Release e rollback
 
 1. Guardar SHA, checks e artefatos da PR; gates da readiness satisfeitos antes do merge.
-2. Confirmar backup restaurável e configuração de chaves; não gerar nova chave mestre durante deploy.
+2. Registrar a dispensa de backup externo e confirmar a configuração de chaves sem expor seus valores; não gerar nova chave mestre durante deploy. Não afirmar que existe recuperação validada.
 3. Implantar API compatível; verificar health sem expor detalhes e fluxos sintéticos autorizados. Esta revisão não introduz schema novo.
 4. Promover Web; validar login existente, usuário pendente, start público e navegação. Observar falhas/latência antes de distribuição nativa.
 5. Publicar cliente nativo apenas após instalação/upgrade/rollback físicos, preservando assinatura e dados.

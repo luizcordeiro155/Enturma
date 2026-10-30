@@ -21,6 +21,7 @@ function Picker({ composer = true }: { composer?: boolean }) {
 }
 
 beforeEach(() => {
+  vi.stubGlobal("matchMedia", () => ({ matches: false }));
   vi.stubGlobal("ResizeObserver", class { observe() {} disconnect() {} });
 });
 afterEach(() => {
@@ -97,4 +98,20 @@ it("follows the live composer on viewport resize and scroll without covering it 
   await waitFor(() => expect(parseFloat(dialog.style.top)).toBeGreaterThanOrEqual(62));
   assertFits();
   expect(screen.getByLabelText("Mensagem")).toHaveFocus();
+});
+
+it("does not revive the mobile keyboard after it was dismissed while the picker was open", () => {
+  document.documentElement.dataset.enturmaMobile = "true";
+  document.documentElement.dataset.enturmaIme = "true";
+  render(<Picker />);
+  const input = screen.getByLabelText("Mensagem");
+  input.focus();
+  fireEvent.click(screen.getByText("Emojis"));
+  screen.getByLabelText("Pesquisar").focus();
+  document.documentElement.dataset.enturmaIme = "false";
+  const focus = vi.spyOn(input, "focus");
+  fireEvent.click(screen.getByText("Fechar"));
+  expect(focus).not.toHaveBeenCalled();
+  delete document.documentElement.dataset.enturmaMobile;
+  delete document.documentElement.dataset.enturmaIme;
 });

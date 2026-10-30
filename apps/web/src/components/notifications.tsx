@@ -84,6 +84,7 @@ export function NotificationsProvider({
   const [inline, setInline] = useState<Notice[]>([]);
   const [error, setError] = useState("");
   const revision = useRef(0);
+  const initializedInbox = useRef(false);
   const [sessionEpoch, setSessionEpoch] = useState(0);
   const pending = useRef(false),
     seen = useRef(new Set<string>());
@@ -93,6 +94,7 @@ export function NotificationsProvider({
       revision.current++;
       pending.current = false;
       seen.current.clear();
+      initializedInbox.current = false;
       setInbox({ items: [], unreadCount: 0 });
       setInline([]);
       setError("");
@@ -105,7 +107,7 @@ export function NotificationsProvider({
     };
   }, []);
   useEffect(() => {
-    if (isMobileApp() || window.enturmaDesktop) return;
+    if (isMobileApp()) return;
     const unlock = () => {
       if (notificationSoundEnabled()) void unlockNotificationSound();
     };
@@ -115,7 +117,7 @@ export function NotificationsProvider({
         !document.hidden &&
         document.hasFocus()
       )
-        playNotificationSound();
+        playNotificationSound(false, event.data.id);
     };
     window.addEventListener("pointerdown", unlock);
     window.addEventListener("keydown", unlock);
@@ -259,6 +261,23 @@ export function NotificationsProvider({
       }
       if (requested !== revision.current) return;
 
+      // In-app sound must not depend on OS push permission or push preferences.
+      // Skip the initial snapshot so old unread notices never chime on login.
+      if (
+        initializedInbox.current &&
+        !isMobileApp() &&
+        (Boolean(window.enturmaDesktop) || (!document.hidden && document.hasFocus()))
+      ) {
+        for (const notice of data.items) {
+          if (
+            !notice.readAt &&
+            !seen.current.has(notice.id) &&
+            !contexts.includes(notice.contextKey ?? "")
+          )
+            playNotificationSound(false, notice.id);
+        }
+      }
+      initializedInbox.current = true;
       seen.current = new Set(data.items.map((n) => n.id));
       setInbox(data);
       setError("");

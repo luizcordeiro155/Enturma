@@ -37,12 +37,14 @@ export function AppShellStateProvider({
 }) {
   useKeyboardViewport();
   const path = usePathname();
+  const privatePage = /^\/(home|rooms|friends|notebooks|profile|settings|caronas|forum|portfolio|onboarding|admin|challenges|learn|subjects)(\/|$)/.test(path);
   const [installedApp, setInstalledApp] = useState(false);
   const [learning, setLearning] = useState(false);
   const [profileShortcut, setProfileShortcut] =
     useState<ProfileShortcut | null>(null);
 
   const refreshProfileShortcut = useCallback(async (bumpAvatar = false) => {
+    if (!privatePage) return;
     try {
       const profile = await api<{ id: string; hasAvatar?: boolean }>(
         "/users/me",
@@ -61,7 +63,7 @@ export function AppShellStateProvider({
     } catch {
       // As próprias páginas tratam sessão expirada e indisponibilidade.
     }
-  }, []);
+  }, [privatePage]);
 
   useEffect(() => {
     const installedTimer = window.setTimeout(() => {
@@ -107,12 +109,7 @@ export function AppShellStateProvider({
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      const publicAccountRoute =
-        path === "/" ||
-        /^\/(login|register|forgot-password|reset-password|verify-email)(\/|$)/.test(
-          path,
-        );
-      if (publicAccountRoute) {
+      if (!privatePage) {
         setProfileShortcut(null);
       } else {
         // Route changes are a fallback for account switches completed by an older
@@ -121,9 +118,10 @@ export function AppShellStateProvider({
       }
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [path, refreshProfileShortcut]);
+  }, [privatePage, refreshProfileShortcut]);
 
   useEffect(() => {
+    if (!privatePage) return;
     let active = true;
     api<{ eligible: boolean }>("/learning/access")
       .then((value) => {
@@ -133,7 +131,7 @@ export function AppShellStateProvider({
     return () => {
       active = false;
     };
-  }, [path]);
+  }, [privatePage]);
 
   const value = useMemo(
     () => ({

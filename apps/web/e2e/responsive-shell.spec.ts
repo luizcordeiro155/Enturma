@@ -15,18 +15,21 @@ test("login contrast and navigation remain accessible at every viewport", async 
     ),
   );
   await page.goto("/login");
-  await expect(page.locator(".auth-story h1")).toHaveCSS(
-    "color",
-    "rgb(24, 63, 54)",
-  );
-  await expect(page.locator(".auth-story")).toHaveCSS(
-    "background-color",
-    "rgb(221, 242, 128)",
-  );
-  await expect(page.locator(".auth-main")).not.toHaveCSS(
-    "background-color",
-    "rgb(221, 242, 128)",
-  );
+  for (const label of ["Escuro", "Claro"]) {
+    await page.locator(".auth-theme-option").filter({ hasText: label }).click();
+    const contrast = await page.locator(".auth-story h1").evaluate((node) => {
+      const luminance = (value: string) => (value.match(/[\d.]+/g) ?? [])
+        .slice(0, 3).map(Number).reduce((sum, value, index) => {
+          const channel = value / 255;
+          const linear = channel <= .04045 ? channel / 12.92 : ((channel + .055) / 1.055) ** 2.4;
+          return sum + linear * [.2126, .7152, .0722][index];
+        }, 0);
+      const foreground = luminance(getComputedStyle(node).color);
+      const background = luminance(getComputedStyle(node.closest(".auth-story")!).backgroundColor);
+      return (Math.max(foreground, background) + .05) / (Math.min(foreground, background) + .05);
+    });
+    expect(contrast).toBeGreaterThanOrEqual(4.5);
+  }
   await page.screenshot({
     path: "../../.local/login-contrast-desktop.png",
     animations: "disabled",

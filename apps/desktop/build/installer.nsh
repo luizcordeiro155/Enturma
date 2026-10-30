@@ -2,6 +2,8 @@
 ; The independent animation window survives the application being replaced.
 !ifndef BUILD_UNINSTALLER
   Var EnturmaShouldRun
+!else
+  Var EnturmaRemoveData
 !endif
 !macro EnturmaSetupUX MODE
   Push $0
@@ -47,9 +49,37 @@
 !macroend
 
 !macro customUnInit
+  StrCpy $EnturmaRemoveData 0
   ; Updates invoke the old uninstaller; only the outer installer owns that UI.
   ${IfNot} ${isUpdated}
+    ${IfNot} ${Silent}
+      InitPluginsDir
+      File /oname=$PLUGINSDIR\EnturmaSetupUX.exe "${BUILD_RESOURCES_DIR}\EnturmaSetupUX.exe"
+      File /oname=$PLUGINSDIR\uninstall.gif "${BUILD_RESOURCES_DIR}\..\assets\motion\uninstall.gif"
+      ClearErrors
+      ExecWait '"$PLUGINSDIR\EnturmaSetupUX.exe" --uninstall-options "$PLUGINSDIR\uninstall.gif"' $0
+      ${If} ${Errors}
+        MessageBox MB_ICONSTOP "Não foi possível abrir a confirmação. Nenhum dado foi removido."
+        Abort
+      ${EndIf}
+      ${If} $0 == 11
+        StrCpy $EnturmaRemoveData 1
+      ${ElseIf} $0 != 10
+        Abort
+      ${EndIf}
+    ${EndIf}
     !insertmacro EnturmaSetupUX uninstall
+  ${EndIf}
+!macroend
+
+!macro customUnInstall
+  ${IfNot} ${isUpdated}
+  ${AndIf} $EnturmaRemoveData == 1
+    ExecWait '"$PLUGINSDIR\EnturmaSetupUX.exe" --remove-local-data' $0
+    ${If} $0 != 0
+      MessageBox MB_ICONEXCLAMATION "O aplicativo foi removido, mas alguns dados locais estão em uso ou protegidos. Eles foram preservados."
+      SetErrorLevel 4
+    ${EndIf}
   ${EndIf}
 !macroend
 

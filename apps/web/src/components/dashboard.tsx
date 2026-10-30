@@ -20,22 +20,23 @@ import { ForumHighlights } from "./forum-highlights";
 import { StudyJourney } from "./study-journey";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { EnturmaIntroExperience } from "./intro/enturma-intro-experience";
-export function Dashboard() {
+export function Dashboard({ visitor = false }: { visitor?: boolean }) {
   const [profile, setProfile] = useState<Profile | undefined>(() =>
-    peekApiSnapshot<Profile>("/users/me"),
+    visitor ? undefined : peekApiSnapshot<Profile>("/users/me"),
   );
   const [rooms, setRooms] = useState<Room[]>(
-    () => peekApiSnapshot<Room[]>("/study-rooms?page=0") ?? [],
+    () => visitor ? [] : peekApiSnapshot<Room[]>("/study-rooms?page=0") ?? [],
   );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(
-    () => !peekApiSnapshot("/study-rooms?page=0"),
+    () => !visitor && !peekApiSnapshot("/study-rooms?page=0"),
   );
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const router = useRouter();
   const [now] = useState(() => Date.now());
   useEffect(() => {
+    if (visitor) return;
     let alive = true;
     Promise.all([
       api<Profile>("/users/me"),
@@ -58,8 +59,9 @@ export function Dashboard() {
     return () => {
       alive = false;
     };
-  }, [router, page]);
+  }, [router, page, visitor]);
   async function refreshRooms() {
+    if (visitor) return;
     const next = await api<Room[]>(`/study-rooms?page=${page}`, {
       cache: "no-store",
     });
@@ -76,7 +78,7 @@ export function Dashboard() {
     }
   }
   return (
-    <Shell>
+    <Shell visitor={visitor}>
       <div className="dashboard-grid">
         <div className="dashboard-main">
           <div className="dashboard-intro">
@@ -92,6 +94,11 @@ export function Dashboard() {
             </p>
             <Feedback error={error} />
             <CatalogSearch />
+            {visitor && <section className="onboarding-banner">
+              <BookOpen size={40} />
+              <div><h2>Encontre sua turma</h2><p>Explore o catálogo. Entre para escolher suas matérias e participar.</p></div>
+              <Link className="button" href="/onboarding">Escolher minhas matérias</Link>
+            </section>}
             {profile && !profile.enrollment ? (
               <section className="onboarding-banner">
                 <BookOpen size={44} />
@@ -174,7 +181,7 @@ export function Dashboard() {
             </section>
           ) : null}
           <div className="dashboard-community">
-            <RoomCodeEntry />
+            {!visitor && <RoomCodeEntry />}
             <div className="section-heading">
               <h2>Salas acontecendo agora</h2>
               {rooms.length ? (
@@ -196,8 +203,8 @@ export function Dashboard() {
             ) : !error && rooms.length === 0 ? (
               <section className="empty">
                 <BookOpen size={52} />
-                <h3>Ainda não há salas abertas.</h3>
-                <p>Escolha uma matéria para começar a primeira turma.</p>
+                <h3>{visitor ? "Sua próxima turma está no Enturma." : "Ainda não há salas abertas."}</h3>
+                <p>{visitor ? "Entre para ver as salas e conversar com os estudantes. As conversas ficam protegidas." : "Escolha uma matéria para começar a primeira turma."}</p>
                 <Link
                   className="button"
                   href={profile?.enrollment ? "/rooms/new" : "/onboarding"}
@@ -239,7 +246,7 @@ export function Dashboard() {
                   ))}
               </div>
             )}
-            <div className="actions home-room-pages">
+            {!visitor && <div className="actions home-room-pages">
               <button
                 disabled={page === 0}
                 onClick={() => {
@@ -259,8 +266,8 @@ export function Dashboard() {
               >
                 Próxima
               </button>
-            </div>
-            <ForumHighlights />
+            </div>}
+            {!visitor && <ForumHighlights />}
           </div>
         </div>
         {profile ? <StudyJourney enrolled={!!profile.enrollment} /> : null}

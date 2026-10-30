@@ -150,7 +150,8 @@ export function useLiveRefresh(
     async function run() {
       // Call signaling must work in background tabs; content refresh can wait.
       if (!active) return;
-      if (document.hidden && type !== "private_call_changed") {
+      if (document.hidden && type !== "private_call_changed" &&
+          !(type === "notifications_changed" && window.enturmaDesktop)) {
         dirty = true;
         return;
       }
@@ -205,7 +206,7 @@ export function useLiveRefresh(
     const timer = window.setInterval(() => {
       if (
         type === "private_call_changed" ||
-        (!liveConnected && !document.hidden)
+        (!liveConnected && (!document.hidden || (type === "notifications_changed" && window.enturmaDesktop)))
       )
         refresh();
     }, fallbackEvery);
