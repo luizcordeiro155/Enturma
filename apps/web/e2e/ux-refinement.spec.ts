@@ -103,10 +103,15 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     expect(shellMetrics.mainOverflow).toBeLessThanOrEqual(2);
     expect(shellMetrics.composerWithinChat).toBe(true);
     expect(shellMetrics.messageScroll).toBe("auto");
-    // No decorative divider should overlay the last private message.
-    await expect(page.locator(".private-composer.enturma-message-composer")).toHaveCSS(
-      "border-top-width", "0px",
-    );
+    // No decorative divider in private conversations, and the desktop pill
+    // must match the rounded, slim Windows application composer.
+    const desktopPrivateComposer = page.locator(".private-chat > .private-composer.enturma-message-composer");
+    await expect(desktopPrivateComposer).toHaveCSS("border-top-width", "0px");
+    await expect(desktopPrivateComposer).toHaveCSS("box-shadow", "none");
+    const desktopPrivatePill = desktopPrivateComposer.locator(":scope > .composer-main-row");
+    await expect(desktopPrivatePill).toHaveCSS("min-height", "56px");
+    await expect(desktopPrivatePill).toHaveCSS("border-radius", "28px");
+    await expect(desktopPrivatePill).toHaveCSS("border-top-width", "1px");
     // The scrollport must reach the private composer; the previously blank
     // upper footer cut off the last message well above the actual input.
     await expect.poll(() => page.evaluate(() => {
@@ -257,6 +262,19 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     await other.keyboard.press("Escape");
     await expect(viewer).toHaveCount(0);
     await other.setViewportSize({ width: 390, height: 844 });
+    // Mobile private chat retains its existing field but has NO extra line
+    // or raised strip on the outer form, including when native IME opens.
+    const mobilePrivateComposer = other.locator(".private-chat > .private-composer.enturma-message-composer");
+    await expect(mobilePrivateComposer).toHaveCSS("border-top-width", "0px");
+    await expect(mobilePrivateComposer).toHaveCSS("box-shadow", "none");
+    await other.evaluate(() => {
+      document.documentElement.dataset.enturmaIme = "true";
+    });
+    await expect(mobilePrivateComposer).toHaveCSS("border-top-width", "0px");
+    await expect(mobilePrivateComposer).toHaveCSS("box-shadow", "none");
+    await other.evaluate(() => {
+      delete document.documentElement.dataset.enturmaIme;
+    });
     await other.evaluate(() => {
       document.documentElement.dataset.theme = "dark";
     });
@@ -1139,6 +1157,10 @@ test.describe("touch chat", () => {
       ).toHaveCount(0);
       await expect(page).toHaveURL(new RegExp(`/rooms/${room.id}`));
       await page.setViewportSize({ width: 1376, height: 768 });
+      const desktopRoomPill = page.locator(".room-section-chat .persistent-composer.enturma-message-composer > .composer-main-row");
+      await expect(desktopRoomPill).toHaveCSS("min-height", "56px");
+      await expect(desktopRoomPill).toHaveCSS("border-radius", "28px");
+      await expect(desktopRoomPill).toHaveCSS("border-top-width", "1px");
       await expect.poll(() => page.evaluate(() => {
         const history = document.querySelector(".room-section-chat .persistent-chat > .persistent-messages");
         const pill = document.querySelector(".room-section-chat .persistent-composer .composer-main-row");
