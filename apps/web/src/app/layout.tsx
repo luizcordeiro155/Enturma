@@ -39,6 +39,8 @@ import "./notebook-profile-polish.css";
 import "./composer-experience.css";
 import "./study-room-finish.css";
 import "./mobile-keyboard-stability.css";
+import "./desktop-chat-composer.css";
+import "./chat-typing-placement.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";

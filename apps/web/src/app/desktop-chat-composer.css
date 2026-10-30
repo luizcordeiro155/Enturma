@@ -1,0 +1,78 @@
+/* Align the WEB desktop editor to the approved Enturma Windows editor.
+ * Both run the same CSS. No layout, IME or sizing overrides for mobile. */
+@media (min-width: 761px) {
+  .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer > .composer-main-row,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer.enturma-message-composer > .composer-main-row,
+  .private-chat > .private-composer.enturma-message-composer > .composer-main-row {
+    box-sizing: border-box !important;
+    display: flex !important;
+    align-items: flex-end !important;
+    width: 100% !important;
+    min-height: 56px !important;
+    gap: 4px !important;
+    padding: 4px 6px !important;
+    border: 1px solid color-mix(
+      in srgb,
+      var(--room-accent, var(--accent)) 72%,
+      var(--room-border, var(--border))
+    ) !important;
+    border-radius: 28px !important;
+    background: var(--room-subtle, var(--surface-hover)) !important;
+    box-shadow: none !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer > .composer-main-row:focus-within,
+  .room-active-shell .room-section-call .call-chat-pane .persistent-composer.enturma-message-composer > .composer-main-row:focus-within,
+  .private-chat > .private-composer.enturma-message-composer > .composer-main-row:focus-within {
+    border-color: var(--room-accent, var(--accent)) !important;
+    box-shadow: 0 0 0 1px color-mix(
+      in srgb,
+      var(--room-accent, var(--accent)) 16%,
+      transparent
+    ) !important;
+  }
+}
+
+/* PRIVATE CHAT seam, both DESKTOP and MOBILE:
+ * This separator is on the outer form (and sometimes the native IME shadow),
+ * not on the rounded field. Remove the decorative rule without modifying
+ * the field, scrolling, keyboard placement, safe areas or navigation. */
+.private-chat > .private-composer.enturma-message-composer,
+html[data-enturma-private-chat="true"] .private-chat .private-composer.enturma-message-composer,
+html[data-enturma-ime="true"] .private-chat .private-composer.enturma-message-composer {
+  border-top: 0 !important;
+  border-top-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Some client themes also draw the dividing rule at the history edge. */
+.private-chat > .private-messages {
+  border-bottom: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Desktop CALLS: compact RoomChat shares the pill above, but its own
+ * call-chat-pane retained a scrollport/footer seam that was already fixed
+ * in the full-size room chat. Extend only this pane's scroll area into the
+ * unused 32px footer strip. The rounded field remains in its original place. */
+@media (min-width: 761px) {
+  .room-active-shell .room-section-call .call-chat-pane > .persistent-messages {
+    margin-bottom: -32px !important;
+    border-bottom: 0 !important;
+    box-shadow: none !important;
+  }
+
+  .room-active-shell .room-section-call .call-chat-pane > .persistent-composer.enturma-message-composer {
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+  }
+
+  /* Keep attachments, emoji, input and send button interactive while
+   * the transparent footer itself no longer blocks message actions. */
+  .room-active-shell .room-section-call .call-chat-pane > .persistent-composer.enturma-message-composer > * {
+    pointer-events: auto !important;
+  }
+}

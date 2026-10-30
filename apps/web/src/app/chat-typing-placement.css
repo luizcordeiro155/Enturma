@@ -1,0 +1,83 @@
+/* Shared typing status for room chat, call companion chat, and direct messages.
+   This element is a flex sibling directly ABOVE the input composer, never a
+   child of the scrolling message history or an absolutely fixed viewport row. */
+.room-active-shell .room-section-chat .persistent-chat > .conversation-typing,
+.room-active-shell .room-section-call .call-chat-pane > .conversation-typing,
+.private-chat > .conversation-typing {
+  box-sizing: border-box !important;
+  display: flex !important;
+  align-items: center !important;
+  flex: 0 0 22px !important;
+  align-self: stretch !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 22px !important;
+  max-height: 22px !important;
+  margin: 0 !important;
+  padding: 2px 16px !important;
+  gap: 8px !important;
+  position: relative !important;
+  inset: auto !important;
+  z-index: 5 !important;
+  overflow: hidden !important;
+  border: 0 !important;
+  background: var(--room-panel, var(--surface)) !important;
+  box-shadow: none !important;
+  transform: none !important;
+  pointer-events: none !important;
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--room-muted, var(--muted)) !important;
+}
+
+.conversation-typing > .conversation-typing-dots {
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 3px;
+}
+.conversation-typing > .conversation-typing-label {
+  display: block;
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Narrow call panels should truncate names, never overflow the pane. */
+.room-active-shell .room-section-call .call-chat-pane > .conversation-typing {
+  padding-inline: 12px !important;
+  background: var(--surface, #161e21) !important;
+}
+.private-chat > .conversation-typing {
+  padding-inline: 24px !important;
+  background: var(--surface) !important;
+}
+
+/* Desktop scrollport overlaps the empty footer to eliminate its former
+   divider. Give the bottom of long histories scrollable clearance only while
+   typing text is present, without moving or resizing the composer. */
+@media (min-width: 761px) {
+  .room-active-shell .room-section-chat .persistent-chat:has(> .conversation-typing) > .persistent-messages,
+  .room-active-shell .room-section-call .call-chat-pane:has(> .conversation-typing) > .persistent-messages,
+  html[data-enturma-private-chat="true"] .private-chat:has(> .conversation-typing) > .private-messages {
+    padding-bottom: 36px !important;
+    scroll-padding-bottom: 36px !important;
+  }
+}
+
+/* On Chrome Mobile and Android WebView, keep IME and navigation layout
+   unchanged. The indicator remains in the same flex stack as the composer. */
+@media (max-width: 760px) {
+  .room-active-shell .room-section-chat .persistent-chat > .conversation-typing,
+  .private-chat > .conversation-typing {
+    flex-basis: 20px !important;
+    min-height: 20px !important;
+    max-height: 20px !important;
+    padding: 1px 10px !important;
+    font-size: 11px !important;
+  }
+  .private-chat > .conversation-typing {
+    padding-inline: 12px !important;
+  }
+}

@@ -1,4 +1,5 @@
 "use client";
+import { TypingIndicator } from "./typing-indicator";
 import { ComposerMedia } from "./composer-media";
 import { providerMessageUrl, type KlipyGif } from "@/lib/klipy";
 import { ChatImage } from "./chat-image-viewer";
@@ -792,13 +793,13 @@ export function RoomChat(props: Props) {
         />
       ) : null}
 
-      {(composerBlocked || Boolean(props.typing?.length)) ? (
+      {composerBlocked ? (
         <div className="typing-status" role="status">
-          {composerBlocked
-            ? `Envio temporariamente bloqueado · ${moderationCountdown(penaltySeconds)}`
-            : `${props.typing?.map((p) => p.name).join(", ")} ${props.typing?.length === 1 ? "está digitando" : "estão digitando"}…`}
+          {`Envio temporariamente bloqueado · ${moderationCountdown(penaltySeconds)}`}
         </div>
-      ) : null}
+      ) : (
+        <TypingIndicator names={props.typing?.map((person) => person.name) ?? []} />
+      )}
       {composerBlocked ? (
         <div className="room-penalty-timer" role="status" aria-live="polite">
           <ShieldAlert size={17} />

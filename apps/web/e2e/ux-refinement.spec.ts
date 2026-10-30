@@ -103,6 +103,23 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     expect(shellMetrics.mainOverflow).toBeLessThanOrEqual(2);
     expect(shellMetrics.composerWithinChat).toBe(true);
     expect(shellMetrics.messageScroll).toBe("auto");
+    // No decorative divider in private conversations, and the desktop pill
+    // must match the rounded, slim Windows application composer.
+    const desktopPrivateComposer = page.locator(".private-chat > .private-composer.enturma-message-composer");
+    await expect(desktopPrivateComposer).toHaveCSS("border-top-width", "0px");
+    await expect(desktopPrivateComposer).toHaveCSS("box-shadow", "none");
+    const desktopPrivatePill = desktopPrivateComposer.locator(":scope > .composer-main-row");
+    await expect(desktopPrivatePill).toHaveCSS("min-height", "56px");
+    await expect(desktopPrivatePill).toHaveCSS("border-radius", "28px");
+    await expect(desktopPrivatePill).toHaveCSS("border-top-width", "1px");
+    // The scrollport must reach the private composer; the previously blank
+    // upper footer cut off the last message well above the actual input.
+    await expect.poll(() => page.evaluate(() => {
+      const history = document.querySelector(".private-chat > .private-messages");
+      const pill = document.querySelector(".private-composer .composer-main-row");
+      if (!history || !pill) return 999;
+      return Math.round(pill.getBoundingClientRect().top - history.getBoundingClientRect().bottom);
+    })).toBeLessThanOrEqual(10);
     const header = page.locator(".private-chat-header");
     await expect(header).toBeVisible();
     const headerBounds = await header.boundingBox();
@@ -245,6 +262,19 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     await other.keyboard.press("Escape");
     await expect(viewer).toHaveCount(0);
     await other.setViewportSize({ width: 390, height: 844 });
+    // Mobile private chat retains its existing field but has NO extra line
+    // or raised strip on the outer form, including when native IME opens.
+    const mobilePrivateComposer = other.locator(".private-chat > .private-composer.enturma-message-composer");
+    await expect(mobilePrivateComposer).toHaveCSS("border-top-width", "0px");
+    await expect(mobilePrivateComposer).toHaveCSS("box-shadow", "none");
+    await other.evaluate(() => {
+      document.documentElement.dataset.enturmaIme = "true";
+    });
+    await expect(mobilePrivateComposer).toHaveCSS("border-top-width", "0px");
+    await expect(mobilePrivateComposer).toHaveCSS("box-shadow", "none");
+    await other.evaluate(() => {
+      delete document.documentElement.dataset.enturmaIme;
+    });
     await other.evaluate(() => {
       document.documentElement.dataset.theme = "dark";
     });
@@ -965,6 +995,10 @@ test.describe("touch chat", () => {
       });
       await expect(composer).toBeVisible();
       await expect(page.locator(".persistent-messages")).toBeVisible();
+      // Composer stays as designed; only its external separator is removed.
+      await expect(page.locator(".room-section-chat .persistent-composer.enturma-message-composer")).toHaveCSS(
+        "border-top-width", "0px",
+      );
       await db.query(
         "UPDATE room_participant SET joined_at=now()-interval '2 hours' WHERE room_id=$1",
         [room.id],
@@ -1123,6 +1157,44 @@ test.describe("touch chat", () => {
       ).toHaveCount(0);
       await expect(page).toHaveURL(new RegExp(`/rooms/${room.id}`));
       await page.setViewportSize({ width: 1376, height: 768 });
+      const desktopRoomPill = page.locator(".room-section-chat .persistent-composer.enturma-message-composer > .composer-main-row");
+      await expect(desktopRoomPill).toHaveCSS("min-height", "56px");
+      await expect(desktopRoomPill).toHaveCSS("border-radius", "28px");
+      await expect(desktopRoomPill).toHaveCSS("border-top-width", "1px");
+      await expect.poll(() => page.evaluate(() => {
+        const history = document.querySelector(".room-section-chat .persistent-chat > .persistent-messages");
+        const pill = document.querySelector(".room-section-chat .persistent-composer .composer-main-row");
+        if (!history || !pill) return 999;
+        return Math.round(pill.getBoundingClientRect().top - history.getBoundingClientRect().bottom);
+      })).toBeLessThanOrEqual(10);
+
+      // Calls render the same RoomChat inside a dedicated .call-chat-pane.
+      // Its own scrollport used to stop above a thick footer separator.
+      await page.locator(".room-channel-nav").getByRole("button", { name: "Chamada" }).click();
+      const callPane = page.locator(".room-section-call .call-chat-pane");
+      await expect(callPane).toBeVisible();
+      const callComposer = callPane.locator(":scope > .persistent-composer.enturma-message-composer");
+      const callPill = callComposer.locator(":scope > .composer-main-row");
+      await expect(callComposer).toHaveCSS("border-top-width", "0px");
+      await expect(callComposer).toHaveCSS("box-shadow", "none");
+      await expect(callComposer).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+      await expect(callPill).toHaveCSS("min-height", "56px");
+      await expect(callPill).toHaveCSS("border-radius", "28px");
+      await expect(callPill).toHaveCSS("border-top-width", "1px");
+      await expect(callPane.locator(":scope > .persistent-messages")).toHaveCSS(
+        "margin-bottom", "-32px",
+      );
+      await expect.poll(() => callPane.evaluate((pane) => {
+        const messages = pane.querySelector(".persistent-messages");
+        const pill = pane.querySelector(".composer-main-row");
+        if (!messages || !pill) return 999;
+        return Math.round(
+          pill.getBoundingClientRect().top - messages.getBoundingClientRect().bottom,
+        );
+      })).toBeLessThanOrEqual(10);
+      await expect(callComposer.getByRole("textbox", { name: "Mensagem" })).toBeEnabled();
+      await page.locator(".room-channel-nav").getByRole("button", { name: "Conversa" }).click();
+      await expect(page.locator(".room-section-chat .persistent-messages")).toBeVisible();
       await own.click({ button: "right" });
       await page
         .getByRole("button", { name: "Excluir mensagem", exact: true })
