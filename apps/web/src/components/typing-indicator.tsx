@@ -32,20 +32,18 @@ export function TypingIndicator({ names }: { names: string[] }) {
       document.removeEventListener("visibilitychange", pause);
     };
   }, [visible]);
+  // Do not reserve a phantom row below the history while nobody is typing.
+  if (!visible) return null;
+
+  const label = `${names.slice(0, 2).join(" e ")}${names.length > 2 ? " e outras pessoas" : ""} ${names.length === 1 ? "está digitando…" : "estão digitando…"}`;
   return (
     <div className="conversation-typing" role="status" aria-live="polite">
-      {visible && (
-        <>
-          <span ref={dots} aria-hidden="true">
-            <i />
-            <i />
-            <i />
-          </span>
-          {names.slice(0, 2).join(" e ")}
-          {names.length > 2 ? " e outras pessoas" : ""}{" "}
-          {names.length === 1 ? "está digitando…" : "estão digitando…"}
-        </>
-      )}
+      <span className="conversation-typing-dots" ref={dots} aria-hidden="true">
+        <i />
+        <i />
+        <i />
+      </span>
+      <span className="conversation-typing-label" title={label}>{label}</span>
     </div>
   );
 }
