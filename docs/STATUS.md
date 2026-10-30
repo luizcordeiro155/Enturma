@@ -11,7 +11,7 @@ O Enturma está em estabilização. A [Release Candidate](PRODUCTION_READINESS.m
 | PostgreSQL | Migrations até V65; autorização por objeto no Java; papel efetivo de produção precisa de validação |
 | Chat privado | Cifragem no cliente e custódia cifrada por conta, recuperável pela API; não E2EE inacessível ao serviço |
 | iOS | Export técnico na CI; sem homologação/publicação oficial confirmada |
-| Escala e backup | Sem benchmark de carga ou restauração de backup real comprovados |
+| Escala e backup | Benchmark de carga não executado; backup externo inexistente e dispensado pelo responsável em 28/10/2026; recuperação real não comprovada |
 
 Pacotes: Web 0.3.0, Expo Android 0.3.30/code 33 e Desktop 0.3.15. O builder calcula a versão distribuída; consultar os manifests oficiais antes de anunciar um release. SHA-256 verifica integridade, **não é assinatura digital Authenticode**.
 
