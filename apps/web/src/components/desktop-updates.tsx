@@ -555,10 +555,20 @@ export function DesktopUpdateProvider({
 export function DesktopUpdateTitlebarAction() {
   const { state, open } = useContext(Context);
   const button = useRef<HTMLButtonElement>(null);
+  const tipElement = useRef<HTMLSpanElement>(null);
   const [tip, setTip] = useState(false);
-  const [dismissed, setDismissed] = useState(false);
+  const [dismissedVersion, setDismissedVersion] = useState<string>();
   const available = state?.status === "available";
   const version = state?.version;
+  const dismissed = !!version && dismissedVersion === version;
+  useEffect(() => {
+    if (!tip || !tipElement.current) return;
+    const animation = playMotion(tipElement.current, [
+      { opacity: 0, transform: "translateY(-6px)" },
+      { opacity: 1, transform: "none" },
+    ]);
+    return () => animation?.cancel();
+  }, [tip]);
   useEffect(() => {
     if (!available || dismissed || !isDesktop()) return;
     const element = button.current;
@@ -597,7 +607,7 @@ export function DesktopUpdateTitlebarAction() {
         title={label}
         aria-label={label}
         onClick={() => {
-          setDismissed(true);
+          setDismissedVersion(version);
           setTip(false);
           open();
         }}
@@ -605,7 +615,7 @@ export function DesktopUpdateTitlebarAction() {
         <Download size={17} aria-hidden="true" />
       </button>
       {tip && available && !dismissed && (
-        <span className="desktop-update-tip" role="status">
+        <span ref={tipElement} className="desktop-update-tip" role="status">
           Uma atualização está disponível. Toque na seta para baixar.
         </span>
       )}

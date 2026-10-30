@@ -1,4 +1,31 @@
 /* Shared composer owns its outline. The surrounding footer needs no divider. */
+/* Public surfaces must not inherit the legacy lime-button and light-story palette. */
+html .auth-entry .auth-theme-control {
+  background: var(--soft);
+  border-color: var(--border);
+}
+html .auth-entry .auth-story .auth-theme-option:not([aria-pressed="true"]) {
+  background: transparent !important;
+  color: var(--ink) !important;
+}
+html .auth-entry .auth-story .auth-theme-option[aria-pressed="true"] {
+  background: #d8ef79 !important;
+  color: #173f35 !important;
+}
+html[data-theme] .auth-entry .auth-story footer.auth-story-footer,
+html[data-theme] .auth-entry .auth-story-footer :is(p, a, span) {
+  color: var(--muted) !important;
+}
+html .visitor-shell .visitor-nav > button,
+html .visitor-shell .visitor-actions > button {
+  background: transparent !important;
+  color: var(--ink) !important;
+}
+html .visitor-shell .visitor-nav > button:is([aria-current], :hover),
+html .visitor-shell .visitor-actions > button:hover {
+  background: var(--soft) !important;
+  color: var(--ink) !important;
+}
 html .enturma-message-composer:is(.persistent-composer, .private-composer) {
   border-top: 0 !important;
   box-shadow: none !important;
@@ -390,6 +417,8 @@ html .enturma-message-composer:is(.persistent-composer, .private-composer) {
   }
   .visitor-header > span {
     font-size: 0.75rem;
+    order: 4;
+    flex-basis: 100%;
   }
   .visitor-nav {
     flex-direction: row;
@@ -413,9 +442,12 @@ html .enturma-message-composer:is(.persistent-composer, .private-composer) {
     object-fit: cover;
   }
   .visitor-catalog li {
-    flex-wrap: wrap;
+    display: grid;
+    grid-template-columns: 24px minmax(0, 1fr);
   }
   .visitor-catalog li > button {
-    margin-left: 36px;
+    grid-column: 2;
+    justify-self: start;
+    max-width: 100%;
   }
 }

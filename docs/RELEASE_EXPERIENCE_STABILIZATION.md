@@ -11,7 +11,7 @@ Escopo: autenticação pública, visitante Web, notificações, digitação, qua
 - O diálogo de transmissão usa controles acessíveis de resolução/FPS e áudio opcional. A escolha afeta captura e codificação do LiveKit. A fonte continua sendo escolhida no seletor autorizado do navegador/sistema. Qualidade depende de hardware e rede.
 - A borda externa do rodapé de chat foi retirada sem alterar o cálculo de teclado, safe areas ou rolagem.
 - Desktop mostra somente o ícone de atualização na barra superior, com destaque breve e lembrete temporário. Após aumento confirmado da versão instalada, apresenta uma vez o filme Remotion existente e as notas fornecidas pelo próprio binário; clientes anteriores sem notas recebem o link oficial.
-- Instalador, atualizador e desinstalador usam o ícone oficial. A remoção opcional de dados locais vem desmarcada; cancelar interrompe a desinstalação. Instalação silenciosa e atualização preservam os dados. A limpeza é restrita à pasta Roaming/Enturma, recusa links/junctions e não procura arquivos exportados nem apaga a conta.
+- Instalador, atualizador e desinstalador usam o ícone oficial. A remoção opcional de dados locais vem desmarcada; cancelar interrompe a desinstalação. Instalação silenciosa e atualização preservam os dados. A limpeza é restrita à pasta Roaming/@enturma/desktop, recusa links/junctions e não procura arquivos exportados nem apaga a conta.
 
 ## Provas e limites
 
@@ -20,6 +20,8 @@ Testes de regressão cobrem som independente de permissão, deduplicação, even
 `isolated-load.spec.ts` executa 144 leituras em fases com concorrência 1/4/12 contra catálogo e conta sintética. Exige API em loopback e banco efêmero `enturma_e2e`; registra p50/p95/máximo/códigos em `isolated-load.json`. Não consulta SquareCloud, contas reais, modelos de IA, LiveKit ou fornecedores. O resultado não é uma estimativa de capacidade nem SLA de produção.
 
 Os resultados de execução, imagens e auditorias ficam nos checks da PR e no artefato `interface-evidence`. Verificação local: suíte de unidades, TypeScript e lint; resultados finais da CI e pacote Windows devem ser consultados antes da promoção. Nenhuma migração de banco acompanha este ciclo.
+
+Windows: NSIS/ZIP compilados localmente; `SetupUX.Tests.cs` passou com uma raiz descartável dentro de `.local`, verificando remoção da pasta correta, preservação de pasta vizinha e repetição idempotente. O job `windows-uninstall-safety` repete a prova no GitHub. Nenhuma instalação real nem dados da conta foram removidos no computador do responsável.
 
 ## Implantação e limites operacionais
 

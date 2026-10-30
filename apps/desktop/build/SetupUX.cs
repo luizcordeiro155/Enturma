@@ -162,12 +162,22 @@ internal sealed class SetupUX : Form {
   }
 
   static int RemoveLocalData() {
+    return RemoveLocalDataAt(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+  }
+
+  // The caller owns the OS app-data root; no CLI input can override it.
+  static int RemoveLocalDataAt(string applicationData) {
     try {
       // Fixed application-owned directory only. No user-supplied path, Downloads
       // scanning, cloud deletion or traversal through directory junctions.
-      var parent = Path.GetFullPath(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
-      var target = Path.GetFullPath(Path.Combine(parent, "Enturma"));
-      if (!String.Equals(Path.GetDirectoryName(target), parent, StringComparison.OrdinalIgnoreCase)) return 4;
+      var root = Path.GetFullPath(applicationData);
+      // Electron uses package.name because productName is only in builder config.
+      // Preserve this established path; changing it would lose existing sessions.
+      var parent = Path.GetFullPath(Path.Combine(root, "@enturma"));
+      var target = Path.GetFullPath(Path.Combine(parent, "desktop"));
+      if (!String.Equals(Path.GetDirectoryName(parent), root, StringComparison.OrdinalIgnoreCase)
+          || !String.Equals(Path.GetDirectoryName(target), parent, StringComparison.OrdinalIgnoreCase)) return 4;
+      if (Directory.Exists(parent) && (new DirectoryInfo(parent).Attributes & FileAttributes.ReparsePoint) != 0) return 4;
       if (Directory.Exists(target)) {
         AssertNoLinks(new DirectoryInfo(target));
         Directory.Delete(target, true);

@@ -11,4 +11,4 @@ const compiler = windows ? path.join(process.env.WINDIR || 'C:\\Windows', 'Micro
 const result = spawnSync(compiler, [(windows ? '/win32icon:' : '-win32icon:') + path.join(__dirname, '../assets/icon.ico'), windows ? '/nologo' : '-nologo', windows ? '/target:winexe' : '-target:winexe', (windows ? '/out:' : '-out:') + output, (windows ? '/r:' : '-r:') + 'System.Windows.Forms.dll', (windows ? '/r:' : '-r:') + 'System.Drawing.dll', source], { stdio: 'inherit', windowsHide: true });
 if (result.error) throw result.error;
 if (result.status !== 0) process.exit(result.status || 1);
-console.log('Native installer UI compiled; file operations remain in NSIS.');
+console.log('Native installer UI compiled; NSIS owns installation and explicit consent gates local data cleanup.');
