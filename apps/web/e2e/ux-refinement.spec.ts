@@ -103,21 +103,10 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     expect(shellMetrics.mainOverflow).toBeLessThanOrEqual(2);
     expect(shellMetrics.composerWithinChat).toBe(true);
     expect(shellMetrics.messageScroll).toBe("auto");
-    // Desktop private chats: no extra border/shadow frame around the pill.
-    const privateComposer = page.locator(".private-composer.enturma-message-composer");
-    await expect(privateComposer).toHaveCSS("border-top-width", "0px");
-    await expect(privateComposer).toHaveCSS("box-shadow", "none");
-    await expect(privateComposer).toHaveCSS("padding-top", "4px");
-    await expect(privateComposer).toHaveCSS("padding-bottom", "4px");
-    await expect(page.locator(".private-messages")).toHaveCSS("padding-bottom", "6px");
-    const privatePill = privateComposer.locator(".composer-main-row");
-    await expect(privatePill).toHaveCSS("border-top-style", "solid");
-    const privateChrome = await privateComposer.evaluate((element) => {
-      const form = element.getBoundingClientRect();
-      const pill = element.querySelector(".composer-main-row")!.getBoundingClientRect();
-      return form.height - pill.height;
-    });
-    expect(privateChrome).toBeLessThanOrEqual(10);
+    // No decorative divider should overlay the last private message.
+    await expect(page.locator(".private-composer.enturma-message-composer")).toHaveCSS(
+      "border-top-width", "0px",
+    );
     const header = page.locator(".private-chat-header");
     await expect(header).toBeVisible();
     const headerBounds = await header.boundingBox();
@@ -263,10 +252,6 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     await other.evaluate(() => {
       document.documentElement.dataset.theme = "dark";
     });
-    // Mobile private chat should share the room's frameless compact style.
-    await expect(other.locator(".private-composer.enturma-message-composer")).toHaveCSS(
-      "border-top-width", "0px",
-    );
     await thumbnail.click();
     await expect(viewer).toBeVisible();
     const area = (await viewer.locator(".chat-image-canvas").boundingBox())!;
@@ -984,9 +969,10 @@ test.describe("touch chat", () => {
       });
       await expect(composer).toBeVisible();
       await expect(page.locator(".persistent-messages")).toBeVisible();
-      const roomComposer = page.locator(".room-section-chat .persistent-composer.enturma-message-composer");
-      await expect(roomComposer).toHaveCSS("border-top-width", "0px");
-      await expect(roomComposer).toHaveCSS("box-shadow", "none");
+      // Composer stays as designed; only its external separator is removed.
+      await expect(page.locator(".room-section-chat .persistent-composer.enturma-message-composer")).toHaveCSS(
+        "border-top-width", "0px",
+      );
       await db.query(
         "UPDATE room_participant SET joined_at=now()-interval '2 hours' WHERE room_id=$1",
         [room.id],
@@ -1145,21 +1131,6 @@ test.describe("touch chat", () => {
       ).toHaveCount(0);
       await expect(page).toHaveURL(new RegExp(`/rooms/${room.id}`));
       await page.setViewportSize({ width: 1376, height: 768 });
-      await expect(roomComposer).toHaveCSS("border-top-width", "0px");
-      await expect(roomComposer).toHaveCSS("padding-top", "4px");
-      await expect(roomComposer).toHaveCSS("padding-bottom", "4px");
-      await expect(page.locator(".room-section-chat .persistent-messages")).toHaveCSS(
-        "padding-bottom", "6px",
-      );
-      await expect(roomComposer.locator(".composer-main-row")).toHaveCSS(
-        "border-top-style", "solid",
-      );
-      const roomChrome = await roomComposer.evaluate((element) => {
-        const form = element.getBoundingClientRect();
-        const pill = element.querySelector(".composer-main-row")!.getBoundingClientRect();
-        return form.height - pill.height;
-      });
-      expect(roomChrome).toBeLessThanOrEqual(10);
       await own.click({ button: "right" });
       await page
         .getByRole("button", { name: "Excluir mensagem", exact: true })

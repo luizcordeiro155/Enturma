@@ -1054,3 +1054,14 @@ html[data-theme="dark"] .room-active-shell button.room-member-action-trigger:foc
     padding-bottom: 12px !important;
   }
 }
+
+/* Restore the original desktop/mobile composer appearance. The thin rule
+   above the message pill comes from the outer composer, not the input.
+   Remove ONLY that redundant divider and its upward shadow; keep the
+   original padding, colors, sizing, position and keyboard behavior. */
+.room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
+.room-active-shell .room-section-call .call-chat-pane .persistent-composer.enturma-message-composer,
+html[data-enturma-private-chat="true"] .private-chat .private-composer.enturma-message-composer {
+  border-top: 0 !important;
+  box-shadow: none !important;
+}
