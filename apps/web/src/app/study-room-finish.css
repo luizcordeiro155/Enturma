@@ -1055,13 +1055,36 @@ html[data-theme="dark"] .room-active-shell button.room-member-action-trigger:foc
   }
 }
 
-/* Restore the original desktop/mobile composer appearance. The thin rule
-   above the message pill comes from the outer composer, not the input.
-   Remove ONLY that redundant divider and its upward shadow; keep the
-   original padding, colors, sizing, position and keyboard behavior. */
+/* Keep the original composer design; strip only its outer decorative line. */
 .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer,
 .room-active-shell .room-section-call .call-chat-pane .persistent-composer.enturma-message-composer,
 html[data-enturma-private-chat="true"] .private-chat .private-composer.enturma-message-composer {
   border-top: 0 !important;
   box-shadow: none !important;
+}
+
+/* Desktop: the screenshot shows the LAST MESSAGE CLIPPED by the end of the
+   scrollport about 36px ABOVE the input. That empty outer footer (not the
+   pill border) was the visible "line" that border-top:0 could not fix.
+   Extend the scroller 32px into that unused footer area, preserving the
+   exact position, height, padding and border of the original input pill.
+   Keep the unused part of the form transparent and click-through. */
+@media (min-width: 761px) {
+  .room-active-shell .room-section-chat .persistent-chat > .persistent-messages,
+  html[data-enturma-private-chat="true"] .private-chat > .private-messages {
+    margin-bottom: -32px !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-chat > .persistent-composer.enturma-message-composer,
+  html[data-enturma-private-chat="true"] .private-chat > .private-composer.enturma-message-composer {
+    background: transparent !important;
+    border-top: 0 !important;
+    box-shadow: none !important;
+    pointer-events: none !important;
+  }
+
+  .room-active-shell .room-section-chat .persistent-chat > .persistent-composer.enturma-message-composer > *,
+  html[data-enturma-private-chat="true"] .private-chat > .private-composer.enturma-message-composer > * {
+    pointer-events: auto !important;
+  }
 }

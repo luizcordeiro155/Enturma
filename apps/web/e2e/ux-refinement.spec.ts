@@ -107,6 +107,14 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     await expect(page.locator(".private-composer.enturma-message-composer")).toHaveCSS(
       "border-top-width", "0px",
     );
+    // The scrollport must reach the private composer; the previously blank
+    // upper footer cut off the last message well above the actual input.
+    await expect.poll(() => page.evaluate(() => {
+      const history = document.querySelector(".private-chat > .private-messages");
+      const pill = document.querySelector(".private-composer .composer-main-row");
+      if (!history || !pill) return 999;
+      return Math.round(pill.getBoundingClientRect().top - history.getBoundingClientRect().bottom);
+    })).toBeLessThanOrEqual(10);
     const header = page.locator(".private-chat-header");
     await expect(header).toBeVisible();
     const headerBounds = await header.boundingBox();
@@ -1131,6 +1139,12 @@ test.describe("touch chat", () => {
       ).toHaveCount(0);
       await expect(page).toHaveURL(new RegExp(`/rooms/${room.id}`));
       await page.setViewportSize({ width: 1376, height: 768 });
+      await expect.poll(() => page.evaluate(() => {
+        const history = document.querySelector(".room-section-chat .persistent-chat > .persistent-messages");
+        const pill = document.querySelector(".room-section-chat .persistent-composer .composer-main-row");
+        if (!history || !pill) return 999;
+        return Math.round(pill.getBoundingClientRect().top - history.getBoundingClientRect().bottom);
+      })).toBeLessThanOrEqual(10);
       await own.click({ button: "right" });
       await page
         .getByRole("button", { name: "Excluir mensagem", exact: true })
