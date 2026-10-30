@@ -275,6 +275,8 @@ function showDesktopNotification(payload) {
     body,
     icon,
     timeoutType: "default",
+    // The shared renderer plays Enturma's chime according to the user's setting.
+    silent: true,
   });
   notice.on("click", () => {
     if (target && mainWindow && !mainWindow.isDestroyed())

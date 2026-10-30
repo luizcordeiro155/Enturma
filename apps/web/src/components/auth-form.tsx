@@ -1,5 +1,5 @@
 "use client";
-import Image from "next/image";
+import dynamic from "next/dynamic";
 import { prepareChatAfterLogin } from "@/lib/account-chat-sync";
 import Link from "next/link";
 import { EnturmaAppIcon } from "./enturma-app-icon";
@@ -20,6 +20,7 @@ import { api, post } from "@/lib/api";
 import { authDestination } from "@/lib/auth-navigation";
 import { PublicThemeControl } from "./public-theme-control";
 import { Feedback } from "./feedback";
+const AuthFilm = dynamic(() => import("./motion/guide-player"), { ssr: false });
 type Mode =
   "login" | "register" | "forgot-password" | "reset-password" | "verify-email";
 type RecoveryStarted = { trackingToken: string; expiresIn: number };
@@ -302,8 +303,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
     if (["login", "register", "reset-password"].includes(mode)) {
       if (!password) errors.password = "Informe sua senha.";
-      else if (mode !== "login" && password.length < 12)
-        errors.password = "A senha precisa ter pelo menos 12 caracteres.";
+      else if (mode !== "login" && (password.length < 6 || password.length > 30))
+        errors.password = "A senha deve ter de 6 a 30 caracteres.";
     }
 
     if (["register", "reset-password"].includes(mode)) {
@@ -769,12 +770,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </div>
         {(mode === "login" || mode === "register") && (
           <div className="auth-entry-art" aria-hidden="true">
-            <Image
-              width={1024}
-              height={1024}
-              src="/start/book-world.webp"
-              alt=""
-            />
+            <AuthFilm step={3} />
           </div>
         )}
         <footer className="auth-story-footer">
@@ -943,8 +939,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   mode === "login" ? "current-password" : "new-password"
                 }
                 required
-                minLength={mode === "login" ? 1 : 12}
-                maxLength={72}
+                minLength={mode === "login" ? 1 : 6}
+                maxLength={mode === "login" ? 72 : 30}
                 onChange={() =>
                   setFieldErrors((current) => {
                     const next = { ...current };
@@ -962,7 +958,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   {fieldErrors.password}
                 </small>
               ) : mode !== "login" ? (
-                <small>Use pelo menos 12 caracteres.</small>
+                <small>Use de 6 a 30 caracteres.</small>
               ) : null}
             </label>
           ) : null}
@@ -984,8 +980,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 type="password"
                 autoComplete="new-password"
                 required
-                minLength={12}
-                maxLength={72}
+                minLength={6}
+                maxLength={30}
                 onChange={() =>
                   setFieldErrors((current) => {
                     const next = { ...current };

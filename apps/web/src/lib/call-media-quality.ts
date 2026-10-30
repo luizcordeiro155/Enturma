@@ -43,6 +43,22 @@ export const cameraCaptureFallback: VideoCaptureOptions = {
   resolution: { width: 1280, height: 720, frameRate: 30 },
 };
 
+/** Phones expose several rear lenses. Flip facing direction, not lens index. */
+export function nextCameraCapture(
+  settings: MediaTrackSettings,
+  devices: Pick<MediaDeviceInfo, "deviceId" | "label">[],
+): VideoCaptureOptions {
+  if (settings.facingMode === "user" || settings.facingMode === "environment")
+    return {
+      ...cameraCapture,
+      deviceId: undefined,
+      facingMode: settings.facingMode === "user" ? "environment" : "user",
+    };
+  const current = devices.findIndex((device) => device.deviceId === settings.deviceId);
+  const next = devices[(current + 1) % devices.length];
+  return { ...cameraCapture, deviceId: { exact: next.deviceId } };
+}
+
 /** Audio constraints for clear speech with echo cancellation always enabled. */
 export function microphoneCapture(
   noiseSuppression = true,

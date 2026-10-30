@@ -12,7 +12,7 @@ export async function POST(req: NextRequest) {
     const base = backendUrl();
     const access = req.cookies.get("enturma_access")?.value;
     if (access) {
-      const check = await fetch(`${base}/api/v1/users/me`, {
+      const check = await fetch(`${base}/api/v1/auth/session-view`, {
         headers: { Authorization: `Bearer ${access}` },
         cache: "no-store",
         signal: AbortSignal.timeout(10000),

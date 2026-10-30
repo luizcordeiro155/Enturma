@@ -266,9 +266,7 @@ export function NotificationsProvider({
       if (
         initializedInbox.current &&
         !isMobileApp() &&
-        !window.enturmaDesktop &&
-        !document.hidden &&
-        document.hasFocus()
+        (Boolean(window.enturmaDesktop) || (!document.hidden && document.hasFocus()))
       ) {
         for (const notice of data.items) {
           if (

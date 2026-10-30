@@ -1,5 +1,7 @@
 # Release Candidate — 28/10/2026
 
+**Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
+
 Este documento preserva a avaliação da RC de 28/10. As alterações e evidências posteriores de 30/10 estão em [estabilização da experiência](RELEASE_EXPERIENCE_STABILIZATION.md) e no [estado atual](STATUS.md). Os resultados abaixo não devem ser atribuídos automaticamente a commits posteriores.
 
 **NO-GO para publicação como produção homologada ou anúncio de escala.** Há correções implementadas e testadas, mas faltam provas operacionais obrigatórias. A autorização para publicar foi recebida; não foi usada para ignorar os gates de integridade, aplicativos e operação exigidos no pedido.

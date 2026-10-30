@@ -943,7 +943,6 @@ export function RoomChat(props: Props) {
             <ComposerMedia
               onEmoji={(emoji) => {
                 setDraft((draft + emoji).slice(0, 4000));
-                composerRef.current?.focus({ preventScroll: true });
               }}
               onFile={selectImage}
               onMedia={props.onSendMedia}

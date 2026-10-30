@@ -63,3 +63,18 @@ test("foreground inbox sound does not require OS notification permission and ski
   });
   expect(state.sound).toHaveBeenCalledTimes(1);
 });
+
+test("desktop chimes in the background without replaying unread notices", async () => {
+  vi.spyOn(document, "hasFocus").mockReturnValue(false);
+  vi.spyOn(document, "hidden", "get").mockReturnValue(true);
+  Object.defineProperty(window, "enturmaDesktop", { configurable: true, value: {} });
+  state.items = [];
+  render(<NotificationsProvider><div>Desktop</div></NotificationsProvider>);
+  await act(async () => { await state.refresh!(); });
+  state.items = [{ id: "desktop-new", readAt: null, kind: "PRIVATE_MESSAGE", contextKey: "friend:other" }];
+  await act(async () => { await state.refresh!(); });
+  expect(state.sound).toHaveBeenCalledExactlyOnceWith(false, "desktop-new");
+  await act(async () => { await state.refresh!(); });
+  expect(state.sound).toHaveBeenCalledTimes(1);
+  Object.defineProperty(window, "enturmaDesktop", { configurable: true, value: undefined });
+});

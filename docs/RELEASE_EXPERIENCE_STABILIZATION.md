@@ -46,3 +46,18 @@ Publicar API e Web do mesmo commit após os checks; gerar binários com a versã
 Continuam necessárias homologação física de áudio/câmera/compartilhamento/teclado e instalação/atualização/desinstalação em Windows descartável. Não apagar dados locais do computador de desenvolvimento como teste. Authenticode e limitações de dependências constam em [DEPENDENCY_AUDIT](DEPENDENCY_AUDIT.md) e [PRODUCTION_READINESS](PRODUCTION_READINESS.md). A auditoria de dependências/segredos da CI não certifica conformidade jurídica LGPD.
 
 A ausência de backup externo foi explicitamente dispensada pelo responsável. Não se declara restauração de produção testada; o ensaio sintético da CI tem escopo diferente. Consulte [operação](OPERATIONS_READINESS.md).
+
+## Revisão solicitada em 30/10/2026 — mobile e consistência
+
+- Cartões do Início respeitam a largura disponível; navegação mobile prioriza Amigos. Mais organiza Desafios, Programação, Caronas, Portfólio, Perfil, download Web e Configurações por último.
+- Chamadas e chat acompanhante usam a paleta semântica; seletores de transmissão têm checkboxes de largura fixa e rótulos responsivos.
+- Cadastro/redefinição aceitam 6–30 caracteres; login continua aceitando as senhas antigas. BCrypt e limites de tentativas permanecem.
+- Notificações Desktop usam o som e a preferência do Web, inclusive em segundo plano; toast nativo silencioso evita som duplo.
+- Picker preserva teclado aberto e respeita dispensa manual; GIFs/figurinhas sem moldura, com controles de favoritos acessíveis. Chrome compacto libera espaço para os emojis.
+- Câmera alterna frontal/traseira usando a direção real da captura, sem percorrer lentes traseiras intermediárias.
+- Navegação privada renova sessão pelo mutex existente antes de solicitar a rota, sem cachear redirecionamentos de sessão expirada. Limite absoluto de sessão continua 30 dias, sem renovação indefinida.
+- Visitante reutiliza Dashboard, Shell, navegação e CatalogSearch; nenhum perfil fictício, conversa ou sala privada é exposto. Login/cadastro reutilizam a animação Remotion do guia, sem corte da ilustração.
+
+Provas locais desta revisão: TypeScript e lint (35 avisos preexistentes, zero erros); 18 testes focados Web; teste Java dos limites de senha. CI completa e publicação serão registradas após sua execução.
+
+O responsável dispensou homologação física, assinatura Windows e validações operacionais como condição de publicação. A ausência dessas provas permanece documentada; a dispensa não significa execução nem certificação de segurança absoluta.

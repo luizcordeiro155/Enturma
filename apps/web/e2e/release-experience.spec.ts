@@ -31,19 +31,28 @@ for (const viewport of [
       });
       await page.getByRole("link", { name: /Explorar como visitante/ }).click();
       await expect(
-        page.getByRole("heading", { name: "Seu próximo estudo começa aqui." }),
+        page.getByRole("heading", {
+          name: "Seu próximo estudo começa em boa companhia.",
+        }),
       ).toBeVisible();
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth + 1,
         ),
       ).toBe(true);
-      await page.getByRole("button", { name: "Caronas", exact: true }).click();
+      if (viewport.width < 761)
+        await page
+          .getByRole("button", { name: "Mais opções", exact: true })
+          .click();
+      await page
+        .getByRole("link", { name: "Caronas", exact: true })
+        .filter({ visible: true })
+        .click();
       const gate = page.getByRole("dialog", { name: "Faça parte da turma." });
       await expect(gate).toBeVisible();
       await expect(
         gate.getByRole("link", { name: /Criar minha conta/ }),
-      ).toHaveAttribute("href", "/register");
+      ).toHaveAttribute("href", /\/register\?next=/);
       await page.screenshot({
         path: info.outputPath(`visitor-gate-${theme}-${viewport.width}.png`),
         fullPage: true,
@@ -51,21 +60,18 @@ for (const viewport of [
       await page.keyboard.press("Escape");
       await expect(gate).toHaveCount(0);
       await expect(
-        page.getByRole("heading", { name: "Seu próximo estudo começa aqui." }),
+        page.getByRole("heading", {
+          name: "Seu próximo estudo começa em boa companhia.",
+        }),
       ).toBeVisible();
-      const catalogResponse = page.waitForResponse((response) =>
-        response.url().includes("/api/backend/catalog/institutions?") &&
-        response.request().method() === "GET",
-      );
-      await page.getByRole("button", { name: /Explorar o catálogo/ }).click();
+      await page.locator(".catalog-note summary").click();
+      await page
+        .getByLabel("Tipo", { exact: true })
+        .selectOption("institutions");
       await expect(
-        page.getByRole("heading", { name: "Encontre seu caminho." }),
+        page.locator(".catalog-note .room-row").first(),
       ).toBeVisible();
-      expect((await catalogResponse).ok()).toBe(true);
-      await expect(page.getByText("Consultando o catálogo…")).toHaveCount(0);
-      // Next's route announcer also uses role=alert. Only catalog errors belong here.
       await expect(page.getByRole("main").getByRole("alert")).toHaveCount(0);
-      await expect(page.locator(".visitor-catalog li").first()).toBeVisible();
       await page.screenshot({
         path: info.outputPath(`visitor-catalog-${theme}-${viewport.width}.png`),
         fullPage: true,

@@ -1,5 +1,7 @@
 # Operação, recuperação e liberação
 
+**Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
+
 Complemento do [relatório de readiness](PRODUCTION_READINESS.md). Este runbook não declara tarefas externas executadas.
 
 ## Banco: migração separada de runtime

@@ -23,6 +23,7 @@ import {
   callRoomOptions,
   cameraCapture,
   cameraCaptureFallback,
+  nextCameraCapture,
   microphoneCapture,
   screenShareOptions,
   cameraResolutionNotSupported,
@@ -572,16 +573,9 @@ export default function VoiceSession({
         setDeviceNotice("Nenhuma outra câmera disponível.");
         return;
       }
-      const current = track.mediaStreamTrack.getSettings().deviceId;
-      const next =
-        devices[
-          (devices.findIndex((d) => d.deviceId === current) + 1) %
-            devices.length
-        ];
-      await track.restartTrack({
-        ...cameraCapture,
-        deviceId: { exact: next.deviceId },
-      });
+      await track.restartTrack(
+        nextCameraCapture(track.mediaStreamTrack.getSettings(), devices),
+      );
       refreshMembers(call);
     } catch (cause) {
       setDeviceNotice(mediaDeviceMessage(cause, "camera"));

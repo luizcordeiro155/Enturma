@@ -287,8 +287,9 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
 .media-library-grid article {
   position: relative;
   min-width: 0;
-  border-radius: 12px;
-  background: var(--surface-hover);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   overflow: hidden;
 }
 .media-select {
@@ -298,7 +299,7 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
   width: 100%;
   padding: 0;
   border: 0;
-  border-radius: 12px;
+  border-radius: 6px;
   color: var(--ink);
   background: transparent;
   text-align: left;
@@ -310,13 +311,15 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
   object-fit: contain;
 }
 .media-select span {
-  font-size: 11px;
-  padding: 6px 8px 32px;
-  overflow-wrap: anywhere;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 .media-item-actions {
   position: absolute;
-  bottom: 4px;
+  top: 4px;
   right: 4px;
   display: flex;
   gap: 4px;
@@ -455,7 +458,7 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
 }
 .klipy-picker .media-library-grid {
   max-height: min(440px, 52dvh);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .klipy-picker .media-select img {
   height: 105px;

@@ -1,5 +1,7 @@
 # Estado atual — 30/10/2026
 
+**Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
+
 O Enturma está em estabilização. A [Release Candidate](PRODUCTION_READINESS.md) registra as correções, evidências e gates ainda pendentes. **NO-GO para anunciar homologação integral ou escala comprovada.**
 
 O [ciclo atual de experiência](RELEASE_EXPERIENCE_STABILIZATION.md), na [PR #133](https://github.com/luizcordeiro155/Enturma/pull/133), acrescenta visitante exclusivo da Web, login/cadastro com identidade oficial, correções de áudio e digitação, escolha de qualidade de transmissão e melhorias do instalador/atualizador Windows. Resultados e artefatos devem ser associados ao SHA verificado; não equivalem a publicação em produção.

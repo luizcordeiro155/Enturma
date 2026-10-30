@@ -1,12 +1,5 @@
 /* Community v0.3: keep controls reachable on short screens and mobile. */
 .call-chat-pane {
-  --ink: #eef5f2;
-  --muted: #becdc7;
-  --bg: #161e21;
-  --surface: #161e21;
-  --soft: #24332e;
-  --border: #63756d;
-  --accent: #ddf280;
   color: var(--ink);
 }
 .call-chat-pane .monitor-card strong,

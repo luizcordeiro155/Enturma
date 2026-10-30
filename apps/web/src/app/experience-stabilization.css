@@ -56,17 +56,14 @@ html .enturma-message-composer:is(.persistent-composer, .private-composer) {
   color: var(--ink);
 }
 .auth-entry-art {
-  flex: 1;
-  min-height: 140px;
-  max-height: 320px;
+  flex: 0 0 auto;
+  width: 100%;
   overflow: hidden;
   border-radius: 16px;
 }
-.auth-entry-art img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 58%;
+.auth-entry-art .guide-film {
+  margin: 0;
+  border-radius: inherit;
 }
 .auth-entry .auth-main {
   background: var(--bg);
@@ -344,16 +341,30 @@ html .enturma-message-composer:is(.persistent-composer, .private-composer) {
 .share-options:disabled {
   opacity: 0.55;
 }
-.share-audio {
+.screen-share-dialog .share-audio {
   display: flex;
   align-items: start;
   gap: 12px;
   margin-block: 20px;
 }
-.share-audio input {
+.screen-share-dialog .share-audio input[type="checkbox"] {
   width: 20px;
+  min-width: 20px;
+  max-width: 20px;
   height: 20px;
-  flex-shrink: 0;
+  flex: 0 0 20px;
+  margin: 2px 0 0;
+}
+.screen-share-dialog .share-audio > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.screen-share-dialog .share-audio small {
+  display: block;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 5px;
 }
 .screen-share-dialog footer {
   display: flex;
@@ -451,3 +462,57 @@ html .enturma-message-composer:is(.persistent-composer, .private-composer) {
     max-width: 100%;
   }
 }
+
+/* The call uses the same semantic palette as its messages in both themes. */
+.room-active-shell .call-mode,
+.room-active-shell .call-chat-layout,
+.room-active-shell .call-stage .room-tool-card {
+  background: var(--surface) !important;
+  color: var(--ink);
+}
+html[data-theme="light"] .discord-controls,
+html[data-theme="light"] .call-controls {
+  background: var(--surface) !important;
+  border-color: var(--border);
+}
+html[data-theme="light"] .call-control:not(.danger):not(.hangup):not(.active) {
+  color: var(--ink) !important;
+  background: var(--soft) !important;
+  border-color: var(--border) !important;
+}
+.screen-share-dialog .share-options { min-width: 0; }
+.screen-share-dialog .share-options label { min-width: 0; }
+.screen-share-dialog footer { flex-wrap: wrap; }
+@media (max-width: 480px) {
+  .screen-share-dialog { padding: 18px; }
+  .screen-share-dialog .share-options span { font-size: .78rem; padding: 6px; }
+  .screen-share-dialog footer .button { flex: 1; }
+  .dashboard-community .section-heading { flex-wrap: wrap; gap: 10px; }
+  .dashboard-community .section-heading h2 { flex: 1 1 190px; }
+  .dashboard-community .room-row small { flex-wrap: wrap; }
+  .dashboard-community .home-room-pages { gap: 8px; justify-content: space-between; }
+  .dashboard-community .home-room-pages button { padding-inline: 12px; }
+}
+/* Compact chrome leaves the available keyboard viewport to the media itself. */
+.composer-media-popover[data-compact="true"] { padding: 8px; }
+.composer-media-popover[data-compact="true"] .media-library > header { margin-bottom: 4px; }
+.composer-media-popover[data-compact="true"] .enturma-emoji-picker {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  grid-template-rows: auto auto minmax(48px, 1fr);
+  gap: 4px 8px;
+  overflow: hidden;
+}
+.composer-media-popover[data-compact="true"] .emoji-categories {
+  grid-column: 1; grid-row: 1 / 4;
+  flex-direction: column; overflow-y: auto; overflow-x: hidden;
+  min-height: 0; padding: 0; gap: 0;
+}
+.composer-media-popover[data-compact="true"] .emoji-categories button { min-width: 34px; min-height: 34px; width: 34px; padding: 5px; }
+.composer-media-popover[data-compact="true"] .emoji-search { grid-column: 2; grid-row: 1; margin: 0; }
+.composer-media-popover[data-compact="true"] .emoji-search input { min-height: 34px; padding-block: 6px; }
+.composer-media-popover[data-compact="true"] .emoji-picker-heading { grid-column: 2; grid-row: 2; margin: 0; font-size: .72rem; }
+.composer-media-popover[data-compact="true"] .emoji-grid { grid-column: 2; grid-row: 3; overflow: auto; gap: 2px; }
+.composer-media-popover[data-compact="true"] .emoji-grid button { min-width: 32px; min-height: 36px; padding: 3px; font-size: 26px; }
+.composer-media-popover .media-library-grid { flex-shrink: 1; min-height: 48px; }
+[data-visitor="true"] .topbar::before { content: "Visitante"; color: var(--muted); font-size: .8rem; }

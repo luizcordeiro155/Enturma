@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   cameraCapture,
+  nextCameraCapture,
   microphoneCapture,
   screenShareOptions,
 } from "./call-media-quality";
@@ -32,4 +33,15 @@ describe("call quality presets", () => {
       6000000,
     );
   });
+});
+
+it("flips directly between front and rear on phones with several rear lenses", () => {
+  const devices = [
+    { deviceId: "wide", label: "Back wide" },
+    { deviceId: "tele", label: "Back telephoto" },
+    { deviceId: "selfie", label: "Front" },
+  ];
+  expect(nextCameraCapture({ deviceId: "wide", facingMode: "environment" }, devices)).toMatchObject({ facingMode: "user", deviceId: undefined });
+  expect(nextCameraCapture({ deviceId: "selfie", facingMode: "user" }, devices)).toMatchObject({ facingMode: "environment", deviceId: undefined });
+  expect(nextCameraCapture({ deviceId: "wide" }, devices).deviceId).toEqual({ exact: "tele" });
 });

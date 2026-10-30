@@ -20,6 +20,7 @@ import {
   type MessageActionAnchor,
 } from "./message-action-popover";
 import { api } from "@/lib/api";
+import { composerKeyboardVisible, isTextEntryControl } from "@/lib/native-chat-ime";
 import {
   chatMediaFile,
   ENTURMA_GIFS,
@@ -124,7 +125,11 @@ export function ComposerMedia({
                 title={label}
                 disabled={disabled}
                 aria-expanded={!!anchor && tab === kind}
-                onPointerDown={(event) => event.preventDefault()}
+                onPointerDown={(event) => {
+                  event.preventDefault();
+                  if (!composerKeyboardVisible() && isTextEntryControl(document.activeElement))
+                    document.activeElement.blur();
+                }}
                 onClick={(event) => {
                   setTab(kind);
                   setCreating(false);

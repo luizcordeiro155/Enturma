@@ -2,7 +2,7 @@
 import { useLayoutEffect, useRef, type PointerEvent, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { playMotion } from "@/lib/motion";
-import { isTextEntryControl } from "@/lib/native-chat-ime";
+import { composerKeyboardVisible, isTextEntryControl } from "@/lib/native-chat-ime";
 import {
   useOverlayHistory,
   waitForOverlayHistory,
@@ -65,6 +65,7 @@ export function MessageActionPopover({
       const width = Math.min(wide ? 408 : 296, viewportWidth - 24);
       el.style.width = `${width}px`;
       el.style.maxHeight = `${Math.max(0, (composer ? aboveBottom : visibleBottom) - visibleTop)}px`;
+      el.dataset.compact = String(composer && aboveBottom - visibleTop < 400);
       const left = Math.max(
         offsetLeft + 12,
         Math.min(offsetLeft + viewportWidth - width - 12, current.right - width),
@@ -141,14 +142,14 @@ export function MessageActionPopover({
       window.visualViewport?.removeEventListener("scroll", schedulePlace);
       keyTarget.removeEventListener("keydown", keys as EventListener);
       // Restore the composer before a focused search field is unmounted.
-      if (composer && previous?.isConnected && isTextEntryControl(previous) &&
+      if (composer && composerKeyboardVisible() && previous?.isConnected && isTextEntryControl(previous) &&
           (el.contains(document.activeElement) || document.activeElement === document.body)) {
         previous.focus({ preventScroll: true });
       }
       void waitForOverlayHistory().then(() =>
         requestAnimationFrame(() => {
           if (
-            previous?.isConnected &&
+            previous?.isConnected && (!composer || composerKeyboardVisible()) &&
             (!document.activeElement ||
               document.activeElement === document.body)
           )
