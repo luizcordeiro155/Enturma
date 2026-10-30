@@ -1,5 +1,7 @@
 # Release Candidate — 28/10/2026
 
+Este documento preserva a avaliação da RC de 28/10. As alterações e evidências posteriores de 30/10 estão em [estabilização da experiência](RELEASE_EXPERIENCE_STABILIZATION.md) e no [estado atual](STATUS.md). Os resultados abaixo não devem ser atribuídos automaticamente a commits posteriores.
+
 **NO-GO para publicação como produção homologada ou anúncio de escala.** Há correções implementadas e testadas, mas faltam provas operacionais obrigatórias. A autorização para publicar foi recebida; não foi usada para ignorar os gates de integridade, aplicativos e operação exigidos no pedido.
 
 **Atualização de escopo em 28/10/2026:** o responsável confirmou que não existem backups externos e dispensou sua configuração. A ausência está registrada como limitação de recuperação, não como impedimento obrigatório desta entrega. Isso não comprova recuperação nem dispensa os demais gates. O serviço de staging ainda não foi identificado.
