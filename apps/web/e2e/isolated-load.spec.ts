@@ -37,7 +37,7 @@ test("bounded isolated load: public catalog and authenticated account reads", as
           const index = next++;
           const then = performance.now();
           const response = await request.get(
-            `${origin.origin}/api/v1${index % 2 ? "/me" : "/catalog/institutions"}`,
+            `${origin.origin}/api/v1${index % 2 ? "/users/me" : "/catalog/institutions"}`,
             { headers: { Authorization: `Bearer ${token}` }, timeout: 15000 },
           );
           await response.body();

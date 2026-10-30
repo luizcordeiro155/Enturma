@@ -757,6 +757,11 @@ export function RoomChat(props: Props) {
         <button
           type="button"
           className="chat-unread"
+          onPointerDown={(event) => {
+            // Jumping to new messages must not dismiss an already open IME.
+            if (document.activeElement?.closest(".persistent-composer"))
+              event.preventDefault();
+          }}
           onClick={() => {
             scrollRoomToLatest("smooth");
           }}
