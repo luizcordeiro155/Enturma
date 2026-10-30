@@ -107,7 +107,7 @@ export function NotificationsProvider({
     };
   }, []);
   useEffect(() => {
-    if (isMobileApp() || window.enturmaDesktop) return;
+    if (isMobileApp()) return;
     const unlock = () => {
       if (notificationSoundEnabled()) void unlockNotificationSound();
     };

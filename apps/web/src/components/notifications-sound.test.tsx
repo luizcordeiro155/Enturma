@@ -1,10 +1,11 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { act, cleanup, render, waitFor } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
 import { NotificationsProvider } from "./notifications";
 const state = vi.hoisted(() => ({
   refresh: undefined as undefined | (() => Promise<void>),
   items: [] as object[],
   sound: vi.fn(),
+  unlock: vi.fn(),
 }));
 vi.mock("@/lib/api", () => ({
   api: vi.fn(async () => ({
@@ -24,7 +25,7 @@ vi.mock("@/lib/notification-presentation", () => ({
 }));
 vi.mock("@/lib/notification-sound", () => ({
   notificationSoundEnabled: () => true,
-  unlockNotificationSound: vi.fn(),
+  unlockNotificationSound: state.unlock,
   playNotificationSound: state.sound,
 }));
 afterEach(() => {
@@ -32,6 +33,7 @@ afterEach(() => {
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
   state.sound.mockClear();
+  state.unlock.mockClear();
 });
 test("foreground inbox sound does not require OS notification permission and skips old notices", async () => {
   vi.spyOn(document, "hasFocus").mockReturnValue(true);
@@ -70,6 +72,8 @@ test("desktop chimes in the background without replaying unread notices", async 
   Object.defineProperty(window, "enturmaDesktop", { configurable: true, value: {} });
   state.items = [];
   render(<NotificationsProvider><div>Desktop</div></NotificationsProvider>);
+  fireEvent.pointerDown(window);
+  expect(state.unlock).toHaveBeenCalledOnce();
   await act(async () => { await state.refresh!(); });
   state.items = [{ id: "desktop-new", readAt: null, kind: "PRIVATE_MESSAGE", contextKey: "friend:other" }];
   await act(async () => { await state.refresh!(); });
