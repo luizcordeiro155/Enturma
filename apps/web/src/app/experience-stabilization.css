@@ -1,0 +1,421 @@
+/* Shared composer owns its outline. The surrounding footer needs no divider. */
+html .enturma-message-composer:is(.persistent-composer, .private-composer) {
+  border-top: 0 !important;
+  box-shadow: none !important;
+}
+.typing-status .conversation-typing {
+  min-height: 0;
+  padding: 0;
+}
+.auth-entry .auth-story {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--ink);
+  gap: 24px;
+  padding: clamp(24px, 4vw, 64px);
+}
+.auth-entry .auth-story h1 {
+  color: var(--ink);
+  font-size: clamp(2rem, 4vw, 3.8rem);
+  line-height: 1.06;
+  letter-spacing: -0.03em;
+}
+.auth-entry .auth-story p,
+.auth-entry .auth-story-footer {
+  color: var(--muted);
+}
+.auth-entry .auth-story .brand {
+  color: var(--ink);
+}
+.auth-entry-art {
+  flex: 1;
+  min-height: 140px;
+  max-height: 320px;
+  overflow: hidden;
+  border-radius: 16px;
+}
+.auth-entry-art img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 58%;
+}
+.auth-entry .auth-main {
+  background: var(--bg);
+  padding: clamp(24px, 5vw, 72px);
+}
+.auth-entry .auth-main form {
+  width: min(100%, 440px);
+}
+.auth-entry .auth-main h1 {
+  font-size: clamp(1.8rem, 3vw, 2.6rem);
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+.auth-visitor-link,
+.start-visitor-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-weight: 650;
+}
+.start-visitor-link {
+  color: var(--ink);
+  margin-top: 16px;
+}
+.visitor-shell {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  grid-template-rows: auto 1fr;
+  background: var(--bg);
+  color: var(--ink);
+}
+.visitor-header {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 16px 28px;
+  border-bottom: 1px solid var(--border);
+}
+.visitor-header > span {
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.visitor-header .brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.6rem;
+}
+.visitor-nav {
+  padding: 24px 16px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.visitor-nav button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 0;
+  padding: 14px;
+  color: var(--muted);
+  background: transparent;
+  text-align: left;
+  border-radius: 10px;
+}
+.visitor-nav button[aria-current],
+.visitor-nav button:hover {
+  background: var(--soft);
+  color: var(--ink);
+}
+.visitor-content {
+  width: min(1100px, 100%);
+  margin-inline: auto;
+  padding: clamp(24px, 4vw, 64px);
+  min-width: 0;
+}
+.visitor-content h1 {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  line-height: 1.08;
+  letter-spacing: -0.03em;
+  text-wrap: balance;
+}
+.visitor-content p {
+  color: var(--muted);
+  max-width: 65ch;
+  line-height: 1.7;
+}
+.visitor-welcome {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  gap: 32px;
+  align-items: center;
+}
+.visitor-welcome img {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+}
+.visitor-actions {
+  margin-top: 40px;
+  display: grid;
+  gap: 0;
+}
+.visitor-actions button {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  text-align: left;
+  padding: 20px 0;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+}
+.visitor-feature {
+  max-width: 650px;
+  padding-block: 32px;
+}
+.visitor-search {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-block: 24px;
+  flex-wrap: wrap;
+}
+.visitor-search label {
+  flex: 1;
+  min-width: 160px;
+}
+.visitor-catalog {
+  list-style: none;
+  padding: 0;
+}
+.visitor-catalog li {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border);
+}
+.visitor-catalog strong {
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.visitor-gate {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(440px, calc(100vw - 32px));
+  padding: 36px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+  max-height: calc(100dvh - 32px);
+  overflow: auto;
+}
+.visitor-gate::backdrop,
+.screen-share-dialog::backdrop,
+.release-dialog::backdrop {
+  background: rgb(0 0 0 / 0.55);
+  backdrop-filter: blur(7px);
+}
+.visitor-gate h2 {
+  font-size: 1.8rem;
+  margin-top: 24px;
+}
+.visitor-gate .wide {
+  margin-top: 12px;
+}
+.visitor-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+}
+.visitor-gate .text-button {
+  margin-top: 16px;
+  width: 100%;
+}
+.screen-share-dialog,
+.release-dialog {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  width: min(650px, calc(100vw - 28px));
+  max-height: calc(100dvh - 28px);
+  overflow: auto;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: clamp(20px, 4vw, 32px);
+}
+.screen-share-dialog header {
+  display: flex;
+  align-items: start;
+  gap: 16px;
+}
+.screen-share-dialog header > div {
+  flex: 1;
+}
+.screen-share-dialog h2 {
+  margin: 0;
+}
+.screen-share-dialog p {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.share-source-note {
+  display: flex;
+  gap: 14px;
+  padding: 18px;
+  margin-block: 20px;
+  background: var(--soft);
+  border-radius: 12px;
+}
+.share-source-note svg {
+  flex-shrink: 0;
+}
+.share-options {
+  padding: 0;
+  border: 0;
+  margin: 20px 0;
+}
+.share-options legend {
+  font-weight: 700;
+  padding: 0 0 10px;
+}
+.share-options > div {
+  display: flex;
+  gap: 6px;
+  background: var(--soft);
+  padding: 5px;
+  border-radius: 12px;
+}
+.share-options label {
+  flex: 1;
+  position: relative;
+  cursor: pointer;
+  text-align: center;
+  margin: 0;
+}
+.share-options input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+}
+.share-options span {
+  display: grid;
+  place-items: center;
+  min-height: 44px;
+  border-radius: 9px;
+  padding: 8px;
+  color: var(--ink);
+}
+.share-options input:checked + span {
+  background: #d8ef79;
+  color: #173f35;
+  font-weight: 750;
+}
+.share-options input:focus-visible + span {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.share-options:disabled {
+  opacity: 0.55;
+}
+.share-audio {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  margin-block: 20px;
+}
+.share-audio input {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}
+.screen-share-dialog footer {
+  display: flex;
+  justify-content: end;
+  gap: 10px;
+  margin-top: 24px;
+}
+.desktop-update-tip {
+  position: fixed;
+  top: 42px;
+  right: 142px;
+  padding: 12px 18px;
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px #0004;
+  font-size: 0.85rem;
+  max-width: 260px;
+  -webkit-app-region: no-drag;
+  pointer-events: none;
+}
+.release-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.release-dialog ul {
+  padding-left: 22px;
+  line-height: 1.7;
+}
+.release-dialog .button {
+  margin-top: 16px;
+}
+@media (max-width: 760px) {
+  .auth-entry .auth-story {
+    padding: 20px;
+    gap: 16px;
+  }
+  .auth-entry .auth-story > div:not(.auth-entry-art) {
+    display: none;
+  }
+  .auth-entry-art,
+  .auth-entry .auth-story-footer {
+    display: none;
+  }
+  .auth-entry .auth-main {
+    padding: 28px 20px;
+  }
+  .visitor-shell {
+    display: flex;
+    flex-direction: column;
+  }
+  .visitor-header {
+    padding: 12px 16px;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .visitor-header .brand {
+    font-size: 1.3rem;
+  }
+  .visitor-header > span {
+    font-size: 0.75rem;
+  }
+  .visitor-nav {
+    flex-direction: row;
+    overflow-x: auto;
+    border-right: 0;
+    padding: 10px;
+  }
+  .visitor-nav button {
+    flex: 0 0 auto;
+    min-height: 44px;
+    font-size: 0.85rem;
+  }
+  .visitor-content {
+    padding: 24px 20px;
+  }
+  .visitor-welcome {
+    grid-template-columns: 1fr;
+  }
+  .visitor-welcome img {
+    max-height: 260px;
+    object-fit: cover;
+  }
+  .visitor-catalog li {
+    flex-wrap: wrap;
+  }
+  .visitor-catalog li > button {
+    margin-left: 36px;
+  }
+}

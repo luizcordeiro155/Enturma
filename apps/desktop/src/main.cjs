@@ -1210,6 +1210,11 @@ ipcMain.handle("desktop:get-info", (event) => {
     version: app.getVersion(),
     platform: process.platform,
     webUrl: WEB_URL,
+    releaseNotes: [
+      "Instalador e desinstalador com o ícone oficial do Enturma.",
+      "Ao desinstalar, você escolhe se deseja apagar também sessões, cache e preferências locais.",
+      "A remoção dos dados locais vem desmarcada e preserva sua conta e os arquivos exportados.",
+    ],
   };
 });
 

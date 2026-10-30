@@ -1,10 +1,12 @@
 "use client";
+import Image from "next/image";
 import { prepareChatAfterLogin } from "@/lib/account-chat-sync";
 import Link from "next/link";
+import { EnturmaAppIcon } from "./enturma-app-icon";
+import { VisitorLink } from "./visitor-experience";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import {
-  BookOpen,
   ArrowRight,
   Check,
   KeyRound,
@@ -38,7 +40,7 @@ function AuthStoryHeader() {
   return (
     <header className="auth-story-top">
       <Link href="/" className="brand">
-        <BookOpen size={40} />
+        <EnturmaAppIcon size={44} />
         enturma.
       </Link>
       <PublicThemeControl />
@@ -746,7 +748,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }
 
   return (
-    <div className="auth-layout">
+    <div
+      className={`auth-layout ${mode === "login" || mode === "register" ? "auth-entry" : ""}`}
+    >
       <section className="auth-story">
         <AuthStoryHeader />
         <div>
@@ -763,6 +767,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
             Uma turma para chamar de sua.
           </p>
         </div>
+        {(mode === "login" || mode === "register") && (
+          <div className="auth-entry-art" aria-hidden="true">
+            <Image
+              width={1024}
+              height={1024}
+              src="/start/book-world.webp"
+              alt=""
+            />
+          </div>
+        )}
         <footer className="auth-story-footer">
           <span>Seu espaço de estudo e conexão.</span>
           <nav aria-label="Informações legais">
@@ -1036,6 +1050,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
             <p>
               Já tem acesso? <Link href="/login">Entrar na minha conta</Link>
             </p>
+          )}
+          {(mode === "login" || mode === "register") && (
+            <VisitorLink className="auth-action-link auth-visitor-link" />
           )}
           {(mode === "login" || mode === "register") && (
             <div className="auth-app-downloads">

@@ -30,17 +30,22 @@ export function usePrivateTyping(friendship?: string) {
           body: JSON.stringify({ typing: true }),
         }).catch(() => {});
       }
-      stopTimer.current = setTimeout(stop, 3500);
+      stopTimer.current = setTimeout(stop, 1800);
     },
     [friendship, stop],
   );
   useEffect(() => {
     if (!friendship) return;
     let active = true,
-      loading = false;
+      loading = false,
+      queued = false;
     let expiry: ReturnType<typeof setTimeout>;
     const load = async () => {
-      if (!active || loading || document.hidden) return;
+      if (!active || document.hidden) return;
+      if (loading) {
+        queued = true;
+        return;
+      }
       loading = true;
       try {
         const list = await api<
@@ -61,6 +66,10 @@ export function usePrivateTyping(friendship?: string) {
         if (active) setUsers([]);
       } finally {
         loading = false;
+        if (queued && active) {
+          queued = false;
+          void load();
+        }
       }
     };
     const changed = () => void load();

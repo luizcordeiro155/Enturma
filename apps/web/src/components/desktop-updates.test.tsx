@@ -16,10 +16,15 @@ import {
 vi.mock("./call-session-provider", () => ({
   useCallSession: () => ({ session: null }),
 }));
+vi.mock("./desktop-release-notes", () => ({ DesktopReleaseNotes: () => null }));
 let receive: (value: UpdateState) => void;
 const install = vi.fn().mockResolvedValue(undefined);
 const unsubscribe = vi.fn();
 beforeEach(() => {
+  vi.stubGlobal(
+    "matchMedia",
+    vi.fn(() => ({ matches: true })),
+  );
   document.documentElement.dataset.reducedMotion = "true";
   HTMLDialogElement.prototype.showModal = function () {
     this.setAttribute("open", "");
@@ -49,45 +54,111 @@ afterEach(() => {
   delete window.enturmaDesktop;
   delete document.documentElement.dataset.reducedMotion;
   vi.clearAllMocks();
+  vi.unstubAllGlobals();
   sessionStorage.clear();
+  localStorage.clear();
 });
 describe("Desktop update UI", () => {
   it("only exposes titlebar download after availability and keeps progress", async () => {
     const show = vi.fn().mockResolvedValue(undefined);
     window.enturmaDesktop!.nativeUpdater = true;
     window.enturmaDesktop!.showUpdateWindow = show;
-    render(<DesktopUpdateProvider><DesktopUpdateTitlebarAction /></DesktopUpdateProvider>);
-    expect(screen.queryByRole("button", { name: /Baixar atualização do Enturma/ })).toBeNull();
-    await act(async () => { await Promise.resolve(); });
-    act(() => receive({ status: "available", currentVersion: "0.4.380", version: "0.4.381", progress: 0 }));
-    fireEvent.click(screen.getByRole("button", { name: "Baixar atualização do Enturma" }));
+    render(
+      <DesktopUpdateProvider>
+        <DesktopUpdateTitlebarAction />
+      </DesktopUpdateProvider>,
+    );
+    expect(
+      screen.queryByRole("button", { name: /Baixar atualização do Enturma/ }),
+    ).toBeNull();
+    await act(async () => {
+      await Promise.resolve();
+    });
+    act(() =>
+      receive({
+        status: "available",
+        currentVersion: "0.4.380",
+        version: "0.4.381",
+        progress: 0,
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: "Baixar atualização do Enturma" }),
+    );
     expect(show).toHaveBeenCalledTimes(1);
-    act(() => receive({ status: "downloading", currentVersion: "0.4.380", version: "0.4.381", progress: 58 }));
-    expect(screen.getByText("58%")).toBeTruthy();
-    act(() => receive({ status: "ready", currentVersion: "0.4.380", version: "0.4.381", progress: 100 }));
-    expect(screen.getByRole("button", { name: "Instalar atualização do Enturma" })).toBeTruthy();
+    act(() =>
+      receive({
+        status: "downloading",
+        currentVersion: "0.4.380",
+        version: "0.4.381",
+        progress: 58,
+      }),
+    );
+    expect(
+      screen.getByRole("button", { name: "Baixando atualização: 58%" }),
+    ).toBeTruthy();
+    expect(screen.queryByText("58%")).toBeNull();
+    act(() =>
+      receive({
+        status: "ready",
+        currentVersion: "0.4.380",
+        version: "0.4.381",
+        progress: 100,
+      }),
+    );
+    expect(
+      screen.getByRole("button", { name: "Instalar atualização do Enturma" }),
+    ).toBeTruthy();
   });
 
   it("never opens the legacy dialog automatically for a native ready update", async () => {
     const show = vi.fn().mockResolvedValue(undefined);
     window.enturmaDesktop!.nativeUpdater = true;
     window.enturmaDesktop!.showUpdateWindow = show;
-    render(<DesktopUpdateProvider><DesktopUpdateButton /></DesktopUpdateProvider>);
-    await screen.findByRole("button", { name: "Atualizações: Você está atualizado" });
-    act(() => receive({ status: "available", currentVersion: "0.4.360", version: "0.4.361", progress: 0 }));
+    render(
+      <DesktopUpdateProvider>
+        <DesktopUpdateButton />
+      </DesktopUpdateProvider>,
+    );
+    await screen.findByRole("button", {
+      name: "Atualizações: Você está atualizado",
+    });
+    act(() =>
+      receive({
+        status: "available",
+        currentVersion: "0.4.360",
+        version: "0.4.361",
+        progress: 0,
+      }),
+    );
     expect(screen.queryByRole("dialog")).toBeNull();
     expect(show).not.toHaveBeenCalled();
   });
 
-  it('opens the local updater instead of duplicating the hosted dialog', async () => {
+  it("opens the local updater instead of duplicating the hosted dialog", async () => {
     const show = vi.fn().mockResolvedValue(undefined);
     window.enturmaDesktop!.nativeUpdater = true;
     window.enturmaDesktop!.showUpdateWindow = show;
-    render(<DesktopUpdateProvider><DesktopUpdateButton /></DesktopUpdateProvider>);
-    await screen.findByRole('button', { name: 'Atualizações: Você está atualizado' });
-    act(() => receive({ status: 'ready', currentVersion: '0.4.356', version: '0.4.357', progress: 100 }));
-    expect(screen.queryByRole('dialog')).toBeNull();
-    fireEvent.click(screen.getByRole('button', { name: 'Atualizações: Atualização pronta' }));
+    render(
+      <DesktopUpdateProvider>
+        <DesktopUpdateButton />
+      </DesktopUpdateProvider>,
+    );
+    await screen.findByRole("button", {
+      name: "Atualizações: Você está atualizado",
+    });
+    act(() =>
+      receive({
+        status: "ready",
+        currentVersion: "0.4.356",
+        version: "0.4.357",
+        progress: 100,
+      }),
+    );
+    expect(screen.queryByRole("dialog")).toBeNull();
+    fireEvent.click(
+      screen.getByRole("button", { name: "Atualizações: Atualização pronta" }),
+    );
     expect(show).toHaveBeenCalledOnce();
     expect(install).not.toHaveBeenCalled();
   });
@@ -144,7 +215,9 @@ describe("Desktop update UI", () => {
       }),
     );
     expect(screen.queryByRole("dialog")).toBeNull();
-    fireEvent.click(screen.getByRole("button", { name: "Atualizações: Atualização pronta" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Atualizações: Atualização pronta" }),
+    );
     expect(screen.getByRole("dialog")).toBeTruthy();
     fireEvent.click(screen.getByRole("button", { name: "Depois" }));
     expect(screen.queryByRole("dialog")).toBeNull();

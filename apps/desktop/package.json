@@ -64,7 +64,9 @@
       "createStartMenuShortcut": true,
       "shortcutName": "Enturma",
       "deleteAppDataOnUninstall": false,
-      "artifactName": "Enturma-Setup-${version}.exe"
+      "artifactName": "Enturma-Setup-${version}.exe",
+      "installerIcon": "assets/icon.ico",
+      "uninstallerIcon": "assets/icon.ico"
     },
     "linux": {
       "target": [

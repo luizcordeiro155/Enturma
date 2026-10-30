@@ -1,5 +1,5 @@
-// Local Windows UI for NSIS. It never installs, deletes or downloads files itself.
-// NSIS remains the only installer; its actual process exit code determines success.
+// Local Windows UI for NSIS. Installation remains owned by NSIS.
+// Explicit uninstall consent permits removal of the fixed application data folder.
 using System;
 using System.Diagnostics;
 using System.Drawing;
@@ -23,6 +23,8 @@ internal sealed class SetupUX : Form {
   MemoryStream imageBytes;
 
   [STAThread] static int Main(string[] args) {
+    if (args.Length == 2 && args[0] == "--uninstall-options") return ConfirmUninstall(args[1]);
+    if (args.Length == 1 && args[0] == "--remove-local-data") return RemoveLocalData();
     int pid;
     if (args.Length != 4 || !int.TryParse(args[1], out pid)) return 2;
     if (args[0] != "install" && args[0] != "update" && args[0] != "uninstall") return 2;
@@ -45,6 +47,7 @@ internal sealed class SetupUX : Form {
     // Keep a handle so ExitCode remains available after the process terminates.
     var handle = installer.Handle;
     Text = "Enturma — " + (mode == "uninstall" ? "Remover aplicativo" : mode == "update" ? "Atualizar aplicativo" : "Instalar aplicativo");
+    Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
     StartPosition = FormStartPosition.CenterScreen;
     FormBorderStyle = FormBorderStyle.None;
     MaximizeBox = false; MinimizeBox = true; ControlBox = false;
@@ -106,5 +109,70 @@ internal sealed class SetupUX : Form {
   protected override void Dispose(bool disposing) {
     if (disposing) { poll.Dispose(); motionTimer.Dispose(); if (art.Image != null) art.Image.Dispose(); if (imageBytes != null) imageBytes.Dispose(); installer.Dispose(); }
     base.Dispose(disposing);
+  }
+
+  static int ConfirmUninstall(string image) {
+    Application.EnableVisualStyles();
+    using (var form = new Form()) {
+      form.Text = "Desinstalar Enturma";
+      form.Icon = Icon.ExtractAssociatedIcon(Application.ExecutablePath);
+      form.StartPosition = FormStartPosition.CenterScreen;
+      form.FormBorderStyle = FormBorderStyle.FixedDialog;
+      form.MaximizeBox = false; form.MinimizeBox = false;
+      form.AutoScaleMode = AutoScaleMode.Dpi;
+      form.ClientSize = new Size(520, 470);
+      form.BackColor = Color.FromArgb(12, 28, 25); form.ForeColor = Color.FromArgb(237, 247, 231);
+      form.Font = new Font("Segoe UI", 11);
+      using (var art = new PictureBox()) {
+        art.SetBounds(0, 0, 520, 240); art.SizeMode = PictureBoxSizeMode.Zoom;
+        try {
+          var motion = Image.FromFile(image);
+          bool animate;
+          SystemParametersInfo(0x1042, 0, out animate, 0);
+          art.Image = animate ? motion : new Bitmap(motion);
+          if (!animate) motion.Dispose();
+        } catch { }
+        form.Controls.Add(art);
+        var title = new Label { Text = "Até a próxima sessão.", Font = new Font("Segoe UI", 17, FontStyle.Bold) };
+        title.SetBounds(24, 245, 472, 40); form.Controls.Add(title);
+        var choice = new CheckBox { Text = "Remover também os dados locais do Enturma", Checked = false, AutoSize = false };
+        choice.SetBounds(24, 295, 472, 34); form.Controls.Add(choice);
+        var detail = new Label { Text = "Inclui sessões, cache, preferências e atualizações baixadas.\nSua conta e arquivos exportados não serão apagados.", AutoSize = false };
+        detail.SetBounds(24, 335, 472, 58); form.Controls.Add(detail);
+        var cancel = new Button { Text = "Cancelar", DialogResult = DialogResult.Cancel };
+        cancel.SetBounds(234, 410, 122, 38); form.Controls.Add(cancel);
+        var remove = new Button { Text = "Desinstalar", DialogResult = DialogResult.OK };
+        remove.SetBounds(366, 410, 130, 38); form.Controls.Add(remove);
+        form.CancelButton = cancel;
+        // Closing this dialog cancels removal; no destructive default button.
+        var result = form.ShowDialog();
+        if (art.Image != null) art.Image.Dispose();
+        return result != DialogResult.OK ? 12 : choice.Checked ? 11 : 10;
+      }
+    }
+  }
+
+  static void AssertNoLinks(DirectoryInfo directory) {
+    if ((directory.Attributes & FileAttributes.ReparsePoint) != 0) throw new IOException("Link de diretório não permitido.");
+    foreach (var child in directory.GetFileSystemInfos()) {
+      if ((child.Attributes & FileAttributes.ReparsePoint) != 0) throw new IOException("Link de arquivo não permitido.");
+      var folder = child as DirectoryInfo;
+      if (folder != null) AssertNoLinks(folder);
+    }
+  }
+
+  static int RemoveLocalData() {
+    try {
+      // Fixed application-owned directory only. No user-supplied path, Downloads
+      // scanning, cloud deletion or traversal through directory junctions.
+      var parent = Path.GetFullPath(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData));
+      var target = Path.GetFullPath(Path.Combine(parent, "Enturma"));
+      if (!String.Equals(Path.GetDirectoryName(target), parent, StringComparison.OrdinalIgnoreCase)) return 4;
+      if (Directory.Exists(target)) {
+        AssertNoLinks(new DirectoryInfo(target));
+        Directory.Delete(target, true);
+      }
+      return 0;
+    } catch { return 4; }
   }
 }
