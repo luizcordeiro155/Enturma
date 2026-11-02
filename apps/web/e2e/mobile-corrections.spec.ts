@@ -151,6 +151,34 @@ test("mobile cards, navigation and transparent renewal preserve the document", a
       }));
       expect(colors.ink).not.toBe(colors.bg);
       if (theme === "light") expect(colors.ink).not.toBe("rgb(238, 245, 242)");
+      const composer = pane.locator(".composer-main-row");
+      const input = (await composer.locator("textarea").boundingBox())!;
+      expect(input.width).toBeGreaterThanOrEqual(90);
+      expect(input.height).toBeLessThanOrEqual(60);
+      expect(
+        await composer.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+      ).toBe(true);
+      const author = pane
+        .locator(
+          ".persistent-message.mine .message-content header .identity-trigger strong",
+        )
+        .last();
+      const nameBox = (await author.boundingBox())!;
+      expect(nameBox.width).toBeGreaterThanOrEqual(100);
+      expect(nameBox.height).toBeLessThanOrEqual(24);
+      await composer
+        .getByRole("button", { name: "Adicionar emoji", exact: true })
+        .click();
+      const library = page.getByRole("dialog", {
+        name: "Emojis, figurinhas e GIFs",
+      });
+      await expect(
+        library.getByRole("tab", { name: "Figurinhas", exact: true }),
+      ).toBeVisible();
+      await expect(
+        library.getByRole("tab", { name: "GIFs", exact: true }),
+      ).toBeVisible();
+      await library.getByRole("button", { name: "Fechar biblioteca" }).click();
       await page.screenshot({
         path: info.outputPath(`call-${theme}.png`),
         fullPage: true,
