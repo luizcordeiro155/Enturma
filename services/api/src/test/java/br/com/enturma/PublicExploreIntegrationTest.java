@@ -80,16 +80,16 @@ class PublicExploreIntegrationTest {
             post("/api/v1/forum/" + post + "/comments")
                 .contentType("application/json")
                 .content("{\"body\":\"blocked\"}"))
-        .andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
     mvc.perform(
             put("/api/v1/forum/" + post + "/vote")
                 .contentType("application/json")
                 .content("{\"value\":1}"))
-        .andExpect(status().isForbidden());
-    mvc.perform(get("/api/v1/users/me")).andExpect(status().isForbidden());
-    mvc.perform(get("/api/v1/friends")).andExpect(status().isForbidden());
+        .andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/v1/users/me")).andExpect(status().isUnauthorized());
+    mvc.perform(get("/api/v1/friends")).andExpect(status().isUnauthorized());
     mvc.perform(post("/api/v1/public/explore/forum").contentType("application/json").content("{}"))
-        .andExpect(status().isMethodNotAllowed());
+        .andExpect(status().isUnauthorized());
   }
 
   @Test
@@ -149,7 +149,7 @@ class PublicExploreIntegrationTest {
     assertThat(item.get("id").asText()).isEqualTo(room.toString());
     for (String field : List.of("hostId", "inviteCode", "shareCode", "messages", "members"))
       assertThat(item.has(field)).isFalse();
-    mvc.perform(post("/api/v1/study-rooms/" + room + "/join")).andExpect(status().isForbidden());
+    mvc.perform(post("/api/v1/study-rooms/" + room + "/join")).andExpect(status().isUnauthorized());
     db.jdbc.update("UPDATE study_room SET entries_locked=true WHERE id=?", room);
     mvc.perform(get("/api/v1/public/explore/rooms").param("subjectId", subject.toString()))
         .andExpect(status().isOk())
