@@ -490,14 +490,14 @@ export function UserIdentity({
                   showcase={showcase}
                   mural={
                     visitor.active ? (
-                      <>
+                      <div className="profile-community profile-community-panel">
                         <h2 className="profile-mural-title">Mural</h2>
                         <ShowcaseView
                           value={showcase}
                           detailed
                           showBadges={false}
                         />
-                      </>
+                      </div>
                     ) : (
                       <ProfileCommunity
                         userId={profile.id}
