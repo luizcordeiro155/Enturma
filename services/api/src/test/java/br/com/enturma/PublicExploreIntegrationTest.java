@@ -97,7 +97,7 @@ class PublicExploreIntegrationTest {
     byte[] picture =
         Base64.getDecoder()
             .decode(
-                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS3sAAAAASUVORK5CYII=");
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=");
     db.jdbc.update(
         "UPDATE app_user SET avatar_bytes=?,avatar_mime='image/png',bio='Meu perfil público' WHERE"
             + " id=?",
