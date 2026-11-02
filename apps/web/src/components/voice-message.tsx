@@ -185,17 +185,19 @@ export function VoiceRecorder({
   }
   if (hiddenWhenIdle && stage === "idle") return null;
   return (
-    <div className="voice-recorder">
-      <button
-        type="button"
-        className="voice-record-button"
-        aria-label="Gravar mensagem de voz"
-        title="Gravar mensagem de voz"
-        disabled={disabled || stage !== "idle"}
-        onClick={() => void begin()}
-      >
-        <Mic size={20} />
-      </button>
+    <div className="voice-recorder" data-stage={stage}>
+      {stage === "idle" && (
+        <button
+          type="button"
+          className="voice-record-button voice-record-send"
+          aria-label="Gravar mensagem de voz"
+          title="Gravar mensagem de voz"
+          disabled={disabled || stage !== "idle"}
+          onClick={() => void begin()}
+        >
+          <Mic size={20} />
+        </button>
+      )}
       {stage !== "idle" && (
         <div
           className="voice-record-panel"

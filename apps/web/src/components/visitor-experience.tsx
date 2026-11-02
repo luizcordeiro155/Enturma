@@ -72,16 +72,6 @@ export function VisitorExperience() {
     };
   }, [target]);
   function restrict(event: MouseEvent<HTMLDivElement>) {
-    const identity = (event.target as HTMLElement).closest<HTMLElement>(
-      ".identity-trigger",
-    );
-    if (identity) {
-      event.preventDefault();
-      event.stopPropagation();
-      origin.current = identity;
-      setTarget("/profile");
-      return;
-    }
     const link = (event.target as HTMLElement).closest<HTMLAnchorElement>(
       "a[href]",
     );

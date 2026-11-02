@@ -6,11 +6,17 @@ import java.util.*;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
-/** Explicit read-only discovery projection. Never returns accounts, memberships or invite codes. */
+/**
+ * Explicit read-only discovery projection. Never returns credentials, memberships or invite codes.
+ */
 @RestController
 @RequestMapping("/api/v1/public/explore")
 public class PublicExploreController {
   private final Db db;
+  private final ProfileShowcaseController showcases;
+  private static final String PUBLIC_AUTHOR =
+      "u.status='ACTIVE' AND EXISTS (SELECT 1 FROM forum_entry f WHERE f.author_id=u.id AND NOT"
+          + " f.deleted)";
   private static final Set<String> CATEGORIES =
       Set.of("GENERAL", "PROGRAMMING", "ACADEMIC", "CAREER", "CAMPUS");
   private static final String VISIBLE = " NOT e.deleted AND u.status='ACTIVE' ";
@@ -18,7 +24,7 @@ public class PublicExploreController {
       """
       SELECT e.id,e.author_id,e.root_id,e.parent_id,e.title,e.body,e.category,e.depth,
         e.deleted,e.created_at,e.updated_at,e.accepted_answer_id,u.name,u.username,
-        false has_avatar,'#3d8b5a' accent_color,'{}'::jsonb profile_details,0 my_vote,
+        (u.avatar_bytes IS NOT NULL) has_avatar,u.media_version,u.accent_color,'{}'::jsonb profile_details,0 my_vote,
         coalesce((SELECT sum(value) FROM forum_vote WHERE entry_id=e.id),0) score,
         (SELECT count(*) FROM forum_entry c JOIN app_user cu ON cu.id=c.author_id
           WHERE c.root_id=e.id AND NOT c.deleted AND cu.status='ACTIVE') comments_count,
@@ -30,8 +36,47 @@ public class PublicExploreController {
   private static final String OPEN_ROOM =
       "r.status IN ('OPEN','ACTIVE') AND NOT r.entries_locked AND r.ends_at>now()";
 
-  public PublicExploreController(Db db) {
+  public PublicExploreController(Db db, ProfileShowcaseController showcases) {
     this.db = db;
+    this.showcases = showcases;
+  }
+
+  @GetMapping("/users/{id}/profile")
+  public Object authorProfile(@PathVariable UUID id) {
+    var profile =
+        db.one(
+            "SELECT"
+                + " u.id,u.name,u.username,u.bio,u.accent_color,u.profile_details,u.media_version,(u.avatar_bytes"
+                + " IS NOT NULL) has_avatar,(u.banner_bytes IS NOT NULL) has_banner FROM app_user u"
+                + " WHERE u.id=? AND "
+                + PUBLIC_AUTHOR,
+            id);
+    return Map.of("profile", profile, "showcase", showcases.publicShowcase(id));
+  }
+
+  @GetMapping("/users/{id}/{kind:avatar|banner}")
+  public ResponseEntity<byte[]> authorImage(@PathVariable UUID id, @PathVariable String kind) {
+    // Only fixed, server-owned column names enter this query.
+    boolean avatar = kind.equals("avatar");
+    String bytes = avatar ? "avatar_bytes" : "banner_bytes";
+    String mime = avatar ? "avatar_mime" : "banner_mime";
+    var image =
+        db.one(
+            "SELECT u."
+                + bytes
+                + " data,u."
+                + mime
+                + " mime FROM app_user u WHERE u.id=? AND "
+                + PUBLIC_AUTHOR
+                + " AND u."
+                + bytes
+                + " IS NOT NULL",
+            id);
+    return ResponseEntity.ok()
+        .contentType(MediaType.parseMediaType((String) image.get("mime")))
+        .header("Cache-Control", "no-store")
+        .header("X-Content-Type-Options", "nosniff")
+        .body((byte[]) image.get("data"));
   }
 
   @GetMapping("/forum")
@@ -49,7 +94,7 @@ public class PublicExploreController {
             ? "score DESC,e.created_at DESC,e.id"
             : sort.equals("relevance") && !q.isBlank()
                 ? "ts_rank(e.search_vector,websearch_to_tsquery('portuguese',?)) DESC,e.created_at"
-                      + " DESC,e.id"
+                    + " DESC,e.id"
                 : "e.created_at DESC,e.id";
     var args = new ArrayList<Object>(List.of(q, q, "%" + q + "%", category, category));
     if (sort.equals("relevance") && !q.isBlank()) args.add(q);

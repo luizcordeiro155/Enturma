@@ -93,6 +93,47 @@ class PublicExploreIntegrationTest {
   }
 
   @Test
+  void publicAuthorsExposeOnlyProfileAndRespectShowcasePrivacy() throws Exception {
+    byte[] picture =
+        Base64.getDecoder()
+            .decode(
+                "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+aS3sAAAAASUVORK5CYII=");
+    db.jdbc.update(
+        "UPDATE app_user SET avatar_bytes=?,avatar_mime='image/png',bio='Meu perfil público' WHERE"
+            + " id=?",
+        picture,
+        author.id());
+    db.jdbc.update("UPDATE profile_privacy_setting SET visible=false WHERE user_id=?", author.id());
+    var result =
+        mvc.perform(get("/api/v1/public/explore/users/" + author.id() + "/profile"))
+            .andExpect(status().isOk())
+            .andReturn();
+    var data = json.readTree(result.getResponse().getContentAsString());
+    assertThat(data.get("profile").get("bio").asText()).isEqualTo("Meu perfil público");
+    for (String secret :
+        List.of("email", "passwordHash", "role", "sessionId", "academicStatus", "avatarBytes"))
+      assertThat(data.get("profile").has(secret)).isFalse();
+    for (String hidden : List.of("stats", "academic", "joinedAt", "achievements", "privacy"))
+      assertThat(data.get("showcase").has(hidden)).isFalse();
+    assertThat(data.get("showcase").get("widgets").isEmpty()).isTrue();
+    mvc.perform(get("/api/v1/public/explore/forum/" + post))
+        .andExpect(jsonPath("$.hasAvatar").value(true));
+    mvc.perform(get("/api/v1/public/explore/users/" + author.id() + "/avatar"))
+        .andExpect(status().isOk())
+        .andExpect(content().bytes(picture))
+        .andExpect(header().string("Cache-Control", "no-store"));
+    mvc.perform(get("/api/v1/public/explore/users/" + author.id() + "/password"))
+        .andExpect(status().isNotFound());
+    mvc.perform(post("/api/v1/friends").contentType("application/json").content("{}"))
+        .andExpect(status().isUnauthorized());
+    forum.delete(author, post);
+    mvc.perform(get("/api/v1/public/explore/users/" + author.id() + "/profile"))
+        .andExpect(status().isNotFound());
+    mvc.perform(get("/api/v1/public/explore/users/" + author.id() + "/avatar"))
+        .andExpect(status().isNotFound());
+  }
+
+  @Test
   void hiddenPostsAndDeletedCommentsAreNeverPublished() throws Exception {
     UUID comment =
         (UUID) ((Map<?, ?>) forum.comment(author, post, null, "Resposta visível")).get("id");

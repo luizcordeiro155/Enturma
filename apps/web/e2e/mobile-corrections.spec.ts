@@ -70,6 +70,9 @@ test("mobile cards, navigation and transparent renewal preserve the document", a
     await expect(page.locator(".enturma-launch-overlay")).toHaveCount(0, {
       timeout: 15000,
     });
+    await page
+      .getByPlaceholder("Busque pelo assunto ou objetivo")
+      .fill("Uma sala com um assunto bastante longo");
     const card = page
       .locator(".dashboard-community .room-row")
       .filter({ hasText: "Uma sala com um assunto bastante longo" });

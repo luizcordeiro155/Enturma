@@ -339,6 +339,10 @@
 .room-active-shell .persistent-messages {
   display: flex !important;
   flex-direction: column !important;
+  /* The legacy .messages utility adds a 24px outer margin and 20px gaps,
+     including around the scroll sentinel. Cards already own their spacing. */
+  margin-block: 0;
+  gap: 0;
 }
 
 .room-active-shell .persistent-messages::before {

@@ -5,6 +5,15 @@ import { randomUUID } from "node:crypto";
 import pg from "pg";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
+test.use({
+  permissions: ["microphone"],
+  launchOptions: {
+    args: [
+      "--use-fake-ui-for-media-stream",
+      "--use-fake-device-for-media-stream",
+    ],
+  },
+});
 
 test("auth loop follows all themes without replacing its player", async ({
   page,
@@ -65,7 +74,7 @@ test("auth loop follows all themes without replacing its player", async ({
           nodes.map((node) => getComputedStyle(node).color),
         ),
       )
-      .toEqual(Array(6).fill(expectedInk));
+      .toEqual(Array(7).fill(expectedInk));
     await page.screenshot({
       path: info.outputPath(`auth-${theme}.png`),
       fullPage: true,
@@ -226,6 +235,12 @@ test("two accounts acknowledge private and room messages, with compact themed co
       .locator(".persistent-message.mine")
       .filter({ hasText: "Uma mensagem para nossa turma" });
     await expect(
+      other
+        .locator(".persistent-message")
+        .filter({ hasText: "Uma mensagem para nossa turma" }),
+    ).toBeVisible();
+    await other.getByLabel("Mensagem", { exact: true }).click();
+    await expect(
       roomMessage.getByRole("img", { name: "Lida", exact: true }),
     ).toBeVisible({ timeout: 20000 });
     for (const width of [390, 1440]) {
@@ -238,11 +253,56 @@ test("two accounts acknowledge private and room messages, with compact themed co
             theme === "enturma" ? "enturma" : "";
         }, theme);
         const composer = page.locator(".persistent-composer");
-        const box = (await composer
+        await expect
+          .poll(async () => {
+            const box = (await composer
+              .locator(".composer-main-row")
+              .boundingBox())!;
+            const messageBox = (await roomMessage.boundingBox())!;
+            return box.y - messageBox.y - messageBox.height;
+          })
+          .toBeLessThan(48);
+        const microphone = composer.getByRole("button", {
+          name: "Gravar mensagem de voz",
+        });
+        const iconBox = (await microphone.locator("svg").boundingBox())!;
+        expect(iconBox.width).toBeGreaterThanOrEqual(18);
+        expect(iconBox.height).toBeGreaterThanOrEqual(18);
+        await page.screenshot({
+          path: info.outputPath(`composer-${theme}-${width}.png`),
+        });
+        await microphone.click();
+        await expect(composer.getByRole("status")).toContainText(
+          "Gravando · 0:01",
+        );
+        for (const name of ["Descartar áudio", "Parar e ouvir áudio"]) {
+          const icon = composer.getByRole("button", { name }).locator("svg");
+          expect((await icon.boundingBox())!.width).toBeGreaterThanOrEqual(18);
+        }
+        expect(
+          await composer.getByLabel("Mensagem", { exact: true }).isVisible(),
+        ).toBe(false);
+        const row = (await composer
           .locator(".composer-main-row")
           .boundingBox())!;
-        const messageBox = (await roomMessage.boundingBox())!;
-        expect(box.y - messageBox.y - messageBox.height).toBeLessThan(48);
+        const panel = (await composer
+          .locator(".voice-record-panel")
+          .boundingBox())!;
+        expect(panel.y).toBeGreaterThanOrEqual(row.y);
+        expect(panel.y + panel.height).toBeLessThanOrEqual(row.y + row.height);
+        await page.screenshot({
+          path: info.outputPath(`recording-${theme}-${width}.png`),
+        });
+        await composer
+          .getByRole("button", { name: "Parar e ouvir áudio" })
+          .click();
+        await expect(
+          composer.getByLabel("Ouvir áudio antes de enviar"),
+        ).toBeVisible();
+        await page.screenshot({
+          path: info.outputPath(`voice-preview-${theme}-${width}.png`),
+        });
+        await composer.getByRole("button", { name: "Descartar áudio" }).click();
         await composer
           .getByRole("button", { name: "Adicionar emoji", exact: true })
           .click();
