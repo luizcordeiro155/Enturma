@@ -5,18 +5,20 @@ import {
   Mic,
   MicOff,
   MonitorUp,
-  PhoneOff,
   Radio,
   Users,
   Video,
   VideoOff,
-  SwitchCamera,
-  Headphones,
-  Settings2,
 } from "lucide-react";
 import { LiveMemberIdentityCard } from "./user-identity";
 import { post } from "@/lib/api";
 import { Feedback } from "./feedback";
+import {
+  startScreenShare,
+  isMobileCallClient,
+  expandCallScreen,
+} from "@/lib/call-screen";
+import { VoiceCallControls } from "./voice-call-controls";
 import { ScreenShareDialog } from "./screen-share-dialog";
 import { callDevice } from "@/lib/call-device";
 import {
@@ -79,6 +81,17 @@ export default function VoiceSession({
       navigator.mediaDevices.removeEventListener("devicechange", scan);
     };
   }, [camera]);
+  const [mobile] = useState(isMobileCallClient);
+  useEffect(() => {
+    const release = () => {
+      if (!document.fullscreenElement) window.screen.orientation?.unlock?.();
+    };
+    document.addEventListener("fullscreenchange", release);
+    return () => {
+      document.removeEventListener("fullscreenchange", release);
+      if (mobile) window.screen.orientation?.unlock?.();
+    };
+  }, [mobile]);
   const [screen, setScreen] = useState(false);
   const [screenAudio, setScreenAudio] = useState(false);
   const [screenBusy, setScreenBusy] = useState(false);
@@ -256,11 +269,9 @@ export default function VoiceSession({
           setError("Use o controle de tela cheia do vídeo neste navegador.");
           return;
         }
-        void (
-          document.fullscreenElement
-            ? document.exitFullscreen()
-            : tile.requestFullscreen()
-        ).catch(() => setError("Tela cheia indisponível neste navegador."));
+        void expandCallScreen(tile).catch(() =>
+          setError("Tela cheia indisponível neste navegador."),
+        );
       };
       tile.appendChild(expand);
       if (media instanceof HTMLVideoElement) media.controls = true;
@@ -538,11 +549,17 @@ export default function VoiceSession({
           screenFps,
           screenAudio,
         );
-        await call.localParticipant.setScreenShareEnabled(
-          true,
+        const withAudio = await startScreenShare(
+          call.localParticipant,
           capture,
           publish,
         );
+        if (screenAudio && !withAudio) {
+          setScreenAudio(false);
+          setDeviceNotice(
+            "Tela compartilhada sem áudio: o Windows não conseguiu abrir o som do computador. Seu microfone continua independente.",
+          );
+        }
         setScreenSettingsOpen(false);
       } else await call.localParticipant.setScreenShareEnabled(false);
       setScreen(next);
@@ -787,94 +804,29 @@ export default function VoiceSession({
             ))}
           </div>
 
-          <div className="call-controls enturma-call-controls">
-            <button
-              type="button"
-              className="call-control"
-              aria-pressed={deafened}
-              onClick={() => setDeafened(!deafened)}
-              title={deafened ? "Ouvir chamada" : "Silenciar áudio"}
-            >
-              <Headphones size={20} />
-              <span>{deafened ? "Ouvir" : "Áudio"}</span>
-            </button>
-            <button
-              type="button"
-              className={muted ? "call-control danger" : "call-control"}
-              onClick={() => void toggleMicrophone()}
-              title={muted ? "Ativar microfone" : "Silenciar"}
-            >
-              {muted ? <MicOff size={20} /> : <Mic size={20} />}
-              <span>{muted ? "Ativar" : "Microfone"}</span>
-            </button>
-            <button
-              type="button"
-              className={camera ? "call-control active" : "call-control"}
-              onClick={() => void toggleCamera()}
-              disabled={cameraSwitchBusy}
-              title={camera ? "Desligar câmera" : "Ligar câmera"}
-            >
-              {camera ? <Video size={20} /> : <VideoOff size={20} />}
-              <span>Câmera</span>
-            </button>
-            {camera && cameraCount > 1 && (
-              <button
-                type="button"
-                className="call-control"
-                disabled={cameraSwitchBusy}
-                onClick={() => void switchCamera()}
-                title="Alternar câmera frontal, traseira ou conectada"
-              >
-                <SwitchCamera size={20} />
-                <span>{cameraSwitchBusy ? "Trocando…" : "Virar câmera"}</span>
-              </button>
-            )}
-            <button
-              type="button"
-              className="call-control"
-              aria-expanded={screenSettingsOpen}
-              onClick={() => setScreenSettingsOpen(!screenSettingsOpen)}
-              title="Qualidade da transmissão"
-            >
-              <Settings2 size={20} />
-              <span>Qualidade</span>
-            </button>
-            <button
-              type="button"
-              className={screen ? "call-control active" : "call-control"}
-              onClick={() =>
-                screen ? void toggleScreen() : setScreenSettingsOpen(true)
-              }
-              disabled={!screenSupported || screenBusy}
-              title={
-                screenSupported
-                  ? screen
-                    ? "Parar compartilhamento"
-                    : "Compartilhar tela"
-                  : "Compartilhamento de tela indisponível neste Android"
-              }
-            >
-              <MonitorUp size={20} />
-              <span>
-                {screen
-                  ? "Parar tela"
-                  : screenSupported
-                    ? "Compartilhar"
-                    : "Tela indisponível"}
-              </span>
-            </button>
-            <button
-              type="button"
-              className="call-control hangup"
-              onClick={onLeave}
-              title="Sair da chamada"
-            >
-              <PhoneOff size={20} />
-              <span>Desconectar</span>
-            </button>
-          </div>
+          <VoiceCallControls
+            deafened={deafened}
+            muted={muted}
+            camera={camera}
+            cameraSwitchBusy={cameraSwitchBusy}
+            canSwitchCamera={cameraCount > 1}
+            mobile={mobile}
+            screen={screen}
+            screenSettingsOpen={screenSettingsOpen}
+            screenSupported={screenSupported}
+            screenBusy={screenBusy}
+            onDeafen={() => setDeafened(!deafened)}
+            onMicrophone={() => void toggleMicrophone()}
+            onCamera={() => void toggleCamera()}
+            onSwitchCamera={() => void switchCamera()}
+            onSettings={() => setScreenSettingsOpen(!screenSettingsOpen)}
+            onShare={() =>
+              screen ? void toggleScreen() : setScreenSettingsOpen(true)
+            }
+            onLeave={onLeave}
+          />
 
-          {screenSettingsOpen && (
+          {!mobile && screenSettingsOpen && (
             <ScreenShareDialog
               resolution={screenResolution}
               fps={screenFps}

@@ -503,7 +503,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
     const existing = accountState === "email-exists";
     const destination = existing ? "/login" : "/register";
     return (
-      <div className="auth-layout">
+      <div className="auth-layout auth-entry">
         <section className="auth-story">
           <AuthStoryHeader />
           <div>
@@ -605,7 +605,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
   if (recoveryWaitingUntil) {
     return (
-      <div className="auth-layout">
+      <div className="auth-layout auth-entry">
         <section className="auth-story">
           <AuthStoryHeader />
           <div>
@@ -668,7 +668,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   if (completed) {
     const verified = completed === "verify";
     return (
-      <div className="auth-layout">
+      <div className="auth-layout auth-entry">
         <section className="auth-story">
           <AuthStoryHeader />
           <div>
@@ -752,9 +752,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
   }
 
   return (
-    <div
-      className={`auth-layout ${mode === "login" || mode === "register" ? "auth-entry" : ""}`}
-    >
+    <div className="auth-layout auth-entry" data-auth-mode={mode}>
       <section className="auth-story">
         <AuthStoryHeader />
         <div>
@@ -771,7 +769,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
             Uma turma para chamar de sua.
           </p>
         </div>
-        {(mode === "login" || mode === "register") && (
+        {mode !== "verify-email" && (
           <div className="auth-entry-art" aria-hidden="true">
             <AuthFilm />
           </div>
@@ -822,7 +820,11 @@ export function AuthForm({ mode }: { mode: Mode }) {
           <p className="muted">
             {mode === "register"
               ? "Crie sua conta, escolha sua instituição e confirme seu vínculo acadêmico para entrar na comunidade."
-              : "Entre no seu espaço de estudo."}
+              : mode === "forgot-password"
+                ? "Informe o e-mail da sua conta. Enviaremos um link seguro para você criar uma nova senha."
+                : mode === "reset-password"
+                  ? "Escolha uma senha de 6 a 30 caracteres para voltar ao seu espaço de estudo."
+                  : "Entre no seu espaço de estudo."}
           </p>
           <Feedback error={error} success={success} />
           {mode === "register" ? (
@@ -1047,7 +1049,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
             </>
           ) : (
             <p>
-              Já tem acesso? <Link href="/login">Entrar na minha conta</Link>
+              Já tem acesso?{" "}
+              <Link className="auth-action-link" href="/login">
+                Entrar na minha conta <ArrowRight size={15} />
+              </Link>
             </p>
           )}
           {(mode === "login" || mode === "register") && (

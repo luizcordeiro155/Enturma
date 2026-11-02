@@ -7,8 +7,8 @@ type Theme = ExperiencePreference["theme"];
 const options = [
   { value: "LIGHT", label: "Claro", Icon: Sun },
   { value: "DARK", label: "Escuro", Icon: Moon },
-  { value: "SYSTEM", label: "Sistema", Icon: MonitorCog },
   { value: "ENTURMA", label: "Enturma", Icon: EnturmaAppIcon },
+  { value: "SYSTEM", label: "Sistema", Icon: MonitorCog },
 ] as const;
 export function ThemePicker({
   value,
@@ -218,12 +218,7 @@ export function ThemePicker({
             consumed.current = false;
             return;
           }
-          const dark =
-            value === "DARK" ||
-            value === "ENTURMA" ||
-            (value === "SYSTEM" &&
-              matchMedia("(prefers-color-scheme: dark)").matches);
-          onChange(dark ? "LIGHT" : "DARK");
+          onChange(options[(index + 1) % options.length].value);
         }}
       >
         <Icon size={20} />

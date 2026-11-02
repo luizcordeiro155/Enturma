@@ -1113,7 +1113,7 @@ function configureSession(ses) {
       }
       const streams = { video: source };
       if (request.audioRequested && process.platform === "win32") {
-        streams.audio = "loopbackWithMute";
+        streams.audio = "loopback";
       }
       callback(streams);
     } catch {

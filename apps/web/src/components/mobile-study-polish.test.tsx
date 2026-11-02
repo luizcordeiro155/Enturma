@@ -43,7 +43,7 @@ describe("theme gestures", () => {
     render(<ThemePicker value="DARK" onChange={change} />);
     const toggle = screen.getByRole("button", { name: /Alternar tema/ });
     fireEvent.click(toggle);
-    expect(change).toHaveBeenLastCalledWith("LIGHT");
+    expect(change).toHaveBeenLastCalledWith("ENTURMA");
     change.mockClear();
     fireEvent.pointerDown(toggle, {
       button: 0,
@@ -80,7 +80,7 @@ describe("theme gestures", () => {
     act(() => vi.runOnlyPendingTimers());
     const system = screen.getByRole("menuitemradio", { name: "Sistema" });
     expect(system.getAttribute("aria-checked")).toBe("true");
-    fireEvent.keyDown(system, { key: "End" });
+    fireEvent.keyDown(system, { key: "ArrowLeft" });
     const enturma = screen.getByRole("menuitemradio", { name: "Enturma" });
     expect(document.activeElement).toBe(enturma);
     fireEvent.click(enturma);

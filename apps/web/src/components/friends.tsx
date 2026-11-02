@@ -9,6 +9,10 @@ import { MessageReceipt, type DeliveryReceipt } from "./message-receipt";
 import { useMessageReceipts } from "@/lib/use-message-receipts";
 import { RoomInvitationPreview } from "./room-invitation-preview";
 import { isChatAtLatest } from "@/lib/chat-scroll";
+import {
+  usePrivateCallHistory,
+  PrivateCallHistoryCard,
+} from "./private-call-history";
 import { PrivateCallButtons } from "./private-calls";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -98,6 +102,7 @@ export function Friends() {
     () => peekApiSnapshot<Friend[]>("/friends") ?? [],
   );
   const [selected, setSelected] = useState<Friend>();
+  const callHistory = usePrivateCallHistory(selected?.id);
   const privateTyping = usePrivateTyping(selected?.id);
   useMobileWebChatViewport(Boolean(selected || requestedChat), "private");
   const [error, setError] = useState("");
@@ -1238,165 +1243,197 @@ export function Friends() {
                       Mensagens anteriores
                     </button>
                   ) : null}
-                  {messages.map((m) => (
-                    <article
-                      key={m.id}
-                      id={`message-${m.id}`}
-                      data-receipt-id={m.id}
-                      className={`${m.senderId === me?.id ? "mine" : ""} ${privateActionMessage?.id === m.id ? "message-action-selected" : ""}`}
-                      onPointerDown={(event) => startPrivateLongPress(event, m)}
-                      onPointerMove={movePrivateLongPress}
-                      onPointerUp={cancelPrivateLongPress}
-                      onPointerCancel={cancelPrivateLongPress}
-                      onContextMenu={(event) => {
-                        if (
-                          !(event.target as HTMLElement).closest(
-                            "input,textarea",
-                          )
-                        ) {
-                          event.preventDefault();
-                          setPrivateActionAnchor(
-                            messageActionAnchor(event.currentTarget),
-                          );
-                          setPrivateActionMessage(m);
-                        }
-                      }}
-                    >
-                      <button
-                        type="button"
-                        className="message-overflow-trigger"
-                        aria-label="Ações da mensagem"
-                        onClick={(event) => {
-                          setPrivateActionAnchor(
-                            messageActionAnchor(
-                              event.currentTarget.closest("article")!,
-                            ),
-                          );
-                          setPrivateActionMessage(m);
-                        }}
-                      >
-                        <MoreHorizontal size={19} />
-                      </button>
-                      <UserIdentity
-                        compact
-                        user={
-                          m.senderId === me?.id
-                            ? me!
-                            : { ...selected, id: selected.userId }
-                        }
-                      />
-                      <div className="private-message-body">
-                        {m.sendStatus ? (
-                          <div
-                            className="private-message-send-state"
-                            role="status"
-                          >
-                            {m.sendStatus === "sending" ? (
-                              <small>Enviando…</small>
-                            ) : (
-                              <button
-                                type="button"
-                                className="text-button"
-                                onClick={() => retryPending(m.clientId)}
-                              >
-                                Não enviada · Tentar novamente
-                              </button>
-                            )}
-                          </div>
-                        ) : null}
-                        {m.deletedAt ? (
-                          <p className="muted">Mensagem removida.</p>
-                        ) : null}
-                        {!m.deletedAt && m.attachmentUrl ? (
-                          m.attachmentMime?.startsWith("audio/") ? (
-                            <VoiceMessage src={m.attachmentUrl} />
-                          ) : (
-                            <ChatImage
-                              kind={m.mediaKind}
-                              src={m.attachmentUrl}
-                              alt={m.attachmentName ?? "Imagem privada"}
-                            />
-                          )
-                        ) : null}
-                        {editingPrivate?.id === m.id ? (
-                          <form
-                            className="private-message-edit"
-                            onSubmit={(event) => {
+                  {[
+                    ...messages.map((message) => ({
+                      kind: "message" as const,
+                      createdAt: message.createdAt,
+                      message,
+                    })),
+                    ...callHistory
+                      .filter(
+                        (call) =>
+                          !messages.length ||
+                          call.createdAt >= messages[0].createdAt,
+                      )
+                      .map((call) => ({
+                        kind: "call" as const,
+                        createdAt: call.createdAt,
+                        call,
+                      })),
+                  ]
+                    .sort((a, b) => a.createdAt.localeCompare(b.createdAt))
+                    .map((entry) => {
+                      if (entry.kind === "call")
+                        return (
+                          <PrivateCallHistoryCard
+                            key={entry.call.id}
+                            call={entry.call}
+                            me={me?.id}
+                          />
+                        );
+                      const m = entry.message;
+                      return (
+                        <article
+                          key={m.id}
+                          id={`message-${m.id}`}
+                          data-receipt-id={m.id}
+                          className={`${m.senderId === me?.id ? "mine" : ""} ${privateActionMessage?.id === m.id ? "message-action-selected" : ""}`}
+                          onPointerDown={(event) =>
+                            startPrivateLongPress(event, m)
+                          }
+                          onPointerMove={movePrivateLongPress}
+                          onPointerUp={cancelPrivateLongPress}
+                          onPointerCancel={cancelPrivateLongPress}
+                          onContextMenu={(event) => {
+                            if (
+                              !(event.target as HTMLElement).closest(
+                                "input,textarea",
+                              )
+                            ) {
                               event.preventDefault();
-                              void savePrivateEdit(m);
+                              setPrivateActionAnchor(
+                                messageActionAnchor(event.currentTarget),
+                              );
+                              setPrivateActionMessage(m);
+                            }
+                          }}
+                        >
+                          <button
+                            type="button"
+                            className="message-overflow-trigger"
+                            aria-label="Ações da mensagem"
+                            onClick={(event) => {
+                              setPrivateActionAnchor(
+                                messageActionAnchor(
+                                  event.currentTarget.closest("article")!,
+                                ),
+                              );
+                              setPrivateActionMessage(m);
                             }}
                           >
-                            <textarea
-                              value={editPrivateText}
-                              autoFocus
-                              maxLength={4000}
-                              onChange={(event) =>
-                                setEditPrivateText(event.target.value)
-                              }
-                            />
-                            <div>
-                              <button type="submit">Salvar</button>
-                              <button
-                                type="button"
-                                className="secondary"
-                                onClick={() => setEditingPrivate(null)}
+                            <MoreHorizontal size={19} />
+                          </button>
+                          <UserIdentity
+                            compact
+                            user={
+                              m.senderId === me?.id
+                                ? me!
+                                : { ...selected, id: selected.userId }
+                            }
+                          />
+                          <div className="private-message-body">
+                            {m.sendStatus ? (
+                              <div
+                                className="private-message-send-state"
+                                role="status"
                               >
-                                Cancelar
-                              </button>
-                            </div>
-                          </form>
-                        ) : m.text ? (
-                          providerMessageUrl(m.text) ? (
-                            <figure
-                              className="klipy-message"
-                              aria-label="GIF compartilhado pela KLIPY"
-                            >
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img
-                                src={providerMessageUrl(m.text)!}
-                                alt="GIF da KLIPY"
-                                loading="lazy"
-                              />
-                              <figcaption>GIF via KLIPY</figcaption>
-                            </figure>
-                          ) : (
-                            <p>
-                              <EmojiText text={m.text} />
-                            </p>
-                          )
-                        ) : null}
-                        {!m.deletedAt && m.text && (
-                          <RoomInvitationPreview text={m.text} />
-                        )}
-                        <small>
-                          {new Date(m.createdAt).toLocaleString("pt-BR")}
-                          {m.editedAt ? " · editada" : ""}
-                          {m.senderId === me?.id &&
-                            !m.sendStatus &&
-                            !m.deletedAt && <MessageReceipt receipt={m} />}
-                        </small>
-                        {!m.deletedAt && (
-                          <div className="message-reactions">
-                            {m.reactions?.map((r) => (
-                              <button
-                                type="button"
-                                key={r.emoji}
-                                aria-pressed={r.mine}
-                                aria-label={`Reagir com ${r.emoji}`}
-                                onClick={() =>
-                                  void reactPrivate(m, r.emoji).catch((e) =>
-                                    setError(e.message),
-                                  )
-                                }
+                                {m.sendStatus === "sending" ? (
+                                  <small>Enviando…</small>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="text-button"
+                                    onClick={() => retryPending(m.clientId)}
+                                  >
+                                    Não enviada · Tentar novamente
+                                  </button>
+                                )}
+                              </div>
+                            ) : null}
+                            {m.deletedAt ? (
+                              <p className="muted">Mensagem removida.</p>
+                            ) : null}
+                            {!m.deletedAt && m.attachmentUrl ? (
+                              m.attachmentMime?.startsWith("audio/") ? (
+                                <VoiceMessage src={m.attachmentUrl} />
+                              ) : (
+                                <ChatImage
+                                  kind={m.mediaKind}
+                                  src={m.attachmentUrl}
+                                  alt={m.attachmentName ?? "Imagem privada"}
+                                />
+                              )
+                            ) : null}
+                            {editingPrivate?.id === m.id ? (
+                              <form
+                                className="private-message-edit"
+                                onSubmit={(event) => {
+                                  event.preventDefault();
+                                  void savePrivateEdit(m);
+                                }}
                               >
-                                <AnimatedEmoji value={r.emoji} /> {r.count}
-                              </button>
-                            ))}
+                                <textarea
+                                  value={editPrivateText}
+                                  autoFocus
+                                  maxLength={4000}
+                                  onChange={(event) =>
+                                    setEditPrivateText(event.target.value)
+                                  }
+                                />
+                                <div>
+                                  <button type="submit">Salvar</button>
+                                  <button
+                                    type="button"
+                                    className="secondary"
+                                    onClick={() => setEditingPrivate(null)}
+                                  >
+                                    Cancelar
+                                  </button>
+                                </div>
+                              </form>
+                            ) : m.text ? (
+                              providerMessageUrl(m.text) ? (
+                                <figure
+                                  className="klipy-message"
+                                  aria-label="GIF compartilhado pela KLIPY"
+                                >
+                                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                                  <img
+                                    src={providerMessageUrl(m.text)!}
+                                    alt="GIF da KLIPY"
+                                    loading="lazy"
+                                  />
+                                  <figcaption>GIF via KLIPY</figcaption>
+                                </figure>
+                              ) : (
+                                <p>
+                                  <EmojiText text={m.text} />
+                                </p>
+                              )
+                            ) : null}
+                            {!m.deletedAt && m.text && (
+                              <RoomInvitationPreview text={m.text} />
+                            )}
+                            <small>
+                              {new Date(m.createdAt).toLocaleString("pt-BR")}
+                              {m.editedAt ? " · editada" : ""}
+                              {m.senderId === me?.id &&
+                                !m.sendStatus &&
+                                !m.deletedAt && <MessageReceipt receipt={m} />}
+                            </small>
+                            {!m.deletedAt && (
+                              <div className="message-reactions">
+                                {m.reactions?.map((r) => (
+                                  <button
+                                    type="button"
+                                    key={r.emoji}
+                                    aria-pressed={r.mine}
+                                    aria-label={`Reagir com ${r.emoji}`}
+                                    onClick={() =>
+                                      void reactPrivate(m, r.emoji).catch((e) =>
+                                        setError(e.message),
+                                      )
+                                    }
+                                  >
+                                    <AnimatedEmoji value={r.emoji} /> {r.count}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
                           </div>
-                        )}
-                      </div>
-                    </article>
-                  ))}
+                        </article>
+                      );
+                    })}
                 </div>
                 {privateActionMessage && privateActionAnchor ? (
                   <MessageMenu

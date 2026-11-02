@@ -28,6 +28,13 @@ const invite = {
 };
 beforeEach(() => {
   vi.clearAllMocks();
+  HTMLDialogElement.prototype.showModal = function () {
+    this.setAttribute("open", "");
+  };
+  HTMLDialogElement.prototype.close = function () {
+    this.removeAttribute("open");
+  };
+  vi.stubGlobal("matchMedia", () => ({ matches: true }));
   vi.stubGlobal("IntersectionObserver", undefined);
   vi.mocked(api).mockResolvedValue(invite);
   vi.mocked(post).mockResolvedValue({ id: "room" });
@@ -47,6 +54,16 @@ it("loads a real invite preview but never joins until the user chooses to enter"
   expect(screen.getByText("12 participantes")).toBeInTheDocument();
   expect(post).not.toHaveBeenCalled();
   fireEvent.click(screen.getByRole("button", { name: "Entrar na sala" }));
+  expect(post).not.toHaveBeenCalled();
+  fireEvent.click(await screen.findByRole("button", { name: "Agora não" }));
+  expect(post).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("button", { name: "Entrar na sala" }));
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Aceitar e entrar" }),
+    ).toBeEnabled(),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Aceitar e entrar" }));
   await waitFor(() =>
     expect(navigation.push).toHaveBeenCalledWith("/rooms/room"),
   );
@@ -61,6 +78,12 @@ it("cannot enter an ended room or silently navigate after a rejected join", asyn
   fireEvent.click(
     await screen.findByRole("button", { name: "Entrar na sala" }),
   );
+  await waitFor(() =>
+    expect(
+      screen.getByRole("button", { name: "Aceitar e entrar" }),
+    ).toBeEnabled(),
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Aceitar e entrar" }));
   expect(await screen.findByRole("alert")).toHaveTextContent(
     "Você não pode entrar nesta sala.",
   );

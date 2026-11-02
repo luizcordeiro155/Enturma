@@ -52,12 +52,23 @@ const lightPalette = {
   danger: "#b42318",
 };
 
+const enturmaPalette = {
+  ...darkPalette,
+  background: "#092118",
+  surface: "#103125",
+  elevated: "#16372b",
+  border: "#416553",
+  text: "#f2f8ef",
+  muted: "#bcd4c5",
+};
+
 const createStyles = (
   dark: boolean,
   fontScale: number,
   highContrast: boolean,
+  enturma: boolean,
 ) => {
-  const palette = dark ? darkPalette : lightPalette;
+  const palette = enturma ? enturmaPalette : dark ? darkPalette : lightPalette;
   const border = highContrast ? palette.text : palette.border;
   const muted = highContrast ? palette.text : palette.muted;
   return StyleSheet.create({
@@ -177,13 +188,21 @@ export function MobileThemeProvider({
   const [preference, setPreference] = useState(defaults);
   const pathname = usePathname();
   const syncGeneration = useRef(0);
+  const loadedAccount = useRef<string | null>(null);
+  const initialized = useRef(false);
+  const pendingChoice = useRef(false);
+  const choiceRevision = useRef(0);
+  const writeQueue = useRef(Promise.resolve());
 
   useEffect(() => {
     let live = true;
     const request = ++syncGeneration.current;
     void (async () => {
       try {
-        const cached = await SecureStore.getItemAsync("enturma_experience");
+        const cached = initialized.current
+          ? null
+          : await SecureStore.getItemAsync("enturma_experience");
+        initialized.current = true;
         if (live && request === syncGeneration.current && cached) {
           try {
             setPreference({ ...defaults, ...JSON.parse(cached) });
@@ -195,13 +214,19 @@ export function MobileThemeProvider({
         }
         const credentials = await session();
         if (!credentials) {
-          if (live && request === syncGeneration.current) setPreference(defaults);
+          loadedAccount.current = null;
           return;
         }
+        if (
+          pendingChoice.current ||
+          loadedAccount.current === credentials.userId
+        )
+          return;
         const remote = await api<ExperiencePreference>("/users/me/experience");
         if (!live || request !== syncGeneration.current) return;
         const resolved = { ...defaults, ...remote };
         setPreference(resolved);
+        loadedAccount.current = credentials.userId;
         await SecureStore.setItemAsync(
           "enturma_experience",
           JSON.stringify(resolved),
@@ -215,12 +240,21 @@ export function MobileThemeProvider({
 
   async function save(p: ExperiencePreference) {
     syncGeneration.current++;
-    await api("/users/me/experience", {
-      method: "PUT",
-      body: JSON.stringify(p),
-    });
-    await SecureStore.setItemAsync("enturma_experience", JSON.stringify(p));
+    const revision = ++choiceRevision.current;
+    pendingChoice.current = true;
     setPreference(p);
+    const task = writeQueue.current
+      .catch(() => {})
+      .then(async () => {
+        await SecureStore.setItemAsync("enturma_experience", JSON.stringify(p));
+        await api("/users/me/experience", {
+          method: "PUT",
+          body: JSON.stringify(p),
+        });
+        if (revision === choiceRevision.current) pendingChoice.current = false;
+      });
+    writeQueue.current = task;
+    await task;
   }
 
   return (
@@ -237,15 +271,20 @@ export function useExperience() {
 export function useResolvedDark() {
   const { preference: p } = useExperience();
   const native = useColorScheme();
-  return p.theme === "DARK" || (p.theme === "SYSTEM" && native === "dark");
+  return (
+    p.theme === "ENTURMA" ||
+    p.theme === "DARK" ||
+    (p.theme === "SYSTEM" && native === "dark")
+  );
 }
 
 export function useStyles() {
   const { preference: p } = useExperience();
   const dark = useResolvedDark();
   return useMemo(
-    () => createStyles(dark, p.fontScale, p.highContrast),
-    [dark, p.fontScale, p.highContrast],
+    () =>
+      createStyles(dark, p.fontScale, p.highContrast, p.theme === "ENTURMA"),
+    [dark, p.fontScale, p.highContrast, p.theme],
   );
 }
 

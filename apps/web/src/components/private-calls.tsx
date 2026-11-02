@@ -16,7 +16,11 @@ import { useCallSession, CallMount } from "./call-session-provider";
 import { Avatar } from "./user-identity";
 import { playMotion } from "@/lib/motion";
 import { callDevice } from "@/lib/call-device";
-import { privateCallsEnabled, deviceOwnsPrivateCall, shouldEndOnPageExit } from "@/lib/private-call-lifecycle";
+import {
+  privateCallsEnabled,
+  deviceOwnsPrivateCall,
+  shouldEndOnPageExit,
+} from "@/lib/private-call-lifecycle";
 import { useCallRingtone } from "@/lib/call-ringtone";
 
 type PrivateCall = {
@@ -211,10 +215,14 @@ export function PrivateCallsProvider({
       setBusy(true);
       setError("");
       try {
-        const result = await post<PrivateCall>(`/calls/private/${current.id}/${operation}`, {
-          deviceId: callDevice(),
-        });
+        const result = await post<PrivateCall>(
+          `/calls/private/${current.id}/${operation}`,
+          {
+            deviceId: callDevice(),
+          },
+        );
         if (!terminal) apply(result);
+        window.dispatchEvent(new Event("enturma-private_call_changed"));
       } catch (cause) {
         if (terminal) {
           ignored.current.delete(current.id);
@@ -242,7 +250,8 @@ export function PrivateCallsProvider({
           currentMedia.current?.roomId === active.id,
           event.persisted,
         )
-      ) return;
+      )
+        return;
       // A document unload is not the same as a route change. Only a locally
       // connected call is eligible; ringing calls must keep ringing.
       const body = new Blob([JSON.stringify({ deviceId: callDevice() })], {
@@ -321,7 +330,15 @@ export function PrivateCallsProvider({
         latest.current = null;
         started.current = null;
         setCall(null);
-        void post<PrivateCall>(`/calls/private/${id}/end`).catch(() => {});
+        void post<PrivateCall>(`/calls/private/${id}/end`)
+          .then(() =>
+            window.dispatchEvent(new Event("enturma-private_call_changed")),
+          )
+          .catch(() =>
+            setError(
+              "A chamada foi fechada neste aparelho, mas não conseguimos confirmar o encerramento no servidor.",
+            ),
+          );
       }
     };
     window.addEventListener("enturma-call-left", ended);
@@ -341,7 +358,8 @@ export function PrivateCallsProvider({
           !deviceOwnsPrivateCall(previous, viewer.current, callDevice()) ||
           !mediaStates.has(previous.state) ||
           started.current === previous.id
-        ) throw Error("Encerre sua chamada atual antes de ligar.");
+        )
+          throw Error("Encerre sua chamada atual antes de ligar.");
         await post(`/calls/private/${previous.id}/end`);
         ignored.current.add(previous.id);
         latest.current = null;
@@ -571,7 +589,15 @@ export function PrivateCallPage({ id }: { id: string }) {
                 type="button"
                 className="call-cancel"
                 disabled={context?.busy}
-                onClick={() => void context?.action(mediaStates.has(call.state) ? "end" : call.callerId === context.me ? "cancel" : "decline")}
+                onClick={() =>
+                  void context?.action(
+                    mediaStates.has(call.state)
+                      ? "end"
+                      : call.callerId === context.me
+                        ? "cancel"
+                        : "decline",
+                  )
+                }
                 aria-label="Desligar chamada"
               >
                 <PhoneOff size={28} />

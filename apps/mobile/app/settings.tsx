@@ -9,7 +9,12 @@ import {
   useExperience,
 } from "../src/ui";
 import { api } from "../src/api";
-type Preference = { category: string; inApp: boolean; email: boolean; push: boolean };
+type Preference = {
+  category: string;
+  inApp: boolean;
+  email: boolean;
+  push: boolean;
+};
 const labels: Record<string, string> = {
   ROOM_MESSAGE: "Mensagens de salas",
   PRIVATE_MESSAGE: "Mensagens privadas",
@@ -48,10 +53,10 @@ export default function Settings() {
     <Screen title="Configurações">
       <ErrorMessage message={status} />
       <Text style={styles.label}>Aparência</Text>
-      {(["LIGHT", "DARK", "SYSTEM"] as const).map((theme, i) => (
+      {(["LIGHT", "DARK", "ENTURMA", "SYSTEM"] as const).map((theme, i) => (
         <Button
           key={theme}
-          title={`${p.theme === theme ? "✓ " : ""}${["Claro", "Escuro", "Do sistema"][i]}`}
+          title={`${p.theme === theme ? "✓ " : ""}${["Claro", "Escuro", "Enturma", "Sistema"][i]}`}
           onPress={() =>
             void save({ ...p, theme }).catch((e) => setStatus(e.message))
           }
@@ -84,9 +89,15 @@ export default function Settings() {
         />
       </View>
       <Text style={styles.label}>Privacidade</Text>
-      <Button title="Privacidade e exclusão de conta" onPress={() => router.push("/privacy")} />
+      <Button
+        title="Privacidade e exclusão de conta"
+        onPress={() => router.push("/privacy")}
+      />
       <Text style={styles.label}>Notificações</Text>
-      <Text style={styles.muted}>Escolha o que aparece no app, chega no celular ou por e-mail. E-mails de segurança permanecem ativos.</Text>
+      <Text style={styles.muted}>
+        Escolha o que aparece no app, chega no celular ou por e-mail. E-mails de
+        segurança permanecem ativos.
+      </Text>
       {items.map((i) => (
         <View style={styles.row} key={i.category}>
           <Text style={styles.label}>{labels[i.category]}</Text>

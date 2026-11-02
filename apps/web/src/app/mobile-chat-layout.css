@@ -18,10 +18,7 @@
     padding: 6px 8px
       calc(
         6px +
-          max(
-            env(safe-area-inset-bottom, 0px),
-            var(--native-safe-bottom, 0px)
-          )
+          max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
       ) !important;
     overflow: visible !important;
     border: 0 !important;
@@ -47,7 +44,9 @@
     border: 1px solid var(--room-border, var(--border));
     border-radius: 25px;
     background: var(--room-subtle, var(--soft));
-    transition: border-color 120ms ease, box-shadow 120ms ease;
+    transition:
+      border-color 120ms ease,
+      box-shadow 120ms ease;
   }
 
   .enturma-message-composer .composer-main-row:focus-within {
@@ -220,7 +219,8 @@
     overflow: hidden !important;
   }
 
-  html[data-enturma-private-chat="true"] .friends-page.mobile-private-chat-open {
+  html[data-enturma-private-chat="true"]
+    .friends-page.mobile-private-chat-open {
     width: 100%;
     height: 100% !important;
     min-height: 0 !important;
@@ -264,24 +264,15 @@
   html[data-enturma-private-chat="true"] .private-chat-header {
     flex: 0 0 auto;
     min-height: calc(
-      62px +
-        max(
-          env(safe-area-inset-top, 0px),
-          var(--native-safe-top, 0px)
-        )
+      62px + max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px))
     );
     display: grid !important;
     grid-template-columns: 46px minmax(0, 1fr);
     align-items: end;
     gap: 6px;
     margin: 0 !important;
-    padding:
-      calc(
-        7px +
-          max(
-            env(safe-area-inset-top, 0px),
-            var(--native-safe-top, 0px)
-          )
+    padding: calc(
+        7px + max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px))
       )
       10px 7px !important;
     box-sizing: border-box;
@@ -351,7 +342,7 @@
     scroll-padding-bottom: 12px;
   }
 
-  html[data-enturma-private-chat="true"] .private-messages article {
+  html[data-enturma-private-chat="true"] .private-messages > article {
     max-width: 86%;
   }
 
@@ -369,11 +360,8 @@
     margin-bottom: 0 !important;
   }
 
-  html[data-enturma-private-chat="true"][data-enturma-ime="true"]
-    .workspace {
-    height: calc(
-      100dvh - var(--native-keyboard-bottom, 0px)
-    ) !important;
+  html[data-enturma-private-chat="true"][data-enturma-ime="true"] .workspace {
+    height: calc(100dvh - var(--native-keyboard-bottom, 0px)) !important;
   }
 
   html[data-enturma-private-chat="true"][data-enturma-ime="true"]
@@ -463,7 +451,9 @@
     transform: none !important;
   }
 
-  .room-active-shell .room-section-chat .persistent-composer.enturma-message-composer {
+  .room-active-shell
+    .room-section-chat
+    .persistent-composer.enturma-message-composer {
     flex: 0 0 auto !important;
     position: relative !important;
     inset: auto !important;
@@ -473,15 +463,9 @@
     overflow: visible !important;
   }
 
-  html[data-enturma-ime="true"]
-    .room-active-shell
-    .room-section-chat {
-    height: calc(
-      100dvh - var(--native-keyboard-bottom, 0px)
-    ) !important;
-    max-height: calc(
-      100dvh - var(--native-keyboard-bottom, 0px)
-    ) !important;
+  html[data-enturma-ime="true"] .room-active-shell .room-section-chat {
+    height: calc(100dvh - var(--native-keyboard-bottom, 0px)) !important;
+    max-height: calc(100dvh - var(--native-keyboard-bottom, 0px)) !important;
     padding-bottom: 0 !important;
   }
 
@@ -506,28 +490,47 @@
   }
 }
 
-
 /* Chrome Android mobile Web only: anchor the *conversation* to visualViewport.
    The private composer remains inside the flex column, so it tracks the
    keyboard from the first focus without a fixed-position jump or double inset.
    The installed Android WebView keeps its own native IME resize path. */
 @media (max-width: 760px) and (pointer: coarse) {
-  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .workspace {
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not(
+      [data-enturma-mobile="true"]
+    )
+    .workspace {
     height: var(--mobile-web-chat-visible-bottom, 100dvh) !important;
     max-height: var(--mobile-web-chat-visible-bottom, 100dvh) !important;
   }
 
-  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .workspace > main,
-  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .friends-page.mobile-private-chat-open,
-  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .friends-workspace,
-  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .private-chat {
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not(
+      [data-enturma-mobile="true"]
+    )
+    .workspace
+    > main,
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not(
+      [data-enturma-mobile="true"]
+    )
+    .friends-page.mobile-private-chat-open,
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not(
+      [data-enturma-mobile="true"]
+    )
+    .friends-workspace,
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not(
+      [data-enturma-mobile="true"]
+    )
+    .private-chat {
     height: 100% !important;
     max-height: 100% !important;
     min-height: 0 !important;
     overflow: hidden !important;
   }
 
-  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .mobile-private-chat-open .private-composer.enturma-message-composer {
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not(
+      [data-enturma-mobile="true"]
+    )
+    .mobile-private-chat-open
+    .private-composer.enturma-message-composer {
     position: relative !important;
     inset: auto !important;
     width: 100% !important;
@@ -538,7 +541,11 @@
     transition: none !important;
   }
 
-  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not([data-enturma-mobile="true"]) .mobile-private-chat-open .private-messages {
+  html[data-enturma-private-chat="true"][data-mobile-web-chat-keyboard="private"]:not(
+      [data-enturma-mobile="true"]
+    )
+    .mobile-private-chat-open
+    .private-messages {
     flex: 1 1 0 !important;
     height: auto !important;
     max-height: none !important;

@@ -145,7 +145,7 @@
     display: none !important;
   }
 
-  .private-messages article.mine,
+  .private-messages > article.mine,
   .persistent-messages .persistent-message.mine {
     touch-action: pan-y;
   }
@@ -358,4 +358,37 @@
 
 .room-active-shell .chat-empty {
   margin-block: auto 0 !important;
+}
+
+.private-call-history {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: fit-content;
+  max-width: 90%;
+  padding: 14px 18px;
+  margin: 8px 0;
+  border-radius: 16px;
+  background: var(--soft);
+  border: 1px solid var(--border);
+  color: var(--ink);
+}
+.private-call-history.outgoing {
+  margin-left: auto;
+}
+.private-call-history > svg {
+  flex-shrink: 0;
+}
+.private-call-history[data-outcome="missed"] > svg {
+  color: var(--danger);
+}
+.private-call-history > div {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.private-call-history span,
+.private-call-history time {
+  color: var(--muted);
+  font-size: 0.76rem;
 }

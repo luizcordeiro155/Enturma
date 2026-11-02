@@ -46,7 +46,11 @@ class PrivateCallsIntegrationTest {
     b = user();
     outsider = user();
     for (Actor actor : List.of(a, b, outsider))
-      db.jdbc.update("UPDATE academic_identity SET status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE user_id=?", actor.id());
+      db.jdbc.update(
+          "UPDATE academic_identity SET"
+              + " status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE"
+              + " user_id=?",
+          actor.id());
     friendship = UUID.randomUUID();
     deviceA = UUID.randomUUID();
     deviceB = UUID.randomUUID();
@@ -90,6 +94,23 @@ class PrivateCallsIntegrationTest {
     db.jdbc.update("INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", b.id(), a.id());
     assertThatThrownBy(() -> calls.create(a, friendship, false, deviceA))
         .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void historyReportsRealOutcomesWithoutLeakingDevicesOrOtherConversations() {
+    UUID id = (UUID) create().get("id");
+    assertThat(calls.history(a, friendship)).isEmpty();
+    calls.transition(b, id, "decline", deviceB);
+    var entry = calls.history(a, friendship).getFirst();
+    assertThat(entry.get("state")).isEqualTo("DECLINED");
+    assertThat(entry.get("answered")).isEqualTo(false);
+    assertThat(entry.keySet())
+        .containsExactlyInAnyOrder(
+            "id", "callerId", "video", "state", "createdAt", "updatedAt", "answered");
+    assertThat(calls.history(b, friendship)).hasSize(1);
+    assertThatThrownBy(() -> calls.history(outsider, friendship)).isInstanceOf(ApiException.class);
+    db.jdbc.update("INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", b.id(), a.id());
+    assertThatThrownBy(() -> calls.history(a, friendship)).isInstanceOf(ApiException.class);
   }
 
   @Test

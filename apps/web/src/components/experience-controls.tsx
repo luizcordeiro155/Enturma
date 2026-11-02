@@ -2,154 +2,42 @@
 import { useEffect, useRef, useState } from "react";
 import { Accessibility, X } from "lucide-react";
 import type { ExperiencePreference } from "@enturma/contracts";
-import { api } from "@/lib/api";
-import { applyEnturmaTheme } from "@/lib/theme-motion";
+import {
+  experienceDefaults as defaults,
+  useExperience,
+  saveExperience,
+  syncExperience,
+} from "@/lib/experience-preferences";
 import { ThemePicker } from "./theme-picker";
-const defaults: ExperiencePreference = {
-  theme: "SYSTEM",
-  fontScale: 1,
-  highContrast: false,
-  reducedMotion: false,
-  enhancedFocus: true,
-};
-function normalize(p: Partial<ExperiencePreference>): ExperiencePreference {
-  return {
-    ...defaults,
-    ...p,
-    theme: ["LIGHT", "DARK", "SYSTEM", "ENTURMA"].includes(p.theme ?? "")
-      ? p.theme!
-      : "SYSTEM",
-    fontScale: Math.max(0.85, Math.min(1.35, Number(p.fontScale) || 1)),
-  };
-}
 export function ExperienceControls({
   localOnly = false,
 }: {
   localOnly?: boolean;
 }) {
-  const [preference, setPreference] = useState(defaults);
-  const [ready, setReady] = useState(false);
+  const preference = useExperience();
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
-  const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
-  const changed = useRef(false);
-  useEffect(() => () => clearTimeout(timer.current), []);
   useEffect(() => {
-    let active = true;
-    let cached = defaults;
-    try {
-      const raw = localStorage.getItem("enturma-experience");
-      if (raw) cached = normalize(JSON.parse(raw));
-    } catch {}
-    queueMicrotask(() => {
-      if (active && !changed.current) {
-        setPreference(cached);
-        setReady(true);
-      }
-    });
-    if (localOnly)
-      return () => {
-        active = false;
-      };
-    let pending: ExperiencePreference | null = null;
-    try {
-      const raw = localStorage.getItem("enturma-experience-pending");
-      if (raw) pending = normalize(JSON.parse(raw));
-    } catch {}
-    const synchronization = pending
-      ? api<ExperiencePreference>("/users/me/experience", {
-          method: "PUT",
-          body: JSON.stringify(pending),
-          keepalive: true,
-        }).then(() => {
-          try {
-            if (
-              localStorage.getItem("enturma-experience-pending") ===
-              JSON.stringify(pending)
-            )
-              localStorage.removeItem("enturma-experience-pending");
-          } catch {}
-          return pending!;
-        })
-      : api<ExperiencePreference>("/users/me/experience");
-    synchronization
-      .then((p) => {
-        if (active && !changed.current) {
-          const next = normalize(p);
-          setPreference(next);
-          try {
-            localStorage.setItem("enturma-experience", JSON.stringify(next));
-          } catch {}
-        }
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
+    if (!localOnly) void syncExperience().catch(() => {});
   }, [localOnly]);
-  useEffect(() => {
-    if (!ready) return;
-    const system = matchMedia("(prefers-color-scheme: dark)");
-    function apply() {
-      const root = document.documentElement;
-      const nextTheme =
-        preference.theme === "SYSTEM"
-          ? system.matches
-            ? "dark"
-            : "light"
-          : preference.theme.toLowerCase();
-      root.dataset.highContrast = String(preference.highContrast);
-      root.dataset.reducedMotion = String(preference.reducedMotion);
-      applyEnturmaTheme(nextTheme, changed.current);
-      root.dataset.enhancedFocus = String(preference.enhancedFocus);
-      root.style.setProperty("--font-scale", String(preference.fontScale));
-      window.dispatchEvent(new Event("enturma-motion"));
-    }
-    apply();
-    system.addEventListener("change", apply);
-    return () => system.removeEventListener("change", apply);
-  }, [preference, ready]);
   useEffect(() => {
     if (open) dialog.current?.showModal();
     else dialog.current?.close();
   }, [open]);
-  function save(p: ExperiencePreference) {
-    const next = normalize(p);
-    changed.current = true;
-    setPreference(next);
-    try {
-      localStorage.setItem("enturma-experience", JSON.stringify(next));
-      localStorage.setItem("enturma-experience-pending", JSON.stringify(next));
-    } catch {}
-    if (localOnly) {
-      setStatus("Preferências aplicadas neste navegador.");
-      return;
-    }
-    setStatus("Salvando…");
-    clearTimeout(timer.current);
-    timer.current = setTimeout(() => {
-      void api("/users/me/experience", {
-        method: "PUT",
-        body: JSON.stringify(next),
-        keepalive: true,
+  function save(next: ExperiencePreference) {
+    setStatus(
+      localOnly ? "Preferências aplicadas neste navegador." : "Salvando…",
+    );
+    void saveExperience(next, localOnly)
+      .then(() => {
+        if (!localOnly) setStatus("Preferências salvas no seu perfil.");
       })
-        .then(() => {
-          try {
-            if (
-              localStorage.getItem("enturma-experience-pending") ===
-              JSON.stringify(next)
-            )
-              localStorage.removeItem("enturma-experience-pending");
-          } catch {}
-          setStatus("Preferências salvas no seu perfil.");
-        })
-        .catch(() =>
-          setStatus(
-            "Preferências aplicadas neste navegador. Não foi possível sincronizar com seu perfil.",
-          ),
-        );
-    }, 400);
+      .catch(() =>
+        setStatus(
+          "Preferências aplicadas neste navegador. Não foi possível sincronizar com seu perfil.",
+        ),
+      );
   }
   return (
     <div className="experience-controls">
@@ -195,10 +83,10 @@ export function ExperienceControls({
               })
             }
           >
-            <option value="SYSTEM">Seguir o sistema</option>
             <option value="LIGHT">Claro</option>
             <option value="DARK">Escuro</option>
             <option value="ENTURMA">Enturma · verde e lima</option>
+            <option value="SYSTEM">Seguir o sistema</option>
           </select>
         </label>
         <label htmlFor="text-size">

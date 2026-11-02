@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { ExternalLink, ShieldAlert, X } from "lucide-react";
+import { RoomJoinDialog } from "./room-join-dialog";
+import { roomInviteCode } from "@/lib/room-invite";
 import { splitLinks } from "@/lib/forum-links";
 export function ForumLinks({ text }: { text: string }) {
   return (
@@ -24,11 +26,20 @@ export function ConfirmedLink({
   label: string;
 }) {
   const [open, setOpen] = useState(false);
+  const [invitation, setInvitation] = useState<string | null>(null);
   return (
     <>
       <a
         href={href}
+        className="message-link"
         onClick={(e) => {
+          const code = roomInviteCode(href, location.origin);
+          if (code) {
+            e.preventDefault();
+            e.stopPropagation();
+            setInvitation(code);
+            return;
+          }
           const url = new URL(href);
           if (url.origin === location.origin) return;
           e.preventDefault();
@@ -37,12 +48,17 @@ export function ConfirmedLink({
         onAuxClick={(e) => {
           if (e.button === 1) {
             e.preventDefault();
-            setOpen(true);
+            const code = roomInviteCode(href, location.origin);
+            if (code) setInvitation(code);
+            else setOpen(true);
           }
         }}
       >
         {label}
       </a>
+      {invitation && (
+        <RoomJoinDialog code={invitation} onClose={() => setInvitation(null)} />
+      )}
       {open ? (
         <ExternalConfirmation href={href} onClose={() => setOpen(false)} />
       ) : null}

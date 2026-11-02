@@ -30,6 +30,11 @@ public class PrivateCallController {
     return calls.current(actor);
   }
 
+  @GetMapping("/friends/{id}/calls")
+  public Object history(@AuthenticationPrincipal Actor actor, @PathVariable UUID id) {
+    return calls.history(actor, id);
+  }
+
   @PostMapping("/calls/private")
   public Object create(@AuthenticationPrincipal Actor actor, @Valid @RequestBody Invite invite) {
     return calls.create(actor, invite.friendshipId(), invite.video(), invite.deviceId());

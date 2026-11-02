@@ -53,6 +53,21 @@ public class PrivateCallService {
     return Map.of("online", presence.online(friend(actor, friendship)));
   }
 
+  public List<Map<String, Object>> history(Actor actor, UUID friendship) {
+    friend(actor, friendship);
+    // Only conversation participants can read the bounded history. Never return
+    // device IDs, media tokens, heartbeat timestamps or unrelated calls.
+    return db.list(
+        "SELECT id,caller_id,video,state,created_at,updated_at,"
+            + " (caller_connected AND callee_connected) answered FROM private_call"
+            + " WHERE friendship_id=? AND (caller_id=? OR callee_id=?)"
+            + " AND state IN ('DECLINED','CANCELLED','NO_ANSWER','ENDED')"
+            + " ORDER BY created_at DESC,id DESC LIMIT 100",
+        friendship,
+        actor.id(),
+        actor.id());
+  }
+
   private void changed(Map<String, Object> call) {
     events.publishEvent(
         new AppChanged(

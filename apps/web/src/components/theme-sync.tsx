@@ -1,50 +1,37 @@
 "use client";
 import { useEffect } from "react";
 import { applyEnturmaTheme, setThemeOrigin } from "@/lib/theme-motion";
-
-/** Keep SYSTEM live on full-screen routes that do not mount the theme controls. */
+import { getExperience, useExperience } from "@/lib/experience-preferences";
+/** The root owns the DOM theme. Route controls only update shared preferences. */
 export function ThemeSync() {
+  const preference = useExperience();
   useEffect(() => {
     const system = matchMedia("(prefers-color-scheme: dark)");
     const update = () => {
-      let preference: {
-        theme?: string;
-        highContrast?: boolean;
-        reducedMotion?: boolean;
-      } = {};
-      try {
-        preference = JSON.parse(
-          localStorage.getItem("enturma-experience") || "{}",
-        );
-      } catch {}
+      const value = getExperience();
       const root = document.documentElement;
-      const nextTheme =
-        preference.theme === "ENTURMA"
-          ? "enturma"
-          : preference.theme === "DARK"
+      root.dataset.highContrast = String(value.highContrast);
+      root.dataset.reducedMotion = String(value.reducedMotion);
+      root.dataset.enhancedFocus = String(value.enhancedFocus);
+      root.style.setProperty("--font-scale", String(value.fontScale));
+      applyEnturmaTheme(
+        value.theme === "SYSTEM"
+          ? system.matches
             ? "dark"
-            : preference.theme === "LIGHT"
-              ? "light"
-              : system.matches
-                ? "dark"
-                : "light";
-      root.dataset.highContrast = String(preference.highContrast === true);
-      root.dataset.reducedMotion = String(preference.reducedMotion === true);
-      applyEnturmaTheme(nextTheme);
+            : "light"
+          : value.theme.toLowerCase(),
+      );
+      window.dispatchEvent(new Event("enturma-motion"));
     };
+    update();
     system.addEventListener("change", update);
-    const storage = (event: StorageEvent) => {
-      if (event.key === "enturma-experience") update();
-    };
-    window.addEventListener("storage", storage);
+    return () => system.removeEventListener("change", update);
+  }, [preference]);
+  useEffect(() => {
     const pointer = (event: PointerEvent) =>
       setThemeOrigin(event.clientX, event.clientY);
     document.addEventListener("pointerdown", pointer, { passive: true });
-    return () => {
-      system.removeEventListener("change", update);
-      window.removeEventListener("storage", storage);
-      document.removeEventListener("pointerdown", pointer);
-    };
+    return () => document.removeEventListener("pointerdown", pointer);
   }, []);
   return null;
 }

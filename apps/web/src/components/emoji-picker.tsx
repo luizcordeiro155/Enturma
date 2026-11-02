@@ -1,4 +1,5 @@
 "use client";
+import { ForumLinks } from "./forum-links";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Clock,
@@ -145,7 +146,7 @@ export function EmojiText({ text }: { text: string }) {
         ))}
       </span>
     );
-  return <>{text}</>;
+  return <ForumLinks text={text} />;
 }
 
 export function EmojiPicker({
