@@ -58,7 +58,7 @@
   color: inherit !important;
   cursor: pointer;
 }
-.voice-recorder .voice-record-button:hover {
+.voice-recorder .voice-record-button:not(.voice-record-send):hover {
   background: color-mix(in srgb, currentColor 12%, transparent) !important;
 }
 .voice-record-button:disabled {
