@@ -6,7 +6,7 @@ O Enturma está em estabilização. A [Release Candidate](PRODUCTION_READINESS.m
 
 O [ciclo anterior de experiência](RELEASE_EXPERIENCE_STABILIZATION.md), na [PR #133](https://github.com/luizcordeiro155/Enturma/pull/133), acrescentou visitante exclusivo da Web, login/cadastro com identidade oficial, correções de áudio e digitação, escolha de qualidade de transmissão e melhorias do instalador/atualizador Windows.
 
-O lote de **02/11/2026**, descrito na continuação do mesmo documento, acrescenta mensagens de voz, recibos de entrega/leitura, convites diretos com cards, tema Enturma, remoção de foto/banner e visitante usando as telas reais com leitura pública limitada. Está em validação: **153 testes Web e build Web passaram localmente**; integração Java completa, CI, E2E final, demais builds e publicação deste lote ainda não estão comprovados nesta documentação. A execução Spring local não chegou às asserções por problema de conexão Java/loopback no Windows. Resultados e artefatos devem ser associados ao SHA verificado; não equivalem a publicação em produção.
+O lote de **02/11/2026** acrescenta mensagens de voz, recibos de entrega/leitura, convites diretos com cards, tema Enturma, remoção de foto/banner e visitante usando as telas reais com leitura pública limitada. O código `6d9ae4b` passou na [CI 41419189860](https://github.com/luizcordeiro155/Enturma/actions/runs/41419189860): **134 testes Java, 166 Web e 46 E2E**, além dos testes Mobile/Desktop, lint, TypeScript, build Web, exports Android/iOS, empacotamento da API e teste Windows de desinstalação. O lote é publicado pela integração da [PR #133](https://github.com/luizcordeiro155/Enturma/pull/133) na `main`; a PR registra a conferência posterior dos serviços e versões distribuídas. Alterações documentais posteriores não modificam o código validado.
 
 | Área | Estado verificado |
 | --- | --- |
@@ -14,7 +14,7 @@ O lote de **02/11/2026**, descrito na continuação do mesmo documento, acrescen
 | Android distribuído | Shell WebView gerado por deploy/android-download/install-web-shell.cjs; pacote Expo é também insumo do builder, seu export não homologa o APK |
 | Desktop | Electron, instalador e atualizador próprios; versão declarada e versão distribuída podem diferir |
 | API | Java 21 / Spring Boot 3.5.16; dependências e alertas em [auditoria](DEPENDENCY_AUDIT.md) |
-| PostgreSQL | Lote acrescenta V66 (recibos/idempotência de mídia) e V68 (tema); sem V67. Aplicação em produção não atestada aqui. Autorização por objeto no Java; papel efetivo de produção precisa de validação |
+| PostgreSQL | V66 (recibos/idempotência de mídia) e V68 (tema), sem V67; aplicadas por Flyway no início da API. Migrações e integração passaram em banco isolado. Autorização por objeto no Java; papel efetivo de produção precisa de validação |
 | Chat privado | Cifragem no cliente de texto/áudio e custódia cifrada por conta, recuperável pela API; não E2EE inacessível ao serviço. Recibos dependem de confirmação real do cliente |
 | iOS | Export técnico na CI; sem homologação/publicação oficial confirmada |
 | Escala e backup | Carga limitada a leituras em serviços efêmeros na CI, com relatório no ciclo atual; capacidade de produção não homologada. Backup externo inexistente e dispensado pelo responsável em 28/10/2026; recuperação real não comprovada |

@@ -64,7 +64,7 @@ O responsável dispensou homologação física, assinatura Windows e validaçõe
 
 ## Continuação — 02/11/2026: comunidade, mensagens e identidade visual
 
-Este registro descreve o código do lote de 02/11. Os resultados de 30/10 acima pertencem aos respectivos commits e não são prova de validação deste lote. CI completa, publicação e versões distribuídas devem ser registradas com seus próprios SHAs e links após confirmação.
+Este registro descreve o código do lote de 02/11, validado no commit `6d9ae4b030505acbc98df4adc3b04abe565c39fd` pela [CI 41419189860](https://github.com/luizcordeiro155/Enturma/actions/runs/41419189860), concluída com sucesso em 02/11. Os resultados de 30/10 acima conservam seu escopo histórico. A publicação é acionada pela integração da [PR #133](https://github.com/luizcordeiro155/Enturma/pull/133), que registra também a conferência posterior dos serviços e manifests.
 
 ### Comportamentos deste lote
 
@@ -87,15 +87,18 @@ Publicar a API compatível e suas migrações antes de ativar os clientes que en
 
 **Rollback aditivo:** manter V66/V68 e os dados ao reverter a aplicação; não apagar recibos, mensagens ou personalizações nem reduzir a restrição de tema enquanto houver valores `ENTURMA`. Selecionar uma versão de API/cliente que tolere esse valor, ou preparar uma correção de compatibilidade. Validar a versão escolhida contra o esquema expandido e a configuração Flyway antes do rollback. O retorno a um cliente sem suporte a áudio/recibos pode reduzir a apresentação desses recursos; não transforma o histórico em texto nem desfaz arquivos já enviados.
 
-### Evidência disponível e pendências deste lote
+### Evidência final e limites deste lote
 
 | Verificação | Evidência confirmada até este registro |
 | --- | --- |
 | Convites, frontend | 12 testes em quatro arquivos passaram: parser/origem, cifragem, envio explícito/retry e card/entrada autorizada. ESLint dos arquivos do recurso passou. |
 | Áudio e recibos, frontend | 10 testes focados passaram, incluindo cifragem de anexo, estados de recibo, visibilidade/foco e recebimento em segundo plano. TypeScript passou na execução local desse conjunto. |
 | Revisão cruzada | Corrigidos leitura após perda de foco durante requisição, duplicação de mídia após falha de atualização do chat e corrida entre pedidos de permissão do microfone. A revisão do visitante identificou e encaminhou a troca da consulta de campus autenticada pela rota pública `/catalog/campuses`. |
-| Web completo local | 159 testes passaram, incluindo suspensão de notificações/recibos durante restauração, conta pendente e logout; TypeScript passou. O build Web anterior ao ajuste final do receptor passou. São resultados locais, não conclusão da CI nem publicação. |
-| Java/PostgreSQL | Compilação local passou; a integração local foi limitada pela conexão Java/loopback no Windows. Após corrigir as expectativas de autorização anônima para `401`, os 134 testes Java passaram na CI Linux do commit `21ac899`. Nenhum controle de acesso foi relaxado. |
-| CI, E2E e distribuição | CI Linux, E2E final, demais builds e publicação pendentes de evidência para este lote. Resultados de execuções anteriores não substituem essas provas. |
+| Web completo | 166 testes passaram localmente e na CI, incluindo suspensão de notificações/recibos durante restauração e logout, cookie ausente e recuperação concorrente. TypeScript, lint e build passaram. |
+| Java/PostgreSQL | 134 testes passaram na CI Linux, sem falhas, erros ou skips. A limitação local de loopback no Windows não foi apresentada como aprovação. Migrações aditivas e ensaio de restauração sintética passaram. |
+| E2E e visual | 46 cenários passaram. Capturas 360/390/1440px conferidas: login, apresentação, visitante, salas e chamadas claro/escuro. Regressões cobrem teclado, compositor estreito, leitura pública, recarga de sessão, recibos e permissões. Não equivale a homologação física. |
+| Builds e distribuição | Build Web, exports Android/iOS, testes Mobile/Desktop/updater, compilação/limpeza Windows, dois testes Python e pacote API passaram. Distribuição usa os pipelines Git existentes; versões ativas são conferidas nos manifests, não nos números de desenvolvimento do package.json. |
+| Carga isolada | 144/144 respostas HTTP200, concorrências1/4/12; p95 de37/26/54ms e máximo114ms. Apenas catálogo e conta sintética em loopback; não representa capacidade ou SLA de produção. |
+| Auditoria | Gitleaks passou. Inventário npm:45 entradas (6 altas,38 moderadas,1 baixa), incluindo dependentes transitivos. Alertas residuais e migrações de plataforma necessárias em [DEPENDENCY_AUDIT](DEPENDENCY_AUDIT.md); não é uma auditoria limpa. |
 
 Nenhum envio a amigos reais, remoção de conta ou teste de carga contra produção integra essas provas. A dispensa do responsável para aparelhos físicos, assinatura Windows, validações operacionais e backup externo permanece; não equivale a testes executados, capacidade de produção demonstrada, pentest independente ou certificação jurídica LGPD.
