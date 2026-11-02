@@ -181,7 +181,7 @@ it("keeps a guest's saved appearance local without querying or changing an accou
   );
   fireEvent.click(screen.getByRole("button", { name: /Alternar tema/ }));
   expect(JSON.parse(localStorage.getItem("enturma-experience")!).theme).toBe(
-    "LIGHT",
+    "SYSTEM",
   );
   expect(api).not.toHaveBeenCalled();
 });

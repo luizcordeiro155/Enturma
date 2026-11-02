@@ -56,6 +56,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.View
 import android.view.WindowManager
 import com.google.firebase.FirebaseApp
 import com.google.firebase.FirebaseOptions
@@ -64,6 +65,7 @@ import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 import android.widget.FrameLayout
 import android.webkit.CookieManager
+import android.content.pm.ActivityInfo
 import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
 import android.webkit.GeolocationPermissions
@@ -522,6 +524,19 @@ class MainActivity : Activity() {
         private const val APP_VERSION = "${version}"
     }
 
+    private var fullscreenView: View? = null
+    private var fullscreenCallback: WebChromeClient.CustomViewCallback? = null
+    private var previousOrientation: Int = ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+    private fun closeFullscreen() {
+        val view = fullscreenView ?: return
+        rootLayout.removeView(view)
+        fullscreenView = null
+        webView.visibility = View.VISIBLE
+        requestedOrientation = previousOrientation
+        WindowInsetsControllerCompat(window, rootLayout).show(WindowInsetsCompat.Type.systemBars())
+        fullscreenCallback?.onCustomViewHidden()
+        fullscreenCallback = null
+    }
     private lateinit var rootLayout: FrameLayout
     private lateinit var webView: WebView
     private var fileChooserCallback: ValueCallback<Array<Uri>>? = null
@@ -781,6 +796,18 @@ class MainActivity : Activity() {
         }
 
         webView.webChromeClient = object : WebChromeClient() {
+            override fun onShowCustomView(view: View?, callback: WebChromeClient.CustomViewCallback?) {
+                if (view == null || fullscreenView != null) { callback?.onCustomViewHidden(); return }
+                fullscreenView = view
+                fullscreenCallback = callback
+                previousOrientation = requestedOrientation
+                requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+                webView.visibility = View.GONE
+                rootLayout.addView(view, FrameLayout.LayoutParams(-1, -1))
+                WindowInsetsControllerCompat(window, rootLayout).hide(WindowInsetsCompat.Type.systemBars())
+            }
+            override fun onHideCustomView() { closeFullscreen() }
+
             override fun onGeolocationPermissionsShowPrompt(
                 origin: String?,
                 callback: GeolocationPermissions.Callback?,
@@ -1712,11 +1739,13 @@ class MainActivity : Activity() {
 
     @Deprecated("Deprecated in Java")
     override fun onBackPressed() {
-        if (::webView.isInitialized && webView.canGoBack()) webView.goBack()
+        if (fullscreenView != null) closeFullscreen()
+        else if (::webView.isInitialized && webView.canGoBack()) webView.goBack()
         else super.onBackPressed()
     }
 
     override fun onDestroy() {
+        closeFullscreen()
         pendingPermissionRequest?.deny()
         pendingPermissionRequest = null
         val pendingOrigin = pendingGeolocationOrigin

@@ -1,18 +1,17 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { useRouter } from "next/navigation";
 import { BookOpen, LogIn, Users } from "lucide-react";
-import { api, post } from "@/lib/api";
+import { api } from "@/lib/api";
 import { roomInvitationCodes, type RoomInvitation } from "@/lib/room-invite";
+import { RoomJoinDialog } from "./room-join-dialog";
 import { RoomArtwork } from "./room-artwork";
 
 function InvitationCard({ code }: { code: string }) {
   const container = useRef<HTMLElement>(null);
   const [room, setRoom] = useState<RoomInvitation>();
   const [error, setError] = useState("");
-  const [busy, setBusy] = useState(false);
-  const router = useRouter();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -49,21 +48,6 @@ function InvitationCard({ code }: { code: string }) {
     };
   }, [code]);
 
-  async function join() {
-    if (busy || !room?.available) return;
-    setBusy(true);
-    setError("");
-    try {
-      const joined = await post<{ id: string }>(
-        `/study-rooms/join-code/${code}/join`,
-      );
-      router.push(`/rooms/${joined.id}`);
-    } catch (cause) {
-      setError((cause as Error).message);
-      setBusy(false);
-    }
-  }
-
   return (
     <article
       ref={container}
@@ -85,15 +69,11 @@ function InvitationCard({ code }: { code: string }) {
             <button
               type="button"
               className="button"
-              disabled={busy || !room.available}
-              onClick={() => void join()}
+              disabled={!room.available}
+              onClick={() => setOpen(true)}
             >
               <LogIn size={17} aria-hidden="true" />
-              {busy
-                ? "Entrando…"
-                : room.available
-                  ? "Entrar na sala"
-                  : "Sala encerrada"}
+              {room.available ? "Entrar na sala" : "Sala encerrada"}
             </button>
             {error && (
               <p className="room-invitation-error" role="alert">
@@ -108,6 +88,7 @@ function InvitationCard({ code }: { code: string }) {
           <span>{error || "Carregando convite…"}</span>
         </div>
       )}
+      {open && <RoomJoinDialog code={code} onClose={() => setOpen(false)} />}
     </article>
   );
 }

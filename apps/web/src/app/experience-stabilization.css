@@ -27,7 +27,10 @@ html .visitor-shell .visitor-actions > button:hover {
   color: var(--ink) !important;
 }
 html .private-chat .private-composer.enturma-message-composer,
-html .room-active-shell :is(.room-section-chat, .room-section-call) .persistent-composer.enturma-message-composer {
+html
+  .room-active-shell
+  :is(.room-section-chat, .room-section-call)
+  .persistent-composer.enturma-message-composer {
   border-top: 0 !important;
   box-shadow: none !important;
   background: transparent !important;
@@ -80,6 +83,85 @@ html .room-active-shell :is(.room-section-chat, .room-section-call) .persistent-
   font-size: clamp(1.8rem, 3vw, 2.6rem);
   letter-spacing: -0.025em;
   line-height: 1.12;
+}
+/* Desktop auth fits the window by reducing space, never by clipping fields.
+   Mobile keeps its existing single-column layout and keyboard behavior. */
+@media (min-width: 1000px) {
+  .auth-entry {
+    min-height: calc(100dvh - var(--desktop-chrome-height, 0px));
+  }
+  html[data-desktop-chrome="true"] .auth-entry {
+    --desktop-chrome-height: 32px;
+  }
+  .auth-entry .auth-story,
+  .auth-entry .auth-main {
+    padding-block: clamp(20px, 3vh, 48px);
+    padding-inline: clamp(24px, 4vw, 64px);
+  }
+  .auth-entry .auth-story {
+    gap: clamp(14px, 2vh, 24px);
+  }
+  .auth-entry .auth-story h1 {
+    font-size: clamp(2rem, 5.4vh, 3.8rem);
+  }
+  .auth-entry .auth-story p {
+    margin-top: 18px;
+    font-size: clamp(1rem, 2.3vh, 1.35rem);
+    line-height: 1.55;
+  }
+  .auth-entry .auth-entry-art {
+    width: min(100%, max(240px, calc((100dvh - 370px) * 1.69)));
+    align-self: center;
+  }
+  .auth-entry .auth-main form {
+    gap: clamp(12px, 1.7vh, 20px);
+    max-width: 460px;
+    width: 100%;
+  }
+  .auth-entry .auth-main form > :is(h1, p) {
+    margin: 0;
+  }
+  .auth-entry .auth-main form > label {
+    align-content: start;
+  }
+  .auth-entry .auth-main h1 {
+    font-size: clamp(1.8rem, 4vh, 2.6rem);
+  }
+  .auth-entry .auth-app-downloads {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 0;
+    padding-top: 12px;
+    gap: 12px;
+  }
+  .auth-entry .auth-app-downloads > div {
+    min-width: 0;
+  }
+  .auth-entry .auth-app-downloads a {
+    flex: 0 0 auto;
+    font-size: 0.8rem;
+    gap: 6px;
+  }
+  .auth-entry[data-auth-mode="register"] .auth-main form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .auth-entry[data-auth-mode="register"] .auth-main form > * {
+    grid-column: 1 / -1;
+  }
+  .auth-entry[data-auth-mode="register"]
+    .auth-main
+    form
+    > label:has(
+      input:is(
+        [name="name"],
+        [name="username"],
+        [name="password"],
+        [name="confirmPassword"]
+      )
+    ) {
+    grid-column: auto;
+  }
 }
 .auth-visitor-link,
 .start-visitor-link {
@@ -479,27 +561,51 @@ html[data-theme="light"] .call-controls {
   background: var(--surface) !important;
   border-color: var(--border);
 }
-html[data-theme="light"] .call-control:not(.danger):not(.hangup):not(.active) {
-  color: var(--ink) !important;
-  background: var(--soft) !important;
-  border-color: var(--border) !important;
+.screen-share-dialog .share-options {
+  min-width: 0;
 }
-.screen-share-dialog .share-options { min-width: 0; }
-.screen-share-dialog .share-options label { min-width: 0; }
-.screen-share-dialog footer { flex-wrap: wrap; }
+.screen-share-dialog .share-options label {
+  min-width: 0;
+}
+.screen-share-dialog footer {
+  flex-wrap: wrap;
+}
 @media (max-width: 480px) {
-  .screen-share-dialog { padding: 18px; }
-  .screen-share-dialog .share-options span { font-size: .78rem; padding: 6px; }
-  .screen-share-dialog footer .button { flex: 1; }
-  .dashboard-community .section-heading { flex-wrap: wrap; gap: 10px; }
-  .dashboard-community .section-heading h2 { flex: 1 1 190px; }
-  .dashboard-community .room-row small { flex-wrap: wrap; }
-  .dashboard-community .home-room-pages { gap: 8px; justify-content: space-between; }
-  .dashboard-community .home-room-pages button { padding-inline: 12px; }
+  .screen-share-dialog {
+    padding: 18px;
+  }
+  .screen-share-dialog .share-options span {
+    font-size: 0.78rem;
+    padding: 6px;
+  }
+  .screen-share-dialog footer .button {
+    flex: 1;
+  }
+  .dashboard-community .section-heading {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .dashboard-community .section-heading h2 {
+    flex: 1 1 190px;
+  }
+  .dashboard-community .room-row small {
+    flex-wrap: wrap;
+  }
+  .dashboard-community .home-room-pages {
+    gap: 8px;
+    justify-content: space-between;
+  }
+  .dashboard-community .home-room-pages button {
+    padding-inline: 12px;
+  }
 }
 /* Compact chrome leaves the available keyboard viewport to the media itself. */
-.composer-media-popover[data-compact="true"] { padding: 8px; }
-.composer-media-popover[data-compact="true"] .media-library > header { margin-bottom: 4px; }
+.composer-media-popover[data-compact="true"] {
+  padding: 8px;
+}
+.composer-media-popover[data-compact="true"] .media-library > header {
+  margin-bottom: 4px;
+}
 .composer-media-popover[data-compact="true"] .enturma-emoji-picker {
   display: grid;
   grid-template-columns: 36px minmax(0, 1fr);
@@ -508,15 +614,54 @@ html[data-theme="light"] .call-control:not(.danger):not(.hangup):not(.active) {
   overflow: hidden;
 }
 .composer-media-popover[data-compact="true"] .emoji-categories {
-  grid-column: 1; grid-row: 1 / 4;
-  flex-direction: column; overflow-y: auto; overflow-x: hidden;
-  min-height: 0; padding: 0; gap: 0;
+  grid-column: 1;
+  grid-row: 1 / 4;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+  padding: 0;
+  gap: 0;
 }
-.composer-media-popover[data-compact="true"] .emoji-categories button { min-width: 34px; min-height: 34px; width: 34px; padding: 5px; }
-.composer-media-popover[data-compact="true"] .emoji-search { grid-column: 2; grid-row: 1; margin: 0; }
-.composer-media-popover[data-compact="true"] .emoji-search input { min-height: 34px; padding-block: 6px; }
-.composer-media-popover[data-compact="true"] .emoji-picker-heading { grid-column: 2; grid-row: 2; margin: 0; font-size: .72rem; }
-.composer-media-popover[data-compact="true"] .emoji-grid { grid-column: 2; grid-row: 3; overflow: auto; gap: 2px; }
-.composer-media-popover[data-compact="true"] .emoji-grid button { min-width: 32px; min-height: 36px; padding: 3px; font-size: 26px; }
-.composer-media-popover .media-library-grid { flex-shrink: 1; min-height: 48px; }
-[data-visitor="true"] .topbar::before { content: "Visitante"; color: var(--muted); font-size: .8rem; }
+.composer-media-popover[data-compact="true"] .emoji-categories button {
+  min-width: 34px;
+  min-height: 34px;
+  width: 34px;
+  padding: 5px;
+}
+.composer-media-popover[data-compact="true"] .emoji-search {
+  grid-column: 2;
+  grid-row: 1;
+  margin: 0;
+}
+.composer-media-popover[data-compact="true"] .emoji-search input {
+  min-height: 34px;
+  padding-block: 6px;
+}
+.composer-media-popover[data-compact="true"] .emoji-picker-heading {
+  grid-column: 2;
+  grid-row: 2;
+  margin: 0;
+  font-size: 0.72rem;
+}
+.composer-media-popover[data-compact="true"] .emoji-grid {
+  grid-column: 2;
+  grid-row: 3;
+  overflow: auto;
+  gap: 2px;
+}
+.composer-media-popover[data-compact="true"] .emoji-grid button {
+  min-width: 32px;
+  min-height: 36px;
+  padding: 3px;
+  font-size: 26px;
+}
+.composer-media-popover .media-library-grid {
+  flex-shrink: 1;
+  min-height: 48px;
+}
+[data-visitor="true"] .topbar::before {
+  content: "Visitante";
+  color: var(--muted);
+  font-size: 0.8rem;
+}

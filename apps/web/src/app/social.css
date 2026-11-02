@@ -228,7 +228,7 @@
   overflow: auto;
   padding: 12px 0;
 }
-.private-messages article {
+.private-messages > article {
   display: flex;
   gap: 12px;
   margin: 12px 0;
@@ -238,7 +238,7 @@
   max-width: 90%;
   width: fit-content;
 }
-.private-messages article.mine {
+.private-messages > article.mine {
   margin-left: auto;
   border: 1px solid var(--border);
 }
@@ -277,12 +277,12 @@ html[data-theme="dark"] .private-connection-status {
 html[data-theme="dark"] .private-messages {
   scrollbar-color: var(--room-border) transparent;
 }
-html[data-theme="dark"] .private-messages article {
+html[data-theme="dark"] .private-messages > article {
   background: var(--room-subtle);
   color: var(--room-ink);
   border: 1px solid color-mix(in srgb, var(--room-border) 82%, transparent);
 }
-html[data-theme="dark"] .private-messages article.mine {
+html[data-theme="dark"] .private-messages > article.mine {
   background: color-mix(in srgb, var(--room-accent) 16%, var(--room-panel));
   color: var(--room-ink);
   border-color: color-mix(in srgb, var(--room-accent) 42%, var(--room-border));
@@ -396,7 +396,7 @@ html[data-theme="dark"] .friends-page .privacy-pill {
   .call-media-tile.screen-share {
     min-height: 190px;
   }
-  .private-messages article {
+  .private-messages > article {
     max-width: 100%;
   }
 }

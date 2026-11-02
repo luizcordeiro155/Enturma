@@ -119,3 +119,20 @@ Nenhum envio a amigos reais, remoção de conta ou teste de carga contra produç
 - Histórico **privado** anterior aos recibos pode adquirir confirmação real ao ser recebido/aberto pelo destinatário. Não há marcação retroativa de leitura. Em salas antigas sem snapshot de destinatários, continua impossível inferir quem recebeu/leu; novas mensagens mantêm o conjunto definido no envio.
 
 Não há nova migração, mudança de senha ou invalidação de sessões neste refinamento. O protocolo nativo aceita clientes anteriores. A CI da [PR #134](https://github.com/luizcordeiro155/Enturma/pull/134) registra os resultados finais e capturas; a PR também registra publicação e manifests verificados. Alertas de dependências e os limites operacionais acima permanecem.
+
+
+## Continuação de 02/11 — temas, convites, chamadas e acesso
+
+- A preferência de aparência Web tem uma única fonte em memória e um único responsável pelo tema no documento. Gravações são serializadas; respostas antigas de leitura não substituem escolhas recentes. As páginas continuam recebendo eventos e revalidação de dados sem recarregar o documento.
+- Todos os seletores oferecem Claro, Escuro, Enturma e Sistema nessa ordem. Toque/clique breve percorre as quatro opções; pressão longa e hover preservam o seletor. Alto contraste mantém a paleta verde do Enturma.
+- Convites no chat privado usam cartões responsivos e links sublinhados. Links da instalação atual ou da origem HTTPS oficial abrem confirmação interna com aceitar/recusar. Só o aceite realiza a entrada pela API, que continua validando autorização, encerramento e bloqueios.
+- Histórico privado de chamadas retorna até 100 resultados reais para os participantes de uma amizade aceita. Mostra chamadas atendidas, recusadas, canceladas ou não atendidas; não expõe dispositivos nem tokens. Não inventa duração.
+- Controles distinguem som desligado e microfone desligado por ícone, texto e cor. Mobile mantém visualização, câmera e áudio e não oferece qualidade/transmissão. Tela cheia solicita horizontal quando suportado; o shell Android implementa a visualização nativa e restaura orientação e barras ao sair.
+- Electron usa captura de áudio loopback. Se o dispositivo de áudio falhar especificamente ao iniciar, a transmissão tenta novamente apenas com vídeo, informando a ausência do áudio do computador. Recusas de permissão e cancelamentos não disparam novas tentativas.
+- Login, cadastro e recuperação compartilham o visual e as animações existentes. Cadastro destaca o retorno ao login. Em desktop, campos e espaçamento se adaptam à altura; janelas pequenas mantêm rolagem acessível. O arranjo mobile dos campos é preservado.
+
+### Evidências e publicação deste lote
+
+Validações locais: TypeScript Web/Expo, lint sem erros (34 avisos existentes), compilação Java e testes unitários dos fluxos alterados. A suíte de CI inclui testes reais de autorização/histórico no PostgreSQL isolado, navegação sem recarga, convites entre duas contas, recusa/aceite, capturas de todos os temas e dimensões e compilação Kotlin do shell Android. Consulte o resultado da PR e seus artefatos antes de considerar essas etapas concluídas. Capturas dos controles validam o componente real e o CSS; não equivalem a uma chamada física ou captura real de áudio do Windows.
+
+Não há migração de banco neste lote. Histórico reutiliza private_call. Publicação segue main: Vercel, sincronização GitHub/SquareCloud e builders Windows/Android Railway. Rollback do código não exige desfazer dados. Trava de orientação em navegadores depende da API oferecida pelo dispositivo; o app Android possui tratamento nativo. Não foi realizada homologação física nesta execução.

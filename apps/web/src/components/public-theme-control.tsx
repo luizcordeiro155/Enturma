@@ -1,73 +1,16 @@
 "use client";
-import { useEffect, useState } from "react";
 import { MonitorCog, Moon, Sun } from "lucide-react";
-import { applyEnturmaTheme } from "@/lib/theme-motion";
+import { useExperience, saveExperience } from "@/lib/experience-preferences";
 import { ThemePicker } from "./theme-picker";
 import { EnturmaAppIcon } from "./enturma-app-icon";
 import type { ExperiencePreference } from "@enturma/contracts";
 type AuthTheme = ExperiencePreference["theme"];
 
 export function PublicThemeControl({ compact = false }: { compact?: boolean }) {
-  const [theme, setTheme] = useState<AuthTheme>("SYSTEM");
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    const sync = () => {
-      let cachedTheme: AuthTheme = "SYSTEM";
-      try {
-        const cached = JSON.parse(
-          localStorage.getItem("enturma-experience") || "{}",
-        ) as { theme?: string };
-        if (
-          cached.theme === "LIGHT" ||
-          cached.theme === "DARK" ||
-          cached.theme === "ENTURMA"
-        ) {
-          cachedTheme = cached.theme;
-        }
-      } catch {}
-      queueMicrotask(() => {
-        setTheme(cachedTheme);
-        setReady(true);
-      });
-    };
-    sync();
-    const changed = (event: StorageEvent) => {
-      if (event.key === "enturma-experience") sync();
-    };
-    window.addEventListener("storage", changed);
-    return () => window.removeEventListener("storage", changed);
-  }, []);
-
-  useEffect(() => {
-    if (!ready) return;
-    const system = window.matchMedia("(prefers-color-scheme: dark)");
-    const apply = () => {
-      const nextTheme =
-        theme === "SYSTEM"
-          ? system.matches
-            ? "dark"
-            : "light"
-          : theme.toLowerCase();
-      applyEnturmaTheme(nextTheme);
-    };
-    apply();
-    if (theme !== "SYSTEM") return;
-    system.addEventListener("change", apply);
-    return () => system.removeEventListener("change", apply);
-  }, [ready, theme]);
-
-  function choose(nextTheme: AuthTheme) {
-    setTheme(nextTheme);
-    try {
-      const cached = JSON.parse(
-        localStorage.getItem("enturma-experience") || "{}",
-      ) as Record<string, unknown>;
-      const next = { ...cached, theme: nextTheme };
-      const serialized = JSON.stringify(next);
-      localStorage.setItem("enturma-experience", serialized);
-      localStorage.setItem("enturma-experience-pending", serialized);
-    } catch {}
+  const preference = useExperience();
+  const theme = preference.theme;
+  function choose(theme: AuthTheme) {
+    void saveExperience({ ...preference, theme }, true);
   }
 
   if (compact) return <ThemePicker value={theme} onChange={choose} />;
@@ -100,22 +43,22 @@ export function PublicThemeControl({ compact = false }: { compact?: boolean }) {
       <button
         type="button"
         className="auth-theme-option"
-        aria-pressed={theme === "SYSTEM"}
-        onClick={() => choose("SYSTEM")}
-        title="Seguir o tema do sistema"
-      >
-        <MonitorCog size={16} />
-        <span>Sistema</span>
-      </button>
-      <button
-        type="button"
-        className="auth-theme-option"
         aria-pressed={theme === "ENTURMA"}
         onClick={() => choose("ENTURMA")}
         title="Usar as cores do Enturma"
       >
         <EnturmaAppIcon size={16} />
         <span>Enturma</span>
+      </button>
+      <button
+        type="button"
+        className="auth-theme-option"
+        aria-pressed={theme === "SYSTEM"}
+        onClick={() => choose("SYSTEM")}
+        title="Seguir o tema do sistema"
+      >
+        <MonitorCog size={16} />
+        <span>Sistema</span>
       </button>
     </div>
   );

@@ -874,22 +874,14 @@ test("theme surfaces stay readable across core routes and narrow screens", async
   expect(await contrast()).toBeGreaterThanOrEqual(4.5);
   await page.screenshot({ path: join(screenshots, "rides-mobile-dark.png") });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await request.put(`${backend}/api/v1/users/me/experience`, {
-    headers: { Authorization: `Bearer ${credentials.accessToken}` },
-    data: {
-      theme: "SYSTEM",
-      reducedMotion: true,
-      fontScale: 1,
-      highContrast: false,
-      enhancedFocus: true,
-    },
-  });
+  // A second Enturma tab notifies the shared preference store through storage.
   await page.evaluate(() => {
     const p = JSON.parse(localStorage.getItem("enturma-experience") || "{}");
     localStorage.setItem(
       "enturma-experience",
       JSON.stringify({ ...p, theme: "SYSTEM" }),
     );
+    window.dispatchEvent(new StorageEvent("storage", { key: "enturma-experience" }));
   });
   await page.emulateMedia({ colorScheme: "light" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");

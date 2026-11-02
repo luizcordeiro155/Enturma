@@ -1,6 +1,6 @@
 /* The optional Enturma palette uses the app icon's forest green and lime.
    Keeping the dark scheme preserves existing accessible call/media surfaces. */
-html[data-palette="enturma"]:not([data-high-contrast="true"]) {
+html[data-palette="enturma"] {
   --bg: #0b211a;
   --ink: #f2f8ef;
   --muted: #b4cbbb;
@@ -108,4 +108,13 @@ html .profile-media-choice .profile-media-remove:is(:hover, :focus-visible) {
     width: 36px;
     height: 36px;
   }
+}
+
+html[data-theme="dark"][data-palette="enturma"][data-high-contrast="true"] {
+  --bg: #061c13;
+  --surface: #0b2c1f;
+  --soft: #143c2b;
+  --ink: #ffffff;
+  --muted: #e1f5e8;
+  --border: #a6d8b7;
 }

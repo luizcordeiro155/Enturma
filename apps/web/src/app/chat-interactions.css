@@ -105,17 +105,17 @@ button.message-overflow-trigger {
   flex-shrink: 0;
 }
 .persistent-message,
-.private-messages article {
+.private-messages > article {
   position: relative;
 }
-.private-messages article {
+.private-messages > article {
   padding-right: 46px;
 }
 .persistent-messages .message-content header {
   padding-right: 30px;
 }
 .persistent-message:hover .message-overflow-trigger,
-.private-messages article:hover .message-overflow-trigger,
+.private-messages > article:hover .message-overflow-trigger,
 .message-overflow-trigger:focus-visible {
   opacity: 1;
 }
