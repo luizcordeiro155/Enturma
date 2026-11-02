@@ -164,11 +164,16 @@ test("saved Enturma contrast and theme cycle survive navigation without reload",
   await page
     .locator("html")
     .evaluate((el) => (el.dataset.navigationProbe = "kept"));
-  for (const label of ["Fórum", "Salas", "Início"]) {
+  for (const [label, path] of [
+    ["Fórum", "/forum"],
+    ["Salas", "/rooms"],
+    ["Início", "/home"],
+  ]) {
     await page
-      .locator(".sidebar")
+      .locator(".sidebar:visible")
       .getByRole("link", { name: label, exact: true })
       .click();
+    await expect(page).toHaveURL(new RegExp(`${path}$`));
     await expect(page.locator("html")).toHaveAttribute(
       "data-palette",
       "enturma",
@@ -190,7 +195,7 @@ test("saved Enturma contrast and theme cycle survive navigation without reload",
       "kept",
     );
   }
-  const picker = page.locator(".topbar .theme-picker");
+  const picker = page.locator(".topbar:visible .theme-picker");
   await picker.hover();
   await expect(picker.getByRole("menuitemradio")).toHaveText([
     "Claro",
