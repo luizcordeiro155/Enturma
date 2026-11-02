@@ -340,6 +340,9 @@ test("private invitation fits all themes, requires consent and keeps navigation 
           );
         }, theme);
         await expect(card).toBeVisible();
+        await recipient.screenshot({
+          path: info.outputPath(`invitation-${theme}-${width}.png`),
+        });
         expect(
           await card.evaluate(
             (node) => node.scrollWidth <= node.clientWidth + 1,
@@ -348,9 +351,6 @@ test("private invitation fits all themes, requires consent and keeps navigation 
         const box = (await card.boundingBox())!;
         expect(box.width).toBeGreaterThan(180);
         expect(box.x + box.width).toBeLessThanOrEqual(width);
-        await recipient.screenshot({
-          path: info.outputPath(`invitation-${theme}-${width}.png`),
-        });
         await recipient
           .getByRole("link", { name: invitation, exact: true })
           .click();

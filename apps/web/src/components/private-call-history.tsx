@@ -19,16 +19,22 @@ export function usePrivateCallHistory(friendshipId?: string) {
     entries: CallHistoryEntry[];
   }>();
   const current = useRef(friendshipId);
+  const request = useRef(0);
   useEffect(() => {
     current.current = friendshipId;
+    return () => {
+      request.current++;
+    };
   }, [friendshipId]);
   const refresh = useCallback(async () => {
     if (!friendshipId) return;
+    const revision = ++request.current;
     const entries = await api<CallHistoryEntry[]>(
       `/friends/${friendshipId}/calls`,
       { cache: "no-store" },
     );
-    if (current.current === friendshipId) setHistory({ friendshipId, entries });
+    if (current.current === friendshipId && request.current === revision)
+      setHistory({ friendshipId, entries });
   }, [friendshipId]);
   useLiveRefresh("private_call_changed", refresh, 5000);
   useEffect(() => {

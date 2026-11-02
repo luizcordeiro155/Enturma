@@ -121,6 +121,9 @@ html
   .auth-entry .auth-main form > :is(h1, p) {
     margin: 0;
   }
+  .auth-entry .auth-main form > label {
+    align-content: start;
+  }
   .auth-entry .auth-main h1 {
     font-size: clamp(1.8rem, 4vh, 2.6rem);
   }
@@ -557,11 +560,6 @@ html[data-theme="light"] .discord-controls,
 html[data-theme="light"] .call-controls {
   background: var(--surface) !important;
   border-color: var(--border);
-}
-html[data-theme="light"] .call-control:not(.danger):not(.hangup):not(.active) {
-  color: var(--ink) !important;
-  background: var(--soft) !important;
-  border-color: var(--border) !important;
 }
 .screen-share-dialog .share-options {
   min-width: 0;

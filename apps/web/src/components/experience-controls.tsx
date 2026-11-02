@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { Accessibility, X } from "lucide-react";
 import type { ExperiencePreference } from "@enturma/contracts";
 import {
@@ -18,6 +18,8 @@ export function ExperienceControls({
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
+  const titleId = useId();
+  const textSizeId = useId();
   useEffect(() => {
     if (!localOnly) void syncExperience().catch(() => {});
   }, [localOnly]);
@@ -57,12 +59,12 @@ export function ExperienceControls({
       <dialog
         ref={dialog}
         className="accessibility-dialog"
-        aria-labelledby="accessibility-title"
+        aria-labelledby={titleId}
         onCancel={() => setOpen(false)}
         onClose={() => setOpen(false)}
       >
         <header>
-          <h2 id="accessibility-title">Aparência e acessibilidade</h2>
+          <h2 id={titleId}>Aparência e acessibilidade</h2>
           <button
             className="icon-control"
             aria-label="Fechar configurações"
@@ -89,11 +91,11 @@ export function ExperienceControls({
             <option value="SYSTEM">Seguir o sistema</option>
           </select>
         </label>
-        <label htmlFor="text-size">
+        <label htmlFor={textSizeId}>
           Tamanho do texto: {Math.round(preference.fontScale * 100)}%
         </label>
         <input
-          id="text-size"
+          id={textSizeId}
           type="range"
           min="0.85"
           max="1.35"
