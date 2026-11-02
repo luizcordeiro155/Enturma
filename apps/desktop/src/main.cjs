@@ -1213,17 +1213,19 @@ ipcMain.handle("desktop:get-info", (event) => {
     platform: process.platform,
     webUrl: WEB_URL,
     releaseNotes: [
-      "Instalador e desinstalador com o ícone oficial do Enturma.",
-      "Ao desinstalar, você escolhe se deseja apagar também sessões, cache e preferências locais.",
-      "A remoção dos dados locais vem desmarcada e preserva sua conta e os arquivos exportados.",
+      "Tema Enturma também no cabeçalho e em Caronas, com a marca oficial transparente.",
+      "Nova animação de entrada no login, sincronizada com suas cores.",
+      "Conversas mais compactas, um seletor de mídias e botão de áudio quando a mensagem está vazia.",
+      "Confirmações reais de entrega e leitura, incluindo histórico privado ao ser aberto novamente.",
     ],
   };
 });
 
-ipcMain.handle("desktop:set-theme", (event, light) => {
+ipcMain.handle("desktop:set-theme", (event, theme) => {
   requireTrusted(event);
-  if (typeof light !== "boolean") throw TypeError("Theme must be a boolean");
-  if (process.platform !== "darwin") mainWindow.setTitleBarOverlay({ color: light ? "#f8faf9" : "#101719", symbolColor: light ? "#183f36" : "#edf5f2", height: 32 });
+  if (typeof theme !== "boolean" && !["light", "dark", "enturma"].includes(theme)) throw TypeError("Invalid theme");
+  const light = theme === true || theme === "light";
+  if (process.platform !== "darwin") mainWindow.setTitleBarOverlay({ color: light ? "#f8faf9" : theme === "enturma" ? "#0b211a" : "#101719", symbolColor: light ? "#183f36" : "#edf5f2", height: 32 });
 });
 ipcMain.handle("desktop:update-state", (event) => {
   requireTrusted(event);

@@ -10,13 +10,24 @@ export function DesktopChrome() {
     const root = document.documentElement;
     root.dataset.desktopChrome = "true";
     const timer = setTimeout(() => setActive(true), 0);
-    const sync = () =>
-      void bridge.setTheme?.(root.dataset.theme === "light").catch(() => {});
+    const sync = () => {
+      const light = root.dataset.theme === "light";
+      // Older installed clients accept only the boolean protocol.
+      const theme =
+        root.dataset.palette === "enturma"
+          ? "enturma"
+          : light
+            ? "light"
+            : "dark";
+      void bridge
+        .setTheme?.(theme)
+        .catch(() => bridge.setTheme?.(light).catch(() => {}));
+    };
     sync();
     const observer = new MutationObserver(sync);
     observer.observe(root, {
       attributes: true,
-      attributeFilter: ["data-theme"],
+      attributeFilter: ["data-theme", "data-palette"],
     });
     return () => {
       clearTimeout(timer);

@@ -26,9 +26,13 @@ html .visitor-shell .visitor-actions > button:hover {
   background: var(--soft) !important;
   color: var(--ink) !important;
 }
-html .enturma-message-composer:is(.persistent-composer, .private-composer) {
+html .private-chat .private-composer.enturma-message-composer,
+html .room-active-shell :is(.room-section-chat, .room-section-call) .persistent-composer.enturma-message-composer {
   border-top: 0 !important;
   box-shadow: none !important;
+  background: transparent !important;
+  padding-top: 4px !important;
+  margin-top: 0 !important;
 }
 .typing-status .conversation-typing {
   min-height: 0;

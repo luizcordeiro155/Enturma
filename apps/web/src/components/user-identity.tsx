@@ -18,7 +18,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ProfileCommunity } from "./profile-community";
 import { api, post } from "@/lib/api";
-import { FeaturedAchievementBadges, type Showcase } from "./profile-showcase";
+import {
+  FeaturedAchievementBadges,
+  ShowcaseView,
+  type Showcase,
+} from "./profile-showcase";
+import { useVisitor } from "@/lib/visitor-context";
 import { ConfirmedLink, ForumLinks } from "./forum-links";
 import { useLiveRefresh } from "@/lib/live-updates";
 export type ProfileDetails = {
@@ -150,6 +155,7 @@ export function LiveIdentity({ id, name }: { id: string; name: string }) {
   return <UserIdentity user={user} />;
 }
 export function Avatar({ user }: { user: PublicProfile }) {
+  const visitor = useVisitor();
   const d = user.profileDetails;
   return (
     <span
@@ -158,7 +164,7 @@ export function Avatar({ user }: { user: PublicProfile }) {
     >
       {user.hasAvatar ? (
         <img
-          src={`/api/backend/users/${user.id}/avatar?v=${user.mediaVersion ?? 0}`}
+          src={`/api/backend/${visitor.active ? "public/explore/" : ""}users/${user.id}/avatar?v=${user.mediaVersion ?? 0}`}
           alt=""
         />
       ) : (
@@ -176,6 +182,7 @@ export function ProfileCard({
   showcase?: Showcase;
   actions?: ReactNode;
 }) {
+  const visitor = useVisitor();
   const d = user.profileDetails ?? {};
   return (
     <div
@@ -185,7 +192,7 @@ export function ProfileCard({
       <div className="public-profile-banner">
         {user.hasBanner ? (
           <img
-            src={`/api/backend/users/${user.id}/banner?v=${user.mediaVersion ?? 0}`}
+            src={`/api/backend/${visitor.active ? "public/explore/" : ""}users/${user.id}/banner?v=${user.mediaVersion ?? 0}`}
             alt="Banner do perfil"
             className="profile-banner-media"
             loading="eager"
@@ -317,6 +324,7 @@ export function UserIdentity({
   subtitle?: string;
 }) {
   const router = useRouter();
+  const visitor = useVisitor();
   const [profile, setProfile] = useState<PublicProfile>();
   const [showcase, setShowcase] = useState<Showcase>();
   const [isOwnProfile, setIsOwnProfile] = useState(false);
@@ -390,6 +398,21 @@ export function UserIdentity({
     loadingProfile.current = true;
     setMessage("");
     try {
+      if (visitor.active) {
+        const result = await api<{
+          profile: PublicProfile;
+          showcase: Showcase;
+        }>(`/public/explore/users/${user.id}/profile`, { cache: "no-store" });
+        setProfile({
+          ...result.profile,
+          showcaseAppearance: result.showcase.appearance,
+        });
+        setShowcase(result.showcase);
+        setIsOwnProfile(false);
+        setFriendship(undefined);
+        setOpen(true);
+        return;
+      }
       const [loadedProfile, loadedShowcase, me] = await Promise.all([
         api<PublicProfile>(`/users/${user.id}/profile`, { cache: "no-store" }),
         api<Showcase>(`/users/${user.id}/showcase`, { cache: "no-store" }),
@@ -444,6 +467,7 @@ export function UserIdentity({
           </span>
         ) : null}
       </button>
+      {!open && message ? <span role="status">{message}</span> : null}
       {open
         ? createPortal(
             <div
@@ -465,15 +489,48 @@ export function UserIdentity({
                   user={profile}
                   showcase={showcase}
                   mural={
-                    <ProfileCommunity
-                      userId={profile.id}
-                      showcase={showcase}
-                      own={isOwnProfile}
-                      onNavigate={(href) => void navigate(href)}
-                    />
+                    visitor.active ? (
+                      <div className="profile-community profile-community-panel">
+                        <h2 className="profile-mural-title">Mural</h2>
+                        <ShowcaseView
+                          value={showcase}
+                          detailed
+                          showBadges={false}
+                        />
+                      </div>
+                    ) : (
+                      <ProfileCommunity
+                        userId={profile.id}
+                        showcase={showcase}
+                        own={isOwnProfile}
+                        onNavigate={(href) => void navigate(href)}
+                      />
+                    )
                   }
                   actions={
-                    !isOwnProfile ? (
+                    visitor.active ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={async () => {
+                            await close(false);
+                            visitor.requestLogin("/friends");
+                          }}
+                        >
+                          Adicionar amizade
+                        </button>
+                        <button
+                          type="button"
+                          className="secondary"
+                          onClick={async () => {
+                            await close(false);
+                            visitor.requestLogin("/friends");
+                          }}
+                        >
+                          Iniciar conversa
+                        </button>
+                      </>
+                    ) : !isOwnProfile ? (
                       <>
                         {friendshipLoading ? (
                           <button type="button" disabled>

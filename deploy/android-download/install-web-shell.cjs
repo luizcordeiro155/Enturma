@@ -588,6 +588,14 @@ class MainActivity : Activity() {
         }
 
         @JavascriptInterface
+        fun setTheme(theme: String) {
+            if (theme !in setOf("light", "dark", "enturma")) return
+            runOnUiThread {
+                applySystemBarTheme(theme == "light", theme == "enturma")
+            }
+        }
+
+        @JavascriptInterface
         fun installUpdate(downloadUrl: String) {
             runOnUiThread {
                 startUpdateInstall(downloadUrl)
@@ -1267,11 +1275,11 @@ class MainActivity : Activity() {
         updateDownloadId?.let { watchUpdateDownload(it) }
     }
 
-    private fun applySystemBarTheme(light: Boolean) {
+    private fun applySystemBarTheme(light: Boolean, enturma: Boolean = false) {
         // Manual IME resize temporarily exposes the native content window
         // below the WebView. Match its background to the active app theme so
         // Android never reveals the default white launch/window surface.
-        val appBackground = Color.parseColor(if (light) "#ffffff" else "#0f1917")
+        val appBackground = Color.parseColor(if (light) "#ffffff" else if (enturma) "#0b211a" else "#0f1917")
         window.setBackgroundDrawable(ColorDrawable(appBackground))
         window.decorView.setBackgroundColor(appBackground)
         if (::rootLayout.isInitialized) rootLayout.setBackgroundColor(appBackground)
@@ -1334,7 +1342,9 @@ class MainActivity : Activity() {
                   light = !window.matchMedia("(prefers-color-scheme: dark)").matches;
                 }
                 try {
-                  if (window.EnturmaNative && typeof window.EnturmaNative.setLightTheme === "function") {
+                  if (window.EnturmaNative && typeof window.EnturmaNative.setTheme === "function") {
+                    window.EnturmaNative.setTheme(root.dataset.palette === "enturma" ? "enturma" : light ? "light" : "dark");
+                  } else if (window.EnturmaNative && typeof window.EnturmaNative.setLightTheme === "function") {
                     window.EnturmaNative.setLightTheme(light);
                   }
                 } catch (_) {}
@@ -1347,7 +1357,7 @@ class MainActivity : Activity() {
               }
               window.__enturmaThemeObserver = new MutationObserver(function(mutations) {
                 for (var i = 0; i < mutations.length; i++) {
-                  if (mutations[i].attributeName === "data-theme") {
+                  if (mutations[i].attributeName === "data-theme" || mutations[i].attributeName === "data-palette") {
                     syncNativeTheme();
                     break;
                   }
@@ -1355,7 +1365,7 @@ class MainActivity : Activity() {
               });
               window.__enturmaThemeObserver.observe(root, {
                 attributes: true,
-                attributeFilter: ["data-theme"]
+                attributeFilter: ["data-theme", "data-palette"]
               });
 
               function nativeVersionIsNewer(remote, current) {

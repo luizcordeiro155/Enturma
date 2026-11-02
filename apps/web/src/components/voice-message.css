@@ -27,23 +27,38 @@
 .voice-recorder {
   display: flex;
   align-items: center;
+  order: 3;
+  flex: 0 0 42px;
+  color: var(--ink);
 }
-.voice-record-button {
-  display: inline-flex;
+.enturma-message-composer .composer-send-button {
+  order: 3;
+}
+.enturma-message-composer .composer-media-buttons {
+  order: 2;
+}
+.enturma-message-composer .composer-text-field {
+  order: 1;
+}
+.voice-recorder .voice-record-button {
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
-  flex: 0 0 38px;
-  width: 38px;
-  height: 38px;
-  padding: 0;
+  flex: 0 0 42px;
+  width: 42px;
+  min-width: 42px;
+  height: 42px;
+  min-height: 42px;
+  margin: 0;
+  padding: 0 !important;
   border: 0 !important;
   box-shadow: none !important;
-  border-radius: 50%;
+  border-radius: 50% !important;
   background: transparent !important;
   color: inherit !important;
   cursor: pointer;
 }
-.voice-record-button:hover {
+.voice-recorder .voice-record-button:not(.voice-record-send):hover {
   background: color-mix(in srgb, currentColor 12%, transparent) !important;
 }
 .voice-record-button:disabled {
@@ -51,18 +66,11 @@
   cursor: default;
 }
 .voice-record-panel {
-  position: absolute;
-  z-index: 12;
-  inset: auto 0 calc(100% + 8px);
   display: flex;
+  width: 100%;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: 18px;
-  background: var(--surface);
-  color: var(--ink);
-  box-shadow: 0 8px 28px #0003;
+  color: var(--room-ink, var(--ink));
   min-width: 0;
 }
 .voice-record-panel audio {
@@ -80,7 +88,32 @@
   font-size: 0.72rem;
   opacity: 0.8;
 }
-.voice-record-send {
-  background: var(--accent) !important;
-  color: var(--accent-contrast, #102b22) !important;
+.voice-recorder .voice-record-send {
+  background: var(--room-accent, var(--accent)) !important;
+  color: var(--room-accent-ink, var(--on-accent, #173a32)) !important;
+}
+
+.voice-recorder svg {
+  flex: none;
+  width: 20px;
+  height: 20px;
+}
+.voice-recorder[data-stage]:not([data-stage="idle"]) {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+/* Recording replaces the controls in the same pill; draft and selection stay mounted. */
+.enturma-message-composer
+  .composer-main-row:has(.voice-recorder:not([data-stage="idle"]))
+  > :not(.voice-recorder) {
+  display: none !important;
+}
+.voice-recorder[data-stage="recording"] .voice-record-timer::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--danger, #e55d6c);
 }

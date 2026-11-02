@@ -20,7 +20,7 @@ import { api, post } from "@/lib/api";
 import { authDestination } from "@/lib/auth-navigation";
 import { PublicThemeControl } from "./public-theme-control";
 import { Feedback } from "./feedback";
-const AuthFilm = dynamic(() => import("./motion/guide-player"), { ssr: false });
+const AuthFilm = dynamic(() => import("./motion/auth-player"), { ssr: false });
 type Mode =
   "login" | "register" | "forgot-password" | "reset-password" | "verify-email";
 type RecoveryStarted = { trackingToken: string; expiresIn: number };
@@ -303,7 +303,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
 
     if (["login", "register", "reset-password"].includes(mode)) {
       if (!password) errors.password = "Informe sua senha.";
-      else if (mode !== "login" && (password.length < 6 || password.length > 30))
+      else if (
+        mode !== "login" &&
+        (password.length < 6 || password.length > 30)
+      )
         errors.password = "A senha deve ter de 6 a 30 caracteres.";
     }
 
@@ -770,7 +773,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
         </div>
         {(mode === "login" || mode === "register") && (
           <div className="auth-entry-art" aria-hidden="true">
-            <AuthFilm step={3} />
+            <AuthFilm />
           </div>
         )}
         <footer className="auth-story-footer">

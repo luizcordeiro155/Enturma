@@ -544,7 +544,9 @@ export function Friends() {
   ) {
     if (
       event.pointerType === "mouse" ||
-      (event.target as HTMLElement).closest("button,a,input,textarea,audio,video")
+      (event.target as HTMLElement).closest(
+        "button,a,input,textarea,audio,video",
+      )
     )
       return;
     cancelPrivateLongPress();
@@ -1521,6 +1523,7 @@ export function Friends() {
 
                     <VoiceRecorder
                       key={selected.id}
+                      hiddenWhenIdle={Boolean(draft.trim() || image)}
                       disabled={busy || !privateImagesEnabled}
                       onError={setError}
                       onSend={(file) => send(undefined, { file })}
@@ -1538,14 +1541,16 @@ export function Friends() {
                       onKlipy={sendKlipy}
                       disabled={busy || !finger}
                     />
-                    <button
-                      className="composer-send-button"
-                      aria-label="Enviar mensagem"
-                      onPointerDown={(event) => event.preventDefault()}
-                      disabled={!finger || busy || (!draft.trim() && !image)}
-                    >
-                      <Send size={22} />
-                    </button>
+                    {(Boolean(draft.trim() || image) || busy) && (
+                      <button
+                        className="composer-send-button"
+                        aria-label="Enviar mensagem"
+                        onPointerDown={(event) => event.preventDefault()}
+                        disabled={!finger || busy || (!draft.trim() && !image)}
+                      >
+                        <Send size={22} />
+                      </button>
+                    )}
                   </div>
                 </form>
               </>

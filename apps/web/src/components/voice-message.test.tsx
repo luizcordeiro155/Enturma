@@ -105,3 +105,28 @@ test("caps recording at two minutes and releases microphone on navigation", asyn
   expect(recorders.at(-1)!.state).toBe("inactive");
   expect(stopTrack).toHaveBeenCalled();
 });
+
+test("typing hides the idle microphone but never discards an active recording", async () => {
+  const onSend = vi.fn(),
+    onError = vi.fn();
+  const { rerender } = render(
+    <VoiceRecorder onSend={onSend} onError={onError} hiddenWhenIdle />,
+  );
+  expect(
+    screen.queryByRole("button", { name: "Gravar mensagem de voz" }),
+  ).toBeNull();
+  rerender(<VoiceRecorder onSend={onSend} onError={onError} />);
+  await act(async () =>
+    fireEvent.click(
+      screen.getByRole("button", { name: "Gravar mensagem de voz" }),
+    ),
+  );
+  rerender(<VoiceRecorder onSend={onSend} onError={onError} hiddenWhenIdle />);
+  expect(recorders.at(-1)!.state).toBe("recording");
+  fireEvent.click(screen.getByRole("button", { name: "Parar e ouvir áudio" }));
+  expect(screen.getByLabelText("Ouvir áudio antes de enviar")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Descartar áudio" }));
+  expect(
+    screen.queryByRole("button", { name: "Gravar mensagem de voz" }),
+  ).toBeNull();
+});

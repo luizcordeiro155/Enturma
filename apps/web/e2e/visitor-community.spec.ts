@@ -20,6 +20,20 @@ test("visitor reads the real community and settings, but account actions stay ga
   expect(registration.ok()).toBe(true);
   const credentials = await registration.json();
   const headers = { Authorization: `Bearer ${credentials.accessToken}` };
+  const avatar = await request.post(`${backend}/api/v1/users/me/avatar`, {
+    headers,
+    multipart: {
+      file: {
+        name: "avatar.png",
+        mimeType: "image/png",
+        buffer: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+ip1sAAAAASUVORK5CYII=",
+          "base64",
+        ),
+      },
+    },
+  });
+  expect(avatar.ok()).toBe(true);
   const title = `Aprender em comunidade ${tag}`;
   const created = await request.post(`${backend}/api/v1/forum`, {
     headers,
@@ -51,6 +65,38 @@ test("visitor reads the real community and settings, but account actions stay ga
       path: info.outputPath(`visitor-forum-${width}.png`),
       fullPage: true,
     });
+    const author = page
+      .getByRole("button", { name: "Ver perfil de Autor visitante" })
+      .first();
+    await expect
+      .poll(() =>
+        author
+          .locator("img")
+          .evaluate(
+            (img: HTMLImageElement) => img.complete && img.naturalWidth > 0,
+          ),
+      )
+      .toBe(true);
+    await author.click();
+    const profile = page.getByRole("dialog", {
+      name: "Perfil de Autor visitante",
+      exact: true,
+    });
+    await expect(profile).toBeVisible();
+    await expect(profile.locator(".identity-avatar img")).toBeVisible();
+    await page.screenshot({
+      path: info.outputPath(`visitor-profile-${width}.png`),
+    });
+    await profile
+      .getByRole("button", { name: "Adicionar amizade", exact: true })
+      .click();
+    await expect(
+      page.getByRole("dialog", { name: "Faça parte da turma." }),
+    ).toBeVisible();
+    await page.keyboard.press("Escape");
+    await page.goto(
+      `/visitante?path=${encodeURIComponent(`/forum/${entry.id}`)}`,
+    );
     await page
       .getByRole("button", { name: "Votar a favor", exact: true })
       .first()

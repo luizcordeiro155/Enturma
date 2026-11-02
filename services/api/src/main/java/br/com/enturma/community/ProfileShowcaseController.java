@@ -147,8 +147,16 @@ public class ProfileShowcaseController {
         id,
         id,
         a.id())) throw ApiException.forbidden();
+    return project(id, a.id().equals(id));
+  }
+
+  /** Shared read projection; callers must enforce access before invoking. */
+  Object publicShowcase(UUID id) {
+    return project(id, false);
+  }
+
+  private Object project(UUID id, boolean owner) {
     var user = db.one("SELECT id,created_at FROM app_user WHERE id=? AND status='ACTIVE'", id);
-    boolean owner = a.id().equals(id);
     Map<String, Boolean> privacy = new LinkedHashMap<>();
     for (String f : FIELDS)
       privacy.put(
