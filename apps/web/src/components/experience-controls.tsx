@@ -16,13 +16,17 @@ function normalize(p: Partial<ExperiencePreference>): ExperiencePreference {
   return {
     ...defaults,
     ...p,
-    theme: ["LIGHT", "DARK", "SYSTEM"].includes(p.theme ?? "")
+    theme: ["LIGHT", "DARK", "SYSTEM", "ENTURMA"].includes(p.theme ?? "")
       ? p.theme!
       : "SYSTEM",
     fontScale: Math.max(0.85, Math.min(1.35, Number(p.fontScale) || 1)),
   };
 }
-export function ExperienceControls() {
+export function ExperienceControls({
+  localOnly = false,
+}: {
+  localOnly?: boolean;
+}) {
   const [preference, setPreference] = useState(defaults);
   const [ready, setReady] = useState(false);
   const [open, setOpen] = useState(false);
@@ -44,6 +48,10 @@ export function ExperienceControls() {
         setReady(true);
       }
     });
+    if (localOnly)
+      return () => {
+        active = false;
+      };
     let pending: ExperiencePreference | null = null;
     try {
       const raw = localStorage.getItem("enturma-experience-pending");
@@ -79,7 +87,7 @@ export function ExperienceControls() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [localOnly]);
   useEffect(() => {
     if (!ready) return;
     const system = matchMedia("(prefers-color-scheme: dark)");
@@ -114,6 +122,10 @@ export function ExperienceControls() {
       localStorage.setItem("enturma-experience", JSON.stringify(next));
       localStorage.setItem("enturma-experience-pending", JSON.stringify(next));
     } catch {}
+    if (localOnly) {
+      setStatus("Preferências aplicadas neste navegador.");
+      return;
+    }
     setStatus("Salvando…");
     clearTimeout(timer.current);
     timer.current = setTimeout(() => {
@@ -186,6 +198,7 @@ export function ExperienceControls() {
             <option value="SYSTEM">Seguir o sistema</option>
             <option value="LIGHT">Claro</option>
             <option value="DARK">Escuro</option>
+            <option value="ENTURMA">Enturma · verde e lima</option>
           </select>
         </label>
         <label htmlFor="text-size">

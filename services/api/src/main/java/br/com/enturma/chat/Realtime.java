@@ -122,11 +122,17 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
         study.member(actor, c.room);
         String type = data.path("type").asText();
         long now = System.currentTimeMillis();
-        if (type.equals("typing_stopped")) c.typingUntil = 0;
-        else if (type.equals("typing_started") && now - c.lastTyping >= 2000) {
+        boolean changed = false;
+        if (type.equals("typing_stopped")) {
+          changed = c.typingUntil > 0;
+          c.typingUntil = 0;
+          c.lastTyping = 0;
+        } else if (type.equals("typing_started") && now - c.lastTyping >= 900) {
+          changed = c.typingUntil <= now;
           c.lastTyping = now;
-          c.typingUntil = now + 5000;
+          c.typingUntil = now + 3500;
         }
+        if (changed) typingChanged(c.room);
       } catch (Exception e) {
         socket.close(CloseStatus.POLICY_VIOLATION);
       }
@@ -181,6 +187,54 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
     }
   }
 
+  private void publishTyping(Connection c) throws Exception {
+    synchronized (c) {
+    if (c.room == null || !c.socket.isOpen()) return;
+    Actor viewer = auth.authenticate(c.token).filter(auth::studentAccess).orElseThrow();
+    study.member(viewer, c.room);
+        var typing = new LinkedHashMap<UUID, String>();
+        for (var peer : connections.values())
+          if (Objects.equals(peer.room, c.room)
+              && peer.socket.isOpen()
+              && !Objects.equals(peer.user, c.user)
+              && peer.typingUntil > System.currentTimeMillis()
+              && peer.user != null
+              && !db.exists(
+                  "SELECT EXISTS(SELECT 1 FROM user_block WHERE (user_id=? AND blocked_id=?) OR"
+                      + " (user_id=? AND blocked_id=?))",
+                  c.user,
+                  peer.user,
+                  peer.user,
+                  c.user)) typing.put(peer.user, peer.name);
+        String typingPayload =
+            json.writeValueAsString(
+                Map.of(
+                    "type",
+                    "typing",
+                    "users",
+                    typing.entrySet().stream()
+                        .map(e -> Map.of("id", e.getKey(), "name", e.getValue()))
+                        .toList()));
+        if (!typingPayload.equals(c.typingPrevious)) {
+          synchronized (c) {
+            c.socket.sendMessage(new TextMessage(typingPayload));
+          }
+          c.typingPrevious = typingPayload;
+        }
+    }
+  }
+
+  private void typingChanged(UUID room) {
+    for (var peer : connections.values()) {
+      if (!room.equals(peer.room)) continue;
+      try { publishTyping(peer); }
+      catch (Exception error) {
+        try { peer.socket.close(CloseStatus.POLICY_VIOLATION); } catch (Exception ignored) {}
+        connections.remove(peer.socket.getId());
+      }
+    }
+  }
+
   @Scheduled(fixedDelay = 1200)
   public void publish() {
     for (var c : connections.values()) {
@@ -212,34 +266,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
           study.heartbeat(actor, c.room);
           c.lastHeartbeat = System.currentTimeMillis();
         }
-        var typing = new LinkedHashMap<UUID, String>();
-        for (var peer : connections.values())
-          if (Objects.equals(peer.room, c.room)
-              && !Objects.equals(peer.user, c.user)
-              && peer.typingUntil > System.currentTimeMillis()
-              && peer.user != null
-              && !db.exists(
-                  "SELECT EXISTS(SELECT 1 FROM user_block WHERE (user_id=? AND blocked_id=?) OR"
-                      + " (user_id=? AND blocked_id=?))",
-                  c.user,
-                  peer.user,
-                  peer.user,
-                  c.user)) typing.put(peer.user, peer.name);
-        String typingPayload =
-            json.writeValueAsString(
-                Map.of(
-                    "type",
-                    "typing",
-                    "users",
-                    typing.entrySet().stream()
-                        .map(e -> Map.of("id", e.getKey(), "name", e.getValue()))
-                        .toList()));
-        if (!typingPayload.equals(c.typingPrevious)) {
-          synchronized (c) {
-            c.socket.sendMessage(new TextMessage(typingPayload));
-          }
-          c.typingPrevious = typingPayload;
-        }
+        publishTyping(c);
         var detail = study.detail(actor, c.room);
         String payload =
             json.writeValueAsString(
@@ -326,6 +353,7 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
   @Override
   public void afterConnectionClosed(WebSocketSession socket, CloseStatus status) {
     presence.remove(socket.getId());
-    connections.remove(socket.getId());
+    var removed = connections.remove(socket.getId());
+    if (removed != null && removed.room != null && removed.typingUntil > 0) typingChanged(removed.room);
   }
 }

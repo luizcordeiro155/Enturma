@@ -1,17 +1,23 @@
-# Estado atual — 28/10/2026
+# Estado atual — 02/11/2026
+
+**Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
 
 O Enturma está em estabilização. A [Release Candidate](PRODUCTION_READINESS.md) registra as correções, evidências e gates ainda pendentes. **NO-GO para anunciar homologação integral ou escala comprovada.**
 
+O [ciclo anterior de experiência](RELEASE_EXPERIENCE_STABILIZATION.md), na [PR #133](https://github.com/luizcordeiro155/Enturma/pull/133), acrescentou visitante exclusivo da Web, login/cadastro com identidade oficial, correções de áudio e digitação, escolha de qualidade de transmissão e melhorias do instalador/atualizador Windows.
+
+O lote de **02/11/2026** acrescenta mensagens de voz, recibos de entrega/leitura, convites diretos com cards, tema Enturma, remoção de foto/banner e visitante usando as telas reais com leitura pública limitada. O código `6d9ae4b` passou na [CI 41419189860](https://github.com/luizcordeiro155/Enturma/actions/runs/41419189860): **134 testes Java, 166 Web e 46 E2E**, além dos testes Mobile/Desktop, lint, TypeScript, build Web, exports Android/iOS, empacotamento da API e teste Windows de desinstalação. O lote é publicado pela integração da [PR #133](https://github.com/luizcordeiro155/Enturma/pull/133) na `main`; a PR registra a conferência posterior dos serviços e versões distribuídas. Alterações documentais posteriores não modificam o código validado.
+
 | Área | Estado verificado |
 | --- | --- |
-| Web | Next.js/React; start público, autenticação e experiência acadêmica compartilhada |
+| Web | Next.js/React; start público e visitante com Início, Fórum/comentários, salas abertas, Caronas e Configurações reais sob restrições; ações privadas exigem login |
 | Android distribuído | Shell WebView gerado por deploy/android-download/install-web-shell.cjs; pacote Expo é também insumo do builder, seu export não homologa o APK |
 | Desktop | Electron, instalador e atualizador próprios; versão declarada e versão distribuída podem diferir |
 | API | Java 21 / Spring Boot 3.5.16; dependências e alertas em [auditoria](DEPENDENCY_AUDIT.md) |
-| PostgreSQL | Migrations até V65; autorização por objeto no Java; papel efetivo de produção precisa de validação |
-| Chat privado | Cifragem no cliente e custódia cifrada por conta, recuperável pela API; não E2EE inacessível ao serviço |
+| PostgreSQL | V66 (recibos/idempotência de mídia) e V68 (tema), sem V67; aplicadas por Flyway no início da API. Migrações e integração passaram em banco isolado. Autorização por objeto no Java; papel efetivo de produção precisa de validação |
+| Chat privado | Cifragem no cliente de texto/áudio e custódia cifrada por conta, recuperável pela API; não E2EE inacessível ao serviço. Recibos dependem de confirmação real do cliente |
 | iOS | Export técnico na CI; sem homologação/publicação oficial confirmada |
-| Escala e backup | Sem benchmark de carga ou restauração de backup real comprovados |
+| Escala e backup | Carga limitada a leituras em serviços efêmeros na CI, com relatório no ciclo atual; capacidade de produção não homologada. Backup externo inexistente e dispensado pelo responsável em 28/10/2026; recuperação real não comprovada |
 
 Pacotes: Web 0.3.0, Expo Android 0.3.30/code 33 e Desktop 0.3.15. O builder calcula a versão distribuída; consultar os manifests oficiais antes de anunciar um release. SHA-256 verifica integridade, **não é assinatura digital Authenticode**.
 

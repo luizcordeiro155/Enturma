@@ -8,6 +8,7 @@ beforeEach(() => {
   callbacks.length = 0;
   transitions.length = 0;
   document.documentElement.dataset.theme = "light";
+  document.documentElement.dataset.palette = "default";
   vi.stubGlobal("matchMedia", () => ({ matches: false }));
   Object.defineProperty(document, "hidden", {
     configurable: true,
@@ -33,6 +34,14 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 describe("theme transition ownership", () => {
+  it("switches the branded palette independently of the dark color scheme", () => {
+    applyEnturmaTheme("enturma", false);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(document.documentElement.dataset.palette).toBe("enturma");
+    applyEnturmaTheme("dark", false);
+    expect(document.documentElement.dataset.theme).toBe("dark");
+    expect(document.documentElement.dataset.palette).toBe("default");
+  });
   it.each([10, 20, 30, 50])(
     "keeps the latest of %i rapid choices despite late callbacks",
     (count) => {

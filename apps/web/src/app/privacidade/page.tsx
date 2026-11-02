@@ -14,7 +14,7 @@ export default function PrivacyPage() {
     <LegalDocument
       title="Política de Privacidade"
       summary="Esta política explica quais dados o Enturma utiliza, por que eles são necessários e quais controles você possui sobre sua conta, seus conteúdos e sua localização."
-      updatedAt="24 de outubro de 2026"
+      updatedAt="2 de novembro de 2026"
     >
       <section>
         <h2>1. Sobre esta política</h2>
@@ -63,6 +63,23 @@ export default function PrivacyPage() {
 
       <section>
         <h2>3. Como usamos esses dados</h2>
+        <p>
+          Publicações e comentários da comunidade podem ser lidos por visitantes
+          do site, junto ao nome e nome de usuário de quem publicou. A
+          descoberta de salas abertas mostra título, matéria, imagens da sala e
+          quantidade de participantes. Ela não publica a lista de participantes,
+          códigos de convite, mensagens, materiais, perfis completos ou
+          localização de caronas. Entrar em salas e interagir na comunidade
+          exige uma conta autorizada.
+        </p>
+        <p>
+          Mensagens de voz usam o microfone somente depois de sua autorização e
+          podem ser ouvidas ou descartadas antes do envio. Nas conversas
+          privadas, o áudio utiliza a mesma proteção criptográfica dos anexos.
+          Os indicadores de entrega e leitura registram quando um cliente
+          autorizado recebeu a mensagem e quando ela ficou visível ao
+          destinatário com a conversa em foco.
+        </p>
         <p>Os dados podem ser usados para:</p>
         <ul>
           <li>criar e proteger sua conta;</li>

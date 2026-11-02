@@ -26,7 +26,10 @@ export const screenResolutions: ReadonlyArray<{
 
 export const screenFrameRates: readonly ScreenFrameRate[] = [15, 30, 60];
 
-const screenDimensions: Record<ScreenResolution, { width: number; height: number; bitrate: number }> = {
+const screenDimensions: Record<
+  ScreenResolution,
+  { width: number; height: number; bitrate: number }
+> = {
   "720p": { width: 1280, height: 720, bitrate: 2_100_000 },
   "1080p": { width: 1920, height: 1080, bitrate: 4_000_000 },
   "1440p": { width: 2560, height: 1440, bitrate: 6_500_000 },
@@ -40,8 +43,26 @@ export const cameraCaptureFallback: VideoCaptureOptions = {
   resolution: { width: 1280, height: 720, frameRate: 30 },
 };
 
+/** Phones expose several rear lenses. Flip facing direction, not lens index. */
+export function nextCameraCapture(
+  settings: MediaTrackSettings,
+  devices: Pick<MediaDeviceInfo, "deviceId" | "label">[],
+): VideoCaptureOptions {
+  if (settings.facingMode === "user" || settings.facingMode === "environment")
+    return {
+      ...cameraCapture,
+      deviceId: undefined,
+      facingMode: settings.facingMode === "user" ? "environment" : "user",
+    };
+  const current = devices.findIndex((device) => device.deviceId === settings.deviceId);
+  const next = devices[(current + 1) % devices.length];
+  return { ...cameraCapture, deviceId: { exact: next.deviceId } };
+}
+
 /** Audio constraints for clear speech with echo cancellation always enabled. */
-export function microphoneCapture(noiseSuppression = true): AudioCaptureOptions {
+export function microphoneCapture(
+  noiseSuppression = true,
+): AudioCaptureOptions {
   return {
     noiseSuppression,
     echoCancellation: true,
@@ -67,7 +88,11 @@ export const callRoomOptions: RoomOptions = {
  * Capture options only constrain the browser source; publish encoding limits
  * the video sent to LiveKit, rather than just enlarging the local preview.
  */
-export function screenShareOptions(resolution: ScreenResolution, fps: ScreenFrameRate): {
+export function screenShareOptions(
+  resolution: ScreenResolution,
+  fps: ScreenFrameRate,
+  audio = false,
+): {
   capture: ScreenShareCaptureOptions;
   publish: TrackPublishOptions;
 } {
@@ -76,22 +101,30 @@ export function screenShareOptions(resolution: ScreenResolution, fps: ScreenFram
   const bitrate = Math.round(preset.bitrate * fpsFactor);
   return {
     capture: {
-      audio: false,
+      audio,
       contentHint: fps === 60 ? "motion" : "detail",
-      resolution: { width: preset.width, height: preset.height, frameRate: fps },
+      resolution: {
+        width: preset.width,
+        height: preset.height,
+        frameRate: fps,
+      },
     },
     publish: {
       simulcast: true,
       screenShareEncoding: { maxBitrate: bitrate, maxFramerate: fps },
-      screenShareSimulcastLayers: resolution === "720p" ? [] : [
-        new VideoPreset(1280, 720, Math.min(1_800_000, bitrate), fps),
-      ],
+      screenShareSimulcastLayers:
+        resolution === "720p"
+          ? []
+          : [new VideoPreset(1280, 720, Math.min(1_800_000, bitrate), fps)],
       degradationPreference: fps === 60 ? "balanced" : "maintain-resolution",
     },
   };
 }
 
 export function cameraResolutionNotSupported(error: unknown): boolean {
-  return error instanceof Error &&
-    (error.name === "OverconstrainedError" || error.name === "ConstraintNotSatisfiedError");
+  return (
+    error instanceof Error &&
+    (error.name === "OverconstrainedError" ||
+      error.name === "ConstraintNotSatisfiedError")
+  );
 }

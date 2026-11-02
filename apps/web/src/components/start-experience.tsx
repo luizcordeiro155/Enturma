@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { VisitorLink } from "./visitor-experience";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useTransition } from "react";
@@ -16,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { PublicThemeControl } from "./public-theme-control";
+import { EnturmaAppIcon } from "./enturma-app-icon";
 import styles from "@/app/start/start.module.css";
 
 /** The public presentation uses local geometry and WAAPI; no video download blocks entry. */
@@ -164,7 +166,7 @@ export function StartExperience({
           className={styles.brand}
           aria-label="Enturma, apresentação"
         >
-          <BookOpen size={32} strokeWidth={1.7} />
+          <EnturmaAppIcon size={40} />
           <span>
             enturma<span className={styles.dot}>.</span>
           </span>
@@ -207,6 +209,7 @@ export function StartExperience({
                 Baixar o aplicativo
               </Link>
             </div>
+            <VisitorLink className="start-visitor-link" />
             <div className={styles.platforms}>
               <span>
                 <Globe size={15} aria-hidden="true" /> Web

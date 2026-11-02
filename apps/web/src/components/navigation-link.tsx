@@ -1,10 +1,13 @@
 "use client";
 import Link, { useLinkStatus } from "next/link";
-import { useEffect, useRef, type ComponentProps } from "react";
+import { useEffect, useRef, useState, type ComponentProps } from "react";
+import { useRouter } from "next/navigation";
+import { prepareSessionNavigation } from "@/lib/api";
 import { reducedMotion } from "@/lib/motion";
 
-function Pending() {
-  const { pending } = useLinkStatus();
+function Pending({ preparing }: { preparing: boolean }) {
+  const status = useLinkStatus();
+  const pending = preparing || status.pending;
   const dot = useRef<HTMLSpanElement>(null);
   useEffect(() => {
     if (!pending || reducedMotion()) return;
@@ -27,10 +30,25 @@ export function NavigationLink({
   children,
   ...props
 }: Omit<ComponentProps<typeof Link>, "key">) {
+  const router = useRouter();
+  const [preparing, setPreparing] = useState(false);
+  const href = typeof props.href === "string" ? props.href : "";
+  const privateLink = /^\/(home|rooms|friends|profile|settings|notebooks|caronas|forum|portfolio|challenges|learn|onboarding)(\/|$)/.test(href);
   return (
-    <Link prefetch={true} {...props}>
+    <Link {...props} prefetch={privateLink ? false : props.prefetch ?? true}
+      onNavigate={privateLink ? (event) => {
+        event.preventDefault();
+        if (preparing) return;
+        setPreparing(true);
+        // Never cache an expired-session redirect in a prefetched route. The
+        // server still validates authorization before serving the destination.
+        void prepareSessionNavigation().catch(() => false).finally(() => {
+          router.push(href);
+          setPreparing(false);
+        });
+      } : props.onNavigate}>
       {children}
-      <Pending />
+      <Pending preparing={preparing} />
     </Link>
   );
 }

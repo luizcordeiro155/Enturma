@@ -275,6 +275,8 @@ function showDesktopNotification(payload) {
     body,
     icon,
     timeoutType: "default",
+    // The shared renderer plays Enturma's chime according to the user's setting.
+    silent: true,
   });
   notice.on("click", () => {
     if (target && mainWindow && !mainWindow.isDestroyed())
@@ -1210,6 +1212,11 @@ ipcMain.handle("desktop:get-info", (event) => {
     version: app.getVersion(),
     platform: process.platform,
     webUrl: WEB_URL,
+    releaseNotes: [
+      "Instalador e desinstalador com o ícone oficial do Enturma.",
+      "Ao desinstalar, você escolhe se deseja apagar também sessões, cache e preferências locais.",
+      "A remoção dos dados locais vem desmarcada e preserva sua conta e os arquivos exportados.",
+    ],
   };
 });
 

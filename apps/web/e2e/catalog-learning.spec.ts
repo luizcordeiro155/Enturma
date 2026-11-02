@@ -235,11 +235,10 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
     if (name === "Minhas matérias") {
       await page.goto("/subjects");
     } else {
-      if (name !== "Cadernos")
-        await page
-          .getByRole("button", { name: "Mais opções", exact: true })
-          .click();
-      await page.getByRole("link", { name, exact: true }).click();
+      await page
+        .getByRole("navigation", { name: "Navegação mobile" })
+        .getByRole("link", { name, exact: true })
+        .click();
     }
     await expect(page).toHaveURL(
       new RegExp(

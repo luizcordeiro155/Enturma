@@ -208,11 +208,15 @@
 }
 .dashboard-community .room-row > div:not(.room-artwork),
 .dashboard-community .room-row > button {
+  min-width: 0;
+  width: auto;
+  overflow-wrap: anywhere;
   margin-left: 18px;
   margin-right: 18px;
 }
 .dashboard-community .room-row > button {
   margin-top: auto;
+  flex: 0 0 auto;
 }
 .room-artwork-editor > div:not(.room-artwork) {
   display: flex;

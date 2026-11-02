@@ -9,6 +9,7 @@ const readCache = new Map<string, CacheEntry>();
 const pendingReads = new Map<string, Promise<unknown>>();
 let renewing: Promise<boolean> | null = null;
 let sessionGeneration = 0;
+let navigationRefreshUntil = 0;
 // BroadcastChannel also reaches other channel objects in the same document.
 // Keep one origin ID across module reloads, so login cannot reload its own form.
 const documentIdentity = (() => {
@@ -75,6 +76,7 @@ export function invalidateApiCache(prefix?: string) {
 
 export function resetSessionCache() {
   sessionGeneration++;
+  navigationRefreshUntil = 0;
   readCache.clear();
   pendingReads.clear();
 }
@@ -90,13 +92,40 @@ if (typeof window !== "undefined" && typeof BroadcastChannel !== "undefined") {
 }
 
 async function renew() {
+  const generation = sessionGeneration;
   const run = async () => {
     const res = await fetch("/api/session", { method: "POST" });
+    // This only skips redundant renewal round trips. The server validates each
+    // protected destination; the ten-minute access cookie remains authoritative.
+    if (res.ok && generation === sessionGeneration)
+      navigationRefreshUntil = Date.now() + 8 * 60_000;
     return res.ok;
   };
   return navigator.locks?.request
     ? navigator.locks.request("enturma-refresh", run)
     : run();
+}
+
+/** Share the same refresh lock with API calls before requesting private RSC. */
+export async function prepareSessionNavigation() {
+  const generation = sessionGeneration;
+  if (Date.now() < navigationRefreshUntil) {
+    // The cookie is HttpOnly and may expire or disappear independently of this
+    // document. Reuse the local session endpoint before requesting private RSC;
+    // unlike POST renewal, this check does not round-trip to the Java API.
+    const current = await fetch("/api/session", { cache: "no-store" });
+    if (generation !== sessionGeneration) return false;
+    // A parallel API denial may already be renewing the cookie checked above.
+    if (renewing) return (await renewing) && generation === sessionGeneration;
+    if (current.ok) return true;
+    if (current.status !== 401) return false;
+    navigationRefreshUntil = 0;
+  }
+  if (!renewing)
+    renewing = renew().finally(() => {
+      renewing = null;
+    });
+  return (await renewing) && generation === sessionGeneration;
 }
 
 async function requestWithRenewal<T>(
@@ -112,14 +141,14 @@ async function requestWithRenewal<T>(
     if (
       !(e instanceof ApiError) ||
       e.status !== 401 ||
-      (path.startsWith("/auth/") && !path.startsWith("/auth/academic/"))
+      (path.startsWith("/auth/") &&
+        !path.startsWith("/auth/academic/") &&
+        path !== "/auth/session-view")
     )
       throw e;
-    if (!renewing)
-      renewing = renew().finally(() => {
-        renewing = null;
-      });
-    const renewed = await renewing;
+    // An actual access denial overrides any recent renewal hint.
+    navigationRefreshUntil = 0;
+    const renewed = await prepareSessionNavigation();
     if (generation !== sessionGeneration)
       throw new DOMException("A sessão mudou.", "AbortError");
     if (renewed) return request<T>("/api/backend", path, options);

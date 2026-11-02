@@ -28,8 +28,6 @@ type AppShellState = {
 
 const Context = createContext<AppShellState | null>(null);
 
-
-
 export function AppShellStateProvider({
   children,
 }: {
@@ -37,31 +35,39 @@ export function AppShellStateProvider({
 }) {
   useKeyboardViewport();
   const path = usePathname();
+  const privatePage =
+    /^\/(home|rooms|friends|notebooks|profile|settings|caronas|forum|portfolio|onboarding|admin|challenges|learn|subjects)(\/|$)/.test(
+      path,
+    );
   const [installedApp, setInstalledApp] = useState(false);
   const [learning, setLearning] = useState(false);
   const [profileShortcut, setProfileShortcut] =
     useState<ProfileShortcut | null>(null);
 
-  const refreshProfileShortcut = useCallback(async (bumpAvatar = false) => {
-    try {
-      const profile = await api<{ id: string; hasAvatar?: boolean }>(
-        "/users/me",
-        bumpAvatar ? { cache: "no-store" } : undefined,
-      );
-      setProfileShortcut((current) => ({
-        id: profile.id,
-        hasAvatar: Boolean(profile.hasAvatar),
-        version:
-          bumpAvatar ||
-          current?.id !== profile.id ||
-          current?.hasAvatar !== Boolean(profile.hasAvatar)
-            ? Date.now()
-            : current.version,
-      }));
-    } catch {
-      // As próprias páginas tratam sessão expirada e indisponibilidade.
-    }
-  }, []);
+  const refreshProfileShortcut = useCallback(
+    async (bumpAvatar = false) => {
+      if (!privatePage) return;
+      try {
+        const profile = await api<{ id: string; hasAvatar?: boolean }>(
+          "/users/me",
+          bumpAvatar ? { cache: "no-store" } : undefined,
+        );
+        setProfileShortcut((current) => ({
+          id: profile.id,
+          hasAvatar: Boolean(profile.hasAvatar),
+          version:
+            bumpAvatar ||
+            current?.id !== profile.id ||
+            current?.hasAvatar !== Boolean(profile.hasAvatar)
+              ? Date.now()
+              : current.version,
+        }));
+      } catch {
+        // As próprias páginas tratam sessão expirada e indisponibilidade.
+      }
+    },
+    [privatePage],
+  );
 
   useEffect(() => {
     const installedTimer = window.setTimeout(() => {
@@ -95,7 +101,10 @@ export function AppShellStateProvider({
     return () => {
       window.clearTimeout(installedTimer);
       window.removeEventListener("enturma-profile-updated", refreshAvatar);
-      window.removeEventListener("enturma-session-changed", refreshSessionProfile);
+      window.removeEventListener(
+        "enturma-session-changed",
+        refreshSessionProfile,
+      );
       sessionChannel?.removeEventListener("message", refreshSessionProfile);
       sessionChannel?.close();
       window.removeEventListener("enturma-pwa-installed", markInstalled);
@@ -107,12 +116,7 @@ export function AppShellStateProvider({
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
-      const publicAccountRoute =
-        path === "/" ||
-        /^\/(login|register|forgot-password|reset-password|verify-email)(\/|$)/.test(
-          path,
-        );
-      if (publicAccountRoute) {
+      if (!privatePage) {
         setProfileShortcut(null);
       } else {
         // Route changes are a fallback for account switches completed by an older
@@ -121,19 +125,26 @@ export function AppShellStateProvider({
       }
     }, 0);
     return () => window.clearTimeout(timer);
-  }, [path, refreshProfileShortcut]);
+  }, [privatePage, refreshProfileShortcut]);
 
   useEffect(() => {
+    if (!privatePage) return;
     let active = true;
-    api<{ eligible: boolean }>("/learning/access")
-      .then((value) => {
-        if (active) setLearning(value.eligible);
-      })
-      .catch(() => {});
+    const refreshLearning = () =>
+      api<{ eligible: boolean }>("/learning/access", { cache: "no-store" })
+        .then((value) => {
+          if (active) setLearning(value.eligible);
+        })
+        .catch(() => {});
+    void refreshLearning();
+    window.addEventListener("enturma-profile-updated", refreshLearning);
+    window.addEventListener("enturma-session-changed", refreshLearning);
     return () => {
       active = false;
+      window.removeEventListener("enturma-profile-updated", refreshLearning);
+      window.removeEventListener("enturma-session-changed", refreshLearning);
     };
-  }, [path]);
+  }, [privatePage]);
 
   const value = useMemo(
     () => ({

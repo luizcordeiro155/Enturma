@@ -25,7 +25,7 @@ public class AuthController {
       @NotBlank @Size(max = 100) String name,
       @NotBlank @Size(max = 80) String username,
       @Email @NotBlank @Size(max = 254) String email,
-      @NotNull @Size(min = 12, max = 72) String password,
+      @NotNull @Size(min = 6, max = 30) String password,
       @NotBlank @Size(max = 150) String device) {}
 
   public record Login(
@@ -39,7 +39,7 @@ public class AuthController {
 
   public record Reset(
       @NotBlank @Size(max = 100) String token,
-      @NotNull @Size(min = 12, max = 72) String password) {}
+      @NotNull @Size(min = 6, max = 30) String password) {}
 
   @PostMapping("/register")
   @ResponseStatus(org.springframework.http.HttpStatus.CREATED)

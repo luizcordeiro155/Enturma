@@ -9,6 +9,24 @@ concurrency:
   group: ci-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  windows-uninstall-safety:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Compile native UI and verify cleanup on disposable files
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force .local | Out-Null
+          node apps/desktop/build/build-setup-ui.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & "$env:WINDIR\Microsoft.NET\Framework64\v4.0.30319\csc.exe" /nologo /target:exe /out:.local\SetupUX.Tests.exe (Resolve-Path apps/desktop/build/SetupUX.Tests.cs).Path
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          & .\.local\SetupUX.Tests.exe (Resolve-Path apps/desktop/build/EnturmaSetupUX.exe).Path (Join-Path (Get-Location) '.local/uninstall-fixture')
+          exit $LASTEXITCODE
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 25

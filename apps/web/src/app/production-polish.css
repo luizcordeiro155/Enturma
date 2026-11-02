@@ -261,14 +261,14 @@ small,
 
 .call-mode {
   min-width: 0;
-  background: #0f1517;
+  background: var(--bg);
 }
 
 .call-chat-layout {
   min-height: calc(100vh - 194px);
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(310px, 390px);
-  background: #0f1517;
+  background: var(--bg);
 }
 
 .call-stage {
@@ -292,12 +292,12 @@ small,
 
 .call-stage .room-tool-card > div:first-child:not(.call-panel) {
   padding: 6px 4px 12px;
-  color: #f5f7f6;
+  color: var(--ink);
 }
 
 .call-stage .room-tool-card > div:first-child:not(.call-panel) .muted,
 .call-stage .room-tool-card > div:first-child:not(.call-panel) .eyebrow {
-  color: #aeb9b5;
+  color: var(--muted);
 }
 
 .call-chat-pane {
@@ -305,50 +305,50 @@ small,
   min-height: calc(100vh - 194px);
   max-height: calc(100vh - 194px);
   grid-template-rows: auto minmax(0, 1fr) auto;
-  border-left: 1px solid #2e3a3e;
-  background: #161e21;
-  color: #eef5f2;
+  border-left: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .call-chat-pane .persistent-heading,
 .call-chat-pane .persistent-composer {
-  background: #161e21;
-  border-color: #2e3a3e;
+  background: var(--surface);
+  border-color: var(--border);
 }
 
 .call-chat-pane .persistent-messages {
   min-height: 0;
   max-height: none;
-  background: #161e21;
+  background: var(--surface);
   padding: 12px 10px;
 }
 
 .call-chat-pane .persistent-message:hover {
-  background: #202a2e !important;
+  background: var(--soft) !important;
 }
 
 .call-chat-pane .message-avatar {
-  background: #2d3a3f;
-  color: white;
+  background: var(--soft);
+  color: var(--ink);
 }
 
 .call-chat-pane .message-content header small,
 .call-chat-pane .persistent-heading small,
 .call-chat-pane .composer-hint,
 .call-chat-pane .muted {
-  color: #aeb9b5;
+  color: var(--muted);
 }
 
 .call-chat-pane textarea {
-  background: #20292d !important;
-  color: #f3f7f5 !important;
-  border-color: #35454b !important;
+  background: var(--soft) !important;
+  color: var(--ink) !important;
+  border-color: var(--border) !important;
 }
 
 .call-chat-pane .image-picker {
-  background: #20292d;
-  color: #f3f7f5;
-  border-color: #35454b;
+  background: var(--soft);
+  color: var(--ink);
+  border-color: var(--border);
 }
 
 .call-chat-pane .persistent-composer > .composer-tools {

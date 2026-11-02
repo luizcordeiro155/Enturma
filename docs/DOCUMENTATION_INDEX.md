@@ -1,5 +1,7 @@
 # Inventário documental — 28/10/2026
 
+Adição de 30/10: [Estabilização da experiência](RELEASE_EXPERIENCE_STABILIZATION.md), com mudanças funcionais, prova automatizada e limites da homologação.
+
 Cobertura de inventário e links locais; não é homologação funcional de todos os módulos. Notas de versões anteriores permanecem disponíveis e não substituem STATUS.md. Documentos jurídicos não foram alterados.
 
 | Arquivo | Tratamento nesta revisão |

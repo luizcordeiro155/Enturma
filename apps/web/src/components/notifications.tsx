@@ -1,6 +1,7 @@
 "use client";
 import { revealChatMessage } from "@/lib/chat-scroll";
 import { watchNotificationBadge } from "@/lib/notification-presentation";
+import { useBackgroundMessageDelivery } from "@/lib/background-message-delivery";
 import {
   notificationSoundEnabled,
   playNotificationSound,
@@ -18,7 +19,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { isMobileApp } from "./desktop-updates";
-import { api, post } from "@/lib/api";
+import { api, post, prepareSessionNavigation } from "@/lib/api";
 import { playMotion } from "@/lib/motion";
 import { useAppConnection, useLiveRefresh } from "@/lib/live-updates";
 
@@ -84,15 +85,26 @@ export function NotificationsProvider({
   const [inline, setInline] = useState<Notice[]>([]);
   const [error, setError] = useState("");
   const revision = useRef(0);
+  const initializedInbox = useRef(false);
   const [sessionEpoch, setSessionEpoch] = useState(0);
+  const [sessionReady, setSessionReady] = useState(false);
+  const sessionConfirmed = useRef(false);
+  const loggedOut = useRef(false);
+  useBackgroundMessageDelivery(sessionEpoch, sessionReady);
   const pending = useRef(false),
     seen = useRef(new Set<string>());
-  useAppConnection();
+  useAppConnection(sessionReady);
   useEffect(() => {
-    const reset = () => {
+    const reset = (event: Event) => {
       revision.current++;
+      sessionConfirmed.current = false;
+      loggedOut.current =
+        (event as CustomEvent<{ path?: string }>).detail?.path ===
+        "/auth/logout";
+      setSessionReady(false);
       pending.current = false;
       seen.current.clear();
+      initializedInbox.current = false;
       setInbox({ items: [], unreadCount: 0 });
       setInline([]);
       setError("");
@@ -105,7 +117,47 @@ export function NotificationsProvider({
     };
   }, []);
   useEffect(() => {
-    if (isMobileApp() || window.enturmaDesktop) return;
+    let active = true;
+    let checking = false;
+    const verify = async () => {
+      if (!active || checking || loggedOut.current || sessionConfirmed.current)
+        return;
+      checking = true;
+      const requested = revision.current;
+      try {
+        const valid = await prepareSessionNavigation();
+        if (!valid || !active || requested !== revision.current) return;
+        const session = await api<{ academicAccess: boolean }>(
+          "/auth/session-view",
+          { cache: "no-store" },
+        );
+        if (
+          active &&
+          requested === revision.current &&
+          session.academicAccess
+        ) {
+          sessionConfirmed.current = true;
+          setSessionReady(true);
+        }
+      } catch {
+        // A temporary restoration failure keeps background traffic suspended, not the UI.
+      } finally {
+        checking = false;
+      }
+    };
+    void verify();
+    const retry = window.setInterval(() => {
+      if (!document.hidden) void verify();
+    }, 30000);
+    window.addEventListener("focus", verify);
+    return () => {
+      active = false;
+      window.clearInterval(retry);
+      window.removeEventListener("focus", verify);
+    };
+  }, [sessionEpoch]);
+  useEffect(() => {
+    if (isMobileApp()) return;
     const unlock = () => {
       if (notificationSoundEnabled()) void unlockNotificationSound();
     };
@@ -115,7 +167,7 @@ export function NotificationsProvider({
         !document.hidden &&
         document.hasFocus()
       )
-        playNotificationSound();
+        playNotificationSound(false, event.data.id);
     };
     window.addEventListener("pointerdown", unlock);
     window.addEventListener("keydown", unlock);
@@ -132,6 +184,7 @@ export function NotificationsProvider({
   );
 
   useEffect(() => {
+    if (!sessionReady) return;
     const desktop = !!window.enturmaDesktop?.showNotification;
     if (
       !desktop &&
@@ -147,7 +200,7 @@ export function NotificationsProvider({
     let queued = false;
 
     const pollDesktopPush = async () => {
-      if (!active) return;
+      if (!active || !sessionConfirmed.current) return;
       if (running) {
         queued = true;
         return;
@@ -219,10 +272,10 @@ export function NotificationsProvider({
       window.removeEventListener("focus", refreshNow);
       document.removeEventListener("visibilitychange", refreshNow);
     };
-  }, [sessionEpoch]);
+  }, [sessionEpoch, sessionReady]);
 
   async function refresh() {
-    if (pending.current) return;
+    if (!sessionConfirmed.current || pending.current) return;
     pending.current = true;
     const requested = revision.current;
     try {
@@ -259,6 +312,24 @@ export function NotificationsProvider({
       }
       if (requested !== revision.current) return;
 
+      // In-app sound must not depend on OS push permission or push preferences.
+      // Skip the initial snapshot so old unread notices never chime on login.
+      if (
+        initializedInbox.current &&
+        !isMobileApp() &&
+        (Boolean(window.enturmaDesktop) ||
+          (!document.hidden && document.hasFocus()))
+      ) {
+        for (const notice of data.items) {
+          if (
+            !notice.readAt &&
+            !seen.current.has(notice.id) &&
+            !contexts.includes(notice.contextKey ?? "")
+          )
+            playNotificationSound(false, notice.id);
+        }
+      }
+      initializedInbox.current = true;
       seen.current = new Set(data.items.map((n) => n.id));
       setInbox(data);
       setError("");
@@ -289,8 +360,9 @@ export function NotificationsProvider({
   useEffect(() => {
     const timer = setTimeout(() => void refresh(), 0);
     return () => clearTimeout(timer);
-  }, [sessionEpoch]);
+  }, [sessionEpoch, sessionReady]);
   async function read(ids?: string[], all = false) {
+    if (!sessionConfirmed.current) return;
     const requested = revision.current;
     try {
       await post("/notifications/read", { ids, all });
@@ -317,6 +389,7 @@ export function NotificationsProvider({
     }
   }
   async function clear() {
+    if (!sessionConfirmed.current) return false;
     const requested = revision.current;
     try {
       await post("/notifications/clear");

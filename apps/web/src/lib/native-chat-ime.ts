@@ -87,3 +87,13 @@ export function resizeMessageComposerTextarea(
   field.style.height = `${Math.min(required, maxHeight)}px`;
   field.style.overflowY = required > maxHeight ? "auto" : "hidden";
 }
+
+/** Focus can survive Android's Back button after the keyboard was dismissed. */
+export function composerKeyboardVisible() {
+  if (!isMobileTextEntryContext()) return true;
+  const root = document.documentElement;
+  if (root.dataset.enturmaMobile === "true") return root.dataset.enturmaIme === "true";
+  if (root.dataset.mobileWebChatKeyboard) return true;
+  const viewport = window.visualViewport;
+  return Boolean(viewport && innerHeight - viewport.height - viewport.offsetTop > 120);
+}

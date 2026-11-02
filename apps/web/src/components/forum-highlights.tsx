@@ -2,10 +2,11 @@
 import { ForumLinks } from "./forum-links";
 import { useLiveRefresh } from "@/lib/live-updates";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ArrowRight, MessageCircle, ThumbsUp, Sparkles } from "lucide-react";
 import { api } from "@/lib/api";
 import { UserIdentity, type PublicProfile } from "./user-identity";
+import { useVisitor } from "@/lib/visitor-context";
 
 type Highlight = PublicProfile & {
   authorId: string;
@@ -18,6 +19,26 @@ type Highlight = PublicProfile & {
 };
 
 export function ForumHighlights() {
+  const { active: visitor } = useVisitor();
+  const loadHighlights = useCallback(async () => {
+    if (!visitor) return api<Highlight[]>("/forum/highlights");
+    const data = await api<{
+      items: (Highlight & {
+        body: string;
+        score: number;
+        reactions: { count: number }[];
+      })[];
+    }>("/public/explore/forum?sort=top&page=0");
+    return data.items.slice(0, 3).map((item) => ({
+      ...item,
+      excerpt: item.body.slice(0, 240),
+      likes: item.score,
+      reactionCount: item.reactions.reduce(
+        (total, reaction) => total + reaction.count,
+        0,
+      ),
+    }));
+  }, [visitor]);
   const [items, setItems] = useState<Highlight[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
@@ -29,7 +50,7 @@ export function ForumHighlights() {
       if (running) return;
       running = true;
       try {
-        const posts = await api<Highlight[]>("/forum/highlights");
+        const posts = await loadHighlights();
         if (active) {
           setItems(posts);
           setFailed(false);
@@ -45,10 +66,10 @@ export function ForumHighlights() {
     return () => {
       active = false;
     };
-  }, [attempt]);
+  }, [attempt, loadHighlights]);
   useLiveRefresh("forum_changed", async () => {
     try {
-      setItems(await api<Highlight[]>("/forum/highlights"));
+      setItems(await loadHighlights());
       setFailed(false);
     } catch {
       setFailed(true);

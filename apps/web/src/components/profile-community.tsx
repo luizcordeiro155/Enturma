@@ -43,7 +43,7 @@ export function ProfileCommunity({
   userId: string;
   showcase?: Showcase;
   own: boolean;
-  onNavigate: () => void;
+  onNavigate: (href: string) => void;
 }) {
   const [data, setData] = useState<Community>();
   const [error, setError] = useState("");
@@ -148,7 +148,10 @@ export function ProfileCommunity({
               <Link
                 className="profile-edit-link"
                 href="/profile"
-                onClick={onNavigate}
+                onNavigate={(event) => {
+                  event.preventDefault();
+                  onNavigate("/profile");
+                }}
               >
                 Personalizar perfil e mural
               </Link>
@@ -221,7 +224,13 @@ export function ProfileCommunity({
               </p>
             )}
             {own && (
-              <Link href="/profile" onClick={onNavigate}>
+              <Link
+                href="/profile"
+                onNavigate={(event) => {
+                  event.preventDefault();
+                  onNavigate("/profile");
+                }}
+              >
                 Gerenciar a privacidade da atividade
               </Link>
             )}
@@ -235,7 +244,10 @@ export function ProfileCommunity({
                 className="profile-community-row"
                 key={room.id}
                 href={`/rooms/${room.id}`}
-                onClick={onNavigate}
+                onNavigate={(event) => {
+                  event.preventDefault();
+                  onNavigate(`/rooms/${room.id}`);
+                }}
               >
                 <span className="profile-community-icon">
                   <BookOpen size={22} />

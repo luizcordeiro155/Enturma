@@ -1,5 +1,7 @@
 # SquareCloud + Vercel
 
+**Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
+
 Antes de promover esta Release Candidate, seguir [gates](PRODUCTION_READINESS.md) e [runbook de operação/rollback](OPERATIONS_READINESS.md). CI verde não comprova restore real, papel efetivo do banco, assinatura do instalador ou homologação física. Flyway pode usar credenciais separadas via `FLYWAY_DATABASE_*`; sua ausência mantém compatibilidade com a conexão atual.
 
 A API Java roda na SquareCloud; a interface Next.js roda na Vercel. O navegador usa o BFF da Vercel para HTTP e conecta diretamente ao WebSocket da SquareCloud. PostgreSQL guarda os dados e precisa existir antes do primeiro boot. Nenhum banco pago é criado pelos scripts.

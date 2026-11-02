@@ -47,6 +47,7 @@ export function RoomView({ id }: { id: string }) {
   const requestedPanel = params.get("panel");
   const [typing, setTyping] = useState<{ id: string; name: string }[]>([]);
   const lastTyping = useRef(0);
+  const typingStopTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const [room, setRoom] = useState<Room>();
   useStudyActivity("ROOM", Boolean(room && room.status !== "ENDED"));
   const [me, setMe] = useState<Profile>();
@@ -73,6 +74,9 @@ export function RoomView({ id }: { id: string }) {
   const socketRef = useRef<WebSocket | null>(null);
   const pageRef = useRef(0);
   const connectedRef = useRef(false);
+  const pendingMedia = useRef(
+    new WeakMap<File, { clientId: string; attachmentId?: string }>(),
+  );
 
   useEffect(() => {
     let active = true;
@@ -242,6 +246,8 @@ export function RoomView({ id }: { id: string }) {
       clearInterval(poll);
       clearTimeout(bootstrap);
       if (retry) clearTimeout(retry);
+      clearTimeout(typingStopTimer.current);
+      lastTyping.current = 0;
       socketRef.current?.close();
     };
   }, [id, loadMessages, normalize, reloadRoom]);
@@ -264,6 +270,7 @@ export function RoomView({ id }: { id: string }) {
     return () => clearTimeout(timer);
   }, [myId, id]);
   function changeDraft(value: string) {
+    clearTimeout(typingStopTimer.current);
     setDraft(value);
     if (me)
       try {
@@ -273,15 +280,22 @@ export function RoomView({ id }: { id: string }) {
     const now = Date.now();
     if (
       socket?.readyState === WebSocket.OPEN &&
-      (!value.trim() || now - lastTyping.current >= 2500)
+      (!value.trim() || now - lastTyping.current >= 1000)
     ) {
       socket.send(
         JSON.stringify({
           type: value.trim() ? "typing_started" : "typing_stopped",
         }),
       );
-      lastTyping.current = now;
+      lastTyping.current = value.trim() ? now : 0;
     }
+    if (value.trim())
+      typingStopTimer.current = setTimeout(() => {
+        if (socket?.readyState === WebSocket.OPEN && lastTyping.current) {
+          socket.send(JSON.stringify({ type: "typing_stopped" }));
+        }
+        lastTyping.current = 0;
+      }, 1800);
   }
   async function loadOlder() {
     if (!hasOlder || busy) return;
@@ -310,14 +324,17 @@ export function RoomView({ id }: { id: string }) {
     if (!file) return null;
     await api("/users/me");
     const form = new FormData();
-    form.set("file", await prepareChatImage(file));
+    form.set(
+      "file",
+      file.type.startsWith("audio/") ? file : await prepareChatImage(file),
+    );
     const response = await fetch(
       `/api/backend/study-rooms/${id}/messages/attachments`,
       { method: "POST", body: form, signal: AbortSignal.timeout(45000) },
     );
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
-      throw Error(body.message ?? "Não foi possível enviar a imagem.");
+      throw Error(body.message ?? "Não foi possível enviar o anexo.");
     }
     return (await response.json()) as Upload;
   }
@@ -374,15 +391,32 @@ export function RoomView({ id }: { id: string }) {
     }
   }
 
-  async function sendMedia(file: File, mediaKind: "STICKER" | "GIF") {
+  async function sendMedia(file: File, mediaKind?: "STICKER" | "GIF") {
     if (busy) return;
     setBusy(true);
     setError("");
     try {
-      const attachment = await uploadImage(file);
-      await post(`/study-rooms/${id}/messages`, { attachmentId: attachment?.id, mediaKind });
-      await loadMessages();
-    } finally { setBusy(false); }
+      let pending = pendingMedia.current.get(file);
+      if (!pending) {
+        pending = { clientId: crypto.randomUUID() };
+        pendingMedia.current.set(file, pending);
+      }
+      if (!pending.attachmentId)
+        pending.attachmentId = (await uploadImage(file))?.id;
+      await post(`/study-rooms/${id}/messages`, {
+        attachmentId: pending.attachmentId,
+        clientId: pending.clientId,
+        mediaKind,
+      });
+      // Publishing succeeded. A refresh failure must not invite a duplicate send.
+      await loadMessages().catch(() =>
+        setError(
+          "Áudio ou mídia enviado. Aguardando sincronização da conversa.",
+        ),
+      );
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function leave() {
@@ -430,6 +464,7 @@ export function RoomView({ id }: { id: string }) {
     onLoadOlder: loadOlder,
     onSubmit: send,
     onSendMedia: sendMedia,
+    onSendAudio: (file: File) => sendMedia(file),
     onSendKlipy: sendKlipy,
     onReloadMessages: loadMessages,
     setDraft: changeDraft,
@@ -461,7 +496,11 @@ export function RoomView({ id }: { id: string }) {
                 <span className="room-mobile-channel-mark">
                   {roomAvatar ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={roomAvatar} alt="" className="room-mobile-artwork-avatar" />
+                    <img
+                      src={roomAvatar}
+                      alt=""
+                      className="room-mobile-artwork-avatar"
+                    />
                   ) : (
                     <Hash size={19} />
                   )}
@@ -483,7 +522,16 @@ export function RoomView({ id }: { id: string }) {
               </button>
             </header>
 
-            <header className={`study-room-header ${roomBanner ? "has-room-banner" : ""}`} style={roomBanner ? { backgroundImage: `linear-gradient(90deg,rgba(10,18,19,.90),rgba(10,18,19,.63)),url("${roomBanner}")` } : undefined}>
+            <header
+              className={`study-room-header ${roomBanner ? "has-room-banner" : ""}`}
+              style={
+                roomBanner
+                  ? {
+                      backgroundImage: `linear-gradient(90deg,rgba(10,18,19,.90),rgba(10,18,19,.63)),url("${roomBanner}")`,
+                    }
+                  : undefined
+              }
+            >
               <div className="room-header-intro">
                 <button
                   type="button"
@@ -494,13 +542,20 @@ export function RoomView({ id }: { id: string }) {
                   Minhas turmas
                 </button>
                 <div className="room-header-identity">
-                  <span className="room-header-identity-mark" aria-hidden="true">
+                  <span
+                    className="room-header-identity-mark"
+                    aria-hidden="true"
+                  >
                     {roomAvatar ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img className="room-header-avatar" src={roomAvatar} alt="" />
+                      <img
+                        className="room-header-avatar"
+                        src={roomAvatar}
+                        alt=""
+                      />
                     ) : /\b(sql|banco de dados|database)\b/i.test(
-                      room.title + " " + room.subjectName,
-                    ) ? (
+                        room.title + " " + room.subjectName,
+                      ) ? (
                       <Database size={29} />
                     ) : (
                       <BookOpen size={29} />
@@ -550,7 +605,9 @@ export function RoomView({ id }: { id: string }) {
               </div>
             </header>
 
-            {room.hasEarlierHistory && section === "chat" && !contextNoticeHidden ? (
+            {room.hasEarlierHistory &&
+            section === "chat" &&
+            !contextNoticeHidden ? (
               <div className="late-join-banner">
                 <Sparkles size={20} />
                 <div>
@@ -561,10 +618,20 @@ export function RoomView({ id }: { id: string }) {
                   </span>
                 </div>
                 <div className="late-join-actions">
-                  <button type="button" onClick={() => { setContextNoticeHidden(true); setSection("ai"); }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setContextNoticeHidden(true);
+                      setSection("ai");
+                    }}
+                  >
                     Me atualizar com IA
                   </button>
-                  <button type="button" className="late-join-later" onClick={() => setContextNoticeHidden(true)}>
+                  <button
+                    type="button"
+                    className="late-join-later"
+                    onClick={() => setContextNoticeHidden(true)}
+                  >
                     Atualizar depois
                   </button>
                 </div>
@@ -677,9 +744,14 @@ export function RoomView({ id }: { id: string }) {
                         }
                       />
 
-                      {member.userId !== me?.id &&
-                      !member.leftAt ? (
-                        <RoomParticipantActions roomId={id} memberId={member.userId} memberName={member.name} canRemove={me?.id === room.hostId} onRemoved={reloadRoom} />
+                      {member.userId !== me?.id && !member.leftAt ? (
+                        <RoomParticipantActions
+                          roomId={id}
+                          memberId={member.userId}
+                          memberName={member.name}
+                          canRemove={me?.id === room.hostId}
+                          onRemoved={reloadRoom}
+                        />
                       ) : null}
                     </div>
                   ))}
@@ -772,7 +844,13 @@ export function RoomView({ id }: { id: string }) {
                             }
                           />
                           {member.userId !== me?.id && !member.leftAt ? (
-                            <RoomParticipantActions roomId={id} memberId={member.userId} memberName={member.name} canRemove={me?.id === room.hostId} onRemoved={reloadRoom} />
+                            <RoomParticipantActions
+                              roomId={id}
+                              memberId={member.userId}
+                              memberName={member.name}
+                              canRemove={me?.id === room.hostId}
+                              onRemoved={reloadRoom}
+                            />
                           ) : null}
                         </div>
                       ))}

@@ -20,9 +20,24 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.useRealTimers();
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
 });
 describe("theme gestures", () => {
+  it("keeps all four theme choices inside a narrow mobile viewport", () => {
+    vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(
+      function (this: Element) {
+        return { left: -48, right: 218, width: 266 } as DOMRect;
+      },
+    );
+    render(<ThemePicker value="SYSTEM" onChange={vi.fn()} />);
+    fireEvent.keyDown(screen.getByRole("button", { name: /Alternar tema/ }), {
+      key: "ArrowDown",
+    });
+    expect(
+      screen.getByRole("menu", { name: "Escolher tema" }).style.translate,
+    ).toBe("60px 0");
+  });
   it("short tap toggles immediately; holding opens choices without toggling", () => {
     const change = vi.fn();
     render(<ThemePicker value="DARK" onChange={change} />);
@@ -55,6 +70,21 @@ describe("theme gestures", () => {
     fireEvent.keyDown(document.activeElement!, { key: "Escape" });
     expect(screen.queryByRole("menu")).toBeNull();
     expect(document.activeElement).toBe(toggle);
+  });
+  it("offers Enturma without replacing the saved system choice and reaches it by keyboard", () => {
+    const change = vi.fn();
+    render(<ThemePicker value="SYSTEM" onChange={change} />);
+    fireEvent.keyDown(screen.getByRole("button", { name: /Alternar tema/ }), {
+      key: "ArrowDown",
+    });
+    act(() => vi.runOnlyPendingTimers());
+    const system = screen.getByRole("menuitemradio", { name: "Sistema" });
+    expect(system.getAttribute("aria-checked")).toBe("true");
+    fireEvent.keyDown(system, { key: "End" });
+    const enturma = screen.getByRole("menuitemradio", { name: "Enturma" });
+    expect(document.activeElement).toBe(enturma);
+    fireEvent.click(enturma);
+    expect(change).toHaveBeenCalledWith("ENTURMA");
   });
 });
 it("stars can be selected independently or with the keyboard", () => {

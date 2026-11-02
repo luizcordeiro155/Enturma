@@ -54,6 +54,18 @@ public class ProfileController {
     profiles.saveBanner(a, file.getContentType(), file.getBytes());
   }
 
+  @DeleteMapping("/avatar")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void removeAvatar(@AuthenticationPrincipal Actor a) {
+    profiles.removeAvatar(a);
+  }
+
+  @DeleteMapping("/banner")
+  @ResponseStatus(HttpStatus.NO_CONTENT)
+  public void removeBanner(@AuthenticationPrincipal Actor a) {
+    profiles.removeBanner(a);
+  }
+
   @PutMapping("/enrollment")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void enroll(@AuthenticationPrincipal Actor a, @Valid @RequestBody Enrollment r) {

@@ -10,6 +10,7 @@ import {
 import { api, post } from "@/lib/api";
 import { ApiError } from "@enturma/contracts";
 import { useRouter } from "next/navigation";
+import { useVisitor } from "@/lib/visitor-context";
 
 type Deletion = {
   status?: string;
@@ -21,6 +22,7 @@ type Deletion = {
 };
 
 export function AccountPrivacyCard() {
+  const visitor = useVisitor();
   const [data, setData] = useState<Deletion>();
   const [busy, setBusy] = useState(false);
   const [mode, setMode] = useState<"schedule" | "now" | null>(null);
@@ -29,6 +31,10 @@ export function AccountPrivacyCard() {
   const modal = useRef<HTMLDivElement>(null);
   const router = useRouter();
   async function exportData() {
+    if (visitor.active) {
+      visitor.requestLogin("/settings");
+      return;
+    }
     setBusy(true);
     setMessage("");
     try {
@@ -104,9 +110,10 @@ export function AccountPrivacyCard() {
     } catch {}
   }
   useEffect(() => {
+    if (visitor.active) return;
     const timer = window.setTimeout(() => void load(), 0);
     return () => window.clearTimeout(timer);
-  }, []);
+  }, [visitor.active]);
   useEffect(() => {
     if (mode && modal.current)
       modal.current.animate(
@@ -163,7 +170,16 @@ export function AccountPrivacyCard() {
     }
   }
   return (
-    <section className="privacy-zone">
+    <section
+      className="privacy-zone"
+      onClickCapture={(event) => {
+        if (visitor.active && (event.target as HTMLElement).closest("button")) {
+          event.preventDefault();
+          event.stopPropagation();
+          visitor.requestLogin("/settings");
+        }
+      }}
+    >
       <div className="privacy-zone-heading">
         <ShieldCheck />
         <div>

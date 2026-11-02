@@ -83,7 +83,10 @@ public class ProfileService {
   public void saveAvatar(Actor a, String mime, byte[] bytes) {
     validateImage(mime, bytes, 2 * 1024 * 1024, "avatar");
     db.jdbc.update(
-        "UPDATE app_user SET avatar_mime=?,avatar_bytes=?,media_version=media_version+1 WHERE id=?", mime, bytes, a.id());
+        "UPDATE app_user SET avatar_mime=?,avatar_bytes=?,media_version=media_version+1 WHERE id=?",
+        mime,
+        bytes,
+        a.id());
     profileChanged();
   }
 
@@ -91,8 +94,31 @@ public class ProfileService {
   public void saveBanner(Actor a, String mime, byte[] bytes) {
     validateImage(mime, bytes, 3 * 1024 * 1024, "banner");
     db.jdbc.update(
-        "UPDATE app_user SET banner_mime=?,banner_bytes=?,media_version=media_version+1 WHERE id=?", mime, bytes, a.id());
+        "UPDATE app_user SET banner_mime=?,banner_bytes=?,media_version=media_version+1 WHERE id=?",
+        mime,
+        bytes,
+        a.id());
     profileChanged();
+  }
+
+  @Transactional
+  public void removeAvatar(Actor a) {
+    int changed =
+        db.jdbc.update(
+            "UPDATE app_user SET avatar_mime=NULL,avatar_bytes=NULL,media_version=media_version+1"
+                + " WHERE id=? AND avatar_bytes IS NOT NULL",
+            a.id());
+    if (changed > 0) profileChanged();
+  }
+
+  @Transactional
+  public void removeBanner(Actor a) {
+    int changed =
+        db.jdbc.update(
+            "UPDATE app_user SET banner_mime=NULL,banner_bytes=NULL,media_version=media_version+1"
+                + " WHERE id=? AND banner_bytes IS NOT NULL",
+            a.id());
+    if (changed > 0) profileChanged();
   }
 
   public record ImageAsset(byte[] bytes, String mime) {}

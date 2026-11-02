@@ -51,3 +51,43 @@ test("requires an unlocked context and enabled preference; throttles repeated ev
   sound.setNotificationSoundEnabled(false);
   expect(sound.playNotificationSound()).toBe(false);
 });
+test("deduplicates service-worker and inbox delivery even after the throttle expires", async () => {
+  vi.useFakeTimers();
+  const start = vi.fn();
+  vi.stubGlobal(
+    "AudioContext",
+    class {
+      state = "running";
+      currentTime = 0;
+      destination = {};
+      createOscillator = () => ({
+        type: "",
+        frequency: { value: 0 },
+        connect: () => ({ connect: vi.fn() }),
+        start,
+        stop: vi.fn(),
+        disconnect: vi.fn(),
+      });
+      createGain = () => ({
+        gain: {
+          setValueAtTime: vi.fn(),
+          linearRampToValueAtTime: vi.fn(),
+          exponentialRampToValueAtTime: vi.fn(),
+        },
+        disconnect: vi.fn(),
+      });
+    },
+  );
+  try {
+    const sound = await import("./notification-sound");
+    sound.setNotificationSoundEnabled(true);
+    await sound.unlockNotificationSound();
+    expect(sound.playNotificationSound(false, "notice-1")).toBe(true);
+    vi.advanceTimersByTime(2000);
+    expect(sound.playNotificationSound(false, "notice-1")).toBe(false);
+    expect(sound.playNotificationSound(false, "notice-2")).toBe(true);
+    expect(start).toHaveBeenCalledTimes(4);
+  } finally {
+    vi.useRealTimers();
+  }
+});

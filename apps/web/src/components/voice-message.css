@@ -1,0 +1,86 @@
+.voice-message {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+  width: 320px;
+  padding: 0.35rem 0;
+  color: var(--muted, currentColor);
+}
+.composer-main-row:has(.voice-recorder) {
+  position: relative;
+}
+.voice-message audio {
+  width: 100%;
+  min-width: 0;
+  height: 42px;
+}
+.message-delivery {
+  display: inline-flex;
+  vertical-align: middle;
+  margin-inline-start: 0.4rem;
+  color: #75838a;
+}
+.message-delivery-read {
+  color: #1299e3;
+}
+.voice-recorder {
+  display: flex;
+  align-items: center;
+}
+.voice-record-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 38px;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 50%;
+  background: transparent !important;
+  color: inherit !important;
+  cursor: pointer;
+}
+.voice-record-button:hover {
+  background: color-mix(in srgb, currentColor 12%, transparent) !important;
+}
+.voice-record-button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.voice-record-panel {
+  position: absolute;
+  z-index: 12;
+  inset: auto 0 calc(100% + 8px);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 28px #0003;
+  min-width: 0;
+}
+.voice-record-panel audio {
+  min-width: 0;
+  flex: 1;
+  height: 42px;
+}
+.voice-record-timer {
+  flex: 1;
+  font-variant-numeric: tabular-nums;
+  font-size: 0.9rem;
+}
+.voice-record-timer small {
+  display: block;
+  font-size: 0.72rem;
+  opacity: 0.8;
+}
+.voice-record-send {
+  background: var(--accent) !important;
+  color: var(--accent-contrast, #102b22) !important;
+}

@@ -63,13 +63,22 @@
   min-height: 24px;
   gap: 7px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .persistent-messages .message-content header .identity-trigger {
   padding: 0 !important;
+  flex: 1 1 8rem;
+  min-width: min(100%, 8rem);
+  max-width: 100%;
 }
 
 .persistent-messages .message-content header .identity-trigger strong {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 0.82rem;
   line-height: 1.15;
 }
@@ -148,10 +157,7 @@
     right: 10px;
     bottom: calc(
       10px +
-        max(
-          env(safe-area-inset-bottom, 0px),
-          var(--native-safe-bottom, 0px)
-        )
+        max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
     );
     display: grid;
     gap: 7px;
@@ -185,7 +191,6 @@
     font-size: 16px;
   }
 }
-
 
 /* Keep the newest room message fully revealable above the composer. */
 .persistent-messages {
@@ -292,7 +297,6 @@
   }
 }
 
-
 /* Keep the real scroll end comfortably above the composer, including
    Android IME resize and the room bottom navigation transition. */
 .chat-bottom-spacer {
@@ -313,7 +317,8 @@
     scroll-padding-bottom: 14px !important;
   }
 
-  .room-active-shell .room-section-chat
+  .room-active-shell
+    .room-section-chat
     .persistent-messages
     .persistent-message:last-of-type {
     margin-bottom: 8px !important;
@@ -328,7 +333,6 @@
     -webkit-tap-highlight-color: transparent;
   }
 }
-
 
 /* Short room conversations stay attached to the composer, like private chat.
    The flexible leading spacer collapses to zero once the history overflows,

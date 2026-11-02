@@ -6,7 +6,7 @@ O **Enturma** é um ecossistema acadêmico multiplataforma construído para apro
 
 O projeto é um monorepo com **Java 21 / Spring Boot**, **Next.js / React**, **React Native / Expo** e **Electron**, com aplicações para **Web, Android e Desktop**.
 
-> **Estado atual — outubro de 2026:** plataforma funcional em desenvolvimento ativo e estabilização. Além de Caronas, os ciclos recentes incluem chat, biblioteca de mídia e GIFs KLIPY, personalização, Cadernos IA, animações, instalador/atualizador e experiências móveis. Builds e deploys não substituem testes em dispositivos reais nem certificam homologação integral em produção.
+> **Estado atual — novembro de 2026:** plataforma funcional em desenvolvimento ativo e estabilização. O lote de 02/11 acrescenta áudio nos chats, recibos, convites diretos, visitante com leitura pública e tema Enturma. Consulte o [estado verificado](docs/STATUS.md) para separar implementação, testes e publicação. Builds e deploys não certificam homologação integral em produção.
 
 ## A proposta
 
@@ -17,6 +17,8 @@ O objetivo é oferecer um ambiente onde o estudante consiga acompanhar sua vida 
 A direção do produto é simples: **menos troca de aplicativos, mais contexto e conexão entre estudantes**.
 
 ## Estado atual do projeto
+
+[Estabilização de experiência — 30/10 e 02/11](docs/RELEASE_EXPERIENCE_STABILIZATION.md): visitante Web, autenticação, som, digitação, transmissão e instalador; continuação com áudio, recibos, convites e identidade visual. Inclui escopo dos testes, migrações e limites da validação.
 
 [Release Candidate e gates](docs/PRODUCTION_READINESS.md) · [Auditoria de dependências](docs/DEPENDENCY_AUDIT.md) · [Operação e rollback](docs/OPERATIONS_READINESS.md) · [Inventário documental](docs/DOCUMENTATION_INDEX.md)
 
@@ -107,7 +109,7 @@ As conversas privadas cifram o conteúdo no cliente e sincronizam a identidade p
 - **Web:** Next.js/React, BFF com cookies de sessão e publicação pela Vercel.
 - **Android:** projeto Expo/React Native e distribuição APK; a versão Android oficial inclui experiência Web integrada em um shell WebView e rotinas nativas de instalação/atualização. Verificar teclado, safe areas, câmera, permissões, notificações e instalação em aparelho real; a confirmação de instalação depende do Android.
 - **Windows:** aplicativo Electron com preload/IPC restritos, instalador NSIS, atualização própria e notificações. Downloads e arquivos de atualização exigem validação de origem e integridade. Não anunciar assinatura de código que não esteja configurada.
-- **UI/UX:** temas claro, escuro e sistema; navegação responsiva, visualização de perfis, chats, caronas e transições com respeito a movimentos reduzidos.
+- **UI/UX:** temas claro, escuro, sistema e Enturma; navegação responsiva, visualização de perfis, chats, caronas e transições com respeito a movimentos reduzidos.
 
 ### Animações
 

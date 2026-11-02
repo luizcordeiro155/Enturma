@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
-import { BookOpen } from "lucide-react";
+import { EnturmaAppIcon } from "./enturma-app-icon";
 import { DesktopUpdateTitlebarAction } from "./desktop-updates";
 export function DesktopChrome() {
   const [active, setActive] = useState(false);
@@ -25,7 +25,7 @@ export function DesktopChrome() {
   }, []);
   return active ? (
     <div className="desktop-titlebar" aria-label="Enturma">
-      <BookOpen size={14} />
+      <EnturmaAppIcon size={18} />
       <span>enturma.</span>
       <DesktopUpdateTitlebarAction />
     </div>

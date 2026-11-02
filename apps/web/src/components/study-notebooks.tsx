@@ -913,7 +913,6 @@ function NotebookWorkspace({ id }: { id?: string }) {
                     <ComposerMedia
                       onEmoji={(emoji) => {
                         setQuestion((value) => (value + emoji).slice(0, 2000));
-                        composer.current?.focus({ preventScroll: true });
                       }}
                       disabled={busy}
                     />

@@ -4,6 +4,10 @@ import { useMobileWebChatViewport } from "@/lib/use-room-browser-viewport";
 import { TypingIndicator } from "./typing-indicator";
 import { synchronizeAccountIdentity } from "@/lib/account-chat-sync";
 import { ChatImage } from "./chat-image-viewer";
+import { VoiceMessage, VoiceRecorder } from "./voice-message";
+import { MessageReceipt, type DeliveryReceipt } from "./message-receipt";
+import { useMessageReceipts } from "@/lib/use-message-receipts";
+import { RoomInvitationPreview } from "./room-invitation-preview";
 import { isChatAtLatest } from "@/lib/chat-scroll";
 import { PrivateCallButtons } from "./private-calls";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -58,7 +62,7 @@ type Friend = Omit<PublicProfile, "id"> & {
   lastMessageAt?: string;
   unreadCount?: number;
 };
-type Envelope = {
+type Envelope = DeliveryReceipt & {
   deletedAt?: string | null;
   hiddenAt?: string | null;
   editedAt?: string | null;
@@ -77,6 +81,7 @@ type Envelope = {
   attachmentSize?: number | null;
 };
 type PrivateMessage = Envelope & {
+  received?: boolean;
   text: string;
   attachmentUrl?: string;
   sendStatus?: "sending" | "failed";
@@ -138,6 +143,19 @@ export function Friends() {
   const nearLatest = useRef(true);
   const previousMessageCount = useRef(0);
   const attachmentUrls = useRef(new Set<string>());
+  const attachmentCache = useRef(
+    new Map<string, { ciphertext: string; url: string }>(),
+  );
+  useMessageReceipts(
+    selected ? `/friends/${selected.id}/messages/receipts` : undefined,
+    messages
+      .filter(
+        (m) =>
+          m.senderId !== me?.id && m.received && !m.deletedAt && !m.hiddenAt,
+      )
+      .map((m) => m.id),
+    messagesViewport,
+  );
   const loadedPages = useRef(0);
   const pendingSends = useRef(
     new Map<
@@ -238,15 +256,37 @@ export function Friends() {
                 );
           let attachmentUrl: string | undefined;
           if (m.attachmentCiphertext && !m.hiddenAt && !m.deletedAt) {
-            const blob = await decryptAttachment(cryptoKey, m, friend.id).catch(
-              () => null,
-            );
-            if (blob) {
-              attachmentUrl = URL.createObjectURL(blob);
-              attachmentUrls.current.add(attachmentUrl);
+            const cached = attachmentCache.current.get(m.id);
+            if (cached?.ciphertext === m.attachmentCiphertext)
+              attachmentUrl = cached.url;
+            else {
+              const blob = await decryptAttachment(
+                cryptoKey,
+                m,
+                friend.id,
+              ).catch(() => null);
+              if (blob) {
+                if (cached) {
+                  URL.revokeObjectURL(cached.url);
+                  attachmentUrls.current.delete(cached.url);
+                }
+                attachmentUrl = URL.createObjectURL(blob);
+                attachmentUrls.current.add(attachmentUrl);
+                attachmentCache.current.set(m.id, {
+                  ciphertext: m.attachmentCiphertext,
+                  url: attachmentUrl,
+                });
+              }
             }
           }
-          return { ...m, text, attachmentUrl };
+          return {
+            ...m,
+            text,
+            attachmentUrl,
+            received:
+              text !== "Não foi possível autenticar esta mensagem." &&
+              (!m.attachmentCiphertext || Boolean(attachmentUrl)),
+          };
         }),
       );
       if (version !== generation.current) return;
@@ -260,7 +300,11 @@ export function Friends() {
             id: newest.id,
             text:
               newest.text ||
-              (newest.attachmentUrl ? "Imagem" : "Mensagem privada"),
+              (newest.attachmentMime?.startsWith("audio/")
+                ? "Mensagem de voz"
+                : newest.attachmentUrl
+                  ? "Imagem"
+                  : "Mensagem privada"),
           },
         }));
       setMessages((old) => {
@@ -322,9 +366,11 @@ export function Friends() {
 
   useEffect(() => {
     const urls = attachmentUrls.current;
+    const cache = attachmentCache.current;
     return () => {
       for (const url of urls) URL.revokeObjectURL(url);
       urls.clear();
+      cache.clear();
     };
   }, []);
 
@@ -498,7 +544,7 @@ export function Friends() {
   ) {
     if (
       event.pointerType === "mouse" ||
-      (event.target as HTMLElement).closest("button,a,input,textarea")
+      (event.target as HTMLElement).closest("button,a,input,textarea,audio,video")
     )
       return;
     cancelPrivateLongPress();
@@ -639,8 +685,7 @@ export function Friends() {
       if (currentFriend && key.current) {
         void load(currentFriend, key.current, 0, generation.current).catch(
           () => {
-            // Server already confirmed delivery; a refresh failure must not mark
-            // the message as undelivered.
+            // Server accepted the message. Recipient delivery is acknowledged separately.
           },
         );
       }
@@ -684,18 +729,32 @@ export function Friends() {
     const now = new Date().toISOString();
     const cryptoKey = key.current;
     const optimistic: PrivateMessage = {
-      id: clientId, clientId, senderId: sender, text: url,
-      iv: "", ciphertext: "", createdAt: now, sendStatus: "sending",
+      id: clientId,
+      clientId,
+      senderId: sender,
+      text: url,
+      iv: "",
+      ciphertext: "",
+      createdAt: now,
+      sendStatus: "sending",
     };
-    setMessages(old => [...old, optimistic]);
+    setMessages((old) => [...old, optimistic]);
     forceFollowLatest.current = true;
     nearLatest.current = true;
     setBusy(true);
     try {
-      const payload = await encryptMessage(cryptoKey, url, friend.id, sender, clientId);
+      const payload = await encryptMessage(
+        cryptoKey,
+        url,
+        friend.id,
+        sender,
+        clientId,
+      );
       const sendPayload = { ...payload, mentioned: false };
       pendingSends.current.set(clientId, {
-        friendshipId: friend.id, text: url, payload: sendPayload,
+        friendshipId: friend.id,
+        text: url,
+        payload: sendPayload,
       });
       await deliverPending(friend.id, clientId, sendPayload);
     } finally {
@@ -703,9 +762,18 @@ export function Friends() {
     }
   }
 
-  async function send(e?: React.FormEvent, media?: { file: File; kind: "STICKER" | "GIF" }) {
+  async function send(
+    e?: React.FormEvent,
+    media?: { file: File; kind?: "STICKER" | "GIF" },
+  ) {
     e?.preventDefault();
-    if (!selected || !me || !key.current || busy || (!media && !draft.trim() && !image))
+    if (
+      !selected ||
+      !me ||
+      !key.current ||
+      busy ||
+      (!media && !draft.trim() && !image)
+    )
       return;
 
     const friend = selected;
@@ -728,13 +796,21 @@ export function Friends() {
       createdAt: now,
       attachmentUrl: preview ?? undefined,
       attachmentName: selectedImage?.name,
+      attachmentMime: selectedImage?.type,
       mediaKind: media?.kind,
       sendStatus: "sending",
     };
     setMessages((old) => [...old, optimistic]);
     setPreviews((old) => ({
       ...old,
-      [friend.id]: { id: clientId, text: text || "Imagem" },
+      [friend.id]: {
+        id: clientId,
+        text:
+          text ||
+          (selectedImage?.type.startsWith("audio/")
+            ? "Mensagem de voz"
+            : "Imagem"),
+      },
     }));
     forceFollowLatest.current = true;
     nearLatest.current = true;
@@ -760,7 +836,9 @@ export function Friends() {
         clientId,
       );
       const preparedImage = selectedImage
-        ? await preparePrivateChatImage(selectedImage)
+        ? selectedImage.type.startsWith("audio/")
+          ? selectedImage
+          : await preparePrivateChatImage(selectedImage)
         : null;
       const attachment = preparedImage
         ? await encryptAttachment(
@@ -1162,6 +1240,7 @@ export function Friends() {
                     <article
                       key={m.id}
                       id={`message-${m.id}`}
+                      data-receipt-id={m.id}
                       className={`${m.senderId === me?.id ? "mine" : ""} ${privateActionMessage?.id === m.id ? "message-action-selected" : ""}`}
                       onPointerDown={(event) => startPrivateLongPress(event, m)}
                       onPointerMove={movePrivateLongPress}
@@ -1227,11 +1306,15 @@ export function Friends() {
                           <p className="muted">Mensagem removida.</p>
                         ) : null}
                         {!m.deletedAt && m.attachmentUrl ? (
-                          <ChatImage
-                            kind={m.mediaKind}
-                            src={m.attachmentUrl}
-                            alt={m.attachmentName ?? "Imagem privada"}
-                          />
+                          m.attachmentMime?.startsWith("audio/") ? (
+                            <VoiceMessage src={m.attachmentUrl} />
+                          ) : (
+                            <ChatImage
+                              kind={m.mediaKind}
+                              src={m.attachmentUrl}
+                              alt={m.attachmentName ?? "Imagem privada"}
+                            />
+                          )
                         ) : null}
                         {editingPrivate?.id === m.id ? (
                           <form
@@ -1261,17 +1344,34 @@ export function Friends() {
                             </div>
                           </form>
                         ) : m.text ? (
-                          providerMessageUrl(m.text)
-                            ? <figure className="klipy-message" aria-label="GIF compartilhado pela KLIPY">
-                                {/* eslint-disable-next-line @next/next/no-img-element */}
-                                <img src={providerMessageUrl(m.text)!} alt="GIF da KLIPY" loading="lazy" />
-                                <figcaption>GIF via KLIPY</figcaption>
-                              </figure>
-                            : <p><EmojiText text={m.text} /></p>
+                          providerMessageUrl(m.text) ? (
+                            <figure
+                              className="klipy-message"
+                              aria-label="GIF compartilhado pela KLIPY"
+                            >
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img
+                                src={providerMessageUrl(m.text)!}
+                                alt="GIF da KLIPY"
+                                loading="lazy"
+                              />
+                              <figcaption>GIF via KLIPY</figcaption>
+                            </figure>
+                          ) : (
+                            <p>
+                              <EmojiText text={m.text} />
+                            </p>
+                          )
                         ) : null}
+                        {!m.deletedAt && m.text && (
+                          <RoomInvitationPreview text={m.text} />
+                        )}
                         <small>
                           {new Date(m.createdAt).toLocaleString("pt-BR")}
                           {m.editedAt ? " · editada" : ""}
+                          {m.senderId === me?.id &&
+                            !m.sendStatus &&
+                            !m.deletedAt && <MessageReceipt receipt={m} />}
                         </small>
                         {!m.deletedAt && (
                           <div className="message-reactions">
@@ -1419,13 +1519,22 @@ export function Friends() {
                       />
                     </label>
 
+                    <VoiceRecorder
+                      key={selected.id}
+                      disabled={busy || !privateImagesEnabled}
+                      onError={setError}
+                      onSend={(file) => send(undefined, { file })}
+                    />
                     <ComposerMedia
                       onEmoji={(emoji) => {
                         setDraft((value) => (value + emoji).slice(0, 4000));
-                        composer.current?.focus({ preventScroll: true });
                       }}
                       onFile={privateImagesEnabled ? selectImage : undefined}
-                      onMedia={privateImagesEnabled ? (file, kind) => send(undefined, { file, kind }) : undefined}
+                      onMedia={
+                        privateImagesEnabled
+                          ? (file, kind) => send(undefined, { file, kind })
+                          : undefined
+                      }
                       onKlipy={sendKlipy}
                       disabled={busy || !finger}
                     />

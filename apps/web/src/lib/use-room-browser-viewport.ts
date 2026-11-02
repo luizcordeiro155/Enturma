@@ -10,7 +10,8 @@ export function isRoomKeyboardVisible(
   visibleHeight: number,
   composerFocused: boolean,
 ): boolean {
-  if (!composerFocused || baselineHeight <= 0 || visibleHeight <= 0) return false;
+  if (!composerFocused || baselineHeight <= 0 || visibleHeight <= 0)
+    return false;
   return baselineHeight - visibleHeight > Math.max(120, baselineHeight * 0.18);
 }
 
@@ -26,13 +27,21 @@ export function mobileWebKeyboardInset(
 ): number {
   return Math.max(
     0,
-    Math.round(layoutHeight - Math.max(0, offsetTop) - Math.max(0, visibleHeight)),
+    Math.round(
+      layoutHeight - Math.max(0, offsetTop) - Math.max(0, visibleHeight),
+    ),
   );
 }
 
 /** The visible bottom remains the source of truth even if Chrome pans its visual viewport. */
-export function mobileWebVisibleBottom(visibleHeight: number, offsetTop = 0): number {
-  return Math.max(0, Math.round(Math.max(0, offsetTop) + Math.max(0, visibleHeight)));
+export function mobileWebVisibleBottom(
+  visibleHeight: number,
+  offsetTop = 0,
+): number {
+  return Math.max(
+    0,
+    Math.round(Math.max(0, offsetTop) + Math.max(0, visibleHeight)),
+  );
 }
 
 /** Compensate after layout rather than trusting how a browser anchors fixed. */
@@ -77,7 +86,9 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     if (!active) return;
 
     const root = document.documentElement;
-    const mobile = window.matchMedia("(max-width: 760px) and (pointer: coarse)");
+    const mobile = window.matchMedia(
+      "(max-width: 760px) and (pointer: coarse)",
+    );
     const nativeBridge = (
       window as Window & {
         EnturmaNative?: { setChatComposerFocused?: (focused: boolean) => void };
@@ -92,6 +103,7 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         ? ".room-section-chat .persistent-composer.enturma-message-composer"
         : ".mobile-private-chat-open .private-composer.enturma-message-composer";
     const viewport = window.visualViewport;
+    const zoomed = () => Math.abs((viewport?.scale || 1) - 1) > 0.05;
     let baselineHeight = viewport?.height ?? window.innerHeight;
     let wasOpen = false;
     // Tracks an actual keyboard, not simply a focused textarea. Android
@@ -139,7 +151,10 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
     };
 
     const geometry = () => {
-      const height = Math.max(1, Math.round(viewport?.height || window.innerHeight));
+      const height = Math.max(
+        1,
+        Math.round(viewport?.height || window.innerHeight),
+      );
       const top = Math.max(0, Math.round(viewport?.offsetTop ?? 0));
       return { height, top };
     };
@@ -148,21 +163,34 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
       if (kind === "room" && !wasOpen) {
         if (roomNavRestTop === null) captureRoomNavigationPosition();
         if (roomNavRestTop !== null)
-          root.style.setProperty("--room-mobile-nav-rest-top", String(roomNavRestTop) + "px");
+          root.style.setProperty(
+            "--room-mobile-nav-rest-top",
+            String(roomNavRestTop) + "px",
+          );
       }
       const { height, top } = geometry();
       root.dataset.mobileWebChatKeyboard = kind;
-      root.style.setProperty("--mobile-web-chat-visible-top", String(top) + "px");
-      root.style.setProperty("--mobile-web-chat-visible-height", String(height) + "px");
-      root.style.setProperty("--mobile-web-chat-visible-bottom", String(top + height) + "px");
+      root.style.setProperty(
+        "--mobile-web-chat-visible-top",
+        String(top) + "px",
+      );
+      root.style.setProperty(
+        "--mobile-web-chat-visible-height",
+        String(height) + "px",
+      );
+      root.style.setProperty(
+        "--mobile-web-chat-visible-bottom",
+        String(top + height) + "px",
+      );
       wasOpen = true;
     };
 
     const sync = () => {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        if (!isBrowserMobile()) {
+        if (!isBrowserMobile() || zoomed()) {
           clearKeyboard();
+          focusArmedUntil = 0;
           if (kind === "room") delete root.dataset.roomBrowserLayout;
           return;
         }
@@ -171,7 +199,8 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         const { height } = geometry();
         const input = document.activeElement;
         const focused =
-          input instanceof HTMLElement && Boolean(input.closest(composerSelector));
+          input instanceof HTMLElement &&
+          Boolean(input.closest(composerSelector));
 
         if (!focused && !wasOpen) {
           baselineHeight = Math.max(baselineHeight, height);
@@ -188,13 +217,18 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
         // Samsung/Chrome can dismiss the IME with the Android Back button
         // while the textarea stays focused. Release the keyboard layout so
         // the four navigation tabs return to their original in-flow position.
-        const recovered = keyboardWasVisible && !keyboardVisible &&
+        const recovered =
+          keyboardWasVisible &&
+          !keyboardVisible &&
           height >= baselineHeight - 40;
         // Private chats retain their first-focus behavior. In study rooms,
         // activation before a real viewport shrink makes the composer leap
         // down over Chat/Chamada/Materiais/AI before the IME even appears.
-        const openingPrivateChat = kind === "private" && focused &&
-          !keyboardWasVisible && performance.now() < focusArmedUntil;
+        const openingPrivateChat =
+          kind === "private" &&
+          focused &&
+          !keyboardWasVisible &&
+          performance.now() < focusArmedUntil;
         if (recovered || (!keyboardVisible && !openingPrivateChat)) {
           clearKeyboard();
           return;
@@ -208,15 +242,14 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
       if (
         event.type === "focusin" &&
         isBrowserMobile() &&
+        !zoomed() &&
         event.target instanceof HTMLElement &&
         event.target.closest(composerSelector)
       ) {
         focusArmedUntil = performance.now() + 900;
         keyboardWasVisible = false;
-        if (kind === "room")
-          captureRoomNavigationPosition();
-        else
-          pinConversation();
+        if (kind === "room") captureRoomNavigationPosition();
+        else pinConversation();
       }
       sync();
       for (const delay of [80, 180, 300, 450]) {
@@ -228,18 +261,22 @@ export function useMobileWebChatViewport(active: boolean, kind: MobileWebChat) {
       const element = event.target;
       if (
         !isBrowserMobile() ||
+        zoomed() ||
         !(element instanceof HTMLElement) ||
-        !(element.matches("textarea") || element.closest(".composer-text-field")) ||
+        !(
+          element.matches("textarea") || element.closest(".composer-text-field")
+        ) ||
         !element.closest(composerSelector)
-      ) return;
-      const textarea = element.closest(composerSelector)?.querySelector("textarea");
+      )
+        return;
+      const textarea = element
+        .closest(composerSelector)
+        ?.querySelector("textarea");
       if (textarea instanceof HTMLTextAreaElement && !textarea.disabled) {
         focusArmedUntil = performance.now() + 900;
         keyboardWasVisible = false;
-        if (kind === "room")
-          captureRoomNavigationPosition();
-        else
-          pinConversation();
+        if (kind === "room") captureRoomNavigationPosition();
+        else pinConversation();
       }
     };
     const onOrientationChange = () => {

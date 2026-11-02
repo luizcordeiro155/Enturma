@@ -1,6 +1,7 @@
 const preferenceKey = "enturma-notification-sound";
 let context: AudioContext | undefined;
 let lastPlayed = 0;
+const delivered = new Set<string>();
 export function notificationSoundEnabled() {
   try {
     return localStorage.getItem(preferenceKey) === "true";
@@ -17,20 +18,26 @@ export function setNotificationSoundEnabled(enabled: boolean) {
 export async function unlockNotificationSound() {
   if (typeof AudioContext === "undefined") return false;
   try {
-    context ??= new AudioContext();
+    if (!context || context.state === "closed") context = new AudioContext();
     if (context.state === "suspended") await context.resume();
     return context.state === "running";
   } catch {
     return false;
   }
 }
-export function playNotificationSound(test = false) {
+export function playNotificationSound(test = false, notificationId?: string) {
+  if (!test && notificationId && delivered.has(notificationId)) return false;
   if (
     !context ||
     context.state !== "running" ||
     (!test && !notificationSoundEnabled())
   )
     return false;
+  if (!test && notificationId) {
+    delivered.add(notificationId);
+    if (delivered.size > 200)
+      delivered.delete(delivered.values().next().value!);
+  }
   if (!test && Date.now() - lastPlayed < 1500) return false;
   lastPlayed = Date.now();
   // Original two-note chime, 320 ms, with a quiet envelope and no media download.

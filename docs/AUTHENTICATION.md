@@ -2,7 +2,7 @@
 
 # Autenticação
 
-Senha: BCrypt custo 12, mínimo de 12 caracteres no cadastro, máximo de 72 bytes UTF-8. Access token de 10 minutos, refresh de 30 dias (limite absoluto da sessão), 256 bits aleatórios. Banco guarda somente SHA-256 desses tokens. Rotação bloqueia a sessão; reutilização de refresh consumido revoga a família. Senha esquecida retorna resposta uniforme, envia link com token único de 30 minutos via outbox e revoga todas as sessões ao redefinir.
+Senha: BCrypt custo 12, de 6 a 30 caracteres no cadastro e redefinição (limite criptográfico de 72 bytes UTF-8); login preserva as senhas antigas. Access token de 10 minutos, refresh de 30 dias (limite absoluto da sessão), 256 bits aleatórios. Banco guarda somente SHA-256 desses tokens. Rotação bloqueia a sessão; reutilização de refresh consumido revoga a família. Senha esquecida retorna resposta uniforme, envia link com token único de 30 minutos via outbox e revoga todas as sessões ao redefinir.
 
 Web: BFF em `/api/backend` transforma cookies HttpOnly em Authorization Bearer para a API. Cookies têm SameSite=Lax e Secure em produção. Mutações exigem Origin igual a APP_URL. Renovação é serializada no cliente e entre abas por Web Locks quando disponível. `/api/session` GET entrega somente o access token de curta duração para autenticar o WebSocket em memória. Refresh nunca é exposto ao JavaScript da página. Não se usa localStorage para credenciais.
 

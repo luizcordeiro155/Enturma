@@ -1,6 +1,7 @@
 package br.com.enturma.study;
 
 import br.com.enturma.auth.Actor;
+import br.com.enturma.common.ApiException;
 import br.com.enturma.common.Db;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.qrcode.QRCodeWriter;
@@ -74,11 +75,19 @@ public class RoomShareController {
 
   @GetMapping("/join-code/{code}")
   public Object resolve(@AuthenticationPrincipal Actor a, @PathVariable String code) {
+    if (code == null || !code.strip().matches("[A-Za-z2-9]{8}"))
+      throw ApiException.invalid("O código tem 8 letras ou números.");
+    // Invitations expose discovery artwork only, never the room conversation,
+    // participant identities, materials or the host's private information.
     return db.one(
-        "SELECT r.id,r.title,r.status,r.ends_at,s.name subject_name"
+        "SELECT r.id,r.title,r.status,r.ends_at,s.name subject_name,"
+            + "r.has_avatar,r.has_banner,r.media_version,"
+            + "(r.status IN ('OPEN','ACTIVE') AND r.ends_at>now()) available,"
+            + "(SELECT count(*) FROM room_participant p WHERE p.room_id=r.id AND p.left_at IS NULL)"
+            + " participant_count"
             + " FROM study_room r JOIN academic_entry s ON s.id=r.subject_id"
-            + " WHERE upper(r.share_code)=upper(?)",
-        code.strip());
+            + " WHERE r.share_code=?",
+        code.strip().toUpperCase(Locale.ROOT));
   }
 
   @PostMapping("/join-code/{code}/join")

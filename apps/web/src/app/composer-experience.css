@@ -88,6 +88,9 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
     display: none;
   }
 }
+.enturma-message-composer {
+  container: message-composer / inline-size;
+}
 .enturma-message-composer .composer-main-row {
   display: flex !important;
   align-items: flex-end !important;
@@ -287,8 +290,9 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
 .media-library-grid article {
   position: relative;
   min-width: 0;
-  border-radius: 12px;
-  background: var(--surface-hover);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
   overflow: hidden;
 }
 .media-select {
@@ -298,7 +302,7 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
   width: 100%;
   padding: 0;
   border: 0;
-  border-radius: 12px;
+  border-radius: 6px;
   color: var(--ink);
   background: transparent;
   text-align: left;
@@ -310,13 +314,15 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
   object-fit: contain;
 }
 .media-select span {
-  font-size: 11px;
-  padding: 6px 8px 32px;
-  overflow-wrap: anywhere;
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
 }
 .media-item-actions {
   position: absolute;
-  bottom: 4px;
+  top: 4px;
   right: 4px;
   display: flex;
   gap: 4px;
@@ -378,6 +384,24 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
 @media (max-width: 360px) {
   .enturma-message-composer .composer-main-row {
     gap: 0 !important;
+  }
+}
+
+/* A desktop call sidebar can be narrower than a phone. Keep its three media
+   tabs behind the same picker entry point instead of squeezing the input. */
+@container message-composer (max-width: 440px) {
+  .enturma-message-composer .composer-main-row {
+    gap: 1px !important;
+  }
+  .enturma-message-composer .composer-media-buttons .media-trigger-sticker,
+  .enturma-message-composer .composer-media-buttons .media-trigger-gif {
+    display: none !important;
+  }
+  .enturma-message-composer .composer-icon-button,
+  .enturma-message-composer .composer-send-button {
+    flex-basis: 38px !important;
+    width: 38px !important;
+    min-width: 38px !important;
   }
 }
 
@@ -455,7 +479,7 @@ html[data-desktop-chrome="true"] .enturma-launch-overlay {
 }
 .klipy-picker .media-library-grid {
   max-height: min(440px, 52dvh);
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .klipy-picker .media-select img {
   height: 105px;
@@ -520,7 +544,9 @@ html[data-desktop-chrome="true"] .desktop-titlebar-update {
   cursor: pointer;
   -webkit-app-region: no-drag;
   app-region: no-drag;
-  transition: background-color 160ms ease, border-color 160ms ease;
+  transition:
+    background-color 160ms ease,
+    border-color 160ms ease;
 }
 html[data-desktop-chrome="true"] .desktop-titlebar-update svg {
   width: 17px;
@@ -534,7 +560,8 @@ html[data-desktop-chrome="true"] .desktop-titlebar-update span {
   font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
-html[data-desktop-chrome="true"] .desktop-titlebar-update:is(:hover, :focus-visible) {
+html[data-desktop-chrome="true"]
+  .desktop-titlebar-update:is(:hover, :focus-visible) {
   color: #ffffff;
   background: rgb(255 255 255 / 20%);
   border-color: rgb(255 255 255 / 55%);
@@ -549,21 +576,29 @@ html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar-update {
   border-color: rgb(23 73 53 / 30%);
   box-shadow: inset 0 1px 0 rgb(255 255 255 / 60%);
 }
-html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar-update:is(:hover, :focus-visible) {
+html[data-theme="light"][data-desktop-chrome="true"]
+  .desktop-titlebar-update:is(:hover, :focus-visible) {
   color: #174935;
   background: rgb(23 73 53 / 16%);
   border-color: rgb(23 73 53 / 55%);
 }
-html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar-update:focus-visible {
+html[data-theme="light"][data-desktop-chrome="true"]
+  .desktop-titlebar-update:focus-visible {
   outline-color: #174935;
 }
 @media (prefers-reduced-motion: reduce) {
-  html[data-desktop-chrome="true"] .desktop-titlebar-update { transition: none; }
+  html[data-desktop-chrome="true"] .desktop-titlebar-update {
+    transition: none;
+  }
 }
 
 /* Final native update control: override broad dark-theme button rules. */
-html[data-theme="dark"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update,
-html[data-theme="dark"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update:is(:hover,:focus-visible) {
+html[data-theme="dark"][data-desktop-chrome="true"]
+  .desktop-titlebar
+  button.desktop-titlebar-update,
+html[data-theme="dark"][data-desktop-chrome="true"]
+  .desktop-titlebar
+  button.desktop-titlebar-update:is(:hover, :focus-visible) {
   color: #fff !important;
   border: 1px solid #dce8e5 !important;
   background: #172124 !important;
@@ -571,8 +606,14 @@ html[data-theme="dark"][data-desktop-chrome="true"] .desktop-titlebar button.des
   opacity: 1;
   filter: none !important;
 }
-html[data-theme="dark"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update:hover { background: #253239 !important; }
-html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update {
+html[data-theme="dark"][data-desktop-chrome="true"]
+  .desktop-titlebar
+  button.desktop-titlebar-update:hover {
+  background: #253239 !important;
+}
+html[data-theme="light"][data-desktop-chrome="true"]
+  .desktop-titlebar
+  button.desktop-titlebar-update {
   color: #174935 !important;
   border: 1px solid #53776a !important;
   background: #f8faf9 !important;
@@ -580,12 +621,24 @@ html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar button.de
   opacity: 1;
   filter: none !important;
 }
-html[data-theme="light"][data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update:hover { background: #e8f2ed !important; }
-html[data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update :is(svg,span) {
+html[data-theme="light"][data-desktop-chrome="true"]
+  .desktop-titlebar
+  button.desktop-titlebar-update:hover {
+  background: #e8f2ed !important;
+}
+html[data-desktop-chrome="true"]
+  .desktop-titlebar
+  button.desktop-titlebar-update
+  :is(svg, span) {
   color: inherit !important;
   opacity: 1 !important;
   stroke: currentColor;
 }
-html[data-desktop-chrome="true"] .desktop-titlebar button.desktop-titlebar-update {
-  min-height: 28px; height: 28px; border-radius: 9px; padding: 3px 8px;
+html[data-desktop-chrome="true"]
+  .desktop-titlebar
+  button.desktop-titlebar-update {
+  min-height: 28px;
+  height: 28px;
+  border-radius: 9px;
+  padding: 3px 8px;
 }

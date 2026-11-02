@@ -3,11 +3,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { KeyRound, ArrowRight, QrCode } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useVisitor } from "@/lib/visitor-context";
 const RoomQrScanner = dynamic(() => import("./room-qr-scanner"), {
   ssr: false,
 });
 
 export function RoomCodeEntry() {
+  const visitor = useVisitor();
   const [code, setCode] = useState("");
   const [scanning, setScanning] = useState(false);
   const router = useRouter();
@@ -17,6 +19,10 @@ export function RoomCodeEntry() {
         className="room-code-entry"
         onSubmit={(event) => {
           event.preventDefault();
+          if (visitor.active) {
+            visitor.requestLogin(`/join/${code.trim().toUpperCase()}`);
+            return;
+          }
           router.push(`/join/${encodeURIComponent(code.trim().toUpperCase())}`);
         }}
       >
@@ -47,7 +53,9 @@ export function RoomCodeEntry() {
           className="icon-control room-qr-trigger"
           aria-label="Escanear QR da sala"
           title="Escanear QR da sala"
-          onClick={() => setScanning(true)}
+          onClick={() =>
+            visitor.active ? visitor.requestLogin("/rooms") : setScanning(true)
+          }
         >
           <QrCode size={23} />
         </button>

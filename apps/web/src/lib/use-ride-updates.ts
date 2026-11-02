@@ -71,8 +71,7 @@ async function connect() {
 
     const ws = new WebSocket(url);
     socket = ws;
-    ws.onopen = () =>
-      ws.send(JSON.stringify({ token, scope: "rides" }));
+    ws.onopen = () => ws.send(JSON.stringify({ token, scope: "rides" }));
     ws.onmessage = (event) => {
       try {
         const data = JSON.parse(event.data);
@@ -104,10 +103,7 @@ function startTransport() {
   void connect();
 
   fallback = setInterval(() => {
-    if (
-      document.hidden ||
-      (connected && socket?.readyState === WebSocket.OPEN)
-    )
+    if (document.hidden || (connected && socket?.readyState === WebSocket.OPEN))
       return;
 
     // WebSocket is the normal transport. Poll only while realtime is unavailable,
@@ -155,7 +151,7 @@ function stopTransport() {
   attempts = 0;
 }
 
-export function useRideUpdates(refresh: () => Promise<void>) {
+export function useRideUpdates(refresh: () => Promise<void>, enabled = true) {
   const latest = useRef(refresh);
   const [live, setLive] = useState(connected);
 
@@ -164,6 +160,7 @@ export function useRideUpdates(refresh: () => Promise<void>) {
   }, [refresh]);
 
   useEffect(() => {
+    if (!enabled) return;
     const run = () => latest.current();
     const onStatus = (value: boolean) => setLive(value);
 
@@ -178,7 +175,7 @@ export function useRideUpdates(refresh: () => Promise<void>) {
       statusListeners.delete(onStatus);
       stopTransport();
     };
-  }, []);
+  }, [enabled]);
 
   return live;
 }

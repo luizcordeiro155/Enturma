@@ -1,0 +1,100 @@
+/* The optional Enturma palette uses the app icon's forest green and lime.
+   Keeping the dark scheme preserves existing accessible call/media surfaces. */
+html[data-palette="enturma"]:not([data-high-contrast="true"]) {
+  --bg: #0b211a;
+  --ink: #f2f8ef;
+  --muted: #b4cbbb;
+  --accent: #d8ef79;
+  --on-accent: #183f36;
+  --border: #426453;
+  --soft: #16372b;
+  --surface: #103024;
+  --surface-raised: #183d2e;
+  --surface-hover: #224b38;
+  --surface-strong: #2b5842;
+  --success: #a6e6b5;
+  --danger: #ffadb2;
+  --room-bg: var(--bg);
+  --room-panel: var(--surface);
+  --room-subtle: var(--soft);
+  --room-ink: var(--ink);
+  --room-muted: var(--muted);
+  --room-border: var(--border);
+  --room-accent: var(--accent);
+  --room-accent-ink: var(--on-accent);
+}
+html[data-palette="enturma"] .sidebar {
+  background: var(--surface);
+}
+html[data-palette="enturma"] ::selection {
+  background: #d8ef79;
+  color: #183f36;
+}
+html[data-palette="enturma"] :is(input, textarea) {
+  caret-color: #d8ef79;
+}
+html[data-palette="enturma"] {
+  scrollbar-color: #759e83 #0b211a;
+}
+.brand {
+  gap: 11px;
+  letter-spacing: -0.035em;
+  font-weight: 800;
+}
+.brand > img {
+  flex: 0 0 auto;
+  border-radius: 12px;
+}
+.brand > span {
+  line-height: 1;
+}
+.brand .dot {
+  color: var(--success);
+}
+.profile-media-choice {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 6px;
+}
+.profile-media-choice .profile-media-action {
+  height: 100%;
+}
+html .profile-media-choice .profile-media-remove {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 7px;
+  width: fit-content;
+  max-width: 100%;
+  min-height: 44px;
+  padding: 8px 10px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent !important;
+  color: var(--danger) !important;
+  text-align: left;
+  font-size: 0.8rem;
+}
+html .profile-media-choice .profile-media-remove:is(:hover, :focus-visible) {
+  background: var(--danger-surface) !important;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.profile-media-remove svg {
+  flex: 0 0 auto;
+}
+.auth-theme-control {
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+.auth-theme-option img,
+.theme-switch-panel img {
+  border-radius: 4px;
+}
+@media (max-width: 760px) {
+  .brand > img {
+    width: 36px;
+    height: 36px;
+  }
+}

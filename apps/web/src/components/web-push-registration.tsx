@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 import { api } from "@/lib/api";
 import { isDesktop, isMobileApp } from "./desktop-updates";
 
@@ -76,8 +77,19 @@ export async function enableDesktopNotifications() {
 }
 
 export function WebPushRegistration() {
+  const path = usePathname();
+  const privatePage =
+    /^\/(home|rooms|friends|notebooks|profile|settings|caronas|forum|portfolio|onboarding|admin|challenges|learn|subjects)(\/|$)/.test(
+      path,
+    );
   useEffect(() => {
-    if (isDesktop() || isMobileApp() || !("Notification" in window)) return;
+    if (
+      !privatePage ||
+      isDesktop() ||
+      isMobileApp() ||
+      !("Notification" in window)
+    )
+      return;
 
     const registerIfAllowed = () => {
       if (Notification.permission === "granted")
@@ -92,7 +104,7 @@ export function WebPushRegistration() {
       window.removeEventListener("enturma-enable-web-push", onEnable);
       window.removeEventListener("focus", registerIfAllowed);
     };
-  }, []);
+  }, [privatePage]);
 
   return null;
 }

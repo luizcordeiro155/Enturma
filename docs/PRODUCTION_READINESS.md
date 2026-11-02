@@ -1,6 +1,12 @@
 # Release Candidate — 28/10/2026
 
+**Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
+
+Este documento preserva a avaliação da RC de 28/10. As alterações e evidências posteriores de 30/10 estão em [estabilização da experiência](RELEASE_EXPERIENCE_STABILIZATION.md) e no [estado atual](STATUS.md). Os resultados abaixo não devem ser atribuídos automaticamente a commits posteriores.
+
 **NO-GO para publicação como produção homologada ou anúncio de escala.** Há correções implementadas e testadas, mas faltam provas operacionais obrigatórias. A autorização para publicar foi recebida; não foi usada para ignorar os gates de integridade, aplicativos e operação exigidos no pedido.
+
+**Atualização de escopo em 28/10/2026:** o responsável confirmou que não existem backups externos e dispensou sua configuração. A ausência está registrada como limitação de recuperação, não como impedimento obrigatório desta entrega. Isso não comprova recuperação nem dispensa os demais gates. O serviço de staging ainda não foi identificado.
 
 PR: [#109](https://github.com/luizcordeiro155/Enturma/pull/109), branch `codex/production-readiness`. HEAD inicial: `f3f19a03103621db91e78b8a23f47625e6eeaca4`. HEAD de código/testes: `4ed7aecfcc0a73fd81acb0b08ed7009e2280137f`; os commits posteriores desta RC consolidam documentação. O SHA final exato e os checks correspondentes estão no cabeçalho da PR e podem ser obtidos com `git rev-parse HEAD`.
 
@@ -10,7 +16,7 @@ Treze grupos de trabalho registrados abaixo: **2 P0, 6 P1, 5 P2, 0 P3**. São pr
 
 | ID / prioridade | Sintoma, causa e evidência | Tratamento, risco e estado |
 | --- | --- | --- |
-| R01 / P0 | Backup real restaurável e cópia protegida da chave não demonstrados | Ensaio sintético e runbook concluídos; recuperação de produção **bloqueada por falta de evidência operacional**. Sem a chave, dump de ciphertext pode ser insuficiente. |
+| R01 / P0 | Backup externo inexistente, conforme confirmação do responsável | Configuração **dispensada pelo responsável**; não bloqueia esta entrega por si só. Ensaio sintético concluído; recuperação real não comprovada. Sem a chave, dump de ciphertext pode ser insuficiente. |
 | R02 / P0 | Credencial do pacote disponível é superusuária/BYPASSRLS; papel do processo atual desconhecido | Separação Flyway/runtime configurável e SQL restrito preparados/testados em banco sintético. Troca real **bloqueada** até staging; grants insuficientes podem interromper rotas. |
 | R03 / P1 | Transições concorrentes podiam aplicar callbacks antigos e deixar snapshot/classe presos | Revisão da transição, cancelamento e watchdog; testes 10/20/30/50, erro e movimento reduzido. **Concluído nos cenários automatizados**; WebView/Windows físicos pendentes. |
 | R04 / P1 | Start tinha texto escuro em fundo escuro e controlador separado | Tokens semânticos, contraste, controle compartilhado e persistência. **Concluído com evidência Web** claro/escuro/mobile. Arte preservada. |
@@ -62,20 +68,20 @@ Na execução de referência, 12 leituras autenticadas sequenciais do inbox pelo
 
 Consulta somente leitura em 28/10/2026: Flyway V65, 152 tabelas públicas, 151 com RLS, nenhuma FORCE RLS. A credencial do pacote disponível é `postgres`, superusuária/BYPASSRLS; não foi demonstrado que corresponda às variáveis atuais do processo SquareCloud. Não declarar isolamento de estudantes por RLS da conexão atual.
 
-Railway: volume PostgreSQL de 50 GB, ocupação observada 1,18 GB. Nas 24 horas consultadas, CPU média 0,0041 e memória média 0,117 GB. Isso não dimensiona carga futura. Serviços de download estavam SUCCESS; não prova instalação. Infraestrutura necessária para fechar a RC: staging isolado com topologia representativa, backup externo protegido, métricas/alertas com responsáveis e dispositivos de homologação. Não foi contratado serviço pago ou aumentada capacidade sem evidência.
+Railway: volume PostgreSQL de 50 GB, ocupação observada 1,18 GB. Nas 24 horas consultadas, CPU média 0,0041 e memória média 0,117 GB. Isso não dimensiona carga futura. Serviços de download estavam SUCCESS; não prova instalação. Infraestrutura ainda necessária para os gates restantes: staging isolado com topologia representativa, métricas/alertas com responsáveis e dispositivos de homologação. Backup externo foi dispensado pelo responsável. Não foi contratado serviço pago ou aumentada capacidade sem evidência.
 
 ## Segurança, recuperação e publicação
 
 O scan Codex Security `6d6a36ff-bb64-4204-9cc1-48b101e91bec` foi finalizado com **cobertura parcial**, um achado médio e sete superfícies registradas. O achado descreve a base inicial, corrigida na PR. Não há certificação de segurança ou conformidade jurídica. Consulte [dependências](DEPENDENCY_AUDIT.md), [segurança](SECURITY.md) e [privacidade do chat](CHAT_PRIVACY.md).
 
-Backup deve cobrir banco, objetos e cópia protegida da chave de custódia. RPO/RTO e retenção ainda não foram aprovados. O ensaio de CI restaura apenas dados sintéticos; não substitui recuperação real. Plano de promoção e rollback em [operação](OPERATIONS_READINESS.md): API compatível, Web, depois clientes homologados; em regressão, reverter código/JAR/deployment compatível, sem down-migration nem restaurar backup sobre mensagens novas automaticamente.
+Não existe backup externo e sua configuração foi dispensada pelo responsável. O runbook mantém as orientações para eventual adoção futura, cobrindo banco, objetos e chave de custódia. RPO/RTO e retenção não foram demonstrados. O ensaio de CI restaura apenas dados sintéticos; não comprova recuperação real. Plano de promoção e rollback em [operação](OPERATIONS_READINESS.md): API compatível, Web, depois clientes homologados; em regressão, reverter código/JAR/deployment compatível, sem down-migration nem restaurar backup sobre mensagens novas automaticamente.
 
 ## Gates GO / NO-GO
 
 | Gate | Estado | O que falta |
 | --- | --- | --- |
 | A — Segurança | Parcial / NO-GO | provar runtime real; resolver ou aceitar explicitamente triagem residual; validar configuração externa |
-| B — Integridade | Bloqueado / NO-GO | backup real e chaves restauráveis; retenção/RPO/RTO |
+| B — Integridade / recuperação | Backup externo dispensado; recuperação não comprovada | ausência registrada, sem bloquear por esse motivo; não declarar RPO/RTO ou chaves restauráveis como verificados |
 | C — Funcionalidade | Parcial | CI do SHA final e homologação dos provedores físicos/externos |
 | D — Performance | Não executado / NO-GO | baseline de chat, carga progressiva e capacidade documentada |
 | E — Aplicativos | Parcial / NO-GO | instalação, upgrade, rollback, teclado e permissões Android/Windows |
@@ -93,6 +99,6 @@ LGPD: nenhuma certificação emitida. Validar bases legais, retenção, contrato
 
 Os grupos alterados são `apps/web` (componentes, CSS, SW, helpers e testes), `services/api` (cota, geração adaptativa, configuração e regressões), `deploy/postgres-runtime-role.sql`, scripts de auditoria/restore/links, workflow CI, lockfile/POM e documentação. O [inventário documental](DOCUMENTATION_INDEX.md) distingue referências atualizadas de histórico e revisão limitada.
 
-Ordem para fechar os bloqueios: comprovar backup/chaves e papel efetivo; ensaiar runtime restrito em staging; homologar dispositivos e integrações; medir carga/filas/WS; aprovar o tratamento dos advisories e operação LGPD; então reavaliar os gates e promover. **Nenhum deploy, merge em main ou lançamento nativo foi realizado nesta RC.**
+Ordem para fechar os bloqueios restantes: comprovar o papel efetivo; identificar staging e ensaiar runtime restrito; homologar dispositivos e integrações; medir carga/filas/WS; aprovar o tratamento dos advisories e operação LGPD; então reavaliar os gates e promover. Backup externo não é pré-requisito desta entrega após a dispensa explícita. **Nenhum deploy de produção, merge em main ou lançamento nativo foi realizado nesta RC; previews Vercel foram publicados.**
 
 O início de serviços locais foi bloqueado pela aprovação automática do ambiente nesta sessão; o PostgreSQL local estava indisponível. Integração e E2E foram direcionados à CI isolada. Não houve stress em produção nem chamadas pagas de IA para benchmark.

@@ -17,8 +17,19 @@ import {
 import { LiveMemberIdentityCard } from "./user-identity";
 import { post } from "@/lib/api";
 import { Feedback } from "./feedback";
+import { ScreenShareDialog } from "./screen-share-dialog";
 import { callDevice } from "@/lib/call-device";
-import { callRoomOptions, cameraCapture, cameraCaptureFallback, microphoneCapture, screenShareOptions, screenResolutions, screenFrameRates, cameraResolutionNotSupported, type ScreenResolution, type ScreenFrameRate } from "@/lib/call-media-quality";
+import {
+  callRoomOptions,
+  cameraCapture,
+  cameraCaptureFallback,
+  nextCameraCapture,
+  microphoneCapture,
+  screenShareOptions,
+  cameraResolutionNotSupported,
+  type ScreenResolution,
+  type ScreenFrameRate,
+} from "@/lib/call-media-quality";
 type CallMember = {
   identity: string;
   name: string;
@@ -51,16 +62,30 @@ export default function VoiceSession({
   useEffect(() => {
     if (!camera) return;
     let live = true;
-    const scan = () => navigator.mediaDevices.enumerateDevices().then(devices => {
-      if (live) setCameraCount(devices.filter(d => d.kind === 'videoinput').length);
-    }).catch(() => {});
+    const scan = () =>
+      navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) => {
+          if (live)
+            setCameraCount(
+              devices.filter((d) => d.kind === "videoinput").length,
+            );
+        })
+        .catch(() => {});
     void scan();
-    navigator.mediaDevices.addEventListener('devicechange', scan);
-    return () => { live = false; navigator.mediaDevices.removeEventListener('devicechange', scan); };
+    navigator.mediaDevices.addEventListener("devicechange", scan);
+    return () => {
+      live = false;
+      navigator.mediaDevices.removeEventListener("devicechange", scan);
+    };
   }, [camera]);
   const [screen, setScreen] = useState(false);
+  const [screenAudio, setScreenAudio] = useState(false);
+  const [screenBusy, setScreenBusy] = useState(false);
+  const screenPending = useRef(false);
   const [screenSettingsOpen, setScreenSettingsOpen] = useState(false);
-  const [screenResolution, setScreenResolution] = useState<ScreenResolution>("1080p");
+  const [screenResolution, setScreenResolution] =
+    useState<ScreenResolution>("1080p");
   const [screenFps, setScreenFps] = useState<ScreenFrameRate>(30);
   const [noiseSuppression, setNoiseSuppression] = useState(true);
   const [activeScreenShare, setActiveScreenShare] = useState<string | null>(
@@ -424,7 +449,10 @@ export default function VoiceSession({
           await call.disconnect();
           return;
         }
-        await call.localParticipant.setMicrophoneEnabled(true, microphoneCapture(noiseSuppression));
+        await call.localParticipant.setMicrophoneEnabled(
+          true,
+          microphoneCapture(noiseSuppression),
+        );
         if (cancelled()) {
           await call.disconnect();
           return;
@@ -458,7 +486,10 @@ export default function VoiceSession({
     try {
       setError("");
       setDeviceNotice("");
-      await call.localParticipant.setMicrophoneEnabled(muted, microphoneCapture(noiseSuppression));
+      await call.localParticipant.setMicrophoneEnabled(
+        muted,
+        microphoneCapture(noiseSuppression),
+      );
       setMuted(!muted);
       refreshMembers(call);
     } catch (e) {
@@ -495,18 +526,32 @@ export default function VoiceSession({
 
   async function toggleScreen() {
     const call = room.current;
-    if (!call) return;
+    if (!call || screenPending.current || !screenSupported) return;
+    screenPending.current = true;
+    setScreenBusy(true);
+    setError("");
     try {
       const next = !screen;
       if (next) {
-        const { capture, publish } = screenShareOptions(screenResolution, screenFps);
-        await call.localParticipant.setScreenShareEnabled(true, capture, publish);
+        const { capture, publish } = screenShareOptions(
+          screenResolution,
+          screenFps,
+          screenAudio,
+        );
+        await call.localParticipant.setScreenShareEnabled(
+          true,
+          capture,
+          publish,
+        );
         setScreenSettingsOpen(false);
       } else await call.localParticipant.setScreenShareEnabled(false);
       setScreen(next);
       refreshMembers(call);
     } catch (e) {
       setError(nextScreenMessage(e));
+    } finally {
+      screenPending.current = false;
+      setScreenBusy(false);
     }
   }
 
@@ -514,19 +559,29 @@ export default function VoiceSession({
     const call = room.current;
     if (!call || !camera || cameraSwitchBusy) return;
     setCameraSwitchBusy(true);
-    setDeviceNotice('');
+    setDeviceNotice("");
     try {
-      const { Track } = await import('livekit-client');
-      const track = call.localParticipant.getTrackPublication(Track.Source.Camera)?.videoTrack;
+      const { Track } = await import("livekit-client");
+      const track = call.localParticipant.getTrackPublication(
+        Track.Source.Camera,
+      )?.videoTrack;
       if (!track) return;
-      const devices = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput');
-      if (devices.length < 2) { setDeviceNotice('Nenhuma outra câmera disponível.'); return; }
-      const current = track.mediaStreamTrack.getSettings().deviceId;
-      const next = devices[(devices.findIndex(d => d.deviceId === current) + 1) % devices.length];
-      await track.restartTrack({ ...cameraCapture, deviceId: { exact: next.deviceId } });
+      const devices = (await navigator.mediaDevices.enumerateDevices()).filter(
+        (d) => d.kind === "videoinput",
+      );
+      if (devices.length < 2) {
+        setDeviceNotice("Nenhuma outra câmera disponível.");
+        return;
+      }
+      await track.restartTrack(
+        nextCameraCapture(track.mediaStreamTrack.getSettings(), devices),
+      );
       refreshMembers(call);
-    } catch (cause) { setDeviceNotice(mediaDeviceMessage(cause, 'camera')); }
-    finally { setCameraSwitchBusy(false); }
+    } catch (cause) {
+      setDeviceNotice(mediaDeviceMessage(cause, "camera"));
+    } finally {
+      setCameraSwitchBusy(false);
+    }
   }
 
   const startRef = useRef(join);
@@ -762,15 +817,35 @@ export default function VoiceSession({
               {camera ? <Video size={20} /> : <VideoOff size={20} />}
               <span>Câmera</span>
             </button>
-            {camera && cameraCount > 1 && <button type="button" className="call-control" disabled={cameraSwitchBusy} onClick={() => void switchCamera()} title="Alternar câmera frontal, traseira ou conectada">
-              <SwitchCamera size={20} /><span>{cameraSwitchBusy ? 'Trocando…' : 'Virar câmera'}</span>
-            </button>}
-            <button type="button" className="call-control" aria-expanded={screenSettingsOpen} onClick={() => setScreenSettingsOpen(!screenSettingsOpen)} title="Qualidade da transmissão"><Settings2 size={20} /><span>Qualidade</span></button>
+            {camera && cameraCount > 1 && (
+              <button
+                type="button"
+                className="call-control"
+                disabled={cameraSwitchBusy}
+                onClick={() => void switchCamera()}
+                title="Alternar câmera frontal, traseira ou conectada"
+              >
+                <SwitchCamera size={20} />
+                <span>{cameraSwitchBusy ? "Trocando…" : "Virar câmera"}</span>
+              </button>
+            )}
+            <button
+              type="button"
+              className="call-control"
+              aria-expanded={screenSettingsOpen}
+              onClick={() => setScreenSettingsOpen(!screenSettingsOpen)}
+              title="Qualidade da transmissão"
+            >
+              <Settings2 size={20} />
+              <span>Qualidade</span>
+            </button>
             <button
               type="button"
               className={screen ? "call-control active" : "call-control"}
-              onClick={() => void toggleScreen()}
-              disabled={!screenSupported}
+              onClick={() =>
+                screen ? void toggleScreen() : setScreenSettingsOpen(true)
+              }
+              disabled={!screenSupported || screenBusy}
               title={
                 screenSupported
                   ? screen
@@ -799,14 +874,23 @@ export default function VoiceSession({
             </button>
           </div>
 
-          {screenSettingsOpen ? <section className="call-quality-settings" aria-label="Qualidade de transmissão">
-            <strong>Qualidade do compartilhamento</strong>
-            <p>Defina a resolução e os quadros por segundo antes de compartilhar. O resultado depende do dispositivo e da conexão.</p>
-            <label>Resolução <select value={screenResolution} disabled={screen} onChange={(e) => setScreenResolution(e.target.value as ScreenResolution)}>{screenResolutions.map((item) => <option key={item.value} value={item.value}>{item.label}</option>)}</select></label>
-            <label>Fluidez <select value={screenFps} disabled={screen} onChange={(e) => setScreenFps(Number(e.target.value) as ScreenFrameRate)}>{screenFrameRates.map((fps) => <option key={fps} value={fps}>{fps} FPS</option>)}</select></label>
-            <label className="call-noise-setting"><input type="checkbox" checked={noiseSuppression} onChange={(e) => setNoiseSuppression(e.target.checked)} /> Supressão de ruído do microfone (ativa na próxima ativação)</label>
-            {screen ? <small>Encerre a transmissão para alterar sua qualidade.</small> : null}
-          </section> : null}
+          {screenSettingsOpen && (
+            <ScreenShareDialog
+              resolution={screenResolution}
+              fps={screenFps}
+              audio={screenAudio}
+              noiseSuppression={noiseSuppression}
+              sharing={screen}
+              busy={screenBusy}
+              error={error}
+              onResolution={setScreenResolution}
+              onFps={setScreenFps}
+              onAudio={setScreenAudio}
+              onNoiseSuppression={setNoiseSuppression}
+              onClose={() => setScreenSettingsOpen(false)}
+              onShare={() => void toggleScreen()}
+            />
+          )}
           <small className="call-privacy-note">
             <Users size={14} />
             Todos na chamada aparecem acima. Quem estiver falando recebe

@@ -11,6 +11,7 @@ import {
   Palette,
   Sparkles,
   Type,
+  Trash2,
   X,
 } from "lucide-react";
 import { ProfileBackdrop } from "./profile-motion";
@@ -56,19 +57,26 @@ export function ProfileDetailsEditor({
     setEditorView(view);
     // Both screens share the same scroller on mobile. Reusing its scroll
     // position opens the other screen halfway through the content.
-    if (window.matchMedia("(max-width: 760px)").matches && editorScroller.current)
+    if (
+      window.matchMedia("(max-width: 760px)").matches &&
+      editorScroller.current
+    )
       editorScroller.current.scrollTop = 0;
   }
 
   function changePreviewTab(tab: "PROFILE" | "MURAL") {
     setPreviewTab(tab);
-    if (window.matchMedia("(max-width: 760px)").matches && editorScroller.current)
+    if (
+      window.matchMedia("(max-width: 760px)").matches &&
+      editorScroller.current
+    )
       editorScroller.current.scrollTop = 0;
   }
   const [mediaVersion, setMediaVersion] = useState(0);
-  const [uploadedMedia, setUploadedMedia] = useState<
-    "avatar" | "banner" | null
-  >(null);
+  const [mediaState, setMediaState] = useState<{
+    avatar?: boolean;
+    banner?: boolean;
+  }>({});
   const [crop, setCrop] = useState<{ file: File; kind: "avatar" | "banner" }>();
   const [appearance, setAppearance] = useState({
     name: profile.name,
@@ -138,11 +146,31 @@ export function ProfileDetailsEditor({
       );
     }
     await onSaved();
-    setUploadedMedia(crop.kind);
+    setMediaState((current) => ({ ...current, [crop.kind]: true }));
     setMediaVersion(Date.now());
     window.dispatchEvent(new Event("enturma-profile-updated"));
     setCrop(undefined);
     setStatus("Imagem atualizada.");
+  }
+
+  async function removeMedia(kind: "avatar" | "banner") {
+    if (busy) return;
+    setBusy(true);
+    setStatus("");
+    try {
+      await api(`/users/me/${kind}`, { method: "DELETE" });
+      setMediaState((current) => ({ ...current, [kind]: false }));
+      setMediaVersion(Date.now());
+      window.dispatchEvent(new Event("enturma-profile-updated"));
+      await onSaved();
+      setStatus(
+        kind === "avatar" ? "Foto de perfil removida." : "Banner removido.",
+      );
+    } catch (error) {
+      setStatus((error as Error).message);
+    } finally {
+      setBusy(false);
+    }
   }
 
   async function saveProfile() {
@@ -211,8 +239,8 @@ export function ProfileDetailsEditor({
     ...profile,
     ...appearance,
     mediaVersion: mediaVersion || profile.mediaVersion,
-    hasAvatar: uploadedMedia === "avatar" || profile.hasAvatar,
-    hasBanner: uploadedMedia === "banner" || profile.hasBanner,
+    hasAvatar: mediaState.avatar ?? profile.hasAvatar,
+    hasBanner: mediaState.banner ?? profile.hasBanner,
     profileDetails: details,
     showcaseAppearance: showcase?.appearance,
   };
@@ -284,7 +312,11 @@ export function ProfileDetailsEditor({
           </p>
         ) : null}
 
-        <div className="profile-editor-scroll" ref={editorScroller} tabIndex={0}>
+        <div
+          className="profile-editor-scroll"
+          ref={editorScroller}
+          tabIndex={0}
+        >
           <section
             className="profile-preview-stage"
             aria-label="Prévia do perfil"
@@ -324,45 +356,69 @@ export function ProfileDetailsEditor({
             <section className="profile-editor-section">
               <h2>Visual do perfil</h2>
               <div className="profile-media-grid discord-media-grid">
-                <label className="profile-media-action">
-                  <span className="profile-media-icon">
-                    <Camera size={22} />
-                  </span>
-                  <span>
-                    <strong>Foto de perfil</strong>
-                    <small>JPG, PNG, WEBP ou GIF</small>
-                  </span>
-                  <ChevronRight size={20} />
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    disabled={busy}
-                    onChange={(event) => {
-                      choose("avatar", event.target.files?.[0]);
-                      event.target.value = "";
-                    }}
-                  />
-                </label>
-
-                <label className="profile-media-action">
-                  <span className="profile-media-icon">
-                    <ImageIcon size={22} />
-                  </span>
-                  <span>
-                    <strong>Banner</strong>
-                    <small>JPG, PNG, WEBP ou GIF animado</small>
-                  </span>
-                  <ChevronRight size={20} />
-                  <input
-                    type="file"
-                    accept="image/jpeg,image/png,image/webp,image/gif"
-                    disabled={busy}
-                    onChange={(event) => {
-                      choose("banner", event.target.files?.[0]);
-                      event.target.value = "";
-                    }}
-                  />
-                </label>
+                <div className="profile-media-choice">
+                  <label className="profile-media-action">
+                    <span className="profile-media-icon">
+                      <Camera size={22} />
+                    </span>
+                    <span>
+                      <strong>Foto de perfil</strong>
+                      <small>JPG, PNG, WEBP ou GIF</small>
+                    </span>
+                    <ChevronRight size={20} />
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      disabled={busy}
+                      onChange={(event) => {
+                        choose("avatar", event.target.files?.[0]);
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {previewUser.hasAvatar && (
+                    <button
+                      className="profile-remove-button profile-media-remove"
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void removeMedia("avatar")}
+                    >
+                      <Trash2 size={16} aria-hidden="true" /> Remover foto de
+                      perfil
+                    </button>
+                  )}
+                </div>
+                <div className="profile-media-choice">
+                  <label className="profile-media-action">
+                    <span className="profile-media-icon">
+                      <ImageIcon size={22} />
+                    </span>
+                    <span>
+                      <strong>Banner</strong>
+                      <small>JPG, PNG, WEBP ou GIF animado</small>
+                    </span>
+                    <ChevronRight size={20} />
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      disabled={busy}
+                      onChange={(event) => {
+                        choose("banner", event.target.files?.[0]);
+                        event.target.value = "";
+                      }}
+                    />
+                  </label>
+                  {previewUser.hasBanner && (
+                    <button
+                      className="profile-remove-button profile-media-remove"
+                      type="button"
+                      disabled={busy}
+                      onClick={() => void removeMedia("banner")}
+                    >
+                      <Trash2 size={16} aria-hidden="true" /> Remover banner
+                    </button>
+                  )}
+                </div>
               </div>
             </section>
 

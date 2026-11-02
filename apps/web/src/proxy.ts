@@ -53,10 +53,24 @@ function signIn(req: NextRequest) {
  * rendering the Home page and redirecting after hydration.
  */
 export async function proxy(req: NextRequest) {
+  if (req.nextUrl.pathname === "/visitante") {
+    const native = /Enturma(?:Mobile|Desktop)\//.test(
+      req.headers.get("user-agent") ?? "",
+    );
+    const response =
+      native ||
+      req.cookies.has("enturma_access") ||
+      req.cookies.has("enturma_refresh")
+        ? NextResponse.redirect(new URL("/home", req.url))
+        : NextResponse.next();
+    response.headers.set("Cache-Control", "private, no-store");
+    return response;
+  }
   // Presentation is public, but never interrupts an existing session or the mobile shell.
   if (req.nextUrl.pathname === "/" || req.nextUrl.pathname === "/start") {
     if (
-      req.cookies.has("enturma_access") || req.cookies.has("enturma_refresh") ||
+      req.cookies.has("enturma_access") ||
+      req.cookies.has("enturma_refresh") ||
       /EnturmaMobile\//.test(req.headers.get("user-agent") ?? "")
     ) {
       const response = NextResponse.redirect(new URL("/home", req.url));
@@ -83,7 +97,10 @@ export async function proxy(req: NextRequest) {
       cache: "no-store",
       signal: AbortSignal.timeout(8000),
     };
-    let result = await fetch(`${backendUrl()}/api/v1/auth/session-view`, options);
+    let result = await fetch(
+      `${backendUrl()}/api/v1/auth/session-view`,
+      options,
+    );
     // Keep authenticated navigation available while the native Git API deployment catches up.
     // Both endpoints validate the session and academic access on the server.
     if (result.status === 404)

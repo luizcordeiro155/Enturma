@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useVisitor } from "@/lib/visitor-context";
 import Link from "next/link";
 import { Award, ShieldAlert, X } from "lucide-react";
 import { api, post } from "@/lib/api";
@@ -300,6 +301,7 @@ type Preference = {
 };
 
 export function NotificationPreferences() {
+  const visitor = useVisitor();
   const [items, setItems] = useState<Preference[]>([]);
   const [sound, setSound] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -307,12 +309,17 @@ export function NotificationPreferences() {
 
   useEffect(() => {
     queueMicrotask(() => setSound(notificationSoundEnabled()));
+    if (visitor.active) return;
     api<Preference[]>("/notifications/preferences")
       .then(setItems)
       .catch((e) => setStatus(e.message));
-  }, []);
+  }, [visitor.active]);
 
   async function save(item: Preference) {
+    if (visitor.active) {
+      visitor.requestLogin("/settings");
+      return;
+    }
     setBusy(true);
     try {
       await api("/notifications/preferences", {
@@ -372,6 +379,14 @@ export function NotificationPreferences() {
         celular ou PC ou é enviado por e-mail. E-mails de segurança, confirmação
         de conta e recuperação de senha continuam ativos.
       </p>
+      {visitor.active && (
+        <button
+          className="secondary"
+          onClick={() => visitor.requestLogin("/settings")}
+        >
+          Configurar notificações da minha conta
+        </button>
+      )}
       {items.map((item) => (
         <fieldset key={item.category}>
           <legend>{categoryNames[item.category]}</legend>

@@ -4,6 +4,7 @@ import { useLiveRefresh } from "@/lib/live-updates";
 import { useNotificationTarget, focusMessage } from "./notifications";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useVisitor } from "@/lib/visitor-context";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowUp,
@@ -60,10 +61,14 @@ type Me = { id: string; role: string };
 export function Forum({
   id,
   initialCategory = "",
+  visitor = false,
 }: {
   id?: string;
   initialCategory?: string;
+  visitor?: boolean;
 }) {
+  const guest = useVisitor();
+  const endpoint = visitor ? "/public/explore/forum" : "/forum";
   const [emojiTarget, setEmojiTarget] = useState<{
     entry: Entry;
     anchor: MessageActionAnchor;
@@ -71,12 +76,12 @@ export function Forum({
   const router = useRouter();
   useNotificationTarget();
   const [me, setMe] = useState<Me | undefined>(() =>
-    peekApiSnapshot<Me>("/users/me"),
+    visitor ? undefined : peekApiSnapshot<Me>("/users/me"),
   );
   const [items, setItems] = useState<Entry[]>(
     () =>
       peekApiSnapshot<PageData>(
-        `/forum?${new URLSearchParams({ q: "", category: initialCategory, sort: "new", mine: "false", page: "0" })}`,
+        `${endpoint}?${new URLSearchParams({ q: "", category: initialCategory, sort: "new", mine: "false", page: "0" })}`,
       )?.items ?? [],
   );
   const [current, setCurrent] = useState<Entry>();
@@ -93,7 +98,7 @@ export function Forum({
     id
       ? true
       : !peekApiSnapshot(
-          `/forum?${new URLSearchParams({ q: "", category: initialCategory, sort: "new", mine: "false", page: "0" })}`,
+          `${endpoint}?${new URLSearchParams({ q: "", category: initialCategory, sort: "new", mine: "false", page: "0" })}`,
         ),
   );
   const [busy, setBusy] = useState(false);
@@ -113,7 +118,7 @@ export function Forum({
       const target = location.hash.match(/^#entry-([a-f0-9-]+)$/)?.[1];
       if (!target || target === id) return;
       try {
-        const e = await api<Entry>(`/forum/${id}/target/${target}`);
+        const e = await api<Entry>(`${endpoint}/${id}/target/${target}`);
         if (active) {
           setComments((old) =>
             old.some((c) => c.id === e.id) ? old : [...old, e],
@@ -131,25 +136,25 @@ export function Forum({
       window.removeEventListener("hashchange", jump);
       window.removeEventListener("enturma-notification-open", jump);
     };
-  }, [id]);
+  }, [id, endpoint]);
   const load = useCallback(
     async (pageNumber = 0, refresh = false) => {
       const version = ++sequence.current;
       try {
         if (id) {
           const [p, c, r] = await Promise.all([
-            api<Entry>(`/forum/${id}`),
+            api<Entry>(`${endpoint}/${id}`),
             Promise.all(
               Array.from({ length: refresh ? pageNumber + 1 : 1 }, (_, i) =>
                 api<PageData>(
-                  `/forum/${id}/comments?page=${refresh ? i : pageNumber}`,
+                  `${endpoint}/${id}/comments?page=${refresh ? i : pageNumber}`,
                 ),
               ),
             ).then((pages) => ({
               items: pages.flatMap((p) => p.items),
               hasMore: pages.at(-1)!.hasMore,
             })),
-            api<Entry[]>(`/forum/${id}/related`),
+            api<Entry[]>(`${endpoint}/${id}/related`),
           ]);
           if (version !== sequence.current) return;
           setCurrent(p);
@@ -169,7 +174,7 @@ export function Forum({
           const pages = await Promise.all(
             Array.from({ length: refresh ? pageNumber + 1 : 1 }, (_, i) =>
               api<PageData>(
-                `/forum?${new URLSearchParams({ q: search, category, sort, mine: String(mine), page: String(refresh ? i : pageNumber) })}`,
+                `${endpoint}?${new URLSearchParams({ q: search, category, sort, mine: String(mine), page: String(refresh ? i : pageNumber) })}`,
               ),
             ),
           );
@@ -191,7 +196,7 @@ export function Forum({
         if (version === sequence.current) setLoading(false);
       }
     },
-    [id, search, category, sort, mine],
+    [id, search, category, sort, mine, endpoint],
   );
   useLiveRefresh("forum_changed", () => load(page, true));
   useEffect(() => {
@@ -203,11 +208,16 @@ export function Forum({
     };
   }, [load]);
   useEffect(() => {
+    if (visitor) return;
     void api<Me>("/users/me")
       .then(setMe)
       .catch((e) => setError(e.message));
-  }, []);
+  }, [visitor]);
   async function mutate(path: string, method: string, data?: unknown) {
+    if (visitor) {
+      guest.requestLogin(id ? `/forum/${id}` : "/forum");
+      return;
+    }
     setBusy(true);
     setError("");
     try {
@@ -243,7 +253,16 @@ export function Forum({
     }
   }
   const actions = (entry: Entry) => (
-    <div className="forum-entry-actions">
+    <div
+      className="forum-entry-actions"
+      onClickCapture={(event) => {
+        if (visitor && (event.target as HTMLElement).closest("button")) {
+          event.preventDefault();
+          event.stopPropagation();
+          guest.requestLogin(`/forum/${entry.rootId || entry.id}`);
+        }
+      }}
+    >
       <div className="forum-votes" aria-label="Votos">
         <button
           className="icon-control"
@@ -339,7 +358,17 @@ export function Forum({
     </div>
   );
   const reactions = (entry: Entry) => (
-    <div className="forum-reactions" aria-label="Reações">
+    <div
+      className="forum-reactions"
+      aria-label="Reações"
+      onClickCapture={(event) => {
+        if (visitor) {
+          event.preventDefault();
+          event.stopPropagation();
+          guest.requestLogin(`/forum/${entry.rootId || entry.id}`);
+        }
+      }}
+    >
       {[...new Set([...emojis, ...entry.reactions.map((r) => r.emoji)])].map(
         (emoji) => {
           const reaction = entry.reactions.find((r) => r.emoji === emoji);
@@ -454,7 +483,7 @@ export function Forum({
       ));
   }
   return (
-    <Shell>
+    <Shell visitor={visitor}>
       {emojiTarget && (
         <MessageActionPopover
           anchor={emojiTarget.anchor}
@@ -493,7 +522,11 @@ export function Forum({
               <ArrowLeft size={17} /> Voltar ao fórum
             </Link>
           ) : (
-            <button onClick={() => setCompose(true)}>
+            <button
+              onClick={() =>
+                visitor ? guest.requestLogin("/forum") : setCompose(true)
+              }
+            >
               <Plus size={18} /> Nova publicação
             </button>
           )}
@@ -554,7 +587,11 @@ export function Forum({
                     <input
                       type="checkbox"
                       checked={mine}
-                      onChange={(e) => setMine(e.target.checked)}
+                      onChange={(e) =>
+                        visitor
+                          ? guest.requestLogin("/forum")
+                          : setMine(e.target.checked)
+                      }
                     />
                     Minhas publicações
                   </label>
@@ -572,7 +609,13 @@ export function Forum({
                         ? "Experimente outro termo ou compartilhe sua dúvida."
                         : "Comece uma conversa com a comunidade."}
                     </p>
-                    <button onClick={() => setCompose(true)}>
+                    <button
+                      onClick={() =>
+                        visitor
+                          ? guest.requestLogin("/forum")
+                          : setCompose(true)
+                      }
+                    >
                       Criar publicação
                     </button>
                   </div>
@@ -587,6 +630,10 @@ export function Forum({
                     className="forum-comment-form"
                     onSubmit={async (e) => {
                       e.preventDefault();
+                      if (visitor) {
+                        guest.requestLogin(`/forum/${id}`);
+                        return;
+                      }
                       setBusy(true);
                       try {
                         await post(`/forum/${id}/comments`, {
@@ -627,7 +674,17 @@ export function Forum({
                         placeholder="Compartilhe uma explicação ou mencione @usuario…"
                       />
                     </label>
-                    <button disabled={busy || !body.trim()}>
+                    <button
+                      disabled={busy || (!visitor && !body.trim())}
+                      onClick={
+                        visitor
+                          ? (event) => {
+                              event.preventDefault();
+                              guest.requestLogin(`/forum/${id}`);
+                            }
+                          : undefined
+                      }
+                    >
                       {busy ? "Enviando…" : "Comentar"}
                     </button>
                   </form>

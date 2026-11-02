@@ -10,6 +10,9 @@ export function setThemeOrigin(x: number, y: number) {
 /** Native snapshots keep text crisp; the fallback changes no geometry. */
 export function applyEnturmaTheme(theme: string, animate = true) {
   const root = document.documentElement;
+  // Enturma is a dark palette, so existing media/call contrast rules apply.
+  const scheme = theme === "enturma" ? "dark" : theme;
+  const palette = theme === "enturma" ? "enturma" : "default";
   const current = ++revision;
   clearTimeout(deadline);
   animation?.cancel();
@@ -17,10 +20,17 @@ export function applyEnturmaTheme(theme: string, animate = true) {
   active?.skipTransition();
   active = undefined;
   root.classList.remove("enturma-theme-transition");
-  if (root.dataset.theme === theme) return;
+  if (
+    root.dataset.theme === scheme &&
+    (root.dataset.palette || "default") === palette
+  )
+    return;
   const change = () => {
     // skipTransition does not cancel an already queued update callback.
-    if (current === revision) root.dataset.theme = theme;
+    if (current === revision) {
+      root.dataset.theme = scheme;
+      root.dataset.palette = palette;
+    }
   };
   const reduced =
     matchMedia("(prefers-reduced-motion: reduce)").matches ||
