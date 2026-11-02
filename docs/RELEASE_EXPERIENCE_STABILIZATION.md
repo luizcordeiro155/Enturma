@@ -102,3 +102,15 @@ Publicar a API compatível e suas migrações antes de ativar os clientes que en
 | Auditoria | Gitleaks passou. Inventário npm: 45 entradas (6 altas, 38 moderadas, 1 baixa), incluindo dependentes transitivos. Alertas residuais e migrações de plataforma necessárias em [DEPENDENCY_AUDIT](DEPENDENCY_AUDIT.md); não é uma auditoria limpa. |
 
 Nenhum envio a amigos reais, remoção de conta ou teste de carga contra produção integra essas provas. A dispensa do responsável para aparelhos físicos, assinatura Windows, validações operacionais e backup externo permanece; não equivale a testes executados, capacidade de produção demonstrada, pentest independente ou certificação jurídica LGPD.
+
+## Refinamento — PR #134: temas e composição de mensagens
+
+- Marca oficial vetorial sem fundo, herdando a cor do tema; mantém o desenho do livro e o ponto de identidade.
+- Login/cadastro recebem uma composição Remotion exclusiva em loop de 12 segundos. Cores semânticas acompanham a troca de tema sem remontar o player. Movimento reduzido mantém uma composição estática; abas ocultas e animação fora da área visível ficam pausadas.
+- Quatro opções de tema alinhadas; seletor de mídia com texto legível em claro, escuro e Enturma. Caronas e as superfícies nativas de Windows/Android passam a reconhecer a paleta Enturma.
+- Confirmação de link externo usa portal no `body`, evitando herdar as cores personalizadas de perfis e mensagens. Consentimento, foco e abertura com `noopener,noreferrer` permanecem.
+- Um botão abre emoji, figurinhas e GIFs. Compositor vazio oferece gravação; texto/anexo oferece envio. A gravação em andamento mantém a prévia mesmo que o rascunho mude.
+- Removidos o fundo/divisor superior e os espaçamentos acumulados acima do compositor. Histórico curto fica junto à caixa; histórico longo preserva rolagem e o controle existente do teclado.
+- Histórico **privado** anterior aos recibos pode adquirir confirmação real ao ser recebido/aberto pelo destinatário. Não há marcação retroativa de leitura. Em salas antigas sem snapshot de destinatários, continua impossível inferir quem recebeu/leu; novas mensagens mantêm o conjunto definido no envio.
+
+Não há nova migração, mudança de senha ou invalidação de sessões neste refinamento. O protocolo nativo aceita clientes anteriores. A CI da [PR #134](https://github.com/luizcordeiro155/Enturma/pull/134) registra os resultados finais e capturas; a PR também registra publicação e manifests verificados. Alertas de dependências e os limites operacionais acima permanecem.

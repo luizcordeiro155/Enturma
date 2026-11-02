@@ -83,7 +83,11 @@ html .profile-media-choice .profile-media-remove:is(:hover, :focus-visible) {
 .profile-media-remove svg {
   flex: 0 0 auto;
 }
+.auth-story-top {
+  flex-wrap: wrap;
+}
 .auth-story .auth-theme-control {
+  flex: 1 0 280px;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   width: 100%;
@@ -97,6 +101,9 @@ html .profile-media-choice .profile-media-remove:is(:hover, :focus-visible) {
   gap: 5px;
 }
 @media (max-width: 760px) {
+  .auth-story .auth-theme-control {
+    flex: 0 0 auto;
+  }
   .brand > .enturma-app-mark {
     width: 36px;
     height: 36px;

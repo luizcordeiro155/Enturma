@@ -307,6 +307,10 @@
   display: inline-flex;
   gap: 3px;
 }
+.conversation-typing:empty {
+  min-height: 0;
+  padding: 0;
+}
 .conversation-typing i {
   width: 4px;
   height: 4px;

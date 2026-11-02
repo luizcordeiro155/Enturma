@@ -71,6 +71,9 @@ test("pesquisa Web: contrato visual e payload, sem chamadas pagas", async ({
         document.documentElement.dataset.theme = value;
       }, theme);
       await expect(search).toHaveAttribute("aria-pressed", "false");
+      // Let the responsive composer finish switching its container breakpoint
+      // before comparing the inactive/active geometry.
+      await expect(search).toHaveCSS("width", width === 390 ? "38px" : "40px");
       const before = await search.boundingBox();
       await search.click();
       await expect(search).toHaveAttribute("aria-pressed", "true");

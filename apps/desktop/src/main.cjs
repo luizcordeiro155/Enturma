@@ -1213,9 +1213,10 @@ ipcMain.handle("desktop:get-info", (event) => {
     platform: process.platform,
     webUrl: WEB_URL,
     releaseNotes: [
-      "Instalador e desinstalador com o ícone oficial do Enturma.",
-      "Ao desinstalar, você escolhe se deseja apagar também sessões, cache e preferências locais.",
-      "A remoção dos dados locais vem desmarcada e preserva sua conta e os arquivos exportados.",
+      "Tema Enturma também no cabeçalho e em Caronas, com a marca oficial transparente.",
+      "Nova animação de entrada no login, sincronizada com suas cores.",
+      "Conversas mais compactas, um seletor de mídias e botão de áudio quando a mensagem está vazia.",
+      "Confirmações reais de entrega e leitura, incluindo histórico privado ao ser aberto novamente.",
     ],
   };
 });

@@ -26,6 +26,16 @@ test("auth loop follows all themes without replacing its player", async ({
       "true",
     );
     await expect(film).toHaveAttribute("data-continuity", "kept");
+    if (theme === "Enturma")
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-palette",
+        "enturma",
+      );
+    else
+      await expect(page.locator("html")).not.toHaveAttribute(
+        "data-palette",
+        "enturma",
+      );
     const colors = await film.evaluate((el) => {
       const scene =
         el.querySelector("[data-brand-book]")!.parentElement!.parentElement!;
@@ -36,6 +46,26 @@ test("auth loop follows all themes without replacing its player", async ({
     });
     expect(colors[0]).not.toBe(colors[1]);
     if (theme === "Enturma") expect(colors[1]).toBe("rgb(22, 55, 43)");
+    // Inspect actual foregrounds, not just the scene's inherited color. Legacy
+    // auth descendant rules used to paint these dark green in every theme.
+    const foregrounds = page.locator(
+      ".auth-story-top .enturma-app-mark, .auth-film .enturma-app-mark, .auth-film strong, .auth-film svg.lucide-message-circle, .auth-film svg.lucide-book-open",
+    );
+    const dark =
+      (await page.locator("html").getAttribute("data-theme")) === "dark";
+    const expectedInk =
+      theme === "Enturma"
+        ? "rgb(242, 248, 239)"
+        : dark
+          ? "rgb(242, 246, 244)"
+          : "rgb(23, 63, 54)";
+    await expect
+      .poll(() =>
+        foregrounds.evaluateAll((nodes) =>
+          nodes.map((node) => getComputedStyle(node).color),
+        ),
+      )
+      .toEqual(Array(6).fill(expectedInk));
     await page.screenshot({
       path: info.outputPath(`auth-${theme}.png`),
       fullPage: true,
@@ -135,7 +165,11 @@ test("two accounts acknowledge private and room messages, with compact themed co
     ).toBeVisible({ timeout: 20000 });
     await other.bringToFront();
     await other.getByRole("button", { name: "Conversar", exact: true }).click();
-    await expect(other.getByText(text, { exact: true })).toBeVisible();
+    await expect(
+      other
+        .getByRole("region", { name: "Conversa privada" })
+        .getByText(text, { exact: true }),
+    ).toBeVisible();
     await expect(
       sent.getByRole("img", { name: "Lida", exact: true }),
     ).toBeVisible({ timeout: 20000 });
