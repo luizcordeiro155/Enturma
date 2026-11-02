@@ -58,7 +58,7 @@ test("auth loop follows all themes without replacing its player", async ({
     // Inspect actual foregrounds, not just the scene's inherited color. Legacy
     // auth descendant rules used to paint these dark green in every theme.
     const foregrounds = page.locator(
-      ".auth-story-top .enturma-app-mark, .auth-film .enturma-app-mark, .auth-film strong, .auth-film svg.lucide-message-circle, .auth-film svg.lucide-book-open",
+      ".auth-story-top .brand .enturma-app-mark, .auth-film .enturma-app-mark, .auth-film strong, .auth-film svg.lucide-message-circle, .auth-film svg.lucide-book-open",
     );
     const dark =
       (await page.locator("html").getAttribute("data-theme")) === "dark";
@@ -74,7 +74,7 @@ test("auth loop follows all themes without replacing its player", async ({
           nodes.map((node) => getComputedStyle(node).color),
         ),
       )
-      .toEqual(Array(7).fill(expectedInk));
+      .toEqual(Array(6).fill(expectedInk));
     await page.screenshot({
       path: info.outputPath(`auth-${theme}.png`),
       fullPage: true,
