@@ -25,8 +25,9 @@ function markDisconnected() {
     document.documentElement.dataset.realtime = "disconnected";
 }
 
-export function useAppConnection() {
+export function useAppConnection(enabled = true) {
   useEffect(() => {
+    if (!enabled) return;
     let active = true;
     let attempt = 0;
     let socket: WebSocket | undefined;
@@ -34,8 +35,10 @@ export function useAppConnection() {
     let heartbeat: ReturnType<typeof setInterval>;
 
     async function connect() {
+      if (!active) return;
       try {
         await api("/users/me", { cache: "no-store" });
+        if (!active) return;
         const response = await fetch("/api/session", { cache: "no-store" });
         if (!response.ok) throw Error("Sessão realtime indisponível.");
         const { token, url } = await response.json();
@@ -108,15 +111,20 @@ export function useAppConnection() {
       }
     }
 
-    void connect();
-    return () => {
+    const stop = () => {
       active = false;
       markDisconnected();
       clearTimeout(retry);
       clearInterval(heartbeat);
       socket?.close();
     };
-  }, []);
+    window.addEventListener("enturma-session-changed", stop);
+    void connect();
+    return () => {
+      stop();
+      window.removeEventListener("enturma-session-changed", stop);
+    };
+  }, [enabled]);
 }
 
 export function useLiveRefresh(
@@ -150,8 +158,11 @@ export function useLiveRefresh(
     async function run() {
       // Call signaling must work in background tabs; content refresh can wait.
       if (!active) return;
-      if (document.hidden && type !== "private_call_changed" &&
-          !(type === "notifications_changed" && window.enturmaDesktop)) {
+      if (
+        document.hidden &&
+        type !== "private_call_changed" &&
+        !(type === "notifications_changed" && window.enturmaDesktop)
+      ) {
         dirty = true;
         return;
       }
@@ -206,7 +217,9 @@ export function useLiveRefresh(
     const timer = window.setInterval(() => {
       if (
         type === "private_call_changed" ||
-        (!liveConnected && (!document.hidden || (type === "notifications_changed" && window.enturmaDesktop)))
+        (!liveConnected &&
+          (!document.hidden ||
+            (type === "notifications_changed" && window.enturmaDesktop)))
       )
         refresh();
     }, fallbackEvery);

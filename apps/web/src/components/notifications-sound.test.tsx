@@ -1,6 +1,13 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { act, cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  waitFor,
+} from "@testing-library/react";
 import { NotificationsProvider } from "./notifications";
+import { useAppConnection } from "@/lib/live-updates";
 const state = vi.hoisted(() => ({
   refresh: undefined as undefined | (() => Promise<void>),
   items: [] as object[],
@@ -8,10 +15,15 @@ const state = vi.hoisted(() => ({
   unlock: vi.fn(),
 }));
 vi.mock("@/lib/api", () => ({
-  api: vi.fn(async () => ({
-    items: state.items,
-    unreadCount: state.items.length,
-  })),
+  prepareSessionNavigation: vi.fn(async () => true),
+  api: vi.fn(async (path: string) =>
+    path === "/auth/session-view"
+      ? { academicAccess: true }
+      : {
+          items: state.items,
+          unreadCount: state.items.length,
+        },
+  ),
   post: vi.fn(),
 }));
 vi.mock("@/lib/live-updates", () => ({
@@ -69,16 +81,40 @@ test("foreground inbox sound does not require OS notification permission and ski
 test("desktop chimes in the background without replaying unread notices", async () => {
   vi.spyOn(document, "hasFocus").mockReturnValue(false);
   vi.spyOn(document, "hidden", "get").mockReturnValue(true);
-  Object.defineProperty(window, "enturmaDesktop", { configurable: true, value: {} });
+  Object.defineProperty(window, "enturmaDesktop", {
+    configurable: true,
+    value: {},
+  });
   state.items = [];
-  render(<NotificationsProvider><div>Desktop</div></NotificationsProvider>);
+  render(
+    <NotificationsProvider>
+      <div>Desktop</div>
+    </NotificationsProvider>,
+  );
+  await waitFor(() => expect(useAppConnection).toHaveBeenLastCalledWith(true));
   fireEvent.pointerDown(window);
   expect(state.unlock).toHaveBeenCalledOnce();
-  await act(async () => { await state.refresh!(); });
-  state.items = [{ id: "desktop-new", readAt: null, kind: "PRIVATE_MESSAGE", contextKey: "friend:other" }];
-  await act(async () => { await state.refresh!(); });
+  await act(async () => {
+    await state.refresh!();
+  });
+  state.items = [
+    {
+      id: "desktop-new",
+      readAt: null,
+      kind: "PRIVATE_MESSAGE",
+      contextKey: "friend:other",
+    },
+  ];
+  await act(async () => {
+    await state.refresh!();
+  });
   expect(state.sound).toHaveBeenCalledExactlyOnceWith(false, "desktop-new");
-  await act(async () => { await state.refresh!(); });
+  await act(async () => {
+    await state.refresh!();
+  });
   expect(state.sound).toHaveBeenCalledTimes(1);
-  Object.defineProperty(window, "enturmaDesktop", { configurable: true, value: undefined });
+  Object.defineProperty(window, "enturmaDesktop", {
+    configurable: true,
+    value: undefined,
+  });
 });

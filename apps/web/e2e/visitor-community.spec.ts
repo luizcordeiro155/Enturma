@@ -87,12 +87,14 @@ test("visitor reads the real community and settings, but account actions stay ga
   }
   // The UI prompt is not the authorization boundary.
   const denied = await page.request.put(`/api/backend/forum/${entry.id}/vote`, {
+    headers: { Origin: new URL(page.url()).origin },
     data: { value: 1 },
   });
-  expect([401, 403]).toContain(denied.status());
-  expect(
-    (
-      await request.get(`${backend}/api/v1/public/explore/forum/${entry.id}`)
-    ).ok(),
-  ).toBe(true);
+  expect(denied.status()).toBe(401);
+  expect((await denied.json()).code).toBe("UNAUTHORIZED");
+  const unchanged = await request.get(
+    `${backend}/api/v1/public/explore/forum/${entry.id}`,
+  );
+  expect(unchanged.ok()).toBe(true);
+  expect(Number((await unchanged.json()).score)).toBe(0);
 });

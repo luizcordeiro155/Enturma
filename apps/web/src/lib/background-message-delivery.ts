@@ -17,6 +17,7 @@ export async function receivePendingMessages(
   active: () => boolean,
   signal: AbortSignal,
 ) {
+  if (!active() || signal.aborted) return;
   const pending = await api<PendingDelivery[]>("/messages/pending-delivery", {
     cache: "no-store",
     signal,
@@ -57,13 +58,22 @@ export async function receivePendingMessages(
   }
 }
 
-export function useBackgroundMessageDelivery(sessionEpoch: number) {
+export function useBackgroundMessageDelivery(
+  sessionEpoch: number,
+  enabled = true,
+) {
   useEffect(() => {
+    if (!enabled) return;
     let active = true,
       running = false;
     let lastRun = 0;
     let timer: ReturnType<typeof setTimeout>;
     const controller = new AbortController();
+    const stop = () => {
+      active = false;
+      controller.abort();
+      clearTimeout(timer);
+    };
     const receive = async () => {
       if (!active || running) return;
       running = true;
@@ -91,18 +101,18 @@ export function useBackgroundMessageDelivery(sessionEpoch: number) {
       "focus",
     ];
     events.forEach((event) => window.addEventListener(event, schedule));
+    window.addEventListener("enturma-session-changed", stop);
     document.addEventListener("visibilitychange", schedule);
     const fallback = window.setInterval(() => {
       if (!document.hidden || window.enturmaDesktop) schedule();
     }, 30000);
     schedule();
     return () => {
-      active = false;
-      controller.abort();
-      clearTimeout(timer);
+      stop();
       clearInterval(fallback);
       events.forEach((event) => window.removeEventListener(event, schedule));
+      window.removeEventListener("enturma-session-changed", stop);
       document.removeEventListener("visibilitychange", schedule);
     };
-  }, [sessionEpoch]);
+  }, [sessionEpoch, enabled]);
 }
