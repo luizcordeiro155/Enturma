@@ -1812,7 +1812,7 @@ class PlatformIntegrationTest {
   }
 
   @Test
-  void legacyPrivateHistoryAcquiresReceiptsOnlyFromItsRecipient() {
+  void legacyPrivateHistoryAcquiresReceiptsOnlyFromItsRecipient() throws Exception {
     String username =
         (String) db.one("SELECT username FROM app_user WHERE id=?", member.id()).get("username");
     UUID friendship =
