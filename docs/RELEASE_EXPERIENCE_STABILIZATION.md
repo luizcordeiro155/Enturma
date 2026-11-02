@@ -61,3 +61,41 @@ A ausência de backup externo foi explicitamente dispensada pelo responsável. N
 Provas locais desta revisão: TypeScript e lint (35 avisos preexistentes, zero erros); 18 testes focados Web; teste Java dos limites de senha. CI completa e publicação serão registradas após sua execução.
 
 O responsável dispensou homologação física, assinatura Windows e validações operacionais como condição de publicação. A ausência dessas provas permanece documentada; a dispensa não significa execução nem certificação de segurança absoluta.
+
+## Continuação — 02/11/2026: comunidade, mensagens e identidade visual
+
+Este registro descreve o código do lote de 02/11. Os resultados de 30/10 acima pertencem aos respectivos commits e não são prova de validação deste lote. CI completa, publicação e versões distribuídas devem ser registradas com seus próprios SHAs e links após confirmação.
+
+### Comportamentos deste lote
+
+- **Visitante Web:** `/visitante` reutiliza os componentes do Início, Fórum, Salas, Caronas e Configurações. Lê publicações e comentários reais e a descoberta de salas abertas por endpoints públicos com projeção limitada. Publicar, reagir, comentar, entrar em salas, solicitar/oferecer carona, abrir Amigos ou Portfólio e gerenciar conta exigem login. O diálogo permite entrar/cadastrar; ao cancelar, retorna ao início do visitante. Não cria conta fictícia nem consulta mensagens, membros de salas, localização de motoristas/passageiros ou preferências privadas. O modo permanece exclusivo da Web.
+- **Áudio nos chats:** gravação explícita, prévia, cancelamento e envio em conversas privadas e salas. O gravador encerra em até 120 segundos e limita o arquivo a 1.433.600 bytes; escolhe WebM, Ogg ou MP4 conforme suporte. Microfone depende de HTTPS, permissão e suporte de `MediaRecorder`; faixas e URLs temporárias são liberadas ao encerrar/cancelar/sair. Áudio privado reutiliza o anexo AES-GCM, com metadados autenticados e identidade sincronizada por conta. Áudio de sala usa anexos autorizados aos participantes, com validação de tamanho e assinatura do contêiner no Java; não recebe a garantia de cifragem privada. A custódia da chave na API continua permitindo recuperação pelo serviço, conforme [privacidade do chat](CHAT_PRIVACY.md).
+- **Recibos reais:** uma marca cinza significa envio aceito pelo servidor; duas cinzas indicam recebimento confirmado por todos os destinatários do envio; duas azuis indicam leitura confirmada por todos. Nas salas, o conjunto de destinatários é fixado no envio. O cliente confirma entrega após buscar o conteúdo/envelope real; estar online ou receber notificação não basta. Leitura exige mensagem visível na conversa e documento visível com foco. Mensagens antigas sem recibos permanecem sem entrega/leitura inferida. Repetições são idempotentes; falhas de rede não promovem o estado visual.
+- **Convites:** o diálogo de compartilhamento busca amigos aceitos e envia somente após ação explícita. Usa o mesmo envelope cifrado das conversas privadas. Apps oferecem o convite direto; Web mantém também link e QR. Links de convite da mesma origem, em mensagens privadas ou de salas, exibem foto, banner, matéria e botão de entrada. Carregar o card não inscreve ninguém. O servidor preserva bloqueios, remoções e salas encerradas; códigos continuam autorizando convidados em salas cheias ou iniciadas, como solicitado. Reenvio após falha incerta preserva o identificador da mensagem.
+- **Perfil e visual:** tema `ENTURMA` opcional com verde/lima, logo oficial junto ao nome, contraste dos nomes sobre banners no tema claro e destaque dos títulos do Fórum. `SYSTEM` continua padrão e a migração não altera escolhas salvas. Remover foto/banner aparece somente quando existe a imagem, e a navegação de “Editar perfil” fecha a sobreposição e leva ao editor existente.
+
+### Migrações e compatibilidade
+
+| Migração | Alteração |
+| --- | --- |
+| `V66__message_delivery_receipts.sql` | Acrescenta `room_message.client_id` opcional com índice único por remetente; cria `private_message_receipt` e `room_message_receipt`, índices, restrições de coerência e exclusão em cascata. Habilita RLS e revoga permissões de `PUBLIC` nas duas tabelas. Não inventa recibos para mensagens anteriores. |
+| `V68__enturma_experience_theme.sql` | Amplia a restrição de tema para aceitar `ENTURMA`, sem atualizar registros existentes nem trocar o padrão `SYSTEM`. |
+
+Não há V67 neste lote: os convites reutilizam o esquema existente. Os números de Flyway não precisam ser consecutivos. As tabelas de recibos continuam protegidas também por autorização Java de destinatário, amizade/membership e bloqueios; habilitar RLS não é prova isolada das permissões efetivas do papel de produção.
+
+Publicar a API compatível e suas migrações antes de ativar os clientes que enviam `ENTURMA`, áudio e recibos. Clientes anteriores podem continuar enviando mensagens de sala sem `clientId`; para esses envios, o novo mecanismo de idempotência não é aplicado. Novos campos de recibos são opcionais no contrato dos clientes. Convites precisam da API atualizada para receber `available` e os metadados de imagem.
+
+**Rollback aditivo:** manter V66/V68 e os dados ao reverter a aplicação; não apagar recibos, mensagens ou personalizações nem reduzir a restrição de tema enquanto houver valores `ENTURMA`. Selecionar uma versão de API/cliente que tolere esse valor, ou preparar uma correção de compatibilidade. Validar a versão escolhida contra o esquema expandido e a configuração Flyway antes do rollback. O retorno a um cliente sem suporte a áudio/recibos pode reduzir a apresentação desses recursos; não transforma o histórico em texto nem desfaz arquivos já enviados.
+
+### Evidência disponível e pendências deste lote
+
+| Verificação | Evidência confirmada até este registro |
+| --- | --- |
+| Convites, frontend | 12 testes em quatro arquivos passaram: parser/origem, cifragem, envio explícito/retry e card/entrada autorizada. ESLint dos arquivos do recurso passou. |
+| Áudio e recibos, frontend | 10 testes focados passaram, incluindo cifragem de anexo, estados de recibo, visibilidade/foco e recebimento em segundo plano. TypeScript passou na execução local desse conjunto. |
+| Revisão cruzada | Corrigidos leitura após perda de foco durante requisição, duplicação de mídia após falha de atualização do chat e corrida entre pedidos de permissão do microfone. A revisão do visitante identificou e encaminhou a troca da consulta de campus autenticada pela rota pública `/catalog/campuses`. |
+| Web completo local | 153 testes passaram; build Web passou. São resultados locais, não conclusão da CI nem publicação. |
+| Java/PostgreSQL local | V66 foi aplicada em PostgreSQL local. A execução Spring dos cenários de integração não chegou às asserções por falha de conexão Java/loopback no Windows. Não é registrada como aprovação dos testes. A compilação do conjunto Java final ainda está em andamento neste registro. |
+| CI, E2E e distribuição | CI Linux, E2E final, demais builds e publicação pendentes de evidência para este lote. Resultados de execuções anteriores não substituem essas provas. |
+
+Nenhum envio a amigos reais, remoção de conta ou teste de carga contra produção integra essas provas. A dispensa do responsável para aparelhos físicos, assinatura Windows, validações operacionais e backup externo permanece; não equivale a testes executados, capacidade de produção demonstrada, pentest independente ou certificação jurídica LGPD.

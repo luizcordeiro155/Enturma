@@ -54,9 +54,9 @@ public class SocialController {
     unblocked(a.id(), id);
     var profile =
         db.one(
-            "SELECT id,name,username,bio,accent_color,profile_details,media_version,avatar_bytes IS NOT NULL"
-                + " has_avatar,banner_bytes IS NOT NULL has_banner FROM app_user WHERE id=? AND"
-                + " status='ACTIVE'",
+            "SELECT id,name,username,bio,accent_color,profile_details,media_version,avatar_bytes IS"
+                + " NOT NULL has_avatar,banner_bytes IS NOT NULL has_banner FROM app_user WHERE"
+                + " id=? AND status='ACTIVE'",
             id);
     var appearance =
         db.list(
@@ -103,20 +103,20 @@ public class SocialController {
   public Object friends(@AuthenticationPrincipal Actor a) {
     return db.list(
         "SELECT f.id,f.requester,f.recipient,f.status,u.id"
-            + " user_id,u.name,u.username,u.accent_color,u.profile_details,u.media_version,u.avatar_bytes IS NOT"
-            + " NULL has_avatar,EXISTS(SELECT 1 FROM realtime_presence rp WHERE rp.user_id=u.id AND"
-            + " rp.expires_at>now()) online,latest.id last_message_id,latest.created_at"
-            + " last_message_at,(SELECT count(*) FROM notification n WHERE n.user_id=? AND"
-            + " n.context_key='friend:'||f.id::text AND n.read_at IS NULL AND n.kind IN"
-            + " ('PRIVATE_MESSAGE','MENTION')) unread_count FROM friendship f JOIN app_user u ON"
-            + " u.id=CASE WHEN f.requester=? THEN f.recipient ELSE f.requester END LEFT JOIN"
-            + " LATERAL (SELECT m.id,m.created_at FROM private_message m WHERE m.friendship_id=f.id"
-            + " AND m.deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM private_message_hidden h"
-            + " WHERE h.message_id=m.id AND h.user_id=?::uuid) ORDER BY m.created_at DESC,m.id DESC"
-            + " LIMIT 1) latest ON true WHERE (f.requester=? OR f.recipient=?) AND"
-            + " u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
-            + " b.blocked_id=u.id) OR (b.blocked_id=? AND b.user_id=u.id)) ORDER BY"
-            + " COALESCE(latest.created_at,f.created_at) DESC",
+            + " user_id,u.name,u.username,u.accent_color,u.profile_details,u.media_version,u.avatar_bytes"
+            + " IS NOT NULL has_avatar,EXISTS(SELECT 1 FROM realtime_presence rp WHERE"
+            + " rp.user_id=u.id AND rp.expires_at>now()) online,latest.id"
+            + " last_message_id,latest.created_at last_message_at,(SELECT count(*) FROM"
+            + " notification n WHERE n.user_id=? AND n.context_key='friend:'||f.id::text AND"
+            + " n.read_at IS NULL AND n.kind IN ('PRIVATE_MESSAGE','MENTION')) unread_count FROM"
+            + " friendship f JOIN app_user u ON u.id=CASE WHEN f.requester=? THEN f.recipient ELSE"
+            + " f.requester END LEFT JOIN LATERAL (SELECT m.id,m.created_at FROM private_message m"
+            + " WHERE m.friendship_id=f.id AND m.deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM"
+            + " private_message_hidden h WHERE h.message_id=m.id AND h.user_id=?::uuid) ORDER BY"
+            + " m.created_at DESC,m.id DESC LIMIT 1) latest ON true WHERE (f.requester=? OR"
+            + " f.recipient=?) AND u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b"
+            + " WHERE (b.user_id=? AND b.blocked_id=u.id) OR (b.blocked_id=? AND b.user_id=u.id))"
+            + " ORDER BY COALESCE(latest.created_at,f.created_at) DESC",
         a.id(),
         a.id(),
         a.id(),
@@ -346,16 +346,53 @@ public class SocialController {
             + " m.attachment_ciphertext,m.attachment_iv,m.attachment_mime,m.attachment_name,m.attachment_size,m.media_kind,h.created_at"
             + " hidden_at, COALESCE((SELECT jsonb_agg(r) FROM (SELECT emoji,count(*)"
             + " count,bool_or(user_id=?::uuid) mine FROM private_message_reaction WHERE"
-            + " message_id=m.id GROUP BY emoji ORDER BY min(created_at)) r),'[]'::jsonb) reactions"
-            + " FROM private_message m LEFT JOIN private_message_hidden h ON h.message_id=m.id AND"
-            + " h.user_id=?::uuid WHERE m.friendship_id=? AND (?::uuid IS NULL OR m.id=?) ORDER BY"
-            + " m.created_at DESC,m.id DESC LIMIT 50 OFFSET ?",
+            + " message_id=m.id GROUP BY emoji ORDER BY min(created_at)) r),'[]'::jsonb) reactions,"
+            + " (SELECT count(*) FROM private_message_receipt r WHERE r.message_id=m.id)"
+            + " receipt_total, (SELECT count(*) FROM private_message_receipt r WHERE"
+            + " r.message_id=m.id AND r.delivered_at IS NOT NULL) delivered_count, (SELECT count(*)"
+            + " FROM private_message_receipt r WHERE r.message_id=m.id AND r.read_at IS NOT NULL)"
+            + " read_count FROM private_message m LEFT JOIN private_message_hidden h ON"
+            + " h.message_id=m.id AND h.user_id=?::uuid WHERE m.friendship_id=? AND (?::uuid IS"
+            + " NULL OR m.id=?) ORDER BY m.created_at DESC,m.id DESC LIMIT 50 OFFSET ?",
         a.id(),
         a.id(),
         id,
         target,
         target,
         Math.clamp(page, 0, 10000) * 50);
+  }
+
+  @PostMapping("/friends/{id}/messages/receipts")
+  @Transactional
+  public void acknowledge(
+      @AuthenticationPrincipal Actor a,
+      @PathVariable UUID id,
+      @Valid @RequestBody br.com.enturma.chat.MessageReceipt receipt) {
+    var friendship = access(a, id, true);
+    if (receipt.messageIds() == null
+        || receipt.messageIds().isEmpty()
+        || receipt.messageIds().size() > 100)
+      throw ApiException.invalid("Confirmação de mensagens inválida.");
+    int changed = 0;
+    for (UUID message : new HashSet<>(receipt.messageIds()))
+      changed +=
+          db.jdbc.update(
+              "UPDATE private_message_receipt r SET delivered_at=COALESCE(r.delivered_at,now()),"
+                  + " read_at=CASE WHEN ? THEN COALESCE(r.read_at,GREATEST(r.delivered_at,now()))"
+                  + " ELSE r.read_at END FROM private_message m WHERE r.message_id=m.id AND"
+                  + " m.friendship_id=? AND m.id=? AND r.user_id=? AND m.sender_id<>? AND"
+                  + " m.deleted_at IS NULL AND (r.delivered_at IS NULL OR (? AND r.read_at IS"
+                  + " NULL)) AND NOT EXISTS(SELECT 1 FROM private_message_hidden h WHERE"
+                  + " h.message_id=m.id AND h.user_id=?)",
+              receipt.read(),
+              id,
+              message,
+              a.id(),
+              a.id(),
+              receipt.read(),
+              a.id());
+    if (changed > 0)
+      friendsChanged((UUID) friendship.get("requester"), (UUID) friendship.get("recipient"));
   }
 
   @PostMapping("/friends/{id}/messages/{messageId}/hide")
@@ -431,7 +468,7 @@ public class SocialController {
       Boolean mentioned,
       @Size(max = 2000000) @Pattern(regexp = "[A-Za-z0-9+/=]+") String attachmentCiphertext,
       @Pattern(regexp = "[A-Za-z0-9+/]{16}") String attachmentIv,
-      @Pattern(regexp = "image/(jpeg|png|webp|gif)") String attachmentMime,
+      @Pattern(regexp = "image/(jpeg|png|webp|gif)|audio/(webm|ogg|mp4)") String attachmentMime,
       @Size(max = 200) String attachmentName,
       @Min(1) @Max(1433600) Integer attachmentSize,
       @Pattern(regexp = "STICKER|GIF") String mediaKind) {
@@ -453,7 +490,8 @@ public class SocialController {
               && attachmentIv != null
               && attachmentMime != null
               && attachmentName != null
-              && attachmentSize != null);
+              && attachmentSize != null
+              && (mediaKind == null || attachmentMime.startsWith("image/")));
     }
   }
 
@@ -489,6 +527,8 @@ public class SocialController {
               (a.id().equals(friendship.get("requester"))
                   ? friendship.get("recipient")
                   : friendship.get("requester"));
+      db.jdbc.update(
+          "INSERT INTO private_message_receipt(message_id,user_id) VALUES (?,?)", message, peer);
       notices.send(
           a.id(),
           peer,

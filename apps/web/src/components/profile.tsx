@@ -14,16 +14,20 @@ import { AppUpdateSettingsCard } from "./desktop-updates";
 import { NotificationPreferences } from "./community-feedback";
 import { AppHelp } from "./app-help";
 import { AccountPrivacyCard } from "./account-privacy-card";
+import { useVisitor } from "@/lib/visitor-context";
 export function ProfileView({
   subjectsOnly = false,
   settings = false,
+  visitor = false,
 }: {
   subjectsOnly?: boolean;
   settings?: boolean;
+  visitor?: boolean;
 }) {
+  const guest = useVisitor();
   const router = useRouter();
   const [p, setP] = useState<Profile | undefined>(() =>
-    peekApiSnapshot<Profile>("/users/me"),
+    visitor ? undefined : peekApiSnapshot<Profile>("/users/me"),
   );
   const [sessions, setSessions] = useState<
     { id: string; device: string; createdAt: string }[]
@@ -42,6 +46,7 @@ export function ProfileView({
   }, []);
 
   useEffect(() => {
+    if (visitor) return;
     let active = true;
     api<Profile>("/users/me")
       .then((profile) => {
@@ -61,7 +66,7 @@ export function ProfileView({
     return () => {
       active = false;
     };
-  }, [settings]);
+  }, [settings, visitor]);
 
   useEffect(() => {
     if (!verificationWaitingUntil) return;
@@ -93,6 +98,7 @@ export function ProfileView({
   }, [verificationWaitingUntil]);
 
   useEffect(() => {
+    if (visitor) return;
     const refreshVerifiedProfile = () => {
       void loadProfile().then(() => {
         setVerificationConfirmed(true);
@@ -118,7 +124,7 @@ export function ProfileView({
       channel?.close();
       window.removeEventListener("storage", onStorage);
     };
-  }, [loadProfile]);
+  }, [loadProfile, visitor]);
 
   useEffect(() => {
     if (!verificationConfirmed) return;
@@ -149,7 +155,7 @@ export function ProfileView({
   }
 
   return (
-    <Shell>
+    <Shell visitor={visitor}>
       <div
         className={
           subjectsOnly
@@ -167,6 +173,29 @@ export function ProfileView({
           </h1>
         </div>
         <Feedback error={error} success={notice} />
+        {visitor && settings && (
+          <>
+            <p>
+              Ajuste a aparência neste navegador pelo controle de tema e
+              acessibilidade. Entre para gerenciar sua conta e sincronizar
+              preferências.
+            </p>
+            <button onClick={() => guest.requestLogin("/settings")}>
+              Entrar para gerenciar minha conta
+            </button>
+            <AppHelp />
+            <NotificationPreferences />
+            <h2 className="section-heading">Sessões ativas</h2>
+            <p>Seus dispositivos conectados aparecem aqui depois de entrar.</p>
+            <button
+              className="secondary"
+              onClick={() => guest.requestLogin("/settings")}
+            >
+              Gerenciar dispositivos
+            </button>
+            <AccountPrivacyCard />
+          </>
+        )}
 
         {p ? (
           <>

@@ -101,6 +101,8 @@ public class RequestSecurity extends OncePerRequestFilter {
       }
     }
     if ((!Set.of("GET", "HEAD", "OPTIONS").contains(req.getMethod())
+            || route.startsWith("/api/v1/public/explore/")
+            || route.equals("/api/v1/messages/pending-delivery")
             || route.equals("/api/v1/auth/recovery-status")
             || route.equals("/api/v1/account/privacy/export")
             || route.equals("/api/v1/learning/advanced/words/challenge"))
@@ -116,12 +118,21 @@ public class RequestSecurity extends OncePerRequestFilter {
       int limit = 90;
       int windowSeconds = 60;
 
-      if (uri.equals("/api/v1/learning/advanced/words/challenge")) {
+      if (uri.startsWith("/api/v1/public/explore/")) {
+        prefix = "public-explore:";
+        limit = 120;
+      } else if (uri.equals("/api/v1/learning/advanced/words/challenge")) {
         prefix = "word-challenge:";
         limit = 20;
       } else if (uri.matches("/api/v1/study-rooms/[^/]+/messages/attachments")) {
         prefix = "room-chat-upload:";
         limit = 8;
+      } else if (uri.matches("/api/v1/(friends|study-rooms)/[^/]+/messages/receipts")) {
+        prefix = "message-receipts:";
+        limit = 120;
+      } else if (uri.equals("/api/v1/messages/pending-delivery")) {
+        prefix = "message-delivery-poll:";
+        limit = 120;
       } else if (uri.equals("/api/v1/private-account-vault/session")) {
         prefix = "account-chat-sync:";
         limit = 20;

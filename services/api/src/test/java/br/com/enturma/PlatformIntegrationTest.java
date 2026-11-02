@@ -1699,6 +1699,174 @@ class PlatformIntegrationTest {
   }
 
   @Autowired ChatMediaController chatMedia;
+  @Autowired MessageDeliveryController delivery;
+
+  @Test
+  void roomReceiptsRequireTheRecipientAndNeverInferReadingFromFetching() {
+    UUID roomId = room(8);
+    study.join(member, roomId);
+    UUID message =
+        (UUID)
+            ((Map<?, ?>) chat.send(host, roomId, "Confirme somente após receber", null)).get("id");
+    var receipt = new MessageReceipt(List.of(message), true);
+    assertThat((List<?>) delivery.pending(outsider)).isEmpty();
+    assertThat(
+            ((List<Map<String, Object>>) delivery.pending(member))
+                .stream().map(r -> r.get("id")).toList())
+        .contains(message);
+    chat.messages(member, roomId, 0);
+    chat.acknowledge(host, roomId, receipt);
+    assertThatThrownBy(() -> chat.acknowledge(outsider, roomId, receipt))
+        .isInstanceOf(ApiException.class);
+    var row = db.one("SELECT * FROM room_message_receipt WHERE message_id=?", message);
+    assertThat(row.get("deliveredAt")).isNull();
+    assertThat(row.get("readAt")).isNull();
+    UUID otherRoom =
+        (UUID) study.create(outsider, subject, null, "Outra turma", 50, 8, 1).get("id");
+    study.join(member, otherRoom);
+    chat.acknowledge(member, otherRoom, receipt);
+    assertThat(
+            db.one("SELECT delivered_at FROM room_message_receipt WHERE message_id=?", message)
+                .get("deliveredAt"))
+        .isNull();
+    chat.acknowledge(member, roomId, new MessageReceipt(List.of(message), false));
+    assertThat((List<?>) delivery.pending(member)).isEmpty();
+    row = db.one("SELECT * FROM room_message_receipt WHERE message_id=?", message);
+    assertThat(row.get("deliveredAt")).isNotNull();
+    assertThat(row.get("readAt")).isNull();
+    study.join(outsider, roomId);
+    // Late joiners cannot alter the original recipient set or acknowledge for another account.
+    chat.acknowledge(outsider, roomId, receipt);
+    chat.acknowledge(member, roomId, receipt);
+    var before = db.one("SELECT * FROM room_message_receipt WHERE message_id=?", message);
+    chat.acknowledge(member, roomId, new MessageReceipt(List.of(message), false));
+    assertThat(db.one("SELECT * FROM room_message_receipt WHERE message_id=?", message))
+        .isEqualTo(before);
+    var summary = (Map<?, ?>) ((List<?>) chat.messages(host, roomId, 0)).getFirst();
+    assertThat(summary.get("receiptTotal")).isEqualTo(1L);
+    assertThat(summary.get("deliveredCount")).isEqualTo(1L);
+    assertThat(summary.get("readCount")).isEqualTo(1L);
+    UUID second = (UUID) ((Map<?, ?>) chat.send(host, roomId, "Oculta", null)).get("id");
+    chat.hide(member, roomId, second);
+    assertThat((List<?>) delivery.pending(member)).isEmpty();
+    chat.acknowledge(member, roomId, new MessageReceipt(List.of(second), true));
+    assertThat(
+            db.one(
+                    "SELECT read_at FROM room_message_receipt WHERE message_id=? AND user_id=?",
+                    second,
+                    member.id())
+                .get("readAt"))
+        .isNull();
+  }
+
+  @Test
+  void privateReceiptsAreIdempotentConcurrentAndCannotBeForgedByTheSender() throws Exception {
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", member.id()).get("username");
+    UUID friendship =
+        (UUID) ((Map<?, ?>) social.invite(host, new SocialController.Invite(username))).get("id");
+    social.accept(member, friendship);
+    social.identity(
+        host, new SocialController.PublicKey("EC", "P-256", "a".repeat(43), "b".repeat(43)));
+    var envelope =
+        new SocialController.Envelope(UUID.randomUUID(), "Y2lwaGVydGV4dA==", "abcdefghijklmnop");
+    social.send(host, friendship, envelope);
+    social.send(host, friendship, envelope);
+    UUID id =
+        (UUID) db.one("SELECT id FROM private_message WHERE friendship_id=?", friendship).get("id");
+    assertThat((List<?>) delivery.pending(outsider)).isEmpty();
+    assertThat(
+            ((List<Map<String, Object>>) delivery.pending(member))
+                .stream().map(r -> r.get("id")).toList())
+        .contains(id);
+    social.messages(member, friendship, 0);
+    social.acknowledge(host, friendship, new MessageReceipt(List.of(id), true));
+    assertThatThrownBy(
+            () -> social.acknowledge(outsider, friendship, new MessageReceipt(List.of(id), true)))
+        .isInstanceOf(ApiException.class);
+    assertThat(
+            db.one("SELECT delivered_at FROM private_message_receipt WHERE message_id=?", id)
+                .get("deliveredAt"))
+        .isNull();
+    try (var executor = Executors.newFixedThreadPool(4)) {
+      var jobs = new ArrayList<Callable<Void>>();
+      for (int i = 0; i < 8; i++) {
+        final boolean read = i % 2 == 0;
+        jobs.add(
+            () -> {
+              social.acknowledge(member, friendship, new MessageReceipt(List.of(id), read));
+              return null;
+            });
+      }
+      for (var future : executor.invokeAll(jobs)) future.get();
+    }
+    var rows =
+        db.list("SELECT delivered_at,read_at FROM private_message_receipt WHERE message_id=?", id);
+    assertThat(rows).hasSize(1);
+    assertThat(rows.getFirst().get("readAt")).isNotNull();
+    assertThat(Instant.parse((String) rows.getFirst().get("readAt")))
+        .isAfterOrEqualTo(Instant.parse((String) rows.getFirst().get("deliveredAt")));
+    var summary = (Map<?, ?>) ((List<?>) social.messages(host, friendship, 0)).getFirst();
+    assertThat(summary.get("readCount")).isEqualTo(1L);
+    assertThat((List<?>) delivery.pending(member)).isEmpty();
+  }
+
+  @Test
+  void audioUploadsAndEncryptedAudioKeepConversationAccessBoundaries() throws Exception {
+    UUID roomId = room(8);
+    byte[] audio = new byte[] {0x1a, 0x45, (byte) 0xdf, (byte) 0xa3, 0, 0, 0, 0, 0, 0, 0, 0};
+    UUID attachment =
+        (UUID) ((Map<?, ?>) chat.upload(host, roomId, "voz.webm", "audio/webm", audio)).get("id");
+    UUID clientId = UUID.randomUUID();
+    Object first = chat.send(host, roomId, null, null, attachment, null, clientId);
+    assertThat(chat.send(host, roomId, null, null, attachment, null, clientId)).isEqualTo(first);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM room_message WHERE room_id=?", Integer.class, roomId))
+        .isEqualTo(1);
+    assertThat(chat.download(host, roomId, attachment).mime()).isEqualTo("audio/webm");
+    assertThatThrownBy(() -> chat.download(outsider, roomId, attachment))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                chat.upload(
+                    host,
+                    roomId,
+                    "fake.webm",
+                    "audio/webm",
+                    "<script>alert(1)</script>".getBytes()))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () -> chat.upload(host, roomId, "huge.webm", "audio/webm", new byte[1433601]))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> chat.send(host, roomId, null, null, attachment, "GIF"))
+        .isInstanceOf(ApiException.class);
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", member.id()).get("username");
+    UUID friendship =
+        (UUID) ((Map<?, ?>) social.invite(host, new SocialController.Invite(username))).get("id");
+    social.accept(member, friendship);
+    social.identity(
+        host, new SocialController.PublicKey("EC", "P-256", "a".repeat(43), "b".repeat(43)));
+    var envelope =
+        new SocialController.Envelope(
+            UUID.randomUUID(),
+            "Y2lwaGVydGV4dA==",
+            "abcdefghijklmnop",
+            false,
+            "Y2lwaGVydGV4dA==",
+            "abcdefghijklmnop",
+            "audio/webm",
+            "voz.webm",
+            12,
+            null);
+    social.send(host, friendship, envelope);
+    var privateRow = (Map<?, ?>) ((List<?>) social.messages(member, friendship, 0)).getFirst();
+    assertThat(privateRow.get("attachmentMime")).isEqualTo("audio/webm");
+    assertThat(privateRow.get("attachmentCiphertext")).isEqualTo("Y2lwaGVydGV4dA==");
+    assertThatThrownBy(() -> social.messages(outsider, friendship, 0))
+        .isInstanceOf(ApiException.class);
+  }
 
   @Test
   void mediaPresentationPersistsWithoutBypassingAttachmentOwnership() {
@@ -1893,6 +2061,41 @@ class PlatformIntegrationTest {
     assertThatThrownBy(() -> study.joinByCode(member, code)).isInstanceOf(ApiException.class);
     study.end(host, id);
     assertThatThrownBy(() -> study.joinByCode(host, code)).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void invitationPreviewContainsOnlyDiscoveryMetadataAndNeverJoinsTheReader() throws Exception {
+    UUID id = room(2);
+    assertThatThrownBy(() -> roomShare.code(outsider, id)).isInstanceOf(ApiException.class);
+    String code = (String) ((Map<?, ?>) roomShare.code(host, id)).get("code");
+    var image =
+        new org.springframework.mock.web.MockMultipartFile(
+            "file", "banner.gif", "image/gif", "GIF89a123456789".getBytes());
+    roomMedia.upload(host, id, "banner", image);
+    roomMedia.upload(host, id, "avatar", image);
+    study.configure(host, id, "Grupo de revisão", "Assunto privado", true);
+    Map<?, ?> preview = (Map<?, ?>) roomShare.resolve(outsider, code.toLowerCase(Locale.ROOT));
+    assertThat(preview.keySet().stream().map(Object::toString).toList())
+        .containsExactlyInAnyOrder(
+            "id",
+            "title",
+            "status",
+            "endsAt",
+            "subjectName",
+            "hasAvatar",
+            "hasBanner",
+            "mediaVersion",
+            "available",
+            "participantCount");
+    assertThat(preview.get("hasAvatar")).isEqualTo(true);
+    assertThat(preview.get("hasBanner")).isEqualTo(true);
+    assertThat(preview.get("available")).isEqualTo(true);
+    assertThat(((Number) preview.get("participantCount")).intValue()).isEqualTo(1);
+    assertThatThrownBy(() -> study.member(outsider, id)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> roomShare.resolve(outsider, "invalid-code"))
+        .isInstanceOf(ApiException.class);
+    study.end(host, id);
+    assertThat(((Map<?, ?>) roomShare.resolve(outsider, code)).get("available")).isEqualTo(false);
   }
 
   @Test

@@ -3,7 +3,9 @@ import { useEffect, useState } from "react";
 import { MonitorCog, Moon, Sun } from "lucide-react";
 import { applyEnturmaTheme } from "@/lib/theme-motion";
 import { ThemePicker } from "./theme-picker";
-type AuthTheme = "LIGHT" | "DARK" | "SYSTEM";
+import { EnturmaAppIcon } from "./enturma-app-icon";
+import type { ExperiencePreference } from "@enturma/contracts";
+type AuthTheme = ExperiencePreference["theme"];
 
 export function PublicThemeControl({ compact = false }: { compact?: boolean }) {
   const [theme, setTheme] = useState<AuthTheme>("SYSTEM");
@@ -16,7 +18,11 @@ export function PublicThemeControl({ compact = false }: { compact?: boolean }) {
         const cached = JSON.parse(
           localStorage.getItem("enturma-experience") || "{}",
         ) as { theme?: string };
-        if (cached.theme === "LIGHT" || cached.theme === "DARK") {
+        if (
+          cached.theme === "LIGHT" ||
+          cached.theme === "DARK" ||
+          cached.theme === "ENTURMA"
+        ) {
           cachedTheme = cached.theme;
         }
       } catch {}
@@ -100,6 +106,16 @@ export function PublicThemeControl({ compact = false }: { compact?: boolean }) {
       >
         <MonitorCog size={16} />
         <span>Sistema</span>
+      </button>
+      <button
+        type="button"
+        className="auth-theme-option"
+        aria-pressed={theme === "ENTURMA"}
+        onClick={() => choose("ENTURMA")}
+        title="Usar as cores do Enturma"
+      >
+        <EnturmaAppIcon size={16} />
+        <span>Enturma</span>
       </button>
     </div>
   );

@@ -298,7 +298,9 @@ html[data-theme="dark"] .private-chat .safety-code {
   border: 1px solid var(--room-border);
   border-radius: 10px;
 }
-html[data-theme="dark"] .friends-page button:not(.text-button):not(.identity-trigger),
+html[data-theme="dark"]
+  .friends-page
+  button:not(.text-button):not(.identity-trigger),
 html[data-theme="dark"] .friends-page .button {
   background: var(--room-accent);
   color: var(--room-accent-ink);
@@ -397,14 +399,6 @@ html[data-theme="dark"] .friends-page .privacy-pill {
   .private-messages article {
     max-width: 100%;
   }
-}
-.call-chat-pane,
-.call-member {
-  --ink: #eef5f2;
-  --muted: #b6c6bd;
-  --surface: #161e21;
-  --soft: #26342d;
-  --border: #516258;
 }
 .algorithm-editor details,
 .algorithm-editor > label {
@@ -770,252 +764,299 @@ html .auth-story :is(h1, p, span, a, svg) {
   flex-wrap: wrap;
 }
 
-
 /* Profile / member visual refresh 0.3.14 */
-.public-profile-card{
-  position:relative;
-  isolation:isolate;
-  border-color:color-mix(in srgb,var(--profile-accent) 72%,var(--border));
-  box-shadow:0 18px 54px color-mix(in srgb,var(--profile-accent) 18%,transparent);
-  transform-origin:center;
-  will-change:transform;
+.public-profile-card {
+  position: relative;
+  isolation: isolate;
+  border-color: color-mix(in srgb, var(--profile-accent) 72%, var(--border));
+  box-shadow: 0 18px 54px
+    color-mix(in srgb, var(--profile-accent) 18%, transparent);
+  transform-origin: center;
+  will-change: transform;
 }
-.public-profile-card::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  z-index:-1;
-  pointer-events:none;
+.public-profile-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
   background:
-    radial-gradient(circle at 15% 0%,color-mix(in srgb,var(--profile-secondary) 20%,transparent),transparent 38%),
-    linear-gradient(180deg,color-mix(in srgb,var(--profile-accent) 8%,transparent),transparent 42%);
-}
-.public-profile-banner{
-  position:relative;
-  overflow:hidden;
-  height:clamp(126px,28vw,176px);
-  background:var(--profile-banner);
-}
-.public-profile-banner::after{
-  content:"";
-  position:absolute;
-  inset:auto 0 0;
-  height:54%;
-  background:linear-gradient(180deg,transparent,color-mix(in srgb,var(--profile-secondary) 32%,var(--surface)));
-  pointer-events:none;
-}
-.profile-banner-media{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:cover;
-}
-.profile-theme-GRADIENT .public-profile-body{
-  background:
+    radial-gradient(
+      circle at 15% 0%,
+      color-mix(in srgb, var(--profile-secondary) 20%, transparent),
+      transparent 38%
+    ),
     linear-gradient(
       180deg,
-      color-mix(in srgb,var(--profile-accent) 34%,var(--surface)) 0%,
-      color-mix(in srgb,var(--profile-secondary) 20%,var(--surface)) 38%,
-      var(--surface) 100%
+      color-mix(in srgb, var(--profile-accent) 8%, transparent),
+      transparent 42%
     );
-  border-top-color:color-mix(in srgb,var(--profile-accent) 72%,var(--profile-secondary));
 }
-.profile-theme-SOLID .public-profile-body{
-  background:color-mix(in srgb,var(--profile-accent) 14%,var(--surface));
+.public-profile-banner {
+  position: relative;
+  overflow: hidden;
+  height: clamp(126px, 28vw, 176px);
+  background: var(--profile-banner);
 }
-.profile-dual-color-preview{
-  position:relative;
-  min-height:72px;
-  border-radius:14px;
-  overflow:hidden;
-  display:flex;
-  align-items:flex-end;
-  padding:12px 14px;
-  color:white;
-  font-weight:800;
-  box-shadow:inset 0 0 0 1px rgb(255 255 255 / .14);
+.public-profile-banner::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 54%;
+  background: linear-gradient(
+    180deg,
+    transparent,
+    color-mix(in srgb, var(--profile-secondary) 32%, var(--surface))
+  );
+  pointer-events: none;
 }
-.profile-dual-color-preview::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background:linear-gradient(180deg,transparent,#0005);
-  pointer-events:none;
+.profile-banner-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
-.profile-dual-color-preview span{position:relative;z-index:1}
+.profile-theme-GRADIENT .public-profile-body {
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--profile-accent) 34%, var(--surface)) 0%,
+    color-mix(in srgb, var(--profile-secondary) 20%, var(--surface)) 38%,
+    var(--surface) 100%
+  );
+  border-top-color: color-mix(
+    in srgb,
+    var(--profile-accent) 72%,
+    var(--profile-secondary)
+  );
+}
+.profile-theme-SOLID .public-profile-body {
+  background: color-mix(in srgb, var(--profile-accent) 14%, var(--surface));
+}
+.profile-dual-color-preview {
+  position: relative;
+  min-height: 72px;
+  border-radius: 14px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  padding: 12px 14px;
+  color: white;
+  font-weight: 800;
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+}
+.profile-dual-color-preview::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent, #0005);
+  pointer-events: none;
+}
+.profile-dual-color-preview span {
+  position: relative;
+  z-index: 1;
+}
 
-.member-profile-strip{
-  --member-strip-height:68px;
-  position:relative;
-  isolation:isolate;
-  overflow:hidden;
-  min-height:var(--member-strip-height);
-  width:100%;
-  border-radius:13px;
-  border:1px solid color-mix(in srgb,var(--profile-accent) 30%,var(--border));
-  background:var(--surface);
-  box-shadow:0 8px 22px rgb(0 0 0 / .09);
-  transform-origin:center;
-  will-change:transform;
+.member-profile-strip {
+  --member-strip-height: 68px;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: var(--member-strip-height);
+  width: 100%;
+  border-radius: 13px;
+  border: 1px solid color-mix(in srgb, var(--profile-accent) 30%, var(--border));
+  background: var(--surface);
+  box-shadow: 0 8px 22px rgb(0 0 0 / 0.09);
+  transform-origin: center;
+  will-change: transform;
 }
-.member-profile-strip-media{
-  position:absolute;
-  inset:0;
-  z-index:-2;
+.member-profile-strip-media {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
 }
 .member-profile-strip-banner,
-.member-profile-strip-gradient{
-  width:100%;
-  height:100%;
-  display:block;
-  object-fit:cover;
+.member-profile-strip-gradient {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
 }
-.member-profile-strip-gradient{background:var(--profile-banner)}
-.member-profile-strip-shade{
-  position:absolute;
-  inset:0;
+.member-profile-strip-gradient {
+  background: var(--profile-banner);
+}
+.member-profile-strip-shade {
+  position: absolute;
+  inset: 0;
   background:
-    linear-gradient(90deg,color-mix(in srgb,var(--surface) 86%,transparent) 0 34%,color-mix(in srgb,var(--surface) 52%,transparent) 68%,color-mix(in srgb,var(--profile-secondary) 18%,transparent)),
-    linear-gradient(180deg,#0001,#0005);
-  backdrop-filter:saturate(1.08);
+    linear-gradient(
+      90deg,
+      rgb(8 24 20 / 0.88) 0 34%,
+      rgb(8 24 20 / 0.7) 68%,
+      rgb(8 24 20 / 0.38)
+    ),
+    linear-gradient(180deg, #0001, #0005);
 }
-.member-profile-strip-content{
-  min-height:var(--member-strip-height);
-  display:flex;
-  align-items:center;
-  padding:9px 11px;
+.member-profile-strip-content {
+  min-height: var(--member-strip-height);
+  display: flex;
+  align-items: center;
+  padding: 9px 11px;
 }
-.member-profile-strip .identity-trigger{
-  width:100%;
-  padding:0;
-  color:var(--ink);
+.member-profile-strip .identity-trigger {
+  width: 100%;
+  padding: 0;
+  color: var(--ink);
 }
-.member-profile-strip .identity-trigger > span:last-child{
-  min-width:0;
-  text-shadow:0 1px 10px rgb(0 0 0 / .34);
+.member-profile-strip .identity-trigger > span:last-child {
+  min-width: 0;
+  text-shadow: 0 1px 10px rgb(0 0 0 / 0.34);
 }
-.member-profile-strip .identity-trigger strong{
-  color:#fff;
-  font-size:.95rem;
+.member-profile-strip .identity-trigger strong {
+  color: #fff;
+  font-size: 0.95rem;
 }
-.member-profile-strip .identity-trigger small{
-  color:rgb(255 255 255 / .78);
+.member-profile-strip .identity-trigger small {
+  color: #e6f2eb;
 }
-.member-profile-strip .identity-avatar{
-  border:2px solid color-mix(in srgb,var(--profile-accent) 66%,white);
-  box-shadow:0 5px 15px #0005;
+.member-profile-strip .identity-avatar {
+  border: 2px solid color-mix(in srgb, var(--profile-accent) 66%, white);
+  box-shadow: 0 5px 15px #0005;
 }
-.participant-row .member-profile-strip{
-  flex:1;
-  min-width:0;
+.participant-row .member-profile-strip {
+  flex: 1;
+  min-width: 0;
 }
-.call-member{
-  position:relative;
-  overflow:hidden;
+.call-member {
+  position: relative;
+  overflow: hidden;
 }
-.call-member > .member-profile-strip{
-  flex:1;
-  min-width:0;
+.call-member > .member-profile-strip {
+  flex: 1;
+  min-width: 0;
 }
-.call-member-icons{
-  position:relative;
-  z-index:2;
-  background:rgb(13 19 18 / .64);
-  border:1px solid rgb(255 255 255 / .08);
-  border-radius:999px;
-  padding:6px 8px;
-  backdrop-filter:blur(10px);
+.call-member-icons {
+  position: relative;
+  z-index: 2;
+  background: rgb(13 19 18 / 0.64);
+  border: 1px solid rgb(255 255 255 / 0.08);
+  border-radius: 999px;
+  padding: 6px 8px;
+  backdrop-filter: blur(10px);
 }
-.user-profile-popover{
-  transform-origin:top left;
-  box-shadow:0 24px 70px rgb(0 0 0 / .36);
-  border-color:color-mix(in srgb,var(--profile-accent,#527d65) 24%,var(--border));
+.user-profile-popover {
+  transform-origin: top left;
+  box-shadow: 0 24px 70px rgb(0 0 0 / 0.36);
+  border-color: color-mix(
+    in srgb,
+    var(--profile-accent, #527d65) 24%,
+    var(--border)
+  );
 }
 .profile-media-action,
 .showcase-widget,
 .member-profile-strip,
-.public-profile-card{
-  backface-visibility:hidden;
-  -webkit-font-smoothing:antialiased;
+.public-profile-card {
+  backface-visibility: hidden;
+  -webkit-font-smoothing: antialiased;
 }
 
-@media(max-width:760px){
-  .member-profile-strip{--member-strip-height:64px;border-radius:12px}
-  .member-profile-strip-content{padding:8px 9px}
-  .member-profile-strip .identity-avatar{width:42px;height:42px;flex-basis:42px}
-  .room-mobile-members-list .participant-row{padding:0;background:transparent;border:0}
-  .public-profile-banner{height:132px}
-  .profile-dual-color-preview{min-height:64px}
+@media (max-width: 760px) {
+  .member-profile-strip {
+    --member-strip-height: 64px;
+    border-radius: 12px;
+  }
+  .member-profile-strip-content {
+    padding: 8px 9px;
+  }
+  .member-profile-strip .identity-avatar {
+    width: 42px;
+    height: 42px;
+    flex-basis: 42px;
+  }
+  .room-mobile-members-list .participant-row {
+    padding: 0;
+    background: transparent;
+    border: 0;
+  }
+  .public-profile-banner {
+    height: 132px;
+  }
+  .profile-dual-color-preview {
+    min-height: 64px;
+  }
 }
-
 
 /* Mobile updater settings card 0.3.15 */
-.app-update-settings-card{
-  display:grid;
-  grid-template-columns:auto minmax(0,1fr) auto;
-  gap:14px;
-  align-items:center;
-  margin:0 0 24px;
-  padding:16px;
-  border:1px solid var(--border);
-  border-radius:16px;
-  background:var(--surface);
-  box-shadow:0 10px 28px rgb(0 0 0 / .07);
+.app-update-settings-card {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+  margin: 0 0 24px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 10px 28px rgb(0 0 0 / 0.07);
 }
 .app-update-settings-card.available,
 .app-update-settings-card.downloading,
-.app-update-settings-card.ready{
-  border-color:color-mix(in srgb,var(--accent) 68%,var(--border));
-  background:color-mix(in srgb,var(--accent) 7%,var(--surface));
+.app-update-settings-card.ready {
+  border-color: color-mix(in srgb, var(--accent) 68%, var(--border));
+  background: color-mix(in srgb, var(--accent) 7%, var(--surface));
 }
-.app-update-settings-icon{
-  position:relative;
-  width:46px;
-  height:46px;
-  display:grid;
-  place-items:center;
-  border-radius:13px;
-  background:var(--soft);
+.app-update-settings-icon {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  border-radius: 13px;
+  background: var(--soft);
 }
-.app-update-settings-icon .app-update-dot{
-  position:absolute;
-  right:3px;
-  top:3px;
+.app-update-settings-icon .app-update-dot {
+  position: absolute;
+  right: 3px;
+  top: 3px;
 }
-.app-update-settings-copy{
-  min-width:0;
-  display:grid;
-  gap:3px;
+.app-update-settings-copy {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
 }
-.app-update-settings-copy strong{font-size:1rem}
-.app-update-settings-copy span{color:var(--ink)}
-.app-update-settings-copy small{
-  color:var(--muted);
-  overflow-wrap:anywhere;
+.app-update-settings-copy strong {
+  font-size: 1rem;
 }
-.app-update-settings-actions{
-  display:flex;
-  align-items:center;
-  justify-content:flex-end;
+.app-update-settings-copy span {
+  color: var(--ink);
 }
-.app-update-settings-actions button{
-  min-width:132px;
-  white-space:nowrap;
+.app-update-settings-copy small {
+  color: var(--muted);
+  overflow-wrap: anywhere;
 }
-@media(max-width:760px){
-  .app-update-settings-card{
-    grid-template-columns:46px minmax(0,1fr);
-    padding:14px;
+.app-update-settings-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.app-update-settings-actions button {
+  min-width: 132px;
+  white-space: nowrap;
+}
+@media (max-width: 760px) {
+  .app-update-settings-card {
+    grid-template-columns: 46px minmax(0, 1fr);
+    padding: 14px;
   }
-  .app-update-settings-actions{
-    grid-column:1/-1;
+  .app-update-settings-actions {
+    grid-column: 1/-1;
   }
-  .app-update-settings-actions button{
-    width:100%;
-    min-height:48px;
+  .app-update-settings-actions button {
+    width: 100%;
+    min-height: 48px;
   }
 }
-
 
 /* Destaque ao abrir Configurações por uma notificação de atualização */
 .app-update-settings-card.attention {
@@ -1035,11 +1076,10 @@ html .auth-story :is(h1, p, span, a, svg) {
   border-radius: 999px;
   background: var(--accent);
   color: #183f36;
-  font-size: .72rem;
+  font-size: 0.72rem;
   font-weight: 900;
-  letter-spacing: .02em;
+  letter-spacing: 0.02em;
 }
-
 
 /* Discord-inspired public profile panel v2 */
 .user-profile-popover {
@@ -1056,8 +1096,8 @@ html .auth-story :is(h1, p, span, a, svg) {
   border-radius: 18px;
   background: #111816;
   box-shadow:
-    0 0 0 100vmax rgb(0 0 0 / .66),
-    0 26px 90px rgb(0 0 0 / .52);
+    0 0 0 100vmax rgb(0 0 0 / 0.66),
+    0 26px 90px rgb(0 0 0 / 0.52);
 }
 
 .user-profile-popover .profile-close {
@@ -1073,7 +1113,7 @@ html .auth-story :is(h1, p, span, a, svg) {
   height: 100%;
   min-height: 0;
   display: grid !important;
-  grid-template-columns: minmax(320px, .9fr) minmax(380px, 1.1fr);
+  grid-template-columns: minmax(320px, 0.9fr) minmax(380px, 1.1fr);
   gap: 0 !important;
 }
 
@@ -1091,12 +1131,11 @@ html .auth-story :is(h1, p, span, a, svg) {
   flex-direction: column;
   gap: 16px;
   padding: 0 18px 18px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--profile-accent, #183f36) 9%, #0f1513),
-      #0f1513 54%
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--profile-accent, #183f36) 9%, #0f1513),
+    #0f1513 54%
+  );
 }
 
 .profile-discord-public-layout .public-profile-card {
@@ -1144,7 +1183,7 @@ html .auth-story :is(h1, p, span, a, svg) {
 .profile-handle-row > p {
   margin: 0;
   color: var(--muted);
-  font-size: .9rem;
+  font-size: 0.9rem;
 }
 
 .profile-handle-achievements {
@@ -1224,7 +1263,7 @@ html .auth-story :is(h1, p, span, a, svg) {
   background: #070b0a;
   color: #f7faf8;
   box-shadow: 0 8px 24px #0007;
-  font-size: .7rem;
+  font-size: 0.7rem;
   font-weight: 800;
   line-height: 1.25;
   white-space: normal;
@@ -1277,13 +1316,13 @@ html .auth-story :is(h1, p, span, a, svg) {
 .profile-achievement-popover small {
   margin-top: 2px;
   color: #aebbb5;
-  font-size: .68rem;
+  font-size: 0.68rem;
 }
 
 .profile-achievement-popover p {
   margin: 8px 0 0;
   color: #dce5e1;
-  font-size: .76rem;
+  font-size: 0.76rem;
   line-height: 1.45;
 }
 
@@ -1313,9 +1352,9 @@ html .auth-story :is(h1, p, span, a, svg) {
 
 .profile-public-advanced-heading > span {
   color: var(--muted);
-  font-size: .68rem;
+  font-size: 0.68rem;
   font-weight: 900;
-  letter-spacing: .09em;
+  letter-spacing: 0.09em;
   text-transform: uppercase;
 }
 
@@ -1330,7 +1369,7 @@ html .auth-story :is(h1, p, span, a, svg) {
 
 .profile-public-advanced-heading p {
   color: var(--muted);
-  font-size: .82rem;
+  font-size: 0.82rem;
   line-height: 1.5;
 }
 
@@ -1370,7 +1409,7 @@ html .auth-story :is(h1, p, span, a, svg) {
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--soft);
-  font-size: .72rem;
+  font-size: 0.72rem;
 }
 
 .profile-showcase-compact .showcase-grid {
@@ -1386,12 +1425,12 @@ html .auth-story :is(h1, p, span, a, svg) {
 
 .profile-showcase-compact .showcase-widget h3 {
   margin: 0 0 5px;
-  font-size: .84rem;
+  font-size: 0.84rem;
 }
 
 .profile-showcase-compact .showcase-widget p {
   margin: 4px 0;
-  font-size: .78rem;
+  font-size: 0.78rem;
   line-height: 1.42;
 }
 
@@ -1415,19 +1454,21 @@ html .auth-story :is(h1, p, span, a, svg) {
   border-radius: 9px;
   background: #101715e8;
   color: #dbe6e1;
-  font-size: .72rem;
+  font-size: 0.72rem;
   pointer-events: none;
 }
 
 @media (max-width: 760px) {
   .user-profile-popover {
     left: 0 !important;
-    top: max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px)) !important;
+    top: max(
+      env(safe-area-inset-top, 0px),
+      var(--native-safe-top, 0px)
+    ) !important;
     translate: none;
     width: 100vw;
     height: calc(
-      100dvh -
-        max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px))
+      100dvh - max(env(safe-area-inset-top, 0px), var(--native-safe-top, 0px))
     );
     border: 0;
     border-radius: 0;
@@ -1455,7 +1496,10 @@ html .auth-story :is(h1, p, span, a, svg) {
 
   .profile-public-advanced {
     padding: 22px 14px
-      calc(30px + max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px)));
+      calc(
+        30px +
+          max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
+      );
     border-left: 0;
     border-top: 1px solid var(--border);
   }
@@ -1470,7 +1514,8 @@ html .auth-story :is(h1, p, span, a, svg) {
     left: 14px;
     right: 14px;
     bottom: calc(
-      16px + max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
+      16px +
+        max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
     );
     top: auto;
     width: auto;
@@ -1484,7 +1529,8 @@ html .auth-story :is(h1, p, span, a, svg) {
     left: 14px;
     right: 14px;
     bottom: calc(
-      12px + max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
+      12px +
+        max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
     );
     max-width: none;
   }
@@ -1497,7 +1543,6 @@ html .auth-story :is(h1, p, span, a, svg) {
   }
 }
 
-
 .profile-main-meta {
   display: flex;
   align-items: center;
@@ -1506,7 +1551,7 @@ html .auth-story :is(h1, p, span, a, svg) {
   padding: 13px 2px 0;
   border-top: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
   color: var(--muted);
-  font-size: .76rem;
+  font-size: 0.76rem;
 }
 
 .profile-main-meta strong {
@@ -1530,7 +1575,6 @@ html .auth-story :is(h1, p, span, a, svg) {
   height: 20px;
 }
 
-
 /* Profile dialog stability and complete advanced customization 0.3.16 */
 .user-profile-popover .public-profile-card,
 .user-profile-popover .showcase-widget,
@@ -1549,13 +1593,12 @@ html .auth-story :is(h1, p, span, a, svg) {
   gap: 0;
   padding: 0;
   overflow-y: auto;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--profile-accent, #183f36) 18%, #0f1513) 0%,
-      color-mix(in srgb, var(--profile-secondary, #183f36) 11%, #0f1513) 48%,
-      #0f1513 100%
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--profile-accent, #183f36) 18%, #0f1513) 0%,
+    color-mix(in srgb, var(--profile-secondary, #183f36) 11%, #0f1513) 48%,
+    #0f1513 100%
+  );
 }
 
 .profile-public-primary::before {
@@ -1564,29 +1607,39 @@ html .auth-story :is(h1, p, span, a, svg) {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: .72;
+  opacity: 0.72;
 }
 
 .profile-public-primary.profile-theme-GRADIENT::before {
-  background:
-    linear-gradient(
-      155deg,
-      color-mix(in srgb, var(--profile-accent) 30%, transparent),
-      transparent 42%,
-      color-mix(in srgb, var(--profile-secondary) 24%, transparent)
-    );
+  background: linear-gradient(
+    155deg,
+    color-mix(in srgb, var(--profile-accent) 30%, transparent),
+    transparent 42%,
+    color-mix(in srgb, var(--profile-secondary) 24%, transparent)
+  );
 }
 
 .profile-public-primary.profile-effect-AURORA::before {
   background:
-    radial-gradient(circle at 18% 18%, color-mix(in srgb, var(--profile-secondary) 36%, transparent), transparent 34%),
-    radial-gradient(circle at 88% 68%, color-mix(in srgb, var(--profile-accent) 28%, transparent), transparent 40%);
+    radial-gradient(
+      circle at 18% 18%,
+      color-mix(in srgb, var(--profile-secondary) 36%, transparent),
+      transparent 34%
+    ),
+    radial-gradient(
+      circle at 88% 68%,
+      color-mix(in srgb, var(--profile-accent) 28%, transparent),
+      transparent 40%
+    );
   animation: profile-dialog-aurora 8s ease-in-out infinite alternate;
 }
 
 .profile-public-primary.profile-effect-DOTS::before {
-  background-image:
-    radial-gradient(circle, color-mix(in srgb, var(--profile-secondary) 42%, transparent) 1px, transparent 1.5px);
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--profile-secondary) 42%, transparent) 1px,
+    transparent 1.5px
+  );
   background-size: 18px 18px;
 }
 
@@ -1604,22 +1657,20 @@ html .auth-story :is(h1, p, span, a, svg) {
 .profile-discord-public-layout .public-profile-body {
   min-height: 0;
   padding: 0 22px 24px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--profile-accent) 20%, #f8f8ef) 0%,
-      color-mix(in srgb, var(--profile-secondary) 12%, #f8f8ef) 100%
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--profile-accent) 20%, #f8f8ef) 0%,
+    color-mix(in srgb, var(--profile-secondary) 12%, #f8f8ef) 100%
+  );
   color: #173a32;
 }
 
 html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--profile-accent) 22%, #101715) 0%,
-      color-mix(in srgb, var(--profile-secondary) 14%, #101715) 100%
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--profile-accent) 22%, #101715) 0%,
+    color-mix(in srgb, var(--profile-secondary) 14%, #101715) 100%
+  );
   color: var(--ink);
 }
 
@@ -1646,12 +1697,11 @@ html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
   align-content: start;
   gap: 18px;
   padding: 54px 28px 28px;
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--profile-secondary, #799f80) 6%, var(--surface)) 0%,
-      var(--surface) 260px
-    );
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--profile-secondary, #799f80) 6%, var(--surface)) 0%,
+    var(--surface) 260px
+  );
 }
 
 .profile-public-advanced.profile-effect-AURORA::before,
@@ -1661,17 +1711,23 @@ html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  opacity: .34;
+  opacity: 0.34;
 }
 
 .profile-public-advanced.profile-effect-AURORA::before {
-  background:
-    radial-gradient(circle at 70% 4%, color-mix(in srgb, var(--profile-secondary) 24%, transparent), transparent 28%);
+  background: radial-gradient(
+    circle at 70% 4%,
+    color-mix(in srgb, var(--profile-secondary) 24%, transparent),
+    transparent 28%
+  );
 }
 
 .profile-public-advanced.profile-effect-DOTS::before {
-  background-image:
-    radial-gradient(circle, color-mix(in srgb, var(--profile-secondary) 22%, transparent) 1px, transparent 1.2px);
+  background-image: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--profile-secondary) 22%, transparent) 1px,
+    transparent 1.2px
+  );
   background-size: 20px 20px;
 }
 
@@ -1712,22 +1768,30 @@ html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
   display: grid;
   place-items: center;
   border-radius: 11px;
-  background: color-mix(in srgb, var(--profile-secondary, var(--accent)) 14%, var(--soft));
-  color: color-mix(in srgb, var(--profile-secondary, var(--accent)) 76%, var(--ink));
+  background: color-mix(
+    in srgb,
+    var(--profile-secondary, var(--accent)) 14%,
+    var(--soft)
+  );
+  color: color-mix(
+    in srgb,
+    var(--profile-secondary, var(--accent)) 76%,
+    var(--ink)
+  );
 }
 
 .profile-advanced-highlight h3,
 .profile-advanced-academic h3,
 .profile-advanced-section-heading h3 {
   margin: 0 0 4px;
-  font-size: .83rem;
+  font-size: 0.83rem;
 }
 
 .profile-advanced-highlight p,
 .profile-advanced-academic p {
   margin: 0;
   color: var(--muted);
-  font-size: .77rem;
+  font-size: 0.77rem;
   line-height: 1.48;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -1753,12 +1817,16 @@ html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
 }
 
 .profile-advanced-section-heading > svg {
-  color: color-mix(in srgb, var(--profile-secondary, var(--accent)) 72%, var(--ink));
+  color: color-mix(
+    in srgb,
+    var(--profile-secondary, var(--accent)) 72%,
+    var(--ink)
+  );
 }
 
 .profile-advanced-section-heading small {
   color: var(--muted);
-  font-size: .69rem;
+  font-size: 0.69rem;
 }
 
 .profile-showcase-detailed .achievement-grid {
@@ -1784,12 +1852,22 @@ html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
 }
 
 .profile-showcase-detailed .showcase-widget.favorite {
-  border-color: color-mix(in srgb, var(--profile-secondary, var(--accent)) 58%, var(--border));
+  border-color: color-mix(
+    in srgb,
+    var(--profile-secondary, var(--accent)) 58%,
+    var(--border)
+  );
 }
 
 @keyframes profile-dialog-aurora {
-  from { opacity: .52; filter: hue-rotate(0deg); }
-  to { opacity: .82; filter: hue-rotate(14deg); }
+  from {
+    opacity: 0.52;
+    filter: hue-rotate(0deg);
+  }
+  to {
+    opacity: 0.82;
+    filter: hue-rotate(14deg);
+  }
 }
 
 @media (max-width: 860px) and (min-width: 761px) {
@@ -1832,15 +1910,18 @@ html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
   }
 }
 
-
 /* Profile card fills the entire identity column */
 .profile-public-primary {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--profile-accent, #183f36) 22%, #f8f8ef) 0%,
-      color-mix(in srgb, var(--profile-secondary, var(--profile-accent, #183f36)) 14%, #f8f8ef) 100%
-    ) !important;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--profile-accent, #183f36) 22%, #f8f8ef) 0%,
+    color-mix(
+        in srgb,
+        var(--profile-secondary, var(--profile-accent, #183f36)) 14%,
+        #f8f8ef
+      )
+      100%
+  ) !important;
   color: #173a32;
 }
 
@@ -1875,12 +1956,16 @@ html[data-theme="dark"] .profile-discord-public-layout .public-profile-body {
 }
 
 html[data-theme="dark"] .profile-public-primary {
-  background:
-    linear-gradient(
-      180deg,
-      color-mix(in srgb, var(--profile-accent, #183f36) 30%, #101715) 0%,
-      color-mix(in srgb, var(--profile-secondary, var(--profile-accent, #183f36)) 18%, #101715) 100%
-    ) !important;
+  background: linear-gradient(
+    180deg,
+    color-mix(in srgb, var(--profile-accent, #183f36) 30%, #101715) 0%,
+    color-mix(
+        in srgb,
+        var(--profile-secondary, var(--profile-accent, #183f36)) 18%,
+        #101715
+      )
+      100%
+  ) !important;
   color: var(--ink);
 }
 
@@ -1892,7 +1977,6 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta {
 html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
   color: var(--ink);
 }
-
 
 /* Remove the reserved seam between profile and advanced panel */
 .profile-discord-public-layout {
@@ -1939,7 +2023,6 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
     overflow-x: clip !important;
   }
 }
-
 
 /* Profile modal seam fix: advanced panel begins exactly at the profile edge */
 .user-profile-popover,
@@ -2014,28 +2097,51 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
 }
 
 /* Study match and room member cards */
-.study-match-profile-preview{margin:14px 0 16px;max-width:620px}
-.campus-match{padding:0;border:0;background:transparent}
-.campus-match>.member-profile-strip{min-width:0}
+.study-match-profile-preview {
+  margin: 14px 0 16px;
+  max-width: 620px;
+}
+.campus-match {
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.campus-match > .member-profile-strip {
+  min-width: 0;
+}
 .room-members-panel .participant-row,
-.room-mobile-members-list .participant-row{
-  grid-template-columns:minmax(0,1fr) auto;
-  align-items:center;
-  gap:8px;
-  padding:7px 0;
+.room-mobile-members-list .participant-row {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
 }
-.room-members-panel .participant-row>.member-profile-strip,
-.room-mobile-members-list .participant-row>.member-profile-strip{
-  grid-column:1;
-  min-width:0;
+.room-members-panel .participant-row > .member-profile-strip,
+.room-mobile-members-list .participant-row > .member-profile-strip {
+  grid-column: 1;
+  min-width: 0;
 }
-.room-members-panel .participant-row>.icon-control{grid-column:2}
-.room-members-panel .member-profile-strip{--member-strip-height:62px}
-.room-members-panel .member-profile-strip-content{padding:7px 9px}
-.room-members-panel .member-profile-strip .identity-avatar{width:40px;height:40px;flex-basis:40px}
-@media(max-width:760px){
-  .study-match-profile-preview{max-width:none}
-  .room-mobile-members-list .participant-row{grid-template-columns:minmax(0,1fr)}
+.room-members-panel .participant-row > .icon-control {
+  grid-column: 2;
+}
+.room-members-panel .member-profile-strip {
+  --member-strip-height: 62px;
+}
+.room-members-panel .member-profile-strip-content {
+  padding: 7px 9px;
+}
+.room-members-panel .member-profile-strip .identity-avatar {
+  width: 40px;
+  height: 40px;
+  flex-basis: 40px;
+}
+@media (max-width: 760px) {
+  .study-match-profile-preview {
+    max-width: none;
+  }
+  .room-mobile-members-list .participant-row {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 /* Mobile private chat uses the same compact composer as study rooms.
@@ -2151,15 +2257,10 @@ html[data-theme="dark"] .profile-public-primary .profile-main-meta strong {
 
   html[data-enturma-ime="true"] .private-messages {
     padding-bottom: calc(
-      var(--native-keyboard-bottom, 0px) +
-      var(--private-composer-height) +
-      24px
+      var(--native-keyboard-bottom, 0px) + var(--private-composer-height) + 24px
     ) !important;
     scroll-padding-bottom: calc(
-      var(--native-keyboard-bottom, 0px) +
-      var(--private-composer-height) +
-      18px
+      var(--native-keyboard-bottom, 0px) + var(--private-composer-height) + 18px
     ) !important;
   }
 }
-

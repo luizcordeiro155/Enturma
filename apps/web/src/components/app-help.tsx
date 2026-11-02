@@ -4,7 +4,9 @@ import { BookOpen, Send, Sparkles } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { RichMessage } from "./rich-message";
 import { profileEntrance } from "./profile-motion";
+import { useVisitor } from "@/lib/visitor-context";
 export function AppHelp() {
+  const visitor = useVisitor();
   const [available, setAvailable] = useState<boolean>();
   const [question, setQuestion] = useState("");
   const [busy, setBusy] = useState(false);
@@ -14,6 +16,7 @@ export function AppHelp() {
   >([]);
   const last = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    if (visitor.active) return;
     let live = true;
     api<{ available: boolean }>("/help")
       .then((v) => {
@@ -25,7 +28,7 @@ export function AppHelp() {
     return () => {
       live = false;
     };
-  }, []);
+  }, [visitor.active]);
   useEffect(() => {
     if (last.current) {
       const animation = profileEntrance(last.current);
@@ -33,6 +36,10 @@ export function AppHelp() {
     }
   }, [messages]);
   async function send() {
+    if (visitor.active) {
+      visitor.requestLogin("/settings");
+      return;
+    }
     if (busy || !question.trim()) return;
     const input = question;
     setBusy(true);
@@ -118,7 +125,11 @@ export function AppHelp() {
             placeholder="Pergunte sobre um recurso do aplicativo…"
           />
         </label>
-        <button disabled={busy || !available || !question.trim()}>
+        <button
+          disabled={
+            busy || (!visitor.active && (!available || !question.trim()))
+          }
+        >
           <Send size={18} />
           {busy ? "Preparando resposta…" : "Perguntar"}
         </button>

@@ -24,6 +24,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AcademicEntry } from "@enturma/contracts";
 import { api, post, peekApiSnapshot } from "@/lib/api";
 import { useRideUpdates } from "@/lib/use-ride-updates";
+import { useVisitor } from "@/lib/visitor-context";
 import {
   RideMobilityMap,
   type MapMarker,
@@ -487,13 +488,20 @@ function BottomSheet({
   );
 }
 
-export function RideMobilityExperience() {
+export function RideMobilityExperience({
+  visitor = false,
+}: {
+  visitor?: boolean;
+}) {
+  const guest = useVisitor();
   const online = useOnline();
   const [state, setState] = useState<MobilityState | undefined>(() =>
-    peekApiSnapshot<MobilityState>("/rides/mobility/state"),
+    visitor
+      ? { preference: {} }
+      : peekApiSnapshot<MobilityState>("/rides/mobility/state"),
   );
-  const [me, setMe] = useState(
-    () => peekApiSnapshot<{ id: string }>("/users/me")?.id ?? "",
+  const [me, setMe] = useState(() =>
+    visitor ? "" : (peekApiSnapshot<{ id: string }>("/users/me")?.id ?? ""),
   );
   const [campuses, setCampuses] = useState<AcademicEntry[]>(
     () => peekApiSnapshot<AcademicEntry[]>("/academics?kind=CAMPUS") ?? [],
@@ -540,6 +548,13 @@ export function RideMobilityExperience() {
   }, [location]);
 
   const load = useCallback(async () => {
+    if (visitor) {
+      const catalog = await api<{ items: AcademicEntry[] }>(
+        "/catalog/campuses",
+      );
+      setCampuses(catalog.items);
+      return { next: { preference: {} } as MobilityState, user: "" };
+    }
     const [next, user, campusList] = await Promise.all([
       api<MobilityState>("/rides/mobility/state", { cache: "no-store" }),
       userRef.current
@@ -605,7 +620,7 @@ export function RideMobilityExperience() {
       setLocation(actualCenter);
     }
     return { next, user: user.id };
-  }, []);
+  }, [visitor]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -630,7 +645,7 @@ export function RideMobilityExperience() {
     } catch (e) {
       setError((e as Error).message);
     }
-  });
+  }, !visitor);
 
   const pref = state?.preference;
   const catalogCampusPoint = point(pref?.campusLat, pref?.campusLng);
@@ -724,6 +739,10 @@ export function RideMobilityExperience() {
   }
 
   const acquire = useCallback(async () => {
+    if (visitor) {
+      guest.requestLogin("/caronas");
+      throw Error("Entre na sua conta para usar sua localização nas caronas.");
+    }
     setBusy(true);
     setError("");
     try {
@@ -747,7 +766,7 @@ export function RideMobilityExperience() {
     } finally {
       setBusy(false);
     }
-  }, []);
+  }, [visitor, guest]);
 
   const routeWithCampus = useCallback(
     async (
@@ -1563,7 +1582,7 @@ export function RideMobilityExperience() {
         <div className="ride-connection-state error" role="status">
           Sem conexão · sua corrida será sincronizada quando a internet voltar.
         </div>
-      ) : !live ? (
+      ) : !visitor && !live ? (
         <div className="ride-connection-state" role="status">
           Reconectando em tempo real…
         </div>
@@ -1621,11 +1640,20 @@ export function RideMobilityExperience() {
             <div className="ride-campus-onboarding">
               <GraduationCap size={28} />
               <h2>Qual é o seu campus?</h2>
-              <p>Ele será o ponto fixo das suas caronas de ida e volta.</p>
+              <p>
+                {visitor
+                  ? "Conheça as caronas entre estudantes. Entre para escolher seu campus e encontrar companhia no trajeto."
+                  : "Ele será o ponto fixo das suas caronas de ida e volta."}
+              </p>
               <select
                 defaultValue=""
                 onChange={async (event) => {
                   if (!event.target.value) return;
+                  if (visitor) {
+                    event.target.value = "";
+                    guest.requestLogin("/caronas");
+                    return;
+                  }
                   try {
                     await api("/rides/mobility/preferences", {
                       method: "PUT",
@@ -1647,6 +1675,14 @@ export function RideMobilityExperience() {
                   </option>
                 ))}
               </select>
+              {visitor && (
+                <button
+                  className="button wide"
+                  onClick={() => guest.requestLogin("/caronas")}
+                >
+                  Entrar para solicitar ou oferecer carona
+                </button>
+              )}
             </div>
           ) : (!campusPoint || campusSetupOpen) &&
             !activeMatch &&

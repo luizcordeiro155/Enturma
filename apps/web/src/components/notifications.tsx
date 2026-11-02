@@ -1,6 +1,7 @@
 "use client";
 import { revealChatMessage } from "@/lib/chat-scroll";
 import { watchNotificationBadge } from "@/lib/notification-presentation";
+import { useBackgroundMessageDelivery } from "@/lib/background-message-delivery";
 import {
   notificationSoundEnabled,
   playNotificationSound,
@@ -86,6 +87,7 @@ export function NotificationsProvider({
   const revision = useRef(0);
   const initializedInbox = useRef(false);
   const [sessionEpoch, setSessionEpoch] = useState(0);
+  useBackgroundMessageDelivery(sessionEpoch);
   const pending = useRef(false),
     seen = useRef(new Set<string>());
   useAppConnection();
@@ -266,7 +268,8 @@ export function NotificationsProvider({
       if (
         initializedInbox.current &&
         !isMobileApp() &&
-        (Boolean(window.enturmaDesktop) || (!document.hidden && document.hasFocus()))
+        (Boolean(window.enturmaDesktop) ||
+          (!document.hidden && document.hasFocus()))
       ) {
         for (const notice of data.items) {
           if (

@@ -10,7 +10,7 @@
   right: -10px;
   top: calc(100% + 10px);
   display: grid;
-  grid-template-columns: repeat(3, 64px);
+  grid-template-columns: repeat(4, 64px);
   padding: 5px;
   border: 1px solid var(--border);
   border-radius: 32px;

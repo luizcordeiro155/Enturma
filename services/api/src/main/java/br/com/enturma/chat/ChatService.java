@@ -55,12 +55,16 @@ public class ChatService {
             + " NULL has_avatar, a.id attachment_id,a.file_name attachment_name,a.mime_type"
             + " attachment_mime, a.file_size attachment_size, COALESCE((SELECT jsonb_agg(r) FROM"
             + " (SELECT emoji,count(*) count,bool_or(user_id=?::uuid) mine FROM room_reaction WHERE"
-            + " message_id=m.id GROUP BY emoji ORDER BY min(created_at)) r),'[]'::jsonb) reactions"
-            + " FROM room_message m JOIN app_user u ON u.id=m.user_id LEFT JOIN room_attachment a"
-            + " ON a.id=m.attachment_id WHERE m.room_id=? AND (?::uuid IS NULL OR m.id=?) AND NOT"
-            + " EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND b.blocked_id=m.user_id) OR"
-            + " (b.blocked_id=? AND b.user_id=m.user_id)) ORDER BY m.created_at DESC,m.id DESC"
-            + " LIMIT 50 OFFSET ?",
+            + " message_id=m.id GROUP BY emoji ORDER BY min(created_at)) r),'[]'::jsonb) reactions,"
+            + " (SELECT count(*) FROM room_message_receipt r WHERE r.message_id=m.id)"
+            + " receipt_total, (SELECT count(*) FROM room_message_receipt r WHERE r.message_id=m.id"
+            + " AND r.delivered_at IS NOT NULL) delivered_count, (SELECT count(*) FROM"
+            + " room_message_receipt r WHERE r.message_id=m.id AND r.read_at IS NOT NULL)"
+            + " read_count FROM room_message m JOIN app_user u ON u.id=m.user_id LEFT JOIN"
+            + " room_attachment a ON a.id=m.attachment_id WHERE m.room_id=? AND (?::uuid IS NULL OR"
+            + " m.id=?) AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
+            + " b.blocked_id=m.user_id) OR (b.blocked_id=? AND b.user_id=m.user_id)) ORDER BY"
+            + " m.created_at DESC,m.id DESC LIMIT 50 OFFSET ?",
         a.id(),
         a.id(),
         room,
@@ -96,8 +100,36 @@ public class ChatService {
   @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
   public Object send(
       Actor a, UUID room, String body, UUID reply, UUID attachment, String mediaKind) {
-    study.activeLocked(room);
+    return send(a, room, body, reply, attachment, mediaKind, null);
+  }
+
+  @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
+  public Object send(
+      Actor a,
+      UUID room,
+      String body,
+      UUID reply,
+      UUID attachment,
+      String mediaKind,
+      UUID clientId) {
     study.member(a, room);
+    if (clientId != null) {
+      db.jdbc.queryForObject(
+          "SELECT pg_advisory_xact_lock(hashtextextended(?,0))",
+          Object.class,
+          "room-send:" + a.id() + ":" + clientId);
+      var existing =
+          db.list(
+              "SELECT id,room_id FROM room_message WHERE user_id=? AND client_id=?",
+              a.id(),
+              clientId);
+      if (!existing.isEmpty()) {
+        if (!room.equals(existing.getFirst().get("roomId")))
+          throw ApiException.invalid("Identificador de mensagem já utilizado.");
+        return Map.of("id", existing.getFirst().get("id"));
+      }
+    }
+    study.activeLocked(room);
     if (mediaKind != null && (attachment == null || !Set.of("STICKER", "GIF").contains(mediaKind)))
       throw ApiException.invalid("Tipo de mídia inválido.");
     String text = body == null ? "" : body.strip();
@@ -111,24 +143,34 @@ public class ChatService {
       throw ApiException.invalid("Mensagem de referência inválida.");
     if (attachment != null
         && db.list(
-                "SELECT id FROM room_attachment WHERE id=? AND room_id=? AND"
-                    + " uploaded_by=? FOR KEY SHARE",
-                attachment,
-                room,
-                a.id())
+                "SELECT id FROM room_attachment WHERE id=? AND room_id=? AND uploaded_by=? AND"
+                    + " (?::text IS NULL OR mime_type LIKE 'image/%') FOR KEY SHARE",
+                attachment, room, a.id(), mediaKind)
             .isEmpty()) throw ApiException.invalid("Anexo inválido.");
     automod.inspect(a, room, text);
     UUID id = UUID.randomUUID();
     db.jdbc.update(
-        "INSERT INTO room_message(id,room_id,user_id,body,reply_to,attachment_id,media_kind) VALUES"
-            + " (?,?,?,?,?,?,?)",
+        "INSERT INTO"
+            + " room_message(id,room_id,user_id,body,reply_to,attachment_id,media_kind,client_id)"
+            + " VALUES (?,?,?,?,?,?,?,?)",
         id,
         room,
         a.id(),
         text.isBlank() ? null : text,
         reply,
         attachment,
-        mediaKind);
+        mediaKind,
+        clientId);
+    db.jdbc.update(
+        "INSERT INTO room_message_receipt(message_id,user_id) SELECT ?,p.user_id FROM"
+            + " room_participant p WHERE p.room_id=? AND p.user_id<>? AND NOT p.removed AND"
+            + " p.left_at IS NULL AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND"
+            + " b.blocked_id=p.user_id) OR (b.blocked_id=? AND b.user_id=p.user_id))",
+        id,
+        room,
+        a.id(),
+        a.id(),
+        a.id());
     var mentions = notices.mentions(text);
     for (var member :
         db.list(
@@ -148,6 +190,34 @@ public class ChatService {
               : "Nova mensagem na sua sala de estudo.");
     }
     return Map.of("id", id);
+  }
+
+  @Transactional
+  public void acknowledge(Actor a, UUID room, MessageReceipt receipt) {
+    study.member(a, room);
+    if (receipt.messageIds() == null
+        || receipt.messageIds().isEmpty()
+        || receipt.messageIds().size() > 100)
+      throw ApiException.invalid("Confirmação de mensagens inválida.");
+    for (UUID id : new HashSet<>(receipt.messageIds()))
+      db.jdbc.update(
+          "UPDATE room_message_receipt r SET delivered_at=COALESCE(r.delivered_at,now()),"
+              + " read_at=CASE WHEN ? THEN COALESCE(r.read_at,GREATEST(r.delivered_at,now())) ELSE"
+              + " r.read_at END FROM room_message m WHERE r.message_id=m.id AND m.room_id=? AND"
+              + " m.id=? AND r.user_id=? AND m.user_id<>? AND m.deleted_at IS NULL AND"
+              + " (r.delivered_at IS NULL OR (? AND r.read_at IS NULL)) AND NOT EXISTS(SELECT 1"
+              + " FROM room_message_hidden h WHERE h.message_id=m.id AND h.user_id=?) AND NOT"
+              + " EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND b.blocked_id=m.user_id)"
+              + " OR (b.blocked_id=? AND b.user_id=m.user_id))",
+          receipt.read(),
+          room,
+          id,
+          a.id(),
+          a.id(),
+          receipt.read(),
+          a.id(),
+          a.id(),
+          a.id());
   }
 
   @Transactional(noRollbackFor = br.com.enturma.moderation.PenaltyException.class)
@@ -207,9 +277,11 @@ public class ChatService {
     study.member(a, room);
     automod.allowed(a.id(), room);
     if (bytes.length == 0 || bytes.length > 8 * 1024 * 1024)
-      throw ApiException.invalid("A imagem deve ter no máximo 8 MB.");
-    if (!Set.of("image/jpeg", "image/png", "image/webp", "image/gif").contains(mime))
-      throw ApiException.invalid("Use JPG, PNG, WEBP ou GIF.");
+      throw ApiException.invalid("O anexo deve ter no máximo 8 MB.");
+    if (Set.of("audio/webm", "audio/ogg", "audio/mp4").contains(mime)) {
+      AudioAttachment.validate(mime, bytes);
+    } else if (!Set.of("image/jpeg", "image/png", "image/webp", "image/gif").contains(mime))
+      throw ApiException.invalid("Use uma imagem ou grave um áudio.");
     // A transaction-scoped user lock serializes this budget across different rooms.
     db.jdbc.queryForObject(
         "SELECT pg_advisory_xact_lock(hashtextextended(?, 0))",

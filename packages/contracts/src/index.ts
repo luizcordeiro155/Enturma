@@ -143,6 +143,9 @@ export interface MessageReaction {
   mine: boolean;
 }
 export interface Message extends IdentityStyle {
+  receiptTotal?: number;
+  deliveredCount?: number;
+  readCount?: number;
   hiddenAt?: string | null;
   reactions?: MessageReaction[];
   id: string;
@@ -167,7 +170,7 @@ export interface RoomArtifact {
   createdAt: string;
 }
 export interface ExperiencePreference {
-  theme: "LIGHT" | "DARK" | "SYSTEM";
+  theme: "LIGHT" | "DARK" | "SYSTEM" | "ENTURMA";
   fontScale: number;
   highContrast: boolean;
   reducedMotion: boolean;

@@ -13,8 +13,9 @@ import {
   useOverlayHistory,
   waitForOverlayHistory,
 } from "@/lib/use-overlay-history";
-import { createPortal } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ProfileCommunity } from "./profile-community";
 import { api, post } from "@/lib/api";
 import { FeaturedAchievementBadges, type Showcase } from "./profile-showcase";
@@ -315,6 +316,7 @@ export function UserIdentity({
   nameOnly?: boolean;
   subtitle?: string;
 }) {
+  const router = useRouter();
   const [profile, setProfile] = useState<PublicProfile>();
   const [showcase, setShowcase] = useState<Showcase>();
   const [isOwnProfile, setIsOwnProfile] = useState(false);
@@ -327,7 +329,7 @@ export function UserIdentity({
   const card = useRef<HTMLDivElement>(null);
   const id = useId();
   const closing = useRef(false);
-  const close = useCallback(async () => {
+  const close = useCallback(async (restoreFocus = true) => {
     if (closing.current) return;
     closing.current = true;
     const animation = card.current
@@ -338,11 +340,18 @@ export function UserIdentity({
     } catch {
       /* Unmount can cancel the transition. */
     }
-    setOpen(false);
-    closing.current = false;
+    // Commit closure before waiting: cleanup removes the overlay's history
+    // entry. Starting navigation earlier lets that Back undo the new route.
+    flushSync(() => setOpen(false));
     await waitForOverlayHistory();
-    trigger.current?.focus({ preventScroll: true });
+    closing.current = false;
+    if (restoreFocus) trigger.current?.focus({ preventScroll: true });
   }, []);
+  async function navigate(href: string) {
+    if (closing.current) return;
+    await close(false);
+    router.push(href);
+  }
   useOverlayHistory(() => void close(), open);
   useEffect(() => {
     if (!open || !profile || !card.current) return;
@@ -460,7 +469,7 @@ export function UserIdentity({
                       userId={profile.id}
                       showcase={showcase}
                       own={isOwnProfile}
-                      onNavigate={() => setOpen(false)}
+                      onNavigate={(href) => void navigate(href)}
                     />
                   }
                   actions={
@@ -474,7 +483,10 @@ export function UserIdentity({
                           <Link
                             className="button"
                             href={`/friends?chat=${friendship.id}`}
-                            onClick={() => setOpen(false)}
+                            onNavigate={(event) => {
+                              event.preventDefault();
+                              void navigate(`/friends?chat=${friendship.id}`);
+                            }}
                           >
                             Iniciar conversa
                           </Link>
@@ -486,7 +498,10 @@ export function UserIdentity({
                             <Link
                               className="button secondary"
                               href="/friends"
-                              onClick={() => setOpen(false)}
+                              onNavigate={(event) => {
+                                event.preventDefault();
+                                void navigate("/friends");
+                              }}
                             >
                               Gerenciar convite
                             </Link>
@@ -524,7 +539,10 @@ export function UserIdentity({
                       <Link
                         className="button"
                         href="/profile"
-                        onClick={() => setOpen(false)}
+                        onNavigate={(event) => {
+                          event.preventDefault();
+                          void navigate("/profile");
+                        }}
                       >
                         Editar perfil
                       </Link>

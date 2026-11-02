@@ -3,6 +3,10 @@ import { TypingIndicator } from "./typing-indicator";
 import { ComposerMedia } from "./composer-media";
 import { providerMessageUrl, type KlipyGif } from "@/lib/klipy";
 import { ChatImage } from "./chat-image-viewer";
+import { VoiceMessage, VoiceRecorder } from "./voice-message";
+import { MessageReceipt } from "./message-receipt";
+import { useMessageReceipts } from "@/lib/use-message-receipts";
+import { RoomInvitationPreview } from "./room-invitation-preview";
 
 import {
   useCallback,
@@ -92,6 +96,7 @@ type Props = {
   onLoadOlder: () => Promise<void>;
   onSubmit: (event: React.FormEvent<HTMLFormElement>) => Promise<void>;
   onSendMedia?: (file: File, kind: "STICKER" | "GIF") => Promise<void>;
+  onSendAudio?: (file: File) => Promise<void>;
   onSendKlipy?: (gif: KlipyGif) => Promise<void>;
   onReloadMessages: () => Promise<void>;
   setDraft: (value: string) => void;
@@ -191,6 +196,13 @@ export function RoomChat(props: Props) {
 
   const bottomRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  useMessageReceipts(
+    me ? `/study-rooms/${roomId}/messages/receipts` : undefined,
+    messages
+      .filter((m) => m.userId !== me?.id && !m.deletedAt && !m.hiddenAt)
+      .map((m) => m.id),
+    scrollRef,
+  );
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const nearBottom = useRef(true);
   const forceFollowLatest = useRef(false);
@@ -300,7 +312,7 @@ export function RoomChat(props: Props) {
   ) {
     if (
       event.pointerType === "mouse" ||
-      (event.target as HTMLElement).closest("button,a,input,textarea")
+      (event.target as HTMLElement).closest("button,a,input,textarea,audio,video")
     )
       return;
     cancelRoomLongPress();
@@ -525,6 +537,7 @@ export function RoomChat(props: Props) {
                 <article
                   className={`message persistent-message ${message.userId === me?.id ? "mine" : ""} ${roomActionMessage?.id === message.id ? "message-action-selected" : ""}`}
                   key={message.id}
+                  data-receipt-id={message.id}
                   onPointerDown={(event) => startRoomLongPress(event, message)}
                   onPointerMove={moveRoomLongPress}
                   onPointerUp={cancelRoomLongPress}
@@ -584,6 +597,9 @@ export function RoomChat(props: Props) {
                           hour: "2-digit",
                           minute: "2-digit",
                         })}
+                        {message.userId === me?.id && !message.deletedAt && (
+                          <MessageReceipt receipt={message} />
+                        )}
                       </small>
                     </header>
 
@@ -676,17 +692,27 @@ export function RoomChat(props: Props) {
                               <RichMessage text={message.body} />
                             )
                           ) : null}
+                          {message.body && (
+                            <RoomInvitationPreview text={message.body} />
+                          )}
                           {message.editedAt && (
                             <small className="muted">editada</small>
                           )}
                           {message.attachmentId ? (
-                            <ChatImage
-                              kind={message.mediaKind}
-                              src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
-                              alt={
-                                message.attachmentName ?? "Imagem compartilhada"
-                              }
-                            />
+                            message.attachmentMime?.startsWith("audio/") ? (
+                              <VoiceMessage
+                                src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
+                              />
+                            ) : (
+                              <ChatImage
+                                kind={message.mediaKind}
+                                src={`/api/backend/study-rooms/${roomId}/messages/attachments/${message.attachmentId}`}
+                                alt={
+                                  message.attachmentName ??
+                                  "Imagem compartilhada"
+                                }
+                              />
+                            )
                           ) : null}
                         </>
                       )}
@@ -940,6 +966,14 @@ export function RoomChat(props: Props) {
               />
             </label>
 
+            {props.onSendAudio && (
+              <VoiceRecorder
+                key={roomId}
+                disabled={busy || composerBlocked}
+                onError={setError}
+                onSend={props.onSendAudio}
+              />
+            )}
             <ComposerMedia
               onEmoji={(emoji) => {
                 setDraft((draft + emoji).slice(0, 4000));

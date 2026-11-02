@@ -2,6 +2,7 @@
 import { NavigationLink as Link } from "./navigation-link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useVisitor } from "@/lib/visitor-context";
 import { EnturmaAppIcon } from "./enturma-app-icon";
 import {
   Home,
@@ -16,7 +17,11 @@ import {
   Gamepad2,
   BriefcaseBusiness,
 } from "lucide-react";
-import { isInstalledApp, isMobileApp, useAppUpdateState } from "./desktop-updates";
+import {
+  isInstalledApp,
+  isMobileApp,
+  useAppUpdateState,
+} from "./desktop-updates";
 const tabs = [
   ["/home", "Início", Home],
   ["/rooms", "Salas", Users],
@@ -26,7 +31,8 @@ const tabs = [
 ] as const;
 export function MobileNavigation() {
   const pathname = usePathname();
-  const path = pathname === "/visitante" ? "/home" : pathname;
+  const guest = useVisitor();
+  const path = guest.active ? guest.path.split("?")[0] : pathname;
   const updateState = useAppUpdateState();
   const updatePending =
     isMobileApp() &&
@@ -104,7 +110,9 @@ export function MobileNavigation() {
               ["/download", "Baixar o Enturma", EnturmaAppIcon],
               ["/settings", "Configurações", Settings],
             ] as const
-          ).filter(([href])=>!(href==="/download"&&installedApp)).map(([href, label, Icon]) => (
+          )
+            .filter(([href]) => !(href === "/download" && installedApp))
+            .map(([href, label, Icon]) => (
               <Link
                 href={href}
                 key={href}

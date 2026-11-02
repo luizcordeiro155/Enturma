@@ -25,14 +25,21 @@ export function useKeyboardViewport() {
       if (!viewport) return;
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        const inset = Math.max(
-          0,
-          Math.round(window.innerHeight - viewport.height - viewport.offsetTop),
-        );
+        // Pinch zoom shrinks the visual viewport without opening the IME.
+        // Leave scrolling/zooming to the browser instead of moving the sheet.
+        const zoomed = Math.abs((viewport.scale || 1) - 1) > 0.05;
+        const inset = zoomed
+          ? 0
+          : Math.max(
+              0,
+              Math.round(
+                window.innerHeight - viewport.height - viewport.offsetTop,
+              ),
+            );
         root.style.setProperty("--ride-keyboard-inset", `${inset}px`);
         root.style.setProperty(
           "--enturma-visual-viewport-height",
-          `${Math.round(viewport.height)}px`,
+          `${Math.round(zoomed ? window.innerHeight : viewport.height)}px`,
         );
       });
     };
@@ -55,7 +62,7 @@ export function useKeyboardViewport() {
       )
         return;
 
-      if (!viewport) return;
+      if (!viewport || Math.abs((viewport.scale || 1) - 1) > 0.05) return;
       const rect = active.getBoundingClientRect();
       const visibleTop = viewport.offsetTop + 12;
       const visibleBottom = viewport.offsetTop + viewport.height - 16;
@@ -76,8 +83,7 @@ export function useKeyboardViewport() {
       syncInset();
       if (focusTimer) clearTimeout(focusTimer);
       // Wait for the keyboard to reach its final geometry, then correct once.
-      if (textEntry)
-        focusTimer = setTimeout(ensureFocusedControlVisible, 260);
+      if (textEntry) focusTimer = setTimeout(ensureFocusedControlVisible, 260);
     };
 
     const onFocusOut = () => {

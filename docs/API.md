@@ -128,3 +128,48 @@ Os exemplos de testes não representam nenhuma universidade real. Não use as fi
 | Notificações | `/notifications/preferences`, `/notifications/inbox`, `/notifications/web-push/public-key`, `/notifications/desktop-push` |
 
 Todas as rotas seguem o prefixo `/api/v1` e autorizam conforme a identidade e o recurso. A rota `GET /api/klipy-config` é exclusiva do frontend Next.js; a pesquisa KLIPY ocorre diretamente no navegador, não no Java.
+
+## Comunidade para visitantes — lote 02/11/2026
+
+Os endpoints abaixo permitem somente leitura anônima. `/visitante` é uma rota da interface Web, não uma identidade com permissão para usar endpoints privados. Fórum expõe conteúdo publicado, identificador/nome/username do autor e contadores agregados; não inclui e-mail, preferências ou personalização privada do autor. Publicações removidas e autores com status diferente de `ACTIVE` são excluídos. A política pública não depende do cache de um usuário autenticado.
+
+| Método/rota | Contrato |
+| --- | --- |
+| `GET /public/explore/forum` | `q` até 160 caracteres, `category`, `sort=new|top|relevance`, `page` a partir de 0; `{items,hasMore}`, até 30 itens. Categorias: `GENERAL`, `PROGRAMMING`, `ACADEMIC`, `CAREER`, `CAMPUS`. |
+| `GET /public/explore/forum/{id}` | Publicação raiz visível; não permite buscar uma mensagem privada pelo identificador. |
+| `GET /public/explore/forum/{id}/comments` | Comentários visíveis da raiz, `page`; `{items,hasMore}`, até 30 itens. |
+| `GET /public/explore/forum/{id}/related` | Até cinco outras publicações visíveis da mesma categoria. |
+| `GET /public/explore/forum/{id}/target/{target}` | Raiz ou comentário pertencente à raiz informada; valida visibilidade de ambos. |
+| `GET /public/explore/rooms` | `page`, `subjectId` opcional; lista de até 30 salas `OPEN`/`ACTIVE`, não travadas e não expiradas. Metadados de descoberta e contagem de participantes; sem host, lista de membros, código de convite, conversa ou materiais. |
+| `GET /public/explore/rooms/{id}/avatar` ou `/banner` | Imagem de uma sala que atende aos mesmos critérios públicos. `Cache-Control: no-store` e `X-Content-Type-Options: nosniff`. |
+
+Essas rotas compartilham limite de 120 requisições por minuto por identidade de cliente. O cliente anônimo usa a identificação assinada pelo BFF quando válida, ou endereço da conexão como fallback. Caronas visitante consulta `GET /catalog/campuses`; não consulta estado da viagem, coordenadas, pedidos ou disponibilidade de motoristas. `/academics` permanece autenticado. Participação, votos, reações, denúncias, perfil, amigos e portfólio continuam usando endpoints protegidos.
+
+## Mensagens de voz e recibos — lote 02/11/2026
+
+| Método/rota | Contrato |
+| --- | --- |
+| `POST /study-rooms/{id}/messages/attachments` | Multipart `file`; além das imagens existentes, aceita `audio/webm`, `audio/ogg`, `audio/mp4`, até 1.433.600 bytes e com assinatura de contêiner válida. Exige membership. |
+| `GET /study-rooms/{id}/messages/attachments/{attachmentId}` | Download autorizado do anexo; não se torna público por ser áudio. |
+| `POST /study-rooms/{id}/messages` | `body`, `replyTo`, `attachmentId`, `mediaKind` opcionais; `clientId` UUID opcional torna o envio idempotente por remetente. Reutilizar o ID em outra sala é rejeitado. `mediaKind=STICKER|GIF` é somente para imagens; áudio é identificado pelo MIME do anexo. |
+| `POST /friends/{id}/messages` | Envelope cifrado existente com `clientId`, `ciphertext`, `iv` e campos opcionais `attachmentCiphertext`, `attachmentIv`, `attachmentMime`, `attachmentName`, `attachmentSize`. Áudio utiliza os mesmos MIME e limite de tamanho; metadados fazem parte da autenticação AES-GCM no cliente. Exige amizade aceita e ausência de bloqueio. |
+| `GET /messages/pending-delivery` | Até 20 pendências `{id,contextKey}` para o destinatário autenticado. Contexto `friend:{uuid}` ou `room:{uuid}`. Não confirma recebimento nem devolve o conteúdo. Exclui mensagens removidas/ocultas, bloqueios e vínculos sem acesso. |
+| `GET /friends/{id}/messages/target/{messageId}` ou `GET /study-rooms/{id}/messages/target/{messageId}` | Busca autorizada do envelope/mensagem antes de confirmar entrega; retorno em lista. No privado, mantém o conteúdo cifrado. |
+| `POST /friends/{id}/messages/receipts` ou `POST /study-rooms/{id}/messages/receipts` | `{messageIds: UUID[], read: boolean}`, de 1 a 100 IDs. Atualiza somente os recibos do próprio destinatário, naquele vínculo/sala e com acesso válido. Repetir a confirmação não altera timestamps já registrados. |
+
+Listagens e buscas de mensagens acrescentam `receiptTotal`, `deliveredCount` e `readCount`. O conjunto de destinatários é registrado quando a mensagem é enviada. `read=true` confirma também a entrega; o cliente só o envia para conteúdo visível com documento visível e focado. Entrega é confirmada após buscar a mensagem real, inclusive pelo receptor em segundo plano enquanto o aplicativo estiver executando. Não depende apenas de presença ou notificação. Uma marca significa aceita pelo servidor; duas cinzas, todos os destinatários receberam; duas azuis, todos leram. Registros antigos sem recibos não recebem entrega/leitura retroativa.
+
+Escritas de recibos têm bucket de 120 requisições/minuto por usuário; uploads de anexos de sala, oito/minuto. O gravador da interface limita a captura a 120 segundos; a API limita tamanho/formato, não afirma ter medido a duração de qualquer arquivo arbitrário. A API recebe o anexo privado cifrado e não inspeciona sua assinatura em texto claro. A proteção por custódia de conta é descrita em [CHAT_PRIVACY](CHAT_PRIVACY.md); não implica E2EE inacessível ao serviço. Persistência e idempotência de sala são acrescentadas por V66.
+
+## Convites e personalização — lote 02/11/2026
+
+| Método/rota | Contrato |
+| --- | --- |
+| `POST /study-rooms/{id}/share-code` | Exige membership; retorna `{code,url}` atual da sala. |
+| `GET /study-rooms/{id}/qr` | QR do convite; exige membership. |
+| `GET /study-rooms/join-code/{code}` | Exige conta autorizada a usar recursos estudantis. Código de oito letras/números; retorna `id,title,status,endsAt,subjectName,hasAvatar,hasBanner,mediaVersion,available,participantCount`. Não inscreve o leitor nem retorna conversas/membros. |
+| `POST /study-rooms/join-code/{code}/join` | Entrada por convite, inclusive em sala cheia ou já iniciada; continua rejeitando sala encerrada, usuário removido e bloqueios aplicáveis. |
+| `DELETE /users/me/avatar` ou `/users/me/banner` | Remove somente a mídia do usuário autenticado. Interface exibe a ação apenas se a imagem existe. |
+| `GET/PUT /users/me/experience` | `theme` aceita `LIGHT`, `DARK`, `SYSTEM`, `ENTURMA`; demais campos de acessibilidade permanecem. V68 amplia a restrição sem modificar preferências anteriores. |
+
+Envio direto de convite reutiliza `POST /friends/{id}/messages` com envelope cifrado, sem endpoint que envie mensagens automaticamente. O diálogo confirma amizade e membership antes de preparar o envio. A interface reconhece links de convite da própria origem, limita a três cards por mensagem e busca metadados somente ao aproximar o card da área visível. Apps ocultam “Copiar link”; Web preserva link/QR e também oferece convite direto.

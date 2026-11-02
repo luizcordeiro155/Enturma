@@ -2,7 +2,12 @@
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import type { AcademicEntry } from "@enturma/contracts";
-import { academicLabels, catalogOptions, academicOnboardingContext, type AcademicContext } from "@enturma/contracts";
+import {
+  academicLabels,
+  catalogOptions,
+  academicOnboardingContext,
+  type AcademicContext,
+} from "@enturma/contracts";
 import { api } from "@/lib/api";
 import { Shell } from "./shell";
 import { Feedback } from "./feedback";
@@ -31,12 +36,23 @@ export function Onboarding() {
   const [contextReady, setContextReady] = useState(false);
   useEffect(() => {
     let active = true;
-    api<AcademicContext>("/auth/academic/status", {cache:"no-store"}).then(identity => {
-      if (!active) return;
-      const context = academicOnboardingContext(identity);
-      if (context.length) { setSelected(context.map(item=>item.id)); setSelection(context); setStep(context.length); }
-    }).catch(()=>{}).finally(()=>{if(active)setContextReady(true);});
-    return()=>{active=false;};
+    api<AcademicContext>("/auth/academic/status", { cache: "no-store" })
+      .then((identity) => {
+        if (!active) return;
+        const context = academicOnboardingContext(identity);
+        if (context.length) {
+          setSelected(context.map((item) => item.id));
+          setSelection(context);
+          setStep(context.length);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        if (active) setContextReady(true);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
   useEffect(() => {
     if (!contextReady) return;
@@ -98,6 +114,7 @@ export function Onboarding() {
           preferences: form.get("preferences"),
         }),
       });
+      window.dispatchEvent(new Event("enturma-profile-updated"));
       router.push("/home");
     } catch (e) {
       setError((e as Error).message);

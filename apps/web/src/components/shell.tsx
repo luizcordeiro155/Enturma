@@ -9,6 +9,7 @@ import { Check, Gamepad2, MailCheck } from "lucide-react";
 import { NotificationBell } from "./notifications";
 import { ExperienceControls } from "./experience-controls";
 import { usePathname } from "next/navigation";
+import { useVisitor } from "@/lib/visitor-context";
 import {
   MessageCircle,
   BookOpen,
@@ -40,9 +41,16 @@ const links = [
   { href: "/settings", label: "Configurações", icon: Settings },
   { href: "/download", label: "Baixar o Enturma", icon: EnturmaAppIcon },
 ];
-export function Shell({ children, visitor = false }: { children: React.ReactNode; visitor?: boolean }) {
+export function Shell({
+  children,
+  visitor = false,
+}: {
+  children: React.ReactNode;
+  visitor?: boolean;
+}) {
   const pathname = usePathname();
-  const path = visitor ? "/home" : pathname;
+  const guest = useVisitor();
+  const path = visitor ? guest.path.split("?")[0] : pathname;
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
   const inRideHub = path.startsWith("/caronas");
   const updateState = useAppUpdateState();
@@ -142,7 +150,7 @@ export function Shell({ children, visitor = false }: { children: React.ReactNode
       ) : (
         <aside className="sidebar">
           <Link href="/home" className="brand">
-            <BookOpen size={40} />
+            <EnturmaAppIcon size={44} className="brand-app-icon" />
             <span>
               enturma<span className="dot">.</span>
             </span>
@@ -187,8 +195,14 @@ export function Shell({ children, visitor = false }: { children: React.ReactNode
               {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
             </span>
             <div className="topbar-actions">
-              {visitor ? <Link href="/login" className="text-button">Entrar</Link> : <NotificationBell />}
-              <ExperienceControls />
+              {visitor ? (
+                <Link href="/login" className="text-button">
+                  Entrar
+                </Link>
+              ) : (
+                <NotificationBell />
+              )}
+              <ExperienceControls localOnly={visitor} />
               <Link
                 className="topbar-profile-link"
                 href="/profile"
@@ -212,7 +226,7 @@ export function Shell({ children, visitor = false }: { children: React.ReactNode
           </header>
         ) : null}
         <main id="content">
-          {path.startsWith("/rooms") ? <CommunityFeedback /> : null}
+          {!visitor && path.startsWith("/rooms") ? <CommunityFeedback /> : null}
           {children}
         </main>
         {!inRideHub ? (

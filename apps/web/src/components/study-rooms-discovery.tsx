@@ -18,6 +18,7 @@ import { Feedback, Loading } from "./feedback";
 import { Shell } from "./shell";
 import { RoomArtwork } from "./room-artwork";
 import { RoomCodeEntry } from "./room-code-entry";
+import { useVisitor } from "@/lib/visitor-context";
 
 type RecommendedRoom = Room & {
   recommendationReason?: "SUBJECT" | "COURSE" | "RELATED";
@@ -34,29 +35,44 @@ function remainingLabel(endsAt: string) {
   return `${Math.ceil(hours / 24)}d`;
 }
 
-export function StudyRoomsDiscovery() {
+export function StudyRoomsDiscovery({
+  visitor = false,
+}: {
+  visitor?: boolean;
+}) {
+  const guest = useVisitor();
   const router = useRouter();
   const [profile, setProfile] = useState<Profile | undefined>(() =>
-    peekApiSnapshot<Profile>("/users/me"),
+    visitor ? undefined : peekApiSnapshot<Profile>("/users/me"),
   );
   const [rooms, setRooms] = useState<RecommendedRoom[]>(
     () =>
-      peekApiSnapshot<RecommendedRoom[]>("/study-rooms?recommended=true") ?? [],
+      peekApiSnapshot<RecommendedRoom[]>(
+        visitor ? "/public/explore/rooms" : "/study-rooms?recommended=true",
+      ) ?? [],
   );
   const [query, setQuery] = useState("");
   const [joining, setJoining] = useState<string>();
   const [loading, setLoading] = useState(
-    () => !peekApiSnapshot("/study-rooms?recommended=true"),
+    () =>
+      !peekApiSnapshot(
+        visitor ? "/public/explore/rooms" : "/study-rooms?recommended=true",
+      ),
   );
   const [error, setError] = useState("");
 
   const load = useCallback(async () => {
     try {
       const [me, result] = await Promise.all([
-        api<Profile>("/users/me", { cache: "no-store" }),
-        api<RecommendedRoom[]>("/study-rooms?recommended=true", {
-          cache: "no-store",
-        }),
+        visitor
+          ? Promise.resolve(undefined)
+          : api<Profile>("/users/me", { cache: "no-store" }),
+        api<RecommendedRoom[]>(
+          visitor ? "/public/explore/rooms" : "/study-rooms?recommended=true",
+          {
+            cache: "no-store",
+          },
+        ),
       ]);
       setProfile(me);
       setRooms(result);
@@ -71,7 +87,7 @@ export function StudyRoomsDiscovery() {
     } finally {
       setLoading(false);
     }
-  }, [router]);
+  }, [router, visitor]);
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -94,7 +110,8 @@ export function StudyRoomsDiscovery() {
       .filter((room) => {
         const relatedToSelectedSubject = subjectIds.has(room.subjectId);
         const relatedToCourse = room.recommendationReason === "COURSE";
-        if (!relatedToSelectedSubject && !relatedToCourse) return false;
+        if (!visitor && !relatedToSelectedSubject && !relatedToCourse)
+          return false;
         if (!normalized) return true;
         return `${room.title} ${room.subjectName} ${room.topicText ?? ""}`
           .toLocaleLowerCase()
@@ -106,9 +123,13 @@ export function StudyRoomsDiscovery() {
         if (aDirect !== bDirect) return aDirect - bDirect;
         return b.participants - a.participants;
       });
-  }, [query, rooms, subjectIds]);
+  }, [query, rooms, subjectIds, visitor]);
 
   async function join(room: RecommendedRoom) {
+    if (visitor) {
+      guest.requestLogin(`/rooms/${room.id}`);
+      return;
+    }
     setJoining(room.id);
     setError("");
     try {
@@ -122,7 +143,7 @@ export function StudyRoomsDiscovery() {
   }
 
   return (
-    <Shell>
+    <Shell visitor={visitor}>
       <section className="rooms-discovery">
         <RoomCodeEntry />
         <header className="rooms-discovery-hero">
@@ -133,8 +154,9 @@ export function StudyRoomsDiscovery() {
             </span>
             <h1>Encontre uma sala para estudar agora.</h1>
             <p>
-              O Enturma mostra primeiro salas abertas ligadas às suas matérias e
-              ao seu curso.
+              {visitor
+                ? "Conheça as salas abertas da comunidade. Entre na sua conta para estudar com a turma."
+                : "O Enturma mostra primeiro salas abertas ligadas às suas matérias e ao seu curso."}
             </p>
           </div>
           <Link className="button rooms-create-button" href="/rooms/new">
@@ -179,7 +201,11 @@ export function StudyRoomsDiscovery() {
               <i aria-hidden="true" />
               Abertas agora
             </span>
-            <h2>Salas recomendadas para você</h2>
+            <h2>
+              {visitor
+                ? "Salas abertas da comunidade"
+                : "Salas recomendadas para você"}
+            </h2>
           </div>
 
           <label className="rooms-search">
@@ -205,7 +231,7 @@ export function StudyRoomsDiscovery() {
 
               return (
                 <article className="rooms-discovery-card" key={room.id}>
-                  <RoomArtwork room={room} />
+                  <RoomArtwork room={room} publicPreview={visitor} />
                   <div className="rooms-card-top">
                     <div className="rooms-card-main">
                       <span
@@ -215,7 +241,11 @@ export function StudyRoomsDiscovery() {
                             : "rooms-match-badge"
                         }
                       >
-                        {directSubject ? "Sua matéria" : "Do seu curso"}
+                        {visitor
+                          ? "Comunidade Enturma"
+                          : directSubject
+                            ? "Sua matéria"
+                            : "Do seu curso"}
                       </span>
                       <h3>{room.title}</h3>
                       <strong>{room.subjectName}</strong>

@@ -6,8 +6,29 @@ import dynamic from "next/dynamic";
 import { EnturmaAppIcon } from "./enturma-app-icon";
 import { isDesktop, isMobileApp } from "./desktop-updates";
 import { playMotion } from "@/lib/motion";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  VisitorContext,
+  canExploreAsVisitor,
+  visitorDestination,
+} from "@/lib/visitor-context";
+import { Shell } from "./shell";
 const Dashboard = dynamic(() =>
   import("./dashboard").then((module) => module.Dashboard),
+);
+const Forum = dynamic(() => import("./forum").then((module) => module.Forum));
+const Rooms = dynamic(() =>
+  import("./study-rooms-discovery").then(
+    (module) => module.StudyRoomsDiscovery,
+  ),
+);
+const Rides = dynamic(() =>
+  import("./ride-mobility-experience").then(
+    (module) => module.RideMobilityExperience,
+  ),
+);
+const Settings = dynamic(() =>
+  import("./profile").then((module) => module.ProfileView),
 );
 
 export function VisitorLink({ className }: { className?: string }) {
@@ -25,6 +46,11 @@ export function VisitorLink({ className }: { className?: string }) {
 
 /** Uses the real dashboard. Private routes and APIs still require a session. */
 export function VisitorExperience() {
+  const router = useRouter();
+  const search = useSearchParams();
+  const requestedPath = search.get("path") || "/home";
+  const path = canExploreAsVisitor(requestedPath) ? requestedPath : "/home";
+  const pathname = path.split("?")[0];
   const [target, setTarget] = useState<string | null>(null);
   const dialog = useRef<HTMLDialogElement>(null);
   const origin = useRef<HTMLElement | null>(null);
@@ -46,6 +72,16 @@ export function VisitorExperience() {
     };
   }, [target]);
   function restrict(event: MouseEvent<HTMLDivElement>) {
+    const identity = (event.target as HTMLElement).closest<HTMLElement>(
+      ".identity-trigger",
+    );
+    if (identity) {
+      event.preventDefault();
+      event.stopPropagation();
+      origin.current = identity;
+      setTarget("/profile");
+      return;
+    }
     const link = (event.target as HTMLElement).closest<HTMLAnchorElement>(
       "a[href]",
     );
@@ -57,8 +93,12 @@ export function VisitorExperience() {
     )
       return;
     event.preventDefault();
-    if (link.pathname === "/home" || link.pathname === "/visitante") {
-      document.getElementById("content")?.scrollIntoView({ behavior: "auto" });
+    const destination =
+      link.pathname === "/visitante"
+        ? new URLSearchParams(link.search).get("path") || "/home"
+        : link.pathname + link.search;
+    if (canExploreAsVisitor(destination)) {
+      router.push(visitorDestination(destination));
       return;
     }
     origin.current = link;
@@ -66,13 +106,44 @@ export function VisitorExperience() {
   }
   function dismiss() {
     setTarget(null);
+    router.push("/visitante");
     document.getElementById("content")?.scrollIntoView({ behavior: "auto" });
   }
   return (
     <>
-      <div onClickCapture={restrict} data-visitor="true">
-        <Dashboard visitor />
-      </div>
+      <VisitorContext.Provider
+        value={{
+          active: true,
+          path,
+          requestLogin: (destination) => {
+            origin.current = document.activeElement as HTMLElement;
+            setTarget(destination);
+          },
+        }}
+      >
+        <div onClickCapture={restrict} data-visitor="true">
+          {pathname === "/forum" || pathname.startsWith("/forum/") ? (
+            <Forum
+              key={path}
+              visitor
+              id={pathname.split("/")[2]}
+              initialCategory={
+                new URLSearchParams(path.split("?")[1]).get("category") || ""
+              }
+            />
+          ) : pathname === "/rooms" ? (
+            <Rooms visitor />
+          ) : pathname === "/caronas" ? (
+            <Shell visitor>
+              <Rides visitor />
+            </Shell>
+          ) : pathname === "/settings" ? (
+            <Settings settings visitor />
+          ) : (
+            <Dashboard visitor />
+          )}
+        </div>
+      </VisitorContext.Provider>
       {target && (
         <dialog
           ref={dialog}

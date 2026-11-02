@@ -9,6 +9,7 @@ const readCache = new Map<string, CacheEntry>();
 const pendingReads = new Map<string, Promise<unknown>>();
 let renewing: Promise<boolean> | null = null;
 let sessionGeneration = 0;
+let navigationRefreshUntil = 0;
 // BroadcastChannel also reaches other channel objects in the same document.
 // Keep one origin ID across module reloads, so login cannot reload its own form.
 const documentIdentity = (() => {
@@ -75,6 +76,7 @@ export function invalidateApiCache(prefix?: string) {
 
 export function resetSessionCache() {
   sessionGeneration++;
+  navigationRefreshUntil = 0;
   readCache.clear();
   pendingReads.clear();
 }
@@ -90,8 +92,13 @@ if (typeof window !== "undefined" && typeof BroadcastChannel !== "undefined") {
 }
 
 async function renew() {
+  const generation = sessionGeneration;
   const run = async () => {
     const res = await fetch("/api/session", { method: "POST" });
+    // This only skips redundant renewal round trips. The server validates each
+    // protected destination; the ten-minute access cookie remains authoritative.
+    if (res.ok && generation === sessionGeneration)
+      navigationRefreshUntil = Date.now() + 8 * 60_000;
     return res.ok;
   };
   return navigator.locks?.request
@@ -101,7 +108,11 @@ async function renew() {
 
 /** Share the same refresh lock with API calls before requesting private RSC. */
 export async function prepareSessionNavigation() {
-  if (!renewing) renewing = renew().finally(() => { renewing = null; });
+  if (Date.now() < navigationRefreshUntil) return true;
+  if (!renewing)
+    renewing = renew().finally(() => {
+      renewing = null;
+    });
   return renewing;
 }
 

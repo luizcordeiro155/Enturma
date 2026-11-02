@@ -20,27 +20,36 @@ import { ForumHighlights } from "./forum-highlights";
 import { StudyJourney } from "./study-journey";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { EnturmaIntroExperience } from "./intro/enturma-intro-experience";
+import { useVisitor } from "@/lib/visitor-context";
 export function Dashboard({ visitor = false }: { visitor?: boolean }) {
+  const guest = useVisitor();
   const [profile, setProfile] = useState<Profile | undefined>(() =>
     visitor ? undefined : peekApiSnapshot<Profile>("/users/me"),
   );
   const [rooms, setRooms] = useState<Room[]>(
-    () => visitor ? [] : peekApiSnapshot<Room[]>("/study-rooms?page=0") ?? [],
+    () =>
+      peekApiSnapshot<Room[]>(
+        visitor ? "/public/explore/rooms?page=0" : "/study-rooms?page=0",
+      ) ?? [],
   );
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(
-    () => !visitor && !peekApiSnapshot("/study-rooms?page=0"),
+    () =>
+      !peekApiSnapshot(
+        visitor ? "/public/explore/rooms?page=0" : "/study-rooms?page=0",
+      ),
   );
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(0);
   const router = useRouter();
   const [now] = useState(() => Date.now());
   useEffect(() => {
-    if (visitor) return;
     let alive = true;
     Promise.all([
-      api<Profile>("/users/me"),
-      api<Room[]>(`/study-rooms?page=${page}`),
+      visitor ? Promise.resolve(undefined) : api<Profile>("/users/me"),
+      api<Room[]>(
+        `${visitor ? "/public/explore/rooms" : "/study-rooms"}?page=${page}`,
+      ),
     ])
       .then(([p, r]) => {
         if (alive) {
@@ -61,15 +70,21 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
     };
   }, [router, page, visitor]);
   async function refreshRooms() {
-    if (visitor) return;
-    const next = await api<Room[]>(`/study-rooms?page=${page}`, {
-      cache: "no-store",
-    });
+    const next = await api<Room[]>(
+      `${visitor ? "/public/explore/rooms" : "/study-rooms"}?page=${page}`,
+      {
+        cache: "no-store",
+      },
+    );
     setRooms(next);
   }
   useLiveRefresh("rooms_changed", refreshRooms, 12000);
 
   async function join(id: string) {
+    if (visitor) {
+      guest.requestLogin(`/rooms/${id}`);
+      return;
+    }
     try {
       await post(`/study-rooms/${id}/join`);
       router.push(`/rooms/${id}`);
@@ -94,11 +109,21 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
             </p>
             <Feedback error={error} />
             <CatalogSearch />
-            {visitor && <section className="onboarding-banner">
-              <BookOpen size={40} />
-              <div><h2>Encontre sua turma</h2><p>Explore o catálogo. Entre para escolher suas matérias e participar.</p></div>
-              <Link className="button" href="/onboarding">Escolher minhas matérias</Link>
-            </section>}
+            {visitor && (
+              <section className="onboarding-banner">
+                <BookOpen size={40} />
+                <div>
+                  <h2>Encontre sua turma</h2>
+                  <p>
+                    Explore o catálogo. Entre para escolher suas matérias e
+                    participar.
+                  </p>
+                </div>
+                <Link className="button" href="/onboarding">
+                  Escolher minhas matérias
+                </Link>
+              </section>
+            )}
             {profile && !profile.enrollment ? (
               <section className="onboarding-banner">
                 <BookOpen size={44} />
@@ -181,7 +206,7 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
             </section>
           ) : null}
           <div className="dashboard-community">
-            {!visitor && <RoomCodeEntry />}
+            <RoomCodeEntry />
             <div className="section-heading">
               <h2>Salas acontecendo agora</h2>
               {rooms.length ? (
@@ -203,8 +228,12 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
             ) : !error && rooms.length === 0 ? (
               <section className="empty">
                 <BookOpen size={52} />
-                <h3>{visitor ? "Sua próxima turma está no Enturma." : "Ainda não há salas abertas."}</h3>
-                <p>{visitor ? "Entre para ver as salas e conversar com os estudantes. As conversas ficam protegidas." : "Escolha uma matéria para começar a primeira turma."}</p>
+                <h3>Ainda não há salas abertas.</h3>
+                <p>
+                  {visitor
+                    ? "Entre para criar uma sala e encontrar sua turma. As conversas ficam protegidas."
+                    : "Escolha uma matéria para começar a primeira turma."}
+                </p>
                 <Link
                   className="button"
                   href={profile?.enrollment ? "/rooms/new" : "/onboarding"}
@@ -222,7 +251,7 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
                   )
                   .map((r) => (
                     <article key={r.id} className="room-row">
-                      <RoomArtwork room={r} />
+                      <RoomArtwork room={r} publicPreview={visitor} />
                       <div>
                         <h3>{r.subjectName}</h3>
                         <p>{r.title}</p>
@@ -246,7 +275,7 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
                   ))}
               </div>
             )}
-            {!visitor && <div className="actions home-room-pages">
+            <div className="actions home-room-pages">
               <button
                 disabled={page === 0}
                 onClick={() => {
@@ -266,8 +295,8 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
               >
                 Próxima
               </button>
-            </div>}
-            {!visitor && <ForumHighlights />}
+            </div>
+            <ForumHighlights />
           </div>
         </div>
         {profile ? <StudyJourney enrolled={!!profile.enrollment} /> : null}

@@ -19,13 +19,15 @@ export function ThemeSync() {
       } catch {}
       const root = document.documentElement;
       const nextTheme =
-        preference.theme === "DARK"
-          ? "dark"
-          : preference.theme === "LIGHT"
-            ? "light"
-            : system.matches
-              ? "dark"
-              : "light";
+        preference.theme === "ENTURMA"
+          ? "enturma"
+          : preference.theme === "DARK"
+            ? "dark"
+            : preference.theme === "LIGHT"
+              ? "light"
+              : system.matches
+                ? "dark"
+                : "light";
       root.dataset.highContrast = String(preference.highContrast === true);
       root.dataset.reducedMotion = String(preference.reducedMotion === true);
       applyEnturmaTheme(nextTheme);

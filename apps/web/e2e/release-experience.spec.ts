@@ -40,12 +40,8 @@ for (const viewport of [
           () => document.documentElement.scrollWidth <= innerWidth + 1,
         ),
       ).toBe(true);
-      if (viewport.width < 761)
-        await page
-          .getByRole("button", { name: "Mais opções", exact: true })
-          .click();
       await page
-        .getByRole("link", { name: "Caronas", exact: true })
+        .getByRole("link", { name: "Amigos", exact: true })
         .filter({ visible: true })
         .click();
       const gate = page.getByRole("dialog", { name: "Faça parte da turma." });
@@ -66,7 +62,7 @@ for (const viewport of [
       ).toBeVisible();
       await page.locator(".catalog-note summary").click();
       await page
-        .getByLabel("Tipo", { exact: true })
+        .getByRole("combobox", { name: "Tipo", exact: true })
         .selectOption("institutions");
       await expect(
         page.locator(".catalog-note .room-row").first(),

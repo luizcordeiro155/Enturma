@@ -4,19 +4,40 @@ import { useMobileWebChatViewport } from "./use-room-browser-viewport";
 
 let visualHeight = 780;
 let visualTop = 0;
+let visualScale = 1;
 let onViewportResize: (() => void) | undefined;
 let originalViewport: PropertyDescriptor | undefined;
 
-function PrivateChatFixture({ kind = "private" }: { kind?: "private" | "room" }) {
+function PrivateChatFixture({
+  kind = "private",
+}: {
+  kind?: "private" | "room";
+}) {
   useMobileWebChatViewport(true, kind);
   return (
-    <div className={kind === "room" ? "room-active-shell" : "private-chat-fixture"}>
-      <div className={kind === "private" ? "mobile-private-chat-open" : "room-section-chat"}>
-      <form className={kind === "private" ? "private-composer enturma-message-composer" : "persistent-composer enturma-message-composer"}>
-        <textarea aria-label={kind === "private" ? "Mensagem privada" : "Mensagem"} />
-      </form>
-      <div className="private-messages" />
-      {kind === "room" ? <nav aria-label="Navegação da turma" className="room-mobile-nav" /> : null}
+    <div
+      className={kind === "room" ? "room-active-shell" : "private-chat-fixture"}
+    >
+      <div
+        className={
+          kind === "private" ? "mobile-private-chat-open" : "room-section-chat"
+        }
+      >
+        <form
+          className={
+            kind === "private"
+              ? "private-composer enturma-message-composer"
+              : "persistent-composer enturma-message-composer"
+          }
+        >
+          <textarea
+            aria-label={kind === "private" ? "Mensagem privada" : "Mensagem"}
+          />
+        </form>
+        <div className="private-messages" />
+        {kind === "room" ? (
+          <nav aria-label="Navegação da turma" className="room-mobile-nav" />
+        ) : null}
       </div>
     </div>
   );
@@ -25,13 +46,21 @@ function PrivateChatFixture({ kind = "private" }: { kind?: "private" | "room" })
 beforeEach(() => {
   visualHeight = 780;
   visualTop = 0;
+  visualScale = 1;
   onViewportResize = undefined;
   originalViewport = Object.getOwnPropertyDescriptor(window, "visualViewport");
   Object.defineProperty(window, "visualViewport", {
     configurable: true,
     value: {
-      get height() { return visualHeight; },
-      get offsetTop() { return visualTop; },
+      get height() {
+        return visualHeight;
+      },
+      get offsetTop() {
+        return visualTop;
+      },
+      get scale() {
+        return visualScale;
+      },
       addEventListener(type: string, listener: () => void) {
         if (type === "resize") onViewportResize = listener;
       },
@@ -48,10 +77,13 @@ beforeEach(() => {
     return 1;
   });
   vi.stubGlobal("cancelAnimationFrame", () => {});
-  vi.stubGlobal("ResizeObserver", class {
-    observe() {}
-    disconnect() {}
-  });
+  vi.stubGlobal(
+    "ResizeObserver",
+    class {
+      observe() {}
+      disconnect() {}
+    },
+  );
   delete document.documentElement.dataset.enturmaMobile;
 });
 
@@ -74,26 +106,71 @@ afterEach(() => {
 });
 
 describe("private mobile browser IME", () => {
+  it("does not treat pinch zoom as a keyboard and resumes IME anchoring at normal scale", () => {
+    render(<PrivateChatFixture />);
+    const field = screen.getByRole("textbox", { name: "Mensagem privada" });
+    field.focus();
+    visualScale = 2;
+    visualHeight = 390;
+    onViewportResize?.();
+    expect(
+      document.documentElement.dataset.mobileWebChatKeyboard,
+    ).toBeUndefined();
+    fireEvent.pointerDown(field);
+    expect(
+      document.documentElement.dataset.mobileWebChatKeyboard,
+    ).toBeUndefined();
+    visualScale = 1;
+    visualHeight = 420;
+    onViewportResize?.();
+    expect(document.documentElement.dataset.mobileWebChatKeyboard).toBe(
+      "private",
+    );
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--mobile-web-chat-visible-height",
+      ),
+    ).toBe("420px");
+    visualHeight = 780;
+    onViewportResize?.();
+    expect(
+      document.documentElement.dataset.mobileWebChatKeyboard,
+    ).toBeUndefined();
+  });
   it("anchors on the very first focus before viewport resize and follows subsequent IME frames", () => {
     render(<PrivateChatFixture />);
     const field = screen.getByRole("textbox", { name: "Mensagem privada" });
     field.focus();
     const root = document.documentElement;
     expect(root.dataset.mobileWebChatKeyboard).toBe("private");
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-bottom")).toBe("780px");
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe("0px");
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("780px");
+    expect(
+      root.style.getPropertyValue("--mobile-web-chat-visible-bottom"),
+    ).toBe("780px");
+    expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe(
+      "0px",
+    );
+    expect(
+      root.style.getPropertyValue("--mobile-web-chat-visible-height"),
+    ).toBe("780px");
 
     visualHeight = 420;
     onViewportResize?.();
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-bottom")).toBe("420px");
+    expect(
+      root.style.getPropertyValue("--mobile-web-chat-visible-bottom"),
+    ).toBe("420px");
 
     visualTop = 12;
     visualHeight = 400;
     onViewportResize?.();
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-bottom")).toBe("412px");
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe("12px");
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("400px");
+    expect(
+      root.style.getPropertyValue("--mobile-web-chat-visible-bottom"),
+    ).toBe("412px");
+    expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe(
+      "12px",
+    );
+    expect(
+      root.style.getPropertyValue("--mobile-web-chat-visible-height"),
+    ).toBe("400px");
 
     field.blur();
     expect(root.dataset.mobileWebChatKeyboard).toBe("private");
@@ -107,16 +184,25 @@ describe("private mobile browser IME", () => {
     render(<PrivateChatFixture />);
     const field = screen.getByRole("textbox", { name: "Mensagem privada" });
     fireEvent.pointerDown(field);
-    expect(document.documentElement.dataset.mobileWebChatKeyboard).toBe("private");
-    expect(document.documentElement.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("780px");
+    expect(document.documentElement.dataset.mobileWebChatKeyboard).toBe(
+      "private",
+    );
+    expect(
+      document.documentElement.style.getPropertyValue(
+        "--mobile-web-chat-visible-height",
+      ),
+    ).toBe("780px");
   });
 
   it("preserves the four room tabs behind the keyboard and restores them when Android Back dismisses the IME without blur", () => {
     render(<PrivateChatFixture kind="room" />);
     const root = document.documentElement;
-    const navigation = screen.getByRole("navigation", { name: "Navegação da turma" });
+    const navigation = screen.getByRole("navigation", {
+      name: "Navegação da turma",
+    });
     vi.spyOn(navigation, "getBoundingClientRect").mockReturnValue({
-      top: 714, height: 66,
+      top: 714,
+      height: 66,
     } as DOMRect);
     const field = screen.getByRole("textbox", { name: "Mensagem" });
     // First touch and focus must preserve the original composer + navbar
@@ -132,9 +218,15 @@ describe("private mobile browser IME", () => {
     visualTop = 18;
     onViewportResize?.();
     expect(root.dataset.mobileWebChatKeyboard).toBe("room");
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe("18px");
-    expect(root.style.getPropertyValue("--mobile-web-chat-visible-height")).toBe("380px");
-    expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe("714px");
+    expect(root.style.getPropertyValue("--mobile-web-chat-visible-top")).toBe(
+      "18px",
+    );
+    expect(
+      root.style.getPropertyValue("--mobile-web-chat-visible-height"),
+    ).toBe("380px");
+    expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe(
+      "714px",
+    );
 
     // Keyboard closed, textarea STILL has focus. The navbar must reappear
     // in the normal layout without requiring an extra tap or blur.
@@ -151,13 +243,17 @@ describe("private mobile browser IME", () => {
     visualHeight = 380;
     onViewportResize?.();
     expect(root.dataset.mobileWebChatKeyboard).toBe("room");
-    expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe("714px");
+    expect(root.style.getPropertyValue("--room-mobile-nav-rest-top")).toBe(
+      "714px",
+    );
   });
 
   it("does not install browser keyboard styles inside the Android APK bridge", () => {
     document.documentElement.dataset.enturmaMobile = "true";
     render(<PrivateChatFixture />);
     screen.getByRole("textbox", { name: "Mensagem privada" }).focus();
-    expect(document.documentElement.dataset.mobileWebChatKeyboard).toBeUndefined();
+    expect(
+      document.documentElement.dataset.mobileWebChatKeyboard,
+    ).toBeUndefined();
   });
 });

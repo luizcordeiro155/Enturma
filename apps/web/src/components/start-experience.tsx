@@ -17,6 +17,7 @@ import {
   Users,
 } from "lucide-react";
 import { PublicThemeControl } from "./public-theme-control";
+import { EnturmaAppIcon } from "./enturma-app-icon";
 import styles from "@/app/start/start.module.css";
 
 /** The public presentation uses local geometry and WAAPI; no video download blocks entry. */
@@ -165,7 +166,7 @@ export function StartExperience({
           className={styles.brand}
           aria-label="Enturma, apresentação"
         >
-          <BookOpen size={32} strokeWidth={1.7} />
+          <EnturmaAppIcon size={40} />
           <span>
             enturma<span className={styles.dot}>.</span>
           </span>

@@ -3,9 +3,8 @@ import { expect } from "@playwright/test";
 import { authenticate } from "./session";
 import { randomUUID } from "node:crypto";
 import pg from "pg";
-import { createElement } from "react";
-import { renderToStaticMarkup } from "react-dom/server";
-import { ScreenShareDialog } from "../src/components/screen-share-dialog";
+import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
 test("mobile cards, navigation and transparent renewal preserve the document", async ({
@@ -126,21 +125,25 @@ test("mobile cards, navigation and transparent renewal preserve the document", a
     expect(cookie.httpOnly).toBe(true);
     expect(cookie.expires - Date.now() / 1000).toBeGreaterThan(29 * 86400);
     await page.goto(`/rooms/${room.id}`);
-    await page
-      .getByLabel("Mensagem", { exact: true })
-      .fill("Mensagem legível no modo claro");
+    const message = `Mensagem legível ${randomUUID()}`;
+    await page.getByLabel("Mensagem", { exact: true }).fill(message);
     await page
       .getByRole("button", { name: "Enviar mensagem", exact: true })
       .click();
     await page.setViewportSize({ width: 1440, height: 950 });
     await page.getByRole("button", { name: "Chamada", exact: true }).click();
     for (const theme of ["light", "dark"]) {
-      await page.evaluate((theme) => {
-        document.documentElement.dataset.theme = theme;
-      }, theme);
+      await page.locator(".topbar .theme-picker").hover();
+      await page
+        .getByRole("menuitemradio", {
+          name: theme === "light" ? "Claro" : "Escuro",
+          exact: true,
+        })
+        .click();
+      await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
       const pane = page.locator(".call-chat-pane");
       await expect(
-        pane.getByText("Mensagem legível no modo claro", { exact: true }),
+        pane.getByText(message, { exact: true }).last(),
       ).toBeVisible();
       const colors = await pane.evaluate((el) => ({
         ink: getComputedStyle(el).color,
@@ -161,23 +164,10 @@ test("mobile cards, navigation and transparent renewal preserve the document", a
 test("screen quality dialog keeps checkbox labels inside mobile and desktop surfaces", async ({
   page,
 }, info) => {
-  const noop = () => {};
-  const markup = renderToStaticMarkup(
-    createElement(ScreenShareDialog, {
-      resolution: "1440p",
-      fps: 60,
-      audio: false,
-      noiseSuppression: true,
-      sharing: false,
-      busy: false,
-      error: "",
-      onResolution: noop,
-      onFps: noop,
-      onAudio: noop,
-      onNoiseSuppression: noop,
-      onClose: noop,
-      onShare: noop,
-    }),
+  const markup = execFileSync(
+    process.execPath,
+    [resolve("e2e/render-share-dialog.mjs")],
+    { encoding: "utf8" },
   );
   await page.goto("/login");
   // Layout-only fixture uses the actual shared component, with production CSS.

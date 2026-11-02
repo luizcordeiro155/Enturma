@@ -74,6 +74,9 @@ export function RoomView({ id }: { id: string }) {
   const socketRef = useRef<WebSocket | null>(null);
   const pageRef = useRef(0);
   const connectedRef = useRef(false);
+  const pendingMedia = useRef(
+    new WeakMap<File, { clientId: string; attachmentId?: string }>(),
+  );
 
   useEffect(() => {
     let active = true;
@@ -321,14 +324,17 @@ export function RoomView({ id }: { id: string }) {
     if (!file) return null;
     await api("/users/me");
     const form = new FormData();
-    form.set("file", await prepareChatImage(file));
+    form.set(
+      "file",
+      file.type.startsWith("audio/") ? file : await prepareChatImage(file),
+    );
     const response = await fetch(
       `/api/backend/study-rooms/${id}/messages/attachments`,
       { method: "POST", body: form, signal: AbortSignal.timeout(45000) },
     );
     if (!response.ok) {
       const body = await response.json().catch(() => ({}));
-      throw Error(body.message ?? "Não foi possível enviar a imagem.");
+      throw Error(body.message ?? "Não foi possível enviar o anexo.");
     }
     return (await response.json()) as Upload;
   }
@@ -385,17 +391,29 @@ export function RoomView({ id }: { id: string }) {
     }
   }
 
-  async function sendMedia(file: File, mediaKind: "STICKER" | "GIF") {
+  async function sendMedia(file: File, mediaKind?: "STICKER" | "GIF") {
     if (busy) return;
     setBusy(true);
     setError("");
     try {
-      const attachment = await uploadImage(file);
+      let pending = pendingMedia.current.get(file);
+      if (!pending) {
+        pending = { clientId: crypto.randomUUID() };
+        pendingMedia.current.set(file, pending);
+      }
+      if (!pending.attachmentId)
+        pending.attachmentId = (await uploadImage(file))?.id;
       await post(`/study-rooms/${id}/messages`, {
-        attachmentId: attachment?.id,
+        attachmentId: pending.attachmentId,
+        clientId: pending.clientId,
         mediaKind,
       });
-      await loadMessages();
+      // Publishing succeeded. A refresh failure must not invite a duplicate send.
+      await loadMessages().catch(() =>
+        setError(
+          "Áudio ou mídia enviado. Aguardando sincronização da conversa.",
+        ),
+      );
     } finally {
       setBusy(false);
     }
@@ -446,6 +464,7 @@ export function RoomView({ id }: { id: string }) {
     onLoadOlder: loadOlder,
     onSubmit: send,
     onSendMedia: sendMedia,
+    onSendAudio: (file: File) => sendMedia(file),
     onSendKlipy: sendKlipy,
     onReloadMessages: loadMessages,
     setDraft: changeDraft,

@@ -2,11 +2,13 @@
 import { useEffect, useId, useLayoutEffect, useRef, useState } from "react";
 import { MonitorCog, Moon, Sun } from "lucide-react";
 import type { ExperiencePreference } from "@enturma/contracts";
+import { EnturmaAppIcon } from "./enturma-app-icon";
 type Theme = ExperiencePreference["theme"];
 const options = [
   { value: "LIGHT", label: "Claro", Icon: Sun },
   { value: "DARK", label: "Escuro", Icon: Moon },
   { value: "SYSTEM", label: "Sistema", Icon: MonitorCog },
+  { value: "ENTURMA", label: "Enturma", Icon: EnturmaAppIcon },
 ] as const;
 export function ThemePicker({
   value,
@@ -26,7 +28,10 @@ export function ThemePicker({
   const consumed = useRef(false);
   const previous = useRef(value);
   const id = useId();
-  const index = options.findIndex((option) => option.value === value);
+  const index = Math.max(
+    0,
+    options.findIndex((option) => option.value === value),
+  );
   const selected = options[index];
   const Icon = selected.Icon;
   useEffect(
@@ -36,6 +41,24 @@ export function ThemePicker({
     },
     [],
   );
+  useLayoutEffect(() => {
+    if (!open || !panel.current) return;
+    const element = panel.current;
+    const place = () => {
+      element.style.translate = "";
+      const rect = element.getBoundingClientRect();
+      const shift =
+        rect.left < 12
+          ? 12 - rect.left
+          : rect.right > window.innerWidth - 12
+            ? window.innerWidth - 12 - rect.right
+            : 0;
+      element.style.translate = `${shift}px 0`;
+    };
+    place();
+    window.addEventListener("resize", place);
+    return () => window.removeEventListener("resize", place);
+  }, [open]);
   useLayoutEffect(() => {
     const before = options.findIndex(
       (option) => option.value === previous.current,
@@ -140,11 +163,11 @@ export function ThemePicker({
             event.key === "Home"
               ? 0
               : event.key === "End"
-                ? 2
+                ? options.length - 1
                 : (current +
                     (["ArrowUp", "ArrowLeft"].includes(event.key) ? -1 : 1) +
-                    3) %
-                  3
+                    options.length) %
+                  options.length
           ]?.focus();
         }
       }}
@@ -197,6 +220,7 @@ export function ThemePicker({
           }
           const dark =
             value === "DARK" ||
+            value === "ENTURMA" ||
             (value === "SYSTEM" &&
               matchMedia("(prefers-color-scheme: dark)").matches);
           onChange(dark ? "LIGHT" : "DARK");

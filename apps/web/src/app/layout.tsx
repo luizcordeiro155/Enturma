@@ -40,6 +40,8 @@ import "./composer-experience.css";
 import "./study-room-finish.css";
 import "./mobile-keyboard-stability.css";
 import "./experience-stabilization.css";
+import "./room-invitations.css";
+import "./enturma-identity.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";
@@ -52,8 +54,6 @@ import { DesktopChrome } from "@/components/desktop-chrome";
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
   viewportFit: "cover",
 };
 export const metadata: Metadata = {
@@ -76,7 +76,7 @@ export default function Layout({
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var p={};try{p=JSON.parse(localStorage.getItem('enturma-experience')||'{}')||{}}catch(e){}var r=document.documentElement,t=p.theme;r.dataset.desktop=String(navigator.userAgent.includes('EnturmaDesktop/'));r.dataset.theme=t==='DARK'?'dark':t==='LIGHT'?'light':matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';r.dataset.highContrast=String(p.highContrast===true);r.dataset.reducedMotion=String(p.reducedMotion===true);r.dataset.enhancedFocus=String(p.enhancedFocus!==false);r.style.setProperty('--font-scale',String(Math.max(.85,Math.min(1.35,Number(p.fontScale)||1))));})();`,
+            __html: `(function(){var p={};try{p=JSON.parse(localStorage.getItem('enturma-experience')||'{}')||{}}catch(e){}var r=document.documentElement,t=p.theme;r.dataset.desktop=String(navigator.userAgent.includes('EnturmaDesktop/'));r.dataset.palette=t==='ENTURMA'?'enturma':'default';r.dataset.theme=t==='DARK'||t==='ENTURMA'?'dark':t==='LIGHT'?'light':matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';r.dataset.highContrast=String(p.highContrast===true);r.dataset.reducedMotion=String(p.reducedMotion===true);r.dataset.enhancedFocus=String(p.enhancedFocus!==false);r.style.setProperty('--font-scale',String(Math.max(.85,Math.min(1.35,Number(p.fontScale)||1))));})();`,
           }}
         />
       </head>

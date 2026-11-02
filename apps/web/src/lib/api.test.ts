@@ -5,6 +5,7 @@ import {
   peekApiCache,
   peekApiSnapshot,
   resetSessionCache,
+  prepareSessionNavigation,
 } from "./api";
 
 beforeEach(() => {
@@ -17,6 +18,29 @@ afterEach(() => {
 });
 
 describe("session-scoped navigation snapshots", () => {
+  it("reuses a confirmed renewal during navigation, then renews before access expiry", async () => {
+    vi.useFakeTimers();
+    vi.mocked(fetch).mockImplementation(async () =>
+      Response.json({ ok: true }),
+    );
+    expect(await prepareSessionNavigation()).toBe(true);
+    expect(await prepareSessionNavigation()).toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(1);
+    vi.advanceTimersByTime(8 * 60_000);
+    expect(await prepareSessionNavigation()).toBe(true);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    resetSessionCache();
+    await prepareSessionNavigation();
+    expect(fetch).toHaveBeenCalledTimes(3);
+  });
+  it("never memoizes a failed renewal", async () => {
+    vi.mocked(fetch).mockImplementation(
+      async () => new Response(null, { status: 401 }),
+    );
+    expect(await prepareSessionNavigation()).toBe(false);
+    expect(await prepareSessionNavigation()).toBe(false);
+    expect(fetch).toHaveBeenCalledTimes(2);
+  });
   it("keeps previously displayed data while revalidating an expired response", async () => {
     vi.useFakeTimers();
     vi.mocked(fetch).mockResolvedValueOnce(Response.json([{ id: "first" }]));
