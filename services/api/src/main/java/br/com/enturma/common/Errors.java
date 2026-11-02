@@ -47,6 +47,15 @@ public class Errors {
   }
 
   @ExceptionHandler({
+    org.springframework.web.servlet.resource.NoResourceFoundException.class,
+    org.springframework.web.servlet.NoHandlerFoundException.class
+  })
+  ResponseEntity<?> notFound(Exception e, HttpServletRequest r) {
+    return ResponseEntity.status(404)
+        .body(body(404, "NOT_FOUND", "Conteúdo não encontrado.", r));
+  }
+
+  @ExceptionHandler({
     MethodArgumentNotValidException.class,
     HttpMessageNotReadableException.class,
     org.springframework.web.method.annotation.MethodArgumentTypeMismatchException.class
