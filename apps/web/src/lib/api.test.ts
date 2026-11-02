@@ -18,20 +18,52 @@ afterEach(() => {
 });
 
 describe("session-scoped navigation snapshots", () => {
-  it("reuses a confirmed renewal during navigation, then renews before access expiry", async () => {
+  it("checks the HttpOnly cookie locally while reusing a recent backend renewal", async () => {
     vi.useFakeTimers();
     vi.mocked(fetch).mockImplementation(async () =>
       Response.json({ ok: true }),
     );
     expect(await prepareSessionNavigation()).toBe(true);
     expect(await prepareSessionNavigation()).toBe(true);
-    expect(fetch).toHaveBeenCalledTimes(1);
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenLastCalledWith("/api/session", {
+      cache: "no-store",
+    });
     vi.advanceTimersByTime(8 * 60_000);
     expect(await prepareSessionNavigation()).toBe(true);
-    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledTimes(3);
     resetSessionCache();
     await prepareSessionNavigation();
+    expect(fetch).toHaveBeenCalledTimes(4);
+  });
+  it("renews a missing access cookie even after a recent successful renewal", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(Response.json({ ok: true }))
+      .mockResolvedValueOnce(new Response(null, { status: 401 }))
+      .mockResolvedValueOnce(Response.json({ ok: true }));
+    expect(await prepareSessionNavigation()).toBe(true);
+    expect(await prepareSessionNavigation()).toBe(true);
     expect(fetch).toHaveBeenCalledTimes(3);
+    expect(fetch).toHaveBeenLastCalledWith("/api/session", { method: "POST" });
+  });
+  it("renews after a real API denial regardless of the recent renewal hint", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(Response.json({ ok: true }))
+      .mockResolvedValueOnce(
+        Response.json({ message: "Entre para continuar." }, { status: 401 }),
+      )
+      .mockResolvedValueOnce(Response.json({ ok: true }))
+      .mockResolvedValueOnce(Response.json({ id: "current-account" }));
+    await prepareSessionNavigation();
+    expect(await api("/users/me")).toEqual({ id: "current-account" });
+    expect(
+      vi
+        .mocked(fetch)
+        .mock.calls.filter(
+          ([url, options]) =>
+            url === "/api/session" && options?.method === "POST",
+        ),
+    ).toHaveLength(2);
   });
   it("never memoizes a failed renewal", async () => {
     vi.mocked(fetch).mockImplementation(

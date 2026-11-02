@@ -108,7 +108,15 @@ async function renew() {
 
 /** Share the same refresh lock with API calls before requesting private RSC. */
 export async function prepareSessionNavigation() {
-  if (Date.now() < navigationRefreshUntil) return true;
+  if (Date.now() < navigationRefreshUntil) {
+    // The cookie is HttpOnly and may expire or disappear independently of this
+    // document. Reuse the local session endpoint before requesting private RSC;
+    // unlike POST renewal, this check does not round-trip to the Java API.
+    const current = await fetch("/api/session", { cache: "no-store" });
+    if (current.ok) return true;
+    if (current.status !== 401) return false;
+    navigationRefreshUntil = 0;
+  }
   if (!renewing)
     renewing = renew().finally(() => {
       renewing = null;
@@ -132,6 +140,8 @@ async function requestWithRenewal<T>(
       (path.startsWith("/auth/") && !path.startsWith("/auth/academic/"))
     )
       throw e;
+    // An actual access denial overrides any recent renewal hint.
+    navigationRefreshUntil = 0;
     const renewed = await prepareSessionNavigation();
     if (generation !== sessionGeneration)
       throw new DOMException("A sessão mudou.", "AbortError");
