@@ -209,6 +209,9 @@ test("two accounts acknowledge private and room messages, with compact themed co
         subjectId: subject.id,
         title: "Recebimento e temas",
         minutes: 50,
+        // Quick rooms intentionally reuse another open room for this subject.
+        // A multiday room keeps the receipt recipient set isolated on retries.
+        days: 1,
         maxParticipants: 10,
       },
     });

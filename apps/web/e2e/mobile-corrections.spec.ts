@@ -58,6 +58,7 @@ test("mobile cards, navigation and transparent renewal preserve the document", a
         title:
           "Uma sala com um assunto bastante longo para estudar em companhia",
         minutes: 50,
+        days: 1,
         maxParticipants: 10,
       },
     });
