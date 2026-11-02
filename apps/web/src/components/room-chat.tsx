@@ -205,6 +205,7 @@ export function RoomChat(props: Props) {
   );
   const composerRef = useRef<HTMLTextAreaElement | null>(null);
   const nearBottom = useRef(true);
+  const viewportSize = useRef({ width: 0, height: 0 });
   const forceFollowLatest = useRef(false);
   const roomLongPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const roomLongPressOrigin = useRef<{ x: number; y: number } | null>(null);
@@ -235,6 +236,30 @@ export function RoomChat(props: Props) {
     },
     [roomId],
   );
+
+  useLayoutEffect(() => {
+    const viewport = scrollRef.current;
+    if (!viewport) return;
+    viewportSize.current = {
+      width: viewport.clientWidth,
+      height: viewport.clientHeight,
+    };
+    const observer = new ResizeObserver(() => {
+      const width = viewport.clientWidth;
+      const height = viewport.clientHeight;
+      if (
+        width === viewportSize.current.width &&
+        height === viewportSize.current.height
+      )
+        return;
+      viewportSize.current = { width, height };
+      // Preserve the reader's position when browsing older messages; otherwise
+      // keep the latest message visible as the keyboard/composer/window resizes.
+      if (nearBottom.current) scrollRoomToLatest("auto");
+    });
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [roomId, scrollRoomToLatest]);
 
   useLayoutEffect(() => {
     const latest = messages.at(-1)?.id;
@@ -389,6 +414,13 @@ export function RoomChat(props: Props) {
         aria-live="polite"
         onScroll={(e) => {
           const el = e.currentTarget;
+          // A layout-driven scroll is handled by the resize observer using
+          // the pre-resize follow state, not mistaken for scrolling up.
+          if (
+            el.clientWidth !== viewportSize.current.width ||
+            el.clientHeight !== viewportSize.current.height
+          )
+            return;
           nearBottom.current = isChatAtLatest(el);
           setRoomAtLatest(nearBottom.current);
           if (nearBottom.current) {

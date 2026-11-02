@@ -35,6 +35,23 @@ test("auth loop follows all themes without replacing its player", async ({
       "true",
     );
     await expect(film).toHaveAttribute("data-continuity", "kept");
+    const expectedScheme =
+      theme === "Claro"
+        ? "light"
+        : theme === "Sistema"
+          ? await page.evaluate(() =>
+              matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light",
+            )
+          : "dark";
+    await expect(page.locator("html")).toHaveAttribute(
+      "data-theme",
+      expectedScheme,
+    );
+    await expect(page.locator("html")).not.toHaveClass(
+      /enturma-theme-transition/,
+    );
     if (theme === "Enturma")
       await expect(page.locator("html")).toHaveAttribute(
         "data-palette",
@@ -262,9 +279,10 @@ test("two accounts acknowledge private and room messages, with compact themed co
               .locator(".composer-main-row")
               .boundingBox())!;
             const messageBox = (await roomMessage.boundingBox())!;
-            return box.y - messageBox.y - messageBox.height;
+            const gap = box.y - messageBox.y - messageBox.height;
+            return gap >= 0 && gap < 48;
           })
-          .toBeLessThan(48);
+          .toBe(true);
         const microphone = composer.getByRole("button", {
           name: "Gravar mensagem de voz",
         });
