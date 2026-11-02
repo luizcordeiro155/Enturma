@@ -38,7 +38,9 @@ type DesktopBridge = {
   windowChrome?: boolean;
   nativeUpdater?: boolean;
   showUpdateWindow?: () => Promise<unknown>;
-  setTheme?: (light: boolean) => Promise<unknown>;
+  setTheme?: (
+    theme: boolean | "light" | "dark" | "enturma",
+  ) => Promise<unknown>;
   getInfo: () => Promise<{
     version: string;
     platform: string;

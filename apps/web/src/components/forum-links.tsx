@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ExternalLink, ShieldAlert, X } from "lucide-react";
 import { splitLinks } from "@/lib/forum-links";
 export function ForumLinks({ text }: { text: string }) {
@@ -15,7 +16,13 @@ export function ForumLinks({ text }: { text: string }) {
     </>
   );
 }
-export function ConfirmedLink({ href, label }: { href: string; label: string }) {
+export function ConfirmedLink({
+  href,
+  label,
+}: {
+  href: string;
+  label: string;
+}) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -73,7 +80,7 @@ function ExternalConfirmation({
       previous?.focus();
     };
   }, []);
-  return (
+  return createPortal(
     <dialog
       className="external-link-dialog"
       ref={ref}
@@ -123,6 +130,7 @@ function ExternalConfirmation({
           Abrir link <ExternalLink size={16} />
         </button>
       </div>
-    </dialog>
+    </dialog>,
+    document.body,
   );
 }

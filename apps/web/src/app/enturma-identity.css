@@ -41,9 +41,8 @@ html[data-palette="enturma"] {
   letter-spacing: -0.035em;
   font-weight: 800;
 }
-.brand > img {
+.brand > .enturma-app-mark {
   flex: 0 0 auto;
-  border-radius: 12px;
 }
 .brand > span {
   line-height: 1;
@@ -84,16 +83,21 @@ html .profile-media-choice .profile-media-remove:is(:hover, :focus-visible) {
 .profile-media-remove svg {
   flex: 0 0 auto;
 }
-.auth-theme-control {
-  flex-wrap: wrap;
-  max-width: 100%;
+.auth-story .auth-theme-control {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  width: 100%;
+  max-width: 370px;
+  gap: 2px;
 }
-.auth-theme-option img,
-.theme-switch-panel img {
-  border-radius: 4px;
+.auth-story .auth-theme-control .auth-theme-option {
+  min-width: 0;
+  padding-inline: 8px;
+  justify-content: center;
+  gap: 5px;
 }
 @media (max-width: 760px) {
-  .brand > img {
+  .brand > .enturma-app-mark {
     width: 36px;
     height: 36px;
   }

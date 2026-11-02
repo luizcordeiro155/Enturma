@@ -20,10 +20,12 @@ export function VoiceMessage({ src }: { src: string }) {
 
 export function VoiceRecorder({
   disabled,
+  hiddenWhenIdle = false,
   onSend,
   onError,
 }: {
   disabled?: boolean;
+  hiddenWhenIdle?: boolean;
   onSend: (file: File) => Promise<void>;
   onError: (error: string) => void;
 }) {
@@ -181,6 +183,7 @@ export function VoiceRecorder({
       }
     }
   }
+  if (hiddenWhenIdle && stage === "idle") return null;
   return (
     <div className="voice-recorder">
       <button

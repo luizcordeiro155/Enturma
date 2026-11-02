@@ -312,7 +312,9 @@ export function RoomChat(props: Props) {
   ) {
     if (
       event.pointerType === "mouse" ||
-      (event.target as HTMLElement).closest("button,a,input,textarea,audio,video")
+      (event.target as HTMLElement).closest(
+        "button,a,input,textarea,audio,video",
+      )
     )
       return;
     cancelRoomLongPress();
@@ -969,6 +971,7 @@ export function RoomChat(props: Props) {
             {props.onSendAudio && (
               <VoiceRecorder
                 key={roomId}
+                hiddenWhenIdle={Boolean(draft.trim() || image)}
                 disabled={busy || composerBlocked}
                 onError={setError}
                 onSend={props.onSendAudio}
@@ -983,18 +986,20 @@ export function RoomChat(props: Props) {
               onKlipy={props.onSendKlipy}
               disabled={busy || composerBlocked}
             />
-            <button
-              className="composer-send-button"
-              aria-label="Enviar mensagem"
-              onPointerDown={(event) => event.preventDefault()}
-              disabled={composerBlocked || busy || (!draft.trim() && !image)}
-            >
-              {busy ? (
-                <Loader2 className="spin" size={20} />
-              ) : (
-                <Send size={22} />
-              )}
-            </button>
+            {(Boolean(draft.trim() || image) || busy || !props.onSendAudio) && (
+              <button
+                className="composer-send-button"
+                aria-label="Enviar mensagem"
+                onPointerDown={(event) => event.preventDefault()}
+                disabled={composerBlocked || busy || (!draft.trim() && !image)}
+              >
+                {busy ? (
+                  <Loader2 className="spin" size={20} />
+                ) : (
+                  <Send size={22} />
+                )}
+              </button>
+            )}
           </div>
         </form>
       ) : (

@@ -374,7 +374,19 @@ public class SocialController {
         || receipt.messageIds().size() > 100)
       throw ApiException.invalid("Confirmação de mensagens inválida.");
     int changed = 0;
-    for (UUID message : new HashSet<>(receipt.messageIds()))
+    for (UUID message : new HashSet<>(receipt.messageIds())) {
+      // Pre-receipt private history still has exactly one known recipient.
+      // Create its row only on that recipient's actual acknowledgement, never on a fetch.
+      db.jdbc.update(
+          "INSERT INTO private_message_receipt(message_id,user_id) SELECT m.id,?::uuid"
+              + " FROM private_message m WHERE m.friendship_id=? AND m.id=? AND m.sender_id<>?"
+              + " AND m.deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM private_message_hidden h"
+              + " WHERE h.message_id=m.id AND h.user_id=?) ON CONFLICT DO NOTHING",
+          a.id(),
+          id,
+          message,
+          a.id(),
+          a.id());
       changed +=
           db.jdbc.update(
               "UPDATE private_message_receipt r SET delivered_at=COALESCE(r.delivered_at,now()),"
@@ -391,6 +403,7 @@ public class SocialController {
               a.id(),
               receipt.read(),
               a.id());
+    }
     if (changed > 0)
       friendsChanged((UUID) friendship.get("requester"), (UUID) friendship.get("recipient"));
   }

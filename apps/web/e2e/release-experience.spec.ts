@@ -21,10 +21,9 @@ for (const viewport of [
       await expect(
         page.getByRole("link", { name: /Explorar como visitante/ }),
       ).toBeVisible();
-      await expect(page.locator(".auth-story img").first()).toHaveAttribute(
-        "src",
-        /enturma-mobile-official/,
-      );
+      await expect(
+        page.locator(".auth-story .enturma-app-mark").first(),
+      ).toHaveAttribute("viewBox", "72 104 360 338");
       await page.screenshot({
         path: info.outputPath(`login-${theme}-${viewport.width}.png`),
         fullPage: true,

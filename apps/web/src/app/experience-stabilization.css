@@ -29,6 +29,8 @@ html .visitor-shell .visitor-actions > button:hover {
 html .enturma-message-composer:is(.persistent-composer, .private-composer) {
   border-top: 0 !important;
   box-shadow: none !important;
+  background: transparent !important;
+  padding-top: 4px !important;
 }
 .typing-status .conversation-typing {
   min-height: 0;

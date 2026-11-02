@@ -184,10 +184,13 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
   await page.getByLabel("Mensagem privada").fill("Rascunho durante o GIF");
-  await page.getByRole("button", { name: "GIFs", exact: true }).click();
+  await page
+    .getByRole("button", { name: "Adicionar emoji", exact: true })
+    .click();
   const library = page.getByRole("dialog", {
     name: "Emojis, figurinhas e GIFs",
   });
+  await library.getByRole("tab", { name: "GIFs", exact: true }).click();
   await expect(library.getByRole("tab", { name: "GIFs" })).toHaveAttribute(
     "aria-selected",
     "true",
@@ -498,7 +501,8 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   await page.getByRole("button", { name: "Voltar para conversas" }).click();
   await expect(page.locator("#private-sync")).toHaveCount(0);
   const vaultResponse = await page.request.post(
-    "/api/backend/private-account-vault/session", { data: {}, headers: { Origin: new URL(page.url()).origin } },
+    "/api/backend/private-account-vault/session",
+    { data: {}, headers: { Origin: new URL(page.url()).origin } },
   );
   expect(vaultResponse.ok()).toBeTruthy();
   expect(await vaultResponse.text()).not.toContain("E2E-password-long-123");

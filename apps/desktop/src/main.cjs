@@ -1220,10 +1220,11 @@ ipcMain.handle("desktop:get-info", (event) => {
   };
 });
 
-ipcMain.handle("desktop:set-theme", (event, light) => {
+ipcMain.handle("desktop:set-theme", (event, theme) => {
   requireTrusted(event);
-  if (typeof light !== "boolean") throw TypeError("Theme must be a boolean");
-  if (process.platform !== "darwin") mainWindow.setTitleBarOverlay({ color: light ? "#f8faf9" : "#101719", symbolColor: light ? "#183f36" : "#edf5f2", height: 32 });
+  if (typeof theme !== "boolean" && !["light", "dark", "enturma"].includes(theme)) throw TypeError("Invalid theme");
+  const light = theme === true || theme === "light";
+  if (process.platform !== "darwin") mainWindow.setTitleBarOverlay({ color: light ? "#f8faf9" : theme === "enturma" ? "#0b211a" : "#101719", symbolColor: light ? "#183f36" : "#edf5f2", height: 32 });
 });
 ipcMain.handle("desktop:update-state", (event) => {
   requireTrusted(event);

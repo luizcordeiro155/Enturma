@@ -27,6 +27,24 @@
 .voice-recorder {
   display: flex;
   align-items: center;
+  order: 3;
+  flex: 0 0 42px;
+  color: var(--ink);
+}
+.enturma-message-composer .composer-send-button {
+  order: 3;
+}
+.enturma-message-composer .composer-media-buttons {
+  order: 2;
+}
+.enturma-message-composer .composer-text-field {
+  order: 1;
+}
+.voice-recorder > .voice-record-button {
+  width: 42px;
+  height: 42px;
+  background: var(--accent) !important;
+  color: var(--on-accent, #173a32) !important;
 }
 .voice-record-button {
   display: inline-flex;

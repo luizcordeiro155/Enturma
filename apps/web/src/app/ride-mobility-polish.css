@@ -41,6 +41,22 @@ html[data-theme="dark"] .ride-mobility-boot {
   --ride-shadow: 0 24px 72px rgba(0, 0, 0, 0.46);
 }
 
+html[data-palette="enturma"] .ride-mobility-app,
+html[data-palette="enturma"] .ride-mobility-boot {
+  --ride-canvas: var(--bg);
+  --ride-surface: var(--surface);
+  --ride-surface-2: var(--soft);
+  --ride-surface-3: var(--surface-hover);
+  --ride-text: var(--ink);
+  --ride-muted: var(--muted);
+  --ride-border: var(--border);
+  --ride-accent: var(--accent);
+  --ride-accent-ink: var(--on-accent);
+  --ride-selected: var(--surface-strong);
+  --ride-primary: var(--accent);
+  --ride-on-primary: var(--on-accent);
+}
+
 .ride-mobility-app :is(h1, h2, h3, strong) {
   color: var(--ride-text);
 }
@@ -585,9 +601,9 @@ html .ride-mobility-app .danger-action {
   flex-direction: column;
   height: 100dvh;
   padding: 18px 14px;
-  border-inline-end: 1px solid #26363b;
-  background: #10191c;
-  color: #f5f8f6;
+  border-inline-end: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
 }
 .ride-hub-brand {
   display: flex;
@@ -618,7 +634,7 @@ html .ride-mobility-app .danger-action {
 }
 .ride-hub-brand small,
 .ride-hub-safety small {
-  color: #93a49d;
+  color: var(--muted);
   font-size: 11px;
 }
 .ride-hub-sidebar nav {
@@ -635,7 +651,7 @@ html .ride-mobility-app .danger-action {
   min-height: 48px;
   padding: 0 13px;
   border-radius: 13px;
-  color: #aebcb7;
+  color: var(--muted);
   text-decoration: none;
   transition:
     background-color 180ms cubic-bezier(.16,1,.3,1),
@@ -643,8 +659,8 @@ html .ride-mobility-app .danger-action {
     transform 180ms cubic-bezier(.16,1,.3,1);
 }
 .ride-hub-sidebar nav a[aria-current="page"] {
-  background: #223129;
-  color: #f8fbf9;
+  background: var(--soft);
+  color: var(--ink);
 }
 .ride-hub-sidebar nav a[aria-current="page"]::before {
   content: "";
@@ -659,8 +675,8 @@ html .ride-mobility-app .danger-action {
   .ride-hub-sidebar nav a:hover,
   .ride-hub-safety:hover,
   .ride-hub-back:hover {
-    background: #1a272b;
-    color: #fff;
+    background: var(--surface-hover);
+    color: var(--ink);
     transform: translateX(2px);
   }
 }
@@ -671,7 +687,7 @@ html .ride-mobility-app .danger-action {
   margin-block-end: 6px;
 }
 .ride-hub-back {
-  color: #8da09a;
+  color: var(--muted);
 }
 .ride-hub-mobile-nav {
   display: none;

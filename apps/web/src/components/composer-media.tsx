@@ -3,8 +3,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import {
   Smile,
-  Sticker,
-  ImagePlay,
   Star,
   Plus,
   Search,
@@ -102,49 +100,26 @@ export function ComposerMedia({
   return (
     <>
       <div className="composer-media-buttons">
-        {(["EMOJI", ...(mediaEnabled ? ["STICKER", "GIF"] : [])] as Tab[]).map(
-          (kind) => {
-            const Icon =
-              kind === "EMOJI"
-                ? Smile
-                : kind === "STICKER"
-                  ? Sticker
-                  : ImagePlay;
-            const label =
-              kind === "EMOJI"
-                ? "Adicionar emoji"
-                : kind === "STICKER"
-                  ? "Figurinhas"
-                  : "GIFs";
-            return (
-              <button
-                key={kind}
-                type="button"
-                className={`composer-icon-button media-trigger-${kind.toLowerCase()}`}
-                aria-label={label}
-                title={label}
-                disabled={disabled}
-                aria-expanded={!!anchor && tab === kind}
-                onPointerDown={(event) => {
-                  event.preventDefault();
-                  if (!composerKeyboardVisible() && isTextEntryControl(document.activeElement))
-                    document.activeElement.blur();
-                }}
-                onClick={(event) => {
-                  setTab(kind);
-                  setCreating(false);
-                  setAnchor(
-                    anchor && tab === kind
-                      ? undefined
-                      : messageActionAnchor(event.currentTarget),
-                  );
-                }}
-              >
-                <Icon size={20} />
-              </button>
-            );
-          },
-        )}
+        <button
+          type="button"
+          className="composer-icon-button media-trigger-emoji"
+          aria-label="Adicionar emoji"
+          title="Emojis, figurinhas e GIFs"
+          disabled={disabled}
+          aria-expanded={!!anchor}
+          onPointerDown={(event) => {
+            event.preventDefault();
+            if (!composerKeyboardVisible() && isTextEntryControl(document.activeElement))
+              document.activeElement.blur();
+          }}
+          onClick={(event) => {
+            setTab("EMOJI");
+            setCreating(false);
+            setAnchor(anchor ? undefined : messageActionAnchor(event.currentTarget));
+          }}
+        >
+          <Smile size={20} />
+        </button>
       </div>
       {anchor && (
         <MessageActionPopover

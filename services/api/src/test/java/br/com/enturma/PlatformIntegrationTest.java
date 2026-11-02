@@ -1812,6 +1812,37 @@ class PlatformIntegrationTest {
   }
 
   @Test
+  void legacyPrivateHistoryAcquiresReceiptsOnlyFromItsRecipient() {
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", member.id()).get("username");
+    UUID friendship =
+        (UUID) ((Map<?, ?>) social.invite(host, new SocialController.Invite(username))).get("id");
+    social.accept(member, friendship);
+    social.identity(
+        host, new SocialController.PublicKey("EC", "P-256", "a".repeat(43), "b".repeat(43)));
+    social.send(
+        host,
+        friendship,
+        new SocialController.Envelope(UUID.randomUUID(), "Y2lwaGVydGV4dA==", "abcdefghijklmnop"));
+    UUID message =
+        (UUID) db.one("SELECT id FROM private_message WHERE friendship_id=?", friendship).get("id");
+    db.jdbc.update("DELETE FROM private_message_receipt WHERE message_id=?", message);
+    social.messages(member, friendship, 0);
+    social.acknowledge(host, friendship, new MessageReceipt(List.of(message), true));
+    assertThat(db.list("SELECT * FROM private_message_receipt WHERE message_id=?", message))
+        .isEmpty();
+    social.acknowledge(member, friendship, new MessageReceipt(List.of(message), false));
+    var row = db.one("SELECT * FROM private_message_receipt WHERE message_id=?", message);
+    assertThat(row.get("deliveredAt")).isNotNull();
+    assertThat(row.get("readAt")).isNull();
+    social.acknowledge(member, friendship, new MessageReceipt(List.of(message), true));
+    assertThat(
+            db.one("SELECT read_at FROM private_message_receipt WHERE message_id=?", message)
+                .get("readAt"))
+        .isNotNull();
+  }
+
+  @Test
   void audioUploadsAndEncryptedAudioKeepConversationAccessBoundaries() throws Exception {
     UUID roomId = room(8);
     byte[] audio = new byte[] {0x1a, 0x45, (byte) 0xdf, (byte) 0xa3, 0, 0, 0, 0, 0, 0, 0, 0};
