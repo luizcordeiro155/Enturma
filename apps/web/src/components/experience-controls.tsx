@@ -9,6 +9,7 @@ import {
   syncExperience,
 } from "@/lib/experience-preferences";
 import { ThemePicker } from "./theme-picker";
+const accessibilityTitle = "Aparência e acessibilidade";
 export function ExperienceControls({
   localOnly = false,
 }: {
@@ -18,7 +19,6 @@ export function ExperienceControls({
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState("");
   const dialog = useRef<HTMLDialogElement>(null);
-  const titleId = useId();
   const textSizeId = useId();
   useEffect(() => {
     if (!localOnly) void syncExperience().catch(() => {});
@@ -59,12 +59,12 @@ export function ExperienceControls({
       <dialog
         ref={dialog}
         className="accessibility-dialog"
-        aria-labelledby={titleId}
+        aria-label={accessibilityTitle}
         onCancel={() => setOpen(false)}
         onClose={() => setOpen(false)}
       >
         <header>
-          <h2 id={titleId}>Aparência e acessibilidade</h2>
+          <h2>{accessibilityTitle}</h2>
           <button
             className="icon-control"
             aria-label="Fechar configurações"

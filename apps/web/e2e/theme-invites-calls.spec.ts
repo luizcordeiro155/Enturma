@@ -151,7 +151,9 @@ test("saved Enturma contrast and theme cycle survive navigation without reload",
   const dialog = page.getByRole("dialog", {
     name: "Aparência e acessibilidade",
   });
-  await dialog.getByLabel("Tema", { exact: true }).selectOption("ENTURMA");
+  await dialog
+    .getByRole("combobox", { name: "Tema", exact: true })
+    .selectOption("ENTURMA");
   await dialog.getByLabel("Alto contraste").check();
   await expect(page.locator("html")).toHaveAttribute("data-palette", "enturma");
   await expect(page.locator("html")).toHaveAttribute(
@@ -211,7 +213,9 @@ test("saved Enturma contrast and theme cycle survive navigation without reload",
   await page
     .getByRole("button", { name: "Acessibilidade", exact: true })
     .click();
-  await dialog.getByLabel("Tema", { exact: true }).selectOption("ENTURMA");
+  await dialog
+    .getByRole("combobox", { name: "Tema", exact: true })
+    .selectOption("ENTURMA");
   await dialog.getByRole("button", { name: "Fechar configurações" }).click();
   await page.screenshot({ path: info.outputPath("enturma-high-contrast.png") });
 });
