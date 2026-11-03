@@ -1,5 +1,7 @@
 # Arquitetura — revisão de 28/10/2026
 
+> **Complemento 03/11:** schema versionado avançou até V66 (recibos) e V68 (tema `ENTURMA`), sem V67. Os serviços nativos Railway publicaram Windows/Android 0.4.424 a partir de `9270a5f`. A arquitetura descrita não garante escalabilidade multi-réplica nem RLS por estudante. Consulte [STATUS](STATUS.md) e [DATABASE](DATABASE.md).
+
 Monólito modular Java 21, Spring Boot 3.5, PostgreSQL, Flyway. Autenticação de usuários usa entidades JPA/repositórios; consultas transacionais de catálogo, salas e caronas usam JDBC parametrizado para tornar explícitos os locks e limites de autorização. Não são expostas entidades JPA nos controllers.
 
 ```mermaid

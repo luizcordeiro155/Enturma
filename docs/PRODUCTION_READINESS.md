@@ -1,5 +1,7 @@
 # Release Candidate — 28/10/2026
 
+> **Documento histórico da RC de 28/10.** A frase “nenhum APK/instalador distribuído nesta RC” refere-se exclusivamente àquela execução. Posteriormente, a [PR #135](https://github.com/luizcordeiro155/Enturma/pull/135) foi mesclada e os serviços Railway de Windows e Android distribuíram **0.4.424** com `SUCCESS` em 02/11/2026. Consulte [STATUS](STATUS.md) e [auditoria documental](DOCUMENTATION_AUDIT_2026_11_03.md). Os gates não homologados permanecem como riscos, sem reescrever os resultados históricos.
+
 **Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
 
 Este documento preserva a avaliação da RC de 28/10. As alterações e evidências posteriores de 30/10 estão em [estabilização da experiência](RELEASE_EXPERIENCE_STABILIZATION.md) e no [estado atual](STATUS.md). Os resultados abaixo não devem ser atribuídos automaticamente a commits posteriores.

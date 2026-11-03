@@ -28,7 +28,7 @@ Uma grade ausente mostra “Esta grade ainda está sendo verificada” e permite
 
 ## Laboratório de programação
 
-`/learn` oferece 12 desafios em três jogos JavaScript: rota do algoritmo, laboratório binário e detetive de código. API confere matrícula verificada em curso ou UC marcada como TI; menus e página usam essa mesma decisão. O backend revalida respostas e grava tentativas/conclusões por usuário. Não há `eval`, execução livre de código ou pontuação enviada pelo cliente. Exercícios são conteúdo didático do Enturma, sem atribuição à universidade.
+A implementação inicial de `/learn` oferecia 12 desafios em três jogos JavaScript: rota do algoritmo, laboratório binário e detetive de código. O conjunto atual inclui também **Termo Dev** (quatro jogos de TI); os 12 desafios não representam o inventário total atual. API confere matrícula verificada em curso ou UC marcada como TI; menus e página usam essa mesma decisão. O backend revalida respostas e grava tentativas/conclusões por usuário. Não há `eval`, execução livre de código ou pontuação enviada pelo cliente. Exercícios são conteúdo didático do Enturma, sem atribuição à universidade.
 
 Animações usam Web Animations API, IntersectionObserver e transformações; respeitam `prefers-reduced-motion`. Conteúdo permanece visível se animação falhar. Teclado, toque e visualização móvel são suportados.
 
