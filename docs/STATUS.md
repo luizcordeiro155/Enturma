@@ -1,4 +1,13 @@
-# Estado atual — 02/11/2026
+# Estado atual — 03/11/2026
+
+## Última release confirmada — PR #135
+
+O HEAD da `main` é [`9270a5f`](https://github.com/luizcordeiro155/Enturma/commit/9270a5fe08afd51e1b38926c11431587bfc5ad26), da [PR #135](https://github.com/luizcordeiro155/Enturma/pull/135). A Web foi publicada e os serviços Railway de download concluíram a distribuição nativa **0.4.424**: Windows deployment `ce120d56-57f0-4692-b9f2-7e6382606eef` e Android `b24c25e1-fb48-4598-92fd-efb0d60d4f17`, ambos `SUCCESS`, com versão/commit validados nos logs e healthcheck aprovado. Não se afirma instalação física testada.
+
+A [CI pós-merge 41478805937](https://github.com/luizcordeiro155/Enturma/actions/runs/41478805937) passou, bem como o secret scanning. A PR #135 registra **137 testes Java, 175 Web e 52 E2E**. PRs #133 e #134 também estão integradas; a [PR #132](https://github.com/luizcordeiro155/Enturma/pull/132) permanece aberta e não deve ser tratada como merge concluído.
+
+A publicação **não** equivale a homologação física Android/Windows, assinatura Authenticode, restore de produção, RLS por estudante ou escala comprovada. Consulte [auditoria documental de 03/11](DOCUMENTATION_AUDIT_2026_11_03.md).
+
 
 **Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
 
@@ -19,6 +28,6 @@ O lote de **02/11/2026** acrescenta mensagens de voz, recibos de entrega/leitura
 | iOS | Export técnico na CI; sem homologação/publicação oficial confirmada |
 | Escala e backup | Carga limitada a leituras em serviços efêmeros na CI, com relatório no ciclo atual; capacidade de produção não homologada. Backup externo inexistente e dispensado pelo responsável em 28/10/2026; recuperação real não comprovada |
 
-Pacotes: Web 0.3.0, Expo Android 0.3.30/code 33 e Desktop 0.3.15. O builder calcula a versão distribuída; consultar os manifests oficiais antes de anunciar um release. SHA-256 verifica integridade, **não é assinatura digital Authenticode**.
+Versões **declaradas:** Web 0.3.0, Expo Android 0.3.30/code 33 e Desktop 0.3.15. Versões **distribuídas:** Windows e Android 0.4.424 (02/11, logs Railway). Conferir novamente os manifests oficiais em novos releases; SHA-256 verifica integridade, **não é assinatura digital Authenticode**.
 
 Documentos de implementação antigos são históricos. Consulte o [inventário](DOCUMENTATION_INDEX.md), [operação e rollback](OPERATIONS_READINESS.md) e o [estado anterior preservado](history/STATUS_2026_10_25.md).

@@ -1,5 +1,7 @@
 # Mobile — Android 0.3.30 (com histórico 0.3.8–0.3.16)
 
+> **Distribuição verificada em 02/11/2026:** APK Android **0.4.424**, commit `9270a5f`, deployment Railway `b24c25e1-fb48-4598-92fd-efb0d60d4f17` com `SUCCESS`, log `Verified mobile release 0.4.424` e healthcheck aprovado. A versão `0.3.30` e o `versionCode=33` continuam declarados no workspace Expo, mas não representam a versão calculada pelo builder de download. Instalação/atualização física e compatibilidade da assinatura devem ser verificadas em aparelho real.
+
 A versão Android usa a aplicação Web responsiva oficial dentro de um shell Android seguro. Com isso, Web, Desktop e Android passam a compartilhar as mesmas páginas e a mesma implementação de salas, chamadas, fórum, perfil, cadernos, caronas, configurações e recursos futuros.
 
 ## Ajustes mobile 0.3.8
