@@ -665,3 +665,29 @@ html[data-theme="light"] .call-controls {
   color: var(--muted);
   font-size: 0.8rem;
 }
+
+/* Android's WebView exposes native insets through --native-safe-*.
+   The public auth screens must not let their compact layout override them.
+   Scope this to the installed Android shell; ordinary mobile Web is unchanged. */
+html[data-enturma-mobile="true"] .auth-entry .auth-story {
+  padding-top: calc(clamp(24px, 4vw, 64px) + var(--enturma-safe-top));
+}
+html[data-enturma-mobile="true"] .auth-entry .auth-main {
+  padding-bottom: calc(clamp(24px, 5vw, 72px) + var(--enturma-safe-bottom));
+}
+@media (max-width: 760px) {
+  html[data-enturma-mobile="true"] .auth-entry .auth-story {
+    padding:
+      calc(20px + var(--enturma-safe-top))
+      calc(20px + var(--enturma-safe-right))
+      20px
+      calc(20px + var(--enturma-safe-left));
+  }
+  html[data-enturma-mobile="true"] .auth-entry .auth-main {
+    padding:
+      28px
+      calc(20px + var(--enturma-safe-right))
+      calc(28px + var(--enturma-safe-bottom))
+      calc(20px + var(--enturma-safe-left));
+  }
+}

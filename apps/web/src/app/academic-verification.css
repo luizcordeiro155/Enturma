@@ -548,3 +548,17 @@ html .academic-page .academic-error button {
     margin: 0 auto;
   }
 }
+
+/* Native Windows: the titlebar consumes 32px, and the verification form may
+   exceed a restored/compact window. Scroll this page independently so the
+   bottom action, document upload and footer remain reachable. */
+html[data-desktop="true"] .academic-page,
+html[data-desktop-chrome="true"] .academic-page {
+  height: calc(100dvh - 32px);
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior-y: contain;
+  scrollbar-gutter: stable;
+  scroll-padding-bottom: 32px;
+}
