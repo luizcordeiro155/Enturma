@@ -41,3 +41,42 @@ test("standalone mobile surfaces stay outside Android system bars", async ({
     ).toBe(true);
   }
 });
+
+test("Android protege login, cadastro e recuperação sob as barras do sistema", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await installNativeInsets(page);
+
+  for (const route of ["/login", "/register", "/forgot-password"]) {
+    await page.goto(route);
+    const story = page.locator(".auth-entry .auth-story");
+    const content = page.locator(".auth-entry .auth-main");
+    const brand = story.locator(".brand");
+    await expect(brand).toBeVisible();
+
+    const spacing = await story.evaluate((element) => {
+      const styles = getComputedStyle(element);
+      return {
+        top: parseFloat(styles.paddingTop),
+        left: parseFloat(styles.paddingLeft),
+        right: parseFloat(styles.paddingRight),
+      };
+    });
+    const formPaddingBottom = await content.evaluate((element) =>
+      parseFloat(getComputedStyle(element).paddingBottom),
+    );
+    const brandBounds = await brand.boundingBox();
+
+    expect(spacing.top, route).toBeGreaterThanOrEqual(nativeInsets.top + 20);
+    expect(spacing.left, route).toBeGreaterThanOrEqual(nativeInsets.left + 20);
+    expect(spacing.right, route).toBeGreaterThanOrEqual(nativeInsets.right + 20);
+    expect(formPaddingBottom, route).toBeGreaterThanOrEqual(nativeInsets.bottom + 28);
+    expect(brandBounds?.y ?? 0, route).toBeGreaterThanOrEqual(nativeInsets.top + 20);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= window.innerWidth,
+      ),
+    ).toBe(true);
+  }
+});
