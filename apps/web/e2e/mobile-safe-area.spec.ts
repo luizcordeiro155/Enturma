@@ -2,8 +2,10 @@ import { expect, test } from "@playwright/test";
 
 const nativeInsets = { top: 34, right: 6, bottom: 24, left: 6 };
 
-async function installNativeInsets(page: import("@playwright/test").Page) {
-  await page.addInitScript((insets) => {
+// Android injects the insets after WebView finishes loading, not only at
+// document creation. Simulate that lifecycle after each navigation/hydration.
+async function syncNativeInsets(page: import("@playwright/test").Page) {
+  await page.evaluate((insets) => {
     const root = document.documentElement;
     root.dataset.enturmaMobile = "true";
     root.style.setProperty("--native-safe-top", insets.top + "px");
@@ -17,7 +19,6 @@ test("standalone mobile surfaces stay outside Android system bars", async ({
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await installNativeInsets(page);
 
   for (const [route, selector] of [
     ["/termos", ".legal-page-brand"],
@@ -26,13 +27,14 @@ test("standalone mobile surfaces stay outside Android system bars", async ({
     ["/offline", "main > section"],
   ] as const) {
     await page.goto(route);
+    await syncNativeInsets(page);
     const element = page.locator(selector).first();
     await expect(element).toBeVisible();
 
     const box = await element.boundingBox();
     expect(box).not.toBeNull();
-    expect(box!.y).toBeGreaterThanOrEqual(nativeInsets.top);
-    expect(box!.x).toBeGreaterThanOrEqual(nativeInsets.left);
+    expect(box!.y, route).toBeGreaterThanOrEqual(nativeInsets.top);
+    expect(box!.x, route).toBeGreaterThanOrEqual(nativeInsets.left);
 
     expect(
       await page.evaluate(
@@ -46,10 +48,10 @@ test("Android protege login, cadastro e recuperação sob as barras do sistema",
   page,
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await installNativeInsets(page);
 
   for (const route of ["/login", "/register", "/forgot-password"]) {
     await page.goto(route);
+    await syncNativeInsets(page);
     const story = page.locator(".auth-entry .auth-story");
     const content = page.locator(".auth-entry .auth-main");
     const brand = story.locator(".brand");
