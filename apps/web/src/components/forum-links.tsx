@@ -97,6 +97,8 @@ function ExternalConfirmation({
       previous?.focus();
     };
   }, []);
+  // The profile popover listens for outside pointerdown and Escape on document.
+  // Portaled dialog interactions must not dismiss the parent profile.
   return createPortal(
     <dialog
       className="external-link-dialog"
@@ -107,8 +109,6 @@ function ExternalConfirmation({
         event.stopPropagation();
         onClose();
       }}
-      // The profile popover listens for outside pointerdown and Escape on document.
-      // This dialog is portaled to body: its interactions must not dismiss the profile.
       onPointerDown={(event) => event.stopPropagation()}
       onKeyDown={(event) => {
         if (event.key === "Escape") event.stopPropagation();
