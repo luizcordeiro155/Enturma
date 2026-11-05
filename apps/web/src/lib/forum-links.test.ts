@@ -18,3 +18,33 @@ describe("forum links", () => {
     expect(parts.some((p) => p.href)).toBe(false);
   });
 });
+
+
+describe("routing de links do Enturma", () => {
+  const currentOrigin = "https://enturma-flax.vercel.app";
+  it("trata rotas do próprio Enturma como navegação interna", async () => {
+    const { internalEnturmaPath } = await import("./forum-links");
+    expect(internalEnturmaPath("https://enturma-flax.vercel.app/forum/123?f=top#resposta", currentOrigin))
+      .toBe("/forum/123?f=top#resposta");
+    expect(internalEnturmaPath("/rooms/123", currentOrigin)).toBe("/rooms/123");
+    expect(internalEnturmaPath("https://enturma-flax.vercel.app/join/ABCD2345", currentOrigin))
+      .toBe("/join/ABCD2345");
+  });
+  it("reconhece link canônico em instalações de desenvolvimento sem sair do app", async () => {
+    const { internalEnturmaPath } = await import("./forum-links");
+    expect(internalEnturmaPath("https://enturma-flax.vercel.app/forum", "http://localhost:3000"))
+      .toBe("/forum");
+  });
+  it("não confunde sites falsos ou externos com links do Enturma", async () => {
+    const { internalEnturmaPath } = await import("./forum-links");
+    for (const value of [
+      "https://example.org/forum",
+      "https://enturma-flax.vercel.app.evil.example/join/ABCD2345",
+      "http://enturma-flax.vercel.app/forum",
+      "https://user:pass@enturma-flax.vercel.app/forum",
+      "javascript:alert(1)",
+    ]) {
+      expect(internalEnturmaPath(value, currentOrigin)).toBeNull();
+    }
+  });
+});

@@ -29,3 +29,18 @@ export function splitLinks(text: string): { text: string; href?: string }[] {
   if (end < text.length) parts.push({ text: text.slice(end) });
   return parts;
 }
+
+/** Routes owned by this installation stay in the Enturma window, never in an external browser. */
+export function internalEnturmaPath(raw: string, currentOrigin: string): string | null {
+  try {
+    const url = new URL(raw, currentOrigin);
+    const current = new URL(currentOrigin);
+    if (url.username || url.password || !["http:", "https:"].includes(url.protocol)) return null;
+    const isCurrent = url.origin === current.origin;
+    const isCanonical = url.origin === "https://enturma-flax.vercel.app";
+    if (!isCurrent && !isCanonical) return null;
+    return `${url.pathname}${url.search}${url.hash}`;
+  } catch {
+    return null;
+  }
+}
