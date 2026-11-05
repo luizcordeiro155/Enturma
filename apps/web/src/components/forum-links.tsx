@@ -4,7 +4,7 @@ import { createPortal } from "react-dom";
 import { ExternalLink, ShieldAlert, X } from "lucide-react";
 import { RoomJoinDialog } from "./room-join-dialog";
 import { roomInviteCode } from "@/lib/room-invite";
-import { splitLinks } from "@/lib/forum-links";
+import { internalEnturmaPath, splitLinks } from "@/lib/forum-links";
 export function ForumLinks({ text }: { text: string }) {
   return (
     <>
@@ -40,8 +40,19 @@ export function ConfirmedLink({
             setInvitation(code);
             return;
           }
-          const url = new URL(href);
-          if (url.origin === location.origin) return;
+          const path = internalEnturmaPath(href, location.origin);
+          if (path !== null) {
+            // The official Enturma URL may have a different origin in a local
+            // or preview installation. Keep it in this app window.
+            if (
+              new URL(href, location.origin).origin !== location.origin ||
+              e.metaKey || e.ctrlKey || e.shiftKey || e.altKey
+            ) {
+              e.preventDefault();
+              location.assign(path);
+            }
+            return;
+          }
           e.preventDefault();
           setOpen(true);
         }}
@@ -49,7 +60,12 @@ export function ConfirmedLink({
           if (e.button === 1) {
             e.preventDefault();
             const code = roomInviteCode(href, location.origin);
-            if (code) setInvitation(code);
+            if (code) {
+              setInvitation(code);
+              return;
+            }
+            const path = internalEnturmaPath(href, location.origin);
+            if (path !== null) location.assign(path);
             else setOpen(true);
           }
         }}
