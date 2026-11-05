@@ -510,6 +510,7 @@ test("app Desktop mantém confirmação acadêmica rolável em janela compacta",
         getUpdateState: async () => ({ status: "current", progress: 100, currentVersion: "0.4.424" }),
         onUpdateState: () => () => {},
         checkForUpdates: async () => {},
+        installUpdate: async () => {},
         openExternal: async () => {},
       },
     });
