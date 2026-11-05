@@ -43,6 +43,11 @@ vi.mock("./profile-motion", () => ({
   ProfileBackdrop: () => null,
   profileEntrance: () => undefined,
 }));
+vi.mock("./room-join-dialog", () => ({
+  RoomJoinDialog: ({ code }: { code: string }) => (
+    <div role="dialog" aria-label="Convite da sala">Convite {code}</div>
+  ),
+}));
 vi.mock("./profile-visual-surface", () => ({
   ProfileVisualSurface: ({ actions }: { actions: ReactNode }) => (
     <div>
@@ -131,4 +136,25 @@ it("opens an accepted web link in a new tab instead of dismissing it on checkbox
     "noopener,noreferrer",
   );
   expect(screen.queryByRole("dialog", { name: "Você está saindo do Enturma" })).toBeNull();
+});
+
+it("keeps internal Enturma pages in the same window without a warning", () => {
+  render(<ConfirmedLink href={location.origin + "/forum"} label="Abrir fórum" />);
+  fireEvent.click(screen.getByRole("link", { name: "Abrir fórum" }));
+  expect(screen.queryByRole("dialog", { name: "Você está saindo do Enturma" })).toBeNull();
+});
+
+it("shows the internal room invitation instead of an external warning or tab", () => {
+  const open = vi.fn();
+  vi.stubGlobal("open", open);
+  render(
+    <ConfirmedLink
+      href="https://enturma-flax.vercel.app/join/ABCD2345"
+      label="Convite da sala"
+    />,
+  );
+  fireEvent.click(screen.getByRole("link", { name: "Convite da sala" }));
+  expect(screen.getByRole("dialog", { name: "Convite da sala" })).toBeInTheDocument();
+  expect(screen.queryByRole("dialog", { name: "Você está saindo do Enturma" })).toBeNull();
+  expect(open).not.toHaveBeenCalled();
 });
