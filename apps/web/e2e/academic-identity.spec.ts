@@ -491,3 +491,46 @@ test("admin edita e desativa domínio sem afetar contas já aprovadas", async ({
     ).rows[0]?.status,
   ).toBe("STUDENT_VERIFIED");
 });
+
+test("app Desktop mantém confirmação acadêmica rolável em janela compacta", async ({
+  page,
+  request,
+}) => {
+  const account = await register(request, "Desktop Scroll E2E");
+  await authenticate(page.context(), account);
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "enturmaDesktop", {
+      configurable: true,
+      value: {
+        isDesktop: true,
+        windowChrome: true,
+        nativeUpdater: true,
+        setTheme: async () => {},
+        getInfo: async () => ({ version: "0.4.424", platform: "win32" }),
+        getUpdateState: async () => ({ status: "current", progress: 100, currentVersion: "0.4.424" }),
+        onUpdateState: () => () => {},
+        checkForUpdates: async () => {},
+        openExternal: async () => {},
+      },
+    });
+  });
+  await page.setViewportSize({ width: 1027, height: 663 });
+  await page.goto("/academic-verification");
+  await expect(page.locator("html")).toHaveAttribute("data-desktop-chrome", "true");
+  await selectInstitution(page);
+  const screen = page.locator(".academic-page");
+  const dimensions = await screen.evaluate((element) => ({
+    overflowY: getComputedStyle(element).overflowY,
+    scrollHeight: element.scrollHeight,
+    clientHeight: element.clientHeight,
+  }));
+  expect(dimensions.overflowY).toBe("auto");
+  expect(dimensions.scrollHeight).toBeGreaterThan(dimensions.clientHeight + 100);
+  await screen.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect.poll(() => screen.evaluate((element) => element.scrollTop)).toBeGreaterThan(100);
+  await expect(
+    page.getByRole("button", { name: "Enviar link de confirmação" }),
+  ).toBeInViewport();
+});
