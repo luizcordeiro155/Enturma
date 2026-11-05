@@ -497,6 +497,13 @@ test("app Desktop mantém confirmação acadêmica rolável em janela compacta",
   request,
 }) => {
   const account = await register(request, "Desktop Scroll E2E");
+  // The academic selection is exercised by other E2E tests. Isolate the
+  // scroll regression from catalog searches and async form transitions.
+  const selection = await request.put(`${backend}/api/v1/auth/academic/institution`, {
+    headers: { Authorization: `Bearer ${account.accessToken}` },
+    data: { institutionId, campusId },
+  });
+  expect(selection.ok(), await selection.text()).toBe(true);
   await authenticate(page.context(), account);
   await page.addInitScript(() => {
     Object.defineProperty(window, "enturmaDesktop", {
@@ -518,7 +525,7 @@ test("app Desktop mantém confirmação acadêmica rolável em janela compacta",
   await page.setViewportSize({ width: 1027, height: 663 });
   await page.goto("/academic-verification");
   await expect(page.locator("html")).toHaveAttribute("data-desktop-chrome", "true");
-  await selectInstitution(page);
+  await expect(page.getByRole("heading", { name: "Confirme seu e-mail acadêmico" })).toBeVisible();
   const screen = page.locator(".academic-page");
   const dimensions = await screen.evaluate((element) => ({
     overflowY: getComputedStyle(element).overflowY,
