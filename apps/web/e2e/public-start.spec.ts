@@ -177,3 +177,24 @@ test("presentation remains usable with reduced motion", async ({ page }) => {
   await page.getByRole("link", { name: "Quero participar" }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
+
+test("app Desktop entra no login sem exibir apresentação Start", async ({
+  browser,
+  baseURL,
+}) => {
+  const desktop = await browser.newContext({
+    baseURL,
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) EnturmaDesktop/0.4.424",
+  });
+  try {
+    const page = await desktop.newPage();
+    for (const path of ["/", "/start"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/login(?:\?|$)/);
+      await expect(page.locator("#start-title")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
+    }
+  } finally {
+    await desktop.close();
+  }
+});
