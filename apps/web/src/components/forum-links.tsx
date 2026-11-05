@@ -74,6 +74,7 @@ function ExternalConfirmation({
 }) {
   const ref = useRef<HTMLDialogElement>(null);
   const [accepted, setAccepted] = useState(false);
+  const [openingError, setOpeningError] = useState("");
   useEffect(() => {
     const el = ref.current!,
       previous = document.activeElement as HTMLElement | null;
@@ -101,7 +102,17 @@ function ExternalConfirmation({
       className="external-link-dialog"
       ref={ref}
       aria-labelledby="external-link-title"
-      onCancel={onClose}
+      onCancel={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        onClose();
+      }}
+      // The profile popover listens for outside pointerdown and Escape on document.
+      // This dialog is portaled to body: its interactions must not dismiss the profile.
+      onPointerDown={(event) => event.stopPropagation()}
+      onKeyDown={(event) => {
+        if (event.key === "Escape") event.stopPropagation();
+      }}
     >
       <header>
         <ShieldAlert size={27} />
@@ -130,17 +141,38 @@ function ExternalConfirmation({
         />
         <span>Entendo que vou acessar um site externo e aceito continuar.</span>
       </label>
+      {openingError ? <p role="alert">{openingError}</p> : null}
       <div className="actions">
-        <button className="secondary" onClick={onClose}>
+        <button type="button" className="secondary" onClick={onClose}>
           Ficar no Enturma
         </button>
         <button
+          type="button"
           disabled={!accepted}
           onClick={() => {
-            if (accepted) {
-              window.open(href, "_blank", "noopener,noreferrer");
-              onClose();
+            if (!accepted) return;
+            setOpeningError("");
+            const url = new URL(href);
+            if (!["https:", "http:"].includes(url.protocol) || url.username || url.password) {
+              setOpeningError("Este endereço não é permitido.");
+              return;
             }
+            // Electron owns system-browser navigation. Android WebView blocks
+            // target=_blank, so same-window navigation is intercepted natively.
+            if (window.enturmaDesktop?.openExternal) {
+              void window.enturmaDesktop.openExternal(url.href).then(
+                () => onClose(),
+                () => setOpeningError("Não foi possível abrir o link externo."),
+              );
+              return;
+            }
+            if (/EnturmaMobile\//.test(navigator.userAgent)) {
+              window.location.assign(url.href);
+              onClose();
+              return;
+            }
+            window.open(url.href, "_blank", "noopener,noreferrer");
+            onClose();
           }}
         >
           Abrir link <ExternalLink size={16} />
