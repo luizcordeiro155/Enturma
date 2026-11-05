@@ -108,3 +108,27 @@ it("keeps the external-link warning open when consent is checked inside a user p
   expect(within(warning).getByRole("button", { name: /Abrir link/ })).toBeEnabled();
   expect(screen.getByRole("dialog", { name: "Perfil de Estudante" })).toBeInTheDocument();
 });
+
+it("opens an accepted web link in a new tab instead of dismissing it on checkbox change", async () => {
+  const open = vi.fn();
+  vi.stubGlobal("open", open);
+  render(<ConfirmedLink href="https://example.org/estudo" label="Material externo" />);
+  fireEvent.click(screen.getByRole("link", { name: "Material externo" }));
+  const warning = screen.getByRole("dialog", {
+    name: "Você está saindo do Enturma",
+  });
+  const consent = within(warning).getByLabelText(
+    "Entendo que vou acessar um site externo e aceito continuar.",
+  );
+  expect(within(warning).getByRole("button", { name: /Abrir link/ })).toBeDisabled();
+  fireEvent.click(consent);
+  expect(warning).toBeInTheDocument();
+  expect(consent).toBeChecked();
+  fireEvent.click(within(warning).getByRole("button", { name: /Abrir link/ }));
+  expect(open).toHaveBeenCalledWith(
+    "https://example.org/estudo",
+    "_blank",
+    "noopener,noreferrer",
+  );
+  expect(screen.queryByRole("dialog", { name: "Você está saindo do Enturma" })).toBeNull();
+});
