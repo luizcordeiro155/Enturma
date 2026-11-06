@@ -637,3 +637,194 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Installation safety guide — aligns with the existing Enturma surfaces. */
+.safetySection {
+  margin: 34px 0 22px;
+  padding: clamp(22px, 3.5vw, 36px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+}
+.safetyIntro { display: grid; gap: 22px; }
+.safetyHeading { display: flex; gap: 18px; align-items: flex-start; }
+.safetyHeading > svg { flex: 0 0 auto; margin-top: 4px; color: var(--ink); }
+.safetyHeading h2, .verifyHeader h2 {
+  margin: 0 0 9px;
+  color: var(--ink);
+  font-size: clamp(25px, 3.2vw, 38px);
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+.safetyHeading p, .verifyHeader p {
+  margin: 0;
+  max-width: 70ch;
+  color: var(--muted);
+  line-height: 1.65;
+  font-size: 15px;
+}
+.safetyStatus {
+  display: flex;
+  align-items: flex-start;
+  gap: 13px;
+  padding: 15px 18px;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 14px;
+  line-height: 1.65;
+}
+.safetyStatus svg { flex: none; margin-top: 2px; }
+.safetyPlatforms { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; margin-top: 26px; }
+.safetyPlatform { min-width: 0; padding: 24px 0 0; border-top: 1px solid var(--border); }
+.safetyPlatform h3 {
+  margin: 15px 0 10px;
+  color: var(--ink);
+  font-size: clamp(21px, 2.6vw, 27px);
+  line-height: 1.24;
+  letter-spacing: -0.02em;
+}
+.safetyPlatform > p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.72; }
+.platformTitle { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: 14px; font-weight: 750; }
+.windowsNotice {
+  margin: 20px 0 22px;
+  padding: 22px;
+  border-radius: 10px;
+  background: #e9f1fb;
+  color: #172c45;
+  font-family: "Segoe UI", Arial, sans-serif;
+  box-shadow: 0 10px 25px rgb(20 40 75 / 8%);
+}
+.windowsNoticeTitle { display: flex; align-items: center; gap: 13px; font-size: 18px; font-weight: 700; line-height: 1.3; }
+.windowsNotice p { margin: 13px 0 15px; font-size: 13px; line-height: 1.6; }
+.windowsNotice span { color: #104e96; text-decoration: underline; font-size: 13px; font-weight: 700; }
+.windowsNotice small { display: block; margin-top: 16px; font-size: 11px; line-height: 1.45; opacity: .75; }
+.androidNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  margin: 20px 0 22px;
+  padding: 22px;
+  border-radius: 10px;
+  background: var(--soft);
+  color: var(--ink);
+}
+.androidNotice svg { flex: none; }
+.androidNotice strong { display: block; font-size: 16px; }
+.androidNotice p { margin: 6px 0 0; color: var(--muted); font-size: 13px; line-height: 1.65; }
+.guideSteps { list-style: none; counter-reset: guide; display: grid; gap: 15px; margin: 0; padding: 0; }
+.guideSteps li {
+  position: relative;
+  min-height: 35px;
+  padding: 0 0 0 45px;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.65;
+  counter-increment: guide;
+}
+.guideSteps li::before {
+  content: counter(guide);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 800;
+}
+.guideSteps strong { color: var(--ink); }
+.commandLead { margin: 21px 0 8px !important; color: var(--ink) !important; font-weight: 700; }
+.commandLine {
+  display: block;
+  overflow-x: auto;
+  padding: 13px 15px;
+  border-radius: 8px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 12px;
+  white-space: nowrap;
+  user-select: all;
+}
+.platformFootnote { display: block; margin-top: 14px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.verifySection {
+  display: grid;
+  gap: 22px;
+  margin: 0 0 34px;
+  padding: clamp(22px, 3.5vw, 36px);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--soft) 42%, var(--surface));
+}
+.verifyHeader { display: flex; align-items: flex-start; gap: 17px; }
+.verifyHeader > svg { flex: none; margin-top: 5px; color: var(--ink); }
+.verifyHeader h2 { font-size: clamp(23px, 3vw, 32px); }
+.integrityGrid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.integrityCard {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 11px;
+  min-width: 0;
+  padding: 22px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.integrityCardHead { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; width: 100%; }
+.integrityCardHead strong { color: var(--ink); font-size: 16px; }
+.integrityCardHead span { color: var(--muted); font-size: 12px; }
+.integrityCard p, .integrityCard small { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.integrityState { display: flex; align-items: center; gap: 8px; }
+.integrityHash {
+  display: block;
+  width: 100%;
+  overflow-wrap: anywhere;
+  padding: 11px 12px;
+  border-radius: 8px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 12px;
+  line-height: 1.7;
+}
+.hashCopy, .manifestLink {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  gap: 7px;
+  min-height: 36px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 700;
+}
+.hashCopy {
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  background: var(--soft);
+  color: var(--ink);
+}
+.hashCopy:hover { background: var(--surface-hover); }
+.manifestLink { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+.verifyFooter { display: flex; gap: 12px; color: var(--muted); font-size: 12px; line-height: 1.75; }
+.verifyFooter svg { flex: none; margin-top: 2px; color: var(--ink); }
+.verifyFooter a { color: var(--ink); font-weight: 700; }
+.safetySection :is(a, button):focus-visible, .verifySection :is(a, button):focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+@media (max-width: 900px) {
+  .safetyPlatforms, .integrityGrid { grid-template-columns: 1fr; }
+}
+@media (max-width: 640px) {
+  .safetySection, .verifySection { padding: 20px 16px; border-radius: 12px; }
+  .safetyHeading, .verifyHeader { gap: 12px; }
+  .safetyHeading > svg, .verifyHeader > svg { width: 22px; }
+  .safetyHeading h2 { font-size: 27px; }
+  .safetyPlatform { padding-top: 20px; }
+  .windowsNotice, .androidNotice { padding: 17px; }
+  .integrityCard { padding: 17px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .safetySection *, .verifySection * { scroll-behavior: auto; transition: none !important; }
+}
