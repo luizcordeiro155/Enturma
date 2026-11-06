@@ -262,3 +262,48 @@ test("APP Desktop permite rolar o portfólio público longo sem liberar scroll n
   ).toBeGreaterThan(300);
   await expect(page.getByRole("link", { name: /Voltar ao Enturma/ })).toHaveCount(1);
 });
+
+test("download explica alertas de segurança e oferece comparação de SHA-256 para cada instalador", async ({ page }) => {
+  await page.route("**/latest.json", (route) => {
+    if (!route.request().url().includes("enturma-desktop-download-v5-production.up.railway.app")) {
+      return route.continue();
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({
+        version: "0.4.424",
+        installerSha256: "a".repeat(64),
+        installerUrl: "https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Setup-0.4.424.exe",
+      }),
+    });
+  });
+  await page.route("**/latest-android.json", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({
+        version: "0.4.424",
+        sha256: "b".repeat(64),
+        downloadUrl: "https://enturma-android-download-v3-production.up.railway.app/Enturma-Android-0.4.424.apk",
+      }),
+    }),
+  );
+  await page.goto("/download");
+  await expect(page.getByRole("heading", { name: /Por que o Windows pode mostrar um aviso/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Instale com segurança/i })).toBeVisible();
+  await expect(page.getByText("O Windows protegeu o computador")).toBeVisible();
+  await expect(page.getByText(/assinatura digital de código/i).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Confira o arquivo antes de instalar/i })).toBeVisible();
+
+  const windows = page.getByRole("region", { name: "Integridade do instalador Windows" });
+  await expect(windows.getByText("a".repeat(64))).toBeVisible();
+  const android = page.getByRole("region", { name: "Integridade do APK Android" });
+  await expect(android.getByText("b".repeat(64))).toBeVisible();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("heading", { name: /Instale com segurança/i })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});
