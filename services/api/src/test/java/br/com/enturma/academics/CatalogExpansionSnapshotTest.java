@@ -3,6 +3,7 @@ package br.com.enturma.academics;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -11,7 +12,7 @@ import org.springframework.core.io.ClassPathResource;
 
 /** Structural integrity of staged institutional records; not a substitute for source verification. */
 class CatalogExpansionSnapshotTest {
-  private final ObjectMapper mapper = new ObjectMapper();
+  private final ObjectMapper mapper = new ObjectMapper().registerModule(new JavaTimeModule());
 
   @Test
   void expansionsAreConsistentAndDoNotPublishUnverifiedCurricula() throws Exception {
