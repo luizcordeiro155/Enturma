@@ -1,0 +1,292 @@
+{
+  "provider": "PUCMINAS",
+  "entries": [
+    {
+      "externalId": "puc-lourdes-pendente",
+      "kind": "CAMPUS",
+      "parentExternalId": "pucminas",
+      "name": "Lourdes",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "city": "Belo Horizonte",
+        "state": "MG"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Jogos Digitais",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 8,
+        "learningArea": "IT",
+        "note": "Somente o primeiro período da matriz incluído nesta revisão."
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10",
+      "kind": "CURRICULUM",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026",
+      "name": "Matriz PUC-SITE-2026-10",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "note": "Dados oficiais aguardando auditoria do hash e da vigência."
+      },
+      "curriculumVersion": "PUC-SITE-2026-10"
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10",
+      "name": "1º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Cidadania e Responsabilidade Social",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Cultura Religiosa: Saberes e Tradições",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Fundamentos de Cálculo",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Fundamentos de Jogos Digitais",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Introdução a Computação",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Introdução a Ferramentas de Pintura Digital",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 72,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Mentoria em Carreiras",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Produção de Jogos: Board Game",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 7,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s9",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Seminários I",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 18,
+        "orderIndex": 8,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s10",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "name": "Trabalho Interdisciplinar: Board Game",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
+        "name": "PUC Minas · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 36,
+        "orderIndex": 9,
+        "required": true,
+        "learningArea": "IT"
+      }
+    }
+  ]
+}
