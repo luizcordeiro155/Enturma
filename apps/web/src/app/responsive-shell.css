@@ -301,3 +301,21 @@ body {
    scrollbar-color: rgb(180 193 190 / 28%) transparent;
  }
 }
+
+/* The public portfolio (/p/:username) is rendered outside AppShell.
+   Electron's normal document-scroll lock is valid inside AppShell because
+   .workspace owns the scrollbar; standalone public portfolios need to
+   scroll the document itself. Do not change Web, Android or print layout. */
+@media screen and (min-width: 761px) {
+  html[data-desktop-chrome="true"]:has(.public-portfolio) {
+    height: auto;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+  }
+  html[data-desktop-chrome="true"]:has(.public-portfolio) body {
+    height: auto;
+    max-height: none;
+    min-height: 100dvh;
+    overflow-y: auto !important;
+  }
+}

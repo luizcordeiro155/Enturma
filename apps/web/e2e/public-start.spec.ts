@@ -198,3 +198,67 @@ test("app Desktop entra no login sem exibir apresentação Start", async ({
     await desktop.close();
   }
 });
+
+test("APP Desktop permite rolar o portfólio público longo sem liberar scroll nas outras telas", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1024, height: 600 });
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "enturmaDesktop", {
+      configurable: true,
+      value: {
+        isDesktop: true,
+        windowChrome: true,
+        nativeUpdater: true,
+        setTheme: async () => {},
+        getInfo: async () => ({ version: "0.4.424", platform: "win32" }),
+        getUpdateState: async () => ({
+          status: "current", progress: 100, currentVersion: "0.4.424",
+        }),
+        onUpdateState: () => () => {},
+        checkForUpdates: async () => {},
+        installUpdate: async () => {},
+        openExternal: async () => {},
+      },
+    });
+  });
+  await page.route("**/api/backend/public/portfolio/teste-scroll*", (route) =>
+    route.fulfill({
+      json: {
+        id: "test-owner", name: "Estudante de teste", username: "teste-scroll",
+        publicProfile: true, headline: "Portfólio de projetos",
+        summary: "Projetos universitários e experiências acadêmicas.",
+        accentColor: "#183f36", hasAvatar: false, hasBanner: false,
+        assets: [], skills: ["Java", "TypeScript"],
+        projects: Array.from({ length: 16 }, (_, i) => ({
+          id: String(i), name: `Projeto acadêmico ${i + 1}`,
+          description: "Descrição de um projeto da faculdade.",
+          assets: [],
+        })),
+        subjects: [{ name: "Programação" }],
+        achievements: [], stats: { totalXp: 120, currentStreak: 3 },
+        studyMinutes: 45,
+      },
+    }),
+  );
+
+  await page.goto("/p/teste-scroll?returnTo=%2Fportfolio");
+  const portfolio = page.locator("main.public-portfolio");
+  await expect(page.locator("html")).toHaveAttribute("data-desktop-chrome", "true");
+  await expect(portfolio.getByRole("heading", { name: "Projeto acadêmico 16" })).toBeVisible();
+  const metrics = await page.evaluate(() => ({
+    scrollHeight: document.scrollingElement?.scrollHeight ?? 0,
+    viewportHeight: window.innerHeight,
+    overflowY: getComputedStyle(document.body).overflowY,
+  }));
+  expect(metrics.scrollHeight).toBeGreaterThan(metrics.viewportHeight + 500);
+  expect(["auto", "scroll"]).toContain(metrics.overflowY);
+
+  await page.evaluate(() => {
+    document.scrollingElement?.scrollTo({ top: 800, behavior: "instant" });
+  });
+  await expect.poll(() =>
+    page.evaluate(() => document.scrollingElement?.scrollTop ?? 0)
+  ).toBeGreaterThan(300);
+  await expect(page.getByRole("link", { name: /Voltar ao Enturma/ })).toHaveCount(1);
+});
