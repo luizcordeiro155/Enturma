@@ -1,0 +1,821 @@
+{
+  "provider": "NEWTON",
+  "entries": [
+    {
+      "externalId": "newton-paiva",
+      "kind": "INSTITUTION",
+      "parentExternalId": null,
+      "name": "Centro Universitário Newton Paiva",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "shortName": "Newton Paiva",
+        "state": "MG",
+        "websiteUrl": "https://newtonpaiva.br"
+      }
+    },
+    {
+      "externalId": "newton-ead-polo-pendente",
+      "kind": "CAMPUS",
+      "parentExternalId": "newton-paiva",
+      "name": "EAD · polo a confirmar",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "note": "Polo não explicitado no documento oficial."
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ead-polo-pendente",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 5,
+        "learningArea": "IT",
+        "historical": true,
+        "note": "Matriz histórica 2021-1. Não representa ingresso vigente em 2026."
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1",
+      "kind": "CURRICULUM",
+      "parentExternalId": "newton-ads-ead-historico-2021",
+      "name": "Matriz NEWTON-EAD-2021-1",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "note": "Dados oficiais aguardando auditoria do hash e da vigência."
+      },
+      "curriculumVersion": "NEWTON-EAD-2021-1"
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1",
+      "name": "1º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1",
+      "name": "Algoritmos e programação",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1",
+      "name": "Fundamentos de Ciências Exatas",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1",
+      "name": "Fundamentos de Sistemas de Informação",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1",
+      "name": "Engenharia de Software",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 1",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p1",
+      "name": "Comunicação Efetiva I",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1",
+      "name": "2º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2",
+      "name": "Arquitetura de Computadores",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2",
+      "name": "Banco de Dados",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2",
+      "name": "Análise de Sistemas",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2",
+      "name": "Metodologia de Desenvolvimento de Sistemas",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 2",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p2",
+      "name": "Educação, Sociedade e meio ambiente",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1",
+      "name": "3º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3",
+      "name": "Programação Orientada a Objetos",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3",
+      "name": "Linguagens de Programação",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3",
+      "name": "Sistemas Operacionais",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3",
+      "name": "Qualidade e Testes de Software",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 3",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p3",
+      "name": "Análise de Dados",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1",
+      "name": "4º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4",
+      "name": "Programação Web",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4",
+      "name": "Estrutura de Dados",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4",
+      "name": "Business Intelligence",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4",
+      "name": "Modelagem de Processos de Negócios",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4",
+      "name": "Optativa I",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 4",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p4",
+      "name": "Transformação Digital",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1",
+      "name": "5º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5",
+      "name": "Programação para Dispositivos Móveis",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5",
+      "name": "Arquitetura de Aplicações Web",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5",
+      "name": "Redes de Computadores",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5",
+      "name": "Segurança e Auditoria de Sistemas de Informação",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5",
+      "name": "Fundamentos de Inteligência Artificial",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-NEWTON-EAD-2021-1-p5",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 5",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/08/Matriz_curricular_ADS_EaD_2021-1.pdf",
+        "name": "Newton Paiva · ADS EAD (2021-1 histórica)",
+        "type": "OFFICIAL_PDF",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT"
+      }
+    }
+  ]
+}
