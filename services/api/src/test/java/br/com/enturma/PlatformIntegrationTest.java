@@ -1188,7 +1188,20 @@ class PlatformIntegrationTest {
     assertThat(catalog.list("COURSE", pucCampus, "Sistemas de Informação", 0, false))
         .anyMatch(row -> si.equals(row.get("id"))
             && Boolean.TRUE.equals(row.get("hasCurriculum")));
-    for (Object[] item : new Object[][] {{psychology, 63}, {si, 52}}) {
+    UUID statistics = CatalogImports.identity(
+        "UFMG", "COURSE", "oferta-ufmg-belo-horizonte-estatistica-bachelor");
+    UUID computerScience = CatalogImports.identity(
+        "NEWTON", "COURSE", "newton-2025-presential-ciencia-da-computacao-bachelor");
+    assertThat(catalog.list(
+        "COURSE", CatalogImports.identity("UFMG", "CAMPUS", "ufmg-list-belo-horizonte"),
+        "Estatística", 0, false))
+        .anyMatch(row -> statistics.equals(row.get("id"))
+            && Boolean.TRUE.equals(row.get("hasCurriculum")));
+    assertThat(catalog.list("COURSE", newtonCampus, "Ciência da Computação", 0, false))
+        .anyMatch(row -> computerScience.equals(row.get("id"))
+            && Boolean.TRUE.equals(row.get("hasCurriculum")));
+    for (Object[] item : new Object[][] {
+        {psychology, 63}, {si, 52}, {statistics, 31}, {computerScience, 49}}) {
       assertThat(db.jdbc.queryForObject(
           "SELECT count(*) FROM academic_curriculum_subject s"
               + " JOIN academic_curriculum c ON c.id=s.curriculum_id"
