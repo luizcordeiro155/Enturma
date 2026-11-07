@@ -81,5 +81,16 @@ public class CatalogBootstrap {
           document,
           "NEWTON:PSYCHOLOGY-2021:" + CatalogImports.hash(json.writeValueAsString(document)));
     }
+    var siUberlandia = new ClassPathResource(
+        "catalog/expansions/pucminas-si-uberlandia-2023.json");
+    try (var input = siUberlandia.getInputStream()) {
+      var document = json.readValue(input, CatalogRecord.Document.class);
+      if (!"PUCMINAS".equals(document.provider()))
+        throw new IllegalStateException("Grade PUC com provider inconsistente");
+      imports.seed(
+          document,
+          "PUCMINAS:SI-UBERLANDIA-2023:"
+              + CatalogImports.hash(json.writeValueAsString(document)));
+    }
   }
 }
