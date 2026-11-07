@@ -1,0 +1,2188 @@
+{
+  "provider": "UFMG",
+  "entries": [
+    {
+      "externalId": "ufmg-unidades-bh-a-confirmar",
+      "kind": "CAMPUS",
+      "parentExternalId": "ufmg",
+      "name": "Belo Horizonte — unidade específica a confirmar",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "note": "Lista geral da UFMG. Atribuição à unidade física e turno depende do curso; agrupador de seleção, não um campus físico.",
+        "city": "Belo Horizonte",
+        "state": "MG",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-agronomia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Agronomia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-antropologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Antropologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-aquacultura-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Aquacultura",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-arqueologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Arqueologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-arquitetura-e-urbanismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Arquitetura e Urbanismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-arquivologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Arquivologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-artes-visuais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Artes Visuais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-artes-visuais-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Artes Visuais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-biblioteconomia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Biblioteconomia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-biomedicina-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Biomedicina",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencia-da-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencia-de-dados-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciência de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-atuariais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Atuariais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-biologicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Biológicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-biologicas-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Biológicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-contabeis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Contábeis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-da-natureza-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências da Natureza",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-do-estado-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências do Estado",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-economicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Econômicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-sociais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Sociais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-sociais-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Sociais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-ciencias-socioambientais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Socioambientais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-cinema-de-animacao-e-artes-digitais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Cinema de Animação e Artes Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-conservacao-e-restauracao-de-bens-culturais-moveis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Conservação e Restauração de Bens Culturais Móveis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-controladoria-e-financas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Controladoria e Finanças",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-danca-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Dança",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-design-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Design",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-design-de-moda-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Design de Moda",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-direito-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Direito",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-educacao-do-campo-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Educação do Campo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-educacao-fisica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Educação Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-educacao-fisica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Educação Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-enfermagem-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Enfermagem",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-aeroespacial-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Aeroespacial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-agricola-e-ambiental-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Agrícola e Ambiental",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-ambiental-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Ambiental",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-civil-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Civil",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-de-alimentos-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Alimentos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-de-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-de-controle-e-automacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Controle e Automação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-de-materiais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Materiais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-de-minas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Minas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-de-producao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Produção",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-de-sistemas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-eletrica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Elétrica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-florestal-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Florestal",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-mecanica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-metalurgica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Metalúrgica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-engenharia-quimica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Química",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-estatistica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Estatística",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-farmacia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Farmácia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-filosofia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Filosofia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-filosofia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Filosofia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-fisica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-fisica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-fisioterapia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Fisioterapia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-fonoaudiologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Fonoaudiologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-geografia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Geografia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-geografia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Geografia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-geologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Geologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-gestao-de-servicos-de-saude-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Gestão de Serviços de Saúde",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-gestao-publica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Gestão Pública",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-historia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "História",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-historia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "História",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-jornalismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Jornalismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-letras-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Letras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-letras-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Letras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-letras-libras-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Letras-Libras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-matematica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Matemática",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-matematica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Matemática",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-matematica-computacional-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Matemática Computacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-medicina-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Medicina",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-medicina-veterinaria-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Medicina Veterinária",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-museologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Museologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-musica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Música",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-musica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Música",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-nutricao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Nutrição",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-odontologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Odontologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-pedagogia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Pedagogia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-psicologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-publicidade-e-propaganda-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Publicidade e Propaganda",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-quimica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Química",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-quimica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Química",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-quimica-tecnologica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Química Tecnológica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-radiologia-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Radiologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-relacoes-economicas-internacionais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Relações Econômicas Internacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-relacoes-publicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Relações Públicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-sistemas-de-informacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-teatro-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Teatro",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-teatro-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Teatro",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-terapia-ocupacional-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Terapia Ocupacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-turismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Turismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-ufmg-unidades-bh-a-confirmar-zootecnia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-unidades-bh-a-confirmar",
+      "name": "Zootecnia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/cursos/",
+        "name": "UFMG - listagem institucional de cursos de graduacao 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "fbe60d7ace73c8f8f0652ad2da43af88bed82d0bbcd372b0d4a10b350bf989de"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.ufmg.br/cursos/",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    }
+  ]
+}
