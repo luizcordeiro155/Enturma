@@ -1154,6 +1154,14 @@ class PlatformIntegrationTest {
   @Test
   void expandedUniversitiesAreSelectableAndHistoricalCurriculaPersist() {
     for (int i = 0; i < 60; i++) imports.processBatch();
+    var failedNewCurricula = db.list(
+        "SELECT i.entity_type,i.external_id,i.error_code,i.error_message"
+            + " FROM academic_import_item i JOIN academic_import_job j ON j.id=i.job_id"
+            + " WHERE j.seed_key LIKE '%:COMPLETE-CURRICULUM:%'"
+            + " AND i.status='FAILED' LIMIT 5");
+    assertThat(failedNewCurricula)
+        .as("Full curriculum imports must not silently fail: " + failedNewCurricula)
+        .isEmpty();
     assertThat(db.jdbc.queryForObject(
         "SELECT count(*) FROM academic_import_job WHERE seed_key LIKE"
             + " '%:OFFICIAL-COURSE-LIST:%' AND status='COMPLETED'", Integer.class))
