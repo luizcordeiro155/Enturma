@@ -11,22 +11,28 @@
       "number": 1,
       "subjects": [
         {
-          "name": "Algoritmos e programação"
+          "name": "Algoritmos e programação",
+          "hours": 80
         },
         {
-          "name": "Fundamentos de Ciências Exatas"
+          "name": "Fundamentos de Ciências Exatas",
+          "hours": 80
         },
         {
-          "name": "Fundamentos de Sistemas de Informação"
+          "name": "Fundamentos de Sistemas de Informação",
+          "hours": 80
         },
         {
-          "name": "Engenharia de Software"
+          "name": "Engenharia de Software",
+          "hours": 40
         },
         {
-          "name": "Usina de Projetos Experimentais (UPx) - TI 1"
+          "name": "Usina de Projetos Experimentais (UPx) - TI 1",
+          "hours": 80
         },
         {
-          "name": "Comunicação Efetiva I"
+          "name": "Comunicação Efetiva I",
+          "hours": 40
         }
       ]
     },
@@ -34,22 +40,28 @@
       "number": 2,
       "subjects": [
         {
-          "name": "Arquitetura de Computadores"
+          "name": "Arquitetura de Computadores",
+          "hours": 80
         },
         {
-          "name": "Banco de Dados"
+          "name": "Banco de Dados",
+          "hours": 80
         },
         {
-          "name": "Análise de Sistemas"
+          "name": "Análise de Sistemas",
+          "hours": 40
         },
         {
-          "name": "Metodologia de Desenvolvimento de Sistemas"
+          "name": "Metodologia de Desenvolvimento de Sistemas",
+          "hours": 80
         },
         {
-          "name": "Usina de Projetos Experimentais (UPx) - TI 2"
+          "name": "Usina de Projetos Experimentais (UPx) - TI 2",
+          "hours": 80
         },
         {
-          "name": "Educação, Sociedade e meio ambiente"
+          "name": "Educação, Sociedade e meio ambiente",
+          "hours": 40
         }
       ]
     },
@@ -57,22 +69,28 @@
       "number": 3,
       "subjects": [
         {
-          "name": "Programação Orientada a Objetos"
+          "name": "Programação Orientada a Objetos",
+          "hours": 80
         },
         {
-          "name": "Linguagens de Programação"
+          "name": "Linguagens de Programação",
+          "hours": 80
         },
         {
-          "name": "Sistemas Operacionais"
+          "name": "Sistemas Operacionais",
+          "hours": 80
         },
         {
-          "name": "Qualidade e Testes de Software"
+          "name": "Qualidade e Testes de Software",
+          "hours": 80
         },
         {
-          "name": "Usina de Projetos Experimentais (UPx) - TI 3"
+          "name": "Usina de Projetos Experimentais (UPx) - TI 3",
+          "hours": 80
         },
         {
-          "name": "Análise de Dados"
+          "name": "Análise de Dados",
+          "hours": 40
         }
       ]
     },
@@ -80,25 +98,32 @@
       "number": 4,
       "subjects": [
         {
-          "name": "Programação Web"
+          "name": "Programação Web",
+          "hours": 80
         },
         {
-          "name": "Estrutura de Dados"
+          "name": "Estrutura de Dados",
+          "hours": 80
         },
         {
-          "name": "Business Intelligence"
+          "name": "Business Intelligence",
+          "hours": 80
         },
         {
-          "name": "Modelagem de Processos de Negócios"
+          "name": "Modelagem de Processos de Negócios",
+          "hours": 80
         },
         {
-          "name": "Optativa I"
+          "name": "Optativa I",
+          "hours": 40
         },
         {
-          "name": "Usina de Projetos Experimentais (UPx) - TI 4"
+          "name": "Usina de Projetos Experimentais (UPx) - TI 4",
+          "hours": 80
         },
         {
-          "name": "Transformação Digital"
+          "name": "Transformação Digital",
+          "hours": 40
         }
       ]
     },
@@ -106,22 +131,28 @@
       "number": 5,
       "subjects": [
         {
-          "name": "Programação para Dispositivos Móveis"
+          "name": "Programação para Dispositivos Móveis",
+          "hours": 80
         },
         {
-          "name": "Arquitetura de Aplicações Web"
+          "name": "Arquitetura de Aplicações Web",
+          "hours": 80
         },
         {
-          "name": "Redes de Computadores"
+          "name": "Redes de Computadores",
+          "hours": 80
         },
         {
-          "name": "Segurança e Auditoria de Sistemas de Informação"
+          "name": "Segurança e Auditoria de Sistemas de Informação",
+          "hours": 80
         },
         {
-          "name": "Fundamentos de Inteligência Artificial"
+          "name": "Fundamentos de Inteligência Artificial",
+          "hours": 80
         },
         {
-          "name": "Usina de Projetos Experimentais (UPx) - TI 5"
+          "name": "Usina de Projetos Experimentais (UPx) - TI 5",
+          "hours": 80
         }
       ]
     }
