@@ -6,99 +6,394 @@
       "kind": "COURSE",
       "parentExternalId": "campus-1842",
       "name": "Jogos Digitais",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
-        "name": "UNA · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
         "degreeType": "TECHNOLOGIST",
         "modality": "PRESENTIAL",
         "durationPeriods": 5,
         "learningArea": "IT",
-        "note": "Unidade não confirmada pela página; associação ao campus Aimorés requer revisão."
+        "coursePage": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "sourceVersion": "PPC-JOGOS-2023",
+        "historical": true,
+        "note": "Matriz PPC de 2023, sem garantia de vigencia para ingresso atual; cinco blocos curriculares, organizacao flexivel.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026",
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023",
       "kind": "CURRICULUM",
       "parentExternalId": "una-jogos-digitais-pending-2026",
-      "name": "Matriz UNA-SITE-2026",
-      "status": "PENDING_VERIFICATION",
+      "name": "PPC PPC-JOGOS-2023",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
-        "name": "UNA · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "note": "Dados oficiais aguardando auditoria do hash e da vigência."
+        "minimumPeriods": 5,
+        "note": "Matriz PPC de 2023, sem garantia de vigencia para ingresso atual; cinco blocos curriculares, organizacao flexivel.",
+        "totalWorkloadHours": 2030,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       },
-      "curriculumVersion": "UNA-SITE-2026"
+      "curriculumVersion": "PPC-JOGOS-2023"
     },
     {
-      "externalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1",
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p1",
       "kind": "PERIOD",
-      "parentExternalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026",
-      "name": "1º período",
-      "status": "PENDING_VERIFICATION",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023",
+      "name": "Bloco curricular 1 (percurso flexivel)",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
-        "name": "UNA · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
-      "attributes": {},
+      "attributes": {
+        "organization": "BLOCK",
+        "note": "Agrupamento do PPC, nao fixa a matricula por semestre.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
       "periodNumber": 1
     },
     {
-      "externalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1-s1",
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p1-s1",
       "kind": "SUBJECT",
-      "parentExternalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1",
-      "name": "AFP — Academia de Futuros Profissionais",
-      "status": "PENDING_VERIFICATION",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p1",
+      "name": "Programação de soluções computacionais",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
-        "name": "UNA · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 60,
         "orderIndex": 0,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1-s2",
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p1-s2",
       "kind": "SUBJECT",
-      "parentExternalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1",
-      "name": "Modelagem de software",
-      "status": "PENDING_VERIFICATION",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p1",
+      "name": "Modelagem de Software",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
-        "name": "UNA · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 160,
         "orderIndex": 1,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p1",
+      "name": "Vida & Carreira",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER",
+        "workloadHours": 60,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023",
+      "name": "Bloco curricular 2 (percurso flexivel)",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "BLOCK",
+        "note": "Agrupamento do PPC, nao fixa a matricula por semestre.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 2
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p2",
+      "name": "Animação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p2",
+      "name": "Expressão visual",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023",
+      "name": "Bloco curricular 3 (percurso flexivel)",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "BLOCK",
+        "note": "Agrupamento do PPC, nao fixa a matricula por semestre.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 3
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p3",
+      "name": "Usabilidade, desenvolvimento web, mobile e jogos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p3",
+      "name": "Programação de jogos multiplataforma e engines",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023",
+      "name": "Bloco curricular 4 (percurso flexivel)",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "BLOCK",
+        "note": "Agrupamento do PPC, nao fixa a matricula por semestre.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 4
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p4",
+      "name": "Inteligência artificial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p4",
+      "name": "Computação gráfica e realidade virtual",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023",
+      "name": "Bloco curricular 5 (percurso flexivel)",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "BLOCK",
+        "note": "Agrupamento do PPC, nao fixa a matricula por semestre.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 5
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p5",
+      "name": "Game design",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-PPC-JOGOS-2023-p5",
+      "name": "Core curriculum",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+        "name": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "110fafbd0692f556ef9becf4620217c5af3c705f30b828180e893d7a477f778c",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER",
+        "workloadHours": 160,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     }
   ]
