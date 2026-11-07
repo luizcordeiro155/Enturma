@@ -29,6 +29,12 @@ A correção da importação inclui quatro ofertas adicionais, estruturadas nas 
 
 A presença no GitHub/Vercel **não comprova** atualização do backend: é preciso que o Java atualizado rode no servidor, que os jobs de importação terminem com `COMPLETED`, e que a API de onboarding devolva as novas ofertas. O SHA-256 documentado da expansão protege as transcrições versionadas, não autentica os bytes dos documentos originais.
 
+## Ampliação adicional — PUC Minas, UFMG e Newton Paiva (07/11/2026)
+
+A nova [cobertura detalhada](ACADEMIC_CATALOG_COVERAGE_PUC_UFMG_NEWTON_2026.md) acrescenta **271 novas ofertas** de cursos às listas verificadas: 133 PUC Minas, 94 UFMG e 44 Newton Paiva (as ofertas Newton são do edital histórico 2025). Acrescenta ainda **quatro novas matrizes** com 195 componentes curriculares documentados: Psicologia e Ciência da Computação da Newton, Sistemas de Informação da PUC Uberlândia e Estatística da UFMG.
+
+A quantidade de cursos ofertados não equivale à quantidade de grades conferidas. Quando um curso não tem matriz oficial verificada, ele pode ser selecionado para solicitação de grade, mas **não recebe matérias ou períodos inventados**. Matrizes históricas devem ser conferidas com a versão e modalidade da matrícula do aluno.
+
 ## ADS UNA Aimorés
 
 A matriz E2A Radial organiza o nível Fundamental nos semestres 1–2. Inclui **Interação humano computador e UX**, **Algoritmos e programação**, **Exploração digital e fundamentos tecnológicos** e **Matemática computacional aplicada**, cada uma com 160h. O estudante seleciona as UCs atuais; ter cursado as duas primeiras em 2026.1 não transforma essa sequência individual em uma regra para todas as turmas.
