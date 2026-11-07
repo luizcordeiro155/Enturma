@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import java.util.HashSet;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Set;
 import org.junit.jupiter.api.Test;
@@ -24,6 +25,13 @@ class CatalogExpansionSnapshotTest {
       try (var input = new ClassPathResource(path).getInputStream()) {
         var document = mapper.readValue(input, CatalogRecord.Document.class);
         assertThat(document.provider()).isEqualTo(provider);
+        String evidenceFile = "catalog/evidence/" + provider.toLowerCase(java.util.Locale.ROOT) + ".json";
+        String evidence;
+        try (var evidenceStream = new ClassPathResource(evidenceFile).getInputStream()) {
+          evidence = new String(evidenceStream.readAllBytes(), StandardCharsets.UTF_8);
+        }
+        String evidenceSha256 = CatalogImports.hash(evidence);
+        assertThat(mapper.readTree(evidence).get("provider").asText()).isEqualTo(provider);
         assertThat(document.entries()).isNotEmpty();
         Set<String> identities = new HashSet<>();
         for (var entry : document.entries()) {
@@ -31,7 +39,7 @@ class CatalogExpansionSnapshotTest {
           assertThat(entry.status()).isEqualTo("VERIFIED");
           assertThat(entry.source().url()).startsWith("https://");
           assertThat(entry.source().verifiedAt()).isNotNull();
-          assertThat(entry.source().contentHash()).matches("[0-9a-f]{64}");
+          assertThat(entry.source().contentHash()).isEqualTo(evidenceSha256);
           assertThat(entry.source().type()).isEqualTo("MANUAL_VERIFIED");
           if (!entry.kind().equals("INSTITUTION"))
             assertThat(entry.parentExternalId()).isNotBlank();
