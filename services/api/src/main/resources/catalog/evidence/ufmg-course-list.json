@@ -1,0 +1,579 @@
+{
+  "provider": "UFMG",
+  "sourceUrl": "https://www.ufmg.br/cursos/",
+  "sourceName": "UFMG - listagem institucional de cursos de graduacao 2026",
+  "reviewedAt": "2026-11-07T03:00:00Z",
+  "scope": "List of explicitly named degree programs. SHA-256 covers this curated UTF-8 transcription, not the remote webpage or PDF.",
+  "campusNotes": [
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "note": "Lista geral da UFMG. Atribuição à unidade física e turno depende do curso; agrupador de seleção, não um campus físico."
+    }
+  ],
+  "offerings": [
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Agronomia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Antropologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Aquacultura",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Arqueologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Arquitetura e Urbanismo",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Arquivologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Artes Visuais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Artes Visuais",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Biblioteconomia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Biomedicina",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciência da Computação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciência de Dados",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Atuariais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Biológicas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Biológicas",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências da Natureza",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências do Estado",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Econômicas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Sociais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Sociais",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Ciências Socioambientais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Cinema de Animação e Artes Digitais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Conservação e Restauração de Bens Culturais Móveis",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Controladoria e Finanças",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Dança",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Design",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Design de Moda",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Educação do Campo",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Educação Física",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Educação Física",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Enfermagem",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Aeroespacial",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Agrícola e Ambiental",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Ambiental",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Civil",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Alimentos",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Computação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Controle e Automação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Materiais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Minas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Produção",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia de Sistemas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Elétrica",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Florestal",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Mecânica",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Metalúrgica",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Engenharia Química",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Estatística",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Farmácia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Filosofia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Filosofia",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Física",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Física",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Fisioterapia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Fonoaudiologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Geografia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Geografia",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Geologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Gestão de Serviços de Saúde",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Gestão Pública",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "História",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "História",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Jornalismo",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Letras",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Letras",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Letras-Libras",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Matemática",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Matemática",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Matemática Computacional",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Medicina",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Medicina Veterinária",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Museologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Música",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Música",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Nutrição",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Odontologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Pedagogia",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Publicidade e Propaganda",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Química",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Química",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Química Tecnológica",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Radiologia",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Relações Econômicas Internacionais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Relações Públicas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Teatro",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Teatro",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Terapia Ocupacional",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Turismo",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "ufmg-unidades-bh-a-confirmar",
+      "name": "Zootecnia",
+      "degree": "BACHELOR",
+      "historical": false
+    }
+  ]
+}
