@@ -71,5 +71,15 @@ public class CatalogBootstrap {
             provider + ":OFFICIAL-COURSE-LIST:" + CatalogImports.hash(json.writeValueAsString(document)));
       }
     }
+    // Separate, source-specific curricula must run only after their course offerings exist.
+    var psychology = new ClassPathResource("catalog/expansions/newton-psychology-2021.json");
+    try (var input = psychology.getInputStream()) {
+      var document = json.readValue(input, CatalogRecord.Document.class);
+      if (!"NEWTON".equals(document.provider()))
+        throw new IllegalStateException("Grade de Psicologia Newton com provider inconsistente");
+      imports.seed(
+          document,
+          "NEWTON:PSYCHOLOGY-2021:" + CatalogImports.hash(json.writeValueAsString(document)));
+    }
   }
 }
