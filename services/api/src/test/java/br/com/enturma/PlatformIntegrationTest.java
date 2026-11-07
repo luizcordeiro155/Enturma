@@ -68,7 +68,7 @@ class PlatformIntegrationTest {
         .answer(
             org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.anyString(),
-            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.eq("QUESTION"),
             org.mockito.ArgumentMatchers.eq(false));
   }
 
