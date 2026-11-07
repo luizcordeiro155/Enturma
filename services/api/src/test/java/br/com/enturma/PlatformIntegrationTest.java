@@ -1121,6 +1121,19 @@ class PlatformIntegrationTest {
                   "SELECT count(*) FROM academic_curriculum WHERE course_offering_id=?"
                       + " AND verification_status='VERIFIED'", Integer.class, courseId))
           .isEqualTo(1);
+      String campusExternalId = switch (provider) {
+        case "NEWTON" -> "newton-ead-polo-pendente";
+        case "UNA" -> "campus-1842";
+        case "UFMG" -> "pampulha";
+        case "PUCMINAS" -> "puc-lourdes-pendente";
+        default -> throw new IllegalStateException("Unknown provider");
+      };
+      String search = provider.equals("NEWTON") ? "Análise"
+          : provider.equals("UFMG") ? "Engenharia" : "Jogos";
+      UUID campusId = CatalogImports.identity(provider, "CAMPUS", campusExternalId);
+      assertThat(catalog.list("COURSE", campusId, search, 0, false))
+          .anyMatch(row -> courseId.equals(row.get("id"))
+              && Boolean.TRUE.equals(row.get("hasCurriculum")));
       assertThat(
               db.jdbc.queryForObject(
                   "SELECT count(*) FROM academic_curriculum_subject s"
