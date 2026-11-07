@@ -53,5 +53,23 @@ public class CatalogBootstrap {
             provider + ":EXPANSION:" + CatalogImports.hash(json.writeValueAsString(document)));
       }
     }
+    // Catalog-only offerings are stored separately from verified curriculum snapshots.
+    // Import the official course lists using the same parent-first audited pipeline.
+    // Courses without a documented curriculum remain selectable as requests only.
+    for (String provider : List.of("UFMG", "PUCMINAS", "NEWTON")) {
+      var resource = new ClassPathResource(
+          "catalog/expansions/" + provider.toLowerCase(Locale.ROOT) + "-course-list.json");
+      try (var input = resource.getInputStream()) {
+        var document = json.readValue(input, CatalogRecord.Document.class);
+        if (!provider.equals(document.provider()))
+          throw new IllegalStateException("Provider de cursos inconsistente");
+        if (document.entries().stream().anyMatch(
+            entry -> !List.of("CAMPUS", "COURSE").contains(entry.kind())))
+          throw new IllegalStateException("Lista de cursos nao pode conter grade ficticia");
+        imports.seed(
+            document,
+            provider + ":OFFICIAL-COURSE-LIST:" + CatalogImports.hash(json.writeValueAsString(document)));
+      }
+    }
   }
 }
