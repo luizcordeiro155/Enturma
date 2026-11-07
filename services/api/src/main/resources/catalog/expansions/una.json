@@ -1,0 +1,105 @@
+{
+  "provider": "UNA",
+  "entries": [
+    {
+      "externalId": "una-jogos-digitais-pending-2026",
+      "kind": "COURSE",
+      "parentExternalId": "campus-1842",
+      "name": "Jogos Digitais",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
+        "name": "UNA · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 5,
+        "learningArea": "IT",
+        "note": "Unidade não confirmada pela página; associação ao campus Aimorés requer revisão."
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026",
+      "kind": "CURRICULUM",
+      "parentExternalId": "una-jogos-digitais-pending-2026",
+      "name": "Matriz UNA-SITE-2026",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
+        "name": "UNA · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "note": "Dados oficiais aguardando auditoria do hash e da vigência."
+      },
+      "curriculumVersion": "UNA-SITE-2026"
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026",
+      "name": "1º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
+        "name": "UNA · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1",
+      "name": "AFP — Academia de Futuros Profissionais",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
+        "name": "UNA · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "una-jogos-digitais-pending-2026-UNA-SITE-2026-p1",
+      "name": "Modelagem de software",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.una.br/cursos/graduacao/jogos-digitais-graduacao-tecnologica/",
+        "name": "UNA · Jogos Digitais",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 160,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT"
+      }
+    }
+  ]
+}

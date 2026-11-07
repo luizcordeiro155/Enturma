@@ -1,0 +1,633 @@
+{
+  "provider": "UFMG",
+  "entries": [
+    {
+      "externalId": "ufmg-engenharia-computacao-2026",
+      "kind": "COURSE",
+      "parentExternalId": "pampulha",
+      "name": "Engenharia de Computação",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "kind": "CURRICULUM",
+      "parentExternalId": "ufmg-engenharia-computacao-2026",
+      "name": "Matriz UFMG-SITE-2026",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "note": "Dados oficiais aguardando auditoria do hash e da vigência."
+      },
+      "curriculumVersion": "UFMG-SITE-2026"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "1º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p1",
+      "name": "Programação e Desenvolvimento de Software I",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC203"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p1",
+      "name": "Introdução à Lógica Computacional",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC638"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p1",
+      "name": "Cálculo Diferencial e Integral I",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "MAT001"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "2º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p2",
+      "name": "Matemática Discreta",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC216"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p2",
+      "name": "Programação e Desenvolvimento de Software II",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC219"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "3º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p3",
+      "name": "Estruturas de Dados",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC221"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p3",
+      "name": "Sistemas Digitais",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "ELT124"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "4º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p4",
+      "name": "Introdução a Bancos de Dados",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC222"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p4",
+      "name": "Algoritmos I",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC206"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "5º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p5",
+      "name": "Laboratório de Projetos I",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "INU037"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "6º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6",
+      "name": "Linguagens de Programação",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC024"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6",
+      "name": "Sistemas Operacionais",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC605"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6",
+      "name": "Engenharia de Software",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC603"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p6",
+      "name": "Fundamentos de Inteligência Artificial",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 30,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "INU040"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "7º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p7",
+      "name": "Redes de Computadores",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "INU041"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "8º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p8",
+      "name": "Introdução à Segurança Computacional",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "DCC223"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p9",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "9º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 9
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p9-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p9",
+      "name": "Projeto Final de Curso I",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "INU043"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p10",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026",
+      "name": "10º período",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {},
+      "periodNumber": 10
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p10-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p10",
+      "name": "Estágio Supervisionado",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 165,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "INU046"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p10-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-UFMG-SITE-2026-p10",
+      "name": "Projeto Final de Curso II",
+      "status": "PENDING_VERIFICATION",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG · Engenharia de Computação",
+        "type": "OFFICIAL_WEBPAGE",
+        "contentHash": null,
+        "retrievedAt": "2026-11-06T20:40:00Z",
+        "verifiedAt": null
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "officialCode": "INU045"
+      }
+    }
+  ]
+}
