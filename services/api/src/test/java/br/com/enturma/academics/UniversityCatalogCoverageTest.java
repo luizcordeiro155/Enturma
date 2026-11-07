@@ -26,7 +26,11 @@ class UniversityCatalogCoverageTest {
         new Coverage("NEWTON", "newton-course-list.json", "newton-course-list.json", 44, 0, 0, 0),
         new Coverage("NEWTON", "newton-psychology-2021.json", "newton-psychology-2021.json", 0, 1, 10, 63),
         new Coverage("PUCMINAS", "pucminas-si-uberlandia-2023.json",
-            "pucminas-si-uberlandia-2023.json", 1, 1, 8, 52));
+            "pucminas-si-uberlandia-2023.json", 1, 1, 8, 52),
+        new Coverage("UFMG", "ufmg-estatistica-2024.json",
+            "ufmg-estatistica-2024.json", 0, 1, 8, 31),
+        new Coverage("NEWTON", "newton-computacao-2023.json",
+            "newton-computacao-2023.json", 0, 1, 8, 49));
 
     Map<String, String> parents = Map.of(
         "CAMPUS", "INSTITUTION", "COURSE", "CAMPUS", "CURRICULUM", "COURSE",
