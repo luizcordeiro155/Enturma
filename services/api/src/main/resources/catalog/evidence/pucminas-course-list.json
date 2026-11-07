@@ -1,493 +1,835 @@
 {
   "provider": "PUCMINAS",
-  "sourceUrl": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
-  "sourceName": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+  "sourceUrl": "https://www.pucminas.br/graduacao/_layouts/15/cursos/graduacao.aspx",
+  "sourceName": "PUC Minas - catálogo institucional de graduação por unidade e modalidade",
   "reviewedAt": "2026-11-07T03:00:00Z",
-  "scope": "List of explicitly named degree programs. SHA-256 covers this curated UTF-8 transcription, not the remote webpage or PDF.",
-  "campusNotes": [
+  "scope": "Transcrição de cursos explicitamente listados por unidade na página institucional; SHA-256 sobre este arquivo UTF-8, não sobre a página remota.",
+  "campuses": {
+    "barreiro": "puc-barreiro-si-campus",
+    "betim": "puc-list-betim",
+    "contagem": "puc-list-contagem",
+    "coracao-eucaristico": "puc-list-coracao-eucaristico",
+    "lourdes": "puc-lourdes-pendente",
+    "pocos": "puc-pocos-cc-campus",
+    "sao-gabriel": "puc-list-sao-gabriel",
+    "virtual": "puc-list-virtual"
+  },
+  "offerings": [
     {
-      "campus": "puc-campus-coverage-coracao",
-      "note": "Ofertas documentadas pela PUC Minas em 2026."
-    },
-    {
-      "campus": "puc-lourdes-pendente",
-      "note": "Ofertas documentadas pela PUC Minas em 2026."
-    },
-    {
-      "campus": "puc-campus-coverage-sao-gabriel",
-      "note": "Ofertas documentadas pela PUC Minas em 2026."
+      "campus": "puc-barreiro-si-campus",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-barreiro-si-campus",
-      "note": "Ofertas documentadas pela PUC Minas em 2026."
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "note": "Unidade lógica de ensino virtual, não endereço físico."
-    }
-  ],
-  "offerings": [
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Administração",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Arquitetura e Urbanismo",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Ciência da Computação",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Ciências Biológicas",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
       "name": "Ciências Contábeis",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Ciências Econômicas",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Ciências Sociais",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Cinema e Audiovisual",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
+      "campus": "puc-barreiro-si-campus",
       "name": "Direito",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Educação Física",
+      "campus": "puc-barreiro-si-campus",
+      "name": "Nutrição",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Enfermagem",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Engenharia Civil",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Engenharia de Computação",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Engenharia de Controle e Automação",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Engenharia de Produção",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Engenharia Elétrica",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Engenharia Mecânica",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Engenharia Química",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Filosofia",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Fisioterapia",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Fonoaudiologia",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Geografia",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "História",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Jornalismo",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Letras",
-      "degree": "LICENTIATE",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Matemática",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Odontologia",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
-      "name": "Pedagogia",
-      "degree": "LICENTIATE",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-coracao",
+      "campus": "puc-barreiro-si-campus",
       "name": "Psicologia",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-coracao",
+      "campus": "puc-barreiro-si-campus",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-barreiro-si-campus",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "degree": "TECHNOLOGIST",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Biomedicina",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Enfermagem",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Fisioterapia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Medicina",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Medicina Veterinária",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-betim",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "degree": "TECHNOLOGIST",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-contagem",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-contagem",
+      "name": "Biomedicina",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-contagem",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-contagem",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-contagem",
+      "name": "Engenharia de Software",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-contagem",
+      "name": "Medicina",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-contagem",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-contagem",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "degree": "TECHNOLOGIST",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Arquitetura e Urbanismo",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Ciência da Computação",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Ciências Biológicas - Bacharelado",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Ciências Biológicas - Licenciatura",
+      "degree": "LICENTIATE",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Ciências Econômicas",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Ciências Sociais - Bacharelado",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Ciências Sociais - Licenciatura",
+      "degree": "LICENTIATE",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Cinema e Audiovisual",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Educação Física - Bacharelado",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Educação Física - Licenciatura",
+      "degree": "LICENTIATE",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Enfermagem",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia Civil",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia de Computação",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia de Controle e Automação",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia de Produção",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia de Software",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia Elétrica",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia Eletrônica e de Telecomunicação",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia Mecânica",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia Química",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Engenharia Robótica",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Farmácia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Filosofia - Bacharelado",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Física",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Física Médica",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Fisioterapia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Fonoaudiologia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Geografia - Bacharelado",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Geografia - Licenciatura",
+      "degree": "LICENTIATE",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "História - Bacharelado",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "História - Licenciatura",
+      "degree": "LICENTIATE",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Jornalismo",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Letras - Bacharelado",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Letras - Licenciatura em Português",
+      "degree": "LICENTIATE",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Letras - Licenciatura em Português/Inglês",
+      "degree": "LICENTIATE",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Matemática",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Nutrição",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Odontologia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Pedagogia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-coracao-eucaristico",
       "name": "Publicidade e Propaganda",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-coracao",
+      "campus": "puc-list-coracao-eucaristico",
       "name": "Relações Internacionais",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-coracao",
+      "campus": "puc-list-coracao-eucaristico",
       "name": "Relações Públicas",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-coracao",
+      "campus": "puc-list-coracao-eucaristico",
       "name": "Serviço Social",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-coracao",
+      "campus": "puc-list-coracao-eucaristico",
       "name": "Teologia",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Administração",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Arquitetura e Urbanismo",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Biomedicina",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Ciência da Computação",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Ciência de Dados e Inteligência Artificial",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Ciências Contábeis",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Ciências Econômicas",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Design",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Direito",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Engenharia de Computação",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Engenharia de Software",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Jogos Digitais",
       "degree": "TECHNOLOGIST",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Jornalismo",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Medicina Veterinária",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Psicologia",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Publicidade e Propaganda",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
       "campus": "puc-lourdes-pendente",
       "name": "Relações Internacionais",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-sao-gabriel",
+      "campus": "puc-pocos-cc-campus",
       "name": "Administração",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-sao-gabriel",
-      "name": "Análise e Desenvolvimento de Sistemas",
-      "degree": "TECHNOLOGIST",
-      "historical": false
+      "campus": "puc-pocos-cc-campus",
+      "name": "Arquitetura e Urbanismo",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-sao-gabriel",
+      "campus": "puc-pocos-cc-campus",
+      "name": "Biomedicina",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
+      "name": "Ciência da Computação",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
       "name": "Direito",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-sao-gabriel",
-      "name": "Engenharia Mecânica",
+      "campus": "puc-pocos-cc-campus",
+      "name": "Enfermagem",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-sao-gabriel",
-      "name": "Sistemas de Informação",
+      "campus": "puc-pocos-cc-campus",
+      "name": "Engenharia Civil",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-sao-gabriel",
+      "campus": "puc-pocos-cc-campus",
+      "name": "Engenharia de Produção",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
+      "name": "Engenharia de Software",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
+      "name": "Engenharia Elétrica",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
+      "name": "Fisioterapia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
+      "name": "Jornalismo",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
+      "name": "Medicina",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
+      "name": "Medicina Veterinária",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
+      "name": "Odontologia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-pocos-cc-campus",
       "name": "Psicologia",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-barreiro-si-campus",
-      "name": "Administração",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-barreiro-si-campus",
-      "name": "Direito",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-barreiro-si-campus",
-      "name": "Sistemas de Informação",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Administração",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Análise e Desenvolvimento de Sistemas",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Banco de Dados",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Ciências Contábeis",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Ciências Econômicas",
-      "degree": "BACHELOR",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Comércio Exterior",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Gestão Comercial",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Gestão da Tecnologia da Informação",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Gestão Financeira",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Gestão de Recursos Humanos",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Jogos Digitais",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Marketing",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Processos Gerenciais",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Produção Audiovisual",
-      "degree": "TECHNOLOGIST",
-      "historical": false
-    },
-    {
-      "campus": "puc-campus-coverage-virtual",
+      "campus": "puc-pocos-cc-campus",
       "name": "Publicidade e Propaganda",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Redes de Computadores",
-      "degree": "TECHNOLOGIST",
-      "historical": false
+      "campus": "puc-pocos-cc-campus",
+      "name": "Relações Internacionais",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-virtual",
-      "name": "Segurança da Informação",
-      "degree": "TECHNOLOGIST",
-      "historical": false
+      "campus": "puc-list-sao-gabriel",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
     },
     {
-      "campus": "puc-campus-coverage-virtual",
+      "campus": "puc-list-sao-gabriel",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-sao-gabriel",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-sao-gabriel",
+      "name": "Engenharia Aeronáutica",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-sao-gabriel",
+      "name": "Engenharia Mecânica",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-sao-gabriel",
+      "name": "Jornalismo",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-sao-gabriel",
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-sao-gabriel",
       "name": "Sistemas de Informação",
       "degree": "BACHELOR",
-      "historical": false
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-sao-gabriel",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "degree": "TECHNOLOGIST",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-sao-gabriel",
+      "name": "Manutenção de Aeronaves",
+      "degree": "TECHNOLOGIST",
+      "modality": "PRESENTIAL"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Banco de Dados",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Comércio Exterior",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Gestão Comercial",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Gestão de Recursos Humanos",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Gestão Financeira",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Gestão da Tecnologia da Informação",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Jogos Digitais",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Marketing",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Processos Gerenciais",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Produção Audiovisual",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Redes de Computadores",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Segurança da Informação",
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Ciências Econômicas",
+      "degree": "BACHELOR",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Publicidade e Propaganda",
+      "degree": "BACHELOR",
+      "modality": "REMOTE"
+    },
+    {
+      "campus": "puc-list-virtual",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "modality": "REMOTE"
     }
   ]
 }
