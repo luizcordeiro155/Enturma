@@ -1,0 +1,577 @@
+{
+  "provider": "NEWTON",
+  "entries": [
+    {
+      "externalId": "newton-catalog-campus-nao-definido",
+      "kind": "CAMPUS",
+      "parentExternalId": "newton-paiva",
+      "name": "Newton Paiva — unidade da oferta a confirmar",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "note": "Cursos em documentos institucionais de 2023; confirmar oferta e unidade vigentes antes da matrícula.",
+        "state": "MG",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-enfermagem-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Enfermagem",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-fisioterapia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Fisioterapia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-farmacia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Farmácia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-medicina-veterinaria-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Medicina Veterinária",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-odontologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Odontologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-estetica-e-cosmetica-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Estética e Cosmética",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-direito-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Direito",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-ciencias-contabeis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Ciências Contábeis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-arquitetura-e-urbanismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Arquitetura e Urbanismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-engenharia-civil-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia Civil",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-engenharia-eletrica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia Elétrica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-engenharia-mecanica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-engenharia-de-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia de Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-engenharia-de-producao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia de Produção",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-sistemas-de-informacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-ciencia-da-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-gestao-de-recursos-humanos-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Gestão de Recursos Humanos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-gestao-comercial-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Gestão Comercial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-gestao-da-tecnologia-da-informacao-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Gestão da Tecnologia da Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-letras-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Letras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-pedagogia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "newton-catalog-campus-nao-definido",
+      "name": "Pedagogia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "name": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "8ac905487b234a94e749301612f765ddafcc07991e469d3fc745db8daa397f25"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+        "historical": true,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    }
+  ]
+}
