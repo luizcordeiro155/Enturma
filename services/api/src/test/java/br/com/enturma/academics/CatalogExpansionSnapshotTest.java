@@ -65,7 +65,7 @@ class CatalogExpansionSnapshotTest {
             default -> throw new IllegalStateException("Unexpected kind: " + entry.kind());
           };
           if (entry.kind().equals("COURSE") && !provider.equals("NEWTON") && !provider.equals("PUCMINAS")) continue;
-          if (entry.kind().equals("CAMPUS") && !provider.equals("NEWTON") && !provider.equals("PUCMINAS")) continue;
+          if (entry.kind().equals("CAMPUS") && !provider.equals("NEWTON")) continue;
           assertThat(ids).contains(parentKind + ":" + entry.parentExternalId());
         }
       }
