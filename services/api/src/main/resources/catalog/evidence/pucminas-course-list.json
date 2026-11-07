@@ -1,0 +1,493 @@
+{
+  "provider": "PUCMINAS",
+  "sourceUrl": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+  "sourceName": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+  "reviewedAt": "2026-11-07T03:00:00Z",
+  "scope": "List of explicitly named degree programs. SHA-256 covers this curated UTF-8 transcription, not the remote webpage or PDF.",
+  "campusNotes": [
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "note": "Ofertas documentadas pela PUC Minas em 2026."
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "note": "Ofertas documentadas pela PUC Minas em 2026."
+    },
+    {
+      "campus": "puc-campus-coverage-sao-gabriel",
+      "note": "Ofertas documentadas pela PUC Minas em 2026."
+    },
+    {
+      "campus": "puc-barreiro-si-campus",
+      "note": "Ofertas documentadas pela PUC Minas em 2026."
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "note": "Unidade lógica de ensino virtual, não endereço físico."
+    }
+  ],
+  "offerings": [
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Arquitetura e Urbanismo",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Ciência da Computação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Ciências Biológicas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Ciências Econômicas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Ciências Sociais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Cinema e Audiovisual",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Educação Física",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Enfermagem",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Engenharia Civil",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Engenharia de Computação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Engenharia de Controle e Automação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Engenharia de Produção",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Engenharia Elétrica",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Engenharia Mecânica",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Engenharia Química",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Filosofia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Fisioterapia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Fonoaudiologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Geografia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "História",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Jornalismo",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Letras",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Matemática",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Odontologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Pedagogia",
+      "degree": "LICENTIATE",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Publicidade e Propaganda",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Relações Internacionais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Relações Públicas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Serviço Social",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-coracao",
+      "name": "Teologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Arquitetura e Urbanismo",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Biomedicina",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Ciência da Computação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Ciência de Dados e Inteligência Artificial",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Ciências Econômicas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Engenharia de Computação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Engenharia de Software",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Jogos Digitais",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Jornalismo",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Medicina Veterinária",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Publicidade e Propaganda",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-lourdes-pendente",
+      "name": "Relações Internacionais",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-sao-gabriel",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-sao-gabriel",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-sao-gabriel",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-sao-gabriel",
+      "name": "Engenharia Mecânica",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-sao-gabriel",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-sao-gabriel",
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-barreiro-si-campus",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-barreiro-si-campus",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-barreiro-si-campus",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Banco de Dados",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Ciências Econômicas",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Comércio Exterior",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Gestão Comercial",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Gestão da Tecnologia da Informação",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Gestão Financeira",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Gestão de Recursos Humanos",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Jogos Digitais",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Marketing",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Processos Gerenciais",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Produção Audiovisual",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Publicidade e Propaganda",
+      "degree": "BACHELOR",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Redes de Computadores",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Segurança da Informação",
+      "degree": "TECHNOLOGIST",
+      "historical": false
+    },
+    {
+      "campus": "puc-campus-coverage-virtual",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "historical": false
+    }
+  ]
+}
