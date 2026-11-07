@@ -1,0 +1,1857 @@
+{
+  "provider": "PUCMINAS",
+  "entries": [
+    {
+      "externalId": "puc-campus-coverage-coracao",
+      "kind": "CAMPUS",
+      "parentExternalId": "pucminas",
+      "name": "Coração Eucarístico",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "note": "Ofertas documentadas pela PUC Minas em 2026.",
+        "city": "Belo Horizonte",
+        "state": "MG",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-arquitetura-e-urbanismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Arquitetura e Urbanismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-ciencia-da-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-ciencias-biologicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Ciências Biológicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-ciencias-contabeis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Ciências Contábeis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-ciencias-economicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Ciências Econômicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-ciencias-sociais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Ciências Sociais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-cinema-e-audiovisual-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Cinema e Audiovisual",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-direito-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Direito",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-educacao-fisica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Educação Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-enfermagem-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Enfermagem",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-engenharia-civil-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Engenharia Civil",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-engenharia-de-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Engenharia de Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-engenharia-de-controle-e-automacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Engenharia de Controle e Automação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-engenharia-de-producao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Engenharia de Produção",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-engenharia-eletrica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Engenharia Elétrica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-engenharia-mecanica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Engenharia Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-engenharia-quimica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Engenharia Química",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-filosofia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Filosofia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-fisioterapia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Fisioterapia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-fonoaudiologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Fonoaudiologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-geografia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Geografia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-historia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "História",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-jornalismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Jornalismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-letras-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Letras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-matematica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Matemática",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-odontologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Odontologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-pedagogia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Pedagogia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-psicologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-publicidade-e-propaganda-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Publicidade e Propaganda",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-relacoes-internacionais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Relações Internacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-relacoes-publicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Relações Públicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-servico-social-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Serviço Social",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-coracao-teologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-coracao",
+      "name": "Teologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-arquitetura-e-urbanismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Arquitetura e Urbanismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-biomedicina-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Biomedicina",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-ciencia-da-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-ciencia-de-dados-e-inteligencia-artificial-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Ciência de Dados e Inteligência Artificial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-ciencias-contabeis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Ciências Contábeis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-ciencias-economicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Ciências Econômicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-direito-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Direito",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-engenharia-de-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Engenharia de Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-engenharia-de-software-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Engenharia de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-jogos-digitais-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-jornalismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Jornalismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-medicina-veterinaria-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Medicina Veterinária",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-psicologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-publicidade-e-propaganda-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Publicidade e Propaganda",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-lourdes-pendente-relacoes-internacionais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-lourdes-pendente",
+      "name": "Relações Internacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-campus-coverage-sao-gabriel",
+      "kind": "CAMPUS",
+      "parentExternalId": "pucminas",
+      "name": "São Gabriel",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "note": "Ofertas documentadas pela PUC Minas em 2026.",
+        "city": "Belo Horizonte",
+        "state": "MG",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-sao-gabriel-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-sao-gabriel",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-sao-gabriel-analise-e-desenvolvimento-de-sistemas-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-sao-gabriel",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-sao-gabriel-direito-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-sao-gabriel",
+      "name": "Direito",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-sao-gabriel-engenharia-mecanica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-sao-gabriel",
+      "name": "Engenharia Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-sao-gabriel-sistemas-de-informacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-sao-gabriel",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-sao-gabriel-psicologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-sao-gabriel",
+      "name": "Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-barreiro-si-campus-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-barreiro-si-campus",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-barreiro-si-campus-direito-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-barreiro-si-campus",
+      "name": "Direito",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-barreiro-si-campus-sistemas-de-informacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-barreiro-si-campus",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-campus-coverage-virtual",
+      "kind": "CAMPUS",
+      "parentExternalId": "pucminas",
+      "name": "PUC Minas Virtual",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "note": "Unidade lógica de ensino virtual, não endereço físico.",
+        "city": "Belo Horizonte",
+        "state": "MG",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-analise-e-desenvolvimento-de-sistemas-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-banco-de-dados-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Banco de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-ciencias-contabeis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Ciências Contábeis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-ciencias-economicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Ciências Econômicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-comercio-exterior-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Comércio Exterior",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-gestao-comercial-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Gestão Comercial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-gestao-da-tecnologia-da-informacao-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Gestão da Tecnologia da Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-gestao-financeira-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Gestão Financeira",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-gestao-de-recursos-humanos-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Gestão de Recursos Humanos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-jogos-digitais-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-marketing-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Marketing",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-processos-gerenciais-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Processos Gerenciais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-producao-audiovisual-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Produção Audiovisual",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-publicidade-e-propaganda-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Publicidade e Propaganda",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-redes-de-computadores-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Redes de Computadores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-seguranca-da-informacao-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Segurança da Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "catalog-puc-campus-coverage-virtual-sistemas-de-informacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "puc-campus-coverage-virtual",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "name": "PUC Minas - lista de cursos presenciais e EAD no Guia da Faculdade 2026",
+        "type": "MANUAL_VERIFIED",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z",
+        "contentHash": "050c21b2a1cfb281de4aae315b34e2aca5df6640c77fab52380183f6bf96901a"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "sourceStatus": "INSTITUTIONAL_COURSE_LIST",
+        "catalogNote": "Curso documentado; grade e período de ingresso ainda não verificados. Solicite a grade para ativar matérias.",
+        "sourcePage": "https://www.pucminas.br/sala-imprensa/noticias/Paginas/Doze-cursos-da-PUC-Minas-se-classificam-com-nota-m%C3%A1xima-no-Guia-da-Faculdade-2026.aspx",
+        "modality": "REMOTE",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    }
+  ]
+}
