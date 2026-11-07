@@ -314,5 +314,8 @@
       "modality": "REMOTE",
       "campus": "newton-ofertas-2025-ead-flex"
     }
-  ]
+  ],
+  "presentialConfirmationUrl": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+  "presentialEvidenceNote": "Lista institucional de cursos presenciais na rematrícula 2025.2. Unidade e turno de cada oferta precisam de confirmação.",
+  "flexEvidenceNote": "Anexo IV é a relação EAD/Flex de 2025.1, não é a relação de cursos presenciais."
 }
