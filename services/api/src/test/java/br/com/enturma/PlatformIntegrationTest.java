@@ -1099,7 +1099,43 @@ class PlatformIntegrationTest {
             db.jdbc.queryForObject(
                 "SELECT count(*) FROM academic_entry WHERE provider='UNA' AND kind='CURRICULUM'",
                 Integer.class))
-        .isEqualTo(18);
+        .isEqualTo(19);
+
+    // Regression: the new official catalog must be usable by student onboarding, not just
+    // present as pending import jobs that repeatedly notify administrators.
+    for (String[] spec : new String[][] {
+        {"NEWTON", "newton-ads-ead-historico-2021", "31"},
+        {"UNA", "una-jogos-digitais-pending-2026", "11"},
+        {"UFMG", "ufmg-engenharia-computacao-2026", "52"},
+        {"PUCMINAS", "puc-jogos-digitais-bachelor-2026", "62"}
+    }) {
+      String provider = spec[0];
+      UUID courseId = CatalogImports.identity(provider, "COURSE", spec[1]);
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM academic_entry WHERE id=? AND kind='COURSE'"
+                      + " AND status='VERIFIED'", Integer.class, courseId))
+          .isEqualTo(1);
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM academic_curriculum WHERE course_offering_id=?"
+                      + " AND verification_status='VERIFIED'", Integer.class, courseId))
+          .isEqualTo(1);
+      assertThat(
+              db.jdbc.queryForObject(
+                  "SELECT count(*) FROM academic_curriculum_subject s"
+                      + " JOIN academic_curriculum c ON c.id=s.curriculum_id"
+                      + " JOIN academic_entry e ON e.id=s.id"
+                      + " WHERE c.course_offering_id=? AND e.status='VERIFIED'",
+                  Integer.class, courseId))
+          .isEqualTo(Integer.parseInt(spec[2]));
+    }
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM academic_import_job WHERE"
+                    + " (seed_key LIKE '%:EXPANSION:%' OR seed_key LIKE 'NEWTON:%')"
+                    + " AND status <> 'COMPLETED'", Integer.class))
+        .isZero();
   }
 
   @Test
