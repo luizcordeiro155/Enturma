@@ -1,0 +1,312 @@
+{
+  "provider": "NEWTON",
+  "course": "Psicologia",
+  "officialUrl": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+  "publication": "MATRIZ CURRICULAR 2021.1 PSICOLOGIA",
+  "reviewedAt": "2026-11-07T03:00:00Z",
+  "integrityScope": "SHA-256 UTF-8 of the transcription, not of remote PDF; historical curriculum",
+  "semesters": [
+    {
+      "period": 1,
+      "subjects": [
+        {
+          "name": "História da Psicologia",
+          "workloadHours": 80
+        },
+        {
+          "name": "Desenvolvimento Humano da infância e da adolescência",
+          "workloadHours": 80
+        },
+        {
+          "name": "Antropologia e Cultura Brasileira",
+          "workloadHours": 40
+        },
+        {
+          "name": "Processos Psicológicos Básicos",
+          "workloadHours": 80
+        },
+        {
+          "name": "Comunicação efetiva I",
+          "workloadHours": 40
+        },
+        {
+          "name": "Estratégias colaborativas I",
+          "workloadHours": 40
+        }
+      ]
+    },
+    {
+      "period": 2,
+      "subjects": [
+        {
+          "name": "Psicologia Social",
+          "workloadHours": 80
+        },
+        {
+          "name": "Bases Estruturais e Funcionais do Comportamento Humano",
+          "workloadHours": 80
+        },
+        {
+          "name": "Desenvolvimento Humano na Vida Adulta e Envelhecimento",
+          "workloadHours": 80
+        },
+        {
+          "name": "Análise Experimental do Comportamento Humano",
+          "workloadHours": 80
+        },
+        {
+          "name": "Estratégias colaborativas II",
+          "workloadHours": 40
+        }
+      ]
+    },
+    {
+      "period": 3,
+      "subjects": [
+        {
+          "name": "Estágio Básico I - Habilidades: observação e entrevista",
+          "workloadHours": 100
+        },
+        {
+          "name": "Teorias Fenomenológicas e Existenciais",
+          "workloadHours": 80
+        },
+        {
+          "name": "Fundamentos da Avaliação Psicológica",
+          "workloadHours": 80
+        },
+        {
+          "name": "Saúde Coletiva",
+          "workloadHours": 80
+        },
+        {
+          "name": "Bases Biológicas do Comportamento Humano",
+          "workloadHours": 80
+        },
+        {
+          "name": "Estratégias colaborativas III",
+          "workloadHours": 40
+        }
+      ]
+    },
+    {
+      "period": 4,
+      "subjects": [
+        {
+          "name": "Estágio Básico II - Processos Psicossociais",
+          "workloadHours": 100
+        },
+        {
+          "name": "Psicologia nas Políticas de Gestão",
+          "workloadHours": 80
+        },
+        {
+          "name": "Psicopatologia do Adulto",
+          "workloadHours": 80
+        },
+        {
+          "name": "Teoria Psicanalítica",
+          "workloadHours": 80
+        },
+        {
+          "name": "Psicologia Aplicada às Políticas Públicas",
+          "workloadHours": 40
+        },
+        {
+          "name": "Comunicação efetiva II",
+          "workloadHours": 40
+        },
+        {
+          "name": "Estratégias colaborativas IV",
+          "workloadHours": 40
+        }
+      ]
+    },
+    {
+      "period": 5,
+      "subjects": [
+        {
+          "name": "Estágio Básico III - Processos Educativos",
+          "workloadHours": 100
+        },
+        {
+          "name": "Teoria Sistêmica",
+          "workloadHours": 80
+        },
+        {
+          "name": "Intervenções Psicoeducativas",
+          "workloadHours": 80
+        },
+        {
+          "name": "Processos Grupais",
+          "workloadHours": 80
+        },
+        {
+          "name": "Psicologia e Saúde Mental no Trabalho",
+          "workloadHours": 40
+        },
+        {
+          "name": "Métodos e Técnicas de Avaliação Psicológica",
+          "workloadHours": 100
+        },
+        {
+          "name": "Laboratório de carreira I",
+          "workloadHours": 20
+        }
+      ]
+    },
+    {
+      "period": 6,
+      "subjects": [
+        {
+          "name": "Estágio Básico IV - Processos Laborais",
+          "workloadHours": 100
+        },
+        {
+          "name": "Análise do Comportamento Aplicada",
+          "workloadHours": 80
+        },
+        {
+          "name": "Técnicas de Pesquisa em Psicologia",
+          "workloadHours": 80
+        },
+        {
+          "name": "Políticas Públicas e Modelos de atenção à saúde",
+          "workloadHours": 40
+        },
+        {
+          "name": "Psicofarmacologia",
+          "workloadHours": 80
+        },
+        {
+          "name": "Teorias Analítico Comportamentais",
+          "workloadHours": 80
+        },
+        {
+          "name": "Psicologia Organizacional e do Trabalho",
+          "workloadHours": 40
+        }
+      ]
+    },
+    {
+      "period": 7,
+      "subjects": [
+        {
+          "name": "Estágio Básico V - Processos de Acolhimento e Avaliação Psicológica",
+          "workloadHours": 100
+        },
+        {
+          "name": "Psicologia Escolar e Educacional",
+          "workloadHours": 80
+        },
+        {
+          "name": "Educação, direito e cidadania",
+          "workloadHours": 40
+        },
+        {
+          "name": "Intervenções Psicossociais",
+          "workloadHours": 80
+        },
+        {
+          "name": "Epidemiologia e Bioestatística",
+          "workloadHours": 40
+        },
+        {
+          "name": "Processos Psicopatológicos na Infância e na Adolescência",
+          "workloadHours": 80
+        },
+        {
+          "name": "Laboratório de carreira II",
+          "workloadHours": 20
+        },
+        {
+          "name": "Educação, Sociedade e Meio Ambiente",
+          "workloadHours": 40
+        }
+      ]
+    },
+    {
+      "period": 8,
+      "subjects": [
+        {
+          "name": "Estágio Específico Ênfase I",
+          "workloadHours": 120
+        },
+        {
+          "name": "Intervenções Analítico Comportamentais",
+          "workloadHours": 80
+        },
+        {
+          "name": "Intervenções Fenomenológicas e Existenciais",
+          "workloadHours": 80
+        },
+        {
+          "name": "Intervenções Sistêmicas",
+          "workloadHours": 80
+        },
+        {
+          "name": "Intervenções Psicanalíticas",
+          "workloadHours": 80
+        },
+        {
+          "name": "Diversidade na contemporaneidade",
+          "workloadHours": 40
+        }
+      ]
+    },
+    {
+      "period": 9,
+      "subjects": [
+        {
+          "name": "Estágio Específico Ênfase II",
+          "workloadHours": 120
+        },
+        {
+          "name": "Psicologia Jurídica",
+          "workloadHours": 80
+        },
+        {
+          "name": "Psicologia da Urgência e Desastre",
+          "workloadHours": 40
+        },
+        {
+          "name": "Intervenções Psicológicas na Infância e na Adolescência",
+          "workloadHours": 80
+        },
+        {
+          "name": "Trabalho de Conclusão de Curso I",
+          "workloadHours": 40
+        }
+      ]
+    },
+    {
+      "period": 10,
+      "subjects": [
+        {
+          "name": "Estágio Específico Ênfase III",
+          "workloadHours": 120
+        },
+        {
+          "name": "Temas Contemporâneos em Psicologia",
+          "workloadHours": 40
+        },
+        {
+          "name": "Clinica Ampliada",
+          "workloadHours": 40
+        },
+        {
+          "name": "Psicologia da Saúde",
+          "workloadHours": 80
+        },
+        {
+          "name": "Optativa I",
+          "workloadHours": 40
+        },
+        {
+          "name": "Trabalho de Conclusão de Curso II",
+          "workloadHours": 40
+        }
+      ]
+    }
+  ]
+}
