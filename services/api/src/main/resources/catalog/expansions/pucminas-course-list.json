@@ -217,29 +217,6 @@
       }
     },
     {
-      "externalId": "catalog-puc-barreiro-si-campus-sistemas-de-informacao-bachelor",
-      "kind": "COURSE",
-      "parentExternalId": "puc-barreiro-si-campus",
-      "name": "Sistemas de Informação",
-      "status": "VERIFIED",
-      "source": {
-        "url": "https://www.pucminas.br/graduacao/_layouts/15/cursos/graduacao.aspx",
-        "name": "PUC Minas - catálogo institucional de graduação por unidade e modalidade",
-        "type": "MANUAL_VERIFIED",
-        "contentHash": "177cc15146a34dd44fdd1139e48fb48dba1c062d6aca1a52107ded19faf3cd6b",
-        "retrievedAt": "2026-11-07T03:00:00Z",
-        "verifiedAt": "2026-11-07T03:00:00Z"
-      },
-      "attributes": {
-        "degreeType": "BACHELOR",
-        "learningArea": "IT",
-        "modality": "PRESENTIAL",
-        "sourceStatus": "OFFICIAL_COURSE_LIST",
-        "catalogNote": "Curso consta do catálogo oficial. Matriz, turno, modalidade por edição e períodos ainda precisam de verificação individual; não atribuir grade inventada.",
-        "coursePage": "https://www.pucminas.br/graduacao/_layouts/15/cursos/graduacao.aspx"
-      }
-    },
-    {
       "externalId": "catalog-puc-barreiro-si-campus-analise-e-desenvolvimento-de-sistemas-technologist",
       "kind": "COURSE",
       "parentExternalId": "puc-barreiro-si-campus",
@@ -2034,29 +2011,6 @@
       }
     },
     {
-      "externalId": "catalog-puc-lourdes-pendente-jogos-digitais-technologist",
-      "kind": "COURSE",
-      "parentExternalId": "puc-lourdes-pendente",
-      "name": "Jogos Digitais",
-      "status": "VERIFIED",
-      "source": {
-        "url": "https://www.pucminas.br/graduacao/_layouts/15/cursos/graduacao.aspx",
-        "name": "PUC Minas - catálogo institucional de graduação por unidade e modalidade",
-        "type": "MANUAL_VERIFIED",
-        "contentHash": "177cc15146a34dd44fdd1139e48fb48dba1c062d6aca1a52107ded19faf3cd6b",
-        "retrievedAt": "2026-11-07T03:00:00Z",
-        "verifiedAt": "2026-11-07T03:00:00Z"
-      },
-      "attributes": {
-        "degreeType": "TECHNOLOGIST",
-        "learningArea": "IT",
-        "modality": "PRESENTIAL",
-        "sourceStatus": "OFFICIAL_COURSE_LIST",
-        "catalogNote": "Curso consta do catálogo oficial. Matriz, turno, modalidade por edição e períodos ainda precisam de verificação individual; não atribuir grade inventada.",
-        "coursePage": "https://www.pucminas.br/graduacao/_layouts/15/cursos/graduacao.aspx"
-      }
-    },
-    {
       "externalId": "catalog-puc-lourdes-pendente-jornalismo-bachelor",
       "kind": "COURSE",
       "parentExternalId": "puc-lourdes-pendente",
@@ -2234,29 +2188,6 @@
       "attributes": {
         "degreeType": "BACHELOR",
         "learningArea": "OTHER",
-        "modality": "PRESENTIAL",
-        "sourceStatus": "OFFICIAL_COURSE_LIST",
-        "catalogNote": "Curso consta do catálogo oficial. Matriz, turno, modalidade por edição e períodos ainda precisam de verificação individual; não atribuir grade inventada.",
-        "coursePage": "https://www.pucminas.br/graduacao/_layouts/15/cursos/graduacao.aspx"
-      }
-    },
-    {
-      "externalId": "catalog-puc-pocos-cc-campus-ciencia-da-computacao-bachelor",
-      "kind": "COURSE",
-      "parentExternalId": "puc-pocos-cc-campus",
-      "name": "Ciência da Computação",
-      "status": "VERIFIED",
-      "source": {
-        "url": "https://www.pucminas.br/graduacao/_layouts/15/cursos/graduacao.aspx",
-        "name": "PUC Minas - catálogo institucional de graduação por unidade e modalidade",
-        "type": "MANUAL_VERIFIED",
-        "contentHash": "177cc15146a34dd44fdd1139e48fb48dba1c062d6aca1a52107ded19faf3cd6b",
-        "retrievedAt": "2026-11-07T03:00:00Z",
-        "verifiedAt": "2026-11-07T03:00:00Z"
-      },
-      "attributes": {
-        "degreeType": "BACHELOR",
-        "learningArea": "IT",
         "modality": "PRESENTIAL",
         "sourceStatus": "OFFICIAL_COURSE_LIST",
         "catalogNote": "Curso consta do catálogo oficial. Matriz, turno, modalidade por edição e períodos ainda precisam de verificação individual; não atribuir grade inventada.",
