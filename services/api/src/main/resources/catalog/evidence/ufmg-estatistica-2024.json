@@ -1,0 +1,205 @@
+{
+  "provider": "UFMG",
+  "course": "Estatística",
+  "officialUrl": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+  "curriculum": "Grade Curricular 2024/1",
+  "retrievedAt": "2026-11-07T03:00:00Z",
+  "note": "Inclui componentes obrigatórios nomeados; blocos de carga optativa e formação livre sem disciplina específica não foram inventados.",
+  "semesters": [
+    {
+      "number": 1,
+      "subjects": [
+        {
+          "code": "EST185",
+          "name": "Seminários I",
+          "hours": 30
+        },
+        {
+          "code": "EST199",
+          "name": "Introdução à Probabilidade",
+          "hours": 60
+        },
+        {
+          "code": "MAT001",
+          "name": "Cálculo Diferencial e Integral I",
+          "hours": 90
+        },
+        {
+          "code": "MAT038",
+          "name": "Geometria Analítica e Álgebra Linear",
+          "hours": 60
+        },
+        {
+          "code": "EST200",
+          "name": "Introdução à Ciência de Dados",
+          "hours": 60
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "subjects": [
+        {
+          "code": "MAT048",
+          "name": "Álgebra Linear I",
+          "hours": 60
+        },
+        {
+          "code": "EST206",
+          "name": "Probabilidade I",
+          "hours": 60
+        },
+        {
+          "code": "MAT039",
+          "name": "Cálculo Diferencial e Integral II",
+          "hours": 60
+        },
+        {
+          "code": "DCC203",
+          "name": "Programação e Desenvolvimento de Software I",
+          "hours": 60
+        },
+        {
+          "code": "EST207",
+          "name": "Métodos Computacionais para Ciência de Dados I",
+          "hours": 60
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "subjects": [
+        {
+          "code": "EST208",
+          "name": "Introdução à Inferência Estatística",
+          "hours": 90
+        },
+        {
+          "code": "EST028",
+          "name": "Probabilidade II",
+          "hours": 90
+        },
+        {
+          "code": "DCC204",
+          "name": "Programação e Desenvolvimento de Software II",
+          "hours": 60
+        },
+        {
+          "code": "MAT002",
+          "name": "Cálculo Diferencial e Integral III",
+          "hours": 60
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "subjects": [
+        {
+          "code": "DCC034",
+          "name": "Cálculo Numérico",
+          "hours": 60
+        },
+        {
+          "code": "EST035",
+          "name": "Análise de Regressão",
+          "hours": 60
+        },
+        {
+          "code": "EST209",
+          "name": "Inferência I",
+          "hours": 60
+        },
+        {
+          "code": "EST039",
+          "name": "Processos Estocásticos",
+          "hours": 60
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "subjects": [
+        {
+          "code": "DCC011",
+          "name": "Introdução a Bancos de Dados",
+          "hours": 60
+        },
+        {
+          "code": "EST036",
+          "name": "Planejamento de Experimentos",
+          "hours": 60
+        },
+        {
+          "code": "EST080",
+          "name": "Estatística Não Paramétrica",
+          "hours": 60
+        },
+        {
+          "code": "EST088",
+          "name": "Inferência Estatística com Abordagem Bayesiana",
+          "hours": 60
+        },
+        {
+          "code": "EST210",
+          "name": "Inferência II",
+          "hours": 60
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "subjects": [
+        {
+          "code": "EST011",
+          "name": "Estatística Multivariada",
+          "hours": 60
+        },
+        {
+          "code": "EST038",
+          "name": "Métodos Estatísticos de Previsão",
+          "hours": 60
+        },
+        {
+          "code": "EST211",
+          "name": "Métodos Computacionais para Ciência de Dados II",
+          "hours": 60
+        },
+        {
+          "code": "EST079",
+          "name": "Modelos Lineares Generalizados",
+          "hours": 60
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "subjects": [
+        {
+          "code": "EST037",
+          "name": "Amostragem",
+          "hours": 60
+        },
+        {
+          "code": "EST090",
+          "name": "Análise de Sobrevivência",
+          "hours": 60
+        },
+        {
+          "code": "EST212",
+          "name": "Laboratório de Estatística I",
+          "hours": 90
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "subjects": [
+        {
+          "code": "EST059",
+          "name": "Monografia",
+          "hours": 210
+        }
+      ]
+    }
+  ]
+}
