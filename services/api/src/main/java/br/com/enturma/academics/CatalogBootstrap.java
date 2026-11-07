@@ -92,5 +92,19 @@ public class CatalogBootstrap {
           "PUCMINAS:SI-UBERLANDIA-2023:"
               + CatalogImports.hash(json.writeValueAsString(document)));
     }
+    for (String curriculumFile : List.of(
+        "ufmg-estatistica-2024.json", "newton-computacao-2023.json")) {
+      var curriculum = new ClassPathResource("catalog/expansions/" + curriculumFile);
+      try (var input = curriculum.getInputStream()) {
+        var document = json.readValue(input, CatalogRecord.Document.class);
+        String expectedProvider = curriculumFile.startsWith("ufmg-") ? "UFMG" : "NEWTON";
+        if (!expectedProvider.equals(document.provider()))
+          throw new IllegalStateException("Provider de grade inconsistente");
+        imports.seed(
+            document,
+            expectedProvider + ":COMPLETE-CURRICULUM:" + curriculumFile + ":"
+                + CatalogImports.hash(json.writeValueAsString(document)));
+      }
+    }
   }
 }
