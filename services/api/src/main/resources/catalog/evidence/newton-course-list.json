@@ -1,0 +1,153 @@
+{
+  "provider": "NEWTON",
+  "sourceUrl": "https://newtonpaiva.br/wp-content/uploads/2022/10/Edital-Newton-Paiva-Docente-Presencial-2023.1.pdf",
+  "sourceName": "Newton Paiva - relacao de cursos no edital institucional 2023.1",
+  "reviewedAt": "2026-11-07T03:00:00Z",
+  "scope": "List of explicitly named degree programs. SHA-256 covers this curated UTF-8 transcription, not the remote webpage or PDF.",
+  "campusNotes": [
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "note": "Cursos em documentos institucionais de 2023; confirmar oferta e unidade vigentes antes da matrícula."
+    }
+  ],
+  "offerings": [
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Enfermagem",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Fisioterapia",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Farmácia",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Medicina Veterinária",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Odontologia",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Estética e Cosmética",
+      "degree": "TECHNOLOGIST",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Arquitetura e Urbanismo",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia Civil",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia Elétrica",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia Mecânica",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia de Computação",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Engenharia de Produção",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Sistemas de Informação",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Ciência da Computação",
+      "degree": "BACHELOR",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Gestão de Recursos Humanos",
+      "degree": "TECHNOLOGIST",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Gestão Comercial",
+      "degree": "TECHNOLOGIST",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Gestão da Tecnologia da Informação",
+      "degree": "TECHNOLOGIST",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Letras",
+      "degree": "LICENTIATE",
+      "historical": true
+    },
+    {
+      "campus": "newton-catalog-campus-nao-definido",
+      "name": "Pedagogia",
+      "degree": "LICENTIATE",
+      "historical": true
+    }
+  ]
+}
