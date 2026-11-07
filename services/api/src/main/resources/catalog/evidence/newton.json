@@ -1,0 +1,129 @@
+{
+  "provider": "NEWTON",
+  "officialUrl": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+  "sourceTitle": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+  "sourceYear": "2023",
+  "curriculumVersion": "GRADE-EAD-2023",
+  "integrityScope": "SHA-256 of the UTF-8 bytes of this reviewed institutional curriculum transcription; NOT a hash of the remote PDF/HTML",
+  "note": "Matriz documental historica; nao pressupor vigencia em 2026 ou polo presencial.",
+  "academicPeriods": [
+    {
+      "number": 1,
+      "subjects": [
+        {
+          "name": "Algoritmos e programação"
+        },
+        {
+          "name": "Fundamentos de Ciências Exatas"
+        },
+        {
+          "name": "Fundamentos de Sistemas de Informação"
+        },
+        {
+          "name": "Engenharia de Software"
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 1"
+        },
+        {
+          "name": "Comunicação Efetiva I"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "subjects": [
+        {
+          "name": "Arquitetura de Computadores"
+        },
+        {
+          "name": "Banco de Dados"
+        },
+        {
+          "name": "Análise de Sistemas"
+        },
+        {
+          "name": "Metodologia de Desenvolvimento de Sistemas"
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 2"
+        },
+        {
+          "name": "Educação, Sociedade e meio ambiente"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "subjects": [
+        {
+          "name": "Programação Orientada a Objetos"
+        },
+        {
+          "name": "Linguagens de Programação"
+        },
+        {
+          "name": "Sistemas Operacionais"
+        },
+        {
+          "name": "Qualidade e Testes de Software"
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 3"
+        },
+        {
+          "name": "Análise de Dados"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "subjects": [
+        {
+          "name": "Programação Web"
+        },
+        {
+          "name": "Estrutura de Dados"
+        },
+        {
+          "name": "Business Intelligence"
+        },
+        {
+          "name": "Modelagem de Processos de Negócios"
+        },
+        {
+          "name": "Optativa I"
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 4"
+        },
+        {
+          "name": "Transformação Digital"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "subjects": [
+        {
+          "name": "Programação para Dispositivos Móveis"
+        },
+        {
+          "name": "Arquitetura de Aplicações Web"
+        },
+        {
+          "name": "Redes de Computadores"
+        },
+        {
+          "name": "Segurança e Auditoria de Sistemas de Informação"
+        },
+        {
+          "name": "Fundamentos de Inteligência Artificial"
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 5"
+        }
+      ]
+    }
+  ]
+}
