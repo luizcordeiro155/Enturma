@@ -1,0 +1,321 @@
+{
+  "provider": "UFMG",
+  "officialUrl": "https://www.ufmg.br/engcomp/",
+  "sourceTitle": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+  "sourceYear": "2026",
+  "curriculumVersion": "PORTAL-ENGCOMP-2026",
+  "integrityScope": "SHA-256 of the UTF-8 bytes of this reviewed institutional curriculum transcription; NOT a hash of the remote PDF/HTML",
+  "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+  "academicPeriods": [
+    {
+      "number": 1,
+      "subjects": [
+        {
+          "name": "Programação e Desenvolvimento de Software I",
+          "hours": 60,
+          "code": "DCC203"
+        },
+        {
+          "name": "Introdução à Lógica Computacional",
+          "hours": 60,
+          "code": "DCC638"
+        },
+        {
+          "name": "Cálculo Diferencial e Integral I",
+          "hours": 90,
+          "code": "MAT001"
+        },
+        {
+          "name": "Geometria Analítica e Álgebra Linear",
+          "hours": 60,
+          "code": "MAT038"
+        },
+        {
+          "name": "Física Experimental Básica - Mecânica",
+          "hours": 30,
+          "code": "FIS151"
+        },
+        {
+          "name": "Introdução à Engenharia de Computação",
+          "hours": 45,
+          "code": "INU034"
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "subjects": [
+        {
+          "name": "Programação e Desenvolvimento de Software II",
+          "hours": 60,
+          "code": "DCC219"
+        },
+        {
+          "name": "Matemática Discreta",
+          "hours": 60,
+          "code": "DCC216"
+        },
+        {
+          "name": "Cálculo de Várias Variáveis",
+          "hours": 60,
+          "code": "MAT042"
+        },
+        {
+          "name": "Fundamentos de Mecânica",
+          "hours": 60,
+          "code": "FIS065"
+        },
+        {
+          "name": "Fundamentos da Interação Humano-Computador",
+          "hours": 30,
+          "code": "DCC220"
+        },
+        {
+          "name": "Análise de Circuitos Elétricos I",
+          "hours": 30,
+          "code": "ELE064"
+        },
+        {
+          "name": "Fundamentos de Eletromagnetismo",
+          "hours": 60,
+          "code": "FIS069"
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "subjects": [
+        {
+          "name": "Estruturas de Dados",
+          "hours": 60,
+          "code": "DCC221"
+        },
+        {
+          "name": "Álgebra Linear Computacional",
+          "hours": 60,
+          "code": "DCC639"
+        },
+        {
+          "name": "Equações Diferenciais A",
+          "hours": 60,
+          "code": "MAT015"
+        },
+        {
+          "name": "Fundamentos de Estatística e Ciência de Dados",
+          "hours": 60,
+          "code": "EST773"
+        },
+        {
+          "name": "Laboratório de Circuitos Elétricos I",
+          "hours": 30,
+          "code": "ELE028"
+        },
+        {
+          "name": "Análise de Circuitos Elétricos II",
+          "hours": 30,
+          "code": "ELE065"
+        },
+        {
+          "name": "Sistemas Digitais",
+          "hours": 60,
+          "code": "ELT124"
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "subjects": [
+        {
+          "name": "Algoritmos I",
+          "hours": 60,
+          "code": "DCC206"
+        },
+        {
+          "name": "Introdução a Bancos de Dados",
+          "hours": 60,
+          "code": "DCC222"
+        },
+        {
+          "name": "Fundamentos de Sistemas Paralelos e Distribuídos",
+          "hours": 30,
+          "code": "DCC641"
+        },
+        {
+          "name": "Arquitetura e Organização de Computadores I",
+          "hours": 60,
+          "code": "INU035"
+        },
+        {
+          "name": "Análise de Sistemas Dinâmicos Lineares",
+          "hours": 60,
+          "code": "ELT088"
+        },
+        {
+          "name": "Química Geral E",
+          "hours": 60,
+          "code": "QUI628"
+        },
+        {
+          "name": "Laboratório de Sistemas Digitais",
+          "hours": 30,
+          "code": "ELT029"
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "subjects": [
+        {
+          "name": "Fundamentos de Teoria da Computação",
+          "hours": 60,
+          "code": "DCC129"
+        },
+        {
+          "name": "Arquitetura e Organização de Computadores II",
+          "hours": 60,
+          "code": "INU036"
+        },
+        {
+          "name": "Laboratório de Projetos I",
+          "hours": 60,
+          "code": "INU037"
+        },
+        {
+          "name": "Dispositivos e Circuitos Eletrônicos Básicos",
+          "hours": 60,
+          "code": "ELT084"
+        },
+        {
+          "name": "Processamento Digital de Sinais",
+          "hours": 60,
+          "code": "ELE639"
+        },
+        {
+          "name": "Projetos de Sistemas Embarcados",
+          "hours": 60,
+          "code": "EEE055"
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "subjects": [
+        {
+          "name": "Linguagens de Programação",
+          "hours": 60,
+          "code": "DCC024"
+        },
+        {
+          "name": "Sistemas Operacionais",
+          "hours": 60,
+          "code": "DCC605"
+        },
+        {
+          "name": "Engenharia de Software",
+          "hours": 60,
+          "code": "DCC603"
+        },
+        {
+          "name": "Laboratório de Projetos II",
+          "hours": 60,
+          "code": "INU039"
+        },
+        {
+          "name": "Pesquisa Operacional",
+          "hours": 60,
+          "code": "INU038"
+        },
+        {
+          "name": "Laboratório de Circuitos Eletrônicos I",
+          "hours": 30,
+          "code": "ELT089"
+        },
+        {
+          "name": "Fundamentos de Inteligência Artificial",
+          "hours": 30,
+          "code": "INU040"
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "subjects": [
+        {
+          "name": "Redes de Computadores",
+          "hours": 60,
+          "code": "INU041"
+        },
+        {
+          "name": "Laboratório de Projetos III",
+          "hours": 60,
+          "code": "INU042"
+        },
+        {
+          "name": "Fenômenos de Transporte",
+          "hours": 30,
+          "code": "ENG157"
+        },
+        {
+          "name": "Concepção de Circuitos Integrados",
+          "hours": 60,
+          "code": "EEE058"
+        },
+        {
+          "name": "Ciências do Ambiente",
+          "hours": 30,
+          "code": "ESA137"
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "subjects": [
+        {
+          "name": "Introdução à Segurança Computacional",
+          "hours": 60,
+          "code": "DCC223"
+        },
+        {
+          "name": "Teoria dos Materiais",
+          "hours": 60,
+          "code": "ELE032"
+        },
+        {
+          "name": "Administração T.G.A.",
+          "hours": 60,
+          "code": "CAD103"
+        }
+      ]
+    },
+    {
+      "number": 9,
+      "subjects": [
+        {
+          "name": "Projeto Final de Curso I",
+          "hours": 60,
+          "code": "INU043"
+        },
+        {
+          "name": "Engenharia de Computação e Sociedade",
+          "hours": 30,
+          "code": "INU044"
+        }
+      ]
+    },
+    {
+      "number": 10,
+      "subjects": [
+        {
+          "name": "Estágio Supervisionado",
+          "hours": 165,
+          "code": "INU046"
+        },
+        {
+          "name": "Projeto Final de Curso II",
+          "hours": 60,
+          "code": "INU045"
+        }
+      ]
+    }
+  ]
+}
