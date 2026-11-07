@@ -1,0 +1,80 @@
+{
+  "provider": "UNA",
+  "officialUrl": "https://www.una.br/wp-content/uploads/2024/03/PPC_CST.Jogos-Digitais_UNA.pdf",
+  "sourceTitle": "PPC UNA Jogos Digitais 2023, secao 8.1; transcricao revisada",
+  "sourceYear": "2023",
+  "curriculumVersion": "PPC-JOGOS-2023",
+  "integrityScope": "SHA-256 of the UTF-8 bytes of this reviewed institutional curriculum transcription; NOT a hash of the remote PDF/HTML",
+  "note": "Matriz PPC de 2023, sem garantia de vigencia para ingresso atual; cinco blocos curriculares, organizacao flexivel.",
+  "academicPeriods": [
+    {
+      "number": 1,
+      "subjects": [
+        {
+          "name": "Programação de soluções computacionais",
+          "hours": 160
+        },
+        {
+          "name": "Modelagem de Software",
+          "hours": 160
+        },
+        {
+          "name": "Vida & Carreira",
+          "hours": 60
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "subjects": [
+        {
+          "name": "Animação",
+          "hours": 160
+        },
+        {
+          "name": "Expressão visual",
+          "hours": 160
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "subjects": [
+        {
+          "name": "Usabilidade, desenvolvimento web, mobile e jogos",
+          "hours": 160
+        },
+        {
+          "name": "Programação de jogos multiplataforma e engines",
+          "hours": 160
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "subjects": [
+        {
+          "name": "Inteligência artificial",
+          "hours": 160
+        },
+        {
+          "name": "Computação gráfica e realidade virtual",
+          "hours": 160
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "subjects": [
+        {
+          "name": "Game design",
+          "hours": 160
+        },
+        {
+          "name": "Core curriculum",
+          "hours": 160
+        }
+      ]
+    }
+  ]
+}
