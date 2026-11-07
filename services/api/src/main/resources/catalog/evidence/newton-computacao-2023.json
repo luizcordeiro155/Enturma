@@ -1,0 +1,248 @@
+{
+  "provider": "NEWTON",
+  "course": "Ciência da Computação",
+  "sourceUrl": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+  "publication": "Matriz curricular Ciência da Computação presencial, 2023",
+  "retrievedAt": "2026-11-07T03:00:00Z",
+  "integrityScope": "SHA-256 of this manually reviewed UTF-8 transcription, not PDF original",
+  "historical": true,
+  "complementaryActivitiesHours": 120,
+  "periods": [
+    {
+      "number": 1,
+      "subjects": [
+        {
+          "name": "Algoritmos e Programação",
+          "hours": 80
+        },
+        {
+          "name": "Fundamentos de Ciências Exatas",
+          "hours": 80
+        },
+        {
+          "name": "Fundamentos de Sistemas de Informação",
+          "hours": 80
+        },
+        {
+          "name": "Engenharia de Software",
+          "hours": 40
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 1",
+          "hours": 80
+        },
+        {
+          "name": "Comunicação Efetiva I",
+          "hours": 40
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "subjects": [
+        {
+          "name": "Arquitetura de Computadores",
+          "hours": 80
+        },
+        {
+          "name": "Banco de Dados",
+          "hours": 80
+        },
+        {
+          "name": "Análise de Sistemas",
+          "hours": 40
+        },
+        {
+          "name": "Metodologia de Desenvolvimento de Sistemas",
+          "hours": 80
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 2",
+          "hours": 80
+        },
+        {
+          "name": "Educação, Sociedade e meio ambiente",
+          "hours": 40
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "subjects": [
+        {
+          "name": "Programação Orientada a Objetos",
+          "hours": 80
+        },
+        {
+          "name": "Linguagens de Programação",
+          "hours": 80
+        },
+        {
+          "name": "Sistemas Operacionais",
+          "hours": 80
+        },
+        {
+          "name": "Qualidade e Testes de Software",
+          "hours": 80
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 3",
+          "hours": 80
+        },
+        {
+          "name": "Análise de Dados",
+          "hours": 40
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "subjects": [
+        {
+          "name": "Programação Web",
+          "hours": 80
+        },
+        {
+          "name": "Estrutura de Dados",
+          "hours": 80
+        },
+        {
+          "name": "Business Intelligence",
+          "hours": 80
+        },
+        {
+          "name": "Modelagem de Processos de Negócios",
+          "hours": 80
+        },
+        {
+          "name": "Optativa I",
+          "hours": 40
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 4",
+          "hours": 80
+        },
+        {
+          "name": "Transformação Digital",
+          "hours": 40
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "subjects": [
+        {
+          "name": "Programação para Dispositivos Móveis",
+          "hours": 80
+        },
+        {
+          "name": "Arquitetura de Aplicações Web",
+          "hours": 80
+        },
+        {
+          "name": "Redes de Computadores",
+          "hours": 80
+        },
+        {
+          "name": "Segurança e Auditoria de Sistemas de Informação",
+          "hours": 80
+        },
+        {
+          "name": "Fundamentos de Inteligência Artificial",
+          "hours": 80
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 5",
+          "hours": 80
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "subjects": [
+        {
+          "name": "Administração de Banco de Dados",
+          "hours": 80
+        },
+        {
+          "name": "Interação Humano-Computador",
+          "hours": 40
+        },
+        {
+          "name": "Sistemas Digitais para Computação",
+          "hours": 80
+        },
+        {
+          "name": "Gerência de Projetos Tecnológicos",
+          "hours": 80
+        },
+        {
+          "name": "Inteligência Artificial e Computacional",
+          "hours": 40
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 6",
+          "hours": 80
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "subjects": [
+        {
+          "name": "Computação em nuvem",
+          "hours": 80
+        },
+        {
+          "name": "Teoria de grafos",
+          "hours": 40
+        },
+        {
+          "name": "Compiladores",
+          "hours": 80
+        },
+        {
+          "name": "Optativa II",
+          "hours": 80
+        },
+        {
+          "name": "Projeto de Conclusão de Curso I",
+          "hours": 40
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 7",
+          "hours": 80
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "subjects": [
+        {
+          "name": "Sistemas Embarcados para TI",
+          "hours": 80
+        },
+        {
+          "name": "Simulação de Sistemas Computacionais",
+          "hours": 80
+        },
+        {
+          "name": "Projeto de Conclusão de Curso II",
+          "hours": 40
+        },
+        {
+          "name": "Computação Gráfica e Processamento de Imagem",
+          "hours": 80
+        },
+        {
+          "name": "Optativa III",
+          "hours": 40
+        },
+        {
+          "name": "Usina de Projetos Experimentais (UPx) - TI 8",
+          "hours": 80
+        }
+      ]
+    }
+  ]
+}

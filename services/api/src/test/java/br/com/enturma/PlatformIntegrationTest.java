@@ -1152,6 +1152,74 @@ class PlatformIntegrationTest {
   }
 
   @Test
+  void expandedUniversitiesAreSelectableAndHistoricalCurriculaPersist() {
+    for (int i = 0; i < 60; i++) imports.processBatch();
+    var failedNewCurricula = db.list(
+        "SELECT i.entity_type,i.external_id,i.error_code,i.error_message"
+            + " FROM academic_import_item i JOIN academic_import_job j ON j.id=i.job_id"
+            + " WHERE j.seed_key LIKE '%:COMPLETE-CURRICULUM:%'"
+            + " AND i.status='FAILED' LIMIT 5");
+    assertThat(failedNewCurricula)
+        .as("Full curriculum imports must not silently fail: " + failedNewCurricula)
+        .isEmpty();
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_import_job WHERE seed_key LIKE"
+            + " '%:OFFICIAL-COURSE-LIST:%' AND status='COMPLETED'", Integer.class))
+        .isEqualTo(3);
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_import_job WHERE seed_key LIKE"
+            + " '%:OFFICIAL-COURSE-LIST:%' AND status='COMPLETED_WITH_ERRORS'",
+        Integer.class)).isZero();
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_entry WHERE provider='UFMG'"
+            + " AND kind='COURSE' AND external_id LIKE 'oferta-ufmg-%'"
+            + " AND status='VERIFIED'", Integer.class)).isEqualTo(94);
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_entry WHERE provider='PUCMINAS'"
+            + " AND kind='COURSE' AND external_id LIKE 'catalog-%'"
+            + " AND status='VERIFIED'", Integer.class)).isEqualTo(133);
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_entry WHERE provider='NEWTON'"
+            + " AND kind='COURSE' AND external_id LIKE 'newton-2025-%'"
+            + " AND status='VERIFIED'", Integer.class)).isEqualTo(44);
+    UUID newtonCampus = CatalogImports.identity(
+        "NEWTON", "CAMPUS", "newton-ofertas-2025-presencial");
+    UUID psychology = CatalogImports.identity(
+        "NEWTON", "COURSE", "newton-2025-presential-psicologia-bachelor");
+    assertThat(catalog.list("COURSE", newtonCampus, "Psicologia", 0, false))
+        .anyMatch(row -> psychology.equals(row.get("id"))
+            && Boolean.TRUE.equals(row.get("hasCurriculum")));
+    UUID pucCampus = CatalogImports.identity(
+        "PUCMINAS", "CAMPUS", "puc-uberlandia-si-historico-2023");
+    UUID si = CatalogImports.identity(
+        "PUCMINAS", "COURSE", "puc-uberlandia-si-noturno-historico-2023");
+    assertThat(catalog.list("COURSE", pucCampus, "Sistemas de Informação", 0, false))
+        .anyMatch(row -> si.equals(row.get("id"))
+            && Boolean.TRUE.equals(row.get("hasCurriculum")));
+    UUID statistics = CatalogImports.identity(
+        "UFMG", "COURSE", "oferta-ufmg-belo-horizonte-estatistica-bachelor");
+    UUID computerScience = CatalogImports.identity(
+        "NEWTON", "COURSE", "newton-2025-presential-ciencia-da-computacao-bachelor");
+    assertThat(catalog.list(
+        "COURSE", CatalogImports.identity("UFMG", "CAMPUS", "ufmg-list-belo-horizonte"),
+        "Estatística", 0, false))
+        .anyMatch(row -> statistics.equals(row.get("id"))
+            && Boolean.TRUE.equals(row.get("hasCurriculum")));
+    assertThat(catalog.list("COURSE", newtonCampus, "Ciência da Computação", 0, false))
+        .anyMatch(row -> computerScience.equals(row.get("id"))
+            && Boolean.TRUE.equals(row.get("hasCurriculum")));
+    for (Object[] item : new Object[][] {
+        {psychology, 63}, {si, 52}, {statistics, 31}, {computerScience, 49}}) {
+      assertThat(db.jdbc.queryForObject(
+          "SELECT count(*) FROM academic_curriculum_subject s"
+              + " JOIN academic_curriculum c ON c.id=s.curriculum_id"
+              + " JOIN academic_entry e ON e.id=s.id"
+              + " WHERE c.course_offering_id=? AND e.status='VERIFIED'",
+          Integer.class, item[0])).isEqualTo(item[1]);
+    }
+  }
+
+  @Test
   @org.springframework.transaction.annotation.Transactional
   void importReviewAndPausePreservePublishedRecords() {
     var mapper =
@@ -1185,7 +1253,7 @@ class PlatformIntegrationTest {
     assertThat(db.one("SELECT status FROM academic_import_job WHERE id=?", job).get("status"))
         .isEqualTo("PAUSED");
     imports.control(admin, job, "resume");
-    for (int i = 0; i < 10; i++) imports.processBatch();
+    for (int i = 0; i < 100; i++) imports.processBatch();
     UUID entity = CatalogImports.identity(provider, "INSTITUTION", "institution");
     assertThat(db.one("SELECT name FROM academic_entry WHERE id=?", entity).get("name"))
         .isEqualTo(first.name());
@@ -1204,7 +1272,7 @@ class PlatformIntegrationTest {
     UUID update =
         imports.submit(
             admin, new CatalogRecord.Document(provider, List.of(changed)), "test-review");
-    for (int i = 0; i < 10; i++) imports.processBatch();
+    for (int i = 0; i < 100; i++) imports.processBatch();
     var pending = db.one("SELECT id,status FROM academic_import_item WHERE job_id=?", update);
     assertThat(pending.get("status")).isEqualTo("PENDING_VERIFICATION");
     assertThat(db.one("SELECT name FROM academic_entry WHERE id=?", entity).get("name"))

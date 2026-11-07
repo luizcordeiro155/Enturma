@@ -1,0 +1,1192 @@
+{
+  "provider": "NEWTON",
+  "entries": [
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "kind": "CURRICULUM",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor",
+      "name": "Ciência da Computação (Matriz 2023)",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 8,
+        "historical": true,
+        "effectiveYear": 2023,
+        "note": "Matriz oficial publicada em 2023. Confrontar com a versão da matrícula atual; optativas são componentes sem nome específico."
+      },
+      "curriculumVersion": "2023"
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1",
+      "name": "Algoritmos e Programação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 0,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1",
+      "name": "Fundamentos de Ciências Exatas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 1,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1",
+      "name": "Fundamentos de Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 2,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1",
+      "name": "Engenharia de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 3,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 1",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 4,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p1",
+      "name": "Comunicação Efetiva I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 5,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2",
+      "name": "Arquitetura de Computadores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 0,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2",
+      "name": "Banco de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 1,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2",
+      "name": "Análise de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 2,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2",
+      "name": "Metodologia de Desenvolvimento de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 3,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 2",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 4,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p2",
+      "name": "Educação, Sociedade e meio ambiente",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 5,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3",
+      "name": "Programação Orientada a Objetos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 0,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3",
+      "name": "Linguagens de Programação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 1,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3",
+      "name": "Sistemas Operacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 2,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3",
+      "name": "Qualidade e Testes de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 3,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 3",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 4,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p3",
+      "name": "Análise de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 5,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4",
+      "name": "Programação Web",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 0,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4",
+      "name": "Estrutura de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 1,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4",
+      "name": "Business Intelligence",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 2,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4",
+      "name": "Modelagem de Processos de Negócios",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 3,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4",
+      "name": "Optativa I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": false,
+        "orderIndex": 4,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 4",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 5,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p4",
+      "name": "Transformação Digital",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 6,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5",
+      "name": "Programação para Dispositivos Móveis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 0,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5",
+      "name": "Arquitetura de Aplicações Web",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 1,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5",
+      "name": "Redes de Computadores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 2,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5",
+      "name": "Segurança e Auditoria de Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 3,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5",
+      "name": "Fundamentos de Inteligência Artificial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 4,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p5",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 5",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 5,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6",
+      "name": "Administração de Banco de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 0,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6",
+      "name": "Interação Humano-Computador",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 1,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6",
+      "name": "Sistemas Digitais para Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 2,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6",
+      "name": "Gerência de Projetos Tecnológicos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 3,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6",
+      "name": "Inteligência Artificial e Computacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 4,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p6",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 6",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 5,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7",
+      "name": "Computação em nuvem",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 0,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7",
+      "name": "Teoria de grafos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 1,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7",
+      "name": "Compiladores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 2,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7",
+      "name": "Optativa II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": false,
+        "orderIndex": 3,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7",
+      "name": "Projeto de Conclusão de Curso I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 4,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p7",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 7",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 5,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8",
+      "name": "Sistemas Embarcados para TI",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 0,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8",
+      "name": "Simulação de Sistemas Computacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 1,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8",
+      "name": "Projeto de Conclusão de Curso II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": true,
+        "orderIndex": 2,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8",
+      "name": "Computação Gráfica e Processamento de Imagem",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 3,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8",
+      "name": "Optativa III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "required": false,
+        "orderIndex": 4,
+        "learningArea": "IT"
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-2025-presential-ciencia-da-computacao-bachelor-curr-2023-p8",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 8",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/08/Matriz_curricular_CC_presencial.pdf",
+        "name": "Newton Paiva Ciência da Computação 2023 - matriz curricular presencial",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "f0938f6fd8dbb00b35838003d550d76f8b0e4c1d242105c8afb1a29820bead47",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "required": true,
+        "orderIndex": 5,
+        "learningArea": "IT"
+      }
+    }
+  ]
+}

@@ -1,0 +1,321 @@
+{
+  "provider": "NEWTON",
+  "sourceUrl": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+  "documentTitle": "Newton Paiva - Anexo IV, quadro de oferta de vagas do 1o semestre de 2025",
+  "sourceYear": 2025,
+  "reviewedAt": "2026-11-07T03:00:00Z",
+  "scope": "Typed transcription of institution's 2025 admission tables. SHA-256 is of THIS JSON file, not remote PDF. No claim of 2026 availability.",
+  "offerings": [
+    {
+      "name": "Administração",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Arquitetura e Urbanismo",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Biomedicina",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Ciência da Computação",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Ciências Contábeis",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Direito",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Enfermagem",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Engenharia Civil",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Engenharia de Computação",
+      "durationPeriods": 9,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Engenharia Elétrica",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Engenharia Mecânica",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Farmácia",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Fisioterapia",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Medicina Veterinária",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Nutrição",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Odontologia",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Psicologia",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Sistemas de Informação",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "durationPeriods": 5,
+      "degree": "TECHNOLOGIST",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Estética e Cosmética",
+      "durationPeriods": 5,
+      "degree": "TECHNOLOGIST",
+      "modality": "PRESENTIAL",
+      "campus": "newton-ofertas-2025-presencial"
+    },
+    {
+      "name": "Administração",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Arquitetura e Urbanismo",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Biomedicina",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Ciência da Computação",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Ciências Contábeis",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Engenharia Civil",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Engenharia de Computação",
+      "durationPeriods": 9,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Engenharia Elétrica",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Engenharia Mecânica",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Farmácia",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Fisioterapia",
+      "durationPeriods": 10,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Letras",
+      "durationPeriods": 8,
+      "degree": "LICENTIATE",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Nutrição",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "HYBRID",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Pedagogia",
+      "durationPeriods": 8,
+      "degree": "LICENTIATE",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Sistemas de Informação",
+      "durationPeriods": 8,
+      "degree": "BACHELOR",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "durationPeriods": 5,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Design de Interiores",
+      "durationPeriods": 4,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Estética e Cosmética",
+      "durationPeriods": 5,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Gestão Comercial",
+      "durationPeriods": 4,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Gestão de Recursos Humanos",
+      "durationPeriods": 4,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Gestão Financeira",
+      "durationPeriods": 4,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Logística",
+      "durationPeriods": 4,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Marketing",
+      "durationPeriods": 4,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    },
+    {
+      "name": "Processos Gerenciais",
+      "durationPeriods": 4,
+      "degree": "TECHNOLOGIST",
+      "modality": "REMOTE",
+      "campus": "newton-ofertas-2025-ead-flex"
+    }
+  ],
+  "presentialConfirmationUrl": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+  "presentialEvidenceNote": "Lista institucional de cursos presenciais na rematrícula 2025.2. Unidade e turno de cada oferta precisam de confirmação.",
+  "flexEvidenceNote": "Anexo IV é a relação EAD/Flex de 2025.1, não é a relação de cursos presenciais."
+}

@@ -1,0 +1,1299 @@
+{
+  "provider": "PUCMINAS",
+  "entries": [
+    {
+      "externalId": "puc-uberlandia-si-historico-2023",
+      "kind": "CAMPUS",
+      "parentExternalId": "pucminas",
+      "name": "Uberlândia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "city": "Uberlândia",
+        "state": "MG",
+        "sourceYear": 2023
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-noturno-historico-2023",
+      "kind": "COURSE",
+      "parentExternalId": "puc-uberlandia-si-historico-2023",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "shift": "EVENING",
+        "durationPeriods": 8,
+        "learningArea": "IT",
+        "historical": true,
+        "note": "Grade histórica maio de 2023; confirmar disponibilidade de oferta atual."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05",
+      "kind": "CURRICULUM",
+      "parentExternalId": "puc-uberlandia-si-noturno-historico-2023",
+      "name": "Matriz 2023 — Sistemas de Informação (Uberlândia)",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 8,
+        "effectiveYear": 2023,
+        "historical": true,
+        "note": "Grade publicada em 2023, versão histórica. Não inventar horas-aula; nenhum turno vigente confirmado para 2026."
+      },
+      "curriculumVersion": "2023-05"
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p1",
+      "name": "ALGORITMOS E TÉCNICAS DE PROGRAMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p1",
+      "name": "FILOSOFIA: RAZÃO E MODERNIDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p1",
+      "name": "INTRODUÇÃO A ADMINISTRAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p1",
+      "name": "INTRODUÇÃO À COMPUTAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p1",
+      "name": "LABORATÓRIO DE ALGORITMOS E TÉCNICAS DE PROGRAMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p1",
+      "name": "MATEMÁTICA DISCRETA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p2",
+      "name": "ARQUITETURA DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p2",
+      "name": "CÁLCULO I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p2",
+      "name": "FILOSOFIA: ANTROPOLOGIA E ÉTICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p2",
+      "name": "FUNDAMENTOS DE SISTEMAS DE INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p2",
+      "name": "LABORATÓRIO DE PROGRAMAÇÃO ORIENTADA POR OBJETOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p2-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p2",
+      "name": "PROGRAMAÇÃO ORIENTADA POR OBJETOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p3",
+      "name": "ALGORITMOS E ESTRUTURAS DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p3",
+      "name": "BANCOS DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p3",
+      "name": "CÁLCULO II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p3",
+      "name": "LABORATÓRIO DE ALGORITMOS E ESTRUTURAS DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p3",
+      "name": "MODELAGEM DE PROCESSOS DE NEGÓCIOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p3-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p3",
+      "name": "SISTEMAS OPERACIONAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p4",
+      "name": "ALGORITMOS EM GRAFOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p4",
+      "name": "CULTURA RELIGIOSA: FENÔMENO RELIGIOSO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p4",
+      "name": "ENGENHARIA DE REQUISITOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p4",
+      "name": "ESTATÍSTICA E PROBABILIDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p4",
+      "name": "INTRODUÇÃO À PESQUISA EM INFORMÁTICA",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p4",
+      "name": "REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p5",
+      "name": "COMPUTADORES E SOCIEDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p5",
+      "name": "CULTURA RELIGIOSA: PESSOA E SOCIEDADE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p5",
+      "name": "FUNDAMENTOS DE TESTES DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p5",
+      "name": "INTELIGÊNCIA ARTIFICIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p5",
+      "name": "INTERAÇÃO HUMANO-COMPUTADOR",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p5",
+      "name": "PROJETO DE REDES DE COMPUTADORES",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p5-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p5",
+      "name": "TÉCNICAS AVANÇADAS DE PROGRAMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p6",
+      "name": "ESTÁGIO OBRIGATÓRIO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p6",
+      "name": "GERENCIA DE PROJETOS DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p6",
+      "name": "LABORATÓRIO DE DESENVOLVIMENTO DE SISTEMAS DE INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p6",
+      "name": "PROCESSOS E QUALIDADE DE SOFTWARE",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p6-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p6",
+      "name": "PROJETO DE SISTEMAS DE INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p6-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p6",
+      "name": "TECNOLOGIAS PARA DESCOBERTA DE CONHECIMENTO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p6-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p6",
+      "name": "TECNOLOGIAS WEB",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "name": "DESENVOLVIMENTO DE APLICAÇÕES DISTRIBUÍDAS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "name": "EMPREENDEDORISMO E PLANO DE NEGÓCIOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "name": "FUNDAMENTOS DE MARKETING",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "name": "GESTÃO DE SERVIÇOS DE TECNOLOGIA DA INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "name": "OTIMIZAÇÃO DE SISTEMAS COMPUTACIONAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "name": "PLANEJAMENTO DE CAPACIDADE E AVALIAÇÃO DE SISTEMAS COMPUTACIONAIS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "name": "TECNOLOGIAS DE BANCOS DE DADOS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p7-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p7",
+      "name": "TRABALHO DE CONCLUSÃO DE CURSO I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 7,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p8",
+      "name": "GOVERNANÇA DE TECNOLOGIA DA INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p8-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p8",
+      "name": "SEGURANÇA DE SISTEMAS DE INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p8-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p8",
+      "name": "SISTEMAS INTEGRADOS DE GESTÃO EMPRESARIAL",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p8-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p8",
+      "name": "TECNOLOGIAS DA INFORMAÇÃO E DO CONHECIMENTO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p8-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p8",
+      "name": "TÓPICOS ESPECIAIS EM SISTEMAS DE INFORMAÇÃO",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    },
+    {
+      "externalId": "puc-uberlandia-si-grade-2023-05-p8-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-uberlandia-si-grade-2023-05-p8",
+      "name": "TRABALHO DE CONCLUSÃO DE CURSO II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+        "name": "PUC Minas - Sistemas de Informação Uberlândia, grade histórica de 2023",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1f6d503b9268f07cb87d61388a305d7deeb2a63eefd0542c04ed561f80da4f18",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "note": "Carga horária não confirmada no texto da fonte; sem valor presumido."
+      }
+    }
+  ]
+}

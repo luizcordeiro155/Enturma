@@ -1,0 +1,845 @@
+{
+  "provider": "UFMG",
+  "entries": [
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "kind": "CURRICULUM",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor",
+      "name": "Estatística - currículo 2024/1",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 8,
+        "effectiveYear": 2024,
+        "note": "Inclui componentes obrigatórios nomeados; blocos de carga optativa e formação livre sem disciplina específica não foram inventados.",
+        "historical": true
+      },
+      "curriculumVersion": "2024/1"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1-EST185",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1",
+      "name": "Seminários I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 30,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST185"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1-EST199",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1",
+      "name": "Introdução à Probabilidade",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST199"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1-MAT001",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1",
+      "name": "Cálculo Diferencial e Integral I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "MAT001"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1-MAT038",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1",
+      "name": "Geometria Analítica e Álgebra Linear",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "MAT038"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1-EST200",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p1",
+      "name": "Introdução à Ciência de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST200"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2-MAT048",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2",
+      "name": "Álgebra Linear I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "MAT048"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2-EST206",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2",
+      "name": "Probabilidade I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST206"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2-MAT039",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2",
+      "name": "Cálculo Diferencial e Integral II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "MAT039"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2-DCC203",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2",
+      "name": "Programação e Desenvolvimento de Software I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "DCC203"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2-EST207",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p2",
+      "name": "Métodos Computacionais para Ciência de Dados I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST207"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3-EST208",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3",
+      "name": "Introdução à Inferência Estatística",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST208"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3-EST028",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3",
+      "name": "Probabilidade II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST028"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3-DCC204",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3",
+      "name": "Programação e Desenvolvimento de Software II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "DCC204"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3-MAT002",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p3",
+      "name": "Cálculo Diferencial e Integral III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "MAT002"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4-DCC034",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4",
+      "name": "Cálculo Numérico",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "DCC034"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4-EST035",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4",
+      "name": "Análise de Regressão",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST035"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4-EST209",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4",
+      "name": "Inferência I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST209"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4-EST039",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p4",
+      "name": "Processos Estocásticos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST039"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5-DCC011",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5",
+      "name": "Introdução a Bancos de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "DCC011"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5-EST036",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5",
+      "name": "Planejamento de Experimentos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST036"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5-EST080",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5",
+      "name": "Estatística Não Paramétrica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST080"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5-EST088",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5",
+      "name": "Inferência Estatística com Abordagem Bayesiana",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST088"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5-EST210",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p5",
+      "name": "Inferência II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST210"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6-EST011",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6",
+      "name": "Estatística Multivariada",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST011"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6-EST038",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6",
+      "name": "Métodos Estatísticos de Previsão",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST038"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6-EST211",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6",
+      "name": "Métodos Computacionais para Ciência de Dados II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST211"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6-EST079",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p6",
+      "name": "Modelos Lineares Generalizados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST079"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p7-EST037",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p7",
+      "name": "Amostragem",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST037"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p7-EST090",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p7",
+      "name": "Análise de Sobrevivência",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 60,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST090"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p7-EST212",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p7",
+      "name": "Laboratório de Estatística I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 90,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST212"
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p8-EST059",
+      "kind": "SUBJECT",
+      "parentExternalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor-estatistica-2024-1-p8",
+      "name": "Monografia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.est.ufmg.br/portal/graduacao-estatistica-ufmg/",
+        "name": "UFMG - Estatística - grade curricular 2024/1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "aa96674dfb3c4891ff39a9aa08e14466b24298ddb783caa1ebe8eb99b96f8883",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 210,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      },
+      "code": "EST059"
+    }
+  ]
+}

@@ -1,0 +1,486 @@
+{
+  "provider": "UFMG",
+  "sourceName": "UFMG Prograd: cursos de Belo Horizonte e Montes Claros, consultados em novembro de 2026",
+  "sourceUrls": [
+    "https://www.ufmg.br/prograd/belo-horizonte/",
+    "https://www.ufmg.br/prograd/montes-claros/"
+  ],
+  "reviewedAt": "2026-11-07T03:00:00Z",
+  "scope": "Source hash covers this reviewed UTF-8 transcription, not original institutional web HTML",
+  "excludedFromNewList": [
+    "Engenharia de Computação: grade já presente na expansão anterior",
+    "Sistemas de Informação: grade já presente no catálogo original"
+  ],
+  "offerings": [
+    {
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Administração",
+      "degree": "BACHELOR",
+      "city": "Montes Claros"
+    },
+    {
+      "name": "Agronomia",
+      "degree": "BACHELOR",
+      "city": "Montes Claros"
+    },
+    {
+      "name": "Antropologia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Aquacultura",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Arqueologia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Arquitetura e Urbanismo",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Arquivologia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Artes Visuais",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Artes Visuais",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Biblioteconomia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Biomedicina",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciência da Computação",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciência de Dados",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências Atuariais",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências Biológicas",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências Biológicas",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências Contábeis",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências da Natureza",
+      "degree": "LICENTIATE",
+      "city": "Montes Claros"
+    },
+    {
+      "name": "Ciências do Estado",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências Econômicas",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências Sociais",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências Sociais",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Ciências Socioambientais",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Cinema de Animação e Artes Digitais",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Conservação e Restauração de Bens Culturais Móveis",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Controladoria e Finanças",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Dança",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Design",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Design de Moda",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Direito",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Educação do Campo",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Educação Física",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Educação Física",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Enfermagem",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia Aeroespacial",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia Agrícola e Ambiental",
+      "degree": "BACHELOR",
+      "city": "Montes Claros"
+    },
+    {
+      "name": "Engenharia Ambiental",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia Civil",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia de Alimentos",
+      "degree": "BACHELOR",
+      "city": "Montes Claros"
+    },
+    {
+      "name": "Engenharia de Controle e Automação",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia de Materiais",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia de Minas",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia de Produção",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia de Sistemas",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia Elétrica",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia Florestal",
+      "degree": "BACHELOR",
+      "city": "Montes Claros"
+    },
+    {
+      "name": "Engenharia Mecânica",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia Metalúrgica",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Engenharia Química",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Estatística",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Farmácia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Filosofia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Filosofia",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Física",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Física",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Fisioterapia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Fonoaudiologia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Geografia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Geografia",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Geologia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Gestão de Serviços de Saúde",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Gestão Pública",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "História",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "História",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Jornalismo",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Letras",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Letras",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Letras-Libras",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Matemática",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Matemática",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Matemática",
+      "degree": "LICENTIATE",
+      "city": "Montes Claros"
+    },
+    {
+      "name": "Matemática Computacional",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Medicina",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Medicina Veterinária",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Museologia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Música",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Música",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Nutrição",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Odontologia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Pedagogia",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Psicologia",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Publicidade e Propaganda",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Química",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Química",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Química Tecnológica",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Radiologia",
+      "degree": "TECHNOLOGIST",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Relações Econômicas Internacionais",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Relações Públicas",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Teatro",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Teatro",
+      "degree": "LICENTIATE",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Terapia Ocupacional",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Turismo",
+      "degree": "BACHELOR",
+      "city": "Belo Horizonte"
+    },
+    {
+      "name": "Zootecnia",
+      "degree": "BACHELOR",
+      "city": "Montes Claros"
+    }
+  ]
+}
