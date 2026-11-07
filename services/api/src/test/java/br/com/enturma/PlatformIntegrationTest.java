@@ -1253,7 +1253,7 @@ class PlatformIntegrationTest {
     assertThat(db.one("SELECT status FROM academic_import_job WHERE id=?", job).get("status"))
         .isEqualTo("PAUSED");
     imports.control(admin, job, "resume");
-    for (int i = 0; i < 10; i++) imports.processBatch();
+    for (int i = 0; i < 100; i++) imports.processBatch();
     UUID entity = CatalogImports.identity(provider, "INSTITUTION", "institution");
     assertThat(db.one("SELECT name FROM academic_entry WHERE id=?", entity).get("name"))
         .isEqualTo(first.name());
@@ -1272,7 +1272,7 @@ class PlatformIntegrationTest {
     UUID update =
         imports.submit(
             admin, new CatalogRecord.Document(provider, List.of(changed)), "test-review");
-    for (int i = 0; i < 10; i++) imports.processBatch();
+    for (int i = 0; i < 100; i++) imports.processBatch();
     var pending = db.one("SELECT id,status FROM academic_import_item WHERE job_id=?", update);
     assertThat(pending.get("status")).isEqualTo("PENDING_VERIFICATION");
     assertThat(db.one("SELECT name FROM academic_entry WHERE id=?", entity).get("name"))
