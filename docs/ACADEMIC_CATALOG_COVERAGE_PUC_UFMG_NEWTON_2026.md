@@ -12,7 +12,7 @@ A UNA já conta com 103 ofertas e 18 grades. A expansão adiciona **ofertas de c
 |---|---:|---|
 | UFMG | 94 | [Lista por Belo Horizonte](https://www.ufmg.br/prograd/belo-horizonte/) e [Montes Claros](https://www.ufmg.br/prograd/montes-claros/). Já havia SI e Eng. Computação com grades no Enturma |
 | PUC Minas | 133 | [Cursos de graduação por unidade](https://www.pucminas.br/graduacao/_layouts/15/cursos/graduacao.aspx), distribuídos em Barreiro, Betim, Contagem, Coração Eucarístico, Lourdes, Poços de Caldas, São Gabriel e PUC Virtual. Três ofertas com matriz anterior não são duplicadas |
-| Newton Paiva | 44 | [Quadro institucional de vagas de 2025](https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf): 20 presenciais e 24 EAD/Flex. **Não comprova oferta vigente em 2026** |
+| Newton Paiva | 44 | [Relação presencial de rematrícula 2025.2](https://newtonpaiva.br/formas-de-entrada/rematricula/) e [Anexo IV EAD/Flex de 2025.1](https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf): 20 presenciais e 24 EAD/Flex. **Não comprova oferta vigente em 2026; conferir unidade, campus e turno por curso** |
 
 Campi lógicos de UFMG por cidade e de Newton por modalidade servem somente para **organizar a seleção**: não representam endereço ou polo físico real. Deve-se confirmar a unidade verdadeira antes de usar matrícula por campus. Identificadores externos novos preservam a identidade e o histórico das ofertas anteriores.
 
