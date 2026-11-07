@@ -6,18 +6,19 @@
       "kind": "CAMPUS",
       "parentExternalId": "pucminas",
       "name": "Lourdes",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
         "city": "Belo Horizonte",
-        "state": "MG"
+        "state": "MG",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
@@ -25,267 +26,1579 @@
       "kind": "COURSE",
       "parentExternalId": "puc-lourdes-pendente",
       "name": "Jogos Digitais",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
         "degreeType": "BACHELOR",
         "modality": "PRESENTIAL",
         "durationPeriods": 8,
         "learningArea": "IT",
-        "note": "Somente o primeiro período da matriz incluído nesta revisão."
+        "coursePage": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "sourceVersion": "GRADE-2026-09",
+        "historical": false,
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "shift": "AFTERNOON",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
       "kind": "CURRICULUM",
       "parentExternalId": "puc-jogos-digitais-bachelor-2026",
-      "name": "Matriz PUC-SITE-2026-10",
-      "status": "PENDING_VERIFICATION",
+      "name": "Matriz GRADE-2026-09",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "note": "Dados oficiais aguardando auditoria do hash e da vigência."
+        "minimumPeriods": 8,
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       },
-      "curriculumVersion": "PUC-SITE-2026-10"
+      "curriculumVersion": "GRADE-2026-09"
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "kind": "PERIOD",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
       "name": "1º período",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
-      "attributes": {},
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
       "periodNumber": 1
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s1",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s1",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Cidadania e Responsabilidade Social",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 36,
         "orderIndex": 0,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "OTHER",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s2",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s2",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Cultura Religiosa: Saberes e Tradições",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 36,
         "orderIndex": 1,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "OTHER",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s3",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s3",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Fundamentos de Cálculo",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 90,
         "orderIndex": 2,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "IT",
+        "workloadHours": 90,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s4",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s4",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Fundamentos de Jogos Digitais",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 36,
         "orderIndex": 3,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s5",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s5",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Introdução a Computação",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 72,
         "orderIndex": 4,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "IT",
+        "workloadHours": 72,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s6",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s6",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Introdução a Ferramentas de Pintura Digital",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 72,
         "orderIndex": 5,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "IT",
+        "workloadHours": 72,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s7",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s7",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Mentoria em Carreiras",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 18,
         "orderIndex": 6,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "OTHER",
+        "workloadHours": 18,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s8",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s8",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Produção de Jogos: Board Game",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 36,
         "orderIndex": 7,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s9",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s9",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Seminários I",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 18,
         "orderIndex": 8,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "OTHER",
+        "workloadHours": 18,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     },
     {
-      "externalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1-s10",
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1-s10",
       "kind": "SUBJECT",
-      "parentExternalId": "puc-jogos-digitais-bachelor-2026-PUC-SITE-2026-10-p1",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p1",
       "name": "Trabalho Interdisciplinar: Board Game",
-      "status": "PENDING_VERIFICATION",
+      "status": "VERIFIED",
       "source": {
-        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?curso=444",
-        "name": "PUC Minas · Jogos Digitais",
-        "type": "OFFICIAL_WEBPAGE",
-        "contentHash": null,
-        "retrievedAt": "2026-11-06T20:40:00Z",
-        "verifiedAt": null
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
       },
       "attributes": {
-        "workloadHours": 36,
         "orderIndex": 9,
         "required": true,
-        "learningArea": "IT"
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 2
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "name": "Áudio para Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 18,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "name": "Criação de Assets 3D para Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 90,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "name": "Design de Interface para Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 42,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "name": "Game Design I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "name": "Introdução a Algoritmos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 144,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "name": "Produção de Jogos Digitais: Fundamentos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 84,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "name": "Seminários II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "OTHER",
+        "workloadHours": 18,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p2",
+      "name": "Trabalho Interdisciplinar: Arcade Shooter",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 7,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 46,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 3
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3",
+      "name": "Engenharia de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 72,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3",
+      "name": "Introdução à Pesquisa em Informática",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3",
+      "name": "Personagens 3D para Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 54,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3",
+      "name": "Pintura de Texturas para Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 42,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3",
+      "name": "Produção de Jogos: Interação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 54,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3",
+      "name": "Programação Modular",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 144,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p3",
+      "name": "Trabalho Interdisciplinar: Platformer Sidescroller",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 51,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 4
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Estrutura de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 144,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Gerência de Projetos de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Jogos Sérios e Gamificação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 76,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Metodologias de Extensão Universitária",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Pipeline Gráfico para Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Produção de Jogos: Extensão",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 122,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Seminários III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "OTHER",
+        "workloadHours": 18,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Trabalho Interdisciplinar: Jogos Educacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 7,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 164,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4-s9",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p4",
+      "name": "Visual Effects",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 8,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 48,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 5
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "name": "Animação 3D para Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 90,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "name": "Arquitetura de Computadores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 42,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "name": "Interação Humano Computador",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 90,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "name": "Level Design",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "name": "Produção de Jogos: Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 90,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "name": "Programação de Shaders",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 90,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "name": "Tópicos em Jogos Digitais II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p5",
+      "name": "Trabalho Interdisciplinar: 3D Platformer",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 7,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 51,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 6
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6",
+      "name": "Agentes Inteligentes",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 84,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6",
+      "name": "Arquitetura de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 84,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6",
+      "name": "Enviroment Design",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 54,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6",
+      "name": "Personagens 3D para Jogos Digitais II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 54,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6",
+      "name": "Produção de Jogos Digitais: Agentes Inteligentes",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 54,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6",
+      "name": "Teste de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 84,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p6",
+      "name": "Trabalho Interdisciplinar: FPS",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 51,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 7
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7",
+      "name": "Filosofia: Lógica e Pensamento Crítico",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7",
+      "name": "Fundamentos de Sistemas Operacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 84,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7",
+      "name": "Game Design II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7",
+      "name": "Produção de Jogos Digitais: Multiplayer",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 54,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7",
+      "name": "Projeto Aplicado I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 51,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7",
+      "name": "Redes de Computadores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 84,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p7",
+      "name": "Tópicos em Jogos Digitais II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 8
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8",
+      "name": "Cultura Religiosa: Humanismo, Sociedade e Ecologia Integral",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8",
+      "name": "Filosofia: Antropologia e Ética",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8",
+      "name": "Mercado de Jogos Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8",
+      "name": "Persistência e Backend",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8",
+      "name": "Produção de Jogos: Otimização",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 36,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "puc-jogos-digitais-bachelor-2026-GRADE-2026-09-p8",
+      "name": "Projeto Aplicado II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+        "name": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "5a19784c3c9c0c4873fdfc0772fd99443e65fc5541dab48d4d92bd9ea9ebd4bc",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 51,
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
       }
     }
   ]

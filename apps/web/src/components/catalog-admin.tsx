@@ -214,7 +214,7 @@ export function CatalogAdmin({ section = "summary" }: { section?: string }) {
             </p>
           </details>
           <div className="actions">
-            {["UNA", "PUCMINAS", "UFMG"].map((p) => (
+            {["UNA", "PUCMINAS", "UFMG", "NEWTON"].map((p) => (
               <button
                 key={p}
                 disabled={busy}

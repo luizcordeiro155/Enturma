@@ -14,6 +14,21 @@ As 18 matrizes UNA correspondem às modalidades vinculadas a Aimorés nas págin
 
 No onboarding: universidade → campus → oferta do curso → versão da grade → período/nível → UCs atuais. As opções vêm da mesma API para web e mobile. Busca ignora acentos, reconhece aliases documentados como ADS e prioriza UNA/Aimorés e ofertas com grade disponível. Não há cadastro livre de nomes acadêmicos pelo estudante.
 
+## Ampliação de novembro de 2026
+
+A cobertura inicial descrita na tabela acima permanece como referência histórica dos primeiros snapshots; ela **não inclui** a ampliação subsequente.
+
+A correção da importação inclui quatro ofertas adicionais, estruturadas nas mesmas tabelas normalizadas e nas APIs de matrícula. A fonte institucional, a versão e as limitações estão documentadas em [Expansão do catálogo](ACADEMIC_CATALOG_EXPANSION_2026_11.md):
+
+| Provider | Curso acrescentado | Ocorrências curriculares | Organização |
+|---|---|---:|---|
+| UNA | Jogos Digitais | 11 UCs | 5 blocos flexíveis do PPC |
+| UFMG | Engenharia de Computação | 52 | 10 períodos; optativas sem denominação não inventadas |
+| PUC Minas | Jogos Digitais | 62 | 8 períodos |
+| Newton | Análise e Desenvolvimento de Sistemas EAD | 31 | 5 períodos; matriz histórica de 2023 |
+
+A presença no GitHub/Vercel **não comprova** atualização do backend: é preciso que o Java atualizado rode no servidor, que os jobs de importação terminem com `COMPLETED`, e que a API de onboarding devolva as novas ofertas. O SHA-256 documentado da expansão protege as transcrições versionadas, não autentica os bytes dos documentos originais.
+
 ## ADS UNA Aimorés
 
 A matriz E2A Radial organiza o nível Fundamental nos semestres 1–2. Inclui **Interação humano computador e UX**, **Algoritmos e programação**, **Exploração digital e fundamentos tecnológicos** e **Matemática computacional aplicada**, cada uma com 160h. O estudante seleciona as UCs atuais; ter cursado as duas primeiras em 2026.1 não transforma essa sequência individual em uma regra para todas as turmas.

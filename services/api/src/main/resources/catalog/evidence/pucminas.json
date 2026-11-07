@@ -1,0 +1,299 @@
+{
+  "provider": "PUCMINAS",
+  "officialUrl": "https://www.pucminas.br/campus/lourdes/ensino/graduacao/Paginas/Jogos-Digitais.aspx?campi=bb24db1d-017d-4797-9656-a1a6b02b2d60&curso=444&tipo=152f25a5-fa8d-4d04-a7ba-57b6b4c21265&turno=2",
+  "sourceTitle": "PUC Minas Jogos Digitais Lourdes, grade por periodo divulgada em 2026; transcricao revisada",
+  "sourceYear": "2026",
+  "curriculumVersion": "GRADE-2026-09",
+  "integrityScope": "SHA-256 of the UTF-8 bytes of this reviewed institutional curriculum transcription; NOT a hash of the remote PDF/HTML",
+  "note": "Bacharelado, turno tarde, oito periodos. A oferta pode ser alterada pela instituicao.",
+  "academicPeriods": [
+    {
+      "number": 1,
+      "subjects": [
+        {
+          "name": "Cidadania e Responsabilidade Social",
+          "hours": 36
+        },
+        {
+          "name": "Cultura Religiosa: Saberes e Tradições",
+          "hours": 36
+        },
+        {
+          "name": "Fundamentos de Cálculo",
+          "hours": 90
+        },
+        {
+          "name": "Fundamentos de Jogos Digitais",
+          "hours": 36
+        },
+        {
+          "name": "Introdução a Computação",
+          "hours": 72
+        },
+        {
+          "name": "Introdução a Ferramentas de Pintura Digital",
+          "hours": 72
+        },
+        {
+          "name": "Mentoria em Carreiras",
+          "hours": 18
+        },
+        {
+          "name": "Produção de Jogos: Board Game",
+          "hours": 36
+        },
+        {
+          "name": "Seminários I",
+          "hours": 18
+        },
+        {
+          "name": "Trabalho Interdisciplinar: Board Game",
+          "hours": 36
+        }
+      ]
+    },
+    {
+      "number": 2,
+      "subjects": [
+        {
+          "name": "Áudio para Jogos Digitais",
+          "hours": 18
+        },
+        {
+          "name": "Criação de Assets 3D para Jogos Digitais",
+          "hours": 90
+        },
+        {
+          "name": "Design de Interface para Jogos Digitais",
+          "hours": 42
+        },
+        {
+          "name": "Game Design I",
+          "hours": 36
+        },
+        {
+          "name": "Introdução a Algoritmos",
+          "hours": 144
+        },
+        {
+          "name": "Produção de Jogos Digitais: Fundamentos",
+          "hours": 84
+        },
+        {
+          "name": "Seminários II",
+          "hours": 18
+        },
+        {
+          "name": "Trabalho Interdisciplinar: Arcade Shooter",
+          "hours": 46
+        }
+      ]
+    },
+    {
+      "number": 3,
+      "subjects": [
+        {
+          "name": "Engenharia de Software",
+          "hours": 72
+        },
+        {
+          "name": "Introdução à Pesquisa em Informática",
+          "hours": 36
+        },
+        {
+          "name": "Personagens 3D para Jogos Digitais",
+          "hours": 54
+        },
+        {
+          "name": "Pintura de Texturas para Jogos Digitais",
+          "hours": 42
+        },
+        {
+          "name": "Produção de Jogos: Interação",
+          "hours": 54
+        },
+        {
+          "name": "Programação Modular",
+          "hours": 144
+        },
+        {
+          "name": "Trabalho Interdisciplinar: Platformer Sidescroller",
+          "hours": 51
+        }
+      ]
+    },
+    {
+      "number": 4,
+      "subjects": [
+        {
+          "name": "Estrutura de Dados",
+          "hours": 144
+        },
+        {
+          "name": "Gerência de Projetos de Software",
+          "hours": 60
+        },
+        {
+          "name": "Jogos Sérios e Gamificação",
+          "hours": 76
+        },
+        {
+          "name": "Metodologias de Extensão Universitária",
+          "hours": 36
+        },
+        {
+          "name": "Pipeline Gráfico para Jogos Digitais",
+          "hours": 36
+        },
+        {
+          "name": "Produção de Jogos: Extensão",
+          "hours": 122
+        },
+        {
+          "name": "Seminários III",
+          "hours": 18
+        },
+        {
+          "name": "Trabalho Interdisciplinar: Jogos Educacionais",
+          "hours": 164
+        },
+        {
+          "name": "Visual Effects",
+          "hours": 48
+        }
+      ]
+    },
+    {
+      "number": 5,
+      "subjects": [
+        {
+          "name": "Animação 3D para Jogos Digitais",
+          "hours": 90
+        },
+        {
+          "name": "Arquitetura de Computadores",
+          "hours": 42
+        },
+        {
+          "name": "Interação Humano Computador",
+          "hours": 90
+        },
+        {
+          "name": "Level Design",
+          "hours": 36
+        },
+        {
+          "name": "Produção de Jogos: Física",
+          "hours": 90
+        },
+        {
+          "name": "Programação de Shaders",
+          "hours": 90
+        },
+        {
+          "name": "Tópicos em Jogos Digitais II",
+          "hours": 36
+        },
+        {
+          "name": "Trabalho Interdisciplinar: 3D Platformer",
+          "hours": 51
+        }
+      ]
+    },
+    {
+      "number": 6,
+      "subjects": [
+        {
+          "name": "Agentes Inteligentes",
+          "hours": 84
+        },
+        {
+          "name": "Arquitetura de Software",
+          "hours": 84
+        },
+        {
+          "name": "Enviroment Design",
+          "hours": 54
+        },
+        {
+          "name": "Personagens 3D para Jogos Digitais II",
+          "hours": 54
+        },
+        {
+          "name": "Produção de Jogos Digitais: Agentes Inteligentes",
+          "hours": 54
+        },
+        {
+          "name": "Teste de Software",
+          "hours": 84
+        },
+        {
+          "name": "Trabalho Interdisciplinar: FPS",
+          "hours": 51
+        }
+      ]
+    },
+    {
+      "number": 7,
+      "subjects": [
+        {
+          "name": "Filosofia: Lógica e Pensamento Crítico",
+          "hours": 36
+        },
+        {
+          "name": "Fundamentos de Sistemas Operacionais",
+          "hours": 84
+        },
+        {
+          "name": "Game Design II",
+          "hours": 36
+        },
+        {
+          "name": "Produção de Jogos Digitais: Multiplayer",
+          "hours": 54
+        },
+        {
+          "name": "Projeto Aplicado I",
+          "hours": 51
+        },
+        {
+          "name": "Redes de Computadores",
+          "hours": 84
+        },
+        {
+          "name": "Tópicos em Jogos Digitais II",
+          "hours": 36
+        }
+      ]
+    },
+    {
+      "number": 8,
+      "subjects": [
+        {
+          "name": "Cultura Religiosa: Humanismo, Sociedade e Ecologia Integral",
+          "hours": 36
+        },
+        {
+          "name": "Filosofia: Antropologia e Ética",
+          "hours": 36
+        },
+        {
+          "name": "Mercado de Jogos Digitais",
+          "hours": 36
+        },
+        {
+          "name": "Persistência e Backend",
+          "hours": 36
+        },
+        {
+          "name": "Produção de Jogos: Otimização",
+          "hours": 36
+        },
+        {
+          "name": "Projeto Aplicado II",
+          "hours": 51
+        }
+      ]
+    }
+  ]
+}
