@@ -1152,6 +1152,53 @@ class PlatformIntegrationTest {
   }
 
   @Test
+  void expandedUniversitiesAreSelectableAndHistoricalCurriculaPersist() {
+    for (int i = 0; i < 60; i++) imports.processBatch();
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_import_job WHERE seed_key LIKE"
+            + " '%:OFFICIAL-COURSE-LIST:%' AND status='COMPLETED'", Integer.class))
+        .isEqualTo(3);
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_import_job WHERE seed_key LIKE"
+            + " '%:OFFICIAL-COURSE-LIST:%' AND status='COMPLETED_WITH_ERRORS'",
+        Integer.class)).isZero();
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_entry WHERE provider='UFMG'"
+            + " AND kind='COURSE' AND external_id LIKE 'oferta-ufmg-%'"
+            + " AND status='VERIFIED'", Integer.class)).isEqualTo(94);
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_entry WHERE provider='PUCMINAS'"
+            + " AND kind='COURSE' AND external_id LIKE 'catalog-%'"
+            + " AND status='VERIFIED'", Integer.class)).isEqualTo(133);
+    assertThat(db.jdbc.queryForObject(
+        "SELECT count(*) FROM academic_entry WHERE provider='NEWTON'"
+            + " AND kind='COURSE' AND external_id LIKE 'newton-2025-%'"
+            + " AND status='VERIFIED'", Integer.class)).isEqualTo(44);
+    UUID newtonCampus = CatalogImports.identity(
+        "NEWTON", "CAMPUS", "newton-ofertas-2025-presencial");
+    UUID psychology = CatalogImports.identity(
+        "NEWTON", "COURSE", "newton-2025-presential-psicologia-bachelor");
+    assertThat(catalog.list("COURSE", newtonCampus, "Psicologia", 0, false))
+        .anyMatch(row -> psychology.equals(row.get("id"))
+            && Boolean.TRUE.equals(row.get("hasCurriculum")));
+    UUID pucCampus = CatalogImports.identity(
+        "PUCMINAS", "CAMPUS", "puc-uberlandia-si-historico-2023");
+    UUID si = CatalogImports.identity(
+        "PUCMINAS", "COURSE", "puc-uberlandia-si-noturno-historico-2023");
+    assertThat(catalog.list("COURSE", pucCampus, "Sistemas de Informação", 0, false))
+        .anyMatch(row -> si.equals(row.get("id"))
+            && Boolean.TRUE.equals(row.get("hasCurriculum")));
+    for (Object[] item : new Object[][] {{psychology, 63}, {si, 52}}) {
+      assertThat(db.jdbc.queryForObject(
+          "SELECT count(*) FROM academic_curriculum_subject s"
+              + " JOIN academic_curriculum c ON c.id=s.curriculum_id"
+              + " JOIN academic_entry e ON e.id=s.id"
+              + " WHERE c.course_offering_id=? AND e.status='VERIFIED'",
+          Integer.class, item[0])).isEqualTo(item[1]);
+    }
+  }
+
+  @Test
   @org.springframework.transaction.annotation.Transactional
   void importReviewAndPausePreservePublishedRecords() {
     var mapper =
