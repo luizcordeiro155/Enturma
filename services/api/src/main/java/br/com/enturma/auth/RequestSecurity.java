@@ -118,7 +118,15 @@ public class RequestSecurity extends OncePerRequestFilter {
       int limit = 90;
       int windowSeconds = 60;
 
-      if (uri.startsWith("/api/v1/public/explore/")) {
+      if (uri.matches("/api/v1/social/posts/[^/]+/publish")) {
+        prefix = "social-publish:"; limit = 10; windowSeconds = 600;
+      } else if (uri.equals("/api/v1/social/media")) {
+        prefix = "social-upload:"; limit = 12; windowSeconds = 600;
+      } else if (uri.matches("/api/v1/social/people/[^/]+/follow")) {
+        prefix = "social-follow:"; limit = 20; windowSeconds = 600;
+      } else if (uri.matches("/api/v1/social/posts/[^/]+/(report|comments)")) {
+        prefix = "social-contribution:"; limit = 15;
+      } else if (uri.startsWith("/api/v1/public/explore/")) {
         prefix = "public-explore:";
         limit = 120;
       } else if (uri.equals("/api/v1/learning/advanced/words/challenge")) {

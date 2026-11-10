@@ -291,6 +291,10 @@ const categoryNames: Record<string, string> = {
   ACHIEVEMENT: "Conquistas",
   RIDE: "Caronas",
   FRIEND: "Amizades",
+  SOCIAL_CONTENT: "Novos Posts e Clips",
+  SOCIAL_RELATIONSHIP: "Seguidores e solicitações",
+  SOCIAL_INTERACTION: "Curtidas, comentários e marcações",
+  SOCIAL_VERIFICATION: "Verificação social",
 };
 
 type Preference = {

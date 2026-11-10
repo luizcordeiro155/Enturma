@@ -55,6 +55,19 @@ public class S3Storage implements ObjectStorageService {
     return client.getObjectAsBytes(r -> r.bucket(bucket).key(key)).asByteArray();
   }
 
+  public void putFile(String key, java.nio.file.Path file, String mime) {
+    ready();
+    client.putObject(r -> r.bucket(bucket).key(key).contentType(mime), RequestBody.fromFile(file));
+  }
+
+  public java.io.InputStream open(String key, Long start, Long end) {
+    ready();
+    return client.getObject(r -> {
+      r.bucket(bucket).key(key);
+      if (start != null) r.range("bytes=" + start + "-" + end);
+    });
+  }
+
   public void delete(String key) {
     ready();
     client.deleteObject(r -> r.bucket(bucket).key(key));

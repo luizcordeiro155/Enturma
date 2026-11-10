@@ -19,7 +19,10 @@ public class PersonalDataExport {
     "sources", "SELECT s.id,s.notebook_id,s.title,s.kind,s.url,s.content,s.created_at FROM notebook_source s JOIN study_notebook n ON n.id=s.notebook_id WHERE n.user_id=? ORDER BY s.created_at,s.id",
     "conversations", "SELECT g.id,g.notebook_id,g.question,g.answer,g.citations,g.external_sources,g.created_at FROM notebook_generation g JOIN study_notebook n ON n.id=g.notebook_id WHERE n.user_id=? ORDER BY g.created_at,g.id",
     "media", "SELECT id,name,kind,favorite,created_at FROM chat_media WHERE user_id=? ORDER BY created_at,id",
-    "attachments", "SELECT id,name,mime,created_at FROM portfolio_attachment WHERE user_id=? ORDER BY created_at,id"
+    "attachments", "SELECT id,name,mime,created_at FROM portfolio_attachment WHERE user_id=? ORDER BY created_at,id",
+    "social-posts", "SELECT id,kind,body,visibility,state,tags,project_url,published_at,created_at FROM social_post WHERE author_id=? ORDER BY created_at,id",
+    "social-interactions", "SELECT post_id,kind,created_at FROM social_reaction WHERE user_id=? ORDER BY created_at,post_id,kind",
+    "social-preferences", "SELECT private_account,recommendations,autoplay,interests,navigation FROM social_profile WHERE user_id=? ORDER BY user_id"
   );
   @GetMapping
   public ResponseEntity<?> export(@AuthenticationPrincipal Actor actor,

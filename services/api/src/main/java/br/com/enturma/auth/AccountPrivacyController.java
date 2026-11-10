@@ -134,6 +134,18 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM learning_stats WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM study_journey WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM user_experience_preference WHERE user_id=?", userId);
+    db.jdbc.update("UPDATE social_media SET state='DELETING' WHERE owner_id=?",userId);
+    db.jdbc.update("DELETE FROM social_post WHERE author_id=?",userId);
+    db.jdbc.update("UPDATE social_comment SET body='',deleted=true WHERE author_id=?",userId);
+    db.jdbc.update("DELETE FROM social_follow WHERE follower_id=? OR followed_id=?",userId,userId);
+    db.jdbc.update("DELETE FROM social_mute WHERE user_id=? OR creator_id=?",userId,userId);
+    db.jdbc.update("DELETE FROM social_reaction WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM social_mention WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM social_feedback WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM social_story_view WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM social_report WHERE reporter_id=?",userId);
+    db.jdbc.update("DELETE FROM social_verification WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM social_profile WHERE user_id=?",userId);
 
     db.jdbc.update("DELETE FROM profile_featured_badge WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM user_achievement WHERE user_id=?", userId);
