@@ -17,6 +17,7 @@ import {
   mediaUrl,
   postPerson,
   socialWrite,
+  storyDuration,
   type SocialPage,
   type SocialPerson,
   type SocialPost,
@@ -55,10 +56,13 @@ export function StoryViewer({
   const video = useRef<HTMLVideoElement>(null),
     stage = useRef<HTMLDivElement>(null),
     elapsed = useRef(0),
+    advancing = useRef<string | undefined>(undefined),
     next = useRef(() => {}),
     currentId = stories[index]?.id;
   useEffect(() => {
     next.current = () => {
+      if (advancing.current === currentId) return;
+      advancing.current = currentId;
       if (index + 1 >= stories.length) close();
       else {
         setIndex((i) => i + 1);
@@ -67,7 +71,7 @@ export function StoryViewer({
         setHighlight(false);
       }
     };
-  }, [index, stories.length, close]);
+  }, [index, stories.length, close, currentId]);
   useEffect(() => {
     if (!currentId) return;
     let alive = true;
@@ -76,6 +80,7 @@ export function StoryViewer({
         if (alive) {
           setItem(r);
           elapsed.current = 0;
+          advancing.current = undefined;
           setProgress(0);
           setError("");
         }
@@ -109,7 +114,7 @@ export function StoryViewer({
     const el = video.current;
     if (el) void el.play().catch(() => {});
     let last = performance.now();
-    const duration = item.media[0]?.durationMs ?? 7000;
+    const duration = storyDuration(item.media[0]);
     const tick = setInterval(() => {
       const now = performance.now();
       const topDialog = Array.from(
@@ -130,9 +135,15 @@ export function StoryViewer({
       if (p >= 1) next.current();
     }, 100);
     const pause = () => {
-      if (document.hidden) el?.pause();
+      if (document.hidden) {
+        el?.pause();
+        setPaused(true);
+      }
     };
-    const blur = () => el?.pause();
+    const blur = () => {
+      el?.pause();
+      setPaused(true);
+    };
     document.addEventListener("visibilitychange", pause);
     window.addEventListener("blur", blur);
     return () => {

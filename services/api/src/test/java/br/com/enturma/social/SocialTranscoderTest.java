@@ -13,6 +13,47 @@ class SocialTranscoderTest {
   @TempDir Path dir;
 
   @Test
+  void acceptsExactlyNinetySecondsIncludingAudioWithoutExceedingTheLimit() throws Exception {
+    Assumptions.assumeTrue("true".equals(System.getenv("SOCIAL_TEST_FFMPEG")));
+    var process =
+        new ProcessBuilder(
+                "ffmpeg",
+                "-nostdin",
+                "-y",
+                "-loglevel",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                "color=c=green:size=320x240:rate=30",
+                "-f",
+                "lavfi",
+                "-i",
+                "sine=frequency=440:sample_rate=48000",
+                "-t",
+                "91",
+                "-c:v",
+                "libx264",
+                "-c:a",
+                "aac",
+                "-f",
+                "mp4",
+                "source")
+            .directory(dir.toFile())
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start();
+    assertThat(process.waitFor(45, TimeUnit.SECONDS)).isTrue();
+    assertThat(process.exitValue()).isZero();
+    var recipe =
+        new VideoRecipe(
+            List.of(new VideoRecipe.Segment(1, 91)), 1, .5, .5, 0, 1, false, 89, List.of());
+    var result =
+        new SocialTranscoder(new ObjectMapper(), "ffmpeg", "ffprobe").render(dir, "VIDEO", recipe);
+    assertThat(result.durationMs()).isBetween(89900, 90000);
+    assertThat(Files.size(result.thumbnail())).isGreaterThan(1000);
+  }
+
+  @Test
   void exportsReorderedCroppedCaptionedMutedVideoAndCover() throws Exception {
     Assumptions.assumeTrue(
         "true".equals(System.getenv("SOCIAL_TEST_FFMPEG")),

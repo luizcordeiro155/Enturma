@@ -3,6 +3,7 @@ import { authenticate } from "./session";
 import { expect, type APIRequestContext } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
 async function student(request: APIRequestContext, name: string) {
@@ -166,6 +167,47 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
         ),
       ).toBe(true);
       await expect(feed.locator(".social-post").first()).toBeVisible();
+      const header = await page.locator(".social-header").boundingBox();
+      expect(header!.y).toBeGreaterThanOrEqual(0);
+      const contrast = await page
+        .locator(
+          ".social-mode-nav button, .social-feed-toolbar .social-tabs button",
+        )
+        .evaluateAll((buttons) =>
+          buttons.map((button) => {
+            const luminance = (value: string) =>
+              (value.match(/[\d.]+/g) ?? [])
+                .slice(0, 3)
+                .map(Number)
+                .map((v) => {
+                  const n = v / 255;
+                  return n <= 0.04045
+                    ? n / 12.92
+                    : ((n + 0.055) / 1.055) ** 2.4;
+                })
+                .reduce(
+                  (sum, n, i) => sum + n * [0.2126, 0.7152, 0.0722][i],
+                  0,
+                );
+            let ancestor: Element | null = button;
+            let background = "rgba(0, 0, 0, 0)";
+            while (
+              ancestor &&
+              (background === "rgba(0, 0, 0, 0)" ||
+                background === "transparent")
+            ) {
+              background = getComputedStyle(ancestor).backgroundColor;
+              ancestor = ancestor.parentElement;
+            }
+            const foreground = luminance(getComputedStyle(button).color),
+              back = luminance(background);
+            return (
+              (Math.max(foreground, back) + 0.05) /
+              (Math.min(foreground, back) + 0.05)
+            );
+          }),
+        );
+      for (const ratio of contrast) expect(ratio).toBeGreaterThanOrEqual(4.5);
       await page.screenshot({
         path: info.outputPath(`social-feed-${width}-${theme}.png`),
       });
@@ -337,4 +379,106 @@ test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; control
   await expect(
     page.getByRole("button", { name: "Publicar Clip" }),
   ).toBeDisabled();
+});
+
+test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", async ({
+  page,
+  request,
+}, info) => {
+  const user = await student(request, "Criador de Clips");
+  await authenticate(page.context(), user);
+  const file = info.outputPath("player-fixture.mp4");
+  execFileSync(
+    "ffmpeg",
+    [
+      "-nostdin",
+      "-y",
+      "-loglevel",
+      "error",
+      "-f",
+      "lavfi",
+      "-i",
+      "testsrc2=size=180x320:rate=30",
+      "-t",
+      "3",
+      "-c:v",
+      "libx264",
+      "-pix_fmt",
+      "yuv420p",
+      file,
+    ],
+    { timeout: 30000 },
+  );
+  const bytes = readFileSync(file);
+  const posts = Array.from({ length: 4 }, (_, i) => ({
+    id: randomUUID(),
+    authorId: user.userId,
+    name: "Criador de Clips",
+    username: user.username,
+    kind: "CLIP",
+    body: `Descoberta ${i + 1} na universidade`,
+    publishedAt: new Date().toISOString(),
+    pinned: false,
+    likes: 0,
+    comments: 0,
+    reposts: 0,
+    mine: [],
+    media: [
+      {
+        id: randomUUID(),
+        kind: "VIDEO",
+        durationMs: 3000,
+        width: 180,
+        height: 320,
+      },
+    ],
+  }));
+  // Isolated player contract fixture, not a publication bypass. Spring tests exercise
+  // actual authorization, export, storage, duration and publication independently.
+  await page.route("**/api/backend/social/feed?**", (route) => {
+    if (new URL(route.request().url()).searchParams.get("kind") !== "CLIP")
+      return route.fallback();
+    return route.fulfill({
+      json: {
+        items: posts,
+        nextCursor: "",
+        snapshot: new Date().toISOString(),
+      },
+    });
+  });
+  await page.route("**/api/backend/social/media/*/content*", (route) => {
+    if (new URL(route.request().url()).searchParams.has("thumbnail"))
+      return route.fulfill({ status: 204 });
+    return route.fulfill({ contentType: "video/mp4", body: bytes });
+  });
+  await page.goto("/social");
+  const navigation = page.getByRole("navigation", {
+    name: "Ambientes do Social",
+  });
+  await navigation.getByRole("button", { name: "Clips", exact: true }).click();
+  const clips = page.locator(".social-clips");
+  const playing = () =>
+    clips
+      .locator("video")
+      .evaluateAll((videos) =>
+        videos.map((video) => !(video as HTMLVideoElement).paused),
+      );
+  await expect.poll(playing).toEqual([true, false, false, false]);
+  await clips.focus();
+  await page.keyboard.press("ArrowDown");
+  await expect.poll(playing).toEqual([false, true, false, false]);
+  await expect(clips.locator("video").nth(3)).not.toHaveAttribute("src", /.+/);
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: 844 });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+    await page.screenshot({
+      path: info.outputPath(`social-clips-${width}.png`),
+    });
+  }
+  await navigation.getByRole("button", { name: "Feed", exact: true }).click();
+  await expect.poll(playing).toEqual([false, false, false, false]);
 });

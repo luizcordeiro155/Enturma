@@ -100,6 +100,10 @@ export const socialWrite = <T = unknown>(
   });
 export const mediaUrl = (id: string, thumbnail = false) =>
   `/api/backend/social/media/${id}/content${thumbnail ? "?thumbnail=true" : ""}`;
+export const storyDuration = (media: SocialMedia | undefined) =>
+  media?.kind === "VIDEO" && (media.durationMs ?? 0) > 0
+    ? media.durationMs!
+    : 7000;
 export const socialLink = (kind: "post" | "person", id: string) =>
   `https://enturma-flax.vercel.app/social?${kind}=${encodeURIComponent(id)}`;
 export const postPerson = (p: SocialPost): SocialPerson => ({
@@ -111,6 +115,27 @@ export const postPerson = (p: SocialPost): SocialPerson => ({
 });
 export const exportDuration = (recipe: VideoRecipe) =>
   recipe.segments.reduce((sum, s) => sum + Math.max(0, s.end - s.start), 0);
+/** Match the export order: rotate the source, scale to cover, then crop. */
+export function videoPreviewFrame(
+  width: number,
+  height: number,
+  recipe: VideoRecipe,
+) {
+  const sideways = recipe.rotation === 90 || recipe.rotation === 270;
+  const rotatedWidth = sideways ? height : width;
+  const rotatedHeight = sideways ? width : height;
+  const scale = Math.max(
+    (Math.floor((720 * recipe.zoom) / 2) * 2) / rotatedWidth,
+    (Math.floor((1280 * recipe.zoom) / 2) * 2) / rotatedHeight,
+  );
+  return {
+    width: `${((width * scale) / 720) * 100}%`,
+    height: `${((height * scale) / 1280) * 100}%`,
+    left: `${(((rotatedWidth * scale) / 2 - (rotatedWidth * scale - 720) * recipe.x) / 720) * 100}%`,
+    top: `${(((rotatedHeight * scale) / 2 - (rotatedHeight * scale - 1280) * recipe.y) / 1280) * 100}%`,
+    transform: `translate(-50%, -50%) rotate(${recipe.rotation}deg)`,
+  };
+}
 export function defaultRecipe(duration: number): VideoRecipe {
   return {
     segments: [{ start: 0, end: Math.min(90, duration) }],

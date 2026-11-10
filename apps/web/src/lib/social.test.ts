@@ -6,8 +6,34 @@ import {
   socialGesture,
   mergeSocialPage,
   socialPath,
+  storyDuration,
+  videoPreviewFrame,
   type SocialPost,
+  type SocialMedia,
 } from "./social";
+
+it("keeps photo and text Stories readable instead of advancing on zero image duration", () => {
+  expect(storyDuration(undefined)).toBe(7000);
+  expect(storyDuration({ kind: "IMAGE", durationMs: 0 } as SocialMedia)).toBe(
+    7000,
+  );
+  expect(
+    storyDuration({ kind: "VIDEO", durationMs: 15300 } as SocialMedia),
+  ).toBe(15300);
+});
+
+it("previews rotation before crop and keeps the selected edge inside the 9:16 frame", () => {
+  const recipe = { ...defaultRecipe(3), rotation: 90, x: 0, y: 1 };
+  const frame = videoPreviewFrame(1920, 1080, recipe);
+  // A landscape source rotated clockwise exactly fills a portrait export.
+  expect(parseFloat(frame.width)).toBeCloseTo(177.7778, 3);
+  expect(parseFloat(frame.height)).toBeCloseTo(56.25, 3);
+  expect(frame.left).toBe("50%");
+  expect(frame.top).toBe("50%");
+  const zoomed = videoPreviewFrame(1920, 1080, { ...recipe, zoom: 2 });
+  expect(zoomed.left).toBe("100%");
+  expect(zoomed.top).toBe("0%");
+});
 
 it("opens canonical Social shares inside the client without trusting lookalike hosts", () => {
   const id = "11111111-1111-1111-1111-111111111111";

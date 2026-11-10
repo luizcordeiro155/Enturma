@@ -54,6 +54,7 @@ export function Shell({
   const path = visitor ? guest.path.split("?")[0] : pathname;
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
   const inRideHub = path.startsWith("/caronas");
+  const inSocial = path === "/social";
   const updateState = useAppUpdateState();
   const updatePending =
     isMobileApp() &&
@@ -140,7 +141,9 @@ export function Shell({
           ? "app-shell room-active-shell"
           : inRideHub
             ? "app-shell ride-active-shell"
-            : "app-shell"
+            : inSocial
+              ? "app-shell social-active-shell"
+              : "app-shell"
       }
     >
       <a className="skip" href="#content">
@@ -231,7 +234,7 @@ export function Shell({
           {!visitor && path.startsWith("/rooms") ? <CommunityFeedback /> : null}
           {children}
         </main>
-        {!inRideHub ? (
+        {!inRideHub && !inSocial ? (
           <footer className="app-legal-footer">
             <div className="app-legal-footer-status">
               <ShieldCheck size={20} />

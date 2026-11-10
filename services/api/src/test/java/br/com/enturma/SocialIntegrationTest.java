@@ -72,6 +72,30 @@ class SocialIntegrationTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
+  void declaredInterestsProduceDifferentFeedsWithoutUsingPrivateHistory() {
+    UUID java = publish(c, "POST", "Projeto #java");
+    UUID art = publish(c, "POST", "Projeto #arte");
+    people.preferences(
+        a, false, true, true, List.of("java"), false, List.of("feed", "clips", "create"));
+    people.preferences(
+        b, false, true, true, List.of("arte"), false, List.of("feed", "clips", "create"));
+    var first = (Map<String, Object>) posts.feed(a, "for-you", "POST", "", "", null, "posts");
+    var second = (Map<String, Object>) posts.feed(b, "for-you", "POST", "", "", null, "posts");
+    assertThat(((List<Map<String, Object>>) first.get("items")).getFirst().get("id"))
+        .isEqualTo(java);
+    assertThat(((List<Map<String, Object>>) second.get("items")).getFirst().get("id"))
+        .isEqualTo(art);
+    posts.react(a, java, "HIDE", true);
+    first = (Map<String, Object>) posts.feed(a, "for-you", "POST", "", "", null, "posts");
+    assertThat(((List<Map<String, Object>>) first.get("items")))
+        .noneMatch(p -> java.equals(p.get("id")));
+    // No verified academic identity: the campus tab must not guess from email or enrollment.
+    var campus = (Map<String, Object>) posts.feed(a, "campus", "POST", "", "", null, "posts");
+    assertThat((List<?>) campus.get("items")).isEmpty();
+  }
+
+  @Test
   void privateFollowApprovalRemovalAndBlockingApplyEverywhere() {
     people.preferences(
         a, true, false, true, List.of("java"), false, List.of("feed", "clips", "create"));

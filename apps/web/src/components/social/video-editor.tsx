@@ -11,7 +11,12 @@ import {
   Pause,
   RotateCw,
 } from "lucide-react";
-import { exportDuration, sourceTime, type VideoRecipe } from "@/lib/social";
+import {
+  exportDuration,
+  sourceTime,
+  videoPreviewFrame,
+  type VideoRecipe,
+} from "@/lib/social";
 
 export function VideoEditor({
   url,
@@ -34,9 +39,22 @@ export function VideoEditor({
     [selected, setSelected] = useState(0),
     [available, setAvailable] = useState({ undo: false, redo: false });
   const [caption, setCaption] = useState("");
+  const [sourceSize, setSourceSize] = useState({ width: 720, height: 1280 });
   const duration = exportDuration(value),
     segment = value.segments[selected] ?? value.segments[0];
   function edit(next: VideoRecipe) {
+    if (next.segments !== value.segments) {
+      const end = exportDuration(next);
+      next = {
+        ...next,
+        cover: Math.min(next.cover, Math.max(0, end - 0.1)),
+        captions: next.captions
+          .filter((c) => c.start < end)
+          .map((c) => ({ ...c, end: Math.min(c.end, end) })),
+      };
+      setPlaying(false);
+      setPosition(0);
+    }
     undo.current.push(value);
     if (undo.current.length > 50) undo.current.shift();
     redo.current = [];
@@ -166,10 +184,15 @@ export function VideoEditor({
           src={url}
           playsInline
           preload="metadata"
-          style={{
-            transform: `scale(${value.zoom}) rotate(${value.rotation}deg)`,
-            objectPosition: `${value.x * 100}% ${value.y * 100}%`,
+          onLoadedMetadata={(event) => {
+            const element = event.currentTarget;
+            setSourceSize({
+              width: element.videoWidth || 720,
+              height: element.videoHeight || 1280,
+            });
+            element.currentTime = sourceTime(value, 0);
           }}
+          style={videoPreviewFrame(sourceSize.width, sourceSize.height, value)}
         />
         {value.captions
           .filter((c) => position >= c.start && position <= c.end)
@@ -177,7 +200,10 @@ export function VideoEditor({
             <span
               className="social-edit-caption"
               key={i}
-              style={{ top: `${c.y * 90}%` }}
+              style={{
+                top: `${c.y * 100}%`,
+                transform: `translateY(-${c.y * 100}%)`,
+              }}
             >
               {c.text}
             </span>

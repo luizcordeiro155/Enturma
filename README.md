@@ -18,6 +18,8 @@ A direção do produto é simples: **menos troca de aplicativos, mais contexto e
 
 ## Estado atual do projeto
 
+[Enturma Social 2.0](docs/SOCIAL_2_IMPLEMENTATION.md): Feed, Clips, Stories e seguidores independentes do Fórum, editor e processamento de mídia limitado. Flags desligadas por padrão; documentação separa implementação, testes, capacidade pendente e ativação.
+
 [Estabilização de experiência — 30/10 e 02/11](docs/RELEASE_EXPERIENCE_STABILIZATION.md): visitante Web, autenticação, som, digitação, transmissão e instalador; continuação com áudio, recibos, convites e identidade visual. Inclui escopo dos testes, migrações e limites da validação.
 
 [Release Candidate e gates](docs/PRODUCTION_READINESS.md) · [Auditoria de dependências](docs/DEPENDENCY_AUDIT.md) · [Operação e rollback](docs/OPERATIONS_READINESS.md) · [Inventário documental](docs/DOCUMENTATION_INDEX.md)

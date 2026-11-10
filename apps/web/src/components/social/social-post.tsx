@@ -505,6 +505,9 @@ export function SocialPost({
     >
       <header>
         <SocialAuthor user={postPerson(item)} open={person} />
+        {clip && item.authorId !== me && (
+          <FollowButton id={item.authorId} me={me} />
+        )}
         <button
           className="icon-control"
           aria-label="Opções da publicação"
@@ -657,7 +660,7 @@ export function SocialPost({
       {dialog === "more" && (
         <SocialDialog title="Esta publicação" close={() => setDialog(null)}>
           <div className="social-dialog-body social-options">
-            <FollowButton id={item.authorId} me={me} />
+            {!clip && <FollowButton id={item.authorId} me={me} />}
             {me !== item.authorId ? (
               <>
                 <button

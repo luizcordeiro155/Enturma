@@ -359,6 +359,7 @@ public class SocialPosts {
   }
 
   private void rank(Actor a, ArrayList<Map<String, Object>> page) {
+    if (page.isEmpty()) return;
     var preferences =
         db.one("SELECT recommendations,interests FROM social_profile WHERE user_id=?", a.id());
     var interests = new HashSet<String>(Arrays.asList((String[]) preferences.get("interests")));
@@ -367,7 +368,28 @@ public class SocialPosts {
         db.list(
             "SELECT followed_id FROM social_follow WHERE follower_id=? AND status='ACCEPTED'",
             a.id())) following.add((UUID) r.get("followedId"));
+    var academic = new HashMap<UUID, Integer>();
     if (Boolean.TRUE.equals(preferences.get("recommendations"))) {
+      // Aggregate only matching academic context; never expose enrollment or subjects.
+      var contextArgs = new ArrayList<Object>(List.of(a.id(), a.id(), a.id(), a.id()));
+      page.forEach(p -> contextArgs.add(p.get("id")));
+      for (var context :
+          db.list(
+              "SELECT p.id, CASE WHEN p.institution_id=(SELECT institution_id FROM"
+                  + " academic_identity WHERE user_id=? AND status='STUDENT_VERIFIED') THEN 8 ELSE"
+                  + " 0 END + CASE WHEN EXISTS(SELECT 1 FROM academic_enrollment me JOIN"
+                  + " academic_enrollment peer ON peer.course_offering_id=me.course_offering_id"
+                  + " WHERE me.user_id=? AND peer.user_id=p.author_id) THEN 6 ELSE 0 END + CASE"
+                  + " WHEN EXISTS(SELECT 1 FROM user_subject me JOIN user_subject peer ON"
+                  + " peer.subject_id=me.subject_id WHERE me.user_id=? AND"
+                  + " peer.user_id=p.author_id) THEN 6 ELSE 0 END - CASE WHEN EXISTS(SELECT 1 FROM"
+                  + " social_feedback f WHERE f.user_id=? AND f.post_id=p.id AND f.watched_ms"
+                  + " BETWEEN 1 AND 1499 AND NOT f.completed) THEN 10 ELSE 0 END score FROM"
+                  + " social_post p WHERE p.id IN ("
+                  + String.join(",", Collections.nCopies(page.size(), "?"))
+                  + ")",
+              contextArgs.toArray()))
+        academic.put((UUID) context.get("id"), ((Number) context.get("score")).intValue());
       // Only the student's authorized Social activity. Blocked/removed/private-inaccessible
       // posts cannot influence later recommendations, even if previously watched.
       for (var row :
@@ -397,9 +419,10 @@ public class SocialPosts {
         Comparator.<Map<String, Object>>comparingInt(
                 p ->
                     SocialRanker.score(
-                        following.contains(p.get("authorId")),
-                        Arrays.asList((String[]) p.get("tags")),
-                        interests))
+                            following.contains(p.get("authorId")),
+                            Arrays.asList((String[]) p.get("tags")),
+                            interests)
+                        + academic.getOrDefault((UUID) p.get("id"), 0))
             .reversed()
             .thenComparing(p -> p.get("publishedAt").toString(), Comparator.reverseOrder()));
     SocialRanker.diversify(page);

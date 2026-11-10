@@ -377,7 +377,9 @@ test("private invitation fits all themes, requires consent and keeps navigation 
       .getByRole("button", { name: "Conversar", exact: true })
       .click();
     await expect(
-      page.getByText(invitation, { exact: true }).first(),
+      page
+        .getByRole("region", { name: "Conversa privada" })
+        .getByRole("link", { name: invitation, exact: true }),
     ).toBeVisible();
     const card = recipient.locator(".room-invitation-card");
     await expect(card.getByRole("heading", { name: room.title })).toBeVisible();

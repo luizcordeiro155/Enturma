@@ -90,7 +90,7 @@ export function SocialSettings({
           [
             "recommendations",
             "Personalizar com minhas interações",
-            "Usar atividades do Social por até 30 dias. Ao desativar, o histórico de visualização usado nas recomendações é excluído.",
+            "Usar atividades do Social por até 30 dias e afinidade com faculdade, curso e matérias. Ao desativar, o histórico de visualização usado nas recomendações é excluído.",
           ],
           [
             "autoplay",

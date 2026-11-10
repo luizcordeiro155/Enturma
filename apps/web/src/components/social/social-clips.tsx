@@ -101,7 +101,18 @@ function ClipVideo({
               e.currentTarget.currentTime,
             );
         }}
-        onPlay={() => setPlaying(true)}
+        onPlay={(event) => {
+          if (!active) {
+            event.currentTarget.pause();
+            return;
+          }
+          document
+            .querySelectorAll<HTMLVideoElement>(".social-clip-video video")
+            .forEach((video) => {
+              if (video !== event.currentTarget) video.pause();
+            });
+          setPlaying(true);
+        }}
         onPause={() => setPlaying(false)}
         onError={() =>
           setError("Não foi possível carregar este Clip. Verifique a conexão.")
@@ -110,6 +121,7 @@ function ClipVideo({
       <button
         className="social-video-toggle"
         aria-label={playing ? "Pausar Clip" : "Reproduzir Clip"}
+        disabled={!active}
         onClick={() => void tap()}
       >
         {!playing && <Play size={38} />}

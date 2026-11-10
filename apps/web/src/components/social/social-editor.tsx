@@ -31,6 +31,13 @@ import { VideoEditor } from "./video-editor";
 import { SocialCapture } from "./social-capture";
 import { SocialDialog } from "./social-dialog";
 import { StoryDecorations, StoryDecorationEditor } from "./story-decorations";
+import { NavigationLink } from "../navigation-link";
+
+type Portfolio = {
+  username: string;
+  publicProfile: boolean;
+  projects: { id: string; name: string }[];
+};
 
 function LocalFile({
   item,
@@ -139,6 +146,8 @@ export function SocialEditor({
     [savedDrafts, setSavedDrafts] = useState<
       { id: string; body: string; kind: string }[]
     >([]);
+  const [portfolio, setPortfolio] = useState<Portfolio>();
+  const [portfolioError, setPortfolioError] = useState("");
   const [error, setError] = useState(""),
     [status, setStatus] = useState(""),
     [busy, setBusy] = useState(false),
@@ -171,6 +180,16 @@ export function SocialEditor({
         if (alive.current) setSavedDrafts(r);
       })
       .catch(() => {});
+    void api<Portfolio>("/portfolio/me", { cache: "no-store" })
+      .then((value) => {
+        if (alive.current) setPortfolio(value);
+      })
+      .catch(() => {
+        if (alive.current)
+          setPortfolioError(
+            "Não foi possível carregar seus projetos. Você ainda pode informar um link.",
+          );
+      });
     return () => {
       alive.current = false;
     };
@@ -661,6 +680,50 @@ export function SocialEditor({
             />
           </label>
         </div>
+        <details>
+          <summary>Vincular projeto do meu portfólio</summary>
+          {portfolio?.publicProfile ? (
+            <label>
+              Projeto público
+              <select
+                value={
+                  portfolio.projects.find(
+                    (project) =>
+                      draft.projectUrl ===
+                      `https://enturma-flax.vercel.app/p/${encodeURIComponent(portfolio.username)}#projeto-${project.id}`,
+                  )?.id ?? ""
+                }
+                onChange={(event) => {
+                  const project = portfolio.projects.find(
+                    (item) => item.id === event.target.value,
+                  );
+                  if (project)
+                    setDraft({
+                      ...draft,
+                      projectUrl: `https://enturma-flax.vercel.app/p/${encodeURIComponent(portfolio.username)}#projeto-${project.id}`,
+                    });
+                }}
+              >
+                <option value="">Selecione um projeto</option>
+                {portfolio.projects.map((project) => (
+                  <option key={project.id} value={project.id}>
+                    {project.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <p>
+              {portfolioError ||
+                (portfolio
+                  ? "Seu portfólio é privado. Torne-o público antes de compartilhar seus projetos."
+                  : "Carregando projetos…")}
+            </p>
+          )}
+          <NavigationLink href="/portfolio">
+            Gerenciar meu portfólio
+          </NavigationLink>
+        </details>
         <p className="social-note">
           Publique apenas conteúdo que você tem autorização para compartilhar. A
           privacidade da sua conta prevalece sobre a opção Comunidade.
