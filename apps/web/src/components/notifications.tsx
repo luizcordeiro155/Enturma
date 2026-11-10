@@ -7,7 +7,8 @@ import {
   playNotificationSound,
   unlockNotificationSound,
 } from "@/lib/notification-sound";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { createContext, Fragment, useContext, useEffect, useRef, useState } from "react";
+import { Avatar } from "./user-identity";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
@@ -27,6 +28,10 @@ type Notice = {
   id: string;
   message: string;
   actorName: string | null;
+  actorId?: string;
+  actorUsername?: string;
+  actorHasAvatar?: boolean;
+  socialFollowStatus?: string;
   kind: string;
   contextKey: string | null;
   targetId: string | null;
@@ -557,12 +562,13 @@ export function NotificationBell() {
           ) : null}
           <div className="notification-items">
             {data.items.map((n) => (
+              <Fragment key={n.id}>
               <button
                 key={n.id}
                 className={`notification-item ${n.readAt ? "" : "unread"}`}
                 onClick={() => void visit(n)}
               >
-                {n.kind === "MODERATION" ? (
+                {n.kind.startsWith("SOCIAL_") && n.actorId ? <Avatar user={{ id: n.actorId, name: n.actorName ?? "Estudante", username: n.actorUsername, hasAvatar: n.actorHasAvatar }} /> : n.kind === "MODERATION" ? (
                   <ShieldAlert size={18} />
                 ) : n.kind === "MENTION" ? (
                   <AtSign size={18} />
@@ -583,12 +589,18 @@ export function NotificationBell() {
                 </span>
                 {!n.readAt ? <i aria-label="Não lida" /> : null}
               </button>
+              {n.socialFollowStatus && n.actorId && <SocialFollowNotice notice={n} />}
+              </Fragment>
             ))}
           </div>
         </dialog>
       ) : null}
     </>
   );
+}
+function SocialFollowNotice({ notice }: { notice: Notice }) {
+  const [status, setStatus] = useState(notice.socialFollowStatus), [busy, setBusy] = useState(false), [error, setError] = useState("");
+  return <div style={{ padding: "0 12px 12px", display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}><small>Te segue</small><button className="secondary" disabled={busy || status !== "NONE"} onClick={() => { setBusy(true);void api<{ status: string }>(`/social/people/${notice.actorId}/follow`, { method: "PUT", body: JSON.stringify({ active: true }) }).then(r => setStatus(r.status)).catch(e => setError(e.message)).finally(() => setBusy(false)); }}>{status === "ACCEPTED" ? "Seguindo" : status === "PENDING" ? "Solicitado" : "Seguir de volta"}</button>{error && <small role="alert">{error}</small>}</div>;
 }
 export function ConversationNotice({ context }: { context: string }) {
   const data = useContext(Context);

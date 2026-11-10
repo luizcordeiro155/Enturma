@@ -1,0 +1,340 @@
+import { test } from "./student-fixture";
+import { authenticate } from "./session";
+import { expect, type APIRequestContext } from "@playwright/test";
+import { randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
+
+const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
+async function student(request: APIRequestContext, name: string) {
+  const tag = randomUUID().slice(0, 8);
+  const response = await request.post(`${backend}/api/v1/auth/register`, {
+    data: {
+      name,
+      username: `social_${tag}`,
+      email: `social-${tag}@example.test`,
+      password: "social-test-123",
+      device: "Social E2E",
+    },
+  });
+  expect(response.ok()).toBe(true);
+  return { ...(await response.json()), username: `social_${tag}` } as {
+    userId: string;
+    accessToken: string;
+    refreshToken: string;
+    username: string;
+  };
+}
+function asUser(token: string) {
+  return { Authorization: `Bearer ${token}` };
+}
+async function publish(
+  request: APIRequestContext,
+  token: string,
+  body: string,
+  kind = "POST",
+) {
+  const id = randomUUID(),
+    headers = asUser(token);
+  const draft = await request.put(`${backend}/api/v1/social/drafts`, {
+    headers,
+    data: { id, kind, body, visibility: "PUBLIC", version: 0, mediaIds: [] },
+  });
+  expect(draft.ok(), await draft.text()).toBe(true);
+  const response = await request.post(
+    `${backend}/api/v1/social/posts/${id}/publish`,
+    { headers, data: { version: (await draft.json()).version } },
+  );
+  expect(response.ok(), await response.text()).toBe(true);
+  return id;
+}
+
+test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em todos os temas", async ({
+  page,
+  request,
+}, info) => {
+  test.setTimeout(180000);
+  const ana = await student(request, "Ana · Engenharia"),
+    bia = await student(request, "Bia · Computação");
+  for (let i = 0; i < 6; i++)
+    await publish(
+      request,
+      ana.accessToken,
+      `Ideia de estudo ${i}: compartilhar o raciocínio ajuda a aprender. #engenharia`,
+    );
+  const postId = await publish(
+    request,
+    ana.accessToken,
+    `Projeto de pontes: testamos estruturas com materiais reciclados. @${bia.username} #engenharia`,
+  );
+  await publish(
+    request,
+    ana.accessToken,
+    "Um novo dia de descobertas na universidade.",
+    "STORY",
+  );
+  await authenticate(page.context(), bia);
+  await page.goto("/social");
+  await expect(
+    page.getByRole("heading", { name: "Enturma Social." }),
+  ).toBeVisible();
+  const feed = page.locator(".social-feed-view .social-stream:visible");
+  const card = feed
+    .locator(".social-post")
+    .filter({ hasText: "Projeto de pontes:" });
+  await expect(card).toBeVisible();
+  await card.getByRole("button", { name: "Curtir · 0", exact: true }).click();
+  await expect(
+    card.getByRole("button", { name: "Curtir · 1", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await card.getByRole("button", { name: "Salvar publicação" }).click();
+  await expect(
+    card.getByRole("button", { name: "Salvar publicação" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  await card.getByRole("button", { name: "Comentários · 0" }).click();
+  const comments = page.getByRole("dialog", { name: "Conversa da publicação" });
+  await expect(comments).toBeVisible();
+  await comments
+    .getByLabel("Seu comentário")
+    .fill("Vamos comparar as estruturas na próxima aula.");
+  await comments.getByRole("button", { name: "Enviar comentário" }).click();
+  await expect(
+    comments.getByText("Vamos comparar as estruturas na próxima aula."),
+  ).toBeVisible();
+  await comments.getByRole("button", { name: "Fechar", exact: true }).click();
+  await card.getByRole("button", { name: /Ana · Engenharia/ }).click();
+  const profile = page.getByRole("dialog", { name: "Perfil social" });
+  await profile.getByRole("button", { name: "Seguir", exact: true }).click();
+  await expect(
+    profile.getByRole("button", { name: "Seguindo", exact: true }).first(),
+  ).toBeVisible();
+  await expect(profile.locator(".social-profile-counts")).toContainText(
+    "1 Seguidores",
+  );
+  await profile.getByRole("button", { name: "Fechar", exact: true }).click();
+  await feed.evaluate((el) => {
+    el.scrollTop = 500;
+    el.setAttribute("data-reading-kept", "yes");
+  });
+  const position = await feed.evaluate((el) => el.scrollTop);
+  expect(position).toBeGreaterThan(0);
+  const navigation = page.getByRole("navigation", {
+    name: "Ambientes do Social",
+  });
+  await navigation.getByRole("button", { name: "Clips", exact: true }).click();
+  await expect(page.locator(".social-clips-shell")).toBeVisible();
+  await navigation.getByRole("button", { name: "Feed", exact: true }).click();
+  expect(await feed.evaluate((el) => el.scrollTop)).toBe(position);
+  await expect(feed).toHaveAttribute("data-reading-kept", "yes");
+  await navigation.getByRole("button", { name: "Criar", exact: true }).click();
+  const editor = page.getByRole("region", { name: "Central de criação" });
+  await editor
+    .getByLabel("O que você quer compartilhar?")
+    .fill("Meu rascunho continua aqui. #computação");
+  await navigation.getByRole("button", { name: "Feed", exact: true }).click();
+  await navigation.getByRole("button", { name: "Criar", exact: true }).click();
+  await expect(editor.getByLabel("O que você quer compartilhar?")).toHaveValue(
+    "Meu rascunho continua aqui. #computação",
+  );
+  await editor.getByRole("button", { name: "Publicar Post" }).click();
+  await expect(
+    feed.getByText("Meu rascunho continua aqui. #computação", { exact: true }),
+  ).toBeVisible();
+  const detail = await request.get(`${backend}/api/v1/social/posts/${postId}`, {
+    headers: asUser(bia.accessToken),
+  });
+  expect(await detail.json()).toMatchObject({
+    likes: 1,
+    comments: 1,
+    mine: expect.arrayContaining(["LIKE", "SAVE"]),
+  });
+  for (const width of [1440, 390]) {
+    await page.setViewportSize({ width, height: width === 390 ? 844 : 960 });
+    for (const theme of ["light", "dark", "enturma"]) {
+      await page.evaluate((theme) => {
+        document.documentElement.dataset.theme =
+          theme === "light" ? "light" : "dark";
+        if (theme === "enturma")
+          document.documentElement.dataset.palette = theme;
+        else delete document.documentElement.dataset.palette;
+      }, theme);
+      await feed.evaluate((el) => {
+        el.scrollTop = 0;
+      });
+      expect(
+        await page.evaluate(
+          () => document.documentElement.scrollWidth <= innerWidth + 1,
+        ),
+      ).toBe(true);
+      await expect(feed.locator(".social-post").first()).toBeVisible();
+      await page.screenshot({
+        path: info.outputPath(`social-feed-${width}-${theme}.png`),
+      });
+    }
+  }
+  await navigation.getByRole("button", { name: "Criar", exact: true }).click();
+  await page.screenshot({ path: info.outputPath("social-editor-mobile.png") });
+});
+
+test("Social: conta privada, aprovação de marcação, expiração e bloqueio não cedem à chamada direta", async ({
+  request,
+}) => {
+  const ana = await student(request, "Autora privada"),
+    bia = await student(request, "Visitante estudante");
+  const headers = asUser(ana.accessToken),
+    other = asUser(bia.accessToken);
+  expect(
+    (
+      await request.put(`${backend}/api/v1/social/preferences`, {
+        headers,
+        data: {
+          privateAccount: true,
+          recommendations: false,
+          autoplay: false,
+          interests: ["java"],
+          automatic: false,
+          order: ["feed", "clips", "create"],
+        },
+      })
+    ).ok(),
+  ).toBe(true);
+  const id = await publish(
+    request,
+    ana.accessToken,
+    `Projeto privado @${bia.username}`,
+  );
+  expect(
+    (
+      await request.get(`${backend}/api/v1/social/posts/${id}`, {
+        headers: other,
+      })
+    ).status(),
+  ).toBe(404);
+  const followed = await request.put(
+    `${backend}/api/v1/social/people/${ana.userId}/follow`,
+    { headers: other, data: { active: true } },
+  );
+  expect(await followed.json()).toMatchObject({ status: "PENDING" });
+  await request.put(`${backend}/api/v1/social/people/${bia.userId}/request`, {
+    headers,
+    data: { active: true },
+  });
+  expect(
+    (
+      await request.get(`${backend}/api/v1/social/posts/${id}`, {
+        headers: other,
+      })
+    ).ok(),
+  ).toBe(true);
+  const mentioned = await publish(
+    request,
+    ana.accessToken,
+    `Nova marcação autorizada @${bia.username}`,
+  );
+  expect(
+    await (
+      await request.get(`${backend}/api/v1/social/mentions`, { headers: other })
+    ).json(),
+  ).toEqual(
+    expect.arrayContaining([expect.objectContaining({ id: mentioned })]),
+  );
+  await request.put(`${backend}/api/v1/social/posts/${mentioned}/mention`, {
+    headers: other,
+    data: { active: true },
+  });
+  const tagged = await request.get(
+    `${backend}/api/v1/social/feed?kind=ALL&author=${bia.userId}&collection=tagged`,
+    { headers: other },
+  );
+  expect((await tagged.json()).items).toEqual(
+    expect.arrayContaining([expect.objectContaining({ id: mentioned })]),
+  );
+  expect(
+    (
+      await request.post(`${backend}/api/v1/blocks/${bia.userId}`, { headers })
+    ).ok(),
+  ).toBe(true);
+  expect(
+    (
+      await request.get(`${backend}/api/v1/social/posts/${id}`, {
+        headers: other,
+      })
+    ).status(),
+  ).toBe(404);
+  expect(
+    (
+      await request.get(`${backend}/api/v1/social/feed`, { headers: other })
+    ).ok(),
+  ).toBe(true);
+});
+
+test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; controles sem overflow", async ({
+  page,
+  request,
+}, info) => {
+  const user = await student(request, "Estudante criador");
+  await authenticate(page.context(), user);
+  // UI-only capability override. Publication/processing stays disabled on the API;
+  // a separate Spring integration test runs the real FFmpeg storage pipeline.
+  await page.route("**/api/backend/social/capabilities", async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      json: { ...(await response.json()), media: true },
+    });
+  });
+  await page.goto("/social");
+  await page
+    .getByRole("navigation", { name: "Ambientes do Social" })
+    .getByRole("button", { name: "Criar", exact: true })
+    .click();
+  await page.getByRole("button", { name: "Clip · até 90s" }).click();
+  const file = info.outputPath("source.mp4");
+  execFileSync(
+    "ffmpeg",
+    [
+      "-nostdin",
+      "-y",
+      "-loglevel",
+      "error",
+      "-f",
+      "lavfi",
+      "-i",
+      "testsrc2=size=320x240:rate=30",
+      "-t",
+      "3",
+      "-c:v",
+      "libx264",
+      file,
+    ],
+    { timeout: 30000 },
+  );
+  await page.getByLabel("Escolher mídia").setInputFiles(file);
+  const editor = page.getByRole("region", { name: "Editor de vídeo" });
+  await expect(editor).toBeVisible();
+  await editor.getByLabel("Começo (s)").fill("0.5");
+  await editor.getByLabel("Fim (s)", { exact: true }).fill("2.5");
+  await editor.getByLabel("Posição de reprodução").fill("1");
+  await editor.getByRole("button", { name: "Dividir aqui" }).click();
+  await expect(editor.getByRole("button", { name: /Trecho 2/ })).toBeVisible();
+  await editor.getByRole("button", { name: "Desfazer edição" }).click();
+  await expect(editor.getByRole("button", { name: /Trecho 2/ })).toHaveCount(0);
+  await editor.getByText("Textos e legendas", { exact: true }).click();
+  await editor.getByLabel("Nova legenda").fill("Uma ideia puxa outra");
+  await editor.getByRole("button", { name: "Adicionar texto" }).click();
+  await expect(editor.locator(".social-edit-caption")).toHaveText(
+    "Uma ideia puxa outra",
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth + 1,
+    ),
+  ).toBe(true);
+  await editor.scrollIntoViewIfNeeded();
+  await page.screenshot({
+    path: info.outputPath("social-video-editor-mobile.png"),
+  });
+  await expect(
+    page.getByRole("button", { name: "Publicar Clip" }),
+  ).toBeDisabled();
+});

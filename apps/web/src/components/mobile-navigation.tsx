@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useVisitor } from "@/lib/visitor-context";
 import { EnturmaAppIcon } from "./enturma-app-icon";
+import { SocialEntry } from "./social/social-entry";
 import {
   Home,
   Users,
@@ -100,6 +101,7 @@ export function MobileNavigation() {
               <X />
             </button>
           </header>
+          {!guest.active && <SocialEntry close={() => setOpen(false)} />}
           {(
             [
               ["/challenges", "Desafios acadêmicos", Gamepad2],

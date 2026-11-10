@@ -47,6 +47,9 @@ export function AccountPrivacyCard() {
         "conversations",
         "media",
         "attachments",
+        "social-posts", "social-interactions", "social-preferences", "social-comments",
+        "social-following", "social-followers", "social-feedback", "social-mutes",
+        "social-verification", "social-reports",
       ]) {
         result[section] = [];
         let offset = 0;

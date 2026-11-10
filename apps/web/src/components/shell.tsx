@@ -28,6 +28,7 @@ import {
   useAppUpdateState,
 } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
+import { SocialEntry } from "./social/social-entry";
 import { RideDesktopNavigation, RideMobileNavigation } from "./ride-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
@@ -156,6 +157,7 @@ export function Shell({
             </span>
           </Link>
           <nav aria-label="Principal">
+            {!visitor && <SocialEntry />}
             {learning ? (
               <Link
                 href="/learn"
