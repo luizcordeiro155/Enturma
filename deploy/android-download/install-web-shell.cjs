@@ -596,6 +596,21 @@ class MainActivity : Activity() {
 
     private inner class EnturmaNativeBridge {
         @JavascriptInterface
+        fun shareRoom(code: String, title: String) {
+            if (!Regex("^[A-Za-z0-9]{6,16}$").matches(code)) return
+            runOnUiThread {
+                if (webView.url?.startsWith(${kotlinString(webOrigin + "/")}) != true) return@runOnUiThread
+                val invitation = ${kotlinString(webOrigin + "/join/")} + code
+                val send = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_SUBJECT, title.take(120))
+                    putExtra(Intent.EXTRA_TEXT, title.take(120) + "\\n" + invitation)
+                }
+                startActivity(Intent.createChooser(send, "Compartilhar sala"))
+            }
+        }
+
+        @JavascriptInterface
         fun setLightTheme(light: Boolean) {
             runOnUiThread {
                 applySystemBarTheme(light)

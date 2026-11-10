@@ -511,6 +511,7 @@ export function RoomView({ id }: { id: string }) {
                 </div>
               </div>
 
+              <RoomSharePanel roomId={id} compact />
               <button
                 type="button"
                 className="room-mobile-info-button"

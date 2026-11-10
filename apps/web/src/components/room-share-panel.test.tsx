@@ -79,7 +79,7 @@ afterEach(cleanup);
 
 it("keeps Web copy/QR and sends only after an accepted friend is explicitly chosen", async () => {
   render(<RoomSharePanel roomId="room" />);
-  fireEvent.click(screen.getByRole("button", { name: "Compartilhar" }));
+  fireEvent.click(screen.getByRole("button", { name: "Compartilhar sala" }));
   expect(
     await screen.findByRole("button", { name: "Convidar Ana" }),
   ).toBeEnabled();
@@ -102,18 +102,18 @@ it("keeps Web copy/QR and sends only after an accepted friend is explicitly chos
 });
 
 it.each(["mobile", "desktop"] as const)(
-  "hides copy link in the %s app while preserving the friend picker",
+  "offers links in the %s app while preserving the friend picker",
   async (kind) => {
     platform[kind] = true;
     render(<RoomSharePanel roomId="room" />);
-    fireEvent.click(screen.getByRole("button", { name: "Compartilhar" }));
+    fireEvent.click(screen.getByRole("button", { name: "Compartilhar sala" }));
     await screen.findByRole("button", { name: "Convidar Ana" });
     expect(
       screen.queryByRole("button", { name: "Copiar link" }),
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
     expect(
       screen.queryByRole("textbox", { name: "Link do convite" }),
-    ).not.toBeInTheDocument();
+    ).toBeInTheDocument();
     expect(screen.getByAltText(/QR Code para entrar/)).toBeInTheDocument();
   },
 );
@@ -125,7 +125,7 @@ it("retries an uncertain response with the same client id and encrypted envelope
     return { code: "MDUT2SGT", url: "https://enturma.test/join/MDUT2SGT" };
   });
   render(<RoomSharePanel roomId="room" />);
-  fireEvent.click(screen.getByRole("button", { name: "Compartilhar" }));
+  fireEvent.click(screen.getByRole("button", { name: "Compartilhar sala" }));
   fireEvent.click(await screen.findByRole("button", { name: "Convidar Ana" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("Sem conexão");
   fireEvent.click(screen.getByRole("button", { name: "Convidar Ana" }));
