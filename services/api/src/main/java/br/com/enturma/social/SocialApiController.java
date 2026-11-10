@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/social")
-public class SocialController {
+public class SocialApiController {
   private final SocialPosts posts;
   private final SocialPeople people;
   private final SocialAccess access;
   private final SocialMedia media;
-  public SocialController(SocialPosts posts,SocialPeople people,SocialAccess access,SocialMedia media) { this.posts=posts;this.people=people;this.access=access;this.media=media; }
+  public SocialApiController(SocialPosts posts,SocialPeople people,SocialAccess access,SocialMedia media) { this.posts=posts;this.people=people;this.access=access;this.media=media; }
   @GetMapping("/capabilities") public Object capabilities() { return Map.of("enabled",access.enabled(),"media",media.enabled(),"maxClipSeconds",90); }
   @GetMapping("/feed") public Object feed(@AuthenticationPrincipal Actor a,@RequestParam(defaultValue="for-you") String tab,@RequestParam(defaultValue="POST") String kind,@RequestParam(defaultValue="") String q,@RequestParam(defaultValue="") String cursor,@RequestParam(required=false) UUID author,@RequestParam(defaultValue="posts") String collection) { return posts.feed(a,tab,kind,q,cursor,author,collection); }
   @GetMapping("/posts/{id}") public Object detail(@AuthenticationPrincipal Actor a,@PathVariable UUID id) { return posts.detail(a,id); }
