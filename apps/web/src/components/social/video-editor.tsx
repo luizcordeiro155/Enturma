@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Undo2,
   Redo2,
@@ -18,11 +18,13 @@ export function VideoEditor({
   sourceDuration,
   value,
   onChange,
+  overlay,
 }: {
   url: string;
   sourceDuration: number;
   value: VideoRecipe;
   onChange: (r: VideoRecipe) => void;
+  overlay?: ReactNode;
 }) {
   const video = useRef<HTMLVideoElement>(null),
     undo = useRef<VideoRecipe[]>([]),
@@ -180,6 +182,7 @@ export function VideoEditor({
               {c.text}
             </span>
           ))}
+        {overlay}
       </div>
       <div className="social-editor-tools">
         <div className="social-row">

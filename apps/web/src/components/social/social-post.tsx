@@ -24,8 +24,9 @@ import {
 } from "@/lib/social";
 import { preparePrivateShare } from "@/lib/send-room-invitation";
 import { Avatar } from "../user-identity";
-import { ForumLinks, ConfirmedLink } from "../forum-links";
+import { ConfirmedLink } from "../forum-links";
 import { SocialDialog } from "./social-dialog";
+import { SocialText } from "./social-text";
 
 export function SocialAuthor({
   user,
@@ -361,7 +362,7 @@ function Comments({
             >
               <SocialAuthor user={{ ...c, id: c.authorId }} open={person} />
               <p>
-                <ForumLinks text={c.body} />
+                <SocialText text={c.body} />
               </p>
               <div className="social-row">
                 <small>{new Date(c.createdAt).toLocaleString("pt-BR")}</small>
@@ -410,6 +411,7 @@ function Comments({
           </p>
         )}
         <form
+          noValidate
           className="social-comment-form"
           onSubmit={(e) => {
             e.preventDefault();
@@ -420,6 +422,7 @@ function Comments({
             Seu comentário
           </label>
           <textarea
+            className="resize-none"
             id="social-comment"
             rows={2}
             maxLength={1500}
@@ -460,7 +463,8 @@ export function SocialPost({
     [busy, setBusy] = useState(false),
     [error, setError] = useState(""),
     [reason, setReason] = useState(""),
-    [expanded, setExpanded] = useState(false);
+    [expanded, setExpanded] = useState(false),
+    [removing, setRemoving] = useState(false);
   async function react(kind: string) {
     if (busy) return;
     setBusy(true);
@@ -554,7 +558,7 @@ export function SocialPost({
         ))}
       <div className="social-post-copy">
         <p>
-          <ForumLinks
+          <SocialText
             text={
               expanded || item.body.length <= 240
                 ? item.body
@@ -686,6 +690,7 @@ export function SocialPost({
                 <label>
                   Motivo da denúncia
                   <textarea
+                    className="resize-none"
                     value={reason}
                     maxLength={1500}
                     onChange={(e) => setReason(e.target.value)}
@@ -714,14 +719,43 @@ export function SocialPost({
                 <button
                   className="secondary"
                   disabled={busy}
-                  onClick={() =>
-                    void act(`/posts/${item.id}`, undefined, "DELETE")
-                  }
+                  onClick={() => setRemoving(true)}
                 >
                   Remover publicação
                 </button>
               </>
             )}
+            {error && <p role="alert">{error}</p>}
+          </div>
+        </SocialDialog>
+      )}
+      {removing && (
+        <SocialDialog
+          title="Remover esta publicação?"
+          close={() => setRemoving(false)}
+        >
+          <div className="social-dialog-body">
+            <p>
+              O conteúdo e suas mídias deixarão de estar disponíveis. Esta ação
+              não pode ser desfeita.
+            </p>
+            <div className="social-row">
+              <button
+                className="secondary"
+                onClick={() => setRemoving(false)}
+                disabled={busy}
+              >
+                Manter publicação
+              </button>
+              <button
+                disabled={busy}
+                onClick={() =>
+                  void act(`/posts/${item.id}`, undefined, "DELETE")
+                }
+              >
+                Remover definitivamente
+              </button>
+            </div>
             {error && <p role="alert">{error}</p>}
           </div>
         </SocialDialog>

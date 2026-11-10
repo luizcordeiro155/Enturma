@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- local selected files and authenticated media */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Camera,
   CloudUpload,
@@ -9,6 +9,8 @@ import {
   Save,
   Send,
   Trash2,
+  ArrowLeft,
+  ArrowRight,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
@@ -28,13 +30,16 @@ import {
 import { VideoEditor } from "./video-editor";
 import { SocialCapture } from "./social-capture";
 import { SocialDialog } from "./social-dialog";
+import { StoryDecorations, StoryDecorationEditor } from "./story-decorations";
 
 function LocalFile({
   item,
   changed,
+  overlay,
 }: {
   item: DraftFile;
   changed: (r: VideoRecipe) => void;
+  overlay?: ReactNode;
 }) {
   const [url, setUrl] = useState("");
   useEffect(() => {
@@ -47,21 +52,26 @@ function LocalFile({
     };
   }, [item.file]);
   if (item.media?.state === "READY")
-    return item.media.kind === "VIDEO" ? (
-      <video
-        className="social-export-preview"
-        controls
-        playsInline
-        preload="metadata"
-        src={mediaUrl(item.id)}
-        poster={mediaUrl(item.id, true)}
-      />
-    ) : (
-      <img
-        className="social-export-preview"
-        alt="Mídia pronta para publicar"
-        src={mediaUrl(item.id)}
-      />
+    return (
+      <div className={overlay ? "social-story-stage" : "social-edit-stage"}>
+        {item.media.kind === "VIDEO" ? (
+          <video
+            className="social-export-preview"
+            controls
+            playsInline
+            preload="metadata"
+            src={mediaUrl(item.id)}
+            poster={mediaUrl(item.id, true)}
+          />
+        ) : (
+          <img
+            className="social-export-preview"
+            alt="Mídia pronta para publicar"
+            src={mediaUrl(item.id)}
+          />
+        )}
+        {overlay}
+      </div>
     );
   if (!url) return <p>Mídia salva. Consulte o processamento para continuar.</p>;
   if (item.recipe && item.duration)
@@ -71,14 +81,18 @@ function LocalFile({
         sourceDuration={item.duration}
         value={item.recipe}
         onChange={changed}
+        overlay={overlay}
       />
     );
   return (
-    <img
-      className="social-export-preview"
-      src={url}
-      alt="Prévia da imagem escolhida"
-    />
+    <div className={overlay ? "social-story-stage" : "social-edit-stage"}>
+      <img
+        className="social-export-preview"
+        src={url}
+        alt="Prévia da imagem escolhida"
+      />
+      {overlay}
+    </div>
   );
 }
 async function videoDuration(file: File) {
@@ -462,7 +476,13 @@ export function SocialEditor({
               className="secondary"
               disabled={busy || draft.files.length > 0}
               aria-pressed={draft.kind === kind}
-              onClick={() => setDraft({ ...draft, kind })}
+              onClick={() =>
+                setDraft({
+                  ...draft,
+                  kind,
+                  storyOverlays: kind === "STORY" ? draft.storyOverlays : [],
+                })
+              }
             >
               {kind === "POST"
                 ? "Post"
@@ -521,6 +541,31 @@ export function SocialEditor({
                   ? ` · ${item.media.state === "READY" ? "Pronta" : item.media.state === "FAILED" ? "Falha no processamento" : "Em preparação"}`
                   : ""}
               </strong>
+              {draft.files.length > 1 &&
+                [-1, 1].map((delta) => (
+                  <button
+                    key={delta}
+                    className="icon-control"
+                    aria-label={`${delta < 0 ? "Antecipar" : "Adiar"} mídia ${i + 1}`}
+                    disabled={
+                      busy || i + delta < 0 || i + delta >= draft.files.length
+                    }
+                    onClick={() => {
+                      const files = [...draft.files];
+                      [files[i], files[i + delta]] = [
+                        files[i + delta],
+                        files[i],
+                      ];
+                      setDraft({ ...draft, files });
+                    }}
+                  >
+                    {delta < 0 ? (
+                      <ArrowLeft size={18} />
+                    ) : (
+                      <ArrowRight size={18} />
+                    )}
+                  </button>
+                ))}
               <button
                 className="icon-control"
                 disabled={busy}
@@ -541,23 +586,45 @@ export function SocialEditor({
                 <Trash2 size={18} />
               </button>
             </div>
-            <LocalFile
-              item={item}
-              changed={(recipe) =>
-                setDraft({
-                  ...draft,
-                  files: draft.files.map((f) =>
-                    f.id === item.id ? { ...f, recipe } : f,
-                  ),
-                })
-              }
-            />
+            <div className="social-edit-stage">
+              <LocalFile
+                item={item}
+                overlay={
+                  draft.kind === "STORY" ? (
+                    <StoryDecorations items={draft.storyOverlays ?? []} />
+                  ) : undefined
+                }
+                changed={(recipe) =>
+                  setDraft({
+                    ...draft,
+                    files: draft.files.map((f) =>
+                      f.id === item.id ? { ...f, recipe } : f,
+                    ),
+                  })
+                }
+              />
+            </div>
             {item.media?.error && <p role="alert">{item.media.error}</p>}
           </div>
         ))}
+        {draft.kind === "STORY" && (
+          <>
+            {!draft.files.length && (
+              <div className="social-story-stage">
+                <p className="social-story-text">{draft.body || "Seu Story"}</p>
+                <StoryDecorations items={draft.storyOverlays ?? []} />
+              </div>
+            )}
+            <StoryDecorationEditor
+              items={draft.storyOverlays ?? []}
+              change={(storyOverlays) => setDraft({ ...draft, storyOverlays })}
+            />
+          </>
+        )}
         <label>
           O que você quer compartilhar?
           <textarea
+            className="resize-none"
             value={draft.body}
             maxLength={4000}
             rows={4}

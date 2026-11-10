@@ -13,3 +13,13 @@
 | Compartilhar sala | RoomSharePanel | RoomShareController | Mesmas permissões e ações no mobile e desktop |
 
 Não expor conteúdo privado por prévia, notificação, busca, contador, mídia ou URL. Fechar editor mantém rascunho; descartar pede confirmação. Atualização do Feed aparece como ação discreta, sem deslocar a leitura. Configuração adaptativa pode recomendar destaques, nunca reordenar botões durante a interação.
+
+## Canonical UI Map
+
+| Capability | Canonical owner | Source of truth | Allowed variants | Verification |
+| --- | --- | --- | --- | --- |
+| Select/Listbox | HTML select e botões com aria-pressed | Estado React | Popup nativo e grupos pequenos de opções | Teclado e rótulos no Playwright |
+| Form | Controles HTML com label | DTO Java e estado React | Timeline com controles range e number | video-editor.test.tsx e SocialIntegrationTest |
+| Scrollbar | globals.css | Tokens de tema | Scroll interno dos diálogos, Feed e Clips | Overflow a 390 e 1440 px no Playwright |
+| Toast | Regiões role=status/alert existentes | Resposta da API | Feedback inline persistente | Estados reais de erro e publicação nos E2E |
+| CRUD | SocialPosts/SocialMedia e editor | PostgreSQL, versão e rascunho IndexedDB | Confirmação de remoção e descarte | Testes de autorização, idempotência e mídia |

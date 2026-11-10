@@ -18,6 +18,7 @@ export type SocialMedia = {
   recipe?: VideoRecipe;
 };
 export type SocialPost = SocialPerson & {
+  storyOverlays?: StoryOverlay[];
   authorId: string;
   kind: "POST" | "CLIP" | "STORY";
   body: string;
@@ -46,6 +47,30 @@ export type SocialPreferences = {
   navigation: { automatic: boolean; order: SocialView[] };
 };
 export type SocialView = "feed" | "clips" | "create";
+export type StoryOverlay = { text: string; x: number; y: number };
+/** Only this application's canonical social URLs are handled as in-app navigation. */
+export function socialPath(raw: string, origin: string): string | null {
+  try {
+    const url = new URL(raw, origin);
+    if (
+      ![new URL(origin).origin, "https://enturma-flax.vercel.app"].includes(
+        url.origin,
+      ) ||
+      url.username ||
+      url.password ||
+      url.pathname !== "/social"
+    )
+      return null;
+    const key = url.searchParams.has("post") ? "post" : "person",
+      id = url.searchParams.get(key);
+    return id &&
+      /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(id)
+      ? `/social?${key}=${id}`
+      : null;
+  } catch {
+    return null;
+  }
+}
 export type VideoSegment = { start: number; end: number };
 export type VideoCaption = {
   text: string;

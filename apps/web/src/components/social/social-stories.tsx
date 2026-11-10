@@ -25,6 +25,8 @@ import { Avatar } from "../user-identity";
 import { ForumLinks } from "../forum-links";
 import { SocialDialog } from "./social-dialog";
 import { SocialAuthor, SocialShare } from "./social-post";
+import { StoryDecorations } from "./story-decorations";
+import { ConfirmedLink } from "../forum-links";
 
 export function StoryViewer({
   stories,
@@ -208,7 +210,14 @@ export function StoryViewer({
               >
                 <ForumLinks text={item.body} />
               </p>
+              <StoryDecorations items={item.storyOverlays ?? []} />
             </div>
+            {item.projectUrl && (
+              <ConfirmedLink
+                href={item.projectUrl}
+                label="Abrir link do Story"
+              />
+            )}
             <div className="social-row social-story-actions">
               <button
                 className="icon-control"

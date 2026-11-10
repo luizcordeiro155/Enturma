@@ -200,6 +200,7 @@ export function SocialSettings({
         <label>
           Solicitação ou recurso
           <textarea
+            className="resize-none"
             maxLength={1500}
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -321,6 +322,7 @@ export function SocialReview({ close }: { close: () => void }) {
                 <label>
                   Justificativa
                   <textarea
+                    className="resize-none"
                     value={reasons[r.id] ?? ""}
                     maxLength={1500}
                     onChange={(e) =>

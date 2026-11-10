@@ -1,0 +1,7 @@
+{
+  "profile": "product-admin",
+  "sourceRoots": ["apps/web/src/components/social", "apps/web/src/app/social"],
+  "canonicalMap": "UX-CONTRACT.md",
+  "ownership": {"Select/Listbox": "native"},
+  "requiredCapabilities": ["Select/Listbox", "Form", "Scrollbar", "Toast", "CRUD"]
+}

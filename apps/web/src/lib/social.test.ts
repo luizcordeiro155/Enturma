@@ -5,8 +5,32 @@ import {
   sourceTime,
   socialGesture,
   mergeSocialPage,
+  socialPath,
   type SocialPost,
 } from "./social";
+
+it("opens canonical Social shares inside the client without trusting lookalike hosts", () => {
+  const id = "11111111-1111-1111-1111-111111111111";
+  expect(
+    socialPath(
+      `https://enturma-flax.vercel.app/social?post=${id}`,
+      "https://localhost",
+    ),
+  ).toBe(`/social?post=${id}`);
+  expect(
+    socialPath(
+      `https://enturma-flax.vercel.app.evil.test/social?post=${id}`,
+      "https://localhost",
+    ),
+  ).toBeNull();
+  expect(
+    socialPath(
+      `https://user@enturma-flax.vercel.app/social?person=${id}`,
+      "https://localhost",
+    ),
+  ).toBeNull();
+  expect(socialPath("javascript:alert(1)", "https://localhost")).toBeNull();
+});
 
 it("distinguishes horizontal navigation from vertical, slow and OS edge gestures", () => {
   expect(socialGesture(100, 15, 250, 120, 390)).toBe("clips");

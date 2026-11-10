@@ -6,6 +6,33 @@
   color: var(--ink);
   min-width: 0;
 }
+.social-edit-stage {
+  position: relative;
+}
+.social-story-decorations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.social-story-decorations span {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  max-width: 78%;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: #102c24e8;
+  color: #fff;
+  font-weight: 700;
+  font-size: clamp(16px, 2vw, 24px);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.social-story-decoration-editor fieldset {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  margin-top: 14px;
+}
 .social-editor-fields {
   border: 0;
   padding: 0;
@@ -663,7 +690,9 @@
 }
 .social-comment-form textarea {
   flex: 1;
-  resize: vertical;
+  resize: none;
+  field-sizing: content;
+  max-height: 320px;
   min-height: 48px;
   max-height: 160px;
 }
@@ -941,7 +970,9 @@
 }
 .social-editor textarea {
   min-height: 120px;
-  resize: vertical;
+  resize: none;
+  field-sizing: content;
+  max-height: 320px;
 }
 .social-editor-grid {
   display: grid;
@@ -1203,4 +1234,11 @@
     animation: none !important;
     transition: none !important;
   }
+}
+.social-page .social-text-link,
+.social-dialog .social-text-link {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  font-weight: 650;
 }

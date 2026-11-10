@@ -1,4 +1,4 @@
-import type { SocialMedia, VideoRecipe } from "./social";
+import type { SocialMedia, VideoRecipe, StoryOverlay } from "./social";
 export type DraftFile = {
   id: string;
   file?: File;
@@ -14,6 +14,7 @@ export type SocialDraft = {
   visibility: "PUBLIC" | "FOLLOWERS";
   projectUrl: string;
   files: DraftFile[];
+  storyOverlays?: StoryOverlay[];
 };
 function database(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {

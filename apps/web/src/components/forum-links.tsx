@@ -5,6 +5,8 @@ import { ExternalLink, ShieldAlert, X } from "lucide-react";
 import { RoomJoinDialog } from "./room-join-dialog";
 import { roomInviteCode } from "@/lib/room-invite";
 import { splitLinks } from "@/lib/forum-links";
+import { socialPath } from "@/lib/social";
+import { useRouter } from "next/navigation";
 export function ForumLinks({ text }: { text: string }) {
   return (
     <>
@@ -26,6 +28,7 @@ export function ConfirmedLink({
   label: string;
 }) {
   const [open, setOpen] = useState(false);
+  const router = useRouter();
   const [invitation, setInvitation] = useState<string | null>(null);
   return (
     <>
@@ -33,6 +36,13 @@ export function ConfirmedLink({
         href={href}
         className="message-link"
         onClick={(e) => {
+          const social = socialPath(href, location.origin);
+          if (social) {
+            e.preventDefault();
+            e.stopPropagation();
+            router.push(social);
+            return;
+          }
           const code = roomInviteCode(href, location.origin);
           if (code) {
             e.preventDefault();

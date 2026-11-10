@@ -88,6 +88,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
   const params = useSearchParams(),
     incomingPost = params.get("post"),
     incomingPerson = params.get("person"),
+    incomingQuery = params.get("q"),
     incomingSettings = params.get("settings");
   const [view, setView] = useState<SocialView>("feed"),
     [opened, setOpened] = useState<SocialView[]>(["feed"]),
@@ -107,12 +108,20 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     usage = useRef({ feed: 0, clips: 0, create: 0 });
   useEffect(() => {
     const timer = setTimeout(() => {
+      if (incomingQuery) {
+        setQuery(incomingQuery.slice(0, 80));
+        setSearched(incomingQuery.slice(0, 80));
+        setPerson(null);
+        setDetail(undefined);
+        setSettings(false);
+        setView("feed");
+      }
       if (incomingPerson && /^[a-f0-9-]{36}$/i.test(incomingPerson))
         setPerson(incomingPerson);
       if (incomingSettings) setSettings(true);
     }, 0);
     return () => clearTimeout(timer);
-  }, [incomingPerson, incomingSettings]);
+  }, [incomingPerson, incomingSettings, incomingQuery]);
   useEffect(() => {
     if (!incomingPost || !/^[a-f0-9-]{36}$/i.test(incomingPost)) return;
     let alive = true;
@@ -145,9 +154,12 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
   useEffect(() => {
     let alive = true;
     if (!searched) return;
-    api<SocialPerson[]>(`/social/people?q=${encodeURIComponent(searched)}`, {
-      cache: "no-store",
-    })
+    api<SocialPerson[]>(
+      `/social/people?q=${encodeURIComponent(searched.replace(/^[@#]/, ""))}`,
+      {
+        cache: "no-store",
+      },
+    )
       .then((r) => {
         if (alive) setPeople(r);
       })
@@ -288,6 +300,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
             ))}
           </div>
           <form
+            noValidate
             className="social-search"
             onSubmit={(e) => {
               e.preventDefault();
@@ -301,7 +314,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
             <input
               id="social-search"
               type="search"
-              maxLength={120}
+              maxLength={80}
               placeholder="Pessoas, assuntos, #ideias"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
