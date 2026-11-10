@@ -39,6 +39,7 @@ public class SocialReview {
     if(db.exists("SELECT EXISTS(SELECT 1 FROM social_verification WHERE user_id=? AND created_at>now()-interval '7 days')",a.id())) throw new ApiException(429,"VERIFICATION_COOLDOWN","Aguarde sete dias entre solicitações ou recursos.");
     UUID id=UUID.randomUUID();
     db.jdbc.update("INSERT INTO social_verification(id,user_id,reason) VALUES (?,?,?)",id,a.id(),body.reason());
+    notices.send(null,a.id(),"SOCIAL_VERIFICATION_RECEIVED","social:verification",id,"/social?settings=verification","Sua solicitação foi recebida para análise.");
     return Map.of("id",id,"status","PENDING");
   }
   @GetMapping("/admin/social/review")
@@ -60,7 +61,7 @@ public class SocialReview {
     db.jdbc.update("UPDATE social_verification SET status=?,decision=?,reviewer_id=?,reviewed_at=now() WHERE id=?",body.status(),body.reason(),a.id(),id);
     db.jdbc.update("UPDATE social_profile SET verified=? WHERE user_id=?",body.status().equals("APPROVED"),item.get("userId"));
     audit(a,id,"SOCIAL_VERIFICATION",prior,body.status(),body.reason());
-    notices.send(a.id(),(UUID)item.get("userId"),"SOCIAL_VERIFICATION","social:verification",id,"/social?settings=verification","Sua solicitação de verificação social foi atualizada.");
+    notices.send(a.id(),(UUID)item.get("userId"),"SOCIAL_VERIFICATION_"+body.status(),"social:verification",id,"/social?settings=verification","Sua solicitação de verificação social foi atualizada.");
     return Map.of("status",body.status());
   }
   @PostMapping("/admin/social/reports/{id}") @Transactional

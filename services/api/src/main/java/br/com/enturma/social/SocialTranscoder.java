@@ -33,7 +33,9 @@ public class SocialTranscoder {
     var args=new ArrayList<>(List.of(ffmpeg,"-hide_banner","-loglevel","error","-nostdin","-y","-threads","2","-protocol_whitelist","file,pipe","-format_whitelist",FORMATS,"-i","source"));
     if(kind.equals("IMAGE")) {
       args.addAll(List.of("-map","0:v:0","-frames:v","1","-vf","scale=1600:1600:force_original_aspect_ratio=decrease","-map_metadata","-1","-q:v","3","image.jpg"));
-      run(dir,args); return new Result(dir.resolve("image.jpg"),dir.resolve("image.jpg"),"image/jpeg",0,Math.min(1600,stream.path("width").asInt()),Math.min(1600,stream.path("height").asInt()));
+      run(dir,args);
+      var image=probe(dir,"image.jpg").path("streams").get(0);
+      return new Result(dir.resolve("image.jpg"),dir.resolve("image.jpg"),"image/jpeg",0,image.path("width").asInt(),image.path("height").asInt());
     }
     double seconds=input.path("format").path("duration").asDouble(0);
     if(seconds<=0 || seconds>3600 || recipe==null) throw ApiException.invalid("Importe um vídeo de até uma hora e selecione até 90 segundos.");

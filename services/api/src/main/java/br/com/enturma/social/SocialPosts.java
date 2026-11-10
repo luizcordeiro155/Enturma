@@ -39,6 +39,8 @@ public class SocialPosts {
   @Transactional
   public Map<String,Object> draft(Actor a,Draft input) {
     access.profile(a.id());
+    // Serialize an owner's drafts before locking posts and reassigning their media.
+    db.one("SELECT user_id FROM social_profile WHERE user_id=? FOR UPDATE",a.id());
     if(input.id()==null || input.kind()==null || !Set.of("POST","CLIP","STORY").contains(input.kind()) || input.body()==null || input.body().length()>4000 || input.visibility()==null || !Set.of("PUBLIC","FOLLOWERS").contains(input.visibility()) || input.mediaIds()==null || input.mediaIds().stream().anyMatch(Objects::isNull) || input.mediaIds().size()>10 || new HashSet<>(input.mediaIds()).size()!=input.mediaIds().size()) throw ApiException.invalid("Revise a publicação e suas mídias.");
     String url=project(input.projectUrl());
     db.jdbc.update("INSERT INTO social_post(id,author_id,kind) VALUES (?,?,?) ON CONFLICT DO NOTHING",input.id(),a.id(),input.kind());
@@ -59,7 +61,7 @@ public class SocialPosts {
   public Map<String,Object> ownDraft(Actor a,UUID id) {
     access.require();
     var row=db.one("SELECT id,kind,body,visibility,project_url,version,updated_at FROM social_post WHERE id=? AND author_id=? AND state='DRAFT'",id,a.id());
-    row.put("media",db.list("SELECT id,kind,state,error,duration_ms,width,height,ordinal FROM social_media WHERE post_id=? ORDER BY ordinal",id));
+    row.put("media",db.list("SELECT id,kind,state,error,recipe,duration_ms,width,height,ordinal FROM social_media WHERE post_id=? ORDER BY ordinal",id));
     return row;
   }
   public Object drafts(Actor a) {
@@ -93,25 +95,29 @@ public class SocialPosts {
       +"(SELECT count(*) FROM social_reaction r WHERE r.post_id=p.id AND r.kind='LIKE') likes,"
       +"(SELECT count(*) FROM social_reaction r WHERE r.post_id=p.id AND r.kind='REPOST') reposts,"
       +"(SELECT count(*) FROM social_comment c WHERE c.post_id=p.id AND NOT c.deleted) comments,"
-      +"coalesce((SELECT jsonb_agg(r.kind) FROM social_reaction r WHERE r.post_id=p.id AND r.user_id=?),'[]'::jsonb) mine,"
+      +"coalesce((SELECT jsonb_agg(r.kind) FROM social_reaction r WHERE r.post_id=p.id AND r.user_id=?),'[]'::jsonb) mine,(SELECT h.title FROM social_highlight h WHERE h.post_id=p.id) highlight_title,EXISTS(SELECT 1 FROM social_story_view sv WHERE sv.post_id=p.id AND sv.user_id=?) seen,"
       +"coalesce((SELECT jsonb_agg(jsonb_build_object('id',m.id,'kind',m.kind,'durationMs',m.duration_ms,'width',m.width,'height',m.height) ORDER BY m.ordinal) FROM social_media m WHERE m.post_id=p.id AND m.state='READY'),'[]'::jsonb) media "
       +"FROM social_post p JOIN app_user u ON u.id=p.author_id LEFT JOIN social_profile sp ON sp.user_id=p.author_id ";
   }
   public Map<String,Object> detail(Actor a,UUID id) {
     access.require();
-    return db.one(projection()+" WHERE p.id=? AND "+SocialAccess.published("p")+" AND "+SocialAccess.visible("p"),a.id(),id,a.id(),a.id(),a.id(),a.id());
+    return db.one(projection()+" WHERE p.id=? AND "+SocialAccess.published("p")+" AND "+SocialAccess.visible("p"),a.id(),a.id(),id,a.id(),a.id(),a.id(),a.id());
   }
   public Object feed(Actor a,String tab,String kind,String query,String cursor,UUID author,String collection) {
     access.profile(a.id());
-    if(!Set.of("for-you","following","campus").contains(tab) || !Set.of("POST","CLIP","STORY").contains(kind) || query.length()>120 || !Set.of("posts","reposts","tagged","saved").contains(collection)) throw ApiException.invalid("Filtros inválidos.");
+    if(!Set.of("for-you","following","campus").contains(tab) || !Set.of("POST","CLIP","STORY","ALL").contains(kind) || query.length()>120 || !Set.of("posts","reposts","tagged","saved","pinned").contains(collection)) throw ApiException.invalid("Filtros inválidos.");
     if(collection.equals("saved") && (author==null || !author.equals(a.id()))) throw ApiException.forbidden();
     String scope=tab+":"+kind+":"+query.hashCode()+":"+author+":"+collection;
     var boundary=SocialCursor.read(cursor,scope);
-    var args=new ArrayList<Object>(List.of(a.id(),a.id(),a.id(),a.id(),a.id(),kind,java.sql.Timestamp.from(boundary.snapshot()),java.sql.Timestamp.from(boundary.before()),boundary.id()));
-    String filters=" WHERE "+SocialAccess.published("p")+" AND "+SocialAccess.visible("p")+" AND p.kind=? AND p.published_at<=? AND (p.published_at,p.id)<(?,?)";
+    var args=new ArrayList<Object>(List.of(a.id(),a.id(),a.id(),a.id(),a.id(),a.id()));
+    String filters=" WHERE "+SocialAccess.published("p")+" AND "+SocialAccess.visible("p");
+    if(kind.equals("ALL")) filters+=" AND p.kind IN ('POST','CLIP')";
+    else { filters+=" AND p.kind=?";args.add(kind); }
+    filters+=" AND p.published_at<=? AND (p.published_at,p.id)<(?,?)";
+    args.add(java.sql.Timestamp.from(boundary.snapshot()));args.add(java.sql.Timestamp.from(boundary.before()));args.add(boundary.id());
     if(kind.equals("STORY")) filters+=" AND p.expires_at>now()";
     if(author!=null) {
-      if(collection.equals("posts")) { filters+=" AND p.author_id=?"; args.add(author); }
+      if(collection.equals("posts") || collection.equals("pinned")) { filters+=" AND p.author_id=?"; args.add(author); if(collection.equals("pinned")) filters+=" AND p.pinned"; }
       else if(collection.equals("tagged")) { filters+=" AND EXISTS(SELECT 1 FROM social_mention sm WHERE sm.post_id=p.id AND sm.user_id=? AND sm.approved)"; args.add(author); }
       else { filters+=" AND EXISTS(SELECT 1 FROM social_reaction sr WHERE sr.post_id=p.id AND sr.user_id=? AND sr.kind=?)"; args.add(author); args.add(collection.equals("saved")?"SAVE":"REPOST"); }
     }
@@ -132,7 +138,11 @@ public class SocialPosts {
     var interests=new HashSet<String>(Arrays.asList((String[])preferences.get("interests")));
     var following=new HashSet<UUID>();
     for(var r:db.list("SELECT followed_id FROM social_follow WHERE follower_id=? AND status='ACCEPTED'",a.id())) following.add((UUID)r.get("followedId"));
-    if(Boolean.TRUE.equals(preferences.get("recommendations"))) for(var row:db.list("SELECT DISTINCT unnest(p.tags) tag FROM social_post p JOIN social_feedback f ON f.post_id=p.id WHERE f.user_id=? AND f.watched_ms>5000 AND f.updated_at>now()-interval '30 days' LIMIT 50",a.id())) interests.add(row.get("tag").toString());
+    if(Boolean.TRUE.equals(preferences.get("recommendations"))) {
+      // Only the student's authorized Social activity. Blocked/removed/private-inaccessible
+      // posts cannot influence later recommendations, even if previously watched.
+      for(var row:db.list("SELECT DISTINCT unnest(p.tags) tag FROM social_post p WHERE "+SocialAccess.published("p")+" AND "+SocialAccess.visible("p")+" AND NOT EXISTS(SELECT 1 FROM social_reaction r WHERE r.user_id=? AND r.post_id=p.id AND r.kind='HIDE') AND (EXISTS(SELECT 1 FROM social_feedback f WHERE f.post_id=p.id AND f.user_id=? AND (f.watched_ms>5000 OR f.completed) AND f.updated_at>now()-interval '30 days') OR EXISTS(SELECT 1 FROM social_reaction r WHERE r.post_id=p.id AND r.user_id=? AND r.kind IN ('LIKE','SAVE','REPOST') AND r.created_at>now()-interval '30 days') OR EXISTS(SELECT 1 FROM social_comment c WHERE c.post_id=p.id AND c.author_id=? AND NOT c.deleted AND c.created_at>now()-interval '30 days')) LIMIT 50",a.id(),a.id(),a.id(),a.id(),a.id(),a.id(),a.id(),a.id())) interests.add(row.get("tag").toString());
+    }
     page.sort(Comparator.<Map<String,Object>>comparingInt(p->SocialRanker.score(following.contains(p.get("authorId")),Arrays.asList((String[])p.get("tags")),interests)).reversed().thenComparing(p->p.get("publishedAt").toString(),Comparator.reverseOrder()));
     SocialRanker.diversify(page);
   }
@@ -175,7 +185,7 @@ public class SocialPosts {
   @Transactional
   public void remove(Actor a,UUID id) {
     access.owner(a,id);
-    db.jdbc.update("UPDATE social_post SET state='REMOVED',body='',project_url=NULL,tags='{}',updated_at=now() WHERE id=?",id);
+    db.jdbc.update("UPDATE social_post SET state='REMOVED',pinned=false,body='',project_url=NULL,tags='{}',updated_at=now() WHERE id=?",id);
     db.jdbc.update("UPDATE social_media SET state='DELETING' WHERE post_id=?",id);
     db.jdbc.update("DELETE FROM social_highlight WHERE post_id=?",id);
   }
@@ -184,12 +194,19 @@ public class SocialPosts {
     access.profile(a.id());
     db.one("SELECT user_id FROM social_profile WHERE user_id=? FOR UPDATE",a.id());
     access.owner(a,id);
-    if(pinned && db.jdbc.queryForObject("SELECT count(*) FROM social_post WHERE author_id=? AND pinned AND id<>?",Long.class,a.id(),id)>=3) throw ApiException.invalid("Você pode fixar até três publicações.");
+    var post=db.one("SELECT state FROM social_post WHERE id=?",id);
+    if(!"PUBLISHED".equals(post.get("state"))) throw ApiException.invalid("Publique o conteúdo antes de fixar.");
+    if(pinned && db.jdbc.queryForObject("SELECT count(*) FROM social_post WHERE author_id=? AND pinned AND state='PUBLISHED' AND id<>?",Long.class,a.id(),id)>=3) throw ApiException.invalid("Você pode fixar até três publicações.");
     db.jdbc.update("UPDATE social_post SET pinned=? WHERE id=?",pinned,id);
   }
   public void mention(Actor a,UUID id,boolean approved) {
     access.post(a,id);
-    db.jdbc.update("UPDATE social_mention SET approved=? WHERE post_id=? AND user_id=?",approved,id,a.id());
+    if(approved) db.jdbc.update("UPDATE social_mention SET approved=true WHERE post_id=? AND user_id=?",id,a.id());
+    else db.jdbc.update("DELETE FROM social_mention WHERE post_id=? AND user_id=?",id,a.id());
+  }
+  public Object pendingMentions(Actor a) {
+    access.require();
+    return db.list(projection()+" JOIN social_mention sm ON sm.post_id=p.id WHERE sm.user_id=? AND NOT sm.approved AND "+SocialAccess.published("p")+" AND "+SocialAccess.visible("p")+" ORDER BY p.published_at DESC LIMIT 30",a.id(),a.id(),a.id(),a.id(),a.id(),a.id(),a.id());
   }
   public void view(Actor a,UUID id,int watchedMs,boolean completed) {
     var p=access.post(a,id);
@@ -214,6 +231,6 @@ public class SocialPosts {
   }
   public Object highlights(Actor a,UUID user) {
     access.unblocked(a.id(),user);
-    return db.list(projection()+" JOIN social_highlight h ON h.post_id=p.id WHERE p.author_id=? AND "+SocialAccess.published("p")+" AND "+SocialAccess.visible("p")+" ORDER BY h.created_at DESC LIMIT 30",a.id(),user,a.id(),a.id(),a.id(),a.id());
+    return db.list(projection()+" JOIN social_highlight h ON h.post_id=p.id WHERE p.author_id=? AND "+SocialAccess.published("p")+" AND "+SocialAccess.visible("p")+" ORDER BY h.created_at DESC LIMIT 30",a.id(),a.id(),user,a.id(),a.id(),a.id(),a.id());
   }
 }

@@ -37,4 +37,17 @@ public class SocialMaintenance {
     db.jdbc.update("UPDATE social_media m SET state='DELETING' FROM social_post p WHERE m.post_id=p.id AND p.kind='STORY' AND p.expires_at<now()-interval '30 days' AND NOT EXISTS(SELECT 1 FROM social_highlight h WHERE h.post_id=p.id)");
     db.jdbc.update("UPDATE social_post SET state='REMOVED',body='',tags='{}',project_url=NULL WHERE kind='STORY' AND expires_at<now()-interval '30 days' AND state='PUBLISHED' AND NOT EXISTS(SELECT 1 FROM social_highlight h WHERE h.post_id=social_post.id)");
   }
+  @Scheduled(fixedDelay=86400000) @Transactional
+  public void verificationEligibility() {
+    if(!access.enabled()) return;
+    // A threshold opens a manual fraud/identity review; it never grants a badge.
+    for(var row:db.list("SELECT f.followed_id FROM social_follow f JOIN app_user u ON u.id=f.follower_id AND u.status='ACTIVE' JOIN social_profile p ON p.user_id=f.followed_id AND NOT p.verified WHERE f.status='ACCEPTED' AND NOT EXISTS(SELECT 1 FROM social_verification v WHERE v.user_id=f.followed_id) GROUP BY f.followed_id HAVING count(*)>=100000 ORDER BY f.followed_id LIMIT 10")) {
+      UUID user=(UUID)row.get("followedId");
+      db.one("SELECT user_id FROM social_profile WHERE user_id=? FOR UPDATE",user);
+      if(db.exists("SELECT EXISTS(SELECT 1 FROM social_verification WHERE user_id=?)",user)) continue;
+      UUID id=UUID.randomUUID();
+      db.jdbc.update("INSERT INTO social_verification(id,user_id,reason) VALUES (?,?,?)",id,user,"Elegibilidade por alcance. Verificar autenticidade dos seguidores e identidade; a contagem não comprova legitimidade.");
+      notices.send(null,user,"SOCIAL_VERIFICATION_RECEIVED","social:verification",id,"/social?settings=verification","Seu alcance iniciou uma análise de elegibilidade. O selo depende da verificação de autenticidade.");
+    }
+  }
 }

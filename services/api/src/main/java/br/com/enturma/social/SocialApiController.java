@@ -19,6 +19,7 @@ public class SocialApiController {
   @GetMapping("/feed") public Object feed(@AuthenticationPrincipal Actor a,@RequestParam(defaultValue="for-you") String tab,@RequestParam(defaultValue="POST") String kind,@RequestParam(defaultValue="") String q,@RequestParam(defaultValue="") String cursor,@RequestParam(required=false) UUID author,@RequestParam(defaultValue="posts") String collection) { return posts.feed(a,tab,kind,q,cursor,author,collection); }
   @GetMapping("/posts/{id}") public Object detail(@AuthenticationPrincipal Actor a,@PathVariable UUID id) { return posts.detail(a,id); }
   @GetMapping("/drafts") public Object drafts(@AuthenticationPrincipal Actor a) { return posts.drafts(a); }
+  @GetMapping("/mentions") public Object mentions(@AuthenticationPrincipal Actor a) { return posts.pendingMentions(a); }
   @GetMapping("/drafts/{id}") public Object draft(@AuthenticationPrincipal Actor a,@PathVariable UUID id) { return posts.ownDraft(a,id); }
   @PutMapping("/drafts") public Object draft(@AuthenticationPrincipal Actor a,@RequestBody SocialPosts.Draft draft) { return posts.draft(a,draft); }
   public record Version(@Min(1) int version) {}

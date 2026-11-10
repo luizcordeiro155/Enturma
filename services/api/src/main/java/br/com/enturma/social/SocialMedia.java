@@ -11,6 +11,9 @@ import java.io.*;
 import java.nio.file.*;
 import java.security.MessageDigest;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -25,6 +28,8 @@ public class SocialMedia {
   private final Db db; private final SocialAccess access; private final ObjectStorageService storage;
   private final SocialTranscoder transcoder; private final ObjectMapper json; private final TransactionTemplate tx;
   private final boolean mediaEnabled;
+  private final ExecutorService worker=Executors.newSingleThreadExecutor(r->{Thread t=new Thread(r,"social-media");t.setDaemon(true);return t;});
+  private final AtomicBoolean working=new AtomicBoolean();
   public SocialMedia(Db db,SocialAccess access,ObjectStorageService storage,SocialTranscoder transcoder,ObjectMapper json,org.springframework.transaction.PlatformTransactionManager manager,@Value("${SOCIAL_MEDIA_ENABLED:false}") boolean enabled) {
     this.db=db;this.access=access;this.storage=storage;this.transcoder=transcoder;this.json=json;this.tx=new TransactionTemplate(manager);this.mediaEnabled=enabled;
   }
@@ -78,6 +83,7 @@ public class SocialMedia {
       var row=db.one("SELECT * FROM social_media WHERE id=? AND owner_id=? FOR UPDATE",id,a.id());
       if(Set.of("QUEUED","PROCESSING").contains(row.get("state"))) return status(a,id);
       if(!Set.of("UPLOADING","FAILED").contains(row.get("state"))) throw ApiException.invalid("Esta mídia já foi finalizada. Envie outra cópia para editar.");
+      if(((Number)row.get("attempts")).intValue()>=3) throw ApiException.invalid("O limite de três exportações deste arquivo foi atingido. Remova-o e escolha um novo arquivo.");
       if(!row.get("expectedBytes").equals(row.get("receivedBytes"))) throw ApiException.invalid("Conclua o upload antes de exportar.");
       if("VIDEO".equals(row.get("kind"))) { if(body.recipe()==null) throw ApiException.invalid("Revise os cortes do vídeo."); body.recipe().validated(3600); }
       try { db.jdbc.update("UPDATE social_media SET recipe=?::jsonb,state='QUEUED',error=NULL,updated_at=now() WHERE id=?",json.writeValueAsString(body.recipe()),id); }
@@ -115,6 +121,16 @@ public class SocialMedia {
   @Scheduled(fixedDelay=2000)
   public void process() {
     if(!enabled()) return;
+    submit(this::processOne);
+  }
+  private void submit(Runnable action) {
+    if(!working.compareAndSet(false,true)) return;
+    try { worker.execute(()->{try { action.run(); } finally { working.set(false); }}); }
+    catch(RejectedExecutionException e) { working.set(false); }
+  }
+  @PreDestroy public void stop() { worker.shutdownNow(); }
+  // Media work must never hold the scheduler used by calls, rooms and notifications.
+  void processOne() {
     var job=tx.execute(s -> {
       var rows=db.list("SELECT * FROM social_media WHERE state='QUEUED' OR (state='PROCESSING' AND lease_until<now()) ORDER BY created_at LIMIT 1 FOR UPDATE SKIP LOCKED");
       if(rows.isEmpty()) return null;
@@ -148,6 +164,9 @@ public class SocialMedia {
   @Scheduled(fixedDelay=60000)
   public void cleanup() {
     if(!storage.enabled()) return;
+    submit(this::cleanupFiles);
+  }
+  void cleanupFiles() {
     for(var row:db.list("SELECT id FROM social_media WHERE state='DELETING' AND (lease_until IS NULL OR lease_until<now()) LIMIT 10")) {
       UUID id=(UUID)row.get("id");
       try {

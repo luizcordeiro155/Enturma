@@ -18,8 +18,9 @@ public class SocialPeople {
   private void pair(Actor a,UUID other) {
     access.unblocked(a.id(),other);
     if(a.id().equals(other)) throw ApiException.invalid("Escolha outro estudante.");
-    access.profile(other); access.profile(a.id());
+    for(UUID id:new TreeSet<>(List.of(a.id(),other))) access.profile(id);
     db.list("SELECT user_id FROM social_profile WHERE user_id IN (?,?) ORDER BY user_id FOR UPDATE",a.id(),other);
+    access.unblocked(a.id(),other);
   }
   @Transactional
   public Object follow(Actor a, UUID other, boolean following) {
@@ -34,7 +35,7 @@ public class SocialPeople {
   }
   public Object relationship(Actor a,UUID other) {
     access.unblocked(a.id(),other);
-    return db.one("SELECT coalesce((SELECT status FROM social_follow WHERE follower_id=? AND followed_id=?),'NONE') status, EXISTS(SELECT 1 FROM social_follow WHERE follower_id=? AND followed_id=? AND status='ACCEPTED') follows_you, EXISTS(SELECT 1 FROM social_mute WHERE user_id=? AND creator_id=?) muted",a.id(),other,other,a.id(),a.id(),other);
+    return db.one("SELECT coalesce((SELECT status FROM social_follow WHERE follower_id=? AND followed_id=?),'NONE') status, coalesce((SELECT notify FROM social_follow WHERE follower_id=? AND followed_id=?),false) notify, EXISTS(SELECT 1 FROM social_follow WHERE follower_id=? AND followed_id=? AND status='ACCEPTED') follows_you, EXISTS(SELECT 1 FROM social_mute WHERE user_id=? AND creator_id=?) muted",a.id(),other,a.id(),other,other,a.id(),a.id(),other);
   }
   public void notify(Actor a,UUID creator,boolean active) {
     access.unblocked(a.id(),creator);
