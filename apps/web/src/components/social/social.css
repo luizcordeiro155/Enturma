@@ -9,6 +9,8 @@ html[data-desktop-chrome="true"] .social-active-shell {
   --social-chrome: 32px;
 }
 .social-active-shell > .workspace {
+  /* Keep loading/error states in the content column before the rail is ready. */
+  grid-column: 2;
   min-height: 0;
   overflow: clip;
 }
@@ -57,9 +59,8 @@ html[data-desktop-chrome="true"] .social-active-shell {
   flex-direction: column;
   gap: 8px;
 }
-html[data-theme]
-  .social-navigation
-  :is(button, .social-navigation-items a, .social-navigation-footer a) {
+html[data-theme] .social-navigation-items > :is(button, a),
+html[data-theme] .social-navigation-footer > :is(button, a) {
   display: flex;
   align-items: center;
   gap: 16px;
@@ -101,7 +102,7 @@ html[data-theme] .social-navigation-items [aria-current="page"] {
   flex: none;
   color: inherit;
 }
-.social-nav-avatar .avatar {
+.social-nav-avatar .identity-avatar {
   width: 28px;
   height: 28px;
   font-size: 10px;
@@ -175,9 +176,8 @@ html[data-theme] .social-opening p {
   .social-navigation-footer p {
     display: none;
   }
-  html[data-theme]
-    .social-navigation
-    :is(button, .social-navigation-items a, .social-navigation-footer a) {
+  html[data-theme] .social-navigation-items > :is(button, a),
+  html[data-theme] .social-navigation-footer > :is(button, a) {
     flex-direction: column;
     gap: 5px;
     padding: 10px 2px;
@@ -1341,7 +1341,7 @@ html[data-theme]
     grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 3px;
   }
-  html[data-theme] .social-navigation-items :is(button, a) {
+  html[data-theme] .social-navigation-items > :is(button, a) {
     flex-direction: column;
     gap: 1px;
     min-height: 52px;

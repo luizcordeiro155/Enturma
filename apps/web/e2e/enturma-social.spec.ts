@@ -34,6 +34,20 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
   request,
 }, info) => {
   const me = await student(request, "Navegação Social");
+  const preferences = await request.put(
+    `${backend}/api/v1/users/me/experience`,
+    {
+      headers: asUser(me.accessToken),
+      data: {
+        theme: "ENTURMA",
+        fontScale: 1,
+        highContrast: false,
+        reducedMotion: false,
+        enhancedFocus: true,
+      },
+    },
+  );
+  expect(preferences.ok()).toBe(true);
   await authenticate(page.context(), me);
   let eligible = false;
   await page.route("**/api/backend/learning/access", (route) =>
@@ -52,6 +66,9 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
   });
   await expect(opening).toBeVisible();
   await expect(opening.locator("[data-brand-book]")).toBeVisible();
+  await expect(page.locator("html")).toHaveAttribute("data-palette", "enturma");
+  // Capture the arrived book, rather than the first, zero-scale entry frame.
+  await page.waitForTimeout(600);
   await page.screenshot({
     path: info.outputPath("social-opening-enturma.png"),
   });
@@ -59,15 +76,20 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
   await expect(opening).not.toBeVisible({ timeout: 8000 });
   const social = page.getByRole("navigation", { name: "Ambientes do Social" });
   await expect(social).toBeVisible();
+  const dock = await page.locator(".social-navigation").boundingBox();
+  expect(dock!.height).toBeLessThanOrEqual(68);
+  await expect(
+    social.getByRole("button", { name: "Feed", exact: true }),
+  ).toHaveCSS("font-size", "10px");
   await expect(
     page.getByRole("navigation", { name: "Navegação mobile" }),
   ).toHaveCount(0);
-  expect(await social.getByRole("button").allTextContents()).toEqual([
-    "Feed",
-    "Clips",
-    "Criar",
-    "Perfil",
-  ]);
+  await expect(
+    social.getByRole("button", { name: /^(Feed|Clips|Criar)$/ }),
+  ).toHaveText(["Feed", "Clips", "Criar"]);
+  await expect(
+    social.getByRole("button", { name: "Meu perfil social" }),
+  ).toBeVisible();
   await expect(social.getByRole("link", { name: "Mensagens" })).toHaveAttribute(
     "href",
     "/friends",
@@ -180,12 +202,10 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
   await authenticate(page.context(), bia);
   await page.goto("/social");
   await expect(
-    page.getByRole("heading", { name: "Enturma Social." }),
+    page.getByRole("heading", { name: "Enturma Social.", level: 1 }),
   ).toBeVisible();
   const feed = page.locator(".social-feed-view .social-stream:visible");
-  const card = feed
-    .locator(".social-post")
-    .filter({ hasText: "Projeto de pontes:" });
+  const card = feed.locator(`[data-post="${postId}"]`);
   await expect(card).toBeVisible();
   await card.getByRole("button", { name: "Curtir · 0", exact: true }).click();
   await expect(
@@ -232,18 +252,15 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
   await expect(feed).toHaveAttribute("data-reading-kept", "yes");
   await navigation.getByRole("button", { name: "Criar", exact: true }).click();
   const editor = page.getByRole("region", { name: "Central de criação" });
-  await editor
-    .getByLabel("O que você quer compartilhar?")
-    .fill("Meu rascunho continua aqui. #computação");
+  const draftText = `Meu rascunho continua aqui. #computação ${bia.username}`;
+  await editor.getByLabel("O que você quer compartilhar?").fill(draftText);
   await navigation.getByRole("button", { name: "Feed", exact: true }).click();
   await navigation.getByRole("button", { name: "Criar", exact: true }).click();
   await expect(editor.getByLabel("O que você quer compartilhar?")).toHaveValue(
-    "Meu rascunho continua aqui. #computação",
+    draftText,
   );
   await editor.getByRole("button", { name: "Publicar Post" }).click();
-  await expect(
-    feed.getByText("Meu rascunho continua aqui. #computação", { exact: true }),
-  ).toBeVisible();
+  await expect(feed.getByText(draftText, { exact: true })).toBeVisible();
   const detail = await request.get(`${backend}/api/v1/social/posts/${postId}`, {
     headers: asUser(bia.accessToken),
   });
@@ -256,9 +273,7 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
     .getByLabel("Pesquisar pessoas, hashtags e publicações")
     .fill("Meu rascunho continua");
   await page.getByRole("button", { name: "Pesquisar", exact: true }).click();
-  await expect(
-    feed.getByText("Meu rascunho continua aqui. #computação", { exact: true }),
-  ).toBeVisible();
+  await expect(feed.getByText(draftText, { exact: true })).toBeVisible();
   const filtered = page.waitForResponse(
     (r) =>
       r.url().includes("/social/feed?") &&
@@ -293,7 +308,7 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
       expect(header!.y).toBeGreaterThanOrEqual(0);
       const contrast = await page
         .locator(
-          ".social-mode-nav button, .social-feed-toolbar .social-tabs button",
+          ".social-navigation-items button, .social-navigation-items a, .social-feed-toolbar .social-tabs button",
         )
         .evaluateAll((buttons) =>
           buttons.map((button) => {

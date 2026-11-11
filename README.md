@@ -6,7 +6,7 @@ O **Enturma** é um ecossistema acadêmico multiplataforma construído para apro
 
 O projeto é um monorepo com **Java 21 / Spring Boot**, **Next.js / React**, **React Native / Expo** e **Electron**, com aplicações para **Web, Android e Desktop**.
 
-> **Estado atual — 03/11/2026:** a [PR #135](https://github.com/luizcordeiro155/Enturma/pull/135) foi integrada à `main`; Web, Windows e Android foram publicados. Os instaladores Windows/Android distribuídos são **0.4.424** (commit `9270a5f`, Railway `SUCCESS`). Builds e CI verdes não comprovam homologação física, recuperação de dados ou capacidade sob carga. Consulte [Status](docs/STATUS.md) e [auditoria documental](docs/DOCUMENTATION_AUDIT_2026_11_03.md).
+> **Estado atual — 11/11/2026:** [Enturma Social 2.0 — PR #144](https://github.com/luizcordeiro155/Enturma/pull/144) reúne Feed, Clips, Stories e editor, preservando o Fórum. A integração na `main` está autorizada e condicionada aos checks; flags de produção permanecem desligadas por padrão. Os manifests nativos consultados ainda informam **0.4.424**. Consulte [Status](docs/STATUS.md) e [evidências/limitações do Social](docs/SOCIAL_2_IMPLEMENTATION.md).
 
 ## A proposta
 
