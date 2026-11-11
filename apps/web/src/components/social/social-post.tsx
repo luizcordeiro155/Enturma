@@ -1,5 +1,4 @@
 "use client";
-/* eslint-disable @next/next/no-img-element -- private authenticated social media */
 import { useEffect, useRef, useState } from "react";
 import {
   BadgeCheck,
@@ -17,16 +16,18 @@ import { api, post } from "@/lib/api";
 import {
   socialWrite,
   socialLink,
-  mediaUrl,
   postPerson,
   type SocialPerson,
   type SocialPost as Post,
 } from "@/lib/social";
+import { relativeTime } from "@/lib/social-media";
 import { preparePrivateShare } from "@/lib/send-room-invitation";
 import { Avatar } from "../user-identity";
 import { ConfirmedLink } from "../forum-links";
 import { SocialDialog } from "./social-dialog";
 import { SocialText } from "./social-text";
+import { SocialMediaCarousel } from "./social-media-carousel";
+import { usePostActions } from "./use-post-actions";
 
 export function SocialAuthor({
   user,
@@ -447,6 +448,7 @@ export function SocialPost({
   me,
   person,
   changed,
+  autoplay = true,
   clip = false,
   children,
 }: {
@@ -454,50 +456,69 @@ export function SocialPost({
   me: string;
   person: (id: string) => void;
   changed: (p: Post) => void;
+  autoplay?: boolean;
   clip?: boolean;
   children?: React.ReactNode;
 }) {
   const [dialog, setDialog] = useState<"comments" | "share" | "more" | null>(
       null,
     ),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState(""),
     [reason, setReason] = useState(""),
     [expanded, setExpanded] = useState(false),
-    [removing, setRemoving] = useState(false);
-  async function react(kind: string) {
-    if (busy) return;
-    setBusy(true);
-    try {
-      changed(
-        await socialWrite<Post>(`/posts/${item.id}/reactions/${kind}`, {
-          active: !item.mine.includes(kind),
-        }),
-      );
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
+    [removing, setRemoving] = useState(false),
+    [burst, setBurst] = useState(0);
+  const lastTap = useRef(0);
+  const actions = usePostActions(item, changed),
+    { busy, error, setError, react } = actions;
   async function act(path: string, body?: unknown, method = "PUT") {
-    setBusy(true);
-    try {
-      await socialWrite(path, body, method);
-      setDialog(null);
-      if (method === "DELETE" || path.endsWith("/mute"))
-        changed({ ...item, mine: [...item.mine, "HIDE"] });
-      else
-        changed(
-          await api<Post>(`/social/posts/${item.id}`, { cache: "no-store" }),
-        );
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
+    if (await actions.act(path, body, method)) setDialog(null);
+  }
+  function tapMedia() {
+    const now = performance.now();
+    if (now - lastTap.current < 300) {
+      lastTap.current = 0;
+      setBurst((count) => count + 1);
+      void actions.like();
+    } else lastTap.current = now;
   }
   if (item.mine.includes("HIDE")) return null;
+  const hasMedia = !clip && item.media.length > 0,
+    limit = hasMedia || clip ? 125 : 280,
+    long = item.body.length > limit;
+  const copy = (
+    <div className="social-post-copy">
+      {!!item.body && (
+        <p>
+          {hasMedia && (
+            <button
+              type="button"
+              className="social-caption-author"
+              onClick={() => person(item.authorId)}
+            >
+              {item.username}
+            </button>
+          )}{" "}
+          <SocialText
+            text={
+              expanded || !long ? item.body : `${item.body.slice(0, limit)}…`
+            }
+          />{" "}
+          {long && (
+            <button
+              type="button"
+              className="text-button social-caption-toggle"
+              onClick={() => setExpanded(!expanded)}
+            >
+              {expanded ? "menos" : "mais"}
+            </button>
+          )}
+        </p>
+      )}
+      {item.projectUrl && (
+        <ConfirmedLink href={item.projectUrl} label="Conhecer o projeto ↗" />
+      )}
+    </div>
+  );
   return (
     <article
       className={`social-post ${clip ? "social-post-clip" : ""}`}
@@ -516,78 +537,31 @@ export function SocialPost({
           <MoreHorizontal size={20} />
         </button>
       </header>
-      {children ??
-        (!!item.media.length && (
-          <div
-            className="social-carousel"
-            data-social-gesture="ignore"
-            aria-label="Mídias da publicação"
-            tabIndex={0}
-          >
-            {item.media.map((m, i) => (
-              <figure key={m.id}>
-                {m.kind === "VIDEO" ? (
-                  <video
-                    controls
-                    playsInline
-                    preload="none"
-                    src={mediaUrl(m.id)}
-                    poster={mediaUrl(m.id, true)}
-                    onPlay={(e) => {
-                      document
-                        .querySelectorAll<HTMLVideoElement>(
-                          ".social-page video",
-                        )
-                        .forEach((v) => {
-                          if (v !== e.currentTarget) v.pause();
-                        });
-                    }}
-                  />
-                ) : (
-                  <img
-                    src={mediaUrl(m.id)}
-                    alt={`Imagem ${i + 1} da publicação de ${item.name}`}
-                    loading="lazy"
-                  />
-                )}
-                {item.media.length > 1 && (
-                  <figcaption>
-                    {i + 1} / {item.media.length}
-                  </figcaption>
-                )}
-              </figure>
-            ))}
-          </div>
-        ))}
-      <div className="social-post-copy">
-        <p>
-          <SocialText
-            text={
-              expanded || item.body.length <= 240
-                ? item.body
-                : `${item.body.slice(0, 240)}…`
-            }
+      {children}
+      {hasMedia ? (
+        <div
+          className="social-post-media"
+          data-testid="post-media"
+          onClick={tapMedia}
+        >
+          <SocialMediaCarousel
+            media={item.media}
+            authorName={item.name}
+            autoplay={autoplay}
           />
-        </p>
-        {item.body.length > 240 && (
-          <button
-            className="text-button"
-            onClick={() => setExpanded(!expanded)}
-          >
-            {expanded ? "Mostrar menos" : "Ler mais"}
-          </button>
-        )}
-        {item.projectUrl && (
-          <ConfirmedLink href={item.projectUrl} label="Conhecer o projeto ↗" />
-        )}
-        <small>
-          {item.pinned && "Fixado · "}
-          {new Date(item.publishedAt).toLocaleDateString("pt-BR", {
-            day: "numeric",
-            month: "short",
-          })}
-        </small>
-      </div>
+          {burst > 0 && (
+            <Heart
+              key={burst}
+              className="social-like-burst"
+              size={96}
+              fill="currentColor"
+              aria-hidden="true"
+            />
+          )}
+        </div>
+      ) : (
+        !clip && copy
+      )}
       <div className="social-post-actions">
         <button
           className="icon-control"
@@ -597,18 +571,16 @@ export function SocialPost({
           onClick={() => void react("LIKE")}
         >
           <Heart
-            size={21}
+            size={24}
             fill={item.mine.includes("LIKE") ? "currentColor" : "none"}
           />
-          <span>{item.likes}</span>
         </button>
         <button
           className="icon-control"
           aria-label={`Comentários · ${item.comments}`}
           onClick={() => setDialog("comments")}
         >
-          <MessageCircle size={21} />
-          <span>{item.comments}</span>
+          <MessageCircle size={24} />
         </button>
         <button
           className="icon-control"
@@ -617,15 +589,15 @@ export function SocialPost({
           disabled={busy}
           onClick={() => void react("REPOST")}
         >
-          <Repeat2 size={21} />
-          <span>{item.reposts}</span>
+          <Repeat2 size={24} />
+          {item.reposts > 0 && <span>{item.reposts}</span>}
         </button>
         <button
           className="icon-control"
           aria-label="Compartilhar publicação"
           onClick={() => setDialog("share")}
         >
-          <Send size={21} />
+          <Send size={23} />
         </button>
         <button
           className="icon-control social-save"
@@ -635,10 +607,35 @@ export function SocialPost({
           onClick={() => void react("SAVE")}
         >
           <Bookmark
-            size={21}
+            size={24}
             fill={item.mine.includes("SAVE") ? "currentColor" : "none"}
           />
         </button>
+      </div>
+      <div className="social-post-meta">
+        {item.likes > 0 && (
+          <p className="social-post-likes">
+            {item.likes} {item.likes === 1 ? "curtida" : "curtidas"}
+          </p>
+        )}
+        {(hasMedia || clip) && copy}
+        {item.comments > 0 && (
+          <button
+            type="button"
+            className="text-button social-post-all-comments"
+            onClick={() => setDialog("comments")}
+          >
+            {item.comments === 1
+              ? "Ver 1 comentário"
+              : `Ver todos os ${item.comments} comentários`}
+          </button>
+        )}
+        <small>
+          {item.pinned && "Fixado · "}
+          <time dateTime={item.publishedAt}>
+            {relativeTime(item.publishedAt, new Date())}
+          </time>
+        </small>
       </div>
       {error && (
         <p className="social-error" role="alert">

@@ -3,6 +3,7 @@ import type { SocialPost } from "./social";
 import {
   groupStories,
   mediaAspect,
+  pullRefreshes,
   relativeTime,
   storyTapZone,
 } from "./social-media";
@@ -38,4 +39,11 @@ it("agrupa Stories por autor, do mais antigo ao mais novo, na ordem de chegada",
 it("divide o toque do Story em voltar (30% à esquerda) e avançar", () => {
   expect(storyTapZone(100, 390)).toBe("back");
   expect(storyTapZone(118, 390)).toBe("forward");
+});
+it("puxar para atualizar só vale no topo, para baixo e na vertical", () => {
+  expect(pullRefreshes(0, 4, 90)).toBe(true);
+  expect(pullRefreshes(0, 4, 60)).toBe(false); // menos de 70 px
+  expect(pullRefreshes(12, 4, 90)).toBe(false); // lista já rolada
+  expect(pullRefreshes(0, 90, 90)).toBe(false); // diagonal
+  expect(pullRefreshes(0, 4, -90)).toBe(false); // para cima
 });

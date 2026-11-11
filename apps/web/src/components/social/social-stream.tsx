@@ -6,6 +6,7 @@ import {
   type SocialPage,
   type SocialPost as Post,
 } from "@/lib/social";
+import { pullRefreshes } from "@/lib/social-media";
 import { SocialPost } from "./social-post";
 
 export function useSocialStream(query: string, active: boolean) {
@@ -66,17 +67,20 @@ export function SocialStream({
   me,
   person,
   refreshKey = 0,
+  autoplay = true,
 }: {
   query: string;
   active: boolean;
   me: string;
   person: (id: string) => void;
   refreshKey?: number;
+  autoplay?: boolean;
 }) {
   const stream = useSocialStream(query, active),
     sentinel = useRef<HTMLDivElement>(null),
     panel = useRef<HTMLDivElement>(null),
-    latest = useRef(stream.load);
+    latest = useRef(stream.load),
+    pull = useRef<{ x: number; y: number } | null>(null);
   const [newContent, setNewContent] = useState(false);
   useEffect(() => {
     latest.current = stream.load;
@@ -114,6 +118,32 @@ export function SocialStream({
       ref={panel}
       tabIndex={0}
       aria-label="Publicações"
+      aria-busy={stream.busy}
+      onTouchStart={(event) => {
+        const touch = event.touches[0];
+        pull.current =
+          event.touches.length === 1 && event.currentTarget.scrollTop <= 0
+            ? { x: touch.clientX, y: touch.clientY }
+            : null;
+      }}
+      onTouchEnd={(event) => {
+        const start = pull.current,
+          touch = event.changedTouches[0];
+        pull.current = null;
+        if (
+          start &&
+          touch &&
+          !stream.busy &&
+          pullRefreshes(
+            event.currentTarget.scrollTop,
+            touch.clientX - start.x,
+            touch.clientY - start.y,
+          )
+        ) {
+          setNewContent(false);
+          void stream.load(true);
+        }
+      }}
     >
       <div className="social-stream-inner">
         {newContent && (
@@ -135,8 +165,18 @@ export function SocialStream({
             me={me}
             person={person}
             changed={stream.change}
+            autoplay={autoplay}
           />
         ))}
+        {stream.busy &&
+          !stream.items.length &&
+          [0, 1, 2].map((key) => (
+            <div key={key} className="social-post-skeleton" aria-hidden="true">
+              <span />
+              <div />
+              <p />
+            </div>
+          ))}
         {!stream.busy && !stream.items.length && !stream.error && (
           <div className="social-empty">
             <h2>Uma ideia pode começar aqui.</h2>

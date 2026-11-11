@@ -41,3 +41,8 @@ export function groupStories(
 export function storyTapZone(x: number, width: number): "back" | "forward" {
   return x < width * 0.3 ? "back" : "forward";
 }
+
+/** Pull to refresh: only from the top of the list, downwards, and clearly vertical. */
+export function pullRefreshes(scrollTop: number, dx: number, dy: number): boolean {
+  return scrollTop <= 0 && dy > 70 && dy > Math.abs(dx) * 1.2;
+}

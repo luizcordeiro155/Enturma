@@ -310,6 +310,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                   me={ready.me.id}
                   person={setPerson}
                   refreshKey={refresh}
+                  autoplay={prefs.autoplay}
                 />
               </div>
             ))}
