@@ -3,7 +3,16 @@ package br.com.enturma.social;
 import br.com.enturma.common.ApiException;
 import com.fasterxml.jackson.databind.*;
 import java.io.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.*;
+import java.util.Base64;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import org.springframework.beans.factory.annotation.Autowired;
 import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -16,25 +25,56 @@ import org.springframework.stereotype.Component;
 @Component
 public class SocialTranscoder {
   private final ObjectMapper json;
-  private final String ffmpeg, ffprobe;
+  private final String ffmpeg, ffprobe, workerUrl, workerToken;
+  private final HttpClient client = HttpClient.newBuilder()
+      .connectTimeout(Duration.ofSeconds(5)).build();
   private Boolean available;
+  private long remoteHealthExpiresAt;
+  private boolean remoteHealth;
   private static final String FORMATS =
       "mov,matroska,webm,avi,png_pipe,jpeg_pipe,webp_pipe,gif,image2";
 
   public record Result(
       Path file, Path thumbnail, String mime, int durationMs, int width, int height) {}
 
+  @Autowired
   public SocialTranscoder(
       ObjectMapper json,
       @Value("${SOCIAL_FFMPEG:ffmpeg}") String ffmpeg,
-      @Value("${SOCIAL_FFPROBE:ffprobe}") String ffprobe) {
+      @Value("${SOCIAL_FFPROBE:ffprobe}") String ffprobe,
+      @Value("${SOCIAL_FFMPEG_WORKER_URL:}") String workerUrl,
+      @Value("${SOCIAL_FFMPEG_WORKER_TOKEN:}") String workerToken) {
     this.json = json;
     this.ffmpeg = ffmpeg;
     this.ffprobe = ffprobe;
+    this.workerUrl = workerUrl.strip().replaceAll("/+$", "");
+    this.workerToken = workerToken;
+  }
+
+  public SocialTranscoder(ObjectMapper json, String ffmpeg, String ffprobe) {
+    this(json, ffmpeg, ffprobe, "", "");
   }
 
   /** Probe only once when media is enabled; never advertise uploads without the runtime. */
   public synchronized boolean available() {
+    if (!workerUrl.isBlank()) {
+      if (workerToken.length() < 32 || !workerUrl.startsWith("https://")) return false;
+      long now = System.nanoTime();
+      if (now < remoteHealthExpiresAt) return remoteHealth;
+      remoteHealthExpiresAt = now + Duration.ofSeconds(15).toNanos();
+      try {
+        var request = HttpRequest.newBuilder(URI.create(workerUrl + "/ready"))
+            .timeout(Duration.ofSeconds(6))
+            .header("Authorization", "Bearer " + workerToken)
+            .GET().build();
+        var response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        remoteHealth = response.statusCode() == 200 &&
+            json.readTree(response.body()).path("ready").asBoolean(false);
+      } catch (Exception ignored) {
+        remoteHealth = false;
+      }
+      return remoteHealth;
+    }
     if (available != null) return available;
     for (String command : List.of(ffmpeg, ffprobe)) {
       Process process = null;
@@ -86,6 +126,7 @@ public class SocialTranscoder {
 
   public Result render(Path dir, String kind, VideoRecipe recipe)
       throws IOException, InterruptedException {
+    if (!workerUrl.isBlank()) return renderRemote(dir, kind, recipe);
     JsonNode input = probe(dir, "source");
     JsonNode stream = null;
     boolean audio = false;
@@ -301,6 +342,77 @@ public class SocialTranscoder {
             "cover.jpg"));
     return new Result(
         dir.resolve("video.mp4"), dir.resolve("cover.jpg"), "video/mp4", ms, 720, 1280);
+  }
+
+
+  private Result renderRemote(Path dir, String kind, VideoRecipe recipe)
+      throws IOException, InterruptedException {
+    if (workerToken.length() < 32 || !workerUrl.startsWith("https://"))
+      throw new IOException("Remote FFmpeg worker is not configured.");
+    byte[] recipeBytes = json.writeValueAsBytes(recipe);
+    String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(recipeBytes);
+    var request = HttpRequest.newBuilder(URI.create(workerUrl + "/render"))
+        .timeout(Duration.ofMinutes(12))
+        .header("Authorization", "Bearer " + workerToken)
+        .header("X-Media-Kind", kind)
+        .header("X-Media-Recipe", encoded)
+        .header("Content-Type", "application/octet-stream")
+        .POST(HttpRequest.BodyPublishers.ofFile(dir.resolve("source")))
+        .build();
+    var response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+    try (var body = response.body()) {
+      if (response.statusCode() != 200) {
+        String reason = new String(body.readNBytes(512), StandardCharsets.UTF_8);
+        if (response.statusCode() == 422)
+          throw ApiException.invalid("Mídia inválida: " + reason);
+        throw new IOException("Remote media worker returned HTTP " + response.statusCode());
+      }
+      byte[] metadata = null;
+      boolean hasMedia = false, hasThumbnail = false;
+      try (var zip = new ZipInputStream(body)) {
+        ZipEntry entry;
+        while ((entry = zip.getNextEntry()) != null) {
+          String name = entry.getName();
+          if (!Set.of("media", "thumbnail", "metadata.json").contains(name) || entry.isDirectory())
+            throw new IOException("Unexpected file in worker response");
+          if ("metadata.json".equals(name)) {
+            if (metadata != null) throw new IOException("Duplicate metadata");
+            metadata = zip.readNBytes(4097);
+            if (metadata.length > 4096) throw new IOException("Metadata size exceeded");
+          } else {
+            if (("media".equals(name) && hasMedia) || ("thumbnail".equals(name) && hasThumbnail))
+              throw new IOException("Duplicate media");
+            Path target = dir.resolve(name);
+            try (var out = Files.newOutputStream(target, StandardOpenOption.CREATE_NEW)) {
+              byte[] buffer = new byte[65536];
+              long count = 0;
+              int read;
+              while ((read = zip.read(buffer)) != -1) {
+                count += read;
+                if (count > 134217728L) throw new IOException("Media size exceeded");
+                out.write(buffer, 0, read);
+              }
+            }
+            if ("media".equals(name)) hasMedia = true;
+            if ("thumbnail".equals(name)) hasThumbnail = true;
+          }
+          zip.closeEntry();
+        }
+      }
+      if (!hasMedia || !hasThumbnail || metadata == null)
+        throw new IOException("Worker returned incomplete media");
+      JsonNode result = json.readTree(metadata);
+      String mime = result.path("mime").asText();
+      if ((!kind.equals("IMAGE") && !mime.equals("video/mp4")) ||
+          (!kind.equals("VIDEO") && !mime.equals("image/jpeg")))
+        throw new IOException("Unexpected media type from worker");
+      int duration = result.path("durationMs").asInt(-1);
+      int width = result.path("width").asInt(-1), height = result.path("height").asInt(-1);
+      if (duration < 0 || duration > 90000 || width < 1 || height < 1)
+        throw new IOException("Invalid transcode metadata");
+      return new Result(dir.resolve("media"), dir.resolve("thumbnail"), mime,
+          duration, width, height);
+    }
   }
 
   private static String n(double value) {
