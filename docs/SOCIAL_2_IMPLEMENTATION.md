@@ -85,7 +85,7 @@ O R2 cobra armazenamento/operações segundo a [tabela oficial](https://develope
 
 1. Navegador/WebView/Electron lê metadados e guarda receita/rascunho. Não carrega o vídeo inteiro na memória para exportar.
 2. Upload privado em blocos de 2 MiB; máximo de 128 MiB por arquivo, dez mídias por Post e uma por Clip/Story. Quota atual de originais: 512 MiB por conta.
-3. Fila PostgreSQL, sem Redis adicional; um worker por instância, lease de 20 minutos, até três tentativas e timeout de oito minutos. Processamento pendente não é publicável.
+3. Fila PostgreSQL, sem Redis adicional; um worker por instância, lease de 20 minutos renovado entre etapas limitadas por timeout, até três tentativas e timeout de oito minutos por comando de exportação. A tentativa é conferida antes de cada etapa e na finalização: um worker substituído não grava nem altera o estado do novo trabalho. Processamento pendente não é publicável.
 4. FFmpeg/ffprobe locais à API: processos sem shell, nomes gerados, protocolos `file,pipe`, formatos permitidos, dois threads, input até uma hora/33 megapixels. Corte, concatenação, enquadramento, textos e áudio são realmente exportados. WebM de MediaRecorder sem Duration recebe remux sem recodificação, limitado a 30 segundos de processamento/144 MiB, e nova medição antes da exportação; a duração informada pelo cliente não é prova.
 5. H.264/AAC, 720×1280, 30 FPS, MP4 faststart e capa JPEG. Probe final exige ≤90.000 ms e duração coerente; arquivo truncado não é sucesso. Imagens viram JPEG até 1600 px com metadados removidos.
 6. Erros preservam o rascunho. Temporários locais são apagados ao terminar; exclusão remota usa tombstone durável.

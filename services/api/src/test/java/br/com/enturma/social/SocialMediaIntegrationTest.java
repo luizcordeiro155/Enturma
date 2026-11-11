@@ -179,6 +179,35 @@ class SocialMediaIntegrationTest {
   }
 
   @Test
+  void reclaimedExportCannotWriteOrFailTheNewWorkersJob() throws Exception {
+    var bytes = new ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(
+        new java.awt.image.BufferedImage(16, 16, java.awt.image.BufferedImage.TYPE_INT_RGB),
+        "png",
+        bytes);
+    UUID id = UUID.randomUUID();
+    media.create(owner, new SocialMedia.Upload(id, "IMAGE", bytes.size()));
+    media.part(owner, id, 0, body(bytes.toByteArray()));
+    media.export(owner, id, new SocialMedia.Export(null));
+    when(storage.open(eq(SocialMedia.key(id) + "part-0"), isNull(), isNull()))
+        .thenAnswer(
+            i -> {
+              // A slow original read returns after another instance has reclaimed the lease.
+              db.jdbc.update(
+                  "UPDATE social_media SET attempts=attempts+1,"
+                      + " lease_until=now()+interval '20 minutes' WHERE id=?",
+                  id);
+              return new ByteArrayInputStream(bytes.toByteArray());
+            });
+    media.processOne();
+    assertThat(media.status(owner, id)).containsEntry("state", "PROCESSING");
+    assertThat(db.one("SELECT attempts FROM social_media WHERE id=?", id).get("attempts"))
+        .isEqualTo(2);
+    verify(storage, never()).putFile(anyString(), any(Path.class), anyString());
+    assertThat(objects.keySet()).containsExactly(SocialMedia.key(id) + "part-0");
+  }
+
+  @Test
   void malformedMediaKeepsDraftAndFailureIsReal() throws Exception {
     UUID id = UUID.randomUUID(), post = UUID.randomUUID();
     byte[] bytes = "not a video".getBytes(java.nio.charset.StandardCharsets.UTF_8);

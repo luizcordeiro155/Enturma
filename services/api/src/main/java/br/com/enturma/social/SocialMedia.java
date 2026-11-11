@@ -340,6 +340,18 @@ public class SocialMedia {
   }
 
   // Media work must never hold the scheduler used by calls, rooms and notifications.
+  private void renewLease(UUID id, int attempt) {
+    // Every external stage has a timeout below the lease. An expired/reclaimed worker
+    // must stop before starting another stage or writing a newer worker's output.
+    if (db.jdbc.update(
+            "UPDATE social_media SET lease_until=now()+interval '20 minutes' WHERE id=? AND"
+                + " state='PROCESSING' AND attempts=? AND lease_until>now()",
+            id,
+            attempt)
+        != 1)
+      throw ApiException.invalid("Esta exportação foi cancelada ou retomada por outro processo.");
+  }
+
   void processOne() {
     var job =
         tx.execute(
@@ -367,12 +379,14 @@ public class SocialMedia {
             });
     if (job == null) return;
     UUID id = (UUID) job.get("id");
+    int attempt = ((Number) job.get("attempts")).intValue() + 1;
     Path dir = null;
     try {
       dir = Files.createTempDirectory("enturma-social-");
       try (var out = Files.newOutputStream(dir.resolve("source"))) {
         long total = 0;
-        for (int part = 0; part < ((Number) job.get("partCount")).intValue(); part++)
+        for (int part = 0; part < ((Number) job.get("partCount")).intValue(); part++) {
+          renewLease(id, attempt);
           try (var in = storage.open(key(id) + "part-" + part, null, null)) {
             byte[] bytes = in.readNBytes(PART_BYTES + 1);
             total += bytes.length;
@@ -381,21 +395,25 @@ public class SocialMedia {
               throw ApiException.invalid("Upload inconsistente.");
             out.write(bytes);
           }
+        }
         if (total != ((Number) job.get("expectedBytes")).longValue())
           throw ApiException.invalid("Upload incompleto.");
       }
       var recipe =
           json.treeToValue(
               (com.fasterxml.jackson.databind.JsonNode) job.get("recipe"), VideoRecipe.class);
+      renewLease(id, attempt);
       var result = transcoder.render(dir, job.get("kind").toString(), recipe);
       String output = key(id) + (result.mime().equals("video/mp4") ? "video.mp4" : "image.jpg"),
           thumb = key(id) + "cover.jpg";
+      renewLease(id, attempt);
       storage.putFile(output, result.file(), result.mime());
+      renewLease(id, attempt);
       storage.putFile(thumb, result.thumbnail(), "image/jpeg");
       db.jdbc.update(
           "UPDATE social_media SET"
               + " state='READY',output_key=?,thumbnail_key=?,output_bytes=?,thumbnail_bytes=?,mime=?,duration_ms=?,width=?,height=?,lease_until=NULL,updated_at=now()"
-              + " WHERE id=? AND state='PROCESSING'",
+              + " WHERE id=? AND state='PROCESSING' AND attempts=? AND lease_until>now()",
           output,
           thumb,
           Files.size(result.file()),
@@ -404,16 +422,18 @@ public class SocialMedia {
           result.durationMs(),
           result.width(),
           result.height(),
-          id);
+          id,
+          attempt);
     } catch (Exception e) {
       if (e instanceof InterruptedException) Thread.currentThread().interrupt();
       db.jdbc.update(
           "UPDATE social_media SET state='FAILED',error=?,lease_until=NULL,updated_at=now() WHERE"
-              + " id=? AND state='PROCESSING'",
+              + " id=? AND state='PROCESSING' AND attempts=?",
           e instanceof ApiException
               ? e.getMessage()
               : "Não foi possível processar a mídia. Seu rascunho foi preservado; tente novamente.",
-          id);
+          id,
+          attempt);
     } finally {
       if (dir != null)
         try (var files = Files.walk(dir)) {

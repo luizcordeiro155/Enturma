@@ -13,11 +13,13 @@ END $$;
 GRANT USAGE ON SCHEMA public TO enturma_runtime;
 REVOKE CREATE ON SCHEMA public FROM enturma_runtime;
 DO $$ DECLARE item record; BEGIN
-  FOR item IN SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename <> 'flyway_schema_history' LOOP
-    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.%I TO enturma_runtime', item.tablename);
+  FOR item IN SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename <> 'flyway_schema_history' ORDER BY tablename LOOP
+    -- CREATE POLICY takes the relation lock before GRANT updates pg_class. Reversing
+    -- this order can deadlock with autovacuum's relation-lock/catalog-update order.
     IF NOT EXISTS (SELECT 1 FROM pg_policies WHERE schemaname='public' AND tablename=item.tablename AND policyname='trusted_api_runtime') THEN
       EXECUTE format('CREATE POLICY trusted_api_runtime ON public.%I FOR ALL TO enturma_runtime USING (true) WITH CHECK (true)', item.tablename);
     END IF;
+    EXECUTE format('GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE public.%I TO enturma_runtime', item.tablename);
   END LOOP;
 END $$;
 GRANT SELECT ON public.flyway_schema_history TO enturma_runtime;
