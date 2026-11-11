@@ -28,6 +28,110 @@ async function student(request: APIRequestContext, name: string) {
 function asUser(token: string) {
   return { Authorization: `Bearer ${token}` };
 }
+
+test("Social navigation: mobile dock, academic menu and opening once per app document", async ({
+  page,
+  request,
+}, info) => {
+  const me = await student(request, "Navegação Social");
+  await authenticate(page.context(), me);
+  let eligible = false;
+  await page.route("**/api/backend/learning/access", (route) =>
+    route.fulfill({ json: { eligible } }),
+  );
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.addInitScript(() =>
+    localStorage.setItem(
+      "enturma-experience",
+      JSON.stringify({ theme: "ENTURMA" }),
+    ),
+  );
+  await page.goto("/social");
+  const opening = page.getByRole("dialog", {
+    name: "Bem-vindo ao Enturma Social",
+  });
+  await expect(opening).toBeVisible();
+  await expect(opening.locator("[data-brand-book]")).toBeVisible();
+  await page.screenshot({
+    path: info.outputPath("social-opening-enturma.png"),
+  });
+  // The player finishes automatically; no overlay can hold up navigation.
+  await expect(opening).not.toBeVisible({ timeout: 8000 });
+  const social = page.getByRole("navigation", { name: "Ambientes do Social" });
+  await expect(social).toBeVisible();
+  await expect(
+    page.getByRole("navigation", { name: "Navegação mobile" }),
+  ).toHaveCount(0);
+  expect(await social.getByRole("button").allTextContents()).toEqual([
+    "Feed",
+    "Clips",
+    "Criar",
+    "Perfil",
+  ]);
+  await expect(social.getByRole("link", { name: "Mensagens" })).toHaveAttribute(
+    "href",
+    "/friends",
+  );
+  await page
+    .locator(".topbar")
+    .getByRole("link", { name: "Início do Enturma" })
+    .click();
+  await expect(page).toHaveURL(/\/home$/);
+  await expect(page.locator(".enturma-launch-overlay")).toHaveCount(0, {
+    timeout: 15000,
+  });
+  const main = page.getByRole("navigation", { name: "Navegação mobile" });
+  expect(await main.getByRole("link").allTextContents()).toEqual([
+    "Início",
+    "Salas",
+    "Social Entu",
+    "Comunidade",
+    "Amigos",
+  ]);
+  await main.getByRole("button", { name: "Mais opções" }).click();
+  const more = page.getByRole("dialog", { name: "Mais opções do Enturma" });
+  await expect(
+    more.getByRole("link", { name: "Programação", exact: true }),
+  ).toHaveCount(0);
+  await expect(more.getByRole("link", { name: "Cadernos IA" })).toBeVisible();
+  await more.getByRole("button", { name: "Fechar menu" }).click();
+  eligible = true;
+  await page.evaluate(() =>
+    dispatchEvent(new Event("enturma-profile-updated")),
+  );
+  await main.getByRole("button", { name: "Mais opções" }).click();
+  await expect(
+    more.getByRole("link", { name: "Programação", exact: true }),
+  ).toBeVisible();
+  const menu = await more.getByRole("link").allTextContents();
+  expect(menu.indexOf("Cadernos IA")).toBe(menu.indexOf("Programação") + 1);
+  await page.screenshot({
+    path: info.outputPath("mobile-more-academic-menu.png"),
+  });
+  await more.getByRole("button", { name: "Fechar menu" }).click();
+  await main.getByRole("link", { name: "Social Entu" }).click();
+  await expect(social).toBeVisible();
+  await expect(opening).toHaveCount(0);
+  await social.getByRole("button", { name: "Clips", exact: true }).click();
+  await social.getByRole("button", { name: "Feed", exact: true }).click();
+  await expect(opening).toHaveCount(0);
+  for (const width of [390, 820, 1440]) {
+    await page.setViewportSize({ width, height: 900 });
+    const box = await social.boundingBox();
+    expect(box).not.toBeNull();
+    expect(box!.x).toBeGreaterThanOrEqual(0);
+    expect(box!.x + box!.width).toBeLessThanOrEqual(width);
+    expect(box!.y + box!.height).toBeLessThanOrEqual(900);
+    await page.screenshot({
+      path: info.outputPath(`social-navigation-${width}.png`),
+    });
+  }
+  // Reload represents a new app document; ordinary route changes above do not.
+  await page.reload();
+  await expect(opening).toBeVisible();
+  await opening.getByRole("button", { name: "Explorar o Social" }).click();
+  await expect(opening).toHaveCount(0);
+});
 async function publish(
   request: APIRequestContext,
   token: string,

@@ -3,7 +3,9 @@
 | Capacidade | Dono canônico | Fonte da verdade | Comportamento |
 | --- | --- | --- | --- |
 | Tema e preferências | experience-preferences / ThemeSync existentes | preferências do usuário | Não sobrescrever ao trocar de página |
-| Navegação | Shell / NavigationLink | rotas e sessão | Fórum independente; Social em rota própria |
+| Navegação | Shell / NavigationLink / SocialNavigation | rotas e preferências sociais | Fórum independente; Social usa rail/dock próprio e saída explícita para Home; mantém estado das abas |
+| Programação | AppShellStateProvider / learning/access | elegibilidade acadêmica do backend | Mesma visibilidade no Desktop e menu Mais mobile |
+| Abertura Social | SocialOpening / SocialOpeningComposition | ciclo de vida do AppShellStateProvider | Uma vez por abertura, pular e timeout seguros; animações gerais e Caronas intactas |
 | Formulários | labels e controles nativos, Feedback | DTOs validados pela API | Preservar valores, impedir envio duplicado, apresentar erros reais |
 | Seleção | select nativo | estado do formulário | Popup do sistema aceito, com rótulo |
 | Diálogos | HTMLDialogElement + useOverlayHistory + playMotion | estado da ação | Foco, Escape, voltar e confirmação de descarte |

@@ -98,9 +98,15 @@ test("mobile cards, navigation and transparent renewal preserve the document", a
     expect(
       (await menu.getByRole("link").allTextContents()).map((t) => t.trim()),
     ).toEqual([
-      "Enturma Social",
       "Desafios acadêmicos",
-      "Programação",
+      ...((
+        await (
+          await request.get(`${backend}/api/v1/learning/access`, { headers })
+        ).json()
+      ).eligible
+        ? ["Programação"]
+        : []),
+      "Cadernos IA",
       "Caronas",
       "Portfólio acadêmico",
       "Perfil",

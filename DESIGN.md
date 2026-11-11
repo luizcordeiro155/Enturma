@@ -14,7 +14,9 @@ Preservar as famílias do aplicativo. Títulos curtos e legíveis, corpo confort
 
 ## Layout
 
-Feed central de leitura, coluna contextual em telas largas, Stories horizontais e Clips verticais. Uma barra local mantém Feed, Clips e Criar visíveis sem substituir a navegação principal. Cada aba retém sua própria posição. O editor prioriza prévia e timeline; controles têm alternativa ao arraste.
+Feed central de leitura, Stories horizontais e Clips verticais. Dentro do Social, a navegação própria ocupa a lateral no Desktop e a base no mobile: Feed, Clips, Criar, Mensagens e Perfil. O retorno ao Início do Enturma permanece no cabeçalho. Cada aba retém sua própria posição e a ordem personalizada é preservada. Fora do Social, a barra mobile oferece Início, Salas, Social Entu, Comunidade, Amigos e Mais; Cadernos fica abaixo de Programação no Mais. Programação usa a mesma elegibilidade acadêmica no mobile e Desktop. O editor prioriza prévia e timeline; controles têm alternativa ao arraste.
+
+A abertura do Social tem composição Remotion própria: páginas do livro formam as lâminas do símbolo Social. Executa uma vez por documento do aplicativo, herda os tokens de tema, permite pular e respeita redução de movimento. As animações de abertura geral e Caronas permanecem inalteradas.
 
 ## Elevation & Depth
 

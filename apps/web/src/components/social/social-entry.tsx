@@ -1,7 +1,6 @@
 "use client";
-import { useEffect, useState } from "react";
 import { Aperture } from "lucide-react";
-import { api } from "@/lib/api";
+import { useAppShellState } from "../app-shell-state";
 import { NavigationLink } from "../navigation-link";
 export function SocialEntry({
   person,
@@ -12,19 +11,8 @@ export function SocialEntry({
   onNavigate?: (href: string) => void;
   close?: () => void;
 }) {
-  const [enabled, setEnabled] = useState(false);
-  useEffect(() => {
-    let active = true;
-    api<{ enabled: boolean }>("/social/capabilities")
-      .then((r) => {
-        if (active) setEnabled(r.enabled);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, []);
-  if (!enabled) return null;
+  const { socialEnabled } = useAppShellState();
+  if (!socialEnabled) return null;
   const href = person ? `/social?person=${person}` : "/social";
   if (onNavigate)
     return (

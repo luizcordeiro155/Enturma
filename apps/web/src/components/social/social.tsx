@@ -1,15 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import {
-  Aperture,
-  Film,
-  Plus,
-  Search,
-  Settings2,
-  UserRound,
-  ArrowLeft,
-} from "lucide-react";
+import { Aperture, Search, Settings2, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import {
   socialGesture,
@@ -28,6 +20,8 @@ import { SocialProfile } from "./social-profile";
 import { SocialSettings } from "./social-settings";
 import { SocialAuthor, SocialPost } from "./social-post";
 import { SocialDialog } from "./social-dialog";
+import { SocialNavigation } from "./social-navigation";
+import { SocialOpening } from "./social-opening";
 
 type Ready = {
   me: SocialPerson & { role: string };
@@ -62,24 +56,21 @@ export function Social() {
       alive = false;
     };
   }, []);
+  if (ready) return <SocialWorkspace key={ready.me.id} ready={ready} />;
   return (
     <Shell>
       <div className="social-page">
-        {ready ? (
-          <SocialWorkspace key={ready.me.id} ready={ready} />
-        ) : (
-          <div className="social-empty">
-            <Aperture size={40} />
-            <h1>Enturma Social</h1>
-            <p role={error ? "alert" : "status"}>
-              {error ||
-                (disabled
-                  ? "O Social ainda não está disponível neste ambiente. Seu Fórum e suas turmas continuam no mesmo lugar."
-                  : "Preparando seu espaço de descobertas…")}
-            </p>
-            <NavigationLink href="/forum">Ir para o Fórum</NavigationLink>
-          </div>
-        )}
+        <div className="social-empty">
+          <Aperture size={40} />
+          <h1>Enturma Social</h1>
+          <p role={error ? "alert" : "status"}>
+            {error ||
+              (disabled
+                ? "O Social ainda não está disponível neste ambiente. Seu Fórum e suas turmas continuam no mesmo lugar."
+                : "Preparando seu espaço de descobertas…")}
+          </p>
+          <NavigationLink href="/forum">Ir para o Fórum</NavigationLink>
+        </div>
       </div>
     </Shell>
   );
@@ -170,14 +161,8 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       alive = false;
     };
   }, [searched]);
-  const navigation = {
-    feed: { label: "Feed", icon: Aperture },
-    clips: { label: "Clips", icon: Film },
-    create: { label: "Criar", icon: Plus },
-  };
   return (
-    <div
-      className="social-workspace"
+    <Shell
       onKeyDown={(e) => {
         if (
           !e.altKey ||
@@ -193,243 +178,237 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
           select(next);
         }
       }}
-    >
-      <header className="social-header">
-        <div>
-          <span className="social-eyebrow">SUA VIDA UNIVERSITÁRIA</span>
-          <h1>
-            Enturma <span>Social.</span>
-          </h1>
-        </div>
-        <div className="social-row">
-          <button
-            className="icon-control"
-            aria-label="Meu perfil social"
-            onClick={() => setPerson(ready.me.id)}
-          >
-            <UserRound size={21} />
-          </button>
-          <button
-            className="icon-control"
-            aria-label="Preferências do Social"
-            onClick={() => setSettings(true)}
-          >
-            <Settings2 size={21} />
-          </button>
-        </div>
-      </header>
-      <nav className="social-mode-nav" aria-label="Ambientes do Social">
-        {prefs.navigation.order.map((v) => {
-          const Icon = navigation[v].icon;
-          return (
-            <button
-              key={v}
-              aria-current={view === v ? "page" : undefined}
-              className={highlight === v ? "social-frequent" : undefined}
-              onClick={() => select(v)}
-              title={`Alt + ${v === "feed" ? 1 : v === "clips" ? 2 : 3}`}
-            >
-              <Icon size={20} />
-              <span>{navigation[v].label}</span>
-              {highlight === v && <i aria-label="Seu acesso mais usado" />}
-            </button>
-          );
-        })}
-      </nav>
-      {error && (
-        <p className="social-error" role="alert">
-          {error}
-        </p>
-      )}
-      <section
-        className="social-feed-view"
-        hidden={view !== "feed"}
-        onTouchStart={(e) => {
-          const target = e.target as HTMLElement;
-          gesture.current =
-            target.closest(
-              "[data-social-gesture],button,a,input,textarea,video,dialog",
-            ) || e.touches.length !== 1
-              ? null
-              : {
-                  x: e.touches[0].clientX,
-                  y: e.touches[0].clientY,
-                  at: performance.now(),
-                };
-        }}
-        onTouchEnd={(e) => {
-          const start = gesture.current;
-          gesture.current = null;
-          if (!start || !e.changedTouches[0]) return;
-          const touch = e.changedTouches[0],
-            next = socialGesture(
-              touch.clientX - start.x,
-              touch.clientY - start.y,
-              performance.now() - start.at,
-              start.x,
-              innerWidth,
-            );
-          if (next) select(next);
-        }}
-      >
-        <SocialStories
+      navigation={
+        <SocialNavigation
+          view={view}
+          order={prefs.navigation.order}
+          highlight={highlight}
+          select={select}
           me={ready.me}
-          create={() => select("create", "STORY")}
-          person={setPerson}
-          refreshKey={refresh}
+          profile={() => setPerson(ready.me.id)}
+          settings={() => setSettings(true)}
         />
-        <div className="social-feed-toolbar">
-          <div
-            className="social-tabs"
-            role="tablist"
-            aria-label="Filtrar publicações"
-          >
-            {[
-              ["for-you", "Para Você"],
-              ["following", "Seguindo"],
-              ["campus", "Minha Faculdade"],
-            ].map(([t, label]) => (
+      }
+    >
+      <div className="social-page">
+        <SocialOpening />
+        <div className="social-workspace">
+          <header className="social-header">
+            <div>
+              <span className="social-eyebrow">SUA VIDA UNIVERSITÁRIA</span>
+              <h1>
+                Enturma <span>Social.</span>
+              </h1>
+            </div>
+            <div className="social-row">
               <button
-                role="tab"
-                aria-selected={t === tab}
-                key={t}
-                onClick={() => setTab(t)}
+                className="icon-control"
+                aria-label="Preferências do Social"
+                onClick={() => setSettings(true)}
               >
-                {label}
+                <Settings2 size={21} />
               </button>
-            ))}
-          </div>
-          <form
-            noValidate
-            className="social-search"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setSearched(query.trim());
+            </div>
+          </header>
+          {error && (
+            <p className="social-error" role="alert">
+              {error}
+            </p>
+          )}
+          <section
+            className="social-feed-view"
+            hidden={view !== "feed"}
+            onTouchStart={(e) => {
+              const target = e.target as HTMLElement;
+              gesture.current =
+                target.closest(
+                  "[data-social-gesture],button,a,input,textarea,video,dialog",
+                ) || e.touches.length !== 1
+                  ? null
+                  : {
+                      x: e.touches[0].clientX,
+                      y: e.touches[0].clientY,
+                      at: performance.now(),
+                    };
+            }}
+            onTouchEnd={(e) => {
+              const start = gesture.current;
+              gesture.current = null;
+              if (!start || !e.changedTouches[0]) return;
+              const touch = e.changedTouches[0],
+                next = socialGesture(
+                  touch.clientX - start.x,
+                  touch.clientY - start.y,
+                  performance.now() - start.at,
+                  start.x,
+                  innerWidth,
+                );
+              if (next) select(next);
             }}
           >
-            <label className="sr-only" htmlFor="social-search">
-              Pesquisar pessoas, hashtags e publicações
-            </label>
-            <Search size={18} />
-            <input
-              id="social-search"
-              type="search"
-              maxLength={80}
-              placeholder="Pessoas, assuntos, #ideias"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <button className="icon-control" aria-label="Pesquisar">
-              <Search size={18} />
-            </button>
-          </form>
-        </div>
-        {searched && (
-          <div className="social-search-results">
-            <button
-              className="text-button"
-              onClick={() => {
-                setSearched("");
-                setQuery("");
-              }}
-            >
-              <ArrowLeft size={16} /> Voltar à leitura
-            </button>
-            <h2>Resultados para “{searched}”</h2>
-            <div>
-              {people.map((u) => (
-                <SocialAuthor key={u.id} user={u} open={setPerson} />
-              ))}
-            </div>
-          </div>
-        )}
-        {["for-you", "following", "campus"].map((t) => (
-          <div
-            className="social-feed-tab"
-            key={t}
-            hidden={tab !== t || !!searched}
-          >
-            <SocialStream
-              query={`tab=${t}&kind=POST`}
-              active={view === "feed" && tab === t && !searched}
-              me={ready.me.id}
+            <SocialStories
+              me={ready.me}
+              create={() => select("create", "STORY")}
               person={setPerson}
               refreshKey={refresh}
             />
-          </div>
-        ))}
-        {searched && (
-          <div className="social-feed-tab">
-            <SocialStream
-              key={`${tab}:${searched}`}
-              query={`tab=${tab}&kind=POST&q=${encodeURIComponent(searched)}`}
-              active={view === "feed"}
+            <div className="social-feed-toolbar">
+              <div
+                className="social-tabs"
+                role="tablist"
+                aria-label="Filtrar publicações"
+              >
+                {[
+                  ["for-you", "Para Você"],
+                  ["following", "Seguindo"],
+                  ["campus", "Minha Faculdade"],
+                ].map(([t, label]) => (
+                  <button
+                    role="tab"
+                    aria-selected={t === tab}
+                    key={t}
+                    onClick={() => setTab(t)}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              <form
+                noValidate
+                className="social-search"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  setSearched(query.trim());
+                }}
+              >
+                <label className="sr-only" htmlFor="social-search">
+                  Pesquisar pessoas, hashtags e publicações
+                </label>
+                <Search size={18} />
+                <input
+                  id="social-search"
+                  type="search"
+                  maxLength={80}
+                  placeholder="Pessoas, assuntos, #ideias"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                />
+                <button className="icon-control" aria-label="Pesquisar">
+                  <Search size={18} />
+                </button>
+              </form>
+            </div>
+            {searched && (
+              <div className="social-search-results">
+                <button
+                  className="text-button"
+                  onClick={() => {
+                    setSearched("");
+                    setQuery("");
+                  }}
+                >
+                  <ArrowLeft size={16} /> Voltar à leitura
+                </button>
+                <h2>Resultados para “{searched}”</h2>
+                <div>
+                  {people.map((u) => (
+                    <SocialAuthor key={u.id} user={u} open={setPerson} />
+                  ))}
+                </div>
+              </div>
+            )}
+            {["for-you", "following", "campus"].map((t) => (
+              <div
+                className="social-feed-tab"
+                key={t}
+                hidden={tab !== t || !!searched}
+              >
+                <SocialStream
+                  query={`tab=${t}&kind=POST`}
+                  active={view === "feed" && tab === t && !searched}
+                  me={ready.me.id}
+                  person={setPerson}
+                  refreshKey={refresh}
+                />
+              </div>
+            ))}
+            {searched && (
+              <div className="social-feed-tab">
+                <SocialStream
+                  key={`${tab}:${searched}`}
+                  query={`tab=${tab}&kind=POST&q=${encodeURIComponent(searched)}`}
+                  active={view === "feed"}
+                  me={ready.me.id}
+                  person={setPerson}
+                />
+              </div>
+            )}
+          </section>
+          {opened.includes("clips") && (
+            <section className="social-clips-view" hidden={view !== "clips"}>
+              <SocialClips
+                active={view === "clips" && !person && !settings && !detail}
+                me={ready.me.id}
+                autoplay={prefs.autoplay}
+                person={setPerson}
+              />
+            </section>
+          )}
+          {opened.includes("create") && (
+            <section className="social-create-view" hidden={view !== "create"}>
+              <SocialEditor
+                user={ready.me.id}
+                mediaEnabled={ready.media}
+                initialKind={kind}
+                published={() => {
+                  setRefresh((n) => n + 1);
+                  select("feed");
+                }}
+              />
+            </section>
+          )}
+          {person && (
+            <SocialProfile
+              key={person}
+              id={person}
               me={ready.me.id}
+              close={() => setPerson(null)}
               person={setPerson}
             />
-          </div>
-        )}
-      </section>
-      {opened.includes("clips") && (
-        <section className="social-clips-view" hidden={view !== "clips"}>
-          <SocialClips
-            active={view === "clips" && !person && !settings && !detail}
-            me={ready.me.id}
-            autoplay={prefs.autoplay}
-            person={setPerson}
-          />
-        </section>
-      )}
-      {opened.includes("create") && (
-        <section className="social-create-view" hidden={view !== "create"}>
-          <SocialEditor
-            user={ready.me.id}
-            mediaEnabled={ready.media}
-            initialKind={kind}
-            published={() => {
-              setRefresh((n) => n + 1);
-              select("feed");
-            }}
-          />
-        </section>
-      )}
-      {person && (
-        <SocialProfile
-          key={person}
-          id={person}
-          me={ready.me.id}
-          close={() => setPerson(null)}
-          person={setPerson}
-        />
-      )}
-      {settings && (
-        <SocialSettings
-          value={prefs}
-          save={setPrefs}
-          close={() => setSettings(false)}
-          admin={["ADMIN", "SUPER_ADMIN"].includes(ready.me.role)}
-        />
-      )}
-      {detail &&
-        (detail.kind === "STORY" ? (
-          <StoryViewer
-            stories={[detail]}
-            me={ready.me.id}
-            person={setPerson}
-            close={() => setDetail(undefined)}
-          />
-        ) : (
-          <SocialDialog title="Publicação" close={() => setDetail(undefined)}>
-            <div className="social-dialog-body">
-              <SocialPost
-                item={detail}
+          )}
+          {settings && (
+            <SocialSettings
+              value={prefs}
+              save={setPrefs}
+              close={() => setSettings(false)}
+              admin={["ADMIN", "SUPER_ADMIN"].includes(ready.me.role)}
+            />
+          )}
+          {detail &&
+            (detail.kind === "STORY" ? (
+              <StoryViewer
+                stories={[detail]}
                 me={ready.me.id}
                 person={setPerson}
-                changed={setDetail}
+                close={() => setDetail(undefined)}
               />
-            </div>
-          </SocialDialog>
-        ))}
-    </div>
+            ) : (
+              <SocialDialog
+                title="Publicação"
+                close={() => setDetail(undefined)}
+              >
+                <div className="social-dialog-body">
+                  <SocialPost
+                    item={detail}
+                    me={ready.me.id}
+                    person={setPerson}
+                    changed={setDetail}
+                  />
+                </div>
+              </SocialDialog>
+            ))}
+        </div>
+      </div>
+    </Shell>
   );
 }

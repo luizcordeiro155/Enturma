@@ -45,9 +45,13 @@ const links = [
 export function Shell({
   children,
   visitor = false,
+  navigation,
+  onKeyDown,
 }: {
   children: React.ReactNode;
   visitor?: boolean;
+  navigation?: React.ReactNode;
+  onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
 }) {
   const pathname = usePathname();
   const guest = useVisitor();
@@ -136,6 +140,7 @@ export function Shell({
   }, [emailCelebration]);
   return (
     <div
+      onKeyDown={onKeyDown}
       className={
         inStudyRoom
           ? "app-shell room-active-shell"
@@ -149,7 +154,7 @@ export function Shell({
       <a className="skip" href="#content">
         Pular para o conteúdo
       </a>
-      {inRideHub ? (
+      {inSocial ? navigation : inRideHub ? (
         <RideDesktopNavigation />
       ) : (
         <aside className="sidebar">
@@ -197,7 +202,7 @@ export function Shell({
         {!inRideHub ? (
           <header className="topbar">
             <span>
-              {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
+              {inSocial ? <Link href="/home" className="social-exit-link"><Home size={18} /> Início do Enturma</Link> : links.find((l) => l.href === path)?.label ?? "Seu espaço"}
             </span>
             <div className="topbar-actions">
               {visitor ? (
@@ -252,7 +257,7 @@ export function Shell({
 
       {inRideHub ? (
         <RideMobileNavigation />
-      ) : !inStudyRoom ? (
+      ) : !inStudyRoom && !inSocial ? (
         <MobileNavigation />
       ) : null}
       {emailCelebration ? (

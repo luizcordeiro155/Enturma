@@ -101,11 +101,16 @@ O Dockerfile da API inclui FFmpeg/ffprobe e fontes DejaVu. O pacote Java da Squa
 - `components/social`: streams, cards, player, Stories, editor/captura, perfil, preferências, revisão e diálogo acessível.
 - `lib/social.ts`, `social-draft.ts`: contratos, geometria equivalente à exportação, gestos e IndexedDB por conta.
 - `SocialPosts`, `SocialPeople`, `SocialAccess`, `SocialReview`: domínio e autorização. `SocialMedia`, `SocialTranscoder`, `VideoRecipe`: pipeline. `SocialMaintenance`: fanout, retenção e elegibilidade.
-- Shell, Mais e perfil exibem acesso ao Social quando habilitado. O roteador existente reconhece links sociais, inclusive recebidos no chat cifrado.
+- Shell, navegação mobile e perfil exibem acesso ao Social quando habilitado. O roteador existente reconhece links sociais, inclusive recebidos no chat cifrado.
+- Dentro do Social, uma navegação própria reúne Feed, Clips, criação, mensagens e perfil: lateral no Desktop e inferior no Mobile, com saída explícita para o início do Enturma. A ordem personalizada dos ambientes e a posição de leitura são preservadas.
+- A barra mobile principal usa Início, Salas, Social Entu, Comunidade e Amigos, com acesso a Mais. Cadernos IA fica abaixo de Programação no menu; a elegibilidade de Programação vem do mesmo estado autenticado usado no Desktop.
+- Uma composição Remotion exclusiva transforma o livro em símbolo do Social na primeira entrada de cada documento do aplicativo. Navegação e retorno do segundo plano não repetem a abertura. Movimento reduzido dispensa a animação; há botão para avançar e limite de espera. As animações existentes de abertura do Enturma e Caronas não foram alteradas.
 - RoomSharePanel, CSS de convites, cabeçalho da sala e bridge Android compartilham a mesma API.
 - `DESIGN.md`, `UX-CONTRACT.md`, `premium-ui.json`: tokens existentes, rolagem, teclado, diálogos e estados. O audit estático é limitado às novas telas sociais, não certifica todo o aplicativo.
 
 ## Validação
+
+A integração com `main` no commit `fcceadf` passou na [CI 42943252908](https://github.com/luizcordeiro155/Enturma/actions/runs/42943252908). A mudança posterior de navegação passou localmente em 194 testes Web, TypeScript e lint sem erros. Os testes E2E adicionados cobrem a navegação nas larguras 390/820/1440 px, elegibilidade acadêmica e abertura do Social uma vez por documento; seu resultado final será registrado após a execução da CI.
 
 A [CI 42941050089](https://github.com/luizcordeiro155/Enturma/actions/runs/42941050089), commit `6df0bc8`, terminou com sucesso em 10/11/2026 (horário de São Paulo): 164 testes Java, sem falhas/erros e um opt-in R2 não executado na CI; 183 testes Web e quatro de contratos; 57 E2E; dois testes Python; lint, TypeScript, build Web, exports Android/iOS, compilação Android e segurança do desinstalador Windows aprovados. O teste R2 foi executado separadamente no bucket real, conforme descrito acima. O ensaio de restauração e os testes de banco usam PostgreSQL efêmero; não representam backup de produção.
 
