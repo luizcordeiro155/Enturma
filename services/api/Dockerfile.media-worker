@@ -1,0 +1,22 @@
+# Reuse Enturma's tested Java transcoder and recipe validation.
+# Railway service: root directory /services/api, Dockerfile Dockerfile.media-worker
+FROM maven:3.9-eclipse-temurin-21 AS build
+WORKDIR /build
+COPY pom.xml .
+RUN mvn -B -ntp dependency:go-offline
+COPY src ./src
+RUN mvn -B -ntp -DskipTests package dependency:copy-dependencies \
+    -DincludeScope=runtime -DoutputDirectory=/build/deps
+
+FROM eclipse-temurin:21-jre
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg fonts-dejavu-core \
+    && rm -rf /var/lib/apt/lists/*
+WORKDIR /opt/enturma
+COPY --from=build /build/target/classes /opt/enturma/classes
+COPY --from=build /build/deps /opt/enturma/lib
+RUN useradd --system --create-home --shell /usr/sbin/nologin media
+USER media
+ENV JAVA_TOOL_OPTIONS="-XX:MaxRAMPercentage=75"
+EXPOSE 3000
+CMD ["java", "-cp", "/opt/enturma/classes:/opt/enturma/lib/*", "br.com.enturma.social.SocialTranscodeWorker"]
