@@ -10,9 +10,9 @@ import {
   pagerSettles,
 } from "@/lib/social-pager";
 
-/** A horizontal drag that starts on one of these keeps its own meaning. */
+/** A horizontal drag that starts on one of these keeps its own meaning (the tab strip scrolls sideways). */
 export const PAGER_IGNORE =
-  "[data-social-gesture],input,textarea,select,[contenteditable],[role=slider],dialog";
+  "[data-social-gesture],.social-tabs,input,textarea,select,[contenteditable],[role=slider],dialog";
 
 type Drag = { x: number; y: number; at: number; axis: "x" | "y" | null };
 

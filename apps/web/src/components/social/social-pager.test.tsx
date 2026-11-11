@@ -19,6 +19,7 @@ function Pager({
         page === "feed" ? (
           <>
             <div data-testid="carousel" data-social-gesture="ignore" />
+            <div data-testid="tabs" className="social-tabs" />
             <textarea aria-label="Comentário" />
           </>
         ) : (
@@ -71,6 +72,7 @@ it("não troca quando o gesto começa em carrossel, campo de texto ou borda", ()
   const select = vi.fn();
   render(<Pager view="feed" select={select} />);
   swipe(screen.getByTestId("carousel"), 300, 100);
+  swipe(screen.getByTestId("tabs"), 300, 100); // a faixa de abas rola na horizontal
   swipe(screen.getByRole("textbox"), 300, 100);
   swipe(page("feed"), 10, 300);
   expect(select).not.toHaveBeenCalled();

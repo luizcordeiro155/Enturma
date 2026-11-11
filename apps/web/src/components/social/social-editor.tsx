@@ -523,7 +523,6 @@ export function SocialEditor({
   return (
     <section
       className="social-editor"
-      data-social-gesture="ignore"
       aria-label="Central de criação"
     >
       <header className="social-section-heading">
