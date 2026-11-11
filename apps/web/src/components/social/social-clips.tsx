@@ -85,7 +85,7 @@ function ClipVideo({
     lastTap.current = now;
   }
   return (
-    <div className="social-clip-video" data-social-gesture="ignore">
+    <div className="social-clip-video">
       <video
         ref={ref}
         src={near ? mediaUrl(m.id) : undefined}

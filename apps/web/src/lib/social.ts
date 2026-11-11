@@ -158,24 +158,6 @@ export function sourceTime(recipe: VideoRecipe, output: number) {
   }
   return recipe.segments.at(-1)?.end ?? 0;
 }
-export function socialGesture(
-  dx: number,
-  dy: number,
-  ms: number,
-  startX: number,
-  width: number,
-): SocialView | null {
-  // Leave the browser/OS edge gesture and vertical scroll alone.
-  if (
-    startX < 28 ||
-    startX > width - 28 ||
-    Math.abs(dx) < 70 ||
-    Math.abs(dx) < Math.abs(dy) * 1.7 ||
-    Math.abs(dx) / Math.max(ms, 1) < 0.12
-  )
-    return null;
-  return dx > 0 ? "clips" : "create";
-}
 export function mergeSocialPage(
   previous: SocialPost[],
   incoming: SocialPost[],

@@ -4,7 +4,6 @@ import { useSearchParams } from "next/navigation";
 import { Aperture, Search, Settings2, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import {
-  socialGesture,
   type SocialPerson,
   type SocialPost as Post,
   type SocialPreferences,
@@ -21,6 +20,7 @@ import { SocialSettings } from "./social-settings";
 import { SocialAuthor, SocialPost } from "./social-post";
 import { SocialDialog } from "./social-dialog";
 import { SocialNavigation } from "./social-navigation";
+import { SocialPager } from "./social-pager";
 import { SocialOpening } from "./social-opening";
 
 type Ready = {
@@ -95,8 +95,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     [people, setPeople] = useState<SocialPerson[]>([]),
     [refresh, setRefresh] = useState(0),
     [highlight, setHighlight] = useState<SocialView | null>(null);
-  const gesture = useRef<{ x: number; y: number; at: number } | null>(null),
-    usage = useRef({ feed: 0, clips: 0, create: 0 });
+  const usage = useRef({ feed: 0, clips: 0, create: 0 });
   useEffect(() => {
     const timer = setTimeout(() => {
       if (incomingQuery) {
@@ -215,37 +214,16 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
               {error}
             </p>
           )}
-          <section
-            className="social-feed-view"
-            hidden={view !== "feed"}
-            onTouchStart={(e) => {
-              const target = e.target as HTMLElement;
-              gesture.current =
-                target.closest(
-                  "[data-social-gesture],button,a,input,textarea,video,dialog",
-                ) || e.touches.length !== 1
-                  ? null
-                  : {
-                      x: e.touches[0].clientX,
-                      y: e.touches[0].clientY,
-                      at: performance.now(),
-                    };
-            }}
-            onTouchEnd={(e) => {
-              const start = gesture.current;
-              gesture.current = null;
-              if (!start || !e.changedTouches[0]) return;
-              const touch = e.changedTouches[0],
-                next = socialGesture(
-                  touch.clientX - start.x,
-                  touch.clientY - start.y,
-                  performance.now() - start.at,
-                  start.x,
-                  innerWidth,
-                );
-              if (next) select(next);
-            }}
+          <SocialPager
+            view={view}
+            select={select}
+            peek={(next) =>
+              setOpened((o) => (o.includes(next) ? o : [...o, next]))
+            }
           >
+            {(page) =>
+              page === "feed" ? (
+                <>
             <SocialStories
               me={ready.me}
               create={() => select("create", "STORY")}
@@ -343,30 +321,31 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                 />
               </div>
             )}
-          </section>
-          {opened.includes("clips") && (
-            <section className="social-clips-view" hidden={view !== "clips"}>
-              <SocialClips
-                active={view === "clips" && !person && !settings && !detail}
-                me={ready.me.id}
-                autoplay={prefs.autoplay}
-                person={setPerson}
-              />
-            </section>
-          )}
-          {opened.includes("create") && (
-            <section className="social-create-view" hidden={view !== "create"}>
-              <SocialEditor
-                user={ready.me.id}
-                mediaEnabled={ready.media}
-                initialKind={kind}
-                published={() => {
-                  setRefresh((n) => n + 1);
-                  select("feed");
-                }}
-              />
-            </section>
-          )}
+                </>
+              ) : page === "clips" ? (
+                opened.includes("clips") && (
+                  <SocialClips
+                    active={view === "clips" && !person && !settings && !detail}
+                    me={ready.me.id}
+                    autoplay={prefs.autoplay}
+                    person={setPerson}
+                  />
+                )
+              ) : (
+                opened.includes("create") && (
+                  <SocialEditor
+                    user={ready.me.id}
+                    mediaEnabled={ready.media}
+                    initialKind={kind}
+                    published={() => {
+                      setRefresh((n) => n + 1);
+                      select("feed");
+                    }}
+                  />
+                )
+              )
+            }
+          </SocialPager>
           {person && (
             <SocialProfile
               key={person}

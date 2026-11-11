@@ -1,0 +1,67 @@
+/*
+ * Enturma Social 3. Loaded after social.css; colours, type and radii come only from
+ * the tokens in globals.css. Width bands: up to 767 px, 768–1199 px, 1200 px and up.
+ */
+
+/* ---------- Pager: Clips | Feed | Create ---------- */
+.social-pager {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow: hidden;
+}
+.social-pager-track {
+  display: flex;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+.social-pager-page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+}
+@media (min-width: 768px) {
+  .social-pager-page[inert] {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .social-pager {
+    touch-action: pan-y;
+  }
+  .social-pager-track {
+    flex: none;
+    width: 300%;
+    transform: translateX(calc(var(--social-pager-index, 1) * -33.3333%));
+    transition: transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .social-pager-page {
+    flex: none;
+    width: 33.3333%;
+    max-width: none;
+    margin: 0;
+  }
+  /* Off-screen pages stay out of sight and out of reach until a drag reveals them. */
+  .social-pager-page[inert] {
+    visibility: hidden;
+  }
+  .social-pager.is-dragging .social-pager-page {
+    visibility: visible;
+  }
+  .social-pager.is-dragging .social-pager-track {
+    transition: none;
+    will-change: transform;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-pager-track {
+    transition: none;
+  }
+}
+:root[data-reduced-motion="true"] .social-pager-track {
+  transition: none;
+}
