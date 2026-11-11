@@ -230,12 +230,25 @@ public class SocialMedia {
   @DeleteMapping("/{id}")
   public void remove(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
     access.require();
-    db.jdbc.update(
-        "UPDATE social_media SET state='DELETING',updated_at=now() WHERE id=? AND owner_id=? AND"
-            + " (post_id IS NULL OR EXISTS(SELECT 1 FROM social_post p WHERE p.id=post_id AND"
-            + " p.state='DRAFT'))",
-        id,
-        a.id());
+    tx.executeWithoutResult(
+        status -> {
+          // Same lock order as draft assignment. Publication owns the post lock, so its
+          // committed state must be checked before marking any attached media for deletion.
+          access.profile(a.id());
+          db.one("SELECT user_id FROM social_profile WHERE user_id=? FOR UPDATE", a.id());
+          var media =
+              db.list("SELECT post_id FROM social_media WHERE id=? AND owner_id=?", id, a.id());
+          if (media.isEmpty()) return;
+          Object post = media.getFirst().get("postId");
+          if (post != null) {
+            var parent = db.one("SELECT state FROM social_post WHERE id=? FOR UPDATE", post);
+            if (!"DRAFT".equals(parent.get("state"))) return;
+          }
+          db.jdbc.update(
+              "UPDATE social_media SET state='DELETING',updated_at=now() WHERE id=? AND owner_id=?",
+              id,
+              a.id());
+        });
   }
 
   @GetMapping("/{id}/content")

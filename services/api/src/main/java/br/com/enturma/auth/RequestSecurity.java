@@ -55,7 +55,6 @@ public class RequestSecurity extends OncePerRequestFilter {
     boolean pendingAllowed =
         route.startsWith("/api/v1/auth/")
             || route.equals("/api/v1/account/privacy/export")
-            || (route.startsWith("/api/v1/social/") && !route.endsWith("/content"))
             || route.matches("/api/v1/account/privacy/deletion(?:/(schedule|cancel|now))?")
             || ((req.getMethod().equals("GET") || req.getMethod().equals("HEAD"))
                 && (route.equals("/api/v1/users/me")
@@ -106,6 +105,7 @@ public class RequestSecurity extends OncePerRequestFilter {
             || route.equals("/api/v1/messages/pending-delivery")
             || route.equals("/api/v1/auth/recovery-status")
             || route.equals("/api/v1/account/privacy/export")
+            || (route.startsWith("/api/v1/social/") && !route.endsWith("/content"))
             || route.equals("/api/v1/learning/advanced/words/challenge"))
         && route.startsWith("/api/")) {
       var authentication = SecurityContextHolder.getContext().getAuthentication();
@@ -120,17 +120,27 @@ public class RequestSecurity extends OncePerRequestFilter {
       int windowSeconds = 60;
 
       if (uri.startsWith("/api/v1/social/") && req.getMethod().equals("GET")) {
-        prefix = "social-read:"; limit = 180;
+        prefix = "social-read:";
+        limit = 180;
       } else if (uri.matches("/api/v1/social/posts/[^/]+/publish")) {
-        prefix = "social-publish:"; limit = 10; windowSeconds = 600;
+        prefix = "social-publish:";
+        limit = 10;
+        windowSeconds = 600;
       } else if (uri.equals("/api/v1/social/media")) {
-        prefix = "social-upload:"; limit = 12; windowSeconds = 600;
+        prefix = "social-upload:";
+        limit = 12;
+        windowSeconds = 600;
       } else if (uri.matches("/api/v1/social/media/[^/]+/export")) {
-        prefix = "social-export:"; limit = 8; windowSeconds = 600;
+        prefix = "social-export:";
+        limit = 8;
+        windowSeconds = 600;
       } else if (uri.matches("/api/v1/social/people/[^/]+/follow")) {
-        prefix = "social-follow:"; limit = 20; windowSeconds = 600;
+        prefix = "social-follow:";
+        limit = 20;
+        windowSeconds = 600;
       } else if (uri.matches("/api/v1/social/posts/[^/]+/(report|comments)")) {
-        prefix = "social-contribution:"; limit = 15;
+        prefix = "social-contribution:";
+        limit = 15;
       } else if (uri.startsWith("/api/v1/public/explore/")) {
         prefix = "public-explore:";
         limit = 120;

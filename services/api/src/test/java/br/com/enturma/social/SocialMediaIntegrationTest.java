@@ -29,6 +29,7 @@ class SocialMediaIntegrationTest {
   @Autowired SocialPosts posts;
   @Autowired AuthService auth;
   @Autowired Db db;
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
   @MockitoBean ObjectStorageService storage;
   @TempDir Path dir;
   final Map<String, byte[]> objects = new ConcurrentHashMap<>();
@@ -159,6 +160,8 @@ class SocialMediaIntegrationTest {
             new SocialPosts.Draft(
                 post, "CLIP", "Resultado exportado", "PUBLIC", null, 0, List.of(id)));
     posts.publish(owner, post, ((Number) draft.get("version")).intValue());
+    media.remove(owner, id);
+    assertThat(media.status(owner, id)).containsEntry("state", "READY");
     media.content(viewer, id, true, new MockHttpServletRequest(), new MockHttpServletResponse());
     db.jdbc.update(
         "INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", owner.id(), viewer.id());
@@ -189,5 +192,80 @@ class SocialMediaIntegrationTest {
     assertThat(media.status(owner, id)).containsEntry("state", "FAILED");
     assertThat(posts.ownDraft(owner, post)).containsEntry("body", "Rascunho preservado");
     assertThatThrownBy(() -> posts.publish(owner, post, 2)).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void deletingMediaWaitsForPublicationAndKeepsTheCommittedPostIntact() throws Exception {
+    var bytes = new ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(
+        new java.awt.image.BufferedImage(16, 16, java.awt.image.BufferedImage.TYPE_INT_RGB),
+        "png",
+        bytes);
+    UUID id = UUID.randomUUID(), post = UUID.randomUUID();
+    media.create(owner, new SocialMedia.Upload(id, "IMAGE", bytes.size()));
+    media.part(owner, id, 0, body(bytes.toByteArray()));
+    media.export(owner, id, new SocialMedia.Export(null));
+    media.processOne();
+    assertThat(media.status(owner, id)).containsEntry("state", "READY");
+    posts.draft(
+        owner,
+        new SocialPosts.Draft(
+            post, "POST", "Publicação concorrente", "PUBLIC", null, 0, List.of(id)));
+    // Commit only synthetic fixtures so the two real database transactions can race.
+    org.springframework.test.context.transaction.TestTransaction.flagForCommit();
+    org.springframework.test.context.transaction.TestTransaction.end();
+    var tx = new org.springframework.transaction.support.TransactionTemplate(transactions);
+    var published = new CountDownLatch(1);
+    var commit = new CountDownLatch(1);
+    var deletionPid = new CompletableFuture<Integer>();
+    try (var executor = Executors.newFixedThreadPool(2)) {
+      try {
+        var publisher =
+            executor.submit(
+                () ->
+                    tx.executeWithoutResult(
+                        status -> {
+                          posts.publish(owner, post, 2);
+                          published.countDown();
+                          try {
+                            assertThat(commit.await(15, TimeUnit.SECONDS)).isTrue();
+                          } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new IllegalStateException(e);
+                          }
+                        }));
+        assertThat(published.await(10, TimeUnit.SECONDS)).isTrue();
+        var deletion =
+            executor.submit(
+                () ->
+                    tx.executeWithoutResult(
+                        status -> {
+                          deletionPid.complete(
+                              db.jdbc.queryForObject("SELECT pg_backend_pid()", Integer.class));
+                          media.remove(owner, id);
+                        }));
+        int pid = deletionPid.get(5, TimeUnit.SECONDS);
+        org.awaitility.Awaitility.await()
+            .atMost(java.time.Duration.ofSeconds(5))
+            .until(
+                () ->
+                    db.exists(
+                        "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE pid=? AND"
+                            + " wait_event_type='Lock')",
+                        pid));
+        commit.countDown();
+        publisher.get(10, TimeUnit.SECONDS);
+        deletion.get(10, TimeUnit.SECONDS);
+        assertThat(media.status(owner, id)).containsEntry("state", "READY");
+        assertThat(posts.detail(viewer, post)).containsEntry("id", post);
+        media.content(
+            viewer, id, false, new MockHttpServletRequest(), new MockHttpServletResponse());
+      } finally {
+        commit.countDown();
+      }
+    } finally {
+      posts.remove(owner, post);
+      media.cleanupFiles();
+    }
   }
 }

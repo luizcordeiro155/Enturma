@@ -150,9 +150,28 @@ export function SocialClips({
     latestLoad = useRef(stream.load);
   const [index, setIndex] = useState(0),
     [muted, setMuted] = useState(true);
+  const currentIndex = useRef(index);
   useEffect(() => {
     latestLoad.current = stream.load;
   }, [stream.load]);
+  useEffect(() => {
+    currentIndex.current = index;
+  }, [index]);
+  useEffect(() => {
+    const viewport = container.current;
+    if (!active || !viewport) return;
+    // Keep the selected Clip aligned after rotation, window resize or keyboard changes.
+    // Scrolling only this surface avoids moving the application header/navigation.
+    const observer = new ResizeObserver(() => {
+      const selected = viewport.querySelector<HTMLElement>(
+        `[data-clip-index="${currentIndex.current}"]`,
+      );
+      if (selected)
+        viewport.scrollTo({ top: selected.offsetTop, behavior: "instant" });
+    });
+    observer.observe(viewport);
+    return () => observer.disconnect();
+  }, [active]);
   useEffect(() => {
     if (!active || !container.current) return;
     const observer = new IntersectionObserver(
@@ -180,15 +199,16 @@ export function SocialClips({
       void latestLoad.current();
   }, [active, index, stream.items.length, stream.cursor, stream.error]);
   function move(delta: number) {
-    container.current
-      ?.querySelector(
-        `[data-clip-index="${Math.max(0, Math.min(stream.items.length - 1, index + delta))}"]`,
-      )
-      ?.scrollIntoView({
+    const viewport = container.current;
+    const selected = viewport?.querySelector<HTMLElement>(
+      `[data-clip-index="${Math.max(0, Math.min(stream.items.length - 1, index + delta))}"]`,
+    );
+    if (selected)
+      viewport?.scrollTo({
+        top: selected.offsetTop,
         behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
           ? "auto"
           : "smooth",
-        block: "nearest",
       });
   }
   return (

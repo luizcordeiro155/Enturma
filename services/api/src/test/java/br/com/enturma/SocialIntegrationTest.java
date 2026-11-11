@@ -1,6 +1,8 @@
 package br.com.enturma;
 
 import static org.assertj.core.api.Assertions.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 import br.com.enturma.auth.*;
 import br.com.enturma.common.*;
@@ -8,10 +10,13 @@ import br.com.enturma.social.*;
 import java.util.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(properties = "SOCIAL_ENABLED=true")
+@AutoConfigureMockMvc
 // Close scheduled workers before another integration context uses the same test database.
 @org.springframework.test.annotation.DirtiesContext(
     classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
@@ -23,6 +28,7 @@ class SocialIntegrationTest {
   @Autowired SocialPeople people;
   @Autowired SocialAccess access;
   @Autowired SocialReview review;
+  @Autowired MockMvc mvc;
   Actor a, b, c;
 
   Actor user() {
@@ -51,6 +57,52 @@ class SocialIntegrationTest {
         posts.draft(author, new SocialPosts.Draft(id, kind, body, "PUBLIC", null, 0, List.of()));
     posts.publish(author, id, ((Number) draft.get("version")).intValue());
     return id;
+  }
+
+  @Test
+  void socialHttpRoutesRequireAcademicAccessAndReadsAreRateLimited() throws Exception {
+    String tag = UUID.randomUUID().toString().substring(0, 8);
+    var credentials =
+        auth.register(
+            "Pendente", "pending_" + tag, tag + "@example.test", "password-12345", "JUnit");
+    Actor pending = auth.authenticate(credentials.accessToken()).orElseThrow();
+    String bearer = "Bearer " + credentials.accessToken();
+    mvc.perform(get("/api/v1/social/feed")).andExpect(status().isUnauthorized());
+    for (String path :
+        List.of("feed", "people", "drafts", "capabilities", "media/" + UUID.randomUUID())) {
+      mvc.perform(get("/api/v1/social/" + path).header("Authorization", bearer))
+          .andExpect(status().isForbidden())
+          .andExpect(jsonPath("$.code").value("ACADEMIC_VERIFICATION_REQUIRED"));
+    }
+    UUID id = UUID.randomUUID();
+    mvc.perform(
+            put("/api/v1/social/drafts")
+                .header("Authorization", bearer)
+                .contentType("application/json")
+                .content(
+                    "{\"id\":\""
+                        + id
+                        + "\",\"kind\":\"POST\",\"body\":\"Teste\",\"visibility\":\"PUBLIC\",\"version\":0,\"mediaIds\":[]}"))
+        .andExpect(status().isForbidden())
+        .andExpect(jsonPath("$.code").value("ACADEMIC_VERIFICATION_REQUIRED"));
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM social_post WHERE id=?)", id)).isFalse();
+    // Only the test fixture grants access; the HTTP filter must observe the server state.
+    db.jdbc.update(
+        "UPDATE academic_identity SET"
+            + " status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE"
+            + " user_id=?",
+        pending.id());
+    mvc.perform(get("/api/v1/social/feed").header("Authorization", bearer))
+        .andExpect(status().isOk());
+    db.jdbc.update(
+        "UPDATE rate_limit SET hits=180,resets_at=now()+interval '1 minute' WHERE bucket=?",
+        "social-read:" + Tokens.hash(pending.id().toString()));
+    mvc.perform(get("/api/v1/social/feed").header("Authorization", bearer))
+        .andExpect(status().isTooManyRequests())
+        .andExpect(header().string("Retry-After", "60"));
+    // The Social quota must not prevent session recovery or academic status checks.
+    mvc.perform(get("/api/v1/auth/academic/status").header("Authorization", bearer))
+        .andExpect(status().isOk());
   }
 
   @Test

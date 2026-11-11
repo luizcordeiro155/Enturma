@@ -470,14 +470,45 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   await expect(clips.locator("video").nth(3)).not.toHaveAttribute("src", /.+/);
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 844 });
+    const selected = clips.locator('[data-clip-index="1"]');
+    await expect.poll(playing).toEqual([false, true, false, false]);
+    await expect
+      .poll(async () => {
+        const frame = await clips.boundingBox();
+        const card = await selected.boundingBox();
+        return (
+          !!frame &&
+          !!card &&
+          Math.abs(frame.y - card.y) < 2 &&
+          Math.abs(frame.height - card.height) < 2
+        );
+      })
+      .toBe(true);
+    await expect(selected.locator("video")).toHaveJSProperty("readyState", 4);
+    await expect(selected.locator("header")).toBeInViewport({ ratio: 0.99 });
+    await expect(selected.locator(".social-post-actions")).toBeInViewport({
+      ratio: 0.99,
+    });
+    await expect(
+      page.getByRole("button", { name: "Ativar som dos Clips" }),
+    ).toBeInViewport({ ratio: 0.99 });
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth + 1,
       ),
     ).toBe(true);
-    await page.screenshot({
-      path: info.outputPath(`social-clips-${width}.png`),
-    });
+    for (const theme of ["light", "dark", "enturma"]) {
+      await page.evaluate((theme) => {
+        document.documentElement.dataset.theme =
+          theme === "light" ? "light" : "dark";
+        if (theme === "enturma")
+          document.documentElement.dataset.palette = theme;
+        else delete document.documentElement.dataset.palette;
+      }, theme);
+      await page.screenshot({
+        path: info.outputPath(`social-clips-${width}-${theme}.png`),
+      });
+    }
   }
   await navigation.getByRole("button", { name: "Feed", exact: true }).click();
   await expect.poll(playing).toEqual([false, false, false, false]);
