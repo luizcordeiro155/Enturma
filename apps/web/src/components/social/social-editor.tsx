@@ -344,12 +344,13 @@ export function SocialEditor({
       setBusy(false);
     }
   }
-  async function save(exportMedia: boolean) {
+  async function save(exportMedia: boolean, publishAfter = false) {
     if (!draft || busyRef.current) return;
     busyRef.current = true;
     setBusy(true);
     setError("");
     let work = { ...draft, files: [...draft.files] };
+    let wasPublished = false;
     try {
       for (let i = 0; i < work.files.length; i++) {
         let item = work.files[i];
@@ -422,17 +423,44 @@ export function SocialEditor({
         { id: work.id, kind: work.kind, body: work.body },
         ...old.filter((d) => d.id !== work.id),
       ]);
-      setStatus(
-        exportMedia && work.files.some((f) => f.media?.state !== "READY")
-          ? "Na fila de exportação. Você pode voltar ao Feed; o rascunho está salvo."
-          : "Rascunho salvo na sua conta.",
-      );
-      setProgress(100);
+      if (publishAfter) {
+        const deadline = Date.now() + 120_000;
+        for (let i = 0; i < work.files.length; i++) {
+          let state = work.files[i].media;
+          while (state?.state !== "READY") {
+            if (state?.state === "FAILED")
+              throw new Error(state.error || "Não foi possível processar a mídia. Seu rascunho foi salvo para tentar novamente.");
+            if (Date.now() >= deadline)
+              throw new Error("A mídia ainda está sendo processada. Seu rascunho está salvo; volte em instantes para publicar.");
+            setStatus(`Preparando mídia ${i + 1} de ${work.files.length}…`);
+            await new Promise<void>((resolve) => setTimeout(resolve, 2300));
+            if (!alive.current) return;
+            state = await api<SocialMedia>(`/social/media/${work.files[i].id}`, { cache: "no-store" });
+            work.files[i] = { ...work.files[i], media: state };
+          }
+        }
+        setStatus("Finalizando publicação…");
+        await socialWrite(`/posts/${work.id}/publish`, { version: result.version }, "POST");
+        await localSocialDraft(user, null).catch(() => {});
+        setSavedDrafts((old) => old.filter((d) => d.id !== work.id));
+        wasPublished = true;
+        setDraft(emptySocialDraft());
+        setStatus("Publicado no Enturma.");
+        setProgress(100);
+        published();
+      } else {
+        setStatus(
+          exportMedia && work.files.some((f) => f.media?.state !== "READY")
+            ? "Na fila de exportação. Você pode voltar ao Feed; o rascunho está salvo."
+            : "Rascunho salvo na sua conta.",
+        );
+        setProgress(100);
+      }
     } catch (e) {
       setError((e as Error).message);
     } finally {
       if (alive.current) {
-        setDraft(work);
+        if (!wasPublished) setDraft(work);
         setBusy(false);
       }
       busyRef.current = false;
@@ -483,11 +511,15 @@ export function SocialEditor({
     }
   }
   if (!draft) return <p role="status">Recuperando seu rascunho…</p>;
+  const hasPendingMedia = draft.files.some((f) => f.media?.state !== "READY");
   const canPublish =
-    (draft.body.trim() || draft.files.length > 0) &&
-    draft.files.every((f) => f.media?.state === "READY") &&
+    Boolean(draft.body.trim() || draft.files.length > 0) &&
+    (!draft.files.length || mediaEnabled) &&
+    draft.files.every((f) => !!f.file || !!f.media) &&
     (draft.kind !== "CLIP" ||
-      (draft.files.length === 1 && draft.files[0].media?.kind === "VIDEO"));
+      (draft.files.length === 1 &&
+        (draft.files[0].media?.kind === "VIDEO" ||
+          draft.files[0].file?.type.startsWith("video/"))));
   return (
     <section
       className="social-editor"
@@ -533,10 +565,13 @@ export function SocialEditor({
           ))}
         </div>
         {!mediaEnabled && (
-          <p className="social-note">
-            Você pode publicar textos. Envio de mídia aguardando habilitação do
-            processamento e armazenamento.
-          </p>
+          <div className="social-media-status" role="status">
+            <ImagePlus size={22} aria-hidden="true" />
+            <div>
+              <strong>Fotos e vídeos ainda não estão liberados</strong>
+              <p>O armazenamento privado e o processamento de mídia precisam ser ativados na API do Enturma. Você pode publicar textos normalmente; os botões de mídia ficam indisponíveis até o servidor confirmar a ativação.</p>
+            </div>
+          </div>
         )}
         <div
           className="social-upload"
@@ -547,8 +582,8 @@ export function SocialEditor({
           }}
         >
           <ImagePlus size={26} />
-          <strong>Da sua galeria para a turma.</strong>
-          <span>Fotos e vídeos · até 128 MB por arquivo</span>
+          <strong>{mediaEnabled ? "Adicione fotos ou vídeos" : "Galeria temporariamente indisponível"}</strong>
+          <span>Até 10 arquivos por post · 1 por Story ou Clip · 128 MB cada</span>
           <div className="social-row">
             <label className="social-file-button">
               Escolher mídia
@@ -779,13 +814,13 @@ export function SocialEditor({
               <Film size={18} /> Exportar e revisar
             </button>
           )}
-          <button disabled={busy || !canPublish} onClick={() => void publish()}>
-            <Send size={18} /> Publicar{" "}
-            {draft.kind === "STORY"
+          <button disabled={busy || !canPublish} onClick={() => void (hasPendingMedia ? save(true, true) : publish())}>
+            <Send size={18} /> {busy ? "Publicando…" : hasPendingMedia ? "Enviar e publicar" : "Publicar"}{" "}
+            {!busy && !hasPendingMedia && (draft.kind === "STORY"
               ? "Story"
               : draft.kind === "CLIP"
                 ? "Clip"
-                : "Post"}
+                : "Post")}
           </button>
         </footer>
         {!!savedDrafts.length && (

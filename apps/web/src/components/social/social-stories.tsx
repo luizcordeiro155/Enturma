@@ -11,6 +11,7 @@ import {
   Send,
   Star,
   Eye,
+  Trash2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
@@ -35,12 +36,14 @@ export function StoryViewer({
   me,
   close,
   person,
+  onDeleted,
 }: {
   stories: SocialPost[];
   start?: number;
   me: string;
   close: () => void;
   person: (id: string) => void;
+  onDeleted?: (id: string) => void;
 }) {
   const [index, setIndex] = useState(start),
     [item, setItem] = useState<SocialPost>(),
@@ -53,6 +56,8 @@ export function StoryViewer({
     [moreViewers, setMoreViewers] = useState(false),
     [highlight, setHighlight] = useState(false),
     [title, setTitle] = useState("");
+  const [confirmDeletion, setConfirmDeletion] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const video = useRef<HTMLVideoElement>(null),
     stage = useRef<HTMLDivElement>(null),
     elapsed = useRef(0),
@@ -164,6 +169,22 @@ export function StoryViewer({
       setMoreViewers(rows.length === 30);
     } catch (e) {
       setError((e as Error).message);
+    }
+  }
+  async function deleteStory() {
+    if (!item || item.authorId !== me || deleting) return;
+    setDeleting(true);
+    setError("");
+    try {
+      await socialWrite(`/posts/${item.id}`, undefined, "DELETE");
+      window.dispatchEvent(new Event("enturma-social_changed"));
+      if (onDeleted) onDeleted(item.id);
+      else close();
+    } catch (cause) {
+      setError((cause as Error).message);
+      setConfirmDeletion(false);
+    } finally {
+      setDeleting(false);
     }
   }
   return (
@@ -291,6 +312,17 @@ export function StoryViewer({
                   >
                     <Star />
                   </button>
+                  <button
+                    className="icon-control social-story-delete-trigger"
+                    type="button"
+                    aria-label="Excluir meu Story"
+                    onClick={() => {
+                      setPaused(true);
+                      setConfirmDeletion(true);
+                    }}
+                  >
+                    <Trash2 />
+                  </button>
                 </>
               )}
               <button
@@ -373,6 +405,23 @@ export function StoryViewer({
           reply={item.authorId !== me}
           close={() => setShare(false)}
         />
+      )}
+      {confirmDeletion && (
+        <SocialDialog
+          title="Excluir este Story?"
+          close={() => { if (!deleting) setConfirmDeletion(false); }}
+        >
+          <div className="social-dialog-body">
+            <p>Seu Story, suas visualizações e os arquivos associados serão removidos. Esta ação não pode ser desfeita.</p>
+            <div className="social-row">
+              <button className="secondary" type="button" disabled={deleting} onClick={() => setConfirmDeletion(false)}>Cancelar</button>
+              <button className="social-danger-action" type="button" disabled={deleting} onClick={() => void deleteStory()}>
+                <Trash2 size={18} /> {deleting ? "Excluindo…" : "Excluir Story"}
+              </button>
+            </div>
+            {error && <p role="alert" className="social-error">{error}</p>}
+          </div>
+        </SocialDialog>
       )}
     </SocialDialog>
   );
@@ -466,6 +515,10 @@ export function SocialStories({
           start={opened}
           me={me.id}
           person={person}
+          onDeleted={(id) => {
+            setStories((current) => current.filter((entry) => entry.id !== id));
+            setOpened(null);
+          }}
           close={() => {
             setStories((s) =>
               s.map((p, i) => (i === opened ? { ...p, seen: true } : p)),
