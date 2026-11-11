@@ -60,6 +60,21 @@ public final class SocialTranscodeWorker {
           exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
           respond(exchange, ready ? 200 : 503, "{\"ready\":" + ready + "}");
         });
+    server.createContext(
+        "/ready",
+        exchange -> {
+          if (!"GET".equals(exchange.getRequestMethod())) {
+            respond(exchange, 405, "Method not allowed");
+            return;
+          }
+          if (!authenticated(exchange, token)) {
+            respond(exchange, 401, "Unauthorized");
+            return;
+          }
+          boolean ready = transcoder.available();
+          exchange.getResponseHeaders().set("Content-Type", "application/json; charset=utf-8");
+          respond(exchange, ready ? 200 : 503, "{\"ready\":" + ready + "}");
+        });
     server.createContext("/render", exchange -> handleRender(exchange, token, transcoder));
     return server;
   }
@@ -73,10 +88,7 @@ public final class SocialTranscodeWorker {
         respond(exchange, 405, "Method not allowed");
         return;
       }
-      String auth = exchange.getRequestHeaders().getFirst("Authorization");
-      String presented = auth == null || !auth.startsWith("Bearer ") ? "" : auth.substring(7);
-      if (!MessageDigest.isEqual(
-          token.getBytes(StandardCharsets.UTF_8), presented.getBytes(StandardCharsets.UTF_8))) {
+      if (!authenticated(exchange, token)) {
         respond(exchange, 401, "Unauthorized");
         return;
       }
@@ -178,6 +190,13 @@ public final class SocialTranscodeWorker {
       if (locked) BUSY.set(false);
       exchange.close();
     }
+  }
+
+  private static boolean authenticated(HttpExchange exchange, String token) {
+    String auth = exchange.getRequestHeaders().getFirst("Authorization");
+    String presented = auth == null || !auth.startsWith("Bearer ") ? "" : auth.substring(7);
+    return MessageDigest.isEqual(
+        token.getBytes(StandardCharsets.UTF_8), presented.getBytes(StandardCharsets.UTF_8));
   }
 
   private static void add(ZipOutputStream zip, String entry, Path file) throws IOException {

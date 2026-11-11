@@ -29,6 +29,8 @@ public class SocialTranscoder {
   private final HttpClient client = HttpClient.newBuilder()
       .connectTimeout(Duration.ofSeconds(5)).build();
   private Boolean available;
+  private long remoteHealthExpiresAt;
+  private boolean remoteHealth;
   private static final String FORMATS =
       "mov,matroska,webm,avi,png_pipe,jpeg_pipe,webp_pipe,gif,image2";
 
@@ -57,14 +59,21 @@ public class SocialTranscoder {
   public synchronized boolean available() {
     if (!workerUrl.isBlank()) {
       if (workerToken.length() < 32 || !workerUrl.startsWith("https://")) return false;
+      long now = System.nanoTime();
+      if (now < remoteHealthExpiresAt) return remoteHealth;
+      remoteHealthExpiresAt = now + Duration.ofSeconds(15).toNanos();
       try {
-        var request = HttpRequest.newBuilder(URI.create(workerUrl + "/health"))
-            .timeout(Duration.ofSeconds(6)).GET().build();
+        var request = HttpRequest.newBuilder(URI.create(workerUrl + "/ready"))
+            .timeout(Duration.ofSeconds(6))
+            .header("Authorization", "Bearer " + workerToken)
+            .GET().build();
         var response = client.send(request, HttpResponse.BodyHandlers.ofString());
-        return response.statusCode() == 200 && json.readTree(response.body()).path("ready").asBoolean(false);
+        remoteHealth = response.statusCode() == 200 &&
+            json.readTree(response.body()).path("ready").asBoolean(false);
       } catch (Exception ignored) {
-        return false;
+        remoteHealth = false;
       }
+      return remoteHealth;
     }
     if (available != null) return available;
     for (String command : List.of(ffmpeg, ffprobe)) {

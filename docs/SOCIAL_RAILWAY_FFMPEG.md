@@ -18,12 +18,12 @@
 | Repositório | `luizcordeiro155/Enturma` |
 | Dockerfile | `services/api/Dockerfile.media-worker` |
 | Root directory | `/services/api` |
-| Porta | `3000` |
+| Porta | `8080` (fornecida por `PORT` na Railway) |
 | Domínio | `https://enturma-ffmpeg-worker-production.up.railway.app` |
-| Healthcheck | `GET /health` |
+| Healthcheck | `GET /health` público; `GET /ready` autenticado para a API |
 | Fonte | `feat/railway-social-ffmpeg-worker` enquanto em validação |
 
-O deploy é acionado pela conexão do repositório no Railway. Verifique `GET /health` retornando HTTP 200 e `{"ready":true}` antes de habilitar a API.
+O deploy é acionado pela conexão do repositório no Railway. Verifique `GET /health` retornando HTTP 200 e `{"ready":true}`; a API valida o token em `GET /ready` antes de habilitar mídia. A porta pública do domínio deve acompanhar o `PORT` injetado pela Railway (atualmente 8080).
 
 ### Variáveis do Railway
 
