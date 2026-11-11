@@ -390,6 +390,10 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                 stories={[detail]}
                 me={ready.me.id}
                 person={setPerson}
+                onDeleted={() => {
+                  setDetail(undefined);
+                  setRefresh((current) => current + 1);
+                }}
                 close={() => setDetail(undefined)}
               />
             ) : (

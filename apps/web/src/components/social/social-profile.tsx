@@ -383,6 +383,11 @@ export function SocialProfile({
           start={story}
           me={me}
           person={person}
+          onDeleted={(removedId) => {
+            setHighlights((current) => current.filter((entry) => entry.id !== removedId));
+            setStory(null);
+            setRevision((current) => current + 1);
+          }}
           close={() => setStory(null)}
         />
       )}

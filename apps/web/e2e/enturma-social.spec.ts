@@ -712,3 +712,43 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   await navigation.getByRole("button", { name: "Feed", exact: true }).click();
   await expect.poll(playing).toEqual([false, false, false, false]);
 });
+
+test("Social: autor consegue excluir seu Story com confirmação", async ({
+  page,
+  request,
+}) => {
+  const author = await student(request, "Autora de Story");
+  const id = await publish(
+    request,
+    author.accessToken,
+    "Story temporário para remover.",
+    "STORY",
+  );
+  await authenticate(page.context(), author);
+  await page.goto("/social");
+  const opening = page.getByRole("dialog", {
+    name: "Bem-vindo ao Enturma Social",
+  });
+  if (await opening.isVisible()) {
+    await opening.getByRole("button", { name: "Explorar o Social" }).click();
+  }
+  const story = page
+    .locator(".social-stories .social-story")
+    .filter({ hasText: author.username })
+    .first();
+  await expect(story).toBeVisible();
+  await story.click();
+  const viewer = page.getByRole("dialog", { name: "Stories da turma" });
+  await expect(viewer.getByRole("button", { name: "Excluir meu Story" })).toBeVisible();
+  await viewer.getByRole("button", { name: "Excluir meu Story" }).click();
+  const confirm = page.getByRole("dialog", { name: "Excluir este Story?" });
+  await expect(confirm).toBeVisible();
+  await confirm.getByRole("button", { name: "Excluir Story", exact: true }).click();
+  await expect(viewer).not.toBeVisible();
+  await expect(story).toHaveCount(0);
+  const deleted = await request.get(
+    `${backend}/api/v1/social/posts/${id}`,
+    { headers: asUser(author.accessToken) },
+  );
+  expect(deleted.status()).toBe(404);
+});
