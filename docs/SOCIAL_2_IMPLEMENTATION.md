@@ -79,7 +79,7 @@ SOCIAL_FFMPEG=ffmpeg
 SOCIAL_FFPROBE=ffprobe
 ```
 
-O conector não possui a permissão Account API Tokens Write. As duas credenciais R2 precisam ser configuradas no ambiente da API pelo responsável, com acesso Object Read & Write somente ao novo bucket. Não reutilizar nem substituir as variáveis `OBJECT_STORAGE_*` dos materiais e chats. Para testar antes da implantação, o arquivo ignorado `.local/social-r2.env` contém os campos; o teste opt-in `SocialR2LiveTest`, com `SOCIAL_R2_SMOKE=true`, envia 128 KiB, verifica bytes e Range e remove apenas seu objeto aleatório.
+O conector não possui a permissão Account API Tokens Write. O responsável forneceu credenciais R2, armazenadas somente no arquivo local ignorado `.local/social-r2.env`. Elas ainda precisam ser configuradas no ambiente Java da SquareCloud, com acesso Object Read & Write somente ao novo bucket. Não reutilizar nem substituir as variáveis `OBJECT_STORAGE_*` dos materiais e chats. O teste opt-in `SocialR2LiveTest`, com `SOCIAL_R2_SMOKE=true`, passou em 10/11/2026: gravou 128 KiB no bucket real, verificou todos os bytes e o intervalo 1021–5097 e removeu seu objeto aleatório. Nenhum dado de usuário foi utilizado.
 
 O R2 cobra armazenamento/operações segundo a [tabela oficial](https://developers.cloudflare.com/r2/pricing/); a implementação usa o [SDK Java compatível](https://developers.cloudflare.com/r2/examples/aws/aws-sdk-java/). Não há orçamento ilimitado implícito: quotas por arquivo/conta e fila serial limitam abuso, mas não estabelecem um teto financeiro global.
 
@@ -93,6 +93,8 @@ O R2 cobra armazenamento/operações segundo a [tabela oficial](https://develope
 A quota conta originais, não derivados. Ambos coexistem até a exclusão da mídia. Duplicação, tráfego pelo BFF, disco temporário e CPU precisam ser avaliados na capacidade atual antes de ativar mídia. Não se promete upload ilimitado nem custo zero em qualquer volume. A flag permanece fechada durante essa avaliação.
 
 O processamento remoto entrega a mesma receita essencial nas quatro plataformas. Captura depende de permissões e codecs; importação da galeria permanece disponível. Reedição após exportação concluída requer nova cópia; o arquivo local fica no rascunho.
+
+O Dockerfile da API inclui FFmpeg/ffprobe e fontes DejaVu. O pacote Java da SquareCloud não instala pacotes de sistema: esse ambiente precisa disponibilizar os dois executáveis e uma fonte compatível com `drawtext`. A API verifica os executáveis antes de anunciar suporte a uploads; se faltarem, mídia permanece indisponível e rascunhos/textos continuam funcionando. Após instalar o runtime é necessário reiniciar a API. A disponibilidade desse runtime na SquareCloud ainda não foi confirmada.
 
 ## Arquivos e integração
 

@@ -60,7 +60,7 @@ public class SocialMedia {
   }
 
   public boolean enabled() {
-    return access.enabled() && mediaEnabled && storage.enabled();
+    return access.enabled() && mediaEnabled && storage.enabled() && transcoder.available();
   }
 
   private void ready() {

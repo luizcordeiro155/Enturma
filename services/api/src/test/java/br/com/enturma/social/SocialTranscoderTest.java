@@ -13,6 +13,28 @@ class SocialTranscoderTest {
   @TempDir Path dir;
 
   @Test
+  void missingRuntimeDoesNotAdvertiseMediaSupport() {
+    var transcoder =
+        new SocialTranscoder(
+            new ObjectMapper(),
+            dir.resolve("missing-ffmpeg").toString(),
+            dir.resolve("missing-ffprobe").toString());
+    assertThat(transcoder.available()).isFalse();
+    assertThat(transcoder.available()).isFalse();
+  }
+
+  @Test
+  void requiresBothRuntimeExecutables() {
+    Assumptions.assumeTrue("true".equals(System.getenv("SOCIAL_TEST_FFMPEG")));
+    assertThat(new SocialTranscoder(new ObjectMapper(), "ffmpeg", "ffprobe").available()).isTrue();
+    assertThat(
+            new SocialTranscoder(
+                    new ObjectMapper(), "ffmpeg", dir.resolve("missing-ffprobe").toString())
+                .available())
+        .isFalse();
+  }
+
+  @Test
   void acceptsLiveWebmWithoutDurationAndValidatesTheRenderedLength() throws Exception {
     Assumptions.assumeTrue("true".equals(System.getenv("SOCIAL_TEST_FFMPEG")));
     var process =

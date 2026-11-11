@@ -68,7 +68,8 @@ class PlatformIntegrationTest {
         .answer(
             org.mockito.ArgumentMatchers.anyString(),
             org.mockito.ArgumentMatchers.anyString(),
-            org.mockito.ArgumentMatchers.anyString(),
+            // Memory consolidation may run concurrently; this assertion concerns room questions.
+            org.mockito.ArgumentMatchers.eq("QUESTION"),
             org.mockito.ArgumentMatchers.eq(false));
   }
 

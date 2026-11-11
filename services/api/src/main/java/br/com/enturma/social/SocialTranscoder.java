@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class SocialTranscoder {
   private final ObjectMapper json;
   private final String ffmpeg, ffprobe;
+  private Boolean available;
   private static final String FORMATS =
       "mov,matroska,webm,avi,png_pipe,jpeg_pipe,webp_pipe,gif,image2";
 
@@ -30,6 +31,31 @@ public class SocialTranscoder {
     this.json = json;
     this.ffmpeg = ffmpeg;
     this.ffprobe = ffprobe;
+  }
+
+  /** Probe only once when media is enabled; never advertise uploads without the runtime. */
+  public synchronized boolean available() {
+    if (available != null) return available;
+    for (String command : List.of(ffmpeg, ffprobe)) {
+      Process process = null;
+      try {
+        process =
+            new ProcessBuilder(command, "-version")
+                .redirectOutput(ProcessBuilder.Redirect.DISCARD)
+                .redirectError(ProcessBuilder.Redirect.DISCARD)
+                .start();
+        if (!process.waitFor(3, TimeUnit.SECONDS) || process.exitValue() != 0)
+          return available = false;
+      } catch (IOException e) {
+        return available = false;
+      } catch (InterruptedException e) {
+        Thread.currentThread().interrupt();
+        return false;
+      } finally {
+        if (process != null && process.isAlive()) process.destroyForcibly();
+      }
+    }
+    return available = true;
   }
 
   private JsonNode probe(Path dir, String file) throws IOException, InterruptedException {
