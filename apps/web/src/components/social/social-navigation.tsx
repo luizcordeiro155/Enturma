@@ -1,5 +1,5 @@
 "use client";
-import { Aperture, Film, Plus, Send, Home, Settings2 } from "lucide-react";
+import { Aperture, Film, Plus, Home, Settings2 } from "lucide-react";
 import type { SocialPerson, SocialView } from "@/lib/social";
 import { NavigationLink } from "../navigation-link";
 import { Avatar } from "../user-identity";
@@ -52,7 +52,7 @@ export function SocialNavigation({
               onClick={() => select(key)}
               aria-current={view === key ? "page" : undefined}
               className={`${key === "create" ? "social-create-action" : ""} ${highlight === key ? "social-frequent" : ""}`}
-              title={`Alt + ${key === "feed" ? 1 : key === "clips" ? 2 : 3}`}
+              title={`${label} (Alt + ${key === "feed" ? 1 : key === "clips" ? 2 : 3})`}
             >
               <span className="social-nav-glyph">
                 <Icon size={24} />
@@ -62,13 +62,12 @@ export function SocialNavigation({
             </button>
           );
         })}
-        <NavigationLink href="/friends">
-          <span className="social-nav-glyph">
-            <Send size={23} />
-          </span>
-          <span>Mensagens</span>
-        </NavigationLink>
-        <button type="button" onClick={profile} aria-label="Meu perfil social">
+        <button
+          type="button"
+          onClick={profile}
+          aria-label="Meu perfil social"
+          title="Perfil"
+        >
           <span className="social-nav-glyph social-nav-avatar">
             <Avatar user={me} />
           </span>
@@ -76,11 +75,11 @@ export function SocialNavigation({
         </button>
       </nav>
       <div className="social-navigation-footer">
-        <button type="button" onClick={settings}>
-          <Settings2 size={21} /> Preferências
+        <button type="button" onClick={settings} title="Preferências">
+          <Settings2 size={21} /> <span>Preferências</span>
         </button>
-        <NavigationLink href="/home">
-          <Home size={21} /> Início do Enturma
+        <NavigationLink href="/home" title="Início do Enturma">
+          <Home size={21} /> <span>Início do Enturma</span>
         </NavigationLink>
         <p>Sua turma. Suas descobertas.</p>
       </div>

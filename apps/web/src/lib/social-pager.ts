@@ -5,6 +5,8 @@ export const PAGER_ORDER: readonly SocialView[] = ["clips", "feed", "create"];
 /** Leave the system back gesture alone near either screen edge. */
 export const EDGE_GUARD = 28;
 export const AXIS_LOCK = 10;
+/** Same phone limit as the application shell, so both switch layouts together. */
+export const PHONE_QUERY = "(max-width: 760px)";
 
 /** `dx > 0` means the finger travelled to the right, revealing the page on the left. */
 export function pagerNeighbor(view: SocialView, dx: number): SocialView | null {

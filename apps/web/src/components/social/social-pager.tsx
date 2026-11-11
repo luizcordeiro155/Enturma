@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { SocialView } from "@/lib/social";
 import {
   PAGER_ORDER,
+  PHONE_QUERY,
   gestureStartAllowed,
   lockAxis,
   pagerNeighbor,
@@ -17,7 +18,7 @@ type Drag = { x: number; y: number; at: number; axis: "x" | "y" | null };
 
 /**
  * Owns the Clips / Feed / Create pages. On phones the pages sit side by side and
- * follow the finger; from 768 px up only the selected page is shown. The dock and
+ * follow the finger; from 761 px up only the selected page is shown. The dock and
  * rail remain the button alternative to every gesture.
  */
 export function SocialPager({
@@ -37,7 +38,7 @@ export function SocialPager({
     swallowClick = useRef(false);
   const [phone, setPhone] = useState(false);
   useEffect(() => {
-    const query = matchMedia("(max-width: 767px)");
+    const query = matchMedia(PHONE_QUERY);
     const sync = () => setPhone(query.matches);
     sync();
     query.addEventListener?.("change", sync);

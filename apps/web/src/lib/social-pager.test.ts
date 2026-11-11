@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import {
   PAGER_ORDER,
+  PHONE_QUERY,
   gestureStartAllowed,
   lockAxis,
   pagerNeighbor,
@@ -9,6 +10,9 @@ import {
 
 it("mantém o Feed entre Clips e Criar", () => {
   expect(PAGER_ORDER).toEqual(["clips", "feed", "create"]);
+});
+it("usa o mesmo limite de celular do restante do aplicativo", () => {
+  expect(PHONE_QUERY).toBe("(max-width: 760px)");
 });
 it("mapeia o arrasto para a página vizinha, com o Feed no meio", () => {
   expect(pagerNeighbor("feed", 80)).toBe("clips");

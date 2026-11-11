@@ -43,7 +43,7 @@ function swipe(el: Element, fromX: number, toX: number, y = 300, toY = y) {
 beforeEach(() => {
   vi.stubGlobal("innerWidth", 390);
   vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: query.includes("max-width: 767px"),
+    matches: query.includes("max-width: 760px"),
     addEventListener: () => {},
     removeEventListener: () => {},
   }));
@@ -113,7 +113,7 @@ it("as páginas inativas ficam inertes", () => {
   expect(page("create")).toHaveAttribute("inert");
   expect(page("feed")).not.toHaveAttribute("inert");
 });
-it("acima de 767 px o arrasto não troca de página", () => {
+it("acima de 760 px o arrasto não troca de página", () => {
   vi.stubGlobal("matchMedia", () => ({
     matches: false,
     addEventListener: () => {},

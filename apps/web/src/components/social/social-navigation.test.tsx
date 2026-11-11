@@ -113,9 +113,12 @@ it("Social uses the existing selection handlers, persisted order and explicit ex
   expect(
     screen.getByRole("link", { name: "Início do Enturma" }),
   ).toHaveAttribute("href", "/home");
-  expect(within(nav).getByRole("link", { name: "Mensagens" })).toHaveAttribute(
-    "href",
-    "/friends",
+  // Messages moved to the Feed header; the dock keeps only the Social places.
+  expect(within(nav).queryByRole("link", { name: "Mensagens" })).toBeNull();
+  expect(within(nav).getAllByRole("button")).toHaveLength(4);
+  expect(within(nav).getByRole("button", { name: "Criar" })).toHaveAttribute(
+    "title",
+    "Criar (Alt + 3)",
   );
 });
 

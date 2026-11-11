@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Aperture, Search, Settings2, ArrowLeft } from "lucide-react";
+import { Aperture, Search, Send, Settings2, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
 import {
   type SocialPerson,
@@ -199,7 +199,10 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                 Enturma <span>Social.</span>
               </h1>
             </div>
-            <div className="social-row">
+            <div className="social-header-actions">
+              <NavigationLink href="/friends" aria-label="Mensagens">
+                <Send size={21} aria-hidden="true" />
+              </NavigationLink>
               <button
                 className="icon-control"
                 aria-label="Preferências do Social"

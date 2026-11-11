@@ -1,6 +1,6 @@
 /*
  * Enturma Social 3. Loaded after social.css; colours, type and radii come only from
- * the tokens in globals.css. Width bands: up to 767 px, 768–1199 px, 1200 px and up.
+ * the tokens in globals.css. Width bands follow the application shell: up to 760 px, 761–1199 px, 1200 px and up.
  */
 
 /* ---------- Pager: Clips | Feed | Create ---------- */
@@ -24,12 +24,12 @@
   min-width: 0;
   min-height: 0;
 }
-@media (min-width: 768px) {
+@media (min-width: 761px) {
   .social-pager-page[inert] {
     display: none;
   }
 }
-@media (max-width: 767px) {
+@media (max-width: 760px) {
   .social-pager {
     touch-action: pan-y;
   }
@@ -64,4 +64,63 @@
 }
 :root[data-reduced-motion="true"] .social-pager-track {
   transition: none;
+}
+
+/* ---------- Navigation: dock, icon rail, labelled rail ---------- */
+.social-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+html[data-theme] .social-header-actions > a {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  color: var(--ink);
+}
+html[data-theme] .social-header-actions > a:hover {
+  background: var(--soft);
+}
+.social-header-actions > a:focus-visible {
+  outline: 3px solid var(--ink);
+  outline-offset: 2px;
+}
+@media (max-width: 760px) {
+  .social-navigation-items {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+@media (min-width: 761px) and (max-width: 1199px) {
+  html .social-active-shell {
+    grid-template-columns: 72px minmax(0, 1fr);
+  }
+  .social-navigation {
+    padding: 18px 8px;
+    align-items: center;
+  }
+  .social-navigation-brand {
+    margin: 0 auto 24px;
+  }
+  .social-navigation-items,
+  .social-navigation-footer {
+    width: 100%;
+  }
+  html[data-theme] .social-navigation-items > :is(button, a),
+  html[data-theme] .social-navigation-footer > :is(button, a) {
+    justify-content: center;
+    gap: 0;
+    padding: 8px 0;
+  }
+  /* Icon-only rail: the label stays available to assistive technology and as a tooltip. */
+  .social-navigation-items > :is(button, a) > span:not(.social-nav-glyph),
+  .social-navigation-footer > :is(button, a) > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
 }
