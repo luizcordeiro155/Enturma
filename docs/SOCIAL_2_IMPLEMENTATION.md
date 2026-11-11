@@ -1,6 +1,6 @@
 # Enturma Social 2.0
 
-Branch `codex/enturma-social-2`, integrada à main `410a740`. O Social usa `/social`; o Fórum continua independente em `/forum`. Esta entrega não autoriza deploy ou ativação em produção.
+Branch `codex/enturma-social-2`, baseada na main `410a740`, entregue pela PR #144. O Social usa `/social`; o Fórum continua independente em `/forum`. O responsável autorizou a integração na main em 11/11/2026, condicionada às validações. Ativar mídia exige a configuração externa descrita abaixo.
 
 ## Implementação
 
@@ -110,7 +110,7 @@ O Dockerfile da API inclui FFmpeg/ffprobe e fontes DejaVu. O pacote Java da Squa
 
 ## Validação
 
-A integração com `main` no commit `fcceadf` passou na [CI 42943252908](https://github.com/luizcordeiro155/Enturma/actions/runs/42943252908). A mudança posterior de navegação passou localmente em 194 testes Web, TypeScript e lint sem erros. Os testes E2E adicionados cobrem a navegação nas larguras 390/820/1440 px, elegibilidade acadêmica e abertura do Social uma vez por documento; seu resultado final será registrado após a execução da CI.
+A integração com `main` no commit `fcceadf` passou na [CI 42943252908](https://github.com/luizcordeiro155/Enturma/actions/runs/42943252908). A mudança posterior de navegação passou localmente em 194 testes Web, TypeScript e lint sem erros. Os testes E2E adicionados cobrem a navegação nas larguras 390/820/1440 px, elegibilidade acadêmica e abertura do Social uma vez por documento; o resultado da revisão final fica nos checks da PR #144. A inspeção visual corrigiu a prioridade do CSS da navegação mobile e passou a verificar sua altura. A regressão também revelou uma corrida no catálogo: o worker agora aguarda o job mais antigo, impedindo importar uma grade enquanto o curso pai está sendo processado por outro worker. Um teste concorrente reproduz a trava e verifica o vínculo final.
 
 A [CI 42941050089](https://github.com/luizcordeiro155/Enturma/actions/runs/42941050089), commit `6df0bc8`, terminou com sucesso em 10/11/2026 (horário de São Paulo): 164 testes Java, sem falhas/erros e um opt-in R2 não executado na CI; 183 testes Web e quatro de contratos; 57 E2E; dois testes Python; lint, TypeScript, build Web, exports Android/iOS, compilação Android e segurança do desinstalador Windows aprovados. O teste R2 foi executado separadamente no bucket real, conforme descrito acima. O ensaio de restauração e os testes de banco usam PostgreSQL efêmero; não representam backup de produção.
 
@@ -136,4 +136,4 @@ Testes usam contas sintéticas e armazenamento simulado apenas na fronteira S3; 
 - Builds/exportações/Chromium não homologam câmera, codecs e compartilhamento nativo em aparelhos físicos. Não houve publicação de APK/EXE nesta entrega.
 - Controles técnicos não são certificação jurídica LGPD. Moderação operacional, política editorial e tratamento de menores precisam acompanhar a liberação.
 
-Após aprovação, implantar código e migrations aditivas com flags desligadas, verificar saúde/regressão, habilitar Social sem mídia e avaliar ativação limitada de mídia. Rollback funcional: desligar flags; não apagar tabelas, objetos ou contas. O binário anterior ignora tabelas adicionais. Esta tarefa não acionou deploy em produção.
+Na integração autorizada, publicar código e migrations aditivas com flags desligadas, verificar saúde/regressão, habilitar Social sem mídia e avaliar ativação limitada de mídia. Rollback funcional: desligar flags; não apagar tabelas, objetos ou contas. O binário anterior ignora tabelas adicionais. Publicação do código não significa que uploads já estejam habilitados; a ativação depende das configurações e verificações acima.

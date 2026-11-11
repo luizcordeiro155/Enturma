@@ -20,7 +20,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest(properties = "CHAT_ACCOUNT_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
+@SpringBootTest(properties = {
+  "CHAT_ACCOUNT_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=",
+  // Import tests drive the worker explicitly, including concurrent calls below.
+  "enturma.catalog.worker-delay=3600000"
+})
 @AutoConfigureMockMvc
 @org.springframework.test.annotation.DirtiesContext(
     classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
@@ -1064,6 +1068,51 @@ class PlatformIntegrationTest {
     db.jdbc.update("INSERT INTO user_block VALUES (?,?)", member.id(), host.id());
     assertThatThrownBy(() -> social.typing(host, id, new SocialController.Typing(true)))
         .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void catalogWorkerDoesNotSkipLockedParentJob() throws Exception {
+    for (int i = 0; i < 100; i++) imports.processBatch();
+    var mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+    String provider = "ORDER_" + UUID.randomUUID().toString().substring(0, 8).toUpperCase(Locale.ROOT);
+    var source = new CatalogRecord.Source(
+        "https://example.test/catalog", "Fixture de concorrência", "JSON_IMPORT",
+        "a".repeat(64), Instant.now().minusSeconds(20), Instant.now().minusSeconds(10));
+    var parent = new CatalogRecord(
+        "institution", "INSTITUTION", null, "Instituição da fixture", null, null, null,
+        "VERIFIED", source, mapper.createObjectNode());
+    var child = new CatalogRecord(
+        "campus", "CAMPUS", "institution", "Campus da fixture", null, null, null,
+        "VERIFIED", source, mapper.createObjectNode());
+    UUID parentJob = imports.submit(admin,
+        new CatalogRecord.Document(provider, List.of(parent)), "ordered-parent");
+    UUID childJob = imports.submit(admin,
+        new CatalogRecord.Document(provider, List.of(child)), "ordered-child");
+    var transaction = new org.springframework.transaction.support.TransactionTemplate(transactionManager);
+    try (var pool = Executors.newSingleThreadExecutor()) {
+      var started = new CountDownLatch(1);
+      Future<?> worker = transaction.execute(status -> {
+        db.jdbc.queryForObject("SELECT id FROM academic_import_job WHERE id=? FOR UPDATE", UUID.class, parentJob);
+        var task = pool.submit(() -> { started.countDown(); imports.processBatch(); });
+        try {
+          assertThat(started.await(5, TimeUnit.SECONDS)).isTrue();
+          assertThatThrownBy(() -> task.get(300, TimeUnit.MILLISECONDS)).isInstanceOf(TimeoutException.class);
+          assertThat(db.one("SELECT status FROM academic_import_job WHERE id=?", childJob).get("status"))
+              .isEqualTo("PENDING");
+        } catch (InterruptedException e) {
+          Thread.currentThread().interrupt();
+          throw new IllegalStateException(e);
+        }
+        return task;
+      });
+      worker.get(10, TimeUnit.SECONDS);
+    }
+    for (int i = 0; i < 10; i++) imports.processBatch();
+    assertThat(db.one("SELECT status FROM academic_import_job WHERE id=?", childJob).get("status"))
+        .isEqualTo("COMPLETED");
+    assertThat(db.one("SELECT parent_id FROM academic_entry WHERE id=?",
+        CatalogImports.identity(provider, "CAMPUS", "campus")).get("parentId"))
+        .isEqualTo(CatalogImports.identity(provider, "INSTITUTION", "institution"));
   }
 
   @Test
