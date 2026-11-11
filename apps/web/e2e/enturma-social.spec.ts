@@ -515,9 +515,14 @@ test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; control
   await page.screenshot({
     path: info.outputPath("social-video-editor-mobile.png"),
   });
+  // Mídia ainda não enviada: a ação principal envia, processa e publica em um só
+  // passo. A publicação direta só reaparece quando a mídia já está READY.
+  await expect(
+    page.getByRole("button", { name: "Enviar e publicar", exact: true }),
+  ).toBeEnabled();
   await expect(
     page.getByRole("button", { name: "Publicar Clip" }),
-  ).toBeDisabled();
+  ).toHaveCount(0);
 });
 
 test("câmera: gravação WebM real sem Duration abre o editor e preserva o rascunho", async ({
