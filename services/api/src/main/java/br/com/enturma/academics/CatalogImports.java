@@ -221,10 +221,12 @@ public class CatalogImports {
   @Scheduled(fixedDelayString = "${enturma.catalog.worker-delay:1500}")
   @Transactional
   public void processBatch() {
+    // Jobs can depend on entries from earlier jobs (course before curriculum).
+    // Wait for the oldest job instead of skipping its lock and importing children first.
     var jobs =
         db.list(
             "SELECT * FROM academic_import_job WHERE status IN ('PENDING','RUNNING') ORDER BY"
-                + " created_at LIMIT 1 FOR UPDATE SKIP LOCKED");
+                + " created_at LIMIT 1 FOR UPDATE");
     if (jobs.isEmpty()) return;
     var job = jobs.getFirst();
     UUID jobId = (UUID) job.get("id");

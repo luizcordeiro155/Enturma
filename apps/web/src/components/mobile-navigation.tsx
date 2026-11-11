@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useVisitor } from "@/lib/visitor-context";
 import { EnturmaAppIcon } from "./enturma-app-icon";
+import { useAppShellState } from "./app-shell-state";
 import {
   Home,
   Users,
@@ -16,6 +17,7 @@ import {
   Settings,
   Gamepad2,
   BriefcaseBusiness,
+  Aperture,
 } from "lucide-react";
 import {
   isInstalledApp,
@@ -25,13 +27,14 @@ import {
 const tabs = [
   ["/home", "Início", Home],
   ["/rooms", "Salas", Users],
+  ["/social", "Social Entu", Aperture],
   ["/forum", "Comunidade", MessagesSquare],
-  ["/notebooks", "Cadernos", BookOpen],
   ["/friends", "Amigos", Users],
 ] as const;
 export function MobileNavigation() {
   const pathname = usePathname();
   const guest = useVisitor();
+  const { learning, socialEnabled } = useAppShellState();
   const path = guest.active ? guest.path.split("?")[0] : pathname;
   const updateState = useAppUpdateState();
   const updatePending =
@@ -64,16 +67,20 @@ export function MobileNavigation() {
   return (
     <>
       <nav className="mobile-bottom-nav" aria-label="Navegação mobile">
-        {tabs.map(([href, label, Icon]) => (
-          <Link
-            href={href}
-            aria-current={path === href ? "page" : undefined}
-            key={href}
-          >
-            <Icon size={21} />
-            <span>{label}</span>
-          </Link>
-        ))}
+        {tabs
+          .filter(
+            ([href]) => href !== "/social" || (socialEnabled && !guest.active),
+          )
+          .map(([href, label, Icon]) => (
+            <Link
+              href={href}
+              aria-current={path === href ? "page" : undefined}
+              key={href}
+            >
+              <Icon size={21} />
+              <span>{label}</span>
+            </Link>
+          ))}
         <button
           type="button"
           aria-label="Mais opções"
@@ -104,6 +111,7 @@ export function MobileNavigation() {
             [
               ["/challenges", "Desafios acadêmicos", Gamepad2],
               ["/learn", "Programação", Gamepad2],
+              ["/notebooks", "Cadernos IA", BookOpen],
               ["/caronas", "Caronas", Car],
               ["/portfolio", "Portfólio acadêmico", BriefcaseBusiness],
               ["/profile", "Perfil", UserRound],
@@ -112,6 +120,7 @@ export function MobileNavigation() {
             ] as const
           )
             .filter(([href]) => !(href === "/download" && installedApp))
+            .filter(([href]) => href !== "/learn" || learning)
             .map(([href, label, Icon]) => (
               <Link
                 href={href}

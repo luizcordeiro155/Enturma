@@ -234,6 +234,14 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   for (const name of ["Cadernos", "Amigos", "Minhas matérias"]) {
     if (name === "Minhas matérias") {
       await page.goto("/subjects");
+    } else if (name === "Cadernos") {
+      await page
+        .getByRole("button", { name: "Mais opções", exact: true })
+        .click();
+      await page
+        .getByRole("dialog", { name: "Mais opções do Enturma" })
+        .getByRole("link", { name: "Cadernos IA", exact: true })
+        .click();
     } else {
       await page
         .getByRole("navigation", { name: "Navegação mobile" })

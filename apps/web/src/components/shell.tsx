@@ -28,6 +28,7 @@ import {
   useAppUpdateState,
 } from "./desktop-updates";
 import { MobileNavigation } from "./mobile-navigation";
+import { SocialEntry } from "./social/social-entry";
 import { RideDesktopNavigation, RideMobileNavigation } from "./ride-navigation";
 const links = [
   { href: "/home", label: "Início", icon: Home },
@@ -44,15 +45,20 @@ const links = [
 export function Shell({
   children,
   visitor = false,
+  navigation,
+  onKeyDown,
 }: {
   children: React.ReactNode;
   visitor?: boolean;
+  navigation?: React.ReactNode;
+  onKeyDown?: React.KeyboardEventHandler<HTMLDivElement>;
 }) {
   const pathname = usePathname();
   const guest = useVisitor();
   const path = visitor ? guest.path.split("?")[0] : pathname;
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
   const inRideHub = path.startsWith("/caronas");
+  const inSocial = path === "/social";
   const updateState = useAppUpdateState();
   const updatePending =
     isMobileApp() &&
@@ -134,18 +140,21 @@ export function Shell({
   }, [emailCelebration]);
   return (
     <div
+      onKeyDown={onKeyDown}
       className={
         inStudyRoom
           ? "app-shell room-active-shell"
           : inRideHub
             ? "app-shell ride-active-shell"
-            : "app-shell"
+            : inSocial
+              ? "app-shell social-active-shell"
+              : "app-shell"
       }
     >
       <a className="skip" href="#content">
         Pular para o conteúdo
       </a>
-      {inRideHub ? (
+      {inSocial ? navigation : inRideHub ? (
         <RideDesktopNavigation />
       ) : (
         <aside className="sidebar">
@@ -156,6 +165,7 @@ export function Shell({
             </span>
           </Link>
           <nav aria-label="Principal">
+            {!visitor && <SocialEntry />}
             {learning ? (
               <Link
                 href="/learn"
@@ -192,7 +202,7 @@ export function Shell({
         {!inRideHub ? (
           <header className="topbar">
             <span>
-              {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
+              {inSocial ? <Link href="/home" className="social-exit-link"><Home size={18} /> Início do Enturma</Link> : links.find((l) => l.href === path)?.label ?? "Seu espaço"}
             </span>
             <div className="topbar-actions">
               {visitor ? (
@@ -229,7 +239,7 @@ export function Shell({
           {!visitor && path.startsWith("/rooms") ? <CommunityFeedback /> : null}
           {children}
         </main>
-        {!inRideHub ? (
+        {!inRideHub && !inSocial ? (
           <footer className="app-legal-footer">
             <div className="app-legal-footer-status">
               <ShieldCheck size={20} />
@@ -247,7 +257,7 @@ export function Shell({
 
       {inRideHub ? (
         <RideMobileNavigation />
-      ) : !inStudyRoom ? (
+      ) : !inStudyRoom && !inSocial ? (
         <MobileNavigation />
       ) : null}
       {emailCelebration ? (

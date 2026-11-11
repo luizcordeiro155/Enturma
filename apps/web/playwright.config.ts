@@ -47,10 +47,16 @@ export default defineConfig({
     },
     {
       name: "chromium-social",
-      testMatch: /(?:forum|friends)\.spec\.ts/,
+      testMatch: /(?:forum|friends|enturma-social)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },
+        launchOptions: {
+          args: [
+            "--use-fake-ui-for-media-stream",
+            "--use-fake-device-for-media-stream",
+          ],
+        },
       },
     },
     {

@@ -3,7 +3,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import { Check, Copy, Search, Send, Users, X } from "lucide-react";
+import { Check, Copy, Search, Send, Share2, Users, X } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { playMotion } from "@/lib/motion";
 import { type RoomInvitation } from "@/lib/room-invite";
@@ -12,7 +12,6 @@ import {
   useOverlayHistory,
   waitForOverlayHistory,
 } from "@/lib/use-overlay-history";
-import { isDesktop, isMobileApp } from "./desktop-updates";
 import { Avatar, type PublicProfile } from "./user-identity";
 import { RoomArtwork } from "./room-artwork";
 
@@ -49,7 +48,6 @@ function ShareDialog({
     new Map<string, Awaited<ReturnType<typeof prepareRoomInvitation>>>(),
   );
   const alive = useRef(true);
-  const nativeApp = isDesktop() || isMobileApp();
   useOverlayHistory(onClose);
 
   useEffect(() => {
@@ -57,6 +55,10 @@ function ShareDialog({
     const element = dialog.current!;
     const previous = document.activeElement as HTMLElement | null;
     element.showModal();
+    const viewport = window.visualViewport;
+    const fit = () => element.style.setProperty("--invite-viewport", `${viewport?.height ?? window.innerHeight}px`);
+    fit();
+    viewport?.addEventListener("resize", fit);
     const animation = playMotion(
       element,
       [
@@ -68,6 +70,7 @@ function ShareDialog({
     return () => {
       alive.current = false;
       animation?.cancel();
+      viewport?.removeEventListener("resize", fit);
       element.close();
       void waitForOverlayHistory().then(() =>
         previous?.focus({ preventScroll: true }),
@@ -137,19 +140,31 @@ function ShareDialog({
     }
   }
 
-  async function copy() {
+  async function copy(code = false) {
     if (!share) return;
     try {
-      await navigator.clipboard.writeText(share.url);
+      await navigator.clipboard.writeText(code ? share.code : share.url);
       if (alive.current) {
-        setCopied(true);
-        setStatus("Link copiado.");
+        if (!code) setCopied(true);
+        setStatus(code ? "Código copiado." : "Link copiado.");
       }
     } catch {
       if (alive.current)
         setError(
           "Não foi possível copiar. Selecione o link abaixo para copiá-lo.",
         );
+    }
+  }
+
+  async function shareOutside() {
+    if (!share) return;
+    try {
+      const native = (window as Window & { EnturmaNative?: { shareRoom?: (code: string, title: string) => void } }).EnturmaNative;
+      if (native?.shareRoom) native.shareRoom(share.code, room?.title ?? "Sala do Enturma");
+      else if (navigator.share) await navigator.share({ title: room?.title ?? "Sala do Enturma", text: "Estude com a minha turma no Enturma", url: share.url });
+      else await copy();
+    } catch (cause) {
+      if ((cause as Error).name !== "AbortError") setError("Não foi possível abrir o compartilhamento. Você ainda pode copiar o convite.");
     }
   }
 
@@ -310,7 +325,10 @@ function ShareDialog({
                 iniciada.
               </p>
             </div>
-            {!nativeApp && (
+            <div className="room-invite-share-actions">
+              <button type="button" className="secondary" onClick={() => void copy(true)}><Copy size={16} /> Copiar código</button>
+              <button type="button" className="secondary" onClick={() => void shareOutside()}><Share2 size={16} /> Compartilhar convite</button>
+            </div>
               <div className="room-invite-web-link">
                 <label className="sr-only" htmlFor={`${searchId}-url`}>
                   Link do convite
@@ -330,7 +348,6 @@ function ShareDialog({
                   {copied ? "Copiado" : "Copiar link"}
                 </button>
               </div>
-            )}
           </footer>
         )}
       </div>
@@ -338,7 +355,7 @@ function ShareDialog({
   );
 }
 
-export function RoomSharePanel({ roomId }: { roomId: string }) {
+export function RoomSharePanel({ roomId, compact = false }: { roomId: string; compact?: boolean }) {
   const [open, setOpen] = useState(false);
   return (
     <div className="room-share-control">
@@ -347,9 +364,10 @@ export function RoomSharePanel({ roomId }: { roomId: string }) {
         className="secondary"
         aria-haspopup="dialog"
         aria-expanded={open}
+        aria-label="Compartilhar sala"
         onClick={() => setOpen(true)}
       >
-        <Users size={16} /> Compartilhar
+        <Share2 size={18} /> {!compact && "Compartilhar sala"}
       </button>
       {open &&
         createPortal(

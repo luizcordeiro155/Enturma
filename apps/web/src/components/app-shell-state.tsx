@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { usePathname } from "next/navigation";
@@ -22,6 +23,8 @@ type ProfileShortcut = {
 type AppShellState = {
   installedApp: boolean;
   learning: boolean;
+  socialEnabled: boolean;
+  claimSocialOpening: () => boolean;
   profileShortcut: ProfileShortcut | null;
   refreshProfileShortcut: (bumpAvatar?: boolean) => Promise<void>;
 };
@@ -36,11 +39,20 @@ export function AppShellStateProvider({
   useKeyboardViewport();
   const path = usePathname();
   const privatePage =
-    /^\/(home|rooms|friends|notebooks|profile|settings|caronas|forum|portfolio|onboarding|admin|challenges|learn|subjects)(\/|$)/.test(
+    /^\/(home|rooms|friends|notebooks|profile|settings|caronas|forum|portfolio|onboarding|admin|challenges|learn|subjects|social)(\/|$)/.test(
       path,
     );
   const [installedApp, setInstalledApp] = useState(false);
   const [learning, setLearning] = useState(false);
+  const [socialEnabled, setSocialEnabled] = useState(false);
+  // This provider survives client navigation, but a new app document starts a
+  // new opening. Backgrounding and revisiting the Social must not replay it.
+  const socialOpened = useRef(false);
+  const claimSocialOpening = useCallback(() => {
+    if (socialOpened.current) return false;
+    socialOpened.current = true;
+    return true;
+  }, []);
   const [profileShortcut, setProfileShortcut] =
     useState<ProfileShortcut | null>(null);
 
@@ -128,32 +140,66 @@ export function AppShellStateProvider({
   }, [privatePage, refreshProfileShortcut]);
 
   useEffect(() => {
-    if (!privatePage) return;
+    if (!privatePage) {
+      const reset = setTimeout(() => setLearning(false), 0);
+      return () => clearTimeout(reset);
+    }
     let active = true;
-    const refreshLearning = () =>
-      api<{ eligible: boolean }>("/learning/access", { cache: "no-store" })
+    let revision = 0;
+    const refreshLearning = () => {
+      const current = ++revision;
+      return api<{ eligible: boolean }>("/learning/access", {
+        cache: "no-store",
+      })
         .then((value) => {
-          if (active) setLearning(value.eligible);
+          if (active && current === revision) setLearning(value.eligible);
         })
         .catch(() => {});
+    };
+    const switchAccount = () => {
+      setLearning(false);
+      void refreshLearning();
+    };
     void refreshLearning();
     window.addEventListener("enturma-profile-updated", refreshLearning);
-    window.addEventListener("enturma-session-changed", refreshLearning);
+    window.addEventListener("enturma-session-changed", switchAccount);
     return () => {
       active = false;
       window.removeEventListener("enturma-profile-updated", refreshLearning);
-      window.removeEventListener("enturma-session-changed", refreshLearning);
+      window.removeEventListener("enturma-session-changed", switchAccount);
     };
   }, [privatePage]);
+
+  useEffect(() => {
+    if (!privatePage) return;
+    let active = true;
+    api<{ enabled: boolean }>("/social/capabilities")
+      .then((flags) => {
+        if (active) setSocialEnabled(flags.enabled);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, [privatePage, path]);
 
   const value = useMemo(
     () => ({
       installedApp,
       learning,
+      socialEnabled,
+      claimSocialOpening,
       profileShortcut,
       refreshProfileShortcut,
     }),
-    [installedApp, learning, profileShortcut, refreshProfileShortcut],
+    [
+      installedApp,
+      learning,
+      socialEnabled,
+      claimSocialOpening,
+      profileShortcut,
+      refreshProfileShortcut,
+    ],
   );
 
   return <Context.Provider value={value}>{children}</Context.Provider>;

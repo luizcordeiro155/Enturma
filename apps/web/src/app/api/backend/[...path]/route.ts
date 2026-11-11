@@ -30,6 +30,7 @@ async function proxy(
   const rememberConnected =
     route !== "auth/login" || req.headers.get("x-enturma-remember") !== "0";
   const headers = upstreamHeaders(req);
+  if (route.startsWith("social/media/") && route.endsWith("/content") && req.headers.has("range")) headers.set("Range", req.headers.get("range")!);
   headers.delete("x-enturma-remember");
   headers.set(
     "Content-Type",
@@ -74,6 +75,7 @@ async function proxy(
         "Content-Type":
           upstream.headers.get("Content-Type") ?? "application/json",
         "Cache-Control": "no-store",
+        ...(route.startsWith("social/media/") && route.endsWith("/content") ? Object.fromEntries(["Content-Range", "Accept-Ranges", "Content-Length"].flatMap(name => upstream.headers.has(name) ? [[name, upstream.headers.get(name)!]] : [])) : {}),
         ...(upstream.headers.has("Retry-After")
           ? { "Retry-After": upstream.headers.get("Retry-After")! }
           : {}),

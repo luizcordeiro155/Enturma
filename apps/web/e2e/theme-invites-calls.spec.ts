@@ -312,21 +312,75 @@ test("private invitation fits all themes, requires consent and keeps navigation 
       { headers: a.headers },
     );
     expect(shared.ok()).toBe(true);
-    const { code } = await shared.json();
-    // Production-origin invitations must stay inside preview/native clients, too.
-    const invitation = `https://enturma-flax.vercel.app/join/${code}`;
+    const { code, url: invitation } = await shared.json();
     await authenticate(page.context(), a);
     await authenticate(recipientContext, b);
+    await recipient.goto("/friends");
+    await expect
+      .poll(async () =>
+        (
+          await request.get(
+            `${backend}/api/v1/friends/${friendship}/identity`,
+            { headers: a.headers },
+          )
+        ).status(),
+      )
+      .toBe(200);
+    await page
+      .context()
+      .grantPermissions(["clipboard-read", "clipboard-write"]);
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(`/rooms/${room.id}`);
+    await page
+      .getByRole("button", { name: "Compartilhar sala", exact: true })
+      .click();
+    const sharing = page.getByRole("dialog", { name: "Convide sua turma" });
+    await expect(sharing.getByText(room.title, { exact: true })).toBeVisible();
+    await sharing.getByLabel("Buscar amigos").fill(b.username);
+    await sharing
+      .getByRole("button", { name: `Convidar ${b.username}`, exact: true })
+      .click();
+    await expect(
+      sharing.getByRole("button", {
+        name: `Convite enviado para ${b.username}`,
+        exact: true,
+      }),
+    ).toBeVisible();
+    await sharing
+      .getByRole("button", { name: "Copiar código", exact: true })
+      .click();
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toBe(code);
+    await sharing
+      .getByRole("button", { name: "Copiar link", exact: true })
+      .click();
+    await expect
+      .poll(() => page.evaluate(() => navigator.clipboard.readText()))
+      .toContain(`/join/${code}`);
+    const qr = sharing.getByRole("img", {
+      name: `QR Code para entrar na sala ${code}`,
+    });
+    await qr.scrollIntoViewIfNeeded();
+    await expect(qr).toBeVisible();
+    expect(
+      await sharing.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBe(true);
+    await page.screenshot({ path: info.outputPath("mobile-room-sharing.png") });
+    await sharing
+      .getByRole("button", { name: "Fechar convite", exact: true })
+      .click();
     await page.goto("/friends");
     await recipient.goto("/friends");
     await page.getByRole("button", { name: "Conversar", exact: true }).click();
     await recipient
       .getByRole("button", { name: "Conversar", exact: true })
       .click();
-    await page.getByLabel("Mensagem privada", { exact: true }).fill(invitation);
-    await page
-      .getByRole("button", { name: "Enviar mensagem", exact: true })
-      .click();
+    await expect(
+      page
+        .getByRole("region", { name: "Conversa privada" })
+        .getByRole("link", { name: invitation, exact: true }),
+    ).toBeVisible();
     const card = recipient.locator(".room-invitation-card");
     await expect(card.getByRole("heading", { name: room.title })).toBeVisible();
     for (const width of [360, 1440]) {

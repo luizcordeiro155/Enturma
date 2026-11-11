@@ -5,6 +5,7 @@ import { api, invalidateApiCache } from "./api";
 export type AppEventType =
   | "private_typing_changed"
   | "private_call_changed"
+  | "social_changed"
   | "forum_changed"
   | "notifications_changed"
   | "achievement_unlocked"
@@ -78,6 +79,7 @@ export function useAppConnection(enabled = true) {
               [
                 "private_typing_changed",
                 "private_call_changed",
+                "social_changed",
                 "forum_changed",
                 "notifications_changed",
                 "achievement_unlocked",

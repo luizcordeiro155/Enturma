@@ -5,6 +5,10 @@ public interface ObjectStorageService {
 
   byte[] get(String key);
 
+  void putFile(String key, java.nio.file.Path file, String mime);
+
+  java.io.InputStream open(String key, Long start, Long end);
+
   void delete(String key);
 
   boolean enabled();

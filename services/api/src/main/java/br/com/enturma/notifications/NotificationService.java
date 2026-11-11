@@ -150,7 +150,8 @@ public class NotificationService {
   public Object inbox(Actor a) {
     var rows =
         db.list(
-            "SELECT n.*,u.name actor_name FROM notification n LEFT JOIN app_user u ON"
+            "SELECT n.*,u.name actor_name,u.username actor_username,u.avatar_bytes IS NOT NULL actor_has_avatar,"
+                + "CASE WHEN n.kind='SOCIAL_FOLLOW' AND EXISTS(SELECT 1 FROM social_follow f WHERE f.follower_id=n.actor_id AND f.followed_id=n.user_id AND f.status='ACCEPTED') THEN coalesce((SELECT f.status FROM social_follow f WHERE f.follower_id=n.user_id AND f.followed_id=n.actor_id),'NONE') END social_follow_status FROM notification n LEFT JOIN app_user u ON"
                 + " u.id=n.actor_id WHERE "
                 + visible()
                 + " ORDER BY (n.read_at IS NULL) DESC,n.created_at DESC,n.id LIMIT 80",

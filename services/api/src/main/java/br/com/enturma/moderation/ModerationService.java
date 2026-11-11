@@ -18,7 +18,9 @@ public class ModerationService {
   public void block(Actor a, UUID target) {
     if (a.id().equals(target))
       throw ApiException.invalid("Não é possível bloquear sua própria conta.");
+    db.list("SELECT user_id FROM social_profile WHERE user_id IN (?,?) ORDER BY user_id FOR UPDATE", a.id(), target);
     db.jdbc.update("INSERT INTO user_block VALUES (?,?) ON CONFLICT DO NOTHING", a.id(), target);
+    db.jdbc.update("DELETE FROM social_follow WHERE (follower_id=? AND followed_id=?) OR (follower_id=? AND followed_id=?)", a.id(), target, target, a.id());
     db.jdbc.update(
         "DELETE FROM ride_live_location WHERE match_id IN (SELECT id FROM ride_match WHERE"
             + " (driver_id=? AND passenger_id=?) OR (driver_id=? AND passenger_id=?))",

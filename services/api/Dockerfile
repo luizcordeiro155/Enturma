@@ -5,7 +5,8 @@ RUN mvn -B dependency:go-offline
 COPY src src
 RUN mvn -B package -DskipTests
 FROM eclipse-temurin:21-jre-alpine
-RUN addgroup -S enturma && adduser -S enturma -G enturma
+RUN apk add --no-cache ffmpeg font-dejavu \
+    && addgroup -S enturma && adduser -S enturma -G enturma
 WORKDIR /app
 COPY --from=build /app/target/enturma-api-*.jar app.jar
 USER enturma

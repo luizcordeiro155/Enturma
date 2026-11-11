@@ -4,6 +4,8 @@ Referência: [`main` `9270a5f`](https://github.com/luizcordeiro155/Enturma/commi
 
 [Estado atual](STATUS.md) · [Auditoria completa](DOCUMENTATION_AUDIT_2026_11_03.md) · [Release #135](RELEASE_EXPERIENCE_STABILIZATION.md) · [Operação](OPERATIONS_READINESS.md) · [Segurança](../SECURITY.md)
 
+Complemento de 10/11/2026: [Enturma Social 2.0](SOCIAL_2_IMPLEMENTATION.md) descreve o novo módulo independente do Fórum, contratos, migrations, mídia privada no R2, evidências e condições de ativação. As flags permanecem desligadas por padrão; essa documentação não anuncia publicação em produção.
+
 ## Inventário Markdown
 
 | Arquivo | Tratamento |

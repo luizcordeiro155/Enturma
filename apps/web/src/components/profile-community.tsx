@@ -13,6 +13,7 @@ import { Avatar, type PublicProfile } from "./user-identity";
 import { ShowcaseView, type Showcase } from "./profile-showcase";
 import { profileEntrance } from "./profile-motion";
 import { RideReputation } from "./ride-reputation";
+import { SocialEntry } from "./social/social-entry";
 
 type Community = {
   rooms: { id: string; title: string; status: string }[];
@@ -98,6 +99,7 @@ export function ProfileCommunity({
       showcase.appearance.projects?.trim());
   return (
     <div className="profile-community">
+      <SocialEntry person={userId} onNavigate={onNavigate} />
       <div
         className="profile-community-tabs"
         role="tablist"

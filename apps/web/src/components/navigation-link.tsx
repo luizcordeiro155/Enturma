@@ -33,7 +33,7 @@ export function NavigationLink({
   const router = useRouter();
   const [preparing, setPreparing] = useState(false);
   const href = typeof props.href === "string" ? props.href : "";
-  const privateLink = /^\/(home|rooms|friends|profile|settings|notebooks|caronas|forum|portfolio|challenges|learn|onboarding)(\/|$)/.test(href);
+  const privateLink = /^\/(home|rooms|friends|profile|settings|notebooks|caronas|forum|portfolio|challenges|learn|onboarding|social)(\/|$)/.test(href);
   return (
     <Link {...props} prefetch={privateLink ? false : props.prefetch ?? true}
       onNavigate={privateLink ? (event) => {

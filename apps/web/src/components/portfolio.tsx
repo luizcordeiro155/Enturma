@@ -384,7 +384,7 @@ export function PublicPortfolio({ username }: { username: string }) {
           <h2>Projetos</h2>
           <div className="public-projects">
             {data.projects.map((p, i) => (
-              <article key={p.id ?? i}>
+              <article key={p.id ?? i} id={p.id ? `projeto-${p.id}` : undefined}>
                 <PortfolioAttachments
                   ids={p.assets}
                   assets={data.assets ?? []}
