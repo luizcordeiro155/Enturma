@@ -107,7 +107,13 @@ O Dockerfile da API inclui FFmpeg/ffprobe e fontes DejaVu. O pacote Java da Squa
 
 ## Validação
 
-O resultado final e o link da execução serão registrados após a suíte completa. Testes usam PostgreSQL efêmero, contas sintéticas e armazenamento simulado apenas na fronteira S3; FFmpeg/ffprobe são reais. O teste de player usa mídia de contrato no navegador; a integração Spring verifica processamento, autorização e publicação.
+A [CI 42941050089](https://github.com/luizcordeiro155/Enturma/actions/runs/42941050089), commit `6df0bc8`, terminou com sucesso em 10/11/2026 (horário de São Paulo): 164 testes Java, sem falhas/erros e um opt-in R2 não executado na CI; 183 testes Web e quatro de contratos; 57 E2E; dois testes Python; lint, TypeScript, build Web, exports Android/iOS, compilação Android e segurança do desinstalador Windows aprovados. O teste R2 foi executado separadamente no bucket real, conforme descrito acima. O ensaio de restauração e os testes de banco usam PostgreSQL efêmero; não representam backup de produção.
+
+As capturas no artefato `interface-evidence` foram inspecionadas: Feed e Clips em 390/1440 px, temas Claro/Escuro/Enturma, editor e convite mobile. O player manteve vídeo único, controles visíveis e posição após redimensionamento. Uma correção adicional deixa a duração do trecho herdar o contraste do botão selecionado no editor. A integração posterior com `main` `410a740` passou nos testes locais de links/perfis, TypeScript e compilação de testes Java; o resultado da suíte dessa integração fica nos checks da [PR #144](https://github.com/luizcordeiro155/Enturma/pull/144).
+
+No ensaio limitado de carga dessa execução, 144 leituras de catálogo/conta em ambiente efêmero retornaram HTTP 200; p95 de 7/19/42 ms para concorrência 1/4/12. Não mede capacidade de produção nem processamento/tráfego de vídeos. O inventário de dependências registrou 22 entradas npm (seis altas, 15 moderadas, uma baixa) e dois advisories em Spring MVC. Não é uma auditoria limpa; a [triagem de dependências](DEPENDENCY_AUDIT.md) explica as cadeias herdadas e os limites. A CI coleta esses relatórios, sem confundir aprovação funcional com ausência de vulnerabilidades.
+
+Testes usam contas sintéticas e armazenamento simulado apenas na fronteira S3; FFmpeg/ffprobe são reais. O teste de player usa mídia de contrato no navegador; a integração Spring verifica processamento, autorização e publicação.
 
 - Unidade: crop/rotação, timeline, undo/redo, duração, captions, cursor, ranking, links internos, gestos, duração de Story e deduplicação.
 - Integração: propriedade/privacidade, bloqueio, seguidores privados, marcação, expiração/destaque/overlay, idempotência, versão, consentimento, feeds diferentes e decisões administrativas.
