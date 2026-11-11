@@ -66,13 +66,21 @@ export async function proxy(req: NextRequest) {
     response.headers.set("Cache-Control", "private, no-store");
     return response;
   }
-  // Presentation is public, but never interrupts an existing session or the mobile shell.
+  // Native shells never show the public marketing Start screen.
+  // With an existing session the protected /home route performs session checks;
+  // otherwise desktop opens the login directly (including on /start).
   if (req.nextUrl.pathname === "/" || req.nextUrl.pathname === "/start") {
-    if (
+    const agent = req.headers.get("user-agent") ?? "";
+    const desktop = /EnturmaDesktop\//.test(agent);
+    const authenticated =
       req.cookies.has("enturma_access") ||
-      req.cookies.has("enturma_refresh") ||
-      /EnturmaMobile\//.test(req.headers.get("user-agent") ?? "")
-    ) {
+      req.cookies.has("enturma_refresh");
+    if (desktop && !authenticated) {
+      const response = NextResponse.redirect(new URL("/login", req.url));
+      response.headers.set("Cache-Control", "private, no-store");
+      return response;
+    }
+    if (authenticated || /EnturmaMobile\//.test(agent)) {
       const response = NextResponse.redirect(new URL("/home", req.url));
       response.headers.set("Cache-Control", "private, no-store");
       return response;

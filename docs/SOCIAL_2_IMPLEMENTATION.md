@@ -1,6 +1,6 @@
 # Enturma Social 2.0
 
-Branch `codex/enturma-social-2`, baseada na main `9270a5f`. O Social usa `/social`; o Fórum continua independente em `/forum`. Esta entrega não autoriza deploy ou ativação em produção.
+Branch `codex/enturma-social-2`, integrada à main `410a740`. O Social usa `/social`; o Fórum continua independente em `/forum`. Esta entrega não autoriza deploy ou ativação em produção.
 
 ## Implementação
 

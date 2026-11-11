@@ -1,5 +1,7 @@
 # SquareCloud + Vercel
 
+> **Estado em 03/11/2026:** a Web da PR #135 está publicada; Windows/Android **0.4.424** foram gerados pelos distribuidores Railway a partir de `9270a5f` com `SUCCESS` em 02/11. A API Java permanece documentada na SquareCloud, com PostgreSQL no Railway. Não deduzir o SHA do backend pelo build dos clientes. Versões de `package.json` não equivalem às versões públicas dos instaladores. Consulte [STATUS](STATUS.md).
+
 **Decisão do responsável — 30/10/2026:** publicação em produção autorizada sem exigir homologação em aparelhos físicos, assinatura Windows ou validações operacionais como gates. A dispensa anterior de backup externo permanece. Esses itens não são apresentados como testes concluídos. A publicação continua condicionada aos checks de código desta revisão; evidências e limites no [ciclo de experiência](RELEASE_EXPERIENCE_STABILIZATION.md). As avaliações históricas abaixo conservam seu escopo original.
 
 Antes de promover esta Release Candidate, seguir [gates](PRODUCTION_READINESS.md) e [runbook de operação/rollback](OPERATIONS_READINESS.md). CI verde não comprova restore real, papel efetivo do banco, assinatura do instalador ou homologação física. Flyway pode usar credenciais separadas via `FLYWAY_DATABASE_*`; sua ausência mantém compatibilidade com a conexão atual.
@@ -125,7 +127,7 @@ O CI usa build web de produção e executa o JAR compilado para Java 21 no runti
 
 ## Operação e mobile
 
-Ative backups do PostgreSQL, teste restauração em banco separado e acompanhe saúde, memória, conexões e falhas de provedores. A API não depende de arquivo local permanente para dados dos usuários. Certificados de conexão são configuração privada.
+Backups do PostgreSQL e restauração em banco separado são recomendados; o responsável dispensou backup externo neste ciclo, portanto não anunciar recuperação validada. Acompanhe saúde, memória, conexões e falhas de provedores. A API não depende de arquivo local permanente para dados dos usuários. Certificados de conexão são configuração privada.
 
 O app Expo continua usando a mesma API por `EXPO_PUBLIC_API_URL=https://SEU-SUBDOMINIO.squareweb.app/api/v1`. Não participa do build da Vercel. A versão 0.3.0 possui navegação nativa, chamadas persistentes e perfis EAS APK/AAB/iOS; consulte MOBILE.md. Não houve publicação em lojas.
 

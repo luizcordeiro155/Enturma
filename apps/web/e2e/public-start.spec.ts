@@ -177,3 +177,133 @@ test("presentation remains usable with reduced motion", async ({ page }) => {
   await page.getByRole("link", { name: "Quero participar" }).click();
   await expect(page).toHaveURL(/\/login$/);
 });
+
+test("app Desktop entra no login sem exibir apresentação Start", async ({
+  browser,
+  baseURL,
+}) => {
+  const desktop = await browser.newContext({
+    baseURL,
+    userAgent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) EnturmaDesktop/0.4.424",
+  });
+  try {
+    const page = await desktop.newPage();
+    for (const path of ["/", "/start"]) {
+      await page.goto(path);
+      await expect(page).toHaveURL(/\/login(?:\?|$)/);
+      await expect(page.locator("#start-title")).toHaveCount(0);
+      await expect(page.getByRole("button", { name: "Entrar" })).toBeVisible();
+    }
+  } finally {
+    await desktop.close();
+  }
+});
+
+test("APP Desktop permite rolar o portfólio público longo sem liberar scroll nas outras telas", async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1024, height: 600 });
+  await page.addInitScript(() => {
+    Object.defineProperty(window, "enturmaDesktop", {
+      configurable: true,
+      value: {
+        isDesktop: true,
+        windowChrome: true,
+        nativeUpdater: true,
+        setTheme: async () => {},
+        getInfo: async () => ({ version: "0.4.424", platform: "win32" }),
+        getUpdateState: async () => ({
+          status: "current", progress: 100, currentVersion: "0.4.424",
+        }),
+        onUpdateState: () => () => {},
+        checkForUpdates: async () => {},
+        installUpdate: async () => {},
+        openExternal: async () => {},
+      },
+    });
+  });
+  await page.route("**/api/backend/public/portfolio/teste-scroll*", (route) =>
+    route.fulfill({
+      json: {
+        id: "test-owner", name: "Estudante de teste", username: "teste-scroll",
+        publicProfile: true, headline: "Portfólio de projetos",
+        summary: "Projetos universitários e experiências acadêmicas.",
+        accentColor: "#183f36", hasAvatar: false, hasBanner: false,
+        assets: [], skills: ["Java", "TypeScript"],
+        projects: Array.from({ length: 16 }, (_, i) => ({
+          id: String(i), name: `Projeto acadêmico ${i + 1}`,
+          description: "Descrição de um projeto da faculdade.",
+          assets: [],
+        })),
+        subjects: [{ name: "Programação" }],
+        achievements: [], stats: { totalXp: 120, currentStreak: 3 },
+        studyMinutes: 45,
+      },
+    }),
+  );
+
+  await page.goto("/p/teste-scroll?returnTo=%2Fportfolio");
+  const portfolio = page.locator("main.public-portfolio");
+  await expect(page.locator("html")).toHaveAttribute("data-desktop-chrome", "true");
+  await expect(portfolio.getByRole("heading", { name: "Projeto acadêmico 16" })).toBeVisible();
+  const metrics = await page.evaluate(() => ({
+    scrollHeight: document.scrollingElement?.scrollHeight ?? 0,
+    viewportHeight: window.innerHeight,
+    overflowY: getComputedStyle(document.body).overflowY,
+  }));
+  expect(metrics.scrollHeight).toBeGreaterThan(metrics.viewportHeight + 500);
+  expect(["auto", "scroll"]).toContain(metrics.overflowY);
+
+  await page.evaluate(() => {
+    document.scrollingElement?.scrollTo({ top: 800, behavior: "instant" });
+  });
+  await expect.poll(() =>
+    page.evaluate(() => document.scrollingElement?.scrollTop ?? 0)
+  ).toBeGreaterThan(300);
+  await expect(page.getByRole("link", { name: /Voltar ao Enturma/ })).toHaveCount(1);
+});
+
+test("download explica alertas de segurança e oferece comparação de SHA-256 para cada instalador", async ({ page }) => {
+  await page.route("**/latest.json", (route) => {
+    if (!route.request().url().includes("enturma-desktop-download-v5-production.up.railway.app")) {
+      return route.continue();
+    }
+    return route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({
+        version: "0.4.424",
+        installerSha256: "a".repeat(64),
+        installerUrl: "https://enturma-desktop-download-v5-production.up.railway.app/Enturma-Setup-0.4.424.exe",
+      }),
+    });
+  });
+  await page.route("**/latest-android.json", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      headers: { "Access-Control-Allow-Origin": "*" },
+      body: JSON.stringify({
+        version: "0.4.424",
+        sha256: "b".repeat(64),
+        downloadUrl: "https://enturma-android-download-v3-production.up.railway.app/Enturma-Android-0.4.424.apk",
+      }),
+    }),
+  );
+  await page.goto("/download");
+  await expect(page.getByRole("heading", { name: /Por que o Windows pode mostrar um aviso/i })).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Instale com segurança/i })).toBeVisible();
+  await expect(page.getByText("O Windows protegeu o computador")).toBeVisible();
+  await expect(page.getByText(/assinatura digital de código/i).first()).toBeVisible();
+  await expect(page.getByRole("heading", { name: /Confira o arquivo antes de instalar/i })).toBeVisible();
+
+  const windows = page.getByRole("region", { name: "Integridade do instalador Windows" });
+  await expect(windows.getByText("a".repeat(64))).toBeVisible();
+  const android = page.getByRole("region", { name: "Integridade do APK Android" });
+  await expect(android.getByText("b".repeat(64))).toBeVisible();
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(page.getByRole("heading", { name: /Instale com segurança/i })).toBeVisible();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+});

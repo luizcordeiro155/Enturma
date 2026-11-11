@@ -1,0 +1,104 @@
+{
+  "provider": "PUCMINAS",
+  "course": "Sistemas de Informação",
+  "campus": "Uberlândia",
+  "gradeDate": "2023-05-30",
+  "sourceUrl": "https://www.pucminas.br/campus/uberlandia/ensino/graduacao/Paginas/Sistemas-de-Informacao.aspx",
+  "auditNote": "Grade publicada em 2023, versão histórica. Não inventar horas-aula; nenhum turno vigente confirmado para 2026.",
+  "reviewedAt": "2026-11-07T03:00:00Z",
+  "integrityScope": "SHA-256 UTF-8 of the transcription, not a remote page checksum",
+  "semesters": [
+    {
+      "number": 1,
+      "subjects": [
+        "ALGORITMOS E TÉCNICAS DE PROGRAMAÇÃO",
+        "FILOSOFIA: RAZÃO E MODERNIDADE",
+        "INTRODUÇÃO A ADMINISTRAÇÃO",
+        "INTRODUÇÃO À COMPUTAÇÃO",
+        "LABORATÓRIO DE ALGORITMOS E TÉCNICAS DE PROGRAMAÇÃO",
+        "MATEMÁTICA DISCRETA"
+      ]
+    },
+    {
+      "number": 2,
+      "subjects": [
+        "ARQUITETURA DE COMPUTADORES",
+        "CÁLCULO I",
+        "FILOSOFIA: ANTROPOLOGIA E ÉTICA",
+        "FUNDAMENTOS DE SISTEMAS DE INFORMAÇÃO",
+        "LABORATÓRIO DE PROGRAMAÇÃO ORIENTADA POR OBJETOS",
+        "PROGRAMAÇÃO ORIENTADA POR OBJETOS"
+      ]
+    },
+    {
+      "number": 3,
+      "subjects": [
+        "ALGORITMOS E ESTRUTURAS DE DADOS",
+        "BANCOS DE DADOS",
+        "CÁLCULO II",
+        "LABORATÓRIO DE ALGORITMOS E ESTRUTURAS DE DADOS",
+        "MODELAGEM DE PROCESSOS DE NEGÓCIOS",
+        "SISTEMAS OPERACIONAIS"
+      ]
+    },
+    {
+      "number": 4,
+      "subjects": [
+        "ALGORITMOS EM GRAFOS",
+        "CULTURA RELIGIOSA: FENÔMENO RELIGIOSO",
+        "ENGENHARIA DE REQUISITOS",
+        "ESTATÍSTICA E PROBABILIDADE",
+        "INTRODUÇÃO À PESQUISA EM INFORMÁTICA",
+        "REDES DE COMPUTADORES"
+      ]
+    },
+    {
+      "number": 5,
+      "subjects": [
+        "COMPUTADORES E SOCIEDADE",
+        "CULTURA RELIGIOSA: PESSOA E SOCIEDADE",
+        "FUNDAMENTOS DE TESTES DE SOFTWARE",
+        "INTELIGÊNCIA ARTIFICIAL",
+        "INTERAÇÃO HUMANO-COMPUTADOR",
+        "PROJETO DE REDES DE COMPUTADORES",
+        "TÉCNICAS AVANÇADAS DE PROGRAMAÇÃO"
+      ]
+    },
+    {
+      "number": 6,
+      "subjects": [
+        "ESTÁGIO OBRIGATÓRIO",
+        "GERENCIA DE PROJETOS DE SOFTWARE",
+        "LABORATÓRIO DE DESENVOLVIMENTO DE SISTEMAS DE INFORMAÇÃO",
+        "PROCESSOS E QUALIDADE DE SOFTWARE",
+        "PROJETO DE SISTEMAS DE INFORMAÇÃO",
+        "TECNOLOGIAS PARA DESCOBERTA DE CONHECIMENTO",
+        "TECNOLOGIAS WEB"
+      ]
+    },
+    {
+      "number": 7,
+      "subjects": [
+        "DESENVOLVIMENTO DE APLICAÇÕES DISTRIBUÍDAS",
+        "EMPREENDEDORISMO E PLANO DE NEGÓCIOS",
+        "FUNDAMENTOS DE MARKETING",
+        "GESTÃO DE SERVIÇOS DE TECNOLOGIA DA INFORMAÇÃO",
+        "OTIMIZAÇÃO DE SISTEMAS COMPUTACIONAIS",
+        "PLANEJAMENTO DE CAPACIDADE E AVALIAÇÃO DE SISTEMAS COMPUTACIONAIS",
+        "TECNOLOGIAS DE BANCOS DE DADOS",
+        "TRABALHO DE CONCLUSÃO DE CURSO I"
+      ]
+    },
+    {
+      "number": 8,
+      "subjects": [
+        "GOVERNANÇA DE TECNOLOGIA DA INFORMAÇÃO",
+        "SEGURANÇA DE SISTEMAS DE INFORMAÇÃO",
+        "SISTEMAS INTEGRADOS DE GESTÃO EMPRESARIAL",
+        "TECNOLOGIAS DA INFORMAÇÃO E DO CONHECIMENTO",
+        "TÓPICOS ESPECIAIS EM SISTEMAS DE INFORMAÇÃO",
+        "TRABALHO DE CONCLUSÃO DE CURSO II"
+      ]
+    }
+  ]
+}

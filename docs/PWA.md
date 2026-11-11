@@ -17,7 +17,7 @@ A instalação PWA não baixa EXE ou APK. O navegador cria o atalho/aplicativo u
 - `start_url=/home?source=pwa`;
 - `display=standalone`;
 - escopo raiz;
-- ícones gerados pelo Next.js;
+- ícones oficiais do Enturma, com arquivos de manifesto e metadata;
 - atalhos para Início, Salas, Comunidade e Cadernos.
 
 ## Service Worker
@@ -42,8 +42,8 @@ Isso preserva atualizações Web imediatas e evita servir dados privados antigos
 
 - O item **Instalar aplicativo** some imediatamente quando o navegador confirma a instalação e permanece oculto nas próximas aberturas desse navegador.
 - O ícone de instalação e os ícones do manifesto usam exatamente o mesmo `apps/mobile/assets/icon.png` da versão mobile do Enturma.
-- A página de instalação não oferece mais EXE/APK como alternativas visíveis; o fluxo principal passa a ser somente PWA.
-- As notificações internas continuam funcionando na PWA enquanto ela está aberta. Push do sistema com a PWA fechada ainda depende de Web Push; o FCM atual registra somente o aplicativo Android nativo.
+- A página `/download` oferece explicitamente **Windows EXE e Android APK como opções principais**, conforme `apps/web/src/app/download/page.tsx`. PWA é alternativa de instalação pelo navegador.
+- O Web/PWA possui **Web Push** por `PushManager`, chave VAPID e componente `WebPushRegistration`, condicionado a permissão, HTTPS, service worker e navegador/SO. Android usa FCM nativo. Não há garantia de som próprio quando a PWA está fechada.
 
 
 ## Ícone oficial da instalação

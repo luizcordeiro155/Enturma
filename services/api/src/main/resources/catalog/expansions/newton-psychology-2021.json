@@ -1,0 +1,1521 @@
+{
+  "provider": "NEWTON",
+  "entries": [
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "kind": "CURRICULUM",
+      "parentExternalId": "newton-2025-presential-psicologia-bachelor",
+      "name": "Psicologia — Matriz histórica 2021.1",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 10,
+        "totalWorkloadHours": 4440,
+        "effectiveYear": 2021,
+        "historical": true,
+        "note": "Matriz oficial de 2021, não comprova vigência da oferta atual; inclui 120h de atividades complementares não atribuídas a semestre."
+      },
+      "curriculumVersion": "2021.1"
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 1
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1",
+      "name": "História da Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1",
+      "name": "Desenvolvimento Humano da infância e da adolescência",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1",
+      "name": "Antropologia e Cultura Brasileira",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1",
+      "name": "Processos Psicológicos Básicos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1",
+      "name": "Comunicação efetiva I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p1",
+      "name": "Estratégias colaborativas I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 2
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2",
+      "name": "Psicologia Social",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2",
+      "name": "Bases Estruturais e Funcionais do Comportamento Humano",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2",
+      "name": "Desenvolvimento Humano na Vida Adulta e Envelhecimento",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2",
+      "name": "Análise Experimental do Comportamento Humano",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p2",
+      "name": "Estratégias colaborativas II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 3
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3",
+      "name": "Estágio Básico I - Habilidades: observação e entrevista",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 100,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3",
+      "name": "Teorias Fenomenológicas e Existenciais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3",
+      "name": "Fundamentos da Avaliação Psicológica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3",
+      "name": "Saúde Coletiva",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3",
+      "name": "Bases Biológicas do Comportamento Humano",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p3",
+      "name": "Estratégias colaborativas III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 4
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4",
+      "name": "Estágio Básico II - Processos Psicossociais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 100,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4",
+      "name": "Psicologia nas Políticas de Gestão",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4",
+      "name": "Psicopatologia do Adulto",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4",
+      "name": "Teoria Psicanalítica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4",
+      "name": "Psicologia Aplicada às Políticas Públicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4",
+      "name": "Comunicação efetiva II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p4",
+      "name": "Estratégias colaborativas IV",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 5
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5",
+      "name": "Estágio Básico III - Processos Educativos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 100,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5",
+      "name": "Teoria Sistêmica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5",
+      "name": "Intervenções Psicoeducativas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5",
+      "name": "Processos Grupais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5",
+      "name": "Psicologia e Saúde Mental no Trabalho",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5",
+      "name": "Métodos e Técnicas de Avaliação Psicológica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 100,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p5",
+      "name": "Laboratório de carreira I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 20,
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 6
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6",
+      "name": "Estágio Básico IV - Processos Laborais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 100,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6",
+      "name": "Análise do Comportamento Aplicada",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6",
+      "name": "Técnicas de Pesquisa em Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6",
+      "name": "Políticas Públicas e Modelos de atenção à saúde",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6",
+      "name": "Psicofarmacologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6",
+      "name": "Teorias Analítico Comportamentais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p6",
+      "name": "Psicologia Organizacional e do Trabalho",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 7
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "name": "Estágio Básico V - Processos de Acolhimento e Avaliação Psicológica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 100,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "name": "Psicologia Escolar e Educacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "name": "Educação, direito e cidadania",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "name": "Intervenções Psicossociais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "name": "Epidemiologia e Bioestatística",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "name": "Processos Psicopatológicos na Infância e na Adolescência",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "name": "Laboratório de carreira II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 20,
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7-s8",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p7",
+      "name": "Educação, Sociedade e Meio Ambiente",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 7,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 8
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8",
+      "name": "Estágio Específico Ênfase I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 120,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8",
+      "name": "Intervenções Analítico Comportamentais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8",
+      "name": "Intervenções Fenomenológicas e Existenciais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8",
+      "name": "Intervenções Sistêmicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8",
+      "name": "Intervenções Psicanalíticas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p8",
+      "name": "Diversidade na contemporaneidade",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "9º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 9
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9",
+      "name": "Estágio Específico Ênfase II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 120,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9",
+      "name": "Psicologia Jurídica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9",
+      "name": "Psicologia da Urgência e Desastre",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9",
+      "name": "Intervenções Psicológicas na Infância e na Adolescência",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p9",
+      "name": "Trabalho de Conclusão de Curso I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10",
+      "kind": "PERIOD",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1",
+      "name": "10º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {},
+      "periodNumber": 10
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10",
+      "name": "Estágio Específico Ênfase III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 120,
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10",
+      "name": "Temas Contemporâneos em Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10",
+      "name": "Clinica Ampliada",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10",
+      "name": "Psicologia da Saúde",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 80,
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10",
+      "name": "Optativa I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 4,
+        "required": false,
+        "learningArea": "OTHER"
+      }
+    },
+    {
+      "externalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "catalog-newton-catalog-campus-nao-definido-psicologia-bachelor-matriz-2021-1-p10",
+      "name": "Trabalho de Conclusão de Curso II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2021/07/Psicologia.pdf",
+        "name": "Newton Paiva - Psicologia, matriz institucional 2021.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "79200deb114df76aeebc0226f9dd9234fc6bb6f2cfa5cc676392661039b01917",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "workloadHours": 40,
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "OTHER"
+      }
+    }
+  ]
+}

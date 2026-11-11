@@ -26,9 +26,9 @@ Os snapshots oficiais UNA/PUC/UFMG são importados por jobs em lotes, com valida
 
 ---
 
-## Inventário completo das migrations — atualizado em 28/10/2026
+## Inventário das migrations — revisado em 03/11/2026
 
-O repositório contém migrations **V1 a V65**. A presença do arquivo não comprova a aplicação no banco de produção: conferir `flyway_schema_history` antes de divulgar a versão do schema.
+A árvore atual contém **67 arquivos SQL de migration: V1–V66 e V68**, sem V67. O Flyway aceita saltos no versionamento; a presença no repositório não prova aplicação no banco de produção. Conferir `flyway_schema_history` antes de divulgar o schema efetivo.
 
 | Versões | Principais mudanças |
 |---|---|
@@ -48,6 +48,11 @@ O repositório contém migrations **V1 a V65**. A presença do arquivo não comp
 | V64 | Custódia cifrada da chave de sincronização da conta |
 | V65 | Índices de proprietário e referência de anexos de salas |
 
+| V66 | Idempotência de mensagens por `client_id` e tabelas de recibos de entrega/leitura em chats privados e de salas |
+| V68 | Tema opcional `ENTURMA` na preferência de experiência, sem modificar valores anteriormente gravados |
+
+**Não existe V67 no repositório.** O lote dos convites reutiliza tabelas e contratos existentes. Mensagens antigas não recebem confirmação de leitura/entrega inferida.
+
 Não modificar migrations históricas. Antes de qualquer atualização, fazer backup, simular restauração, validar foreign keys e testes com banco isolado. Publicar o backend compatível antes dos clientes que usem novas colunas.
 
-A consulta somente de leitura de 28/10 confirmou Flyway V65. A credencial do pacote disponível ignora RLS; a role efetiva da API em execução ainda deve ser comprovada. [Separação de permissões e restore](OPERATIONS_READINESS.md).
+A consulta **histórica** de 28/10 confirmou Flyway V65 naquela data. O código atual inclui V66 e V68; a aplicação real em produção exige consulta a `flyway_schema_history`. A credencial examinada ignorava RLS; a role efetiva da API em execução ainda deve ser comprovada. [Separação de permissões e restore](OPERATIONS_READINESS.md).

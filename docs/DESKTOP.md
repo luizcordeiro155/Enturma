@@ -1,5 +1,7 @@
 # Enturma Desktop — versão declarada 0.3.15
 
+> **Distribuição verificada em 02/11/2026:** Windows **0.4.424**, commit `9270a5f`, deployment Railway `ce120d56-57f0-4692-b9f2-7e6382606eef` com `SUCCESS`, instalador NSIS `Enturma-Setup-0.4.424.exe` e healthcheck aprovado. A versão `0.3.15` deste título é a declaração de desenvolvimento no `package.json`, não a versão pública do EXE. Instalação/upgrade físicos e assinatura Authenticode não foram homologados nesta revisão.
+
 Electron 44 abre a aplicação oficial Next.js/BFF, compartilhando API, conta e dados com o Web. O renderer mantém contextIsolation e sandbox, sem Node. IPC valida o frame/origem; links externos passam pelo fluxo de confirmação do Enturma. O protocolo é `enturma://`.
 
 ## Build e distribuição

@@ -1,5 +1,7 @@
 # Dependências — revisão de 02/11/2026
 
+> **Limite temporal:** as 45 entradas npm descritas abaixo pertencem ao inventário de CI da PR #133. Não foi executado novo `npm audit` em 03/11. A CI verde da PR #135 não significa que os advisories foram corrigidos; reexecutar a auditoria antes de anunciar contagens atuais.
+
 Na [execução 41413561941 da CI](https://github.com/luizcordeiro155/Enturma/actions/runs/41413561941), commit `21ac899` da PR #133, `npm audit --json` registrou **45 entradas: 6 altas, 38 moderadas, 1 baixa e nenhuma crítica**. São seis advisories em cinco pacotes de origem; a contagem inclui dependentes afetados transitivamente, não 45 vulnerabilidades independentes. O inventário contém 1.249 dependências. O relatório é `dist/security/npm-audit.json`, no artefato `interface-evidence`.
 
 Esta auditoria não está limpa. A triagem abaixo não remove alertas nem prova ausência de exploração em produção. Nenhuma dependência foi alterada nesta revisão: as correções publicadas exigem versões fora das faixas usadas pelos respectivos consumidores, e `deepmerge` ainda não possui versão corrigida identificada pelo advisory. Não foi usado `npm audit fix --force`.

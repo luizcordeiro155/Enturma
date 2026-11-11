@@ -1,0 +1,1511 @@
+{
+  "provider": "UFMG",
+  "entries": [
+    {
+      "externalId": "ufmg-engenharia-computacao-2026",
+      "kind": "COURSE",
+      "parentExternalId": "pampulha",
+      "name": "Engenharia de Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "IT",
+        "coursePage": "https://www.ufmg.br/engcomp/",
+        "sourceVersion": "PORTAL-ENGCOMP-2026",
+        "historical": false,
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "shift": "AFTERNOON",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "kind": "CURRICULUM",
+      "parentExternalId": "ufmg-engenharia-computacao-2026",
+      "name": "Matriz PORTAL-ENGCOMP-2026",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 10,
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "curriculumVersion": "PORTAL-ENGCOMP-2026"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 1
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1",
+      "name": "Programação e Desenvolvimento de Software I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC203",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC203"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1",
+      "name": "Introdução à Lógica Computacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC638",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC638"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1",
+      "name": "Cálculo Diferencial e Integral I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 90,
+        "officialCode": "MAT001",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "MAT001"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1",
+      "name": "Geometria Analítica e Álgebra Linear",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "MAT038",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "MAT038"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1",
+      "name": "Física Experimental Básica - Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "FIS151",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "FIS151"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p1",
+      "name": "Introdução à Engenharia de Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 45,
+        "officialCode": "INU034",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU034"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 2
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2",
+      "name": "Programação e Desenvolvimento de Software II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC219",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC219"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2",
+      "name": "Matemática Discreta",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC216",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC216"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2",
+      "name": "Cálculo de Várias Variáveis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "MAT042",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "MAT042"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2",
+      "name": "Fundamentos de Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "FIS065",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "FIS065"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2",
+      "name": "Fundamentos da Interação Humano-Computador",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "DCC220",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC220"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2",
+      "name": "Análise de Circuitos Elétricos I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "ELE064",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELE064"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p2",
+      "name": "Fundamentos de Eletromagnetismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "FIS069",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "FIS069"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 3
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3",
+      "name": "Estruturas de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC221",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC221"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3",
+      "name": "Álgebra Linear Computacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC639",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC639"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3",
+      "name": "Equações Diferenciais A",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "MAT015",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "MAT015"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3",
+      "name": "Fundamentos de Estatística e Ciência de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "EST773",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "EST773"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3",
+      "name": "Laboratório de Circuitos Elétricos I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "ELE028",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELE028"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3",
+      "name": "Análise de Circuitos Elétricos II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "ELE065",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELE065"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p3",
+      "name": "Sistemas Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "ELT124",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELT124"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 4
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4",
+      "name": "Algoritmos I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC206",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC206"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4",
+      "name": "Introdução a Bancos de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC222",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC222"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4",
+      "name": "Fundamentos de Sistemas Paralelos e Distribuídos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "DCC641",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC641"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4",
+      "name": "Arquitetura e Organização de Computadores I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU035",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU035"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4",
+      "name": "Análise de Sistemas Dinâmicos Lineares",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "ELT088",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELT088"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4",
+      "name": "Química Geral E",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "QUI628",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "QUI628"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p4",
+      "name": "Laboratório de Sistemas Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "ELT029",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELT029"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 5
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5",
+      "name": "Fundamentos de Teoria da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC129",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC129"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5",
+      "name": "Arquitetura e Organização de Computadores II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU036",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU036"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5",
+      "name": "Laboratório de Projetos I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU037",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU037"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5",
+      "name": "Dispositivos e Circuitos Eletrônicos Básicos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "ELT084",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELT084"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5",
+      "name": "Processamento Digital de Sinais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "ELE639",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELE639"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p5",
+      "name": "Projetos de Sistemas Embarcados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "EEE055",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "EEE055"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "6º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 6
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6",
+      "name": "Linguagens de Programação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC024",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC024"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6",
+      "name": "Sistemas Operacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC605",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC605"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6",
+      "name": "Engenharia de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC603",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC603"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6",
+      "name": "Laboratório de Projetos II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU039",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU039"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6",
+      "name": "Pesquisa Operacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU038",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU038"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6",
+      "name": "Laboratório de Circuitos Eletrônicos I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "ELT089",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELT089"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p6",
+      "name": "Fundamentos de Inteligência Artificial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "INU040",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU040"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "7º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 7
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7",
+      "name": "Redes de Computadores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU041",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU041"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7",
+      "name": "Laboratório de Projetos III",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU042",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU042"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7",
+      "name": "Fenômenos de Transporte",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "ENG157",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ENG157"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7",
+      "name": "Concepção de Circuitos Integrados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "EEE058",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "EEE058"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p7",
+      "name": "Ciências do Ambiente",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "ESA137",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ESA137"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p8",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "8º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 8
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p8-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p8",
+      "name": "Introdução à Segurança Computacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "DCC223",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "DCC223"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p8-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p8",
+      "name": "Teoria dos Materiais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "ELE032",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "ELE032"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p8-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p8",
+      "name": "Administração T.G.A.",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "OTHER",
+        "workloadHours": 60,
+        "officialCode": "CAD103",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "CAD103"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p9",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "9º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 9
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p9-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p9",
+      "name": "Projeto Final de Curso I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU043",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU043"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p9-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p9",
+      "name": "Engenharia de Computação e Sociedade",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 30,
+        "officialCode": "INU044",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU044"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p10",
+      "kind": "PERIOD",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026",
+      "name": "10º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Componentes obrigatorios publicados para dez periodos. Itens eletivos sem disciplina definida nao foram criados.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 10
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p10-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p10",
+      "name": "Estágio Supervisionado",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 165,
+        "officialCode": "INU046",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU046"
+    },
+    {
+      "externalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p10-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "ufmg-engenharia-computacao-2026-PORTAL-ENGCOMP-2026-p10",
+      "name": "Projeto Final de Curso II",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/engcomp/",
+        "name": "UFMG Engenharia de Computacao, grade do portal institucional; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "1ebe7a0a9cef1efe46e99e48dce931ab132e25217915cee6b7c334fa1d034a83",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "workloadHours": 60,
+        "officialCode": "INU045",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "code": "INU045"
+    }
+  ]
+}

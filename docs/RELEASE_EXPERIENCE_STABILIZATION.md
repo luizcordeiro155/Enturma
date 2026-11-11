@@ -123,6 +123,8 @@ Não há nova migração, mudança de senha ou invalidação de sessões neste r
 
 ## Continuação de 02/11 — temas, convites, chamadas e acesso
 
+**Estado da distribuição posterior:** a PR #135 foi mesclada na `main` e os distribuidores nativos Windows/Android geraram a versão **0.4.424** em 02/11/2026. A evidência detalhada está no encerramento deste documento.
+
 - A preferência de aparência Web tem uma única fonte em memória e um único responsável pelo tema no documento. Gravações são serializadas; respostas antigas de leitura não substituem escolhas recentes. As páginas continuam recebendo eventos e revalidação de dados sem recarregar o documento.
 - Todos os seletores oferecem Claro, Escuro, Enturma e Sistema nessa ordem. Toque/clique breve percorre as quatro opções; pressão longa e hover preservam o seletor. Alto contraste mantém a paleta verde do Enturma.
 - Convites no chat privado usam cartões responsivos e links sublinhados. Links da instalação atual ou da origem HTTPS oficial abrem confirmação interna com aceitar/recusar. Só o aceite realiza a entrada pela API, que continua validando autorização, encerramento e bloqueios.
@@ -136,3 +138,12 @@ Não há nova migração, mudança de senha ou invalidação de sessões neste r
 Validações locais: TypeScript Web/Expo, lint sem erros (34 avisos existentes), compilação Java e testes unitários dos fluxos alterados. A suíte de CI inclui testes reais de autorização/histórico no PostgreSQL isolado, navegação sem recarga, convites entre duas contas, recusa/aceite, capturas de todos os temas e dimensões e compilação Kotlin do shell Android. Consulte o resultado da PR e seus artefatos antes de considerar essas etapas concluídas. Capturas dos controles validam o componente real e o CSS; não equivalem a uma chamada física ou captura real de áudio do Windows.
 
 Não há migração de banco neste lote. Histórico reutiliza private_call. Publicação segue main: Vercel, sincronização GitHub/SquareCloud e builders Windows/Android Railway. Rollback do código não exige desfazer dados. Trava de orientação em navegadores depende da API oferecida pelo dispositivo; o app Android possui tratamento nativo. Não foi realizada homologação física nesta execução.
+
+## Encerramento da distribuição — PR #135
+
+A [PR #135](https://github.com/luizcordeiro155/Enturma/pull/135) foi integrada na `main` em `9270a5f`. A [CI pós-merge 41478805937](https://github.com/luizcordeiro155/Enturma/actions/runs/41478805937) e secret scanning passaram. A PR registra 137 testes Java, 175 Web e 52 E2E. A Web foi publicada.
+
+- Windows: Railway `Enturma Desktop Download v5`, deployment `ce120d56-57f0-4692-b9f2-7e6382606eef`, `SUCCESS`, instalador NSIS `Enturma-Setup-0.4.424.exe` gerado e healthcheck aprovado.
+- Android: Railway `Enturma Android Download v3`, deployment `b24c25e1-fb48-4598-92fd-efb0d60d4f17`, `SUCCESS`, log `Verified mobile release 0.4.424` e healthcheck aprovado.
+
+Acesso direto aos manifests e instalação física não foram testados nesta revisão. A distribuição foi concluída, mas não representa homologação de aparelhos, escala ou assinatura Authenticode.

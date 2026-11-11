@@ -1,0 +1,2019 @@
+{
+  "provider": "UFMG",
+  "entries": [
+    {
+      "externalId": "ufmg-list-belo-horizonte",
+      "kind": "CAMPUS",
+      "parentExternalId": "ufmg",
+      "name": "Belo Horizonte — unidade acadêmica a selecionar",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "city": "Belo Horizonte",
+        "state": "MG",
+        "note": "Agrupamento de cursos por cidade de oferta; NÃO é um campus físico. Unidade acadêmica específica não informada neste catálogo."
+      }
+    },
+    {
+      "externalId": "ufmg-list-montes-claros",
+      "kind": "CAMPUS",
+      "parentExternalId": "ufmg",
+      "name": "Montes Claros — unidade acadêmica a selecionar",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "city": "Montes Claros",
+        "state": "MG",
+        "note": "Agrupamento de cursos por cidade de oferta; NÃO é um campus físico. Unidade acadêmica específica não informada neste catálogo."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-montes-claros-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-montes-claros",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/montes-claros/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-montes-claros-agronomia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-montes-claros",
+      "name": "Agronomia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/montes-claros/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-antropologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Antropologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-aquacultura-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Aquacultura",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-arqueologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Arqueologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-arquitetura-e-urbanismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Arquitetura e Urbanismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-arquivologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Arquivologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-artes-visuais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Artes Visuais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-artes-visuais-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Artes Visuais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-biblioteconomia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Biblioteconomia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-biomedicina-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Biomedicina",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencia-da-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencia-de-dados-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciência de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-atuariais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências Atuariais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-biologicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências Biológicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-biologicas-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências Biológicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-contabeis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências Contábeis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-montes-claros-ciencias-da-natureza-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-montes-claros",
+      "name": "Ciências da Natureza",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/montes-claros/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-do-estado-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências do Estado",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-economicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências Econômicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-sociais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências Sociais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-sociais-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências Sociais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-ciencias-socioambientais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Ciências Socioambientais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-cinema-de-animacao-e-artes-digitais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Cinema de Animação e Artes Digitais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-conservacao-e-restauracao-de-bens-culturais-moveis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Conservação e Restauração de Bens Culturais Móveis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-controladoria-e-financas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Controladoria e Finanças",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-danca-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Dança",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-design-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Design",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-design-de-moda-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Design de Moda",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-direito-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Direito",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-educacao-do-campo-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Educação do Campo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-educacao-fisica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Educação Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-educacao-fisica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Educação Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-enfermagem-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Enfermagem",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-aeroespacial-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia Aeroespacial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-montes-claros-engenharia-agricola-e-ambiental-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-montes-claros",
+      "name": "Engenharia Agrícola e Ambiental",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/montes-claros/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-ambiental-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia Ambiental",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-civil-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia Civil",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-montes-claros-engenharia-de-alimentos-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-montes-claros",
+      "name": "Engenharia de Alimentos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/montes-claros/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-de-controle-e-automacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia de Controle e Automação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-de-materiais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia de Materiais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-de-minas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia de Minas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-de-producao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia de Produção",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-de-sistemas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-eletrica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia Elétrica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-montes-claros-engenharia-florestal-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-montes-claros",
+      "name": "Engenharia Florestal",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/montes-claros/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-mecanica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-metalurgica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia Metalúrgica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-engenharia-quimica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Engenharia Química",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-estatistica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Estatística",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-farmacia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Farmácia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-filosofia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Filosofia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-filosofia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Filosofia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-fisica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-fisica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Física",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-fisioterapia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Fisioterapia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-fonoaudiologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Fonoaudiologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-geografia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Geografia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-geografia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Geografia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-geologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Geologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-gestao-de-servicos-de-saude-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Gestão de Serviços de Saúde",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-gestao-publica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Gestão Pública",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-historia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "História",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-historia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "História",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-jornalismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Jornalismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-letras-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Letras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-letras-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Letras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-letras-libras-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Letras-Libras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-matematica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Matemática",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-matematica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Matemática",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-montes-claros-matematica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-montes-claros",
+      "name": "Matemática",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/montes-claros/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-matematica-computacional-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Matemática Computacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "IT",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-medicina-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Medicina",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-medicina-veterinaria-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Medicina Veterinária",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-museologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Museologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-musica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Música",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-musica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Música",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-nutricao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Nutrição",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-odontologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Odontologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-pedagogia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Pedagogia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-psicologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-publicidade-e-propaganda-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Publicidade e Propaganda",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-quimica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Química",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-quimica-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Química",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-quimica-tecnologica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Química Tecnológica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-radiologia-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Radiologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-relacoes-economicas-internacionais-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Relações Econômicas Internacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-relacoes-publicas-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Relações Públicas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-teatro-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Teatro",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-teatro-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Teatro",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-terapia-ocupacional-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Terapia Ocupacional",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-belo-horizonte-turismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-belo-horizonte",
+      "name": "Turismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Belo Horizonte",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/belo-horizonte/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    },
+    {
+      "externalId": "oferta-ufmg-montes-claros-zootecnia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "ufmg-list-montes-claros",
+      "name": "Zootecnia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://www.ufmg.br/prograd/montes-claros/",
+        "name": "UFMG Pró-Reitoria de Graduação - cursos Montes Claros",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "03cef9aae1e6ea71fcb6a861f1d9dd8c0ddf8c0db47b897bbd0853f44b505029",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "learningArea": "OTHER",
+        "coursePage": "https://www.ufmg.br/prograd/montes-claros/",
+        "catalogNote": "Curso ofertado pela cidade; matriz/turno específicos sujeitos a revisão. Esta oferta não implica grade verificada."
+      }
+    }
+  ]
+}

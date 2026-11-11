@@ -6,7 +6,7 @@ O **Enturma** é um ecossistema acadêmico multiplataforma construído para apro
 
 O projeto é um monorepo com **Java 21 / Spring Boot**, **Next.js / React**, **React Native / Expo** e **Electron**, com aplicações para **Web, Android e Desktop**.
 
-> **Estado atual — novembro de 2026:** plataforma funcional em desenvolvimento ativo e estabilização. O lote de 02/11 acrescenta áudio nos chats, recibos, convites diretos, visitante com leitura pública e tema Enturma. Consulte o [estado verificado](docs/STATUS.md) para separar implementação, testes e publicação. Builds e deploys não certificam homologação integral em produção.
+> **Estado atual — 03/11/2026:** a [PR #135](https://github.com/luizcordeiro155/Enturma/pull/135) foi integrada à `main`; Web, Windows e Android foram publicados. Os instaladores Windows/Android distribuídos são **0.4.424** (commit `9270a5f`, Railway `SUCCESS`). Builds e CI verdes não comprovam homologação física, recuperação de dados ou capacidade sob carga. Consulte [Status](docs/STATUS.md) e [auditoria documental](docs/DOCUMENTATION_AUDIT_2026_11_03.md).
 
 ## A proposta
 
@@ -29,16 +29,18 @@ A apresentação pública fica em [`/start`](https://enturma-flax.vercel.app/sta
 | Área | Situação atual |
 | --- | --- |
 | Web | Implementação principal em Next.js, em uso como referência visual e funcional do ecossistema |
-| Android | APK distribuído com shell WebView; projeto Expo/React Native **0.3.30** também serve ao builder, com homologação física pendente |
-| Desktop | Aplicativo Electron com instalador e fluxo próprio de atualização; pacote atual **0.3.15** |
+| Android | APK WebView distribuído **0.4.424**; o workspace Expo/React Native permanece declarado **0.3.30**, sem homologação física nesta revisão |
+| Desktop | Instalador Windows NSIS distribuído **0.4.424**; versão declarada do workspace Electron **0.3.15** |
 | Backend | API Java 21 / Spring Boot com PostgreSQL, Flyway, autenticação, tempo real e integrações externas |
 | Salas e colaboração | Implementadas: salas, chat, presença, voz, câmera e compartilhamento de tela |
 | Comunidade | Fórum, amigos, perfil, personalização, conquistas e notificações |
 | Aprendizagem | Matérias, desafios, missões, notebooks, XP e assistência de IA |
 | Caronas | Fluxo universitário em evolução avançada, atualmente recebendo o maior ciclo de refinamento |
-| Produção | Existem builds e deploys reais, mas ainda há validações de dispositivo, escala e homologação a concluir |
+| Produção | Web e distribuidores nativos publicados; recuperação de dados, dispositivos físicos e escala ainda não homologados |
 
 As versões declaradas são Web **0.3.0**, Android **0.3.30** e Desktop **0.3.15**, com ciclos independentes. Os builders de download podem calcular números de release a partir do histórico de commits: confira os manifests de distribuição antes de anunciar uma versão. Existe estrutura iOS no repositório, mas não há publicação ou homologação oficial confirmada.
+
+**Release distribuída verificada em 02/11/2026:** Windows e Android **0.4.424**, originados no commit `9270a5f`; os dois serviços Railway terminaram em `SUCCESS` com healthcheck aprovado. Esse número não substitui os valores declarados nos workspaces.
 
 ## Principais experiências
 
@@ -48,7 +50,7 @@ O Enturma organiza a vida do estudante em torno do contexto acadêmico real:
 
 - instituições, campus, cursos, matérias e matrículas;
 - visão de semestre e agenda;
-- salas, turmas e modo professor;
+- salas de estudo; estrutura de turmas/modo professor ainda exige validação funcional ponta a ponta antes de anunciar disponibilidade integral;
 - materiais e notebooks;
 - jornada e portfólio acadêmico;
 - missões, XP, conquistas e desafios de programação.

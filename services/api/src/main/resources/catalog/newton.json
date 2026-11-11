@@ -1,0 +1,881 @@
+{
+  "provider": "NEWTON",
+  "entries": [
+    {
+      "externalId": "newton-paiva",
+      "kind": "INSTITUTION",
+      "parentExternalId": null,
+      "name": "Centro Universitário Newton Paiva",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "shortName": "Newton Paiva",
+        "city": "Belo Horizonte",
+        "state": "MG",
+        "websiteUrl": "https://newtonpaiva.br",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "newton-ead-polo-pendente",
+      "kind": "CAMPUS",
+      "parentExternalId": "newton-paiva",
+      "name": "Ensino a distância (EAD)",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "state": "MG",
+        "note": "Campus logico de oferta EAD; nao representa endereco fisico ou polo local.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ead-polo-pendente",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 5,
+        "learningArea": "IT",
+        "coursePage": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "sourceVersion": "GRADE-EAD-2023",
+        "historical": true,
+        "note": "Matriz documental historica; nao pressupor vigencia em 2026 ou polo presencial.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023",
+      "kind": "CURRICULUM",
+      "parentExternalId": "newton-ads-ead-historico-2021",
+      "name": "Matriz GRADE-EAD-2023",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "minimumPeriods": 5,
+        "note": "Matriz documental historica; nao pressupor vigencia em 2026 ou polo presencial.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "curriculumVersion": "GRADE-EAD-2023"
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023",
+      "name": "1º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Matriz documental historica; nao pressupor vigencia em 2026 ou polo presencial.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 1
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1",
+      "name": "Algoritmos e programação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1",
+      "name": "Fundamentos de Ciências Exatas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1",
+      "name": "Fundamentos de Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1",
+      "name": "Engenharia de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 40
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 1",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p1",
+      "name": "Comunicação Efetiva I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 40
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023",
+      "name": "2º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Matriz documental historica; nao pressupor vigencia em 2026 ou polo presencial.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 2
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2",
+      "name": "Arquitetura de Computadores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2",
+      "name": "Banco de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2",
+      "name": "Análise de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 40
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2",
+      "name": "Metodologia de Desenvolvimento de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 2",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p2",
+      "name": "Educação, Sociedade e meio ambiente",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 40
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023",
+      "name": "3º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Matriz documental historica; nao pressupor vigencia em 2026 ou polo presencial.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 3
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3",
+      "name": "Programação Orientada a Objetos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3",
+      "name": "Linguagens de Programação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3",
+      "name": "Sistemas Operacionais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3",
+      "name": "Qualidade e Testes de Software",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 3",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p3",
+      "name": "Análise de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 40
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023",
+      "name": "4º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Matriz documental historica; nao pressupor vigencia em 2026 ou polo presencial.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 4
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4",
+      "name": "Programação Web",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4",
+      "name": "Estrutura de Dados",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4",
+      "name": "Business Intelligence",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4",
+      "name": "Modelagem de Processos de Negócios",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4",
+      "name": "Optativa I",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 40
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 4",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4-s7",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p4",
+      "name": "Transformação Digital",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 6,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 40
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5",
+      "kind": "PERIOD",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023",
+      "name": "5º período",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "organization": "SEMESTER",
+        "note": "Matriz documental historica; nao pressupor vigencia em 2026 ou polo presencial.",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION"
+      },
+      "periodNumber": 5
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5-s1",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5",
+      "name": "Programação para Dispositivos Móveis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 0,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5-s2",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5",
+      "name": "Arquitetura de Aplicações Web",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 1,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5-s3",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5",
+      "name": "Redes de Computadores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 2,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5-s4",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5",
+      "name": "Segurança e Auditoria de Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 3,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5-s5",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5",
+      "name": "Fundamentos de Inteligência Artificial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 4,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    },
+    {
+      "externalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5-s6",
+      "kind": "SUBJECT",
+      "parentExternalId": "newton-ads-ead-historico-2021-GRADE-EAD-2023-p5",
+      "name": "Usina de Projetos Experimentais (UPx) - TI 5",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2023/02/ANALISE-E-DESENVOLVIMENTO-DE-SISTEMAS.pdf",
+        "name": "Newton Paiva ADS EAD grade historica publicada em 2023; transcricao revisada",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "b0255b042ed19a3a14ac5743d9aedbfe357302c4cbfb81dd2ee6440b270e3644",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "orderIndex": 5,
+        "required": true,
+        "learningArea": "IT",
+        "sourceIntegrityScope": "CURATED_TRANSCRIPTION",
+        "workloadHours": 80
+      }
+    }
+  ]
+}

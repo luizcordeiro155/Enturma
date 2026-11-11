@@ -4,6 +4,10 @@
 
 Complemento do [relatório de readiness](PRODUCTION_READINESS.md). Este runbook não declara tarefas externas executadas.
 
+## Release 0.4.424 — confirmação de distribuição
+
+Em 02/11/2026, a PR #135 foi integrada no commit `9270a5f`; os serviços Railway `Enturma Desktop Download v5` e `Enturma Android Download v3` passaram com `SUCCESS` e healthcheck aprovado, gerando **0.4.424**. Isso não comprova instalação, atualização, rollback ou assinatura física. A dispensa dos gates para publicação não equivale a validação. Em próximas releases, conferir manifests, SHA-256, `sourceCommit` e downloads servidos antes do anúncio.
+
 ## Banco: migração separada de runtime
 
 `spring.flyway` aceita `FLYWAY_DATABASE_URL`, `FLYWAY_DATABASE_USERNAME` e `FLYWAY_DATABASE_PASSWORD`; sem essas variáveis preserva a conexão atual. As URLs Flyway devem estar no formato JDBC. As credenciais de runtime continuam em `DATABASE_*`. Nunca preencher valores em arquivos versionados.

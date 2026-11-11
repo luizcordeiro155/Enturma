@@ -1,0 +1,1103 @@
+{
+  "provider": "NEWTON",
+  "entries": [
+    {
+      "externalId": "newton-ofertas-2025-presencial",
+      "kind": "CAMPUS",
+      "parentExternalId": "newton-paiva",
+      "name": "Cursos presenciais — oferta 2025",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "city": "Belo Horizonte",
+        "state": "MG",
+        "historical": true,
+        "note": "Agrupador de cursos presenciais publicado no edital 2025; campus físico exato não indicado."
+      }
+    },
+    {
+      "externalId": "newton-ofertas-2025-ead-flex",
+      "kind": "CAMPUS",
+      "parentExternalId": "newton-paiva",
+      "name": "Cursos EAD/Flex — oferta 2025",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "city": "Belo Horizonte",
+        "state": "MG",
+        "historical": true,
+        "note": "Modalidades EAD e Flex agrupadas, não indica polo físico."
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-arquitetura-e-urbanismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Arquitetura e Urbanismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-biomedicina-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Biomedicina",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencia-da-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 8,
+        "learningArea": "IT",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-ciencias-contabeis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Ciências Contábeis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-direito-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Direito",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-enfermagem-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Enfermagem",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-engenharia-civil-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Engenharia Civil",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-engenharia-de-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Engenharia de Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 9,
+        "learningArea": "IT",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-engenharia-eletrica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Engenharia Elétrica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-engenharia-mecanica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Engenharia Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-farmacia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Farmácia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-fisioterapia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Fisioterapia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-medicina-veterinaria-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Medicina Veterinária",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-nutricao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Nutrição",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-odontologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Odontologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-psicologia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Psicologia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-sistemas-de-informacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 8,
+        "learningArea": "IT",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-analise-e-desenvolvimento-de-sistemas-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 5,
+        "learningArea": "IT",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-presential-estetica-e-cosmetica-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-presencial",
+      "name": "Estética e Cosmética",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/formas-de-entrada/rematricula/",
+        "name": "Newton Paiva - Rematricula 2025.2, cursos presenciais",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "PRESENTIAL",
+        "durationPeriods": 5,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-administracao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Administração",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "REMOTE",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-arquitetura-e-urbanismo-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Arquitetura e Urbanismo",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-biomedicina-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Biomedicina",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-ciencia-da-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Ciência da Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "REMOTE",
+        "durationPeriods": 8,
+        "learningArea": "IT",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-ciencias-contabeis-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Ciências Contábeis",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "REMOTE",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-engenharia-civil-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Engenharia Civil",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-engenharia-de-computacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Engenharia de Computação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 9,
+        "learningArea": "IT",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-engenharia-eletrica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Engenharia Elétrica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-engenharia-mecanica-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Engenharia Mecânica",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-farmacia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Farmácia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-fisioterapia-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Fisioterapia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 10,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-letras-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Letras",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "modality": "REMOTE",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-hybrid-nutricao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Nutrição",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "HYBRID",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-pedagogia-licentiate",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Pedagogia",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "LICENTIATE",
+        "modality": "REMOTE",
+        "durationPeriods": 8,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-sistemas-de-informacao-bachelor",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Sistemas de Informação",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "BACHELOR",
+        "modality": "REMOTE",
+        "durationPeriods": 8,
+        "learningArea": "IT",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-analise-e-desenvolvimento-de-sistemas-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Análise e Desenvolvimento de Sistemas",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 5,
+        "learningArea": "IT",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-design-de-interiores-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Design de Interiores",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 4,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-estetica-e-cosmetica-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Estética e Cosmética",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 5,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-gestao-comercial-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Gestão Comercial",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 4,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-gestao-de-recursos-humanos-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Gestão de Recursos Humanos",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 4,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-gestao-financeira-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Gestão Financeira",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 4,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-logistica-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Logística",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 4,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-marketing-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Marketing",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 4,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    },
+    {
+      "externalId": "newton-2025-remote-processos-gerenciais-technologist",
+      "kind": "COURSE",
+      "parentExternalId": "newton-ofertas-2025-ead-flex",
+      "name": "Processos Gerenciais",
+      "status": "VERIFIED",
+      "source": {
+        "url": "https://newtonpaiva.br/wp-content/uploads/2024/11/ANEXO-IV-QUADRO-DE-OFERTA-DE-VAGAS-.pdf",
+        "name": "Newton Paiva - Anexo IV, cursos EAD e Flex 2025.1",
+        "type": "MANUAL_VERIFIED",
+        "contentHash": "04d7e82f935398eb841e06990a85d5268cbbca1f45e8050df3eff4f203a82dc7",
+        "retrievedAt": "2026-11-07T03:00:00Z",
+        "verifiedAt": "2026-11-07T03:00:00Z"
+      },
+      "attributes": {
+        "degreeType": "TECHNOLOGIST",
+        "modality": "REMOTE",
+        "durationPeriods": 4,
+        "learningArea": "OTHER",
+        "historical": true,
+        "catalogNote": "Oferta documentada em edital do 1o semestre de 2025. Não afirmar vigência em 2026; grade só disponível quando vinculada a fonte curricular.",
+        "sourceYear": 2025
+      }
+    }
+  ]
+}

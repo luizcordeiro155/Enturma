@@ -10,10 +10,14 @@ import {
   Smartphone,
   RefreshCw,
   ShieldCheck,
+  ShieldAlert,
+  FileCheck2,
+  Fingerprint,
   Sparkles,
 } from "lucide-react";
 import { PwaInstallButton } from "@/components/pwa-install";
 import { EnturmaAppIcon } from "@/components/enturma-app-icon";
+import { DownloadIntegrity } from "@/components/download-integrity";
 import styles from "./download.module.css";
 
 const WINDOWS_DOWNLOAD =
@@ -187,6 +191,104 @@ export default async function DownloadPage() {
             A instalação pelo navegador continua disponível abaixo como uma
             segunda alternativa.
           </small>
+        </section>
+
+        <section className={styles.safetySection} aria-labelledby="safety-title">
+          <div className={styles.safetyIntro}>
+            <div className={styles.safetyHeading}>
+              <ShieldAlert size={28} aria-hidden="true" />
+              <div>
+                <h2 id="safety-title">Instale com segurança</h2>
+                <p>
+                  O Enturma é distribuído diretamente pelos canais oficiais do
+                  projeto. Entenda os alertas do sistema e confira o arquivo
+                  antes de instalar no computador ou celular.
+                </p>
+              </div>
+            </div>
+            <div className={styles.safetyStatus}>
+              <ShieldCheck size={20} aria-hidden="true" />
+              <span>
+                <strong>Assinatura de código do Windows ainda não confirmada.</strong>{" "}
+                O objetivo é disponibilizar um instalador assinado futuramente,
+                mas ainda não há data confirmada. Isso é diferente de uma
+                licença do Windows ou da assinatura obrigatória de APKs Android.
+              </span>
+            </div>
+          </div>
+
+          <div className={styles.safetyPlatforms}>
+            <article className={styles.safetyPlatform} aria-labelledby="windows-guide-title">
+              <span className={styles.platformTitle}><Monitor size={21} aria-hidden="true" /> Windows · EXE</span>
+              <h3 id="windows-guide-title">Por que o Windows pode mostrar um aviso?</h3>
+              <p>
+                O Microsoft Defender SmartScreen pode alertar quando um
+                executável não tem assinatura digital de código reconhecida ou
+                ainda não possui reputação suficiente. O aviso não comprova
+                que o arquivo é malicioso, mas também não garante que seja seguro.
+              </p>
+              <div className={styles.windowsNotice} aria-label="Exemplo ilustrativo de alerta do Windows">
+                <div className={styles.windowsNoticeTitle}><ShieldAlert size={22} aria-hidden="true" /> O Windows protegeu o computador</div>
+                <p>O Microsoft Defender SmartScreen impediu a execução de um aplicativo não reconhecido.</p>
+                <span>Mais informações</span>
+                <small>Ilustração explicativa. A aparência real varia conforme a versão do Windows.</small>
+              </div>
+              <ol className={styles.guideSteps}>
+                <li><strong>Baixe somente por esta página.</strong> Confira o domínio antes de baixar e evite instaladores enviados por terceiros.</li>
+                <li><strong>Verifique o arquivo.</strong> Compare o SHA-256 abaixo com o resultado do PowerShell e confira o arquivo com seu antivírus.</li>
+                <li><strong>Leia o aviso.</strong> Se a origem e o hash corresponderem, avalie a opção “Mais informações” e somente então prossiga se confiar no arquivo. Não desative o SmartScreen.</li>
+              </ol>
+              <p className={styles.commandLead}>No PowerShell, na pasta Downloads:</p>
+              <code className={styles.commandLine}>Get-FileHash .\Enturma-Setup-*.exe -Algorithm SHA256</code>
+              <small className={styles.platformFootnote}>Compare o campo Hash exibido com o SHA-256 oficial abaixo. Se forem diferentes, não execute o instalador.</small>
+            </article>
+
+            <article className={styles.safetyPlatform} aria-labelledby="android-guide-title">
+              <span className={styles.platformTitle}><Smartphone size={21} aria-hidden="true" /> Android · APK</span>
+              <h3 id="android-guide-title">Por que o Android pode pedir permissão?</h3>
+              <p>
+                Como o APK é obtido fora da Play Store, o Android pode solicitar
+                autorização para instalar apps desta fonte e mostrar avisos
+                do Play Protect. São proteções normais para instalações externas:
+                verifique o arquivo e nunca ignore um alerta de ameaça detectada.
+              </p>
+              <div className={styles.androidNotice}>
+                <FileCheck2 size={27} aria-hidden="true" />
+                <div>
+                  <strong>Instalação de fontes externas</strong>
+                  <p>O navegador pode precisar de permissão específica para abrir um APK baixado.</p>
+                </div>
+              </div>
+              <ol className={styles.guideSteps}>
+                <li><strong>Baixe o APK oficial</strong> pelo botão do Enturma nesta página, usando conexão HTTPS.</li>
+                <li><strong>Confira a integridade.</strong> Use o SHA-256 abaixo e, se disponível, um gerenciador de arquivos confiável que calcule hashes.</li>
+                <li><strong>Abra o download.</strong> Se o Android pedir autorização, conceda somente ao navegador utilizado, após conferir origem e integridade.</li>
+                <li><strong>Revogue a permissão depois.</strong> Não desative o Play Protect; se houver aviso de aplicativo nocivo, interrompa a instalação.</li>
+              </ol>
+              <small className={styles.platformFootnote}>O nome das opções muda conforme fabricante e versão do Android. A permissão é concedida ao aplicativo que abriu o APK, não a todos os apps.</small>
+            </article>
+          </div>
+        </section>
+
+        <section className={styles.verifySection} aria-labelledby="verify-download-title">
+          <div className={styles.verifyHeader}>
+            <Fingerprint size={25} aria-hidden="true" />
+            <div>
+              <h2 id="verify-download-title">Confira o arquivo antes de instalar</h2>
+              <p>Os hashes vêm dos manifestos de distribuição do próprio Enturma e são atualizados para a versão disponível no servidor. Só instale quando o arquivo baixado corresponder.</p>
+            </div>
+          </div>
+          <DownloadIntegrity />
+          <div className={styles.verifyFooter}>
+            <ShieldCheck size={18} aria-hidden="true" />
+            <span>
+              A correspondência de SHA-256 verifica a integridade em relação ao
+              manifesto consultado, mas não prova, sozinha, que um programa é
+              seguro. Se o navegador, o antivírus ou o sistema indicar ameaça,
+              pare e procure orientação antes de prosseguir.{" "}
+              <a href="https://github.com/luizcordeiro155/Enturma" target="_blank" rel="noopener noreferrer">Conheça o código-fonte oficial</a>.
+            </span>
+          </div>
         </section>
 
         <section
