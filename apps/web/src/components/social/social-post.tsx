@@ -28,6 +28,7 @@ import { SocialDialog } from "./social-dialog";
 import { SocialText } from "./social-text";
 import { SocialMediaCarousel } from "./social-media-carousel";
 import { usePostActions } from "./use-post-actions";
+import { SocialPostOptions } from "./social-post-options";
 
 export function SocialAuthor({
   user,
@@ -277,7 +278,7 @@ type Comment = SocialPerson & {
   parentId?: string;
   createdAt: string;
 };
-function Comments({
+export function SocialComments({
   item,
   me,
   close,
@@ -449,30 +450,21 @@ export function SocialPost({
   person,
   changed,
   autoplay = true,
-  clip = false,
-  children,
 }: {
   item: Post;
   me: string;
   person: (id: string) => void;
   changed: (p: Post) => void;
   autoplay?: boolean;
-  clip?: boolean;
-  children?: React.ReactNode;
 }) {
   const [dialog, setDialog] = useState<"comments" | "share" | "more" | null>(
       null,
     ),
-    [reason, setReason] = useState(""),
     [expanded, setExpanded] = useState(false),
-    [removing, setRemoving] = useState(false),
     [burst, setBurst] = useState(0);
   const lastTap = useRef(0);
   const actions = usePostActions(item, changed),
-    { busy, error, setError, react } = actions;
-  async function act(path: string, body?: unknown, method = "PUT") {
-    if (await actions.act(path, body, method)) setDialog(null);
-  }
+    { busy, error, react } = actions;
   function tapMedia() {
     const now = performance.now();
     if (now - lastTap.current < 300) {
@@ -482,8 +474,8 @@ export function SocialPost({
     } else lastTap.current = now;
   }
   if (item.mine.includes("HIDE")) return null;
-  const hasMedia = !clip && item.media.length > 0,
-    limit = hasMedia || clip ? 125 : 280,
+  const hasMedia = item.media.length > 0,
+    limit = hasMedia ? 125 : 280,
     long = item.body.length > limit;
   const copy = (
     <div className="social-post-copy">
@@ -520,15 +512,9 @@ export function SocialPost({
     </div>
   );
   return (
-    <article
-      className={`social-post ${clip ? "social-post-clip" : ""}`}
-      data-post={item.id}
-    >
+    <article className="social-post" data-post={item.id}>
       <header>
         <SocialAuthor user={postPerson(item)} open={person} />
-        {clip && item.authorId !== me && (
-          <FollowButton id={item.authorId} me={me} />
-        )}
         <button
           className="icon-control"
           aria-label="Opções da publicação"
@@ -537,7 +523,6 @@ export function SocialPost({
           <MoreHorizontal size={20} />
         </button>
       </header>
-      {children}
       {hasMedia ? (
         <div
           className="social-post-media"
@@ -560,7 +545,7 @@ export function SocialPost({
           )}
         </div>
       ) : (
-        !clip && copy
+        copy
       )}
       <div className="social-post-actions">
         <button
@@ -618,7 +603,7 @@ export function SocialPost({
             {item.likes} {item.likes === 1 ? "curtida" : "curtidas"}
           </p>
         )}
-        {(hasMedia || clip) && copy}
+        {hasMedia && copy}
         {item.comments > 0 && (
           <button
             type="button"
@@ -643,7 +628,7 @@ export function SocialPost({
         </p>
       )}
       {dialog === "comments" && (
-        <Comments
+        <SocialComments
           item={item}
           me={me}
           close={() => setDialog(null)}
@@ -655,110 +640,12 @@ export function SocialPost({
         <SocialShare item={item} close={() => setDialog(null)} />
       )}
       {dialog === "more" && (
-        <SocialDialog title="Esta publicação" close={() => setDialog(null)}>
-          <div className="social-dialog-body social-options">
-            {!clip && <FollowButton id={item.authorId} me={me} />}
-            {me !== item.authorId ? (
-              <>
-                <button
-                  className="secondary"
-                  disabled={busy}
-                  onClick={() => void react("HIDE")}
-                >
-                  Não tenho interesse
-                </button>
-                <button
-                  className="secondary"
-                  disabled={busy}
-                  onClick={() =>
-                    void act(`/people/${item.authorId}/mute`, { active: true })
-                  }
-                >
-                  Ver menos deste criador
-                </button>
-                <button
-                  className="secondary"
-                  disabled={busy}
-                  onClick={() => {
-                    void api(`/blocks/${item.authorId}`, { method: "POST" })
-                      .then(() => changed({ ...item, mine: ["HIDE"] }))
-                      .catch((e) => setError(e.message));
-                  }}
-                >
-                  Bloquear usuário
-                </button>
-                <label>
-                  Motivo da denúncia
-                  <textarea
-                    className="resize-none"
-                    value={reason}
-                    maxLength={1500}
-                    onChange={(e) => setReason(e.target.value)}
-                  />
-                </label>
-                <button
-                  disabled={busy || !reason.trim()}
-                  onClick={() =>
-                    void act(`/posts/${item.id}/report`, { reason }, "POST")
-                  }
-                >
-                  Enviar denúncia
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  className="secondary"
-                  disabled={busy}
-                  onClick={() =>
-                    void act(`/posts/${item.id}/pin`, { active: !item.pinned })
-                  }
-                >
-                  {item.pinned ? "Desafixar" : "Fixar publicação"}
-                </button>
-                <button
-                  className="secondary"
-                  disabled={busy}
-                  onClick={() => setRemoving(true)}
-                >
-                  Remover publicação
-                </button>
-              </>
-            )}
-            {error && <p role="alert">{error}</p>}
-          </div>
-        </SocialDialog>
-      )}
-      {removing && (
-        <SocialDialog
-          title="Remover esta publicação?"
-          close={() => setRemoving(false)}
-        >
-          <div className="social-dialog-body">
-            <p>
-              O conteúdo e suas mídias deixarão de estar disponíveis. Esta ação
-              não pode ser desfeita.
-            </p>
-            <div className="social-row">
-              <button
-                className="secondary"
-                onClick={() => setRemoving(false)}
-                disabled={busy}
-              >
-                Manter publicação
-              </button>
-              <button
-                disabled={busy}
-                onClick={() =>
-                  void act(`/posts/${item.id}`, undefined, "DELETE")
-                }
-              >
-                Remover definitivamente
-              </button>
-            </div>
-            {error && <p role="alert">{error}</p>}
-          </div>
-        </SocialDialog>
+        <SocialPostOptions
+          item={item}
+          me={me}
+          changed={changed}
+          close={() => setDialog(null)}
+        />
       )}
     </article>
   );

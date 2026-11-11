@@ -710,6 +710,16 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
       })
       .toBe(true);
     await expect(selected.locator("video")).toHaveJSProperty("readyState", 4);
+    // Full-height Clip: the whole width on a phone, a centred 9:16 column on desktop.
+    const size = (await selected.boundingBox())!;
+    if (width === 390) {
+      expect(size.width).toBeGreaterThanOrEqual(389);
+      expect(size.height).toBeGreaterThan(844 * 0.8);
+    } else expect(size.width / size.height).toBeCloseTo(9 / 16, 1);
+    await expect(
+      selected.getByRole("progressbar", { name: "Progresso do Clip" }),
+    ).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Seguindo" })).toBeVisible();
     await expect(selected.locator("header")).toBeInViewport({ ratio: 0.99 });
     await expect(selected.locator(".social-post-actions")).toBeInViewport({
       ratio: 0.99,

@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { ChevronDown, ChevronUp, Play, Volume2, VolumeX } from "lucide-react";
 import { mediaUrl, socialWrite, type SocialPost as Post } from "@/lib/social";
 import { useSocialStream } from "./social-stream";
-import { SocialPost } from "./social-post";
+import { SocialClipOverlay } from "./social-clip-overlay";
 
 function ClipVideo({
   item,
@@ -12,6 +12,7 @@ function ClipVideo({
   autoplay,
   muted,
   change,
+  progress,
 }: {
   item: Post;
   active: boolean;
@@ -19,6 +20,7 @@ function ClipVideo({
   autoplay: boolean;
   muted: boolean;
   change: (p: Post) => void;
+  progress: (fraction: number) => void;
 }) {
   const ref = useRef<HTMLVideoElement>(null),
     lastTap = useRef(0),
@@ -95,6 +97,8 @@ function ClipVideo({
         preload={near ? "metadata" : "none"}
         loop
         onTimeUpdate={(e) => {
+          if (active && e.currentTarget.duration)
+            progress(e.currentTarget.currentTime / e.currentTarget.duration);
           if (active && !e.currentTarget.paused)
             watched.current = Math.max(
               watched.current,
@@ -134,6 +138,54 @@ function ClipVideo({
     </div>
   );
 }
+function ClipPage({
+  item,
+  me,
+  person,
+  active,
+  near,
+  autoplay,
+  muted,
+  change,
+}: {
+  item: Post;
+  me: string;
+  person: (id: string) => void;
+  active: boolean;
+  near: boolean;
+  autoplay: boolean;
+  muted: boolean;
+  change: (p: Post) => void;
+}) {
+  const [progress, setProgress] = useState(0);
+  if (item.mine.includes("HIDE")) return null;
+  return (
+    <>
+      <ClipVideo
+        item={item}
+        active={active}
+        near={near}
+        autoplay={autoplay}
+        muted={muted}
+        change={change}
+        progress={setProgress}
+      />
+      <SocialClipOverlay
+        item={item}
+        me={me}
+        person={person}
+        changed={change}
+        progress={active ? progress : 0}
+      />
+    </>
+  );
+}
+const MUTED_KEY = "enturma-social-clips-muted";
+const TABS = [
+  ["for-you", "Para você"],
+  ["following", "Seguindo"],
+] as const;
+/** Full-screen Clips with one feed per tab; each keeps its own position. */
 export function SocialClips({
   active,
   me,
@@ -145,11 +197,83 @@ export function SocialClips({
   autoplay: boolean;
   person: (id: string) => void;
 }) {
-  const stream = useSocialStream("kind=CLIP&tab=for-you", active),
+  const [tab, setTab] = useState<(typeof TABS)[number][0]>("for-you"),
+    [opened, setOpened] = useState<string[]>(["for-you"]),
+    // This component only renders in the browser, after the workspace has loaded.
+    [muted, setMuted] = useState(() => {
+      try {
+        return sessionStorage.getItem(MUTED_KEY) !== "0";
+      } catch {
+        return true; // Storage unavailable: Clips simply start muted.
+      }
+    });
+  function toggleMuted() {
+    setMuted((value) => {
+      try {
+        sessionStorage.setItem(MUTED_KEY, value ? "0" : "1");
+      } catch {
+        // Not remembered for this session.
+      }
+      return !value;
+    });
+  }
+  return (
+    <div className="social-clips-tabbed">
+      <div className="social-tabs social-clips-tabs" role="tablist" aria-label="Clips">
+        {TABS.map(([key, label]) => (
+          <button
+            key={key}
+            role="tab"
+            aria-selected={tab === key}
+            onClick={() => {
+              setTab(key);
+              setOpened((o) => (o.includes(key) ? o : [...o, key]));
+            }}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+      {TABS.map(
+        ([key]) =>
+          opened.includes(key) && (
+            <div key={key} className="social-clips-feed" hidden={tab !== key}>
+              <ClipsFeed
+                query={`kind=CLIP&tab=${key}`}
+                active={active && tab === key}
+                me={me}
+                autoplay={autoplay}
+                person={person}
+                muted={muted}
+                toggleMuted={toggleMuted}
+              />
+            </div>
+          ),
+      )}
+    </div>
+  );
+}
+function ClipsFeed({
+  query,
+  active,
+  me,
+  autoplay,
+  person,
+  muted,
+  toggleMuted,
+}: {
+  query: string;
+  active: boolean;
+  me: string;
+  autoplay: boolean;
+  person: (id: string) => void;
+  muted: boolean;
+  toggleMuted: () => void;
+}) {
+  const stream = useSocialStream(query, active),
     container = useRef<HTMLDivElement>(null),
     latestLoad = useRef(stream.load);
-  const [index, setIndex] = useState(0),
-    [muted, setMuted] = useState(true);
+  const [index, setIndex] = useState(0);
   const currentIndex = useRef(index);
   useEffect(() => {
     latestLoad.current = stream.load;
@@ -236,22 +360,16 @@ export function SocialClips({
             data-clip-index={i}
             className="social-clip-page"
           >
-            <SocialPost
+            <ClipPage
               item={item}
               me={me}
               person={person}
-              changed={stream.change}
-              clip
-            >
-              <ClipVideo
-                item={item}
-                active={active && i === index}
-                near={active && Math.abs(i - index) <= 1}
-                autoplay={autoplay}
-                muted={muted}
-                change={stream.change}
-              />
-            </SocialPost>
+              active={active && i === index}
+              near={active && Math.abs(i - index) <= 1}
+              autoplay={autoplay}
+              muted={muted}
+              change={stream.change}
+            />
           </section>
         ))}
         {!stream.items.length && (
@@ -275,7 +393,7 @@ export function SocialClips({
         <button
           className="icon-control"
           aria-label={muted ? "Ativar som dos Clips" : "Silenciar Clips"}
-          onClick={() => setMuted((v) => !v)}
+          onClick={toggleMuted}
         >
           {muted ? <VolumeX /> : <Volume2 />}
         </button>
