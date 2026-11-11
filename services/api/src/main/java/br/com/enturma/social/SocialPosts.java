@@ -599,16 +599,21 @@ public class SocialPosts {
         a.id());
   }
 
+  @Transactional
   public void view(Actor a, UUID id, int watchedMs, boolean completed) {
     var p = access.post(a, id);
     if (watchedMs < 0 || watchedMs > 90000) throw ApiException.invalid("Tempo inválido.");
+    access.profile(a.id());
+    // Serialize with consent withdrawal: it must erase every preceding feedback event,
+    // and a later event must observe the new preference before recording anything.
+    var profile =
+        db.one("SELECT recommendations FROM social_profile WHERE user_id=? FOR UPDATE", a.id());
     if ("STORY".equals(p.get("kind")))
       db.jdbc.update(
           "INSERT INTO social_story_view(post_id,user_id) VALUES (?,?) ON CONFLICT DO NOTHING",
           id,
           a.id());
-    if (db.exists(
-        "SELECT EXISTS(SELECT 1 FROM social_profile WHERE user_id=? AND recommendations)", a.id()))
+    if (Boolean.TRUE.equals(profile.get("recommendations")))
       db.jdbc.update(
           "INSERT INTO social_feedback(user_id,post_id,watched_ms,completed) VALUES (?,?,?,?) ON"
               + " CONFLICT(user_id,post_id) DO UPDATE SET"

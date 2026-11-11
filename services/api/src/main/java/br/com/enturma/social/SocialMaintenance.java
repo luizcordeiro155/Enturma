@@ -70,15 +70,24 @@ public class SocialMaintenance {
         "UPDATE social_media SET state='DELETING' WHERE (state IN ('UPLOADING','FAILED') AND"
             + " updated_at<now()-interval '7 days') OR (post_id IS NULL AND state='READY' AND"
             + " updated_at<now()-interval '7 days')");
-    db.jdbc.update(
-        "UPDATE social_media m SET state='DELETING' FROM social_post p WHERE m.post_id=p.id AND"
-            + " p.kind='STORY' AND p.expires_at<now()-interval '30 days' AND NOT EXISTS(SELECT 1"
-            + " FROM social_highlight h WHERE h.post_id=p.id)");
-    db.jdbc.update(
-        "UPDATE social_post SET"
-            + " state='REMOVED',body='',tags='{}',project_url=NULL,story_overlays='[]' WHERE"
-            + " kind='STORY' AND expires_at<now()-interval '30 days' AND state='PUBLISHED' AND NOT"
-            + " EXISTS(SELECT 1 FROM social_highlight h WHERE h.post_id=social_post.id)");
+    // A highlight and expiry cleanup both own the post lock. Recheck after acquiring it;
+    // an older statement snapshot must never delete media from a newly saved highlight.
+    for (var row :
+        db.list(
+            "SELECT p.id FROM social_post p WHERE p.kind='STORY' AND p.state='PUBLISHED' AND"
+                + " p.expires_at<now()-interval '30 days' AND NOT EXISTS(SELECT 1 FROM"
+                + " social_highlight h WHERE h.post_id=p.id) ORDER BY p.expires_at,p.id LIMIT 100"
+                + " FOR UPDATE OF p SKIP LOCKED")) {
+      UUID post = (UUID) row.get("id");
+      if (db.exists("SELECT EXISTS(SELECT 1 FROM social_highlight WHERE post_id=?)", post))
+        continue;
+      db.jdbc.update(
+          "UPDATE social_post SET"
+              + " state='REMOVED',body='',tags='{}',project_url=NULL,story_overlays='[]' WHERE"
+              + " id=?",
+          post);
+      db.jdbc.update("UPDATE social_media SET state='DELETING' WHERE post_id=?", post);
+    }
   }
 
   @Scheduled(fixedDelay = 86400000)

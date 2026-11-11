@@ -30,7 +30,10 @@ class SocialMediaIntegrationTest {
   @Autowired AuthService auth;
   @Autowired Db db;
   @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
-  @MockitoBean ObjectStorageService storage;
+
+  @MockitoBean(name = "socialObjectStorage")
+  ObjectStorageService storage;
+
   @TempDir Path dir;
   final Map<String, byte[]> objects = new ConcurrentHashMap<>();
   Actor owner, viewer;

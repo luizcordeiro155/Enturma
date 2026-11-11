@@ -8,6 +8,7 @@ import br.com.enturma.auth.*;
 import br.com.enturma.common.*;
 import br.com.enturma.social.*;
 import java.util.*;
+import java.util.concurrent.*;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -28,7 +29,9 @@ class SocialIntegrationTest {
   @Autowired SocialPeople people;
   @Autowired SocialAccess access;
   @Autowired SocialReview review;
+  @Autowired SocialMaintenance maintenance;
   @Autowired MockMvc mvc;
+  @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
   Actor a, b, c;
 
   Actor user() {
@@ -148,6 +151,74 @@ class SocialIntegrationTest {
   }
 
   @Test
+  void withdrawingConsentSerializesWithAnAlreadyStartedView() throws Exception {
+    UUID id = publish(a, "POST", "Consentimento concorrente");
+    people.preferences(b, false, true, true, List.of(), false, List.of("feed", "clips", "create"));
+    posts.view(b, id, 1000, false);
+    org.springframework.test.context.transaction.TestTransaction.flagForCommit();
+    org.springframework.test.context.transaction.TestTransaction.end();
+    var tx = new org.springframework.transaction.support.TransactionTemplate(transactions);
+    var withdrawn = new CountDownLatch(1);
+    var commit = new CountDownLatch(1);
+    var readerPid = new CompletableFuture<Integer>();
+    try (var executor = Executors.newFixedThreadPool(2)) {
+      try {
+        var withdrawal =
+            executor.submit(
+                () ->
+                    tx.executeWithoutResult(
+                        status -> {
+                          people.preferences(
+                              b,
+                              false,
+                              false,
+                              true,
+                              List.of(),
+                              false,
+                              List.of("feed", "clips", "create"));
+                          withdrawn.countDown();
+                          try {
+                            assertThat(commit.await(15, TimeUnit.SECONDS)).isTrue();
+                          } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new IllegalStateException(e);
+                          }
+                        }));
+        assertThat(withdrawn.await(10, TimeUnit.SECONDS)).isTrue();
+        var view =
+            executor.submit(
+                () ->
+                    tx.executeWithoutResult(
+                        status -> {
+                          readerPid.complete(
+                              db.jdbc.queryForObject("SELECT pg_backend_pid()", Integer.class));
+                          posts.view(b, id, 2500, true);
+                        }));
+        int pid = readerPid.get(5, TimeUnit.SECONDS);
+        org.awaitility.Awaitility.await()
+            .atMost(java.time.Duration.ofSeconds(5))
+            .until(
+                () ->
+                    db.exists(
+                        "SELECT EXISTS(SELECT 1 FROM pg_stat_activity WHERE pid=? AND"
+                            + " wait_event_type='Lock')",
+                        pid));
+        commit.countDown();
+        withdrawal.get(10, TimeUnit.SECONDS);
+        view.get(10, TimeUnit.SECONDS);
+        assertThat(
+                db.jdbc.queryForObject(
+                    "SELECT count(*) FROM social_feedback WHERE user_id=?", Integer.class, b.id()))
+            .isZero();
+      } finally {
+        commit.countDown();
+      }
+    } finally {
+      posts.remove(a, id);
+    }
+  }
+
+  @Test
   void privateFollowApprovalRemovalAndBlockingApplyEverywhere() {
     people.preferences(
         a, true, false, true, List.of("java"), false, List.of("feed", "clips", "create"));
@@ -180,6 +251,24 @@ class SocialIntegrationTest {
     assertThat(posts.detail(b, id).get("id")).isEqualTo(id);
     posts.highlight(a, id, null);
     assertThatThrownBy(() -> posts.detail(b, id)).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void retentionErasesOldStoriesButPreservesExplicitHighlights() {
+    UUID expired = publish(a, "STORY", "Story antigo"), saved = publish(a, "STORY", "Meu destaque");
+    posts.highlight(a, saved, "Semestre");
+    db.jdbc.update(
+        "UPDATE social_post SET expires_at=now()-interval '31 days' WHERE id IN (?,?)",
+        expired,
+        saved);
+    maintenance.retention();
+    assertThat(db.one("SELECT state,body FROM social_post WHERE id=?", expired))
+        .containsEntry("state", "REMOVED")
+        .containsEntry("body", "");
+    assertThat(posts.detail(b, saved)).containsEntry("body", "Meu destaque");
+    posts.highlight(a, saved, null);
+    maintenance.retention();
+    assertThatThrownBy(() -> posts.detail(b, saved)).isInstanceOf(ApiException.class);
   }
 
   @Test

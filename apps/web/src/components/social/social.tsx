@@ -361,7 +361,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
         {searched && (
           <div className="social-feed-tab">
             <SocialStream
-              key={searched}
+              key={`${tab}:${searched}`}
               query={`tab=${tab}&kind=POST&q=${encodeURIComponent(searched)}`}
               active={view === "feed"}
               me={ready.me.id}

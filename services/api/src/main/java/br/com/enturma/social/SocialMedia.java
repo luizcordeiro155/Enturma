@@ -44,7 +44,8 @@ public class SocialMedia {
   public SocialMedia(
       Db db,
       SocialAccess access,
-      ObjectStorageService storage,
+      @org.springframework.beans.factory.annotation.Qualifier("socialObjectStorage")
+          ObjectStorageService storage,
       SocialTranscoder transcoder,
       ObjectMapper json,
       org.springframework.transaction.PlatformTransactionManager manager,

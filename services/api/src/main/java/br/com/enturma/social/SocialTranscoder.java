@@ -72,6 +72,47 @@ public class SocialTranscoder {
         || stream.path("height").asInt() < 1
         || (long) stream.path("width").asInt() * stream.path("height").asInt() > 33000000)
       throw ApiException.invalid("Não foi possível validar esta mídia.");
+    String source = "source";
+    double seconds = input.path("format").path("duration").asDouble(0);
+    if (kind.equals("VIDEO") && (!Double.isFinite(seconds) || seconds <= 0)) {
+      // MediaRecorder's live WebM does not necessarily contain Duration/Cues.
+      // A bounded, lossless remux measures timestamps and makes the input seekable.
+      // Never trust a client-supplied recording duration.
+      run(
+          dir,
+          List.of(
+              ffmpeg,
+              "-nostdin",
+              "-y",
+              "-loglevel",
+              "error",
+              "-protocol_whitelist",
+              "file,pipe",
+              "-format_whitelist",
+              FORMATS,
+              "-i",
+              "source",
+              "-map",
+              "0:v:0",
+              "-map",
+              "0:a:0?",
+              "-c",
+              "copy",
+              "-t",
+              "3601",
+              "-fs",
+              "150994944",
+              "-avoid_negative_ts",
+              "make_zero",
+              "-f",
+              "matroska",
+              "measured.mkv"),
+          Duration.ofSeconds(30));
+      source = "measured.mkv";
+      seconds = probe(dir, source).path("format").path("duration").asDouble(0);
+      if (Files.size(dir.resolve(source)) >= 150994944)
+        throw ApiException.invalid("Não foi possível validar a duração desta mídia.");
+    }
     var args =
         new ArrayList<>(
             List.of(
@@ -88,7 +129,7 @@ public class SocialTranscoder {
                 "-format_whitelist",
                 FORMATS,
                 "-i",
-                "source"));
+                source));
     if (kind.equals("IMAGE")) {
       args.addAll(
           List.of(
@@ -113,8 +154,7 @@ public class SocialTranscoder {
           image.path("width").asInt(),
           image.path("height").asInt());
     }
-    double seconds = input.path("format").path("duration").asDouble(0);
-    if (seconds <= 0 || seconds > 3600 || recipe == null)
+    if (!Double.isFinite(seconds) || seconds <= 0 || seconds > 3600 || recipe == null)
       throw ApiException.invalid("Importe um vídeo de até uma hora e selecione até 90 segundos.");
     recipe.validated(seconds);
     StringBuilder graph = new StringBuilder();
@@ -242,13 +282,18 @@ public class SocialTranscoder {
   }
 
   private void run(Path dir, List<String> args) throws IOException, InterruptedException {
+    run(dir, args, Duration.ofMinutes(8));
+  }
+
+  private void run(Path dir, List<String> args, Duration timeout)
+      throws IOException, InterruptedException {
     Process p =
         new ProcessBuilder(args)
             .directory(dir.toFile())
             .redirectOutput(ProcessBuilder.Redirect.DISCARD)
             .redirectError(dir.resolve("render.log").toFile())
             .start();
-    await(p, Duration.ofMinutes(8));
+    await(p, timeout);
   }
 
   private static void await(Process p, Duration timeout) throws InterruptedException {

@@ -3,7 +3,7 @@ import { authenticate } from "./session";
 import { expect, type APIRequestContext } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
 async function student(request: APIRequestContext, name: string) {
@@ -148,6 +148,24 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
     comments: 1,
     mine: expect.arrayContaining(["LIKE", "SAVE"]),
   });
+  await page
+    .getByLabel("Pesquisar pessoas, hashtags e publicações")
+    .fill("Meu rascunho continua");
+  await page.getByRole("button", { name: "Pesquisar", exact: true }).click();
+  await expect(
+    feed.getByText("Meu rascunho continua aqui. #computação", { exact: true }),
+  ).toBeVisible();
+  const filtered = page.waitForResponse(
+    (r) =>
+      r.url().includes("/social/feed?") &&
+      r.url().includes("tab=following") &&
+      r.url().includes("q="),
+  );
+  await page.getByRole("tab", { name: "Seguindo", exact: true }).click();
+  expect((await filtered).ok()).toBe(true);
+  await expect(feed.locator(".social-post")).toHaveCount(0);
+  await page.getByRole("button", { name: "Voltar à leitura" }).click();
+  await page.getByRole("tab", { name: "Para Você", exact: true }).click();
   for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: width === 390 ? 844 : 960 });
     for (const theme of ["light", "dark", "enturma"]) {
@@ -373,12 +391,74 @@ test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; control
     ),
   ).toBe(true);
   await editor.scrollIntoViewIfNeeded();
+  const workspaceHeader = await page.locator(".social-header").boundingBox();
+  expect(workspaceHeader!.y).toBeGreaterThanOrEqual(0);
   await page.screenshot({
     path: info.outputPath("social-video-editor-mobile.png"),
   });
   await expect(
     page.getByRole("button", { name: "Publicar Clip" }),
   ).toBeDisabled();
+});
+
+test("câmera: gravação WebM real sem Duration abre o editor e preserva o rascunho", async ({
+  page,
+  request,
+}, info) => {
+  const user = await student(request, "Estudante da câmera");
+  await authenticate(page.context(), user);
+  await page.context().grantPermissions(["camera", "microphone"]);
+  await page.route("**/api/backend/social/capabilities", async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      json: { ...(await response.json()), media: true },
+    });
+  });
+  await page.goto("/social");
+  const navigation = page.getByRole("navigation", {
+    name: "Ambientes do Social",
+  });
+  await navigation.getByRole("button", { name: "Criar", exact: true }).click();
+  await page.getByRole("button", { name: "Clip · até 90s" }).click();
+  await page.getByRole("button", { name: "Gravar", exact: true }).click();
+  const camera = page.getByRole("dialog", { name: "Gravar um Clip" });
+  await camera.getByRole("button", { name: "Ativar câmera" }).click();
+  await camera.getByRole("button", { name: "Gravar", exact: true }).click();
+  await expect(camera.getByRole("status")).toHaveText("Gravando · 3s / 90s");
+  await camera.getByRole("button", { name: "Finalizar" }).click();
+  const editor = page.getByRole("region", { name: "Editor de vídeo" });
+  await expect(editor).toBeVisible();
+  const end = Number(
+    await editor.getByLabel("Fim (s)", { exact: true }).inputValue(),
+  );
+  expect(end).toBeGreaterThan(2);
+  expect(end).toBeLessThan(10);
+  const original = info.outputPath("camera-recording.webm");
+  const bytes = await editor
+    .locator("video")
+    .evaluate(async (video) =>
+      Array.from(
+        new Uint8Array(
+          await (await fetch(video.getAttribute("src")!)).arrayBuffer(),
+        ),
+      ),
+    );
+  writeFileSync(original, Buffer.from(bytes));
+  const metadata = JSON.parse(
+    execFileSync(
+      "ffprobe",
+      ["-v", "error", "-show_format", "-of", "json", original],
+      { timeout: 10000 },
+    ).toString(),
+  );
+  expect(metadata.format.duration).toBeUndefined();
+  await navigation.getByRole("button", { name: "Feed", exact: true }).click();
+  await navigation.getByRole("button", { name: "Criar", exact: true }).click();
+  await expect(editor).toBeVisible();
+  await expect(editor.getByLabel("Fim (s)", { exact: true })).toHaveValue(
+    String(end),
+  );
 });
 
 test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", async ({

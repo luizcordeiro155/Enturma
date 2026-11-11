@@ -63,12 +63,30 @@ O cursor inclui snapshot e último par data/UUID e pertence aos filtros. Cada lo
 
 ## Mídia e custo
 
-**Restrição autorizada: infraestrutura atual, sem custo adicional.** Não foram contratados serviços, CDN, GPU ou APIs de recomendação. `SOCIAL_ENABLED=false` e `SOCIAL_MEDIA_ENABLED=false` por padrão. Mídia também exige armazenamento de objetos já configurado no serviço existente.
+O responsável autorizou custo adicional e integração Cloudflare. Foi criado o bucket **privado `enturma-social`** na conta `80ceceff716db11e0a3a081d35eb6c13`, classe Standard, região ENAM. O acesso público `r2.dev` está desativado e não há domínio público associado. O bucket `enturma-materials` existente permanece separado. `SOCIAL_ENABLED=false` e `SOCIAL_MEDIA_ENABLED=false` continuam sendo os padrões; provisionar armazenamento não ativa o Social em produção.
+
+O cliente S3 existente é reutilizado com configuração independente `SOCIAL_STORAGE_*`. A API lê/grava R2; o navegador recebe mídia somente pelo endpoint autenticado, com a mesma autorização do Post/Story e suporte a Range. As credenciais nunca vão ao frontend. Não é necessário contratar Cloudflare Stream para esta entrega: a API processa MP4 e R2 armazena os resultados. Isso não oferece streaming adaptativo HLS nem elimina o tráfego pelo servidor da API.
+
+Configuração do serviço Java:
+
+```dotenv
+SOCIAL_STORAGE_ENDPOINT=https://80ceceff716db11e0a3a081d35eb6c13.r2.cloudflarestorage.com
+SOCIAL_STORAGE_REGION=auto
+SOCIAL_STORAGE_BUCKET=enturma-social
+SOCIAL_STORAGE_ACCESS_KEY=<credencial R2 restrita ao bucket>
+SOCIAL_STORAGE_SECRET_KEY=<segredo R2 restrito ao bucket>
+SOCIAL_FFMPEG=ffmpeg
+SOCIAL_FFPROBE=ffprobe
+```
+
+O conector não possui a permissão Account API Tokens Write. As duas credenciais R2 precisam ser configuradas no ambiente da API pelo responsável, com acesso Object Read & Write somente ao novo bucket. Não reutilizar nem substituir as variáveis `OBJECT_STORAGE_*` dos materiais e chats. Para testar antes da implantação, o arquivo ignorado `.local/social-r2.env` contém os campos; o teste opt-in `SocialR2LiveTest`, com `SOCIAL_R2_SMOKE=true`, envia 128 KiB, verifica bytes e Range e remove apenas seu objeto aleatório.
+
+O R2 cobra armazenamento/operações segundo a [tabela oficial](https://developers.cloudflare.com/r2/pricing/); a implementação usa o [SDK Java compatível](https://developers.cloudflare.com/r2/examples/aws/aws-sdk-java/). Não há orçamento ilimitado implícito: quotas por arquivo/conta e fila serial limitam abuso, mas não estabelecem um teto financeiro global.
 
 1. Navegador/WebView/Electron lê metadados e guarda receita/rascunho. Não carrega o vídeo inteiro na memória para exportar.
 2. Upload privado em blocos de 2 MiB; máximo de 128 MiB por arquivo, dez mídias por Post e uma por Clip/Story. Quota atual de originais: 512 MiB por conta.
 3. Fila PostgreSQL, sem Redis adicional; um worker por instância, lease de 20 minutos, até três tentativas e timeout de oito minutos. Processamento pendente não é publicável.
-4. FFmpeg/ffprobe locais à API: processos sem shell, nomes gerados, protocolos `file,pipe`, formatos permitidos, dois threads, input até uma hora/33 megapixels. Corte, concatenação, enquadramento, textos e áudio são realmente exportados.
+4. FFmpeg/ffprobe locais à API: processos sem shell, nomes gerados, protocolos `file,pipe`, formatos permitidos, dois threads, input até uma hora/33 megapixels. Corte, concatenação, enquadramento, textos e áudio são realmente exportados. WebM de MediaRecorder sem Duration recebe remux sem recodificação, limitado a 30 segundos de processamento/144 MiB, e nova medição antes da exportação; a duração informada pelo cliente não é prova.
 5. H.264/AAC, 720×1280, 30 FPS, MP4 faststart e capa JPEG. Probe final exige ≤90.000 ms e duração coerente; arquivo truncado não é sucesso. Imagens viram JPEG até 1600 px com metadados removidos.
 6. Erros preservam o rascunho. Temporários locais são apagados ao terminar; exclusão remota usa tombstone durável.
 
@@ -97,7 +115,7 @@ O resultado final e o link da execução serão registrados após a suíte compl
 
 ## Limitações e ativação
 
-- Produção de mídia depende da capacidade atual de FFmpeg, armazenamento privado, CPU, disco e tráfego, seguida de aprovação. Nada novo foi provisionado.
+- Produção de mídia depende da configuração das credenciais do bucket provisionado, capacidade de FFmpeg, CPU, disco e tráfego, seguida de aprovação. R2 foi provisionado; nenhuma aplicação foi implantada nem flag de produção ativada.
 - Música licenciada, narração adicional, ASR, transições, filtros, velocidade e templates avançados permanecem fora desta entrega. Não há controles fictícios desses recursos. O editor entrega as ferramentas essenciais enumeradas acima.
 - Sem ML nem afirmação de detectar automaticamente seguidores fraudulentos. A análise de identidade/legitimidade é administrativa antes do selo.
 - Ordem manual é salva na conta; destaque automático considera uso da sessão e nunca reposiciona os botões durante interação.

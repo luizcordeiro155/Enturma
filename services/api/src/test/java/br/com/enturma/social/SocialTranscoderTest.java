@@ -13,6 +13,57 @@ class SocialTranscoderTest {
   @TempDir Path dir;
 
   @Test
+  void acceptsLiveWebmWithoutDurationAndValidatesTheRenderedLength() throws Exception {
+    Assumptions.assumeTrue("true".equals(System.getenv("SOCIAL_TEST_FFMPEG")));
+    var process =
+        new ProcessBuilder(
+                "ffmpeg",
+                "-nostdin",
+                "-y",
+                "-loglevel",
+                "error",
+                "-f",
+                "lavfi",
+                "-i",
+                "testsrc2=size=160x240:rate=30",
+                "-t",
+                "3",
+                "-c:v",
+                "libvpx",
+                "-deadline",
+                "realtime",
+                "-f",
+                "webm",
+                "-live",
+                "1",
+                "source")
+            .directory(dir.toFile())
+            .redirectError(ProcessBuilder.Redirect.INHERIT)
+            .start();
+    assertThat(process.waitFor(30, TimeUnit.SECONDS)).isTrue();
+    assertThat(process.exitValue()).isZero();
+    var probe =
+        new ProcessBuilder("ffprobe", "-v", "error", "-show_format", "-of", "json", "source")
+            .directory(dir.toFile())
+            .redirectOutput(dir.resolve("original.json").toFile())
+            .start();
+    assertThat(probe.waitFor(10, TimeUnit.SECONDS)).isTrue();
+    assertThat(
+            new ObjectMapper()
+                .readTree(dir.resolve("original.json").toFile())
+                .path("format")
+                .has("duration"))
+        .isFalse();
+    var recipe =
+        new VideoRecipe(
+            List.of(new VideoRecipe.Segment(.5, 2.5)), 1, .5, .5, 0, 1, true, .2, List.of());
+    var result =
+        new SocialTranscoder(new ObjectMapper(), "ffmpeg", "ffprobe").render(dir, "VIDEO", recipe);
+    assertThat(result.durationMs()).isBetween(1950, 2050);
+    assertThat(Files.size(result.thumbnail())).isGreaterThan(1000);
+  }
+
+  @Test
   void acceptsExactlyNinetySecondsIncludingAudioWithoutExceedingTheLimit() throws Exception {
     Assumptions.assumeTrue("true".equals(System.getenv("SOCIAL_TEST_FFMPEG")));
     var process =

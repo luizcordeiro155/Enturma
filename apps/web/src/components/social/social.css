@@ -2,7 +2,7 @@
 html .social-active-shell {
   height: calc(100dvh - var(--social-chrome, 0px));
   min-height: 0;
-  overflow: hidden;
+  overflow: clip;
   padding-bottom: 0;
 }
 html[data-desktop-chrome="true"] .social-active-shell {
@@ -10,7 +10,7 @@ html[data-desktop-chrome="true"] .social-active-shell {
 }
 .social-active-shell > .workspace {
   min-height: 0;
-  overflow: hidden;
+  overflow: clip;
 }
 .social-active-shell .topbar {
   flex: none;
@@ -19,7 +19,7 @@ html[data-desktop-chrome="true"] .social-active-shell {
   padding: 0;
   display: flex;
   min-height: 0;
-  overflow: hidden;
+  overflow: clip;
 }
 .social-page,
 .social-workspace {
@@ -113,8 +113,9 @@ html[data-theme]
   :is(.social-page, .social-dialog)
   .social-segments
   [aria-pressed="true"] {
-  color: #143d32;
-  background: var(--accent);
+  color: #143d32 !important;
+  background: var(--accent) !important;
+  border-color: var(--accent) !important;
 }
 .social-edit-media,
 .social-editor-tools,
@@ -1159,6 +1160,12 @@ html[data-theme]
       66px +
         max(env(safe-area-inset-bottom, 0px), var(--native-safe-bottom, 0px))
     );
+  }
+  /* The shared mobile shell uses block layout; give its flex workspace a
+     definite height so the active Feed/Clips scroll surface cannot collapse. */
+  .social-active-shell > .workspace {
+    height: 100%;
+    padding-bottom: 0;
   }
   .social-page {
     padding: 12px 8px;

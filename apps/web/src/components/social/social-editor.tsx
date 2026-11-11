@@ -106,8 +106,15 @@ async function videoDuration(file: File) {
   return new Promise<number>((resolve, reject) => {
     const el = document.createElement("video"),
       url = URL.createObjectURL(file);
+    let settled = false;
     const done = () => {
+      settled = true;
       clearTimeout(timer);
+      el.onloadedmetadata =
+        el.ondurationchange =
+        el.onseeked =
+        el.onerror =
+          null;
       el.removeAttribute("src");
       el.load();
       URL.revokeObjectURL(url);
@@ -116,12 +123,26 @@ async function videoDuration(file: File) {
       done();
       reject(new Error("Não foi possível ler a duração do vídeo."));
     }, 15000);
-    el.onloadedmetadata = () => {
-      const d = el.duration;
+    const accept = (d: number) => {
+      if (settled) return;
       done();
       if (!Number.isFinite(d) || d <= 0 || d > 3600)
         reject(new Error("Escolha um vídeo de até uma hora."));
       else resolve(d);
+    };
+    el.onloadedmetadata = () => {
+      if (Number.isFinite(el.duration)) accept(el.duration);
+      else {
+        // MediaRecorder WebM may omit Duration. Seeking forces the browser to
+        // inspect the final cluster without decoding/playing the whole recording.
+        el.ondurationchange = () => {
+          if (Number.isFinite(el.duration) && el.duration > 0)
+            accept(el.duration);
+        };
+        el.onseeked = () =>
+          accept(Number.isFinite(el.duration) ? el.duration : el.currentTime);
+        el.currentTime = 3601;
+      }
     };
     el.onerror = () => {
       done();
