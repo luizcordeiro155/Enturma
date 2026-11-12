@@ -172,8 +172,15 @@ test("Studio visual: long video, drag trimming, timed text, cover and theme snap
     .click();
   const cover = editor.getByRole("slider", { name: "Escolher quadro da capa" });
   await cover.focus();
+  const previousCover = Number(await cover.getAttribute("aria-valuenow"));
   await page.keyboard.press("ArrowRight");
-  expect(Number(await cover.getAttribute("aria-valuenow"))).toBeGreaterThan(0);
+  await expect(cover).toHaveAttribute(
+    "aria-valuenow",
+    String(previousCover + 0.1),
+  );
+  await expect(editor.getByLabel("Posição de reprodução")).toHaveValue(
+    String(previousCover + 0.1),
+  );
   await editor
     .getByLabel("Capa da galeria")
     .setInputFiles({ name: "capa.png", mimeType: "image/png", buffer: png });
@@ -376,6 +383,7 @@ test("LiveKit: host publishes, viewer receives real video/chat and both see the 
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
   });
+  await context.tracing.start({ screenshots: true, snapshots: true });
   try {
     const audience = await context.newPage();
     await enter(audience, viewer);
@@ -420,6 +428,9 @@ test("LiveKit: host publishes, viewer receives real video/chat and both see the 
       player.getByRole("heading", { name: "Esta live terminou" }),
     ).toBeVisible({ timeout: 20000 });
   } finally {
+    await context.tracing.stop({
+      path: info.outputPath("live-viewer-trace.zip"),
+    });
     await context.close();
     await request.post(`${backend}/api/v1/social/live/${live.id}/end`, {
       headers: { Authorization: `Bearer ${author.accessToken}` },

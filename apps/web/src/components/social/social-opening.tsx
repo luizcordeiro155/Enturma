@@ -1,6 +1,5 @@
 "use client";
 import dynamic from "next/dynamic";
-import { Aperture } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { reducedMotion } from "@/lib/motion";
 import { useAppShellState } from "../app-shell-state";
@@ -9,7 +8,7 @@ const SocialOpeningPlayer = dynamic(
   () => import("../motion/social-opening-player"),
   {
     ssr: false,
-    loading: () => <Aperture size={72} aria-hidden="true" />,
+    loading: () => null,
   },
 );
 
@@ -19,11 +18,17 @@ export function SocialOpening() {
   const dialog = useRef<HTMLDialogElement>(null);
   const closing = useRef(false);
   const animation = useRef<Animation | undefined>(undefined);
+  const ready = useCallback(() => {
+    // Keep the dialog closed while the lazy player loads: a placeholder icon
+    // followed by frame zero looks like the opening has flashed and restarted.
+    if (!closing.current && dialog.current && !dialog.current.open)
+      dialog.current.showModal();
+  }, []);
   const close = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
     const el = dialog.current;
-    if (!el || reducedMotion() || !el.animate) {
+    if (!el?.open || reducedMotion() || !el.animate) {
       setVisible(false);
       return;
     }
@@ -51,7 +56,6 @@ export function SocialOpening() {
   useEffect(() => {
     if (!visible) return;
     const el = dialog.current!;
-    el.showModal();
     // Loading or decoding an animation must never block access to the Social.
     const fallback = setTimeout(close, 6000);
     return () => {
@@ -73,7 +77,7 @@ export function SocialOpening() {
       }}
     >
       <div className="social-opening-art" aria-hidden="true">
-        <SocialOpeningPlayer ended={close} />
+        <SocialOpeningPlayer ready={ready} ended={close} />
       </div>
       <h2>
         Enturma Social<span>.</span>

@@ -17,6 +17,7 @@ const state = vi.hoisted(() => ({
   learning: false,
   socialEnabled: true,
   claimSocialOpening: vi.fn(),
+  playerReady: undefined as (() => void) | undefined,
 }));
 vi.mock("../app-shell-state", () => ({ useAppShellState: () => state }));
 vi.mock("next/navigation", () => ({ usePathname: () => "/home" }));
@@ -30,12 +31,18 @@ vi.mock("../desktop-updates", () => ({
 }));
 vi.mock("../user-identity", () => ({ Avatar: () => <span>EU</span> }));
 vi.mock("next/dynamic", () => ({
-  default: () => () => <div data-testid="opening-player" />,
+  default:
+    () =>
+    ({ ready }: { ready: () => void }) => {
+      state.playerReady = ready;
+      return <div data-testid="opening-player" />;
+    },
 }));
 
 beforeEach(() => {
   state.learning = false;
   state.socialEnabled = true;
+  state.playerReady = undefined;
   state.claimSocialOpening
     .mockReset()
     .mockReturnValueOnce(true)
@@ -126,12 +133,36 @@ it("opens only once in the app lifecycle and has a timeout when the player fails
   vi.useFakeTimers();
   const page = render(<SocialOpening />);
   await act(() => vi.advanceTimersByTimeAsync(1));
+  act(() => state.playerReady?.());
   expect(screen.getByRole("dialog")).toBeVisible();
   await act(() => vi.advanceTimersByTimeAsync(6000));
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   page.unmount();
   render(<SocialOpening />);
   await act(() => vi.advanceTimersByTimeAsync(1));
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it("waits for the actual animation before opening and never reopens after skipping", async () => {
+  vi.useFakeTimers();
+  render(<SocialOpening />);
+  await act(() => vi.advanceTimersByTimeAsync(1));
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  expect(state.playerReady).toBeTypeOf("function");
+  act(() => state.playerReady?.());
+  expect(screen.getByRole("dialog")).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Explorar o Social" }));
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+  act(() => state.playerReady?.());
+  expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
+});
+
+it("abandons a slow animation without showing a late welcome over the feed", async () => {
+  vi.useFakeTimers();
+  render(<SocialOpening />);
+  await act(() => vi.advanceTimersByTimeAsync(1));
+  await act(() => vi.advanceTimersByTimeAsync(6000));
+  act(() => state.playerReady?.());
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
 

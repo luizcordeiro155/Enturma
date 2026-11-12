@@ -87,13 +87,16 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
       const main = document.querySelector(".workspace > main")!;
       const messageList = document.querySelector(".private-messages")!;
       const composer = document.querySelector(".private-composer")!;
-      const wr = workspace.getBoundingClientRect(), cr = chat.getBoundingClientRect();
+      const wr = workspace.getBoundingClientRect(),
+        cr = chat.getBoundingClientRect();
       return {
         leftGap: Math.abs(cr.left - wr.left),
         rightGap: Math.abs(cr.right - wr.right),
-        documentOverflow: document.documentElement.scrollHeight - window.innerHeight,
+        documentOverflow:
+          document.documentElement.scrollHeight - window.innerHeight,
         mainOverflow: main.scrollHeight - main.clientHeight,
-        composerWithinChat: composer.getBoundingClientRect().bottom <= cr.bottom + 1,
+        composerWithinChat:
+          composer.getBoundingClientRect().bottom <= cr.bottom + 1,
         messageScroll: getComputedStyle(messageList).overflowY,
       };
     });
@@ -291,7 +294,10 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
       .getByRole("button", { name: "Adicionar emoji", exact: true })
       .click();
     await expect(
-      other.getByRole("dialog", { name: "Emojis, figurinhas e GIFs", exact: true }),
+      other.getByRole("dialog", {
+        name: "Emojis, figurinhas e GIFs",
+        exact: true,
+      }),
     ).toBeVisible();
     await expect(
       other.getByRole("searchbox", { name: "Pesquisar emoji" }),
@@ -304,7 +310,10 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     });
     await other.goBack();
     await expect(
-      other.getByRole("dialog", { name: "Emojis, figurinhas e GIFs", exact: true }),
+      other.getByRole("dialog", {
+        name: "Emojis, figurinhas e GIFs",
+        exact: true,
+      }),
     ).toHaveCount(0);
     await expect(other).toHaveURL(
       new RegExp(`friends\\?chat=${friendship.id}`),
@@ -611,7 +620,7 @@ test("Remotion intro adapts, pauses, skips, replays and does not remount after n
 test("private call rings in another route, connects real LiveKit peers and releases media", async ({
   browser,
   request,
-}) => {
+}, info) => {
   test.setTimeout(120000);
   const alice = await user(request, "Alice Chamada"),
     bob = await user(request, "Bruno Chamada");
@@ -630,13 +639,17 @@ test("private call rings in another route, connects real LiveKit peers and relea
   ).toBe(true);
   const a = await browser.newContext({ permissions: ["microphone", "camera"] });
   const b = await browser.newContext({ permissions: ["microphone", "camera"] });
+  await a.tracing.start({ screenshots: true, snapshots: true });
+  await b.tracing.start({ screenshots: true, snapshots: true });
   for (const context of [a, b])
-    await context.addInitScript(() =>
-      localStorage.setItem("enturma-intro:v0.3", "seen"),
-    );
+    await context.addInitScript(() => {
+      if (location.protocol === "http:" || location.protocol === "https:")
+        localStorage.setItem("enturma-intro:v0.3", "seen");
+    });
   // Exercise real LiveKit publishing/subscriptions using a controlled screen track.
   // Native screen-picker permissions still require a manual device check.
   await a.addInitScript(() => {
+    if (!navigator.mediaDevices) return;
     navigator.mediaDevices.getDisplayMedia = async () => {
       const canvas = document.createElement("canvas");
       canvas.width = 640;
@@ -702,6 +715,7 @@ test("private call rings in another route, connects real LiveKit peers and relea
       callee.locator('.call-member[data-camera="true"] video'),
     ).toBeVisible({ timeout: 20000 });
     await caller.getByTitle("Compartilhar tela").click();
+    await expect(caller.getByTitle("Parar compartilhamento")).toBeVisible();
     await expect(
       callee.getByRole("button", { name: "Ver transmissão", exact: true }),
     ).toBeVisible();
@@ -737,6 +751,8 @@ test("private call rings in another route, connects real LiveKit peers and relea
     await expect(caller.locator(".private-call-status")).toHaveCount(0);
     await expect(caller.locator(".global-call-dock.has-call")).toHaveCount(0);
   } finally {
+    await a.tracing.stop({ path: info.outputPath("call-sender-trace.zip") });
+    await b.tracing.stop({ path: info.outputPath("call-receiver-trace.zip") });
     await a.close();
     await b.close();
   }
@@ -881,7 +897,9 @@ test("theme surfaces stay readable across core routes and narrow screens", async
       "enturma-experience",
       JSON.stringify({ ...p, theme: "SYSTEM" }),
     );
-    window.dispatchEvent(new StorageEvent("storage", { key: "enturma-experience" }));
+    window.dispatchEvent(
+      new StorageEvent("storage", { key: "enturma-experience" }),
+    );
   });
   await page.emulateMedia({ colorScheme: "light" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
@@ -982,28 +1000,32 @@ test.describe("touch chat", () => {
         .toBeLessThan(24);
       const navigation = page.locator(".room-section-chat .room-mobile-nav");
       await expect(navigation).toBeVisible();
-      const restingComposerBottom = await page.locator(".persistent-composer").evaluate(
-        (node) => node.getBoundingClientRect().bottom,
-      );
+      const restingComposerBottom = await page
+        .locator(".persistent-composer")
+        .evaluate((node) => node.getBoundingClientRect().bottom);
       const restingNavTop = await navigation.evaluate(
         (node) => node.getBoundingClientRect().top,
       );
-      expect(Math.abs(restingNavTop - restingComposerBottom)).toBeLessThanOrEqual(20);
+      expect(
+        Math.abs(restingNavTop - restingComposerBottom),
+      ).toBeLessThanOrEqual(20);
 
       // Touching and focusing before IME resize must NOT lower the composer
       // onto the navigation tabs. The visible viewport still has full height.
       await composer.dispatchEvent("pointerdown", { pointerType: "touch" });
       await composer.focus();
       await expect(navigation).toBeVisible();
-      await expect.poll(async () => {
-        const inputBottom = await page.locator(".persistent-composer").evaluate(
-          (node) => node.getBoundingClientRect().bottom,
-        );
-        const tabsTop = await navigation.evaluate(
-          (node) => node.getBoundingClientRect().top,
-        );
-        return Math.abs(tabsTop - inputBottom);
-      }).toBeLessThanOrEqual(20);
+      await expect
+        .poll(async () => {
+          const inputBottom = await page
+            .locator(".persistent-composer")
+            .evaluate((node) => node.getBoundingClientRect().bottom);
+          const tabsTop = await navigation.evaluate(
+            (node) => node.getBoundingClientRect().top,
+          );
+          return Math.abs(tabsTop - inputBottom);
+        })
+        .toBeLessThanOrEqual(20);
       await viewport.evaluate((el) => {
         el.scrollTop = 100;
         el.dispatchEvent(new Event("scroll", { bubbles: true }));
@@ -1039,24 +1061,33 @@ test.describe("touch chat", () => {
       // Regression: keyboard-open Chrome had a 300-450px empty gap below
       // the composer because both block chat containers were height:auto.
       // Visibility alone passed while the input floated under the header.
-      await expect.poll(async () => {
-        const bottom = await page.locator(".persistent-composer").evaluate(
-          (node) => node.getBoundingClientRect().bottom,
-        );
-        const visualBottom = await page.evaluate(
-          () => (visualViewport?.offsetTop ?? 0) + (visualViewport?.height ?? innerHeight),
-        );
-        return Math.abs(visualBottom - bottom);
-      }).toBeLessThanOrEqual(14);
+      await expect
+        .poll(async () => {
+          const bottom = await page
+            .locator(".persistent-composer")
+            .evaluate((node) => node.getBoundingClientRect().bottom);
+          const visualBottom = await page.evaluate(
+            () =>
+              (visualViewport?.offsetTop ?? 0) +
+              (visualViewport?.height ?? innerHeight),
+          );
+          return Math.abs(visualBottom - bottom);
+        })
+        .toBeLessThanOrEqual(14);
       // The keyboard should cover the existing navigation instead of
       // removing the tabs or lifting them above the message composer.
       await expect(navigation).toHaveCSS("display", "grid");
       await expect(navigation).toHaveCSS("position", "fixed");
-      await expect.poll(async () => navigation.evaluate((node) => {
-        const viewport = window.visualViewport;
-        const bottom = (viewport?.offsetTop ?? 0) + (viewport?.height ?? innerHeight);
-        return node.getBoundingClientRect().top - bottom;
-      })).toBeGreaterThanOrEqual(0);
+      await expect
+        .poll(async () =>
+          navigation.evaluate((node) => {
+            const viewport = window.visualViewport;
+            const bottom =
+              (viewport?.offsetTop ?? 0) + (viewport?.height ?? innerHeight);
+            return node.getBoundingClientRect().top - bottom;
+          }),
+        )
+        .toBeGreaterThanOrEqual(0);
 
       // Android Back closes the keyboard but can leave its textbox focused.
       await page.setViewportSize({ width: 390, height: 844 });
