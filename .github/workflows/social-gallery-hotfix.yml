@@ -40,11 +40,11 @@ jobs:
           def replace(path, old, new):
               p = Path(path)
               text = p.read_text()
-              assert text.count(old) == 1, f'Expected one exact anchor in {path}'
+              assert text.count(old) == 1, f'Expected one exact anchor in {path}: {old!r}'
               p.write_text(text.replace(old, new, 1))
           css = 'apps/web/src/components/social/social-studio.css'
           replace(css, 'html[data-theme] .social-navigation-brand {\n  display: flex;', 'html[data-theme] .social-navigation-brand {\n  display: none;')
-          replace(css, 'html[data-theme] .social-navigation-brand .brand-app-icon {', '@media (min-width: 761px) {\n  html[data-theme] .social-navigation-brand {\n    display: flex;\n  }\n}\n@media (min-width: 761px) and (max-width: 1199px) {\n  html[data-theme] .social-navigation-brand > span {\n    display: none;\n  }\n}\nhtml[data-theme] .social-navigation-brand .brand-app-icon {')
+          replace(css, '\nhtml[data-theme] .social-navigation-brand .brand-app-icon {', '\n@media (min-width: 761px) {\n  html[data-theme] .social-navigation-brand {\n    display: flex;\n  }\n}\n@media (min-width: 761px) and (max-width: 1199px) {\n  html[data-theme] .social-navigation-brand > span {\n    display: none;\n  }\n}\nhtml[data-theme] .social-navigation-brand .brand-app-icon {')
           editor = 'apps/web/src/components/social/social-editor.tsx'
           replace(editor, 'import { prepareCover } from "@/lib/social-cover";', 'import { prepareCover } from "@/lib/social-cover";\nimport { normalizeSocialGalleryFile } from "@/lib/social-gallery";')
           replace(editor, 'for (const file of files) {\n        if (', 'for (const original of files) {\n        const file = normalizeSocialGalleryFile(original);\n        if (')
@@ -98,7 +98,7 @@ jobs:
           text = p.read_text()
           start = text.index('                if (acceptsImages(params)) {', text.index('            override fun onShowFileChooser('))
           end = text.index('                launchFileChooser(params)', start)
-          text = text[:start] + '                // System photo/document pickers grant access to selected URIs only.\n                // No blanket storage permission is needed to choose a photo or video.\n' + text[end:]
+          text = text[:start] + '                // System pickers grant access to selected URIs only.\n                // No blanket storage permission is needed to choose a photo or video.\n' + text[end:]
           start = text.index('    private fun acceptsImages(')
           end = text.index('    private fun openExternal(', start)
           text = text[:start] + '''    private fun acceptedMimeTypes(params: WebChromeClient.FileChooserParams?): List<String> =
