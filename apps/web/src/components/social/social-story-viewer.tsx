@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- authenticated media */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Eye, Heart, Pause, Play, Send, Star, Trash2, Volume2, VolumeX } from "lucide-react";
 import { api } from "@/lib/api";
 import { mediaUrl, postPerson, socialWrite, storyDuration, type SocialPerson, type SocialPost } from "@/lib/social";
@@ -33,7 +33,7 @@ export function StoryViewer({ stories, start = 0, me, close, person, onDeleted, 
   const pointer = useRef<{ id: number; x: number; y: number; time: number; width: number; localX: number } | null>(null);
   const current = useRef(currentId), viewed = useRef(onViewed), closeRef = useRef(close);
   useEffect(() => { current.current = currentId; viewed.current = onViewed; closeRef.current = close; }, [currentId, onViewed, close]);
-  const navigate = useCallback((action: StoryAction) => {
+  function navigate(action: StoryAction) {
     if (writing.current) return;
     const target = navigateStory(groups, currentId, action);
     if (target === null) { closeRef.current(); return; }
@@ -41,9 +41,10 @@ export function StoryViewer({ stories, start = 0, me, close, person, onDeleted, 
     video.current?.pause(); elapsed.current = 0; completed.current = "";
     setSelectedId(target); setReadyMedia(""); setProgress(0); setPaused(false); setHolding(false);
     setViewers(null); setHighlight(false); setShare(false); setConfirmDeletion(false); setError("");
-  }, [groups, currentId]);
+  }
   const moveNext = useRef(() => {});
-  useEffect(() => { moveNext.current = () => navigate("next"); }, [navigate]);
+  // The timer keeps one subscription while its callback follows the committed render.
+  useEffect(() => { moveNext.current = () => navigate("next"); });
   useEffect(() => {
     if (!currentId) return;
     let alive = true;
@@ -138,8 +139,8 @@ export function StoryViewer({ stories, start = 0, me, close, person, onDeleted, 
             onLoadedData={() => setReadyMedia(currentId)}
             onPlay={event => document.querySelectorAll<HTMLVideoElement>(".social-page video,.social-dialog video").forEach(other => {if (other !== event.currentTarget) other.pause();})}
             onEnded={() => {if (!isPaused && completed.current !== currentId) {completed.current = currentId; moveNext.current();}}}
-            onError={() => {setError("N\u00e3o foi poss\u00edvel carregar o Story. Tente novamente."); setPaused(true);}} /> : item.media[0] ?
-              <img key={`${currentId}:${retry}`} src={mediaUrl(item.media[0].id)} alt={`Story de ${item.name}`} draggable={false} onLoad={() => setReadyMedia(currentId)} onError={() => {setError("N\u00e3o foi poss\u00edvel carregar a imagem.");setPaused(true);}} /> : null}
+            onError={() => {setError("Não foi possível carregar o Story. Tente novamente."); setPaused(true);}} /> : item.media[0] ?
+              <img key={`${currentId}:${retry}`} src={mediaUrl(item.media[0].id)} alt={`Story de ${item.name}`} draggable={false} onLoad={() => setReadyMedia(currentId)} onError={() => {setError("Não foi possível carregar a imagem.");setPaused(true);}} /> : null}
           {item.body && <p className={item.media.length ? "social-story-caption" : "social-story-text"}><ForumLinks text={item.body} /></p>}
           <StoryDecorations items={item.storyOverlays ?? []} />
         </div>
@@ -152,19 +153,19 @@ export function StoryViewer({ stories, start = 0, me, close, person, onDeleted, 
           })}><Heart fill={item.mine.includes("LIKE") ? "currentColor" : "none"} /></button>
           <button type="button" className="icon-control" aria-label="Responder ou compartilhar Story" onClick={() => setShare(true)}><Send /></button>
           {item.authorId === me && <>
-            <button type="button" className="icon-control" aria-label={"Ver visualiza\u00e7\u00f5es"} onClick={() => void showViewers()} disabled={busy}><Eye /></button>
+            <button type="button" className="icon-control" aria-label="Ver visualizações" onClick={() => void showViewers()} disabled={busy}><Eye /></button>
             <button type="button" className="icon-control" aria-label="Salvar nos destaques" onClick={() => {setHighlight(true);setTitle(item.highlightTitle ?? "");}}><Star /></button>
             <button type="button" className="icon-control" aria-label="Excluir meu Story" onClick={() => setConfirmDeletion(true)}><Trash2 /></button>
           </>}
-          <button type="button" className="icon-control" aria-label={"Pr\u00f3ximo Story"} onClick={() => navigate("next")} disabled={busy}><ChevronRight /></button>
+          <button type="button" className="icon-control" aria-label="Próximo Story" onClick={() => navigate("next")} disabled={busy}><ChevronRight /></button>
         </div>
-      </> : <p role="status">{error ? "Story indispon\u00edvel." : "Carregando Story\u2026"}</p>}
+      </> : <p role="status">{error ? "Story indisponível." : "Carregando Story…"}</p>}
       {error && <div className="social-story-error" role="alert"><p>{error}</p><button type="button" className="secondary" onClick={() => {setError("");setReadyMedia("");setRetry(value => value + 1);setPaused(false);}}>Tentar novamente</button></div>}
     </div>
     {share && loaded && <SocialShare item={item} reply={item.authorId !== me} close={() => setShare(false)} />}
     {viewers !== null && <SocialDialog title="Quem viu" close={() => setViewers(null)} variant="panel"><div className="social-dialog-body">
       {viewers.map(viewer => <SocialAuthor key={viewer.id} user={viewer} open={person} />)}
-      {!viewers.length && <p>{"Ainda sem visualiza\u00e7\u00f5es."}</p>}
+      {!viewers.length && <p>Ainda sem visualizações.</p>}
       {moreViewers && <button disabled={busy} onClick={() => void showViewers(viewersPage + 1)}>Carregar mais</button>}
       <button className="secondary" onClick={() => setViewers(null)}>Voltar ao Story</button>{error && <p role="alert">{error}</p>}
     </div></SocialDialog>}
@@ -175,9 +176,9 @@ export function StoryViewer({ stories, start = 0, me, close, person, onDeleted, 
       {error && <p role="alert">{error}</p>}
     </div></SocialDialog>}
     {confirmDeletion && <SocialDialog title="Excluir este Story?" close={() => {if (!busy) setConfirmDeletion(false);}}><div className="social-dialog-body">
-      <p>{"O Story deixar\u00e1 de estar dispon\u00edvel. Esta a\u00e7\u00e3o n\u00e3o pode ser desfeita."}</p>
+      <p>O Story deixará de estar disponível. Esta ação não pode ser desfeita.</p>
       <div className="social-row"><button className="secondary" disabled={busy} onClick={() => setConfirmDeletion(false)}>Cancelar</button>
-      <button className="social-danger-action" disabled={busy} onClick={deleteStory}><Trash2 />{busy ? "Excluindo\u2026" : "Excluir Story"}</button></div>
+      <button className="social-danger-action" disabled={busy} onClick={deleteStory}><Trash2 />{busy ? "Excluindo…" : "Excluir Story"}</button></div>
       {error && <p role="alert">{error}</p>}
     </div></SocialDialog>}
   </SocialDialog>;
