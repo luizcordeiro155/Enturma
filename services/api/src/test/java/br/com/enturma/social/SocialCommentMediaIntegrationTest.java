@@ -12,6 +12,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @SpringBootTest(properties = "SOCIAL_ENABLED=true")
 @Transactional
+@org.springframework.test.annotation.DirtiesContext(
+    classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class SocialCommentMediaIntegrationTest {
   @Autowired SocialPosts posts;
   @Autowired SocialCommentMedia media;
