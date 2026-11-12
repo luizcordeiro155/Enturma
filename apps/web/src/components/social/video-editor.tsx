@@ -327,9 +327,9 @@ export function VideoEditor({
             setPlaying(false);
             if (coverMode) {
               const next = Math.min(time, Math.max(0, duration - 0.05));
+              onCoverFile?.(undefined);
               edit({ ...value, cover: next });
               seek(next);
-              onCoverFile?.(undefined);
             } else {
               if (video.current) video.current.currentTime = time;
               let offset = 0;

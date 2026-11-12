@@ -639,8 +639,10 @@ test("private call rings in another route, connects real LiveKit peers and relea
   ).toBe(true);
   const a = await browser.newContext({ permissions: ["microphone", "camera"] });
   const b = await browser.newContext({ permissions: ["microphone", "camera"] });
-  await a.tracing.start({ screenshots: true, snapshots: true });
-  await b.tracing.start({ screenshots: true, snapshots: true });
+  if (!info.retry) {
+    await a.tracing.start({ screenshots: true, snapshots: true });
+    await b.tracing.start({ screenshots: true, snapshots: true });
+  }
   for (const context of [a, b])
     await context.addInitScript(() => {
       if (location.protocol === "http:" || location.protocol === "https:")
@@ -774,8 +776,12 @@ test("private call rings in another route, connects real LiveKit peers and relea
     await expect(caller.locator(".private-call-status")).toHaveCount(0);
     await expect(caller.locator(".global-call-dock.has-call")).toHaveCount(0);
   } finally {
-    await a.tracing.stop({ path: info.outputPath("call-sender-trace.zip") });
-    await b.tracing.stop({ path: info.outputPath("call-receiver-trace.zip") });
+    if (!info.retry) {
+      await a.tracing.stop({ path: info.outputPath("call-sender-trace.zip") });
+      await b.tracing.stop({
+        path: info.outputPath("call-receiver-trace.zip"),
+      });
+    }
     await a.close();
     await b.close();
   }

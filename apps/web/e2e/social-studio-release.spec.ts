@@ -383,7 +383,8 @@ test("LiveKit: host publishes, viewer receives real video/chat and both see the 
   const context = await browser.newContext({
     viewport: { width: 390, height: 844 },
   });
-  await context.tracing.start({ screenshots: true, snapshots: true });
+  if (!info.retry)
+    await context.tracing.start({ screenshots: true, snapshots: true });
   try {
     const audience = await context.newPage();
     await enter(audience, viewer);
@@ -428,9 +429,10 @@ test("LiveKit: host publishes, viewer receives real video/chat and both see the 
       player.getByRole("heading", { name: "Esta live terminou" }),
     ).toBeVisible({ timeout: 20000 });
   } finally {
-    await context.tracing.stop({
-      path: info.outputPath("live-viewer-trace.zip"),
-    });
+    if (!info.retry)
+      await context.tracing.stop({
+        path: info.outputPath("live-viewer-trace.zip"),
+      });
     await context.close();
     await request.post(`${backend}/api/v1/social/live/${live.id}/end`, {
       headers: { Authorization: `Bearer ${author.accessToken}` },

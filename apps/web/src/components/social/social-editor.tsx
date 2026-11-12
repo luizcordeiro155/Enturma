@@ -909,14 +909,17 @@ export function SocialEditor({
                 <LocalFile
                   item={item}
                   coverChanged={(coverFile) =>
-                    setDraft({
-                      ...draft,
-                      files: draft.files.map((file) =>
-                        file.id === item.id
-                          ? { ...file, coverFile, coverUploaded: false }
-                          : file,
-                      ),
-                    })
+                    setDraft(
+                      (previous) =>
+                        previous && {
+                          ...previous,
+                          files: previous.files.map((file) =>
+                            file.id === item.id
+                              ? { ...file, coverFile, coverUploaded: false }
+                              : file,
+                          ),
+                        },
+                    )
                   }
                   overlay={
                     draft.kind === "STORY" ? (
@@ -924,24 +927,27 @@ export function SocialEditor({
                     ) : undefined
                   }
                   changed={(recipe) =>
-                    setDraft({
-                      ...draft,
-                      files: draft.files.map((file) =>
-                        file.id === item.id
-                          ? {
-                              ...file,
-                              recipe,
-                              ...(file.media?.state === "READY" && file.file
-                                ? {
-                                    id: crypto.randomUUID(),
-                                    media: undefined,
-                                    coverUploaded: false,
-                                  }
-                                : {}),
-                            }
-                          : file,
-                      ),
-                    })
+                    setDraft(
+                      (previous) =>
+                        previous && {
+                          ...previous,
+                          files: previous.files.map((file) =>
+                            file.id === item.id
+                              ? {
+                                  ...file,
+                                  recipe,
+                                  ...(file.media?.state === "READY" && file.file
+                                    ? {
+                                        id: crypto.randomUUID(),
+                                        media: undefined,
+                                        coverUploaded: false,
+                                      }
+                                    : {}),
+                                }
+                              : file,
+                          ),
+                        },
+                    )
                   }
                 />
               </div>

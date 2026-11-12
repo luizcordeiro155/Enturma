@@ -28,7 +28,13 @@ import { SocialDialog } from "./social-dialog";
 import { Avatar } from "../user-identity";
 import { ComposerMedia } from "../composer-media";
 const TOPIC = "enturma-social-live-v1";
-type Chat = { id: string; name: string; body: string; heart: boolean };
+type Chat = {
+  id: string;
+  name: string;
+  body: string;
+  heart: boolean;
+  identity?: string;
+};
 export function SocialLiveDialog({
   initialId,
   me,
@@ -191,6 +197,50 @@ export function SocialLiveDialog({
         current.on(sdk.RoomEvent.AudioPlaybackStatusChanged, () => {
           if (alive && current) setSoundBlocked(!current.canPlaybackAudio);
         });
+        // Text streams carry the authenticated sender identity even when their
+        // first message beats the participant update on the signalling channel.
+        current.registerTextStreamHandler(TOPIC, async (reader, sender) => {
+          if (
+            !alive ||
+            !sender.identity ||
+            !reader.info.size ||
+            reader.info.size > 4096
+          )
+            return;
+          const now = Date.now(),
+            last = rates.get(sender.identity) ?? 0;
+          if (now - last < 400) return;
+          rates.set(sender.identity, now);
+          if (rates.size > 1000) rates.clear();
+          try {
+            const text = await reader.readAll({
+              signal: AbortSignal.timeout(5000),
+            });
+            const message = decodeLiveMessage(new TextEncoder().encode(text));
+            if (!alive || !message) return;
+            append({
+              id: message.id,
+              identity: sender.identity,
+              name:
+                current?.getParticipantByIdentity(sender.identity)?.name ||
+                "Estudante",
+              body: message.body,
+              heart: message.kind === "HEART",
+            });
+          } catch {
+            /* Incomplete or oversized streams are not chat messages. */
+          }
+        });
+        current.on(sdk.RoomEvent.ParticipantConnected, (participant) => {
+          if (alive)
+            setChat((previous) =>
+              previous.map((message) =>
+                message.identity === participant.identity
+                  ? { ...message, name: participant.name || "Estudante" }
+                  : message,
+              ),
+            );
+        });
         current.on(
           sdk.RoomEvent.DataReceived,
           (bytes, participant, _kind, topic) => {
@@ -299,10 +349,12 @@ export function SocialLiveDialog({
         heart ? "HEART" : "CHAT",
         heart ? "" : text,
       );
-      await room.current.localParticipant.publishData(bytes, {
-        reliable: !heart,
-        topic: TOPIC,
-      });
+      await room.current.localParticipant.sendText(
+        new TextDecoder().decode(bytes),
+        {
+          topic: TOPIC,
+        },
+      );
       const message = decodeLiveMessage(bytes)!;
       setChat((previous) => [
         ...previous.slice(-79),
