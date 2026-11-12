@@ -28,6 +28,7 @@ import {
   type DraftFile,
 } from "@/lib/social-draft";
 import { prepareCover } from "@/lib/social-cover";
+import { normalizeSocialGalleryFile } from "@/lib/social-gallery";
 import { ImageEditor } from "./image-editor";
 import { VideoEditor } from "./video-editor";
 import { SocialCapture } from "./social-capture";
@@ -380,7 +381,8 @@ export function SocialEditor({
             : "Use uma mídia por Story ou Clip.",
         );
       const next: DraftFile[] = [];
-      for (const file of files) {
+      for (const original of files) {
+        const file = normalizeSocialGalleryFile(original);
         if (
           !/^(image\/(jpeg|png|webp|gif)|video\/)/.test(file.type) ||
           file.size > 128 * 1024 * 1024
@@ -793,7 +795,7 @@ export function SocialEditor({
                 Escolher mídia
                 <input
                   type="file"
-                  accept="image/jpeg,image/png,image/webp,image/gif,video/*"
+                  accept={draft.kind === "CLIP" ? "video/*" : "image/*,video/*"}
                   multiple={draft.kind === "POST"}
                   disabled={!mediaEnabled || busy}
                   onChange={(event) => {
@@ -802,6 +804,21 @@ export function SocialEditor({
                   }}
                 />
               </label>
+              {draft.kind !== "CLIP" && (
+                <label className="social-file-button">
+                  Fotos da galeria
+                  <input
+                    type="file"
+                    accept="image/*"
+                    multiple={draft.kind === "POST"}
+                    disabled={!mediaEnabled || busy}
+                    onChange={(event) => {
+                      void choose(Array.from(event.target.files ?? []));
+                      event.target.value = "";
+                    }}
+                  />
+                </label>
+              )}
               <button
                 type="button"
                 className="secondary"

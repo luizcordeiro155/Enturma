@@ -33,7 +33,7 @@ it("só bloqueia o gesto de página quando há mais de uma mídia", () => {
   expect(screen.getAllByRole("tab")).toHaveLength(2);
   expect(screen.getAllByRole("tab")[0]).toHaveAttribute("aria-selected", "true");
 });
-it("reserva a proporção da primeira mídia, limitada a 4:5", () => {
+it("reserva a proporção da primeira mídia, limitada a 3:4", () => {
   const { container } = render(
     <SocialMediaCarousel media={[img("a", 1080, 1920)]} authorName="Ana" autoplay />,
   );
@@ -42,7 +42,7 @@ it("reserva a proporção da primeira mídia, limitada a 4:5", () => {
     container
       .querySelector<HTMLElement>(".social-carousel")!
       .style.getPropertyValue("--social-media-aspect"),
-  ).toBe("0.8");
+  ).toBe("0.75");
 });
 it("as setas e os pontos trocam a mídia selecionada", () => {
   render(

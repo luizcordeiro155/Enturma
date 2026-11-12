@@ -29,3 +29,10 @@ A especificação em cinco partes continua sendo a autoridade da versão. Esta a
 - O ambiente local não consegue acessar GitHub/npm e não contém as dependências React/Vitest do projeto. Lint, typecheck, suíte unitária e E2E precisam ser confirmados na CI da PR.
 - Os testes E2E usam somente o banco isolado localhost `enturma_e2e`. Capturas com fixtures comprovam layout, não R2/FFmpeg em produção nem homologação física Android/Desktop.
 - A validação completa e a revisão das capturas permanecem pendentes até haver resultados reais da CI. Não substituir evidência pendente por afirmação de sucesso.
+
+## Gallery and mobile follow-up (2026-11-12)
+- Mobile logo: studio stylesheet specificity overrode the mobile hide rule; hide by default and opt in at desktop breakpoint.
+- Native picker: mixed visual MIME types were forced into image-only ACTION_PICK and broad storage permission. Use AndroidX Photo Picker with image/video scope, multiple selection and document fallback.
+- Browser picker: wildcard visual accepts plus an explicit photos-only gallery entry. Normalize absent/generic/legacy MIME hints; actual bytes remain server-validated. HEIC conversion is not claimed.
+- Photo publication coverage: UI waits for upload/export/draft/publish confirmation; Java integration processes a real PNG with the same 4:5 recipe and reads the published image as a second user.
+- Ruling: local execution unavailable (container ClientError); validation uses isolated existing GitHub CI, not production data. No main merge until checks pass.

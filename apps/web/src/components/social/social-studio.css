@@ -90,12 +90,22 @@ html[data-theme] .social-profile-buttons {
   flex-wrap: wrap;
 }
 html[data-theme] .social-navigation-brand {
-  display: flex;
+  display: none;
   align-items: center;
   gap: 10px;
   white-space: nowrap;
   line-height: 1;
   text-decoration: none;
+}
+@media (min-width: 761px) {
+  html[data-theme] .social-navigation-brand {
+    display: flex;
+  }
+}
+@media (min-width: 761px) and (max-width: 1199px) {
+  html[data-theme] .social-navigation-brand > span {
+    display: none;
+  }
 }
 html[data-theme] .social-navigation-brand .brand-app-icon {
   width: 40px !important;
