@@ -40,7 +40,15 @@ it("notifies dialogs when an overlay keyboard changes without resizing the app",
   expect(
     document.documentElement.style.getPropertyValue("--social-ime-height"),
   ).toBe("320px");
+  expect(document.documentElement.dataset.socialKeyboard).toBe("true");
+  keyboard.boundingRect.height = 0;
+  act(() => {
+    keyboard.dispatchEvent(new Event("geometrychange"));
+    frame(2);
+  });
+  expect(document.documentElement.dataset.socialKeyboard).toBe("false");
   unmount();
+  expect(document.documentElement.dataset.socialKeyboard).toBeUndefined();
   expect(keyboard.overlaysContent).toBe(false);
   window.removeEventListener("enturma-social-viewport", changed);
   delete (navigator as Navigator & { virtualKeyboard?: unknown })

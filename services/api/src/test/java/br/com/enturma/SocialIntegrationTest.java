@@ -237,6 +237,20 @@ class SocialIntegrationTest {
   }
 
   @Test
+  void mentionSuggestionsPreferConnectionsAndExcludeBothBlockDirections() {
+    people.follow(a, b.id(), true);
+    String username = db.one("SELECT username FROM app_user WHERE id=?", b.id()).get("username").toString();
+    assertThat(people.mentionSuggestions(a, "").toString()).contains(username);
+    assertThat(people.mentionSuggestions(a, username).toString()).contains(username);
+    db.jdbc.update("INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", b.id(), a.id());
+    assertThat(people.mentionSuggestions(a, username).toString()).doesNotContain(username);
+    db.jdbc.update("DELETE FROM user_block WHERE user_id=? AND blocked_id=?", b.id(), a.id());
+    db.jdbc.update("INSERT INTO user_block(user_id,blocked_id) VALUES (?,?)", a.id(), b.id());
+    assertThat(people.mentionSuggestions(a, "").toString()).doesNotContain(username);
+    assertThatThrownBy(() -> people.mentionSuggestions(a, "a".repeat(81))).isInstanceOf(ApiException.class);
+  }
+
+  @Test
   void storyExpiryIsServerSideAndHighlightsAreExplicit() {
     UUID id = publish(a, "STORY", "Estudando");
     posts.view(b, id, 0, false);

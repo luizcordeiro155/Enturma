@@ -9,18 +9,18 @@ import {
 } from "./social-pager";
 
 it("mantém o Feed entre Clips e Criar", () => {
-  expect(PAGER_ORDER).toEqual(["clips", "feed", "create"]);
+  expect(PAGER_ORDER).toEqual(["create", "feed", "clips"]);
 });
 it("usa o mesmo limite de celular do restante do aplicativo", () => {
   expect(PHONE_QUERY).toBe("(max-width: 760px)");
 });
 it("mapeia o arrasto para a página vizinha, com o Feed no meio", () => {
-  expect(pagerNeighbor("feed", 80)).toBe("clips");
-  expect(pagerNeighbor("feed", -80)).toBe("create");
-  expect(pagerNeighbor("clips", -80)).toBe("feed");
-  expect(pagerNeighbor("clips", 80)).toBeNull();
-  expect(pagerNeighbor("create", 80)).toBe("feed");
-  expect(pagerNeighbor("create", -80)).toBeNull();
+  expect(pagerNeighbor("feed", 80)).toBe("create");
+  expect(pagerNeighbor("feed", -80)).toBe("clips");
+  expect(pagerNeighbor("create", -80)).toBe("feed");
+  expect(pagerNeighbor("create", 80)).toBeNull();
+  expect(pagerNeighbor("clips", 80)).toBe("feed");
+  expect(pagerNeighbor("clips", -80)).toBeNull();
 });
 it("trava o eixo só depois de 10 px e prefere o vertical em diagonal", () => {
   expect(lockAxis(6, 3)).toBeNull();

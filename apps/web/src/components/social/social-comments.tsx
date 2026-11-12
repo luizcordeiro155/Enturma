@@ -11,6 +11,7 @@ import {
 import { SocialDialog } from "./social-dialog";
 import { SocialAuthor } from "./social-post";
 import { SocialText } from "./social-text";
+import { SocialMentionInput } from "./social-mention-input";
 import { providerMessageUrl } from "@/lib/klipy";
 import { ComposerMedia } from "../composer-media";
 const QUICK = [
@@ -401,15 +402,15 @@ export function SocialComments({
             <label className="sr-only" htmlFor={id}>
               {"Seu coment\u00e1rio"}
             </label>
-            <textarea
+            <SocialMentionInput
               id={id}
-              ref={field}
+              inputRef={field}
               className="resize-none"
               rows={1}
               maxLength={1500}
               value={text}
               disabled={busy}
-              onChange={(event) => setText(event.target.value)}
+              onValueChange={setText}
               placeholder={"Adicione um coment\u00e1rio\u2026"}
             />
             <ComposerMedia

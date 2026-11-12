@@ -1,4 +1,5 @@
 "use client";
+import { SocialMentionInput } from "./social-mention-input";
 /* eslint-disable @next/next/no-img-element -- local files and authenticated media */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
@@ -973,19 +974,18 @@ export function SocialEditor({
             </>
           )}
         </div>
-        <label>
-          O que você quer compartilhar?
-          <textarea
+        <div className="social-caption-field">
+          <label htmlFor="social-caption">O que você quer compartilhar?</label>
+          <SocialMentionInput
+            id="social-caption"
             className="resize-none"
             value={draft.body}
             maxLength={4000}
             rows={3}
             placeholder="Escreva uma legenda… Use #assuntos e @pessoas."
-            onChange={(event) =>
-              setDraft({ ...draft, body: event.target.value })
-            }
+            onValueChange={(body) => setDraft({ ...draft, body })}
           />
-        </label>
+        </div>
         <div hidden={step !== "details"} className="social-create-details">
           {!!draft.files.length && (
             <p className="social-note">

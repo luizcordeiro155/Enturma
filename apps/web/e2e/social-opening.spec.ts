@@ -64,6 +64,8 @@ for (const width of [390, 1440]) {
       name: "Bem-vindo ao Enturma Social",
     });
     await expect(opening).toBeVisible();
+    await expect(page.locator(".social-workspace")).toHaveCount(0);
+    await expect(page.locator(".social-navigation")).toHaveCount(0);
     // No provisional aperture is shown before the real Remotion composition.
     await expect(
       opening.locator(".social-opening-art .lucide-aperture"),

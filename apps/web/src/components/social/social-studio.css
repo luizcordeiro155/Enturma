@@ -1,4 +1,147 @@
 /* Native Enturma surfaces. Media overlays deliberately stay white on arbitrary video. */
+.social-opening-content:not([hidden]) {
+  display: contents;
+}
+.social-opening-content[hidden] {
+  display: none !important;
+}
+.social-opening-pending {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--bg);
+  color: var(--muted);
+  z-index: 100;
+}
+html[data-theme] .social-navigation-items [aria-current="page"] {
+  background: transparent;
+}
+.social-nav-selection {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: var(--soft);
+  pointer-events: none;
+}
+.social-navigation-items button > :not(.social-nav-selection) {
+  position: relative;
+}
+.social-caption-field {
+  display: grid;
+  gap: 8px;
+}
+.social-mention-field {
+  position: relative;
+  min-width: 0;
+  flex: 1;
+}
+.social-mention-field > textarea {
+  display: block;
+  width: 100%;
+}
+.social-mention-popover {
+  position: absolute;
+  inset: auto 0 calc(100% + 6px);
+  z-index: 20;
+  max-height: min(240px, 30dvh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 8px 24px #0003;
+}
+html[data-theme]
+  :is(.social-page, .social-dialog)
+  .social-mention-popover
+  button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  height: auto;
+  min-height: 54px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+}
+html[data-theme]
+  :is(.social-page, .social-dialog)
+  .social-mention-popover
+  button[aria-selected="true"] {
+  background: var(--soft);
+}
+.social-mention-popover .identity-avatar {
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
+}
+.social-mention-popover button > span:last-child {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.social-mention-popover strong,
+.social-mention-popover small {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.social-mention-popover strong {
+  font-size: 13px;
+}
+.social-mention-popover small {
+  font-size: 12px;
+  color: var(--muted);
+}
+.social-mention-popover p {
+  margin: 0;
+  padding: 12px;
+  font-size: 12px;
+  font-weight: 400;
+}
+.social-profile-heading .social-author strong {
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  html[data-theme] .social-profile-intro .social-profile-heading {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+  .social-profile-buttons {
+    margin-block: 0 8px;
+    gap: 6px;
+  }
+  html[data-theme] .social-profile-buttons > :is(a, button),
+  html[data-theme] .social-profile-buttons .social-follow > button {
+    min-height: 44px;
+    padding: 8px 12px;
+  }
+  .social-profile-tools > button {
+    max-width: 100%;
+    font-size: 12px;
+    white-space: normal;
+  }
+  .social-profile-counts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  html[data-social-keyboard="true"] .social-page .social-editor footer {
+    position: static;
+    visibility: hidden;
+    pointer-events: none;
+  }
+  html[data-social-keyboard="true"] .social-navigation {
+    visibility: hidden;
+    pointer-events: none;
+  }
+}
 html[data-theme]
   :is(.social-page, .social-dialog)
   .social-post-actions
@@ -57,7 +200,7 @@ html[data-theme] .social-tabs button {
 }
 html[data-theme] .social-profile-intro .social-author {
   justify-content: flex-start;
-  flex: 1;
+  flex: 1 1 240px;
   min-width: 0;
 }
 html[data-theme] :is(.social-page, .social-dialog) .identity-avatar {

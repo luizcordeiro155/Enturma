@@ -145,13 +145,21 @@ it("opens only once in the app lifecycle and has a timeout when the player fails
 
 it("waits for the actual animation before opening and never reopens after skipping", async () => {
   vi.useFakeTimers();
-  render(<SocialOpening />);
+  render(
+    <SocialOpening>
+      <main data-testid="workspace">Feed e Clips</main>
+    </SocialOpening>,
+  );
+  expect(screen.queryByTestId("workspace")).not.toBeInTheDocument();
   await act(() => vi.advanceTimersByTimeAsync(1));
+  expect(screen.queryByTestId("workspace")).not.toBeInTheDocument();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(state.playerReady).toBeTypeOf("function");
   act(() => state.playerReady?.());
   expect(screen.getByRole("dialog")).toBeVisible();
+  expect(screen.queryByTestId("workspace")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Explorar o Social" }));
+  expect(screen.getByTestId("workspace")).toBeVisible();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   act(() => state.playerReady?.());
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

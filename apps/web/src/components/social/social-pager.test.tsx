@@ -58,14 +58,14 @@ it("troca de página conforme a direção, com o Feed no meio", () => {
   const select = vi.fn();
   const { rerender } = render(<Pager view="feed" select={select} />);
   swipe(page("feed"), 100, 300); // dedo para a direita
-  expect(select).toHaveBeenLastCalledWith("clips");
-  swipe(page("feed"), 300, 100);
   expect(select).toHaveBeenLastCalledWith("create");
-  rerender(<Pager view="clips" select={select} />);
-  swipe(page("clips"), 300, 100);
+  swipe(page("feed"), 300, 100);
+  expect(select).toHaveBeenLastCalledWith("clips");
+  rerender(<Pager view="create" select={select} />);
+  swipe(page("create"), 300, 100);
   expect(select).toHaveBeenLastCalledWith("feed");
   select.mockClear();
-  swipe(page("clips"), 100, 300);
+  swipe(page("create"), 100, 300);
   expect(select).not.toHaveBeenCalled();
 });
 it("não troca quando o gesto começa em carrossel, campo de texto ou borda", () => {
@@ -99,7 +99,7 @@ it("um arrasto curto e lento volta para a página atual", () => {
   fireEvent.touchMove(feed, { touches: [point(150, 300)] });
   clock = 1060; // os mesmos 50 px em 60 ms confirmam a troca
   fireEvent.touchEnd(feed, { changedTouches: [point(150, 300)] });
-  expect(select).toHaveBeenCalledWith("create");
+  expect(select).toHaveBeenCalledWith("clips");
   vi.restoreAllMocks();
 });
 it("prepara a página vizinha assim que o arrasto horizontal começa", () => {
@@ -107,12 +107,12 @@ it("prepara a página vizinha assim que o arrasto horizontal começa", () => {
   render(<Pager view="feed" select={() => {}} peek={peek} />);
   fireEvent.touchStart(page("feed"), { touches: [point(300, 300)] });
   fireEvent.touchMove(page("feed"), { touches: [point(260, 302)] });
-  expect(peek).toHaveBeenCalledWith("create");
+  expect(peek).toHaveBeenCalledWith("clips");
 });
 it("as páginas inativas ficam inertes", () => {
   render(<Pager view="feed" select={() => {}} />);
-  expect(page("clips")).toHaveAttribute("inert");
   expect(page("create")).toHaveAttribute("inert");
+  expect(page("clips")).toHaveAttribute("inert");
   expect(page("feed")).not.toHaveAttribute("inert");
 });
 it("acima de 760 px o arrasto não troca de página", () => {

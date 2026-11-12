@@ -1,4 +1,6 @@
 "use client";
+import { useEffect, useRef } from "react";
+import { playMotion } from "@/lib/motion";
 import { Aperture, Film, Plus, Home, Settings2 } from "lucide-react";
 import type { SocialPerson, SocialView } from "@/lib/social";
 import { NavigationLink } from "../navigation-link";
@@ -29,6 +31,31 @@ export function SocialNavigation({
   profile: () => void;
   settings: () => void;
 }) {
+  const navigation = useRef<HTMLElement>(null);
+  const previous = useRef<SocialView>(view);
+  useEffect(() => {
+    const active = navigation.current?.querySelector<HTMLElement>(
+      '[aria-current="page"]',
+    );
+    if (!active) return;
+    const rect = active.getBoundingClientRect();
+    const from = navigation.current
+      ?.querySelector<HTMLElement>(`[data-social-view="${previous.current}"]`)
+      ?.getBoundingClientRect();
+    const changed = previous.current !== view;
+    previous.current = view;
+    const indicator = active.querySelector(".social-nav-selection");
+    if (!changed || !from || !indicator) return;
+    const animation = playMotion(
+      indicator,
+      [
+        { transform: `translate(${from.x - rect.x}px, ${from.y - rect.y}px)` },
+        { transform: "translate(0, 0)" },
+      ],
+      { duration: 280 },
+    );
+    return () => animation?.cancel();
+  }, [view, order]);
   return (
     <aside className="social-navigation">
       <NavigationLink
@@ -41,18 +68,26 @@ export function SocialNavigation({
           enturma<span className="dot">.</span>
         </span>
       </NavigationLink>
-      <nav aria-label="Ambientes do Social" className="social-navigation-items">
+      <nav
+        ref={navigation}
+        aria-label="Ambientes do Social"
+        className="social-navigation-items"
+      >
         {order.map((key) => {
           const { label, icon: Icon } = destinations[key];
           return (
             <button
               key={key}
+              data-social-view={key}
               type="button"
               onClick={() => select(key)}
               aria-current={view === key ? "page" : undefined}
               className={`${key === "create" ? "social-create-action" : ""} ${highlight === key ? "social-frequent" : ""}`}
               title={`${label} (Alt + ${key === "feed" ? 1 : key === "clips" ? 2 : 3})`}
             >
+              {view === key && (
+                <span className="social-nav-selection" aria-hidden="true" />
+              )}
               <span className="social-nav-glyph">
                 <Icon size={24} />
               </span>

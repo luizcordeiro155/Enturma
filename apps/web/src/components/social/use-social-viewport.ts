@@ -27,7 +27,10 @@ export function useSocialViewport() {
     function sync() {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        if (!matchMedia("(max-width:760px)").matches) return;
+        if (!matchMedia("(max-width:760px)").matches) {
+          delete root.dataset.socialKeyboard;
+          return;
+        }
         const native =
           parseFloat(
             getComputedStyle(root).getPropertyValue("--native-keyboard-bottom"),
@@ -41,6 +44,9 @@ export function useSocialViewport() {
             (viewport?.offsetTop ?? 0),
         );
         if (!focused && inset < 100) restHeight = window.innerHeight;
+        root.dataset.socialKeyboard = String(
+          Math.max(0, restHeight - window.innerHeight, inset) > 100,
+        );
         root.style.setProperty("--social-rest-height", `${restHeight}px`);
         root.style.setProperty(
           "--social-ime-height",
@@ -125,6 +131,7 @@ export function useSocialViewport() {
         keyboard.overlaysContent = oldOverlay;
       root.style.removeProperty("--social-rest-height");
       root.style.removeProperty("--social-ime-height");
+      delete root.dataset.socialKeyboard;
       setNativeChatComposerFocused(false);
     };
   }, []);

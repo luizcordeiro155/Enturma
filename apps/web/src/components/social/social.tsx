@@ -42,6 +42,13 @@ type Ready = {
   live: boolean;
 };
 export function Social() {
+  return (
+    <SocialOpening>
+      <SocialContent />
+    </SocialOpening>
+  );
+}
+function SocialContent() {
   const [ready, setReady] = useState<Ready>(),
     [error, setError] = useState(""),
     [disabled, setDisabled] = useState(false),
@@ -241,7 +248,6 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       }
     >
       <div className="social-page">
-        <SocialOpening />
         <div className="social-workspace">
           <header className="social-header">
             <div className="social-header-brand">
