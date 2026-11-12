@@ -162,6 +162,12 @@ public class SocialApiController {
     return people.profile(a, id);
   }
 
+  @GetMapping("/people/mentions")
+  public Object mentionSuggestions(
+      @AuthenticationPrincipal Actor a, @RequestParam(defaultValue = "") String q) {
+    return people.mentionSuggestions(a, q);
+  }
+
   @GetMapping("/people/{id}/highlights")
   public Object highlights(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
     return posts.highlights(a, id);

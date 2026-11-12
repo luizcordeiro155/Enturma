@@ -24,10 +24,35 @@ export function useSocialViewport() {
     let lastNative = -1,
       lastHeight = -1,
       lastInset = -1;
+    function revealControl(inset: number) {
+      const control = document.activeElement;
+      if (
+        !(control instanceof HTMLElement) ||
+        control.closest(
+          ".social-dialog,.social-comment-form,.social-live-composer",
+        )
+      )
+        return;
+      const page = control.closest<HTMLElement>(
+        '.social-pager-page[data-page="create"]',
+      );
+      if (!page) return;
+      const bottom = Math.min(
+        (viewport?.height ?? innerHeight) + (viewport?.offsetTop ?? 0),
+        innerHeight - inset,
+      );
+      const overflow = control.getBoundingClientRect().bottom - bottom + 16;
+      if (overflow > 0) page.scrollTop += overflow;
+    }
     function sync() {
       cancelAnimationFrame(frame);
       frame = requestAnimationFrame(() => {
-        if (!matchMedia("(max-width:760px)").matches) return;
+        if (!matchMedia("(max-width:760px)").matches) {
+          delete root.dataset.socialKeyboard;
+          root.style.removeProperty("--social-ime-height");
+          root.style.removeProperty("--social-rest-height");
+          return;
+        }
         const native =
           parseFloat(
             getComputedStyle(root).getPropertyValue("--native-keyboard-bottom"),
@@ -41,11 +66,16 @@ export function useSocialViewport() {
             (viewport?.offsetTop ?? 0),
         );
         if (!focused && inset < 100) restHeight = window.innerHeight;
+        root.dataset.socialKeyboard = String(
+          Math.max(0, restHeight - window.innerHeight, inset) > 100,
+        );
         root.style.setProperty("--social-rest-height", `${restHeight}px`);
         root.style.setProperty(
           "--social-ime-height",
           `${Math.max(0, restHeight - window.innerHeight, inset)}px`,
         );
+        if (focused && (inset > 100 || restHeight - innerHeight > 100))
+          revealControl(inset);
         if (
           lastNative !== native ||
           lastHeight !== window.innerHeight ||
@@ -70,24 +100,7 @@ export function useSocialViewport() {
       sync();
       clearTimeout(focusTimer);
       focusTimer = setTimeout(() => {
-        const control = document.activeElement;
-        if (
-          !(control instanceof HTMLElement) ||
-          control.closest(
-            ".social-dialog,.social-comment-form,.social-live-composer",
-          )
-        )
-          return;
-        const page = control.closest<HTMLElement>(
-          '.social-pager-page[data-page="create"]',
-        );
-        if (!page) return;
-        const bottom = Math.min(
-          viewport?.height ?? innerHeight,
-          innerHeight - (keyboard?.boundingRect.height ?? 0),
-        );
-        const overflow = control.getBoundingClientRect().bottom - bottom + 16;
-        if (overflow > 0) page.scrollTop += overflow;
+        revealControl(Math.max(0, lastInset));
       }, 280);
     }
     const blur = () => {
@@ -125,6 +138,7 @@ export function useSocialViewport() {
         keyboard.overlaysContent = oldOverlay;
       root.style.removeProperty("--social-rest-height");
       root.style.removeProperty("--social-ime-height");
+      delete root.dataset.socialKeyboard;
       setNativeChatComposerFocused(false);
     };
   }, []);

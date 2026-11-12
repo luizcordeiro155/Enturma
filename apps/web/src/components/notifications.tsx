@@ -7,7 +7,7 @@ import {
   playNotificationSound,
   unlockNotificationSound,
 } from "@/lib/notification-sound";
-import { createContext, Fragment, useContext, useEffect, useRef, useState } from "react";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
 import { Avatar } from "./user-identity";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -520,25 +520,27 @@ export function NotificationBell() {
               <X size={20} />
             </button>
           </header>
-          <button
-            className="text-button"
-            disabled={!data.unreadCount}
-            onClick={() => void data.read(undefined, true)}
-          >
-            <CheckCheck size={17} /> Marcar todas como lidas
-          </button>
-          <button
-            className="text-button"
-            disabled={clearing || !data.items.length}
-            onClick={async () => {
-              setClearing(true);
-              setCleared(await data.clear());
-              setClearing(false);
-            }}
-          >
-            <Trash2 size={17} />{" "}
-            {clearing ? "Limpando…" : "Limpar notificações"}
-          </button>
+          <div className="notification-toolbar">
+            <button
+              className="text-button"
+              disabled={!data.unreadCount}
+              onClick={() => void data.read(undefined, true)}
+            >
+              <CheckCheck size={17} /> Marcar todas como lidas
+            </button>
+            <button
+              className="text-button"
+              disabled={clearing || !data.items.length}
+              onClick={async () => {
+                setClearing(true);
+                setCleared(await data.clear());
+                setClearing(false);
+              }}
+            >
+              <Trash2 size={17} />{" "}
+              {clearing ? "Limpando…" : "Limpar notificações"}
+            </button>
+          </div>
           {cleared ? (
             <p role="status">
               Caixa de entrada limpa. Novos avisos continuarão chegando.
@@ -562,35 +564,46 @@ export function NotificationBell() {
           ) : null}
           <div className="notification-items">
             {data.items.map((n) => (
-              <Fragment key={n.id}>
-              <button
-                key={n.id}
-                className={`notification-item ${n.readAt ? "" : "unread"}`}
-                onClick={() => void visit(n)}
-              >
-                {n.kind.startsWith("SOCIAL_") && n.actorId ? <Avatar user={{ id: n.actorId, name: n.actorName ?? "Estudante", username: n.actorUsername, hasAvatar: n.actorHasAvatar }} /> : n.kind === "MODERATION" ? (
-                  <ShieldAlert size={18} />
-                ) : n.kind === "MENTION" ? (
-                  <AtSign size={18} />
-                ) : (
-                  <MessageCircle size={18} />
+              <div className="notification-entry" key={n.id}>
+                <button
+                  key={n.id}
+                  className={`notification-item ${n.readAt ? "" : "unread"}`}
+                  onClick={() => void visit(n)}
+                >
+                  {n.kind.startsWith("SOCIAL_") && n.actorId ? (
+                    <Avatar
+                      user={{
+                        id: n.actorId,
+                        name: n.actorName ?? "Estudante",
+                        username: n.actorUsername,
+                        hasAvatar: n.actorHasAvatar,
+                      }}
+                    />
+                  ) : n.kind === "MODERATION" ? (
+                    <ShieldAlert size={18} />
+                  ) : n.kind === "MENTION" ? (
+                    <AtSign size={18} />
+                  ) : (
+                    <MessageCircle size={18} />
+                  )}
+                  <span className="notification-copy">
+                    {n.actorName ? <strong>{n.actorName}</strong> : null}
+                    <span>{n.message}</span>
+                    <time dateTime={n.createdAt}>
+                      {new Date(n.createdAt).toLocaleString("pt-BR", {
+                        day: "2-digit",
+                        month: "2-digit",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </time>
+                  </span>
+                  {!n.readAt ? <i aria-label="Não lida" /> : null}
+                </button>
+                {n.socialFollowStatus && n.actorId && (
+                  <SocialFollowNotice notice={n} />
                 )}
-                <span>
-                  {n.actorName ? <strong>{n.actorName}</strong> : null}
-                  <span>{n.message}</span>
-                  <time dateTime={n.createdAt}>
-                    {new Date(n.createdAt).toLocaleString("pt-BR", {
-                      day: "2-digit",
-                      month: "2-digit",
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}
-                  </time>
-                </span>
-                {!n.readAt ? <i aria-label="Não lida" /> : null}
-              </button>
-              {n.socialFollowStatus && n.actorId && <SocialFollowNotice notice={n} />}
-              </Fragment>
+              </div>
             ))}
           </div>
         </dialog>
@@ -599,8 +612,35 @@ export function NotificationBell() {
   );
 }
 function SocialFollowNotice({ notice }: { notice: Notice }) {
-  const [status, setStatus] = useState(notice.socialFollowStatus), [busy, setBusy] = useState(false), [error, setError] = useState("");
-  return <div style={{ padding: "0 12px 12px", display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}><small>Te segue</small><button className="secondary" disabled={busy || status !== "NONE"} onClick={() => { setBusy(true);void api<{ status: string }>(`/social/people/${notice.actorId}/follow`, { method: "PUT", body: JSON.stringify({ active: true }) }).then(r => setStatus(r.status)).catch(e => setError(e.message)).finally(() => setBusy(false)); }}>{status === "ACCEPTED" ? "Seguindo" : status === "PENDING" ? "Solicitado" : "Seguir de volta"}</button>{error && <small role="alert">{error}</small>}</div>;
+  const [status, setStatus] = useState(notice.socialFollowStatus),
+    [busy, setBusy] = useState(false),
+    [error, setError] = useState("");
+  return (
+    <div className="notification-follow">
+      <small>Te segue</small>
+      <button
+        className="secondary"
+        disabled={busy || status !== "NONE"}
+        onClick={() => {
+          setBusy(true);
+          void api<{ status: string }>(
+            `/social/people/${notice.actorId}/follow`,
+            { method: "PUT", body: JSON.stringify({ active: true }) },
+          )
+            .then((r) => setStatus(r.status))
+            .catch((e) => setError(e.message))
+            .finally(() => setBusy(false));
+        }}
+      >
+        {status === "ACCEPTED"
+          ? "Seguindo"
+          : status === "PENDING"
+            ? "Solicitado"
+            : "Seguir de volta"}
+      </button>
+      {error && <small role="alert">{error}</small>}
+    </div>
+  );
 }
 export function ConversationNotice({ context }: { context: string }) {
   const data = useContext(Context);

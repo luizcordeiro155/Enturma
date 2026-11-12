@@ -65,9 +65,60 @@
   color: var(--ink);
   border-radius: 12px;
 }
-.notification-item > span {
+.notification-item > .notification-copy {
   flex: 1;
   min-width: 0;
+}
+.notification-item > .identity-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  flex: 0 0 40px;
+  overflow: hidden;
+}
+.notification-item > .identity-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.notification-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+  padding: 10px 0;
+}
+.notification-inbox .notification-toolbar .text-button {
+  margin: 0;
+  min-height: 40px;
+  padding: 6px 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+}
+.notification-inbox .notification-item {
+  padding: 12px;
+  gap: 10px;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 400;
+}
+.notification-entry {
+  min-width: 0;
+}
+.notification-follow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 4px 62px;
+  font-size: 12px;
+}
+.notification-inbox .notification-follow button {
+  min-height: 36px;
+  padding: 6px 10px;
+  font-size: 12px;
 }
 .notification-item span span,
 .notification-item strong,

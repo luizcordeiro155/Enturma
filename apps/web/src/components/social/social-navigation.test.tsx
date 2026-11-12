@@ -12,6 +12,7 @@ import type { ComponentProps } from "react";
 import { MobileNavigation } from "../mobile-navigation";
 import { SocialNavigation } from "./social-navigation";
 import { SocialOpening } from "./social-opening";
+import * as motion from "@/lib/motion";
 
 const state = vi.hoisted(() => ({
   learning: false,
@@ -143,15 +144,55 @@ it("opens only once in the app lifecycle and has a timeout when the player fails
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
 
+it("animates the selected destination when the pager changes view", () => {
+  const animate = vi.spyOn(motion, "playMotion").mockReturnValue(undefined);
+  const props = {
+    order: ["clips", "feed", "create"] as ("clips" | "feed" | "create")[],
+    highlight: null,
+    select: vi.fn(),
+    me: { id: "me", name: "Eu", username: "eu" },
+    profile: vi.fn(),
+    settings: vi.fn(),
+  };
+  const page = render(<SocialNavigation {...props} view="feed" />);
+  const feed = screen.getByRole("button", { name: "Feed" });
+  const clips = screen.getByRole("button", { name: "Clips" });
+  const feedBox = vi
+    .spyOn(feed, "getBoundingClientRect")
+    .mockReturnValue({ x: 100, y: 0 } as DOMRect);
+  const clipsBox = vi
+    .spyOn(clips, "getBoundingClientRect")
+    .mockReturnValue({ x: 0, y: 0 } as DOMRect);
+  page.rerender(<SocialNavigation {...props} view="clips" />);
+  expect(clips).toHaveAttribute("aria-current", "page");
+  expect(feed).not.toHaveAttribute("aria-current");
+  expect(animate).toHaveBeenCalledWith(
+    clips.querySelector(".social-nav-selection"),
+    [{ transform: "translate(100px, 0px)" }, { transform: "translate(0, 0)" }],
+    { duration: 280 },
+  );
+  feedBox.mockRestore();
+  clipsBox.mockRestore();
+  animate.mockRestore();
+});
+
 it("waits for the actual animation before opening and never reopens after skipping", async () => {
   vi.useFakeTimers();
-  render(<SocialOpening />);
+  render(
+    <SocialOpening>
+      <main data-testid="workspace">Feed e Clips</main>
+    </SocialOpening>,
+  );
+  expect(screen.queryByTestId("workspace")).not.toBeInTheDocument();
   await act(() => vi.advanceTimersByTimeAsync(1));
+  expect(screen.queryByTestId("workspace")).not.toBeInTheDocument();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   expect(state.playerReady).toBeTypeOf("function");
   act(() => state.playerReady?.());
   expect(screen.getByRole("dialog")).toBeVisible();
+  expect(screen.queryByTestId("workspace")).not.toBeInTheDocument();
   fireEvent.click(screen.getByRole("button", { name: "Explorar o Social" }));
+  expect(screen.getByTestId("workspace")).toBeVisible();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
   act(() => state.playerReady?.());
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();

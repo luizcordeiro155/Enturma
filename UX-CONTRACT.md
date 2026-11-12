@@ -25,6 +25,9 @@ Não expor conteúdo privado por prévia, notificação, busca, contador, mídia
 | Scrollbar | globals.css | Tokens de tema | Scroll interno dos diálogos, Feed e Clips | Overflow a 390 e 1440 px no Playwright |
 | Toast | Regiões role=status/alert existentes | Resposta da API | Feedback inline persistente | Estados reais de erro e publicação nos E2E |
 | CRUD | SocialPosts/SocialMedia e editor | PostgreSQL, versão e rascunho IndexedDB | Confirmação de remoção e descarte | Testes de autorização, idempotência e mídia |
+| Menções | SocialMentionInput | SocialPeople.mentionSuggestions | Legenda e comentário, lista autoral com avatar; @ sugere conexões, texto busca contas ativas sem bloqueios | Testes de composição IME, respostas antigas, toque, teclado e autorização |
+
+No mobile, arrastar para a esquerda abre Clips e para a direita abre Criar a partir do Feed. A seleção animada da navegação acompanha o estado do pager, mantendo a ordem personalizada dos botões. O conteúdo do Social só monta após a abertura terminar ou ser pulada. Com teclado aberto, ações de publicação e navegação ficam ocultas, com espaço preservado; comentários mantêm seu envio junto ao campo. Notificações usam avatar de 40 px e ferramentas compactas; o perfil mobile separa identidade e ações em linhas.
 
 ## Studio, teclado e transmissao
 
