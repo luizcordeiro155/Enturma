@@ -77,8 +77,15 @@ export type VideoCaption = {
   start: number;
   end: number;
   y: number;
+  x?: number;
+  size?: number;
+  color?: string;
 };
 export type VideoRecipe = {
+  aspect?: "9:16" | "4:5" | "3:4" | "1:1" | "1.91:1";
+  filter?:
+    "ORIGINAL" | "VIVID" | "WARM" | "COOL" | "MONO" | "FADE" | "CONTRAST";
+  speed?: number;
   segments: VideoSegment[];
   zoom: number;
   x: number;
@@ -114,25 +121,36 @@ export const postPerson = (p: SocialPost): SocialPerson => ({
   verified: p.verified,
 });
 export const exportDuration = (recipe: VideoRecipe) =>
-  recipe.segments.reduce((sum, s) => sum + Math.max(0, s.end - s.start), 0);
+  recipe.segments.reduce((sum, s) => sum + Math.max(0, s.end - s.start), 0) /
+  (recipe.speed ?? 1);
 /** Match the export order: rotate the source, scale to cover, then crop. */
 export function videoPreviewFrame(
   width: number,
   height: number,
   recipe: VideoRecipe,
 ) {
+  const ratios: Record<string, number> = {
+    "9:16": 9 / 16,
+    "4:5": 0.8,
+    "3:4": 0.75,
+    "1:1": 1,
+    "1.91:1": 1.91,
+  };
+  const outWidth = 720,
+    outHeight =
+      Math.floor(720 / (ratios[recipe.aspect ?? "9:16"] ?? 9 / 16) / 2) * 2;
   const sideways = recipe.rotation === 90 || recipe.rotation === 270;
   const rotatedWidth = sideways ? height : width;
   const rotatedHeight = sideways ? width : height;
   const scale = Math.max(
-    (Math.floor((720 * recipe.zoom) / 2) * 2) / rotatedWidth,
-    (Math.floor((1280 * recipe.zoom) / 2) * 2) / rotatedHeight,
+    (Math.floor((outWidth * recipe.zoom) / 2) * 2) / rotatedWidth,
+    (Math.floor((outHeight * recipe.zoom) / 2) * 2) / rotatedHeight,
   );
   return {
-    width: `${((width * scale) / 720) * 100}%`,
-    height: `${((height * scale) / 1280) * 100}%`,
-    left: `${(((rotatedWidth * scale) / 2 - (rotatedWidth * scale - 720) * recipe.x) / 720) * 100}%`,
-    top: `${(((rotatedHeight * scale) / 2 - (rotatedHeight * scale - 1280) * recipe.y) / 1280) * 100}%`,
+    width: `${((width * scale) / outWidth) * 100}%`,
+    height: `${((height * scale) / outHeight) * 100}%`,
+    left: `${(((rotatedWidth * scale) / 2 - (rotatedWidth * scale - outWidth) * recipe.x) / outWidth) * 100}%`,
+    top: `${(((rotatedHeight * scale) / 2 - (rotatedHeight * scale - outHeight) * recipe.y) / outHeight) * 100}%`,
     transform: `translate(-50%, -50%) rotate(${recipe.rotation}deg)`,
   };
 }
@@ -150,6 +168,7 @@ export function defaultRecipe(duration: number): VideoRecipe {
   };
 }
 export function sourceTime(recipe: VideoRecipe, output: number) {
+  output *= recipe.speed ?? 1;
   let elapsed = 0;
   for (const segment of recipe.segments) {
     if (output < elapsed + segment.end - segment.start)
@@ -157,24 +176,6 @@ export function sourceTime(recipe: VideoRecipe, output: number) {
     elapsed += segment.end - segment.start;
   }
   return recipe.segments.at(-1)?.end ?? 0;
-}
-export function socialGesture(
-  dx: number,
-  dy: number,
-  ms: number,
-  startX: number,
-  width: number,
-): SocialView | null {
-  // Leave the browser/OS edge gesture and vertical scroll alone.
-  if (
-    startX < 28 ||
-    startX > width - 28 ||
-    Math.abs(dx) < 70 ||
-    Math.abs(dx) < Math.abs(dy) * 1.7 ||
-    Math.abs(dx) / Math.max(ms, 1) < 0.12
-  )
-    return null;
-  return dx > 0 ? "clips" : "create";
 }
 export function mergeSocialPage(
   previous: SocialPost[],

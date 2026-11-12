@@ -5,6 +5,8 @@ export type DraftFile = {
   media?: SocialMedia;
   recipe?: VideoRecipe;
   duration?: number;
+  coverFile?: File;
+  coverUploaded?: boolean;
 };
 export type SocialDraft = {
   id: string;

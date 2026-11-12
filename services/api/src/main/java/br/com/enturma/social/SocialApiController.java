@@ -14,18 +14,20 @@ public class SocialApiController {
   private final SocialPeople people;
   private final SocialAccess access;
   private final SocialMedia media;
+  private final SocialLives lives;
 
   public SocialApiController(
-      SocialPosts posts, SocialPeople people, SocialAccess access, SocialMedia media) {
+      SocialPosts posts, SocialPeople people, SocialAccess access, SocialMedia media, SocialLives lives) {
     this.posts = posts;
     this.people = people;
     this.access = access;
     this.media = media;
+    this.lives = lives;
   }
 
   @GetMapping("/capabilities")
   public Object capabilities() {
-    return Map.of("enabled", access.enabled(), "media", media.enabled(), "maxClipSeconds", 90);
+    return Map.of("enabled", access.enabled(), "media", media.enabled(), "maxClipSeconds", 90, "live", lives.enabled());
   }
 
   @GetMapping("/feed")
@@ -111,12 +113,12 @@ public class SocialApiController {
     return posts.comments(a, id, page);
   }
 
-  public record Comment(@NotNull UUID id, @NotBlank @Size(max = 1500) String body, UUID parentId) {}
+  public record Comment(@NotNull UUID id, @NotNull @Size(max = 1500) String body, UUID parentId, UUID mediaId) {}
 
   @PostMapping("/posts/{id}/comments")
   public Object comment(
       @AuthenticationPrincipal Actor a, @PathVariable UUID id, @Valid @RequestBody Comment body) {
-    return posts.comment(a, id, body.id(), body.body(), body.parentId());
+    return posts.comment(a, id, body.id(), body.body(), body.parentId(), body.mediaId());
   }
 
   @DeleteMapping("/posts/{id}/comments/{comment}")

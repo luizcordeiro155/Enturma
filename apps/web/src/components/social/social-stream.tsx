@@ -6,40 +6,58 @@ import {
   type SocialPage,
   type SocialPost as Post,
 } from "@/lib/social";
+import { pullRefreshes } from "@/lib/social-media";
 import { SocialPost } from "./social-post";
+import { useLiveRefresh } from "@/lib/live-updates";
+import { mergeFreshPosts } from "@/lib/social-stream-state";
 
-export function useSocialStream(query: string, active: boolean) {
+export function useSocialStream(
+  query: string,
+  active: boolean,
+  prependFresh?: () => boolean,
+) {
   const [items, setItems] = useState<Post[]>([]),
-    [cursor, setCursor] = useState<string | null>(null),
-    [busy, setBusy] = useState(false),
+    [cursor, setCursor] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   const running = useRef(false),
-    mounted = useRef(true);
+    refreshing = useRef(false),
+    mounted = useRef(true),
+    dirty = useRef(false);
+  const latest = useRef({ active, query, prependFresh }),
+    requestVersion = useRef(0);
+  useEffect(() => {
+    latest.current = { active, query, prependFresh };
+  }, [active, query, prependFresh]);
   useEffect(() => {
     mounted.current = true;
     return () => {
       mounted.current = false;
+      requestVersion.current++;
     };
   }, []);
   const load = useCallback(
     async (reset = false) => {
-      if (running.current || (!reset && cursor === "")) return;
+      if (running.current || (!reset && cursor === "")) return false;
       running.current = true;
       setBusy(true);
       setError("");
+      const version = ++requestVersion.current;
       try {
         const result = await api<SocialPage>(
           `/social/feed?${query}${!reset && cursor ? `&cursor=${encodeURIComponent(cursor)}` : ""}`,
           { cache: "no-store" },
         );
-        if (mounted.current) {
+        if (mounted.current && version === requestVersion.current) {
           setItems((old) =>
             reset ? result.items : mergeSocialPage(old, result.items),
           );
           setCursor(result.nextCursor);
         }
-      } catch (e) {
-        if (mounted.current) setError((e as Error).message);
+        return true;
+      } catch (cause) {
+        if (mounted.current) setError((cause as Error).message);
+        return false;
       } finally {
         running.current = false;
         if (mounted.current) setBusy(false);
@@ -47,17 +65,75 @@ export function useSocialStream(query: string, active: boolean) {
     },
     [query, cursor],
   );
+  const refresh = useCallback(async () => {
+    if (!latest.current.active || document.hidden || !navigator.onLine) {
+      dirty.current = true;
+      return;
+    }
+    if (running.current || refreshing.current) {
+      dirty.current = true;
+      return;
+    }
+    refreshing.current = true;
+    const version = requestVersion.current;
+    try {
+      const result = await api<SocialPage>(
+        `/social/feed?${latest.current.query}`,
+        { cache: "no-store" },
+      );
+      if (mounted.current && version === requestVersion.current) {
+        setItems((old) =>
+          mergeFreshPosts(
+            old,
+            result.items,
+            latest.current.prependFresh?.() ?? false,
+          ),
+        );
+        setError("");
+        dirty.current = false;
+      }
+    } catch (cause) {
+      if (mounted.current) setError((cause as Error).message);
+    } finally {
+      refreshing.current = false;
+    }
+  }, []);
+  useLiveRefresh("social_changed", refresh, 20000);
   useEffect(() => {
     if (!active || cursor !== null || error) return;
     const task = setTimeout(() => void load(), 0);
     return () => clearTimeout(task);
   }, [active, cursor, error, load]);
+  useEffect(() => {
+    const onPublish = () => {
+      dirty.current = true;
+      void refresh();
+    };
+    const onRemove = (event: Event) => {
+      const id = (event as CustomEvent<{ id: string }>).detail?.id;
+      if (id) setItems((old) => old.filter((post) => post.id !== id));
+    };
+    window.addEventListener("enturma-social-published", onPublish);
+    window.addEventListener("enturma-social-post-removed", onRemove);
+    window.addEventListener("online", onPublish);
+    const timer = setInterval(() => void refresh(), 20000);
+    const task = setTimeout(() => {
+      if (active && dirty.current && !busy) void refresh();
+    }, 0);
+    return () => {
+      clearInterval(timer);
+      clearTimeout(task);
+      window.removeEventListener("enturma-social-published", onPublish);
+      window.removeEventListener("enturma-social-post-removed", onRemove);
+      window.removeEventListener("online", onPublish);
+    };
+  }, [refresh, active, busy]);
   const change = useCallback(
-    (p: Post) =>
-      setItems((old) => old.map((item) => (item.id === p.id ? p : item))),
+    (post: Post) =>
+      setItems((old) => old.map((item) => (item.id === post.id ? post : item))),
     [],
   );
-  return { items, cursor, busy, error, load, change };
+  return { items, cursor, busy, error, load, change, refresh };
 }
 
 export function SocialStream({
@@ -66,17 +142,24 @@ export function SocialStream({
   me,
   person,
   refreshKey = 0,
+  autoplay = true,
 }: {
   query: string;
   active: boolean;
   me: string;
   person: (id: string) => void;
   refreshKey?: number;
+  autoplay?: boolean;
 }) {
-  const stream = useSocialStream(query, active),
+  const panel = useRef<HTMLDivElement>(null);
+  const stream = useSocialStream(
+      query,
+      active,
+      () => (panel.current?.scrollTop ?? 0) < 8,
+    ),
     sentinel = useRef<HTMLDivElement>(null),
-    panel = useRef<HTMLDivElement>(null),
-    latest = useRef(stream.load);
+    latest = useRef(stream.load),
+    pull = useRef<{ x: number; y: number } | null>(null);
   const [newContent, setNewContent] = useState(false);
   useEffect(() => {
     latest.current = stream.load;
@@ -114,6 +197,32 @@ export function SocialStream({
       ref={panel}
       tabIndex={0}
       aria-label="Publicações"
+      aria-busy={stream.busy}
+      onTouchStart={(event) => {
+        const touch = event.touches[0];
+        pull.current =
+          event.touches.length === 1 && event.currentTarget.scrollTop <= 0
+            ? { x: touch.clientX, y: touch.clientY }
+            : null;
+      }}
+      onTouchEnd={(event) => {
+        const start = pull.current,
+          touch = event.changedTouches[0];
+        pull.current = null;
+        if (
+          start &&
+          touch &&
+          !stream.busy &&
+          pullRefreshes(
+            event.currentTarget.scrollTop,
+            touch.clientX - start.x,
+            touch.clientY - start.y,
+          )
+        ) {
+          setNewContent(false);
+          void stream.load(true);
+        }
+      }}
     >
       <div className="social-stream-inner">
         {newContent && (
@@ -135,8 +244,18 @@ export function SocialStream({
             me={me}
             person={person}
             changed={stream.change}
+            autoplay={active && autoplay}
           />
         ))}
+        {stream.busy &&
+          !stream.items.length &&
+          [0, 1, 2].map((key) => (
+            <div key={key} className="social-post-skeleton" aria-hidden="true">
+              <span />
+              <div />
+              <p />
+            </div>
+          ))}
         {!stream.busy && !stream.items.length && !stream.error && (
           <div className="social-empty">
             <h2>Uma ideia pode começar aqui.</h2>
@@ -159,7 +278,7 @@ export function SocialStream({
                 </button>
               )}
           {stream.cursor === "" && !!stream.items.length && (
-            <small>Você chegou ao fim por enquanto.</small>
+            <small>Acompanhando novas publicações…</small>
           )}
         </div>
       </div>

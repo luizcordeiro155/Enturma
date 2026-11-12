@@ -6,6 +6,7 @@ import { defaultRecipe } from "@/lib/social";
 import { VideoEditor } from "./video-editor";
 
 beforeEach(() => {
+  vi.spyOn(HTMLMediaElement.prototype, "load").mockImplementation(() => {});
   vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {});
   vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
 });
@@ -77,4 +78,16 @@ it("exports framing, captions and audio choices and exposes invalid final durati
     { target: { value: "100" } },
   );
   expect(screen.getByRole("alert")).toHaveTextContent("até 90 segundos");
+});
+
+it("selects a cover only inside the edited output, not discarded source frames", () => {
+  render(<Editor />);
+  fireEvent.click(screen.getByRole("button", { name: "Escolher capa" }));
+  const cursor = screen.getByRole("slider", {
+    name: "Escolher quadro da capa",
+  });
+  expect(cursor).toHaveAttribute("aria-valuemax", "30");
+  fireEvent.keyDown(cursor, { key: "End" });
+  expect(recipe().cover).toBeGreaterThan(29);
+  expect(recipe().cover).toBeLessThan(30);
 });

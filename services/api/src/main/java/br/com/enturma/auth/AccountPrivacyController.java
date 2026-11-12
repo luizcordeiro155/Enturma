@@ -135,6 +135,9 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM study_journey WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM user_experience_preference WHERE user_id=?", userId);
     db.jdbc.update("UPDATE social_media SET state='DELETING' WHERE owner_id=?",userId);
+    db.jdbc.update("UPDATE social_live SET title='',state='ENDED',ended_at=now(),viewers=0,cleanup_pending=true WHERE author_id=? AND state<>'ENDED'",userId);
+    db.jdbc.update("DELETE FROM social_comment_media WHERE owner_id=?",userId);
+    db.jdbc.update("DELETE FROM social_comment_like WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM social_post WHERE author_id=?",userId);
     db.jdbc.update("UPDATE social_comment SET body='',deleted=true WHERE author_id=?",userId);
     db.jdbc.update("DELETE FROM social_follow WHERE follower_id=? OR followed_id=?",userId,userId);

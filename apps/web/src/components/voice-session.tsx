@@ -171,7 +171,7 @@ export default function VoiceSession({
         const subscribe =
           !String(publication.source).startsWith("screen_share") ||
           activeScreenShareRef.current === participant.identity;
-        if (publication.isSubscribed !== subscribe)
+        if (publication.isDesired !== subscribe)
           publication.setSubscribed(subscribe);
       }
     }
@@ -293,12 +293,9 @@ export default function VoiceSession({
     media?.tile.remove();
     videoTracks.current.delete(key);
 
-    if (
-      source === "screen_share" &&
-      activeScreenShareRef.current === identity
-    ) {
-      syncScreenStage(null);
-    }
+    // An unsubscribe acknowledgement can arrive after the viewer selects this
+    // screen again. Keep their selection; refreshMembers clears it only when
+    // the participant actually stops publishing the screen.
   }
 
   useLayoutEffect(() => {

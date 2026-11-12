@@ -462,13 +462,17 @@ public class SocialPosts {
   public Object comments(Actor a, UUID id, int page) {
     access.post(a, id);
     return db.list(
-        "SELECT c.id,c.author_id,c.parent_id,c.body,c.created_at,u.name,u.username,u.avatar_bytes"
+        "SELECT c.id,c.author_id,c.parent_id,c.body,c.created_at,c.media_id,"
+            + " (SELECT count(*) FROM social_comment_like cl WHERE cl.comment_id=c.id) likes,"
+            + " EXISTS(SELECT 1 FROM social_comment_like cl WHERE cl.comment_id=c.id AND cl.user_id=?) liked,"
+            + " u.name,u.username,u.avatar_bytes"
             + " IS NOT NULL has_avatar,coalesce(s.verified,false) verified FROM social_comment c"
             + " JOIN app_user u ON u.id=c.author_id LEFT JOIN social_profile s ON s.user_id=u.id"
             + " WHERE c.post_id=? AND NOT c.deleted AND u.status='ACTIVE' AND NOT EXISTS(SELECT 1"
             + " FROM user_block b WHERE (b.user_id=? AND b.blocked_id=c.author_id) OR"
             + " (b.blocked_id=? AND b.user_id=c.author_id)) ORDER BY c.created_at,c.id LIMIT 30"
             + " OFFSET ?",
+        a.id(),
         id,
         a.id(),
         a.id(),
@@ -477,9 +481,19 @@ public class SocialPosts {
 
   @Transactional
   public Object comment(Actor a, UUID postId, UUID id, String text, UUID parent) {
+    return comment(a, postId, id, text, parent, null);
+  }
+
+  @Transactional
+  public Object comment(Actor a, UUID postId, UUID id, String text, UUID parent, UUID mediaId) {
     var p = access.post(a, postId);
-    if (id == null || text == null || text.isBlank() || text.length() > 1500)
+    if (id == null || text == null || (text.isBlank() && mediaId == null) || text.length() > 1500)
       throw ApiException.invalid("Escreva de 1 a 1500 caracteres.");
+    if (mediaId != null) {
+      db.one("SELECT id FROM social_comment_media WHERE id=? AND post_id=? AND owner_id=? FOR UPDATE", mediaId, postId, a.id());
+      if (db.exists("SELECT EXISTS(SELECT 1 FROM social_comment WHERE media_id=? AND id<>?)", mediaId, id))
+        throw ApiException.invalid("Este anexo j\u00e1 foi utilizado.");
+    }
     UUID recipient = (UUID) p.get("authorId");
     if (parent != null) {
       var c =
@@ -495,13 +509,14 @@ public class SocialPosts {
     }
     int inserted =
         db.jdbc.update(
-            "INSERT INTO social_comment(id,post_id,author_id,parent_id,body) VALUES (?,?,?,?,?) ON"
+            "INSERT INTO social_comment(id,post_id,author_id,parent_id,body,media_id) VALUES (?,?,?,?,?,?) ON"
                 + " CONFLICT(id) DO NOTHING",
             id,
             postId,
             a.id(),
             parent,
-            text.strip());
+            text.strip(),
+            mediaId);
     db.one(
         "SELECT id FROM social_comment WHERE id=? AND post_id=? AND author_id=?",
         id,
@@ -538,7 +553,9 @@ public class SocialPosts {
     var c = db.one("SELECT author_id FROM social_comment WHERE id=? AND post_id=?", id, post);
     if (!a.admin() && !a.id().equals(c.get("authorId")) && !a.id().equals(p.get("authorId")))
       throw ApiException.forbidden();
-    db.jdbc.update("UPDATE social_comment SET deleted=true,body='' WHERE id=?", id);
+    db.jdbc.update("DELETE FROM social_comment_media WHERE id=(SELECT media_id FROM social_comment WHERE id=?)", id);
+    db.jdbc.update("DELETE FROM social_comment_like WHERE comment_id=?", id);
+    db.jdbc.update("UPDATE social_comment SET deleted=true,body='',media_id=NULL WHERE id=?", id);
   }
 
   @Transactional
@@ -551,6 +568,7 @@ public class SocialPosts {
         id);
     db.jdbc.update("UPDATE social_media SET state='DELETING' WHERE post_id=?", id);
     db.jdbc.update("DELETE FROM social_highlight WHERE post_id=?", id);
+    db.jdbc.update("DELETE FROM social_comment_media WHERE post_id=?", id);
   }
 
   @Transactional

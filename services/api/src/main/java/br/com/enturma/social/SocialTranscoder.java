@@ -205,7 +205,7 @@ public class SocialTranscoder {
               "-frames:v",
               "1",
               "-vf",
-              "scale=1600:1600:force_original_aspect_ratio=decrease",
+              recipe == null ? "scale=1600:1600:force_original_aspect_ratio=decrease" : framing(recipe.validated(1)),
               "-map_metadata",
               "-1",
               "-q:v",
@@ -258,21 +258,8 @@ public class SocialTranscoder {
         .append(sound ? 1 : 0)
         .append("[joined]")
         .append(sound ? "[sound];" : ";");
-    graph.append("[joined]");
-    if (recipe.rotation() == 90) graph.append("transpose=1,");
-    if (recipe.rotation() == 270) graph.append("transpose=2,");
-    if (recipe.rotation() == 180) graph.append("hflip,vflip,");
-    int w = ((int) (720 * recipe.zoom()) / 2) * 2, h = ((int) (1280 * recipe.zoom()) / 2) * 2;
-    graph
-        .append("scale=")
-        .append(w)
-        .append(":")
-        .append(h)
-        .append(":force_original_aspect_ratio=increase,crop=720:1280:(iw-720)*")
-        .append(n(recipe.x()))
-        .append(":(ih-1280)*")
-        .append(n(recipe.y()))
-        .append(",setsar=1,fps=30");
+    graph.append("[joined]setpts=(PTS-STARTPTS)/").append(n(recipe.speed())).append(',')
+        .append(framing(recipe)).append(",fps=30");
     for (int i = 0; i < recipe.captions().size(); i++) {
       var c = recipe.captions().get(i);
       Files.writeString(dir.resolve("caption" + i + ".txt"), c.text());
@@ -280,7 +267,10 @@ public class SocialTranscoder {
           .append(",drawtext=textfile=caption")
           .append(i)
           .append(
-              ".txt:expansion=none:fontcolor=white:fontsize=36:box=1:boxcolor=black@0.65:boxborderw=12:x=(w-text_w)/2:y=(h-text_h)*")
+              ".txt:expansion=none:fontcolor=0x")
+          .append(c.color().substring(1)).append(":fontsize=").append(c.size())
+          .append(":box=1:boxcolor=black@0.65:boxborderw=8:x=(w-text_w)*").append(n(c.x()))
+          .append(":y=(h-text_h)*")
           .append(n(c.y()))
           .append(":enable='between(t,")
           .append(n(c.start()))
@@ -289,7 +279,7 @@ public class SocialTranscoder {
           .append(")'");
     }
     graph.append("[out]");
-    if (sound) graph.append(";[sound]volume=").append(n(recipe.volume())).append("[aout]");
+    if (sound) graph.append(";[sound]atempo=").append(n(recipe.speed())).append(",volume=").append(n(recipe.volume())).append("[aout]");
     args.addAll(
         List.of(
             "-filter_complex_threads", "1", "-filter_complex", graph.toString(), "-map", "[out]"));
@@ -336,14 +326,31 @@ public class SocialTranscoder {
             "-frames:v",
             "1",
             "-vf",
-            "scale=360:640",
+            "scale=360:" + recipe.outputHeight()/2,
             "-q:v",
             "3",
             "cover.jpg"));
     return new Result(
-        dir.resolve("video.mp4"), dir.resolve("cover.jpg"), "video/mp4", ms, 720, 1280);
+        dir.resolve("video.mp4"), dir.resolve("cover.jpg"), "video/mp4", ms, 720, recipe.outputHeight());
   }
 
+
+  private static String framing(VideoRecipe recipe) {
+    String rotate=switch(recipe.rotation()){case 90->"transpose=1,";case 180->"hflip,vflip,";case 270->"transpose=2,";default->"";};
+    int height=recipe.outputHeight();
+    int scaledWidth=((int)(720*recipe.zoom())/2)*2,scaledHeight=((int)(height*recipe.zoom())/2)*2;
+    String filter=switch(recipe.filter()){
+      case "VIVID"->",eq=saturation=1.3:contrast=1.08";
+      case "WARM"->",colorchannelmixer=rr=.89074:rg=.13842:rb=.03402:gr=.06282:gg=.94348:gb=.03024:br=.04896:bg=.09612:bb=.84358,eq=saturation=1.15";
+      case "COOL"->",colorchannelmixer=rr=.95144:rg=.06152:rb=.01512:gr=.02792:gg=.97488:gb=.01344:br=.02176:bg=.04272:bb=.93048,hue=h=180:s=.9";
+      case "MONO"->",hue=s=0";
+      case "FADE"->",eq=saturation=.7:contrast=.85:brightness=.04";
+      case "CONTRAST"->",eq=contrast=1.2";
+      default->"";
+    };
+    return rotate+"scale="+scaledWidth+":"+scaledHeight+":force_original_aspect_ratio=increase,crop=720:"+height+
+        ":(iw-720)*"+n(recipe.x())+":(ih-"+height+")*"+n(recipe.y())+",setsar=1"+filter;
+  }
 
   private Result renderRemote(Path dir, String kind, VideoRecipe recipe)
       throws IOException, InterruptedException {

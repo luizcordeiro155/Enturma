@@ -1,10 +1,20 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { Aperture, Search, Settings2, ArrowLeft } from "lucide-react";
+import {
+  Aperture,
+  ArrowLeft,
+  Check,
+  CircleAlert,
+  LoaderCircle,
+  Plus,
+  Search,
+  Send,
+  Settings2,
+  X,
+} from "lucide-react";
 import { api } from "@/lib/api";
 import {
-  socialGesture,
   type SocialPerson,
   type SocialPost as Post,
   type SocialPreferences,
@@ -14,29 +24,36 @@ import { NavigationLink } from "../navigation-link";
 import { Shell } from "../shell";
 import { SocialStream } from "./social-stream";
 import { SocialClips } from "./social-clips";
-import { SocialEditor } from "./social-editor";
+import { SocialEditor, type SocialEditorProgress } from "./social-editor";
 import { SocialStories, StoryViewer } from "./social-stories";
 import { SocialProfile } from "./social-profile";
 import { SocialSettings } from "./social-settings";
 import { SocialAuthor, SocialPost } from "./social-post";
 import { SocialDialog } from "./social-dialog";
 import { SocialNavigation } from "./social-navigation";
+import { SocialPager } from "./social-pager";
 import { SocialOpening } from "./social-opening";
-
+import { useSocialViewport } from "./use-social-viewport";
+import { SocialLiveProvider } from "./social-live-context";
 type Ready = {
   me: SocialPerson & { role: string };
   preferences: SocialPreferences;
   media: boolean;
+  live: boolean;
 };
 export function Social() {
   const [ready, setReady] = useState<Ready>(),
     [error, setError] = useState(""),
-    [disabled, setDisabled] = useState(false);
+    [disabled, setDisabled] = useState(false),
+    [retry, setRetry] = useState(0);
   useEffect(() => {
     let alive = true;
-    void api<{ enabled: boolean; media: boolean }>("/social/capabilities", {
-      cache: "no-store",
-    })
+    void api<{ enabled: boolean; media: boolean; live?: boolean }>(
+      "/social/capabilities",
+      {
+        cache: "no-store",
+      },
+    )
       .then(async (flags) => {
         if (!alive) return;
         if (!flags.enabled) {
@@ -47,16 +64,27 @@ export function Social() {
           api<Ready["me"]>("/users/me"),
           api<SocialPreferences>("/social/preferences", { cache: "no-store" }),
         ]);
-        if (alive) setReady({ me, preferences, media: flags.media });
+        if (alive)
+          setReady({
+            me,
+            preferences,
+            media: flags.media,
+            live: flags.live === true,
+          });
       })
-      .catch((e) => {
-        if (alive) setError(e.message);
+      .catch((cause) => {
+        if (alive) setError(cause.message);
       });
     return () => {
       alive = false;
     };
-  }, []);
-  if (ready) return <SocialWorkspace key={ready.me.id} ready={ready} />;
+  }, [retry]);
+  if (ready)
+    return (
+      <SocialLiveProvider key={ready.me.id} enabled={ready.live} me={ready.me}>
+        <SocialWorkspace ready={ready} />
+      </SocialLiveProvider>
+    );
   return (
     <Shell>
       <div className="social-page">
@@ -69,6 +97,18 @@ export function Social() {
                 ? "O Social ainda não está disponível neste ambiente. Seu Fórum e suas turmas continuam no mesmo lugar."
                 : "Preparando seu espaço de descobertas…")}
           </p>
+          {error && (
+            <button
+              type="button"
+              className="secondary"
+              onClick={() => {
+                setError("");
+                setRetry((value) => value + 1);
+              }}
+            >
+              Tentar novamente
+            </button>
+          )}
           <NavigationLink href="/forum">Ir para o Fórum</NavigationLink>
         </div>
       </div>
@@ -76,6 +116,7 @@ export function Social() {
   );
 }
 function SocialWorkspace({ ready }: { ready: Ready }) {
+  useSocialViewport();
   const params = useSearchParams(),
     incomingPost = params.get("post"),
     incomingPerson = params.get("person"),
@@ -83,25 +124,32 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     incomingSettings = params.get("settings");
   const [view, setView] = useState<SocialView>("feed"),
     [opened, setOpened] = useState<SocialView[]>(["feed"]),
-    [tab, setTab] = useState("for-you"),
-    [kind, setKind] = useState<"POST" | "STORY" | "CLIP">("POST"),
+    [tab, setTab] = useState("for-you");
+  const [kind, setKind] = useState<"POST" | "STORY" | "CLIP">("POST"),
     [prefs, setPrefs] = useState(ready.preferences),
     [person, setPerson] = useState<string | null>(null),
     [settings, setSettings] = useState(false),
-    [detail, setDetail] = useState<Post>(),
-    [error, setError] = useState(""),
+    [detail, setDetail] = useState<Post>();
+  const [error, setError] = useState(""),
     [query, setQuery] = useState(""),
     [searched, setSearched] = useState(""),
     [people, setPeople] = useState<SocialPerson[]>([]),
     [refresh, setRefresh] = useState(0),
     [highlight, setHighlight] = useState<SocialView | null>(null);
-  const gesture = useRef<{ x: number; y: number; at: number } | null>(null),
-    usage = useRef({ feed: 0, clips: 0, create: 0 });
+  const [searchOpen, setSearchOpen] = useState(false),
+    [upload, setUpload] = useState<SocialEditorProgress>({
+      state: "idle",
+      message: "",
+      percent: 0,
+    }),
+    [dismissedUpload, setDismissedUpload] = useState(false);
+  const usage = useRef({ feed: 0, clips: 0, create: 0 });
   useEffect(() => {
     const timer = setTimeout(() => {
       if (incomingQuery) {
         setQuery(incomingQuery.slice(0, 80));
         setSearched(incomingQuery.slice(0, 80));
+        setSearchOpen(true);
         setPerson(null);
         setDetail(undefined);
         setSettings(false);
@@ -116,12 +164,12 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
   useEffect(() => {
     if (!incomingPost || !/^[a-f0-9-]{36}$/i.test(incomingPost)) return;
     let alive = true;
-    api<Post>(`/social/posts/${incomingPost}`, { cache: "no-store" })
-      .then((r) => {
-        if (alive) setDetail(r);
+    void api<Post>(`/social/posts/${incomingPost}`, { cache: "no-store" })
+      .then((post) => {
+        if (alive) setDetail(post);
       })
-      .catch((e) => {
-        if (alive) setError(e.message);
+      .catch((cause) => {
+        if (alive) setError(cause.message);
       });
     return () => {
       alive = false;
@@ -129,7 +177,9 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
   }, [incomingPost]);
   function select(next: SocialView, contentKind?: typeof kind) {
     setView(next);
-    setOpened((o) => (o.includes(next) ? o : [...o, next]));
+    setOpened((previous) =>
+      previous.includes(next) ? previous : [...previous, next],
+    );
     if (contentKind) setKind(contentKind);
     usage.current[next]++;
     if (prefs.navigation.automatic)
@@ -140,22 +190,20 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       );
     document
       .querySelectorAll<HTMLVideoElement>(".social-page video")
-      .forEach((v) => v.pause());
+      .forEach((video) => video.pause());
   }
   useEffect(() => {
     let alive = true;
     if (!searched) return;
-    api<SocialPerson[]>(
+    void api<SocialPerson[]>(
       `/social/people?q=${encodeURIComponent(searched.replace(/^[@#]/, ""))}`,
-      {
-        cache: "no-store",
-      },
+      { cache: "no-store" },
     )
-      .then((r) => {
-        if (alive) setPeople(r);
+      .then((result) => {
+        if (alive) setPeople(result);
       })
-      .catch((e) => {
-        if (alive) setError(e.message);
+      .catch((cause) => {
+        if (alive) setError(cause.message);
       });
     return () => {
       alive = false;
@@ -163,18 +211,20 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
   }, [searched]);
   return (
     <Shell
-      onKeyDown={(e) => {
+      onKeyDown={(event) => {
         if (
-          !e.altKey ||
-          (e.target instanceof HTMLElement &&
-            e.target.closest("input,textarea,select,dialog,[contenteditable]"))
+          !event.altKey ||
+          (event.target instanceof HTMLElement &&
+            event.target.closest(
+              "input,textarea,select,dialog,[contenteditable]",
+            ))
         )
           return;
         const next = ({ "1": "feed", "2": "clips", "3": "create" } as const)[
-          e.key as "1"
+          event.key as "1"
         ];
         if (next) {
-          e.preventDefault();
+          event.preventDefault();
           select(next);
         }
       }}
@@ -194,13 +244,35 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
         <SocialOpening />
         <div className="social-workspace">
           <header className="social-header">
-            <div>
-              <span className="social-eyebrow">SUA VIDA UNIVERSITÁRIA</span>
+            <div className="social-header-brand">
+              <button
+                type="button"
+                className="icon-control"
+                aria-label="Criar publicação"
+                onClick={() => select("create")}
+              >
+                <Plus size={24} />
+              </button>
               <h1>
                 Enturma <span>Social.</span>
               </h1>
             </div>
-            <div className="social-row">
+            <div className="social-header-actions">
+              <button
+                type="button"
+                className="icon-control social-search-toggle"
+                aria-label="Abrir busca do Social"
+                aria-expanded={searchOpen}
+                onClick={() => {
+                  select("feed");
+                  setSearchOpen((value) => !value);
+                }}
+              >
+                <Search size={21} />
+              </button>
+              <NavigationLink href="/friends" aria-label="Mensagens">
+                <Send size={21} aria-hidden="true" />
+              </NavigationLink>
               <button
                 className="icon-control"
                 aria-label="Preferências do Social"
@@ -215,157 +287,188 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
               {error}
             </p>
           )}
-          <section
-            className="social-feed-view"
-            hidden={view !== "feed"}
-            onTouchStart={(e) => {
-              const target = e.target as HTMLElement;
-              gesture.current =
-                target.closest(
-                  "[data-social-gesture],button,a,input,textarea,video,dialog",
-                ) || e.touches.length !== 1
-                  ? null
-                  : {
-                      x: e.touches[0].clientX,
-                      y: e.touches[0].clientY,
-                      at: performance.now(),
-                    };
-            }}
-            onTouchEnd={(e) => {
-              const start = gesture.current;
-              gesture.current = null;
-              if (!start || !e.changedTouches[0]) return;
-              const touch = e.changedTouches[0],
-                next = socialGesture(
-                  touch.clientX - start.x,
-                  touch.clientY - start.y,
-                  performance.now() - start.at,
-                  start.x,
-                  innerWidth,
-                );
-              if (next) select(next);
-            }}
+          <SocialPager
+            view={view}
+            select={select}
+            peek={(next) =>
+              setOpened((previous) =>
+                previous.includes(next) ? previous : [...previous, next],
+              )
+            }
           >
-            <SocialStories
-              me={ready.me}
-              create={() => select("create", "STORY")}
-              person={setPerson}
-              refreshKey={refresh}
-            />
-            <div className="social-feed-toolbar">
-              <div
-                className="social-tabs"
-                role="tablist"
-                aria-label="Filtrar publicações"
-              >
-                {[
-                  ["for-you", "Para Você"],
-                  ["following", "Seguindo"],
-                  ["campus", "Minha Faculdade"],
-                ].map(([t, label]) => (
-                  <button
-                    role="tab"
-                    aria-selected={t === tab}
-                    key={t}
-                    onClick={() => setTab(t)}
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-              <form
-                noValidate
-                className="social-search"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  setSearched(query.trim());
-                }}
-              >
-                <label className="sr-only" htmlFor="social-search">
-                  Pesquisar pessoas, hashtags e publicações
-                </label>
-                <Search size={18} />
-                <input
-                  id="social-search"
-                  type="search"
-                  maxLength={80}
-                  placeholder="Pessoas, assuntos, #ideias"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                />
-                <button className="icon-control" aria-label="Pesquisar">
-                  <Search size={18} />
-                </button>
-              </form>
-            </div>
-            {searched && (
-              <div className="social-search-results">
-                <button
-                  className="text-button"
-                  onClick={() => {
-                    setSearched("");
-                    setQuery("");
-                  }}
-                >
-                  <ArrowLeft size={16} /> Voltar à leitura
-                </button>
-                <h2>Resultados para “{searched}”</h2>
-                <div>
-                  {people.map((u) => (
-                    <SocialAuthor key={u.id} user={u} open={setPerson} />
+            {(page) =>
+              page === "feed" ? (
+                <>
+                  <SocialStories
+                    me={ready.me}
+                    create={() => select("create", "STORY")}
+                    person={setPerson}
+                    refreshKey={refresh}
+                  />
+                  <div className="social-feed-toolbar">
+                    <div
+                      className="social-tabs"
+                      role="tablist"
+                      aria-label="Filtrar publicações"
+                    >
+                      {[
+                        ["for-you", "Para Você"],
+                        ["following", "Seguindo"],
+                        ["campus", "Minha Faculdade"],
+                      ].map(([key, label]) => (
+                        <button
+                          role="tab"
+                          aria-selected={key === tab}
+                          key={key}
+                          onClick={() => setTab(key)}
+                        >
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                    <form
+                      noValidate
+                      className={`social-search ${searchOpen || searched ? "is-open" : ""}`}
+                      onSubmit={(event) => {
+                        event.preventDefault();
+                        setSearched(query.trim());
+                      }}
+                    >
+                      <label className="sr-only" htmlFor="social-search">
+                        Pesquisar pessoas, hashtags e publicações
+                      </label>
+                      <Search size={18} />
+                      <input
+                        id="social-search"
+                        type="search"
+                        maxLength={80}
+                        placeholder="Pessoas, assuntos, #ideias"
+                        value={query}
+                        onChange={(event) => setQuery(event.target.value)}
+                      />
+                      <button className="icon-control" aria-label="Pesquisar">
+                        <Search size={18} />
+                      </button>
+                    </form>
+                  </div>
+                  {searched && (
+                    <div className="social-search-results">
+                      <button
+                        className="text-button"
+                        onClick={() => {
+                          setSearched("");
+                          setQuery("");
+                        }}
+                      >
+                        <ArrowLeft size={16} />
+                        Voltar à leitura
+                      </button>
+                      <h2>{`Resultados para “${searched}”`}</h2>
+                      <div>
+                        {people.map((user) => (
+                          <SocialAuthor
+                            key={user.id}
+                            user={user}
+                            open={setPerson}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {["for-you", "following", "campus"].map((key) => (
+                    <div
+                      className="social-feed-tab"
+                      key={key}
+                      hidden={tab !== key || !!searched}
+                    >
+                      <SocialStream
+                        query={`tab=${key}&kind=POST`}
+                        active={view === "feed" && tab === key && !searched}
+                        me={ready.me.id}
+                        person={setPerson}
+                        refreshKey={refresh}
+                        autoplay={prefs.autoplay}
+                      />
+                    </div>
                   ))}
-                </div>
-              </div>
-            )}
-            {["for-you", "following", "campus"].map((t) => (
-              <div
-                className="social-feed-tab"
-                key={t}
-                hidden={tab !== t || !!searched}
+                  {searched && (
+                    <div className="social-feed-tab">
+                      <SocialStream
+                        key={`${tab}:${searched}`}
+                        query={`tab=${tab}&kind=POST&q=${encodeURIComponent(searched)}`}
+                        active={view === "feed"}
+                        me={ready.me.id}
+                        person={setPerson}
+                        autoplay={prefs.autoplay}
+                      />
+                    </div>
+                  )}
+                </>
+              ) : page === "clips" ? (
+                opened.includes("clips") && (
+                  <SocialClips
+                    active={view === "clips" && !person && !settings && !detail}
+                    me={ready.me.id}
+                    autoplay={prefs.autoplay}
+                    person={setPerson}
+                  />
+                )
+              ) : (
+                opened.includes("create") && (
+                  <SocialEditor
+                    user={ready.me.id}
+                    mediaEnabled={ready.media}
+                    initialKind={kind}
+                    onProgress={(value) => {
+                      setUpload(value);
+                      if (value.state === "working") setDismissedUpload(false);
+                    }}
+                    published={(publishedKind) => {
+                      setRefresh((value) => value + 1);
+                      if (view === "create")
+                        select(publishedKind === "CLIP" ? "clips" : "feed");
+                    }}
+                  />
+                )
+              )
+            }
+          </SocialPager>
+          {view !== "create" && upload.state !== "idle" && !dismissedUpload && (
+            <div
+              className={`social-upload-banner social-upload-${upload.state}`}
+            >
+              <button
+                type="button"
+                className="social-upload-banner-main"
+                onClick={() => select("create")}
+                aria-label="Abrir progresso da publicação"
               >
-                <SocialStream
-                  query={`tab=${t}&kind=POST`}
-                  active={view === "feed" && tab === t && !searched}
-                  me={ready.me.id}
-                  person={setPerson}
-                  refreshKey={refresh}
-                />
-              </div>
-            ))}
-            {searched && (
-              <div className="social-feed-tab">
-                <SocialStream
-                  key={`${tab}:${searched}`}
-                  query={`tab=${tab}&kind=POST&q=${encodeURIComponent(searched)}`}
-                  active={view === "feed"}
-                  me={ready.me.id}
-                  person={setPerson}
-                />
-              </div>
-            )}
-          </section>
-          {opened.includes("clips") && (
-            <section className="social-clips-view" hidden={view !== "clips"}>
-              <SocialClips
-                active={view === "clips" && !person && !settings && !detail}
-                me={ready.me.id}
-                autoplay={prefs.autoplay}
-                person={setPerson}
-              />
-            </section>
-          )}
-          {opened.includes("create") && (
-            <section className="social-create-view" hidden={view !== "create"}>
-              <SocialEditor
-                user={ready.me.id}
-                mediaEnabled={ready.media}
-                initialKind={kind}
-                published={() => {
-                  setRefresh((n) => n + 1);
-                  select("feed");
-                }}
-              />
-            </section>
+                {upload.state === "working" ? (
+                  <LoaderCircle className="social-upload-spinning" />
+                ) : upload.state === "done" ? (
+                  <Check />
+                ) : (
+                  <CircleAlert />
+                )}
+                <span role="status">{upload.message}</span>
+                {upload.state === "working" && (
+                  <progress
+                    value={upload.percent}
+                    max={100}
+                    aria-label="Progresso do envio"
+                  />
+                )}
+              </button>
+              {upload.state !== "working" && (
+                <button
+                  className="icon-control"
+                  aria-label="Dispensar aviso"
+                  onClick={() => setDismissedUpload(true)}
+                >
+                  <X size={18} />
+                </button>
+              )}
+            </div>
           )}
           {person && (
             <SocialProfile
@@ -392,7 +495,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                 person={setPerson}
                 onDeleted={() => {
                   setDetail(undefined);
-                  setRefresh((current) => current + 1);
+                  setRefresh((value) => value + 1);
                 }}
                 close={() => setDetail(undefined)}
               />

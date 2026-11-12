@@ -211,6 +211,7 @@ public class SocialMedia {
                     + " novo arquivo.");
           if (!row.get("expectedBytes").equals(row.get("receivedBytes")))
             throw ApiException.invalid("Conclua o upload antes de exportar.");
+          if ("IMAGE".equals(row.get("kind")) && body.recipe()!=null) body.recipe().validated(1);
           if ("VIDEO".equals(row.get("kind"))) {
             if (body.recipe() == null) throw ApiException.invalid("Revise os cortes do vídeo.");
             body.recipe().validated(3600);
@@ -250,6 +251,50 @@ public class SocialMedia {
               id,
               a.id());
         });
+  }
+
+  /** A gallery cover is its own bounded JPEG; it never points at another user's media. */
+  @PutMapping(value="/{id}/cover",consumes=MediaType.IMAGE_JPEG_VALUE)
+  public Object cover(@AuthenticationPrincipal Actor actor,@PathVariable UUID id,HttpServletRequest request) throws IOException {
+    ready();
+    final int limit=4*1024*1024;
+    if(request.getContentLengthLong()>limit)throw ApiException.invalid("A capa deve ter at\u00e9 4 MB.");
+    byte[] bytes=request.getInputStream().readNBytes(limit+1);
+    if(bytes.length==0||bytes.length>limit)throw ApiException.invalid("A capa deve ter at\u00e9 4 MB.");
+    java.awt.image.BufferedImage image;
+    try(var input=javax.imageio.ImageIO.createImageInputStream(new ByteArrayInputStream(bytes))) {
+      var readers=javax.imageio.ImageIO.getImageReaders(input);
+      if(!readers.hasNext())throw ApiException.invalid("Escolha uma capa JPEG v\u00e1lida.");
+      var reader=readers.next();
+      try {
+        reader.setInput(input,true,true);
+        int width=reader.getWidth(0),height=reader.getHeight(0);
+        if(!reader.getFormatName().equalsIgnoreCase("JPEG")||width<1||height<1||(long)width*height>4000000)
+          throw ApiException.invalid("Use uma capa JPEG de at\u00e9 4 megapixels.");
+        image=reader.read(0);
+      }finally{reader.dispose();}
+    }catch(ApiException error){throw error;}catch(IOException|RuntimeException error){throw ApiException.invalid("Escolha uma capa JPEG v\u00e1lida.");}
+    double scale=Math.min(1,1080.0/Math.max(image.getWidth(),image.getHeight()));
+    var clean=new java.awt.image.BufferedImage(Math.max(1,(int)(image.getWidth()*scale)),Math.max(1,(int)(image.getHeight()*scale)),java.awt.image.BufferedImage.TYPE_INT_RGB);
+    var graphics=clean.createGraphics();try{graphics.drawImage(image,0,0,clean.getWidth(),clean.getHeight(),null);}finally{graphics.dispose();image.flush();}
+    var encoded=new ByteArrayOutputStream();javax.imageio.ImageIO.write(clean,"jpeg",encoded);clean.flush();
+    String target=key(id)+"gallery-cover-"+UUID.randomUUID()+".jpg";
+    final String[] previous={null};
+    try {
+      Object result=tx.execute(transaction->{
+        access.profile(actor.id());
+        db.one("SELECT user_id FROM social_profile WHERE user_id=? FOR UPDATE",actor.id());
+        var reference=db.one("SELECT post_id FROM social_media WHERE id=? AND owner_id=?",id,actor.id());
+        if(reference.get("postId")!=null){var post=db.one("SELECT state FROM social_post WHERE id=? FOR UPDATE",reference.get("postId"));if(!"DRAFT".equals(post.get("state")))throw ApiException.invalid("A capa de uma publica\u00e7\u00e3o pronta n\u00e3o pode ser alterada por este envio.");}
+        var row=db.one("SELECT thumbnail_key FROM social_media WHERE id=? AND owner_id=? AND kind='VIDEO' AND state='READY' FOR UPDATE",id,actor.id());
+        previous[0]=(String)row.get("thumbnailKey");
+        storage.put(target,encoded.toByteArray(),"image/jpeg");
+        db.jdbc.update("UPDATE social_media SET thumbnail_key=?,thumbnail_bytes=?,updated_at=now() WHERE id=?",target,encoded.size(),id);
+        return status(actor,id);
+      });
+      if(previous[0]!=null)try{storage.delete(previous[0]);}catch(RuntimeException ignored){/* Orphan cleanup is preferable to failing an already committed cover. */}
+      return result;
+    }catch(RuntimeException error){try{storage.delete(target);}catch(RuntimeException ignored){}throw error;}
   }
 
   @GetMapping("/{id}/content")

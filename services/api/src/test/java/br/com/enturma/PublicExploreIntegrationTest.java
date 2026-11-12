@@ -23,6 +23,8 @@ import org.springframework.transaction.annotation.Transactional;
 @SpringBootTest(properties = "CHAT_ACCOUNT_MASTER_KEY=AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=")
 @AutoConfigureMockMvc
 @Transactional
+@org.springframework.test.annotation.DirtiesContext(
+    classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class PublicExploreIntegrationTest {
   @Autowired MockMvc mvc;
   @Autowired AuthService auth;

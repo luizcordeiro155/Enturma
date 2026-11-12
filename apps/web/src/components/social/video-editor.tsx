@@ -1,4 +1,5 @@
 "use client";
+/* eslint-disable @next/next/no-img-element -- local gallery cover preview */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   Undo2,
@@ -10,6 +11,7 @@ import {
   Play,
   Pause,
   RotateCw,
+  ImagePlus,
 } from "lucide-react";
 import {
   exportDuration,
@@ -18,18 +20,57 @@ import {
   type VideoRecipe,
 } from "@/lib/social";
 
+import { MediaTimeline } from "./media-timeline";
+import { useVideoFrames } from "./use-video-frames";
+import { EditableMediaFrame } from "./editable-media-frame";
+import {
+  MEDIA_ASPECTS,
+  FILTERS,
+  FILTER_CSS,
+  FILTER_LABELS,
+  trimSegment,
+  captionRange,
+  normalizeRecipe,
+  timeLabel,
+  frameTimes,
+  type MediaAspect,
+  type MediaFilter,
+} from "@/lib/social-editing";
+
+function GalleryCover({ file }: { file: File }) {
+  const [url, setUrl] = useState("");
+  useEffect(() => {
+    const source = URL.createObjectURL(file);
+    const timer = setTimeout(() => setUrl(source), 0);
+    return () => {
+      clearTimeout(timer);
+      URL.revokeObjectURL(source);
+    };
+  }, [file]);
+  return url ? (
+    <img
+      className="studio-cover-preview"
+      src={url}
+      alt="Capa escolhida na galeria"
+    />
+  ) : null;
+}
 export function VideoEditor({
   url,
   sourceDuration,
   value,
   onChange,
   overlay,
+  coverFile,
+  onCoverFile,
 }: {
   url: string;
   sourceDuration: number;
   value: VideoRecipe;
   onChange: (r: VideoRecipe) => void;
   overlay?: ReactNode;
+  coverFile?: File;
+  onCoverFile?: (file: File | undefined) => void;
 }) {
   const video = useRef<HTMLVideoElement>(null),
     undo = useRef<VideoRecipe[]>([]),
@@ -39,9 +80,37 @@ export function VideoEditor({
     [selected, setSelected] = useState(0),
     [available, setAvailable] = useState({ undo: false, redo: false });
   const [caption, setCaption] = useState("");
+  const [coverMode, setCoverMode] = useState(false);
+  const editedDuration = exportDuration(value);
+  const coverTimes = frameTimes(editedDuration);
+  const captured = useVideoFrames(
+    url,
+    sourceDuration,
+    coverMode ? coverTimes.map((time) => sourceTime(value, time)) : undefined,
+  );
+  const frames = coverMode
+    ? captured.map((frame, index) => ({ ...frame, time: coverTimes[index] }))
+    : captured;
+  const [coverError, setCoverError] = useState("");
+  const gestureBase = useRef<VideoRecipe | null>(null);
   const [sourceSize, setSourceSize] = useState({ width: 720, height: 1280 });
   const duration = exportDuration(value),
     segment = value.segments[selected] ?? value.segments[0];
+  function remember(previous: VideoRecipe) {
+    undo.current.push(previous);
+    if (undo.current.length > 50) undo.current.shift();
+    redo.current = [];
+    setAvailable({ undo: true, redo: false });
+  }
+  function gesture(next: VideoRecipe, commit: boolean) {
+    if (!gestureBase.current) gestureBase.current = value;
+    setPlaying(false);
+    if (commit) {
+      remember(gestureBase.current);
+      gestureBase.current = null;
+    }
+    onChange(next);
+  }
   function edit(next: VideoRecipe) {
     if (next.segments !== value.segments) {
       const end = exportDuration(next);
@@ -89,7 +158,8 @@ export function VideoEditor({
     if (!element) return;
     element.volume = Math.min(1, value.volume);
     element.muted = value.mute;
-  }, [value.volume, value.mute]);
+    element.playbackRate = value.speed ?? 1;
+  }, [value.volume, value.mute, value.speed]);
   useEffect(() => {
     const element = video.current;
     if (!element) return;
@@ -101,8 +171,8 @@ export function VideoEditor({
       elapsed = 0;
     const playFrom = position >= duration ? 0 : position;
     for (const s of value.segments) {
-      if (playFrom < elapsed + s.end - s.start) break;
-      elapsed += s.end - s.start;
+      if (playFrom < elapsed + (s.end - s.start) / (value.speed ?? 1)) break;
+      elapsed += (s.end - s.start) / (value.speed ?? 1);
       segmentIndex++;
     }
     segmentIndex = Math.min(segmentIndex, value.segments.length - 1);
@@ -111,7 +181,7 @@ export function VideoEditor({
     const update = () => {
       const s = value.segments[segmentIndex];
       if (element.currentTime >= s.end - 0.04) {
-        elapsed += s.end - s.start;
+        elapsed += (s.end - s.start) / (value.speed ?? 1);
         segmentIndex++;
         if (segmentIndex >= value.segments.length) {
           element.pause();
@@ -123,7 +193,11 @@ export function VideoEditor({
       }
       setPosition(
         elapsed +
-          Math.max(0, element.currentTime - value.segments[segmentIndex].start),
+          Math.max(
+            0,
+            element.currentTime - value.segments[segmentIndex].start,
+          ) /
+            (value.speed ?? 1),
       );
     };
     const hide = () => {
@@ -146,13 +220,14 @@ export function VideoEditor({
     let offset = 0;
     const index = value.segments.findIndex((s) => {
       const match =
-        position > offset + 0.1 && position < offset + s.end - s.start - 0.1;
-      if (!match) offset += s.end - s.start;
+        position > offset + 0.1 &&
+        position < offset + (s.end - s.start) / (value.speed ?? 1) - 0.1;
+      if (!match) offset += (s.end - s.start) / (value.speed ?? 1);
       return match;
     });
     if (index < 0 || value.segments.length >= 12) return;
     const s = value.segments[index],
-      at = s.start + position - offset;
+      at = s.start + (position - offset) * (value.speed ?? 1);
     edit({
       ...value,
       segments: [
@@ -178,37 +253,36 @@ export function VideoEditor({
       aria-label="Editor de vídeo"
       data-social-gesture="ignore"
     >
-      <div className="social-edit-preview">
-        <video
-          ref={video}
-          src={url}
-          playsInline
-          preload="metadata"
-          onLoadedMetadata={(event) => {
-            const element = event.currentTarget;
-            setSourceSize({
-              width: element.videoWidth || 720,
-              height: element.videoHeight || 1280,
-            });
-            element.currentTime = sourceTime(value, 0);
-          }}
-          style={videoPreviewFrame(sourceSize.width, sourceSize.height, value)}
-        />
-        {value.captions
-          .filter((c) => position >= c.start && position <= c.end)
-          .map((c, i) => (
-            <span
-              className="social-edit-caption"
-              key={i}
-              style={{
-                top: `${c.y * 100}%`,
-                transform: `translateY(-${c.y * 100}%)`,
-              }}
-            >
-              {c.text}
-            </span>
-          ))}
-        {overlay}
+      <div className="studio-preview-column">
+        <EditableMediaFrame
+          value={value}
+          source={sourceSize}
+          position={position}
+          change={gesture}
+        >
+          <video
+            ref={video}
+            src={url}
+            playsInline
+            preload="metadata"
+            onLoadedMetadata={(event) => {
+              const element = event.currentTarget;
+              setSourceSize({
+                width: element.videoWidth || 720,
+                height: element.videoHeight || 1280,
+              });
+              element.currentTime = sourceTime(value, 0);
+            }}
+            style={{
+              ...videoPreviewFrame(sourceSize.width, sourceSize.height, value),
+              filter: FILTER_CSS[value.filter ?? "ORIGINAL"],
+            }}
+          />
+          {overlay}
+        </EditableMediaFrame>
+        <p className="studio-preview-hint">
+          Arraste a imagem ou o texto. Use dois dedos para ampliar.
+        </p>
       </div>
       <div className="social-editor-tools">
         <div className="social-row">
@@ -221,7 +295,7 @@ export function VideoEditor({
             {playing ? <Pause /> : <Play />}
           </button>
           <output>
-            {position.toFixed(1)} / {duration.toFixed(1)} s
+            {timeLabel(position)} / {timeLabel(duration)}
           </output>
           <button
             type="button"
@@ -242,6 +316,121 @@ export function VideoEditor({
             <Redo2 />
           </button>
         </div>
+        <MediaTimeline
+          duration={coverMode ? duration : sourceDuration}
+          frames={frames}
+          start={segment.start}
+          end={segment.end}
+          position={coverMode ? value.cover : sourceTime(value, position)}
+          mode={coverMode ? "cover" : "trim"}
+          seek={(time) => {
+            setPlaying(false);
+            if (coverMode) {
+              const next = Math.min(time, Math.max(0, duration - 0.05));
+              onCoverFile?.(undefined);
+              edit({ ...value, cover: next });
+              seek(next);
+            } else {
+              if (video.current) video.current.currentTime = time;
+              let offset = 0;
+              for (const part of value.segments) {
+                if (time >= part.start && time <= part.end) {
+                  setPosition(
+                    offset + (time - part.start) / (value.speed ?? 1),
+                  );
+                  break;
+                }
+                offset += (part.end - part.start) / (value.speed ?? 1);
+              }
+            }
+          }}
+          change={(handle, time, commit) => {
+            const next = trimSegment(
+              value,
+              selected,
+              handle,
+              time,
+              sourceDuration,
+            );
+            gesture(next, commit);
+            if (video.current)
+              video.current.currentTime =
+                handle === "end"
+                  ? next.segments[selected].end - 0.05
+                  : next.segments[selected].start;
+            setPosition(
+              value.segments
+                .slice(0, selected)
+                .reduce(
+                  (total, part) =>
+                    total + (part.end - part.start) / (value.speed ?? 1),
+                  0,
+                ),
+            );
+          }}
+        />
+        <div className="studio-mode-row">
+          <button
+            type="button"
+            className="secondary"
+            aria-pressed={!coverMode}
+            onClick={() => setCoverMode(false)}
+          >
+            <Scissors size={16} />
+            Cortar
+          </button>
+          <button
+            type="button"
+            className="secondary"
+            aria-pressed={coverMode}
+            onClick={() => {
+              setCoverMode(true);
+              setPlaying(false);
+              seek(value.cover);
+            }}
+          >
+            <ImagePlus size={16} />
+            Escolher capa
+          </button>
+          {coverMode && onCoverFile && (
+            <label className="social-file-button studio-cover-file">
+              Capa da galeria
+              <input
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                onChange={(event) => {
+                  const file = event.target.files?.[0];
+                  setCoverError("");
+                  if (
+                    file &&
+                    /image\/(jpeg|png|webp)$/.test(file.type) &&
+                    file.size <= 16 * 1024 * 1024
+                  )
+                    onCoverFile(file);
+                  else if (file)
+                    setCoverError(
+                      "Use uma imagem JPG, PNG ou WebP de at\u00e9 16 MB para a capa.",
+                    );
+                  event.target.value = "";
+                }}
+              />
+            </label>
+          )}
+        </div>
+        {coverError && <p role="alert">{coverError}</p>}
+        {coverFile && <GalleryCover file={coverFile} />}
+        {coverFile && (
+          <p role="status">
+            Capa selecionada: {coverFile.name}{" "}
+            <button
+              type="button"
+              className="text-button"
+              onClick={() => onCoverFile?.(undefined)}
+            >
+              Usar quadro do v&iacute;deo
+            </button>
+          </p>
+        )}
         <label>
           Posição de reprodução
           <input
@@ -380,6 +569,54 @@ export function VideoEditor({
           <summary>Enquadramento, áudio e capa</summary>
           <div className="social-edit-controls">
             <label>
+              Propor&ccedil;&atilde;o
+              <select
+                value={value.aspect ?? "9:16"}
+                onChange={(event) =>
+                  edit({ ...value, aspect: event.target.value as MediaAspect })
+                }
+              >
+                {MEDIA_ASPECTS.map((aspect) => (
+                  <option key={aspect}>{aspect}</option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Velocidade
+              <select
+                value={value.speed ?? 1}
+                onChange={(event) =>
+                  edit(
+                    normalizeRecipe({
+                      ...value,
+                      speed: Number(event.target.value),
+                    }),
+                  )
+                }
+              >
+                {[0.5, 0.75, 1, 1.25, 1.5, 2].map((speed) => (
+                  <option key={speed} value={speed}>
+                    {speed}x
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              Filtro
+              <select
+                value={value.filter ?? "ORIGINAL"}
+                onChange={(event) =>
+                  edit({ ...value, filter: event.target.value as MediaFilter })
+                }
+              >
+                {FILTERS.map((filter) => (
+                  <option key={filter} value={filter}>
+                    {FILTER_LABELS[filter]}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
               Zoom
               <input
                 type="range"
@@ -469,6 +706,80 @@ export function VideoEditor({
           <summary>Textos e legendas</summary>
           {value.captions.map((c, i) => (
             <div className="social-caption-edit" key={i}>
+              <MediaTimeline
+                duration={duration}
+                frames={[]}
+                start={c.start}
+                end={c.end}
+                position={position}
+                seek={(time) => {
+                  setPlaying(false);
+                  seek(time);
+                }}
+                change={(handle, time, commit) =>
+                  gesture(
+                    {
+                      ...value,
+                      captions: value.captions.map((item, index) =>
+                        index === i
+                          ? captionRange(item, handle, time, duration)
+                          : item,
+                      ),
+                    },
+                    commit,
+                  )
+                }
+              />
+              <div className="social-edit-controls">
+                <label>
+                  Tamanho do texto
+                  <input
+                    type="range"
+                    min={20}
+                    max={72}
+                    step={2}
+                    value={c.size ?? 36}
+                    onChange={(event) =>
+                      edit({
+                        ...value,
+                        captions: value.captions.map((item, index) =>
+                          index === i
+                            ? { ...item, size: Number(event.target.value) }
+                            : item,
+                        ),
+                      })
+                    }
+                  />
+                </label>
+                <label>
+                  Cor do texto
+                  <select
+                    value={c.color ?? "#ffffff"}
+                    onChange={(event) =>
+                      edit({
+                        ...value,
+                        captions: value.captions.map((item, index) =>
+                          index === i
+                            ? { ...item, color: event.target.value }
+                            : item,
+                        ),
+                      })
+                    }
+                  >
+                    {[
+                      ["#ffffff", "Branco"],
+                      ["#000000", "Preto"],
+                      ["#ffeb3b", "Amarelo"],
+                      ["#ff5a7a", "Rosa"],
+                      ["#81e6d9", "Verde"],
+                    ].map(([color, label]) => (
+                      <option key={color} value={color}>
+                        {label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
               <label>
                 Texto {i + 1}
                 <input

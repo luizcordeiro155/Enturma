@@ -1,0 +1,942 @@
+/* Native Enturma surfaces. Media overlays deliberately stay white on arbitrary video. */
+html[data-theme]
+  :is(.social-page, .social-dialog)
+  .social-post-actions
+  .icon-control,
+html[data-theme]
+  :is(.social-page, .social-dialog)
+  .social-story-actions
+  .icon-control {
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0;
+  color: var(--ink);
+  outline-offset: 2px;
+}
+html[data-theme]
+  .social-page
+  :is(.social-clip-rail, .social-clip-controls)
+  .icon-control,
+html[data-theme]
+  .social-page
+  :is(.social-clips-tabs, .social-clips-exit)
+  button,
+html[data-theme] .social-page .social-video-toggle,
+html[data-theme]
+  .social-page
+  .social-clip-caption
+  :is(.social-author, strong, small, p, a, .social-caption-toggle),
+html[data-theme] .social-dialog-story .social-story-actions .icon-control {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+  color: #fff !important;
+  text-shadow: 0 1px 4px #000c;
+}
+html[data-theme]
+  .social-page
+  .social-clip-rail
+  .icon-control[aria-pressed="true"] {
+  color: var(--accent) !important;
+}
+html[data-theme] .social-page .social-clip-rail .icon-control svg {
+  filter: drop-shadow(0 1px 3px #0009);
+}
+html[data-theme]
+  :is(.social-page, .social-dialog)
+  .social-post:not(.social-post-clip)
+  .social-post-actions
+  .icon-control[aria-pressed="true"] {
+  color: var(--accent) !important;
+}
+html[data-theme] .social-header h1,
+html[data-theme] .social-tabs button {
+  color: var(--ink);
+  text-shadow: 0 1px 2px color-mix(in srgb, var(--bg) 55%, transparent);
+}
+html[data-theme] .social-profile-intro .social-author {
+  justify-content: flex-start;
+  flex: 1;
+  min-width: 0;
+}
+html[data-theme] :is(.social-page, .social-dialog) .identity-avatar {
+  flex-shrink: 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+html[data-theme] :is(.social-page, .social-dialog) .identity-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: inherit;
+  display: block;
+}
+html[data-theme] .social-profile-intro .identity-avatar {
+  width: 88px;
+  height: 88px;
+  min-width: 88px;
+  min-height: 88px;
+  flex: 0 0 88px;
+}
+html[data-theme] .social-author > span:not(.identity-avatar) {
+  min-width: 0;
+}
+html[data-theme] .social-profile-buttons {
+  flex-wrap: wrap;
+}
+html[data-theme] .social-navigation-brand {
+  display: none;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+  line-height: 1;
+  text-decoration: none;
+}
+@media (min-width: 761px) {
+  html[data-theme] .social-navigation-brand {
+    display: flex;
+  }
+}
+@media (min-width: 761px) and (max-width: 1199px) {
+  html[data-theme] .social-navigation-brand > span {
+    display: none;
+  }
+}
+html[data-theme] .social-navigation-brand .brand-app-icon {
+  width: 40px !important;
+  height: 40px !important;
+  flex: 0 0 40px;
+}
+html[data-theme] .social-navigation-brand > span {
+  font-weight: 800;
+  font-size: 29px;
+  letter-spacing: -0.04em;
+}
+html[data-theme] .social-navigation-brand > span > .dot {
+  display: inline;
+  font-size: inherit;
+}
+html[data-theme] dialog.social-opening {
+  inset: 0;
+  margin: 0;
+  width: 100vw;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  border: 0;
+  border-radius: 0;
+  padding: env(safe-area-inset-top, 0px) 24px env(safe-area-inset-bottom, 0px);
+  background: var(--bg);
+  box-shadow: none;
+  overflow: hidden;
+}
+html[data-theme] dialog.social-opening[open] {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+html[data-theme] dialog.social-opening .social-opening-art {
+  width: min(440px, 80vw);
+  height: min(320px, 36dvh);
+  flex: none;
+  margin: 0;
+}
+html[data-theme] dialog.social-opening h2 {
+  font-size: clamp(26px, 4vw, 42px);
+  margin: 0;
+}
+html[data-theme] dialog.social-opening p {
+  margin: 0;
+  line-height: 1.7;
+}
+html[data-theme] dialog.social-opening > button {
+  position: absolute;
+  right: 24px;
+  bottom: max(24px, env(safe-area-inset-bottom));
+}
+/* A true editing canvas, followed by a compact timeline rather than a wall of fields. */
+.social-video-editor {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.9fr) minmax(280px, 1.1fr);
+  gap: 24px;
+  align-items: start;
+  min-width: 0;
+}
+.studio-preview-column {
+  position: sticky;
+  top: 0;
+  align-self: start;
+  min-width: 0;
+}
+html[data-theme] :is(.social-page, .social-dialog) .studio-preview {
+  position: relative;
+  container-type: inline-size;
+  width: 100%;
+  height: auto;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 12px;
+  background: #000;
+  touch-action: none;
+  user-select: none;
+  isolation: isolate;
+}
+.studio-preview video,
+.studio-preview img {
+  position: absolute;
+  max-width: none;
+  object-fit: fill;
+  user-select: none;
+  pointer-events: none;
+}
+html[data-theme] .studio-preview .studio-caption {
+  position: absolute;
+  display: block;
+  width: max-content;
+  max-width: 94%;
+  margin: 0;
+  padding: 5px 8px;
+  border-radius: 4px;
+  background: #000a;
+  line-height: 1.25;
+  font-weight: 600;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-align: center;
+  cursor: move;
+  touch-action: none;
+  z-index: 3;
+  left: auto;
+  right: auto;
+  text-shadow: 0 1px 3px #0006;
+}
+.studio-preview .studio-caption:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.studio-preview-hint,
+.studio-timeline-hint {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.4;
+  margin: 8px 0 12px;
+}
+.studio-timeline {
+  min-width: 0;
+  width: 100%;
+  margin: 8px 0;
+}
+.studio-timeline-ruler {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  margin: 0 0 6px;
+}
+.studio-filmstrip {
+  position: relative;
+  height: 66px;
+  border-radius: 6px;
+  background: var(--soft);
+  touch-action: none;
+  cursor: crosshair;
+  user-select: none;
+}
+.studio-filmstrip-images {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+.studio-filmstrip-images img {
+  width: 0;
+  min-width: 0;
+  flex: 1;
+  object-fit: cover;
+  height: 100%;
+  pointer-events: none;
+}
+.studio-filmstrip-loading {
+  align-self: center;
+  padding: 0 12px;
+  font-size: 12px;
+  color: var(--muted);
+}
+.studio-trim-shade {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  background: #000a;
+  pointer-events: none;
+}
+.studio-trim-selection {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  border-block: 3px solid var(--accent);
+  cursor: grab;
+  min-width: 2px;
+  touch-action: none;
+}
+html[data-theme] :is(.social-page, .social-dialog) .studio-trim-handle {
+  position: absolute;
+  top: -3px;
+  bottom: -3px;
+  height: auto;
+  min-height: 0;
+  width: 18px;
+  min-width: 18px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  border: 0;
+  box-shadow: none;
+  border-radius: 4px;
+  cursor: ew-resize;
+  touch-action: none;
+  z-index: 3;
+}
+.studio-trim-start {
+  left: -8px;
+}
+.studio-trim-end {
+  right: -8px;
+}
+.studio-trim-handle span {
+  width: 2px;
+  height: 22px;
+  background: currentColor;
+  border-radius: 2px;
+}
+html[data-theme] :is(.social-page, .social-dialog) .studio-playhead {
+  position: absolute;
+  top: -7px;
+  bottom: -7px;
+  height: auto;
+  min-height: 0;
+  width: 14px;
+  min-width: 14px;
+  transform: translateX(-50%);
+  background: transparent !important;
+  border: 0;
+  box-shadow: none;
+  padding: 0;
+  border-radius: 0;
+  z-index: 4;
+  touch-action: none;
+  cursor: ew-resize;
+}
+.studio-playhead::after {
+  content: "";
+  height: 100%;
+  width: 2px;
+  display: block;
+  margin: auto;
+  background: #fff;
+  box-shadow: 0 1px 4px #000;
+}
+.studio-playhead::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 3px;
+  width: 8px;
+  height: 7px;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow: 0 1px 3px #0006;
+}
+.studio-mode-row,
+.studio-aspects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+html[data-theme]
+  :is(.social-page, .social-dialog)
+  :is(.studio-mode-row, .studio-aspects)
+  > button {
+  padding: 7px 12px;
+  font-size: 12px;
+  min-height: 44px;
+  border-radius: 8px;
+  background: var(--soft);
+  color: var(--ink);
+  border-color: var(--border);
+}
+html[data-theme]
+  :is(.social-page, .social-dialog)
+  :is(.studio-mode-row, .studio-aspects)
+  > button[aria-pressed="true"] {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  border-color: transparent !important;
+}
+.social-video-editor .social-editor-tools {
+  min-width: 0;
+  display: grid;
+  gap: 12px;
+}
+.social-video-editor .social-editor-tools > .social-edit-controls {
+  grid-template-columns: 1fr 1fr;
+}
+.social-video-editor .social-editor-tools > .social-edit-controls label {
+  font-size: 11px;
+  gap: 4px;
+}
+.social-video-editor .social-editor-tools > .social-edit-controls input {
+  font-size: 12px;
+  min-height: 32px;
+  padding: 6px 9px;
+}
+.social-video-editor .social-editor-tools > .social-row {
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.social-video-editor .social-editor-tools output {
+  font-size: 13px;
+  flex: 1;
+  font-variant-numeric: tabular-nums;
+}
+.social-video-editor .social-editor-tools details {
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.social-video-editor .social-editor-tools summary {
+  font-weight: 650;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 0 10px;
+}
+.social-video-editor .social-timeline {
+  margin: 0;
+}
+.social-video-editor .social-timeline button {
+  min-width: 80px;
+  font-size: 11px;
+  min-height: 38px;
+  padding: 6px 8px;
+}
+.social-video-editor .social-timeline small {
+  font-size: 10px;
+}
+.social-caption-edit .studio-filmstrip {
+  height: 30px;
+}
+.social-caption-edit .studio-filmstrip-loading {
+  font-size: 0;
+}
+.studio-image-editor .studio-preview {
+  max-width: 420px;
+  margin: auto;
+}
+.studio-image-editor .studio-aspects {
+  justify-content: center;
+  margin: 14px 0;
+}
+.studio-cover-preview {
+  width: 96px;
+  height: 128px;
+  object-fit: contain;
+  border-radius: 8px;
+}
+.social-share-people {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px 12px;
+}
+html[data-theme] .social-share-people .social-share-person {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  padding: 4px;
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--ink);
+  min-width: 0;
+}
+.social-share-people .identity-avatar {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 64px;
+}
+.social-share-person > strong {
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.3;
+  max-width: 100%;
+  text-align: center;
+  word-break: break-word;
+}
+.social-share-person[aria-pressed="true"] .identity-avatar {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+}
+.social-share-footer {
+  position: sticky;
+  bottom: 0;
+  background: var(--bg);
+  padding: 12px 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+}
+.social-comment-reactions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  margin-bottom: 10px;
+}
+html[data-theme] .social-comment-reactions > button {
+  background: transparent !important;
+  border: 0 !important;
+  min-width: 30px;
+  min-height: 36px;
+  padding: 0;
+  font-size: 24px;
+  box-shadow: none !important;
+}
+.social-comments-body .social-comment-form {
+  display: flex;
+  gap: 8px;
+  align-items: end;
+}
+.social-comments-body .social-comment-form textarea {
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+}
+html[data-theme] .social-comments-body .composer-media-buttons button {
+  background: transparent !important;
+  color: var(--ink);
+  width: 34px;
+  min-width: 34px;
+  padding: 4px;
+}
+.social-comment-media {
+  display: block;
+  max-width: min(220px, 100%);
+  max-height: 220px;
+  object-fit: contain;
+  border-radius: 8px;
+  margin: 8px 0;
+}
+.social-comment-attachment {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 6px 0;
+}
+.social-comment-attachment img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+}
+.social-share-preview {
+  display: block;
+  width: min(260px, 100%);
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  margin: 6px 0;
+}
+.social-share-preview img {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+}
+.social-share-preview strong,
+.social-share-preview p {
+  display: block;
+  padding: 10px 12px;
+  margin: 0;
+  line-height: 1.4;
+}
+.social-share-preview p {
+  font-size: 13px;
+  padding-top: 0;
+}
+@media (max-width: 760px) {
+  html[data-theme] .social-profile-intro .identity-avatar {
+    width: 72px;
+    height: 72px;
+    min-width: 72px;
+    min-height: 72px;
+    flex: 0 0 72px;
+  }
+  .social-video-editor {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .studio-preview-column {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 5;
+    width: 100%;
+    padding: 4px 0 0;
+  }
+  html[data-theme] :is(.social-page, .social-dialog) .studio-preview {
+    width: min(100%, calc(35dvh * var(--studio-aspect, 0.5625)));
+    max-height: 36dvh;
+    margin: auto;
+  }
+  .studio-preview-column .studio-preview-hint {
+    margin: 4px 0 0;
+    text-align: center;
+    font-size: 10px;
+  }
+  .social-video-editor .social-editor-tools {
+    width: 100%;
+    gap: 9px;
+  }
+  .social-video-editor .social-editor-tools > .social-row {
+    position: relative;
+  }
+  .studio-filmstrip {
+    height: 58px;
+  }
+  html[data-theme] dialog.social-dialog-panel {
+    border-radius: 24px 24px 0 0;
+  }
+  .social-dialog-panel > header::before,
+  .social-dialog-sheet > header::before {
+    content: "";
+    position: absolute;
+    top: 7px;
+    left: calc(50% - 18px);
+    width: 36px;
+    height: 4px;
+    background: var(--muted);
+    border-radius: 2px;
+  }
+  .social-dialog-panel > header,
+  .social-dialog-sheet > header {
+    padding-top: 20px !important;
+  }
+  html[data-theme] .social-comments-body .social-comment-form textarea {
+    font-size: 16px;
+  }
+}
+@media (min-width: 761px) and (max-width: 1199px) {
+  html[data-theme] .social-navigation-brand .brand-app-icon {
+    width: 35px !important;
+    height: 35px !important;
+    flex-basis: 35px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-live-ring::after {
+    animation: none !important;
+  }
+}
+/* LiveKit broadcasts use the same authenticated Social shell and native sheets. */
+.social-live-ring .social-story-ring,
+.social-author-live .identity-avatar {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  animation: social-live-pulse 1.8s ease-in-out infinite;
+}
+.social-live-ring .social-story-ring {
+  position: relative;
+}
+.social-live-ring b {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  font-weight: 800;
+  white-space: nowrap;
+  background: var(--accent);
+  color: var(--on-accent);
+  border: 2px solid var(--bg);
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+@keyframes social-live-pulse {
+  50% {
+    outline-offset: 5px;
+    outline-color: color-mix(in srgb, var(--accent) 50%, transparent);
+  }
+}
+.social-live-setup {
+  max-width: 520px;
+  margin: auto;
+  padding: 28px;
+  gap: 18px;
+}
+.social-live-setup h3 {
+  font-size: 22px;
+  margin: 0;
+}
+.social-live-setup p {
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.social-live-view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+.social-live-stage {
+  position: relative;
+  background: #000;
+  min-height: 260px;
+  overflow: hidden;
+}
+.social-live-tracks {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  inset: 0;
+}
+.social-live-video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.social-live-audio {
+  display: none;
+}
+.social-live-top {
+  position: absolute;
+  inset: 0 0 auto;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 16px;
+  background: linear-gradient(#000b, transparent);
+  color: #fff;
+  z-index: 2;
+}
+.social-live-top .identity-avatar {
+  width: 40px;
+  height: 40px;
+  flex: 0 0 40px;
+}
+.social-live-top > div {
+  flex: 1;
+  min-width: 0;
+}
+.social-live-top p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+.social-live-top > span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+}
+.social-live-state {
+  font-size: 10px !important;
+  background: #c32444;
+  border-radius: 4px;
+  padding: 4px 5px;
+  font-weight: 700;
+}
+.social-live-connection,
+.social-live-ended {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+.social-live-host-controls {
+  position: absolute;
+  inset: auto 0 0;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  padding: 14px;
+  background: linear-gradient(transparent, #000b);
+}
+html[data-theme] .social-live-host-controls .icon-control {
+  background: transparent !important;
+  border: 0 !important;
+  color: #fff !important;
+}
+.social-live-sound {
+  position: absolute;
+  right: 14px;
+  top: 80px;
+}
+.social-live-chat {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  background: var(--bg);
+  padding: 12px;
+}
+.social-live-messages {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+.social-live-messages p {
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+.social-live-messages strong {
+  font-weight: 700;
+}
+.social-live-composer {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.social-live-composer input {
+  width: 0;
+  flex: 1;
+  min-width: 0;
+  font-size: 16px;
+}
+html[data-theme] .social-live-composer .icon-control {
+  background: transparent !important;
+  border: 0 !important;
+  color: var(--ink);
+  padding: 5px;
+  min-width: 32px;
+}
+.social-live-heart {
+  color: var(--accent);
+  animation: social-heart-in 0.25s ease-out;
+}
+@keyframes social-heart-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.social-comment-list > article {
+  position: relative;
+  padding-right: 32px;
+}
+html[data-theme] .social-comment-like {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+  color: var(--ink);
+  min-width: 28px;
+  padding: 4px;
+  gap: 3px;
+}
+html[data-theme] .social-comment-like[aria-pressed="true"] {
+  color: var(--accent);
+}
+.social-comment-like small {
+  font-size: 11px;
+}
+.social-comment-copy p {
+  margin: 5px 0;
+}
+.social-comment-attachment > span {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+@media (max-width: 760px) {
+  .social-live-view {
+    display: flex;
+    flex-direction: column;
+  }
+  .social-live-stage {
+    flex: 1;
+    min-height: 140px;
+  }
+  .social-live-chat {
+    height: 32%;
+    min-height: 135px;
+    max-height: 280px;
+    flex-shrink: 0;
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+  .social-live-messages {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-live-ring .social-story-ring,
+  .social-author-live .identity-avatar,
+  .social-live-heart {
+    animation: none;
+  }
+}
+.social-clip-loop {
+  height: 100%;
+  min-height: 100%;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  color: #fff;
+  background: #080b0c;
+}
+@media (max-width: 760px) {
+  html .social-active-shell {
+    height: calc(
+      var(--social-rest-height, 100dvh) - var(--social-chrome, 0px)
+    ) !important;
+    max-height: none !important;
+  }
+  .social-pager-page[data-page="create"] {
+    padding-bottom: var(--social-ime-height, 0px);
+    scroll-padding-bottom: calc(var(--social-ime-height, 0px) + 20px);
+  }
+  .social-dialog :is(textarea, input) {
+    font-size: 16px;
+  }
+}

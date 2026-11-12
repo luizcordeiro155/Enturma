@@ -162,7 +162,7 @@ html[data-theme] .social-opening p {
 .social-opening h2 span {
   color: var(--ink);
 }
-@media (min-width: 761px) and (max-width: 1060px) {
+@media (min-width: 761px) and (max-width: 1199px) {
   html .social-active-shell {
     grid-template-columns: 96px minmax(0, 1fr);
   }

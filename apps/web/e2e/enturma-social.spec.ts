@@ -90,10 +90,31 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
   await expect(
     social.getByRole("button", { name: "Meu perfil social" }),
   ).toBeVisible();
-  await expect(social.getByRole("link", { name: "Mensagens" })).toHaveAttribute(
-    "href",
-    "/friends",
-  );
+  await expect(social.getByRole("link", { name: "Mensagens" })).toHaveCount(0);
+  await expect(
+    page.locator(".social-header").getByRole("link", { name: "Mensagens" }),
+  ).toHaveAttribute("href", "/friends");
+  // Three width bands: bottom dock, icon-only rail, labelled rail.
+  for (const width of [390, 820, 1440]) {
+    await page.setViewportSize({ width, height: 844 });
+    const nav = page.locator(".social-navigation");
+    const box = await nav.boundingBox();
+    if (width <= 760) expect(box!.y).toBeGreaterThan(400);
+    else expect(box!.x).toBeLessThan(40);
+    const label = await nav
+      .getByRole("button", { name: "Feed", exact: true })
+      .locator("span")
+      .last()
+      .boundingBox();
+    // The compact rail keeps the label for assistive technology but clips it visually.
+    expect(label!.width > 2).toBe(width <= 760 || width >= 1200);
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
   await page
     .locator(".topbar")
     .getByRole("link", { name: "Início do Enturma" })
@@ -689,6 +710,16 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
       })
       .toBe(true);
     await expect(selected.locator("video")).toHaveJSProperty("readyState", 4);
+    // Full-height Clip: the whole width on a phone, a centred 9:16 column on desktop.
+    const size = (await selected.boundingBox())!;
+    if (width === 390) {
+      expect(size.width).toBeGreaterThanOrEqual(389);
+      expect(size.height).toBeGreaterThan(844 * 0.8);
+    } else expect(size.width / size.height).toBeCloseTo(9 / 16, 1);
+    await expect(
+      selected.getByRole("progressbar", { name: "Progresso do Clip" }),
+    ).toBeVisible();
+    await expect(page.getByRole("tab", { name: "Seguindo" })).toBeVisible();
     await expect(selected.locator("header")).toBeInViewport({ ratio: 0.99 });
     await expect(selected.locator(".social-post-actions")).toBeInViewport({
       ratio: 0.99,
