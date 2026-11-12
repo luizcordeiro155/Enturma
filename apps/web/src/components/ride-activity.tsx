@@ -47,7 +47,7 @@ const SearchContext = createContext<{ searches: Search[]; live: boolean }>({
 export function RideActivity({ children }: { children: React.ReactNode }) {
   const path = usePathname();
   const privatePage =
-    /^\/(home|portfolio|subjects|learn|profile|settings|friends|notebooks|rooms|caronas|forum|onboarding|admin)(\/|$)/.test(
+    /^\/(home|portfolio|subjects|learn|profile|settings|friends|notebooks|rooms|caronas|forum|social|onboarding|admin)(\/|$)/.test(
       path,
     );
   return privatePage ? (
