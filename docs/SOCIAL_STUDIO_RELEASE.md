@@ -6,7 +6,9 @@ O Studio usa a mesma receita validada pelo FFmpeg para a previa e para o arquivo
 
 Originais de ate uma hora podem ser recortados, respeitando 128 MiB por arquivo. A exportacao final continua limitada a 90 segundos; nao ha promessa de arquivos ou processamento ilimitados. Videos maiores que 90 segundos abrem o editor normalmente. A capa da galeria aceita ate 16 MiB no cliente e e reduzida antes do envio; a API aceita apenas JPEG de ate 4 MiB e quatro megapixels.
 
-O perfil usa avatares quadrados com recorte circular e sem encolhimento flex. Acoes sociais sobre video sao transparentes e brancas, com sombra, independentemente do tema; fora do video seguem os tokens claro/escuro. A abertura Remotion permanece a mesma, agora em tela inteira.
+O perfil usa avatares quadrados com recorte circular e sem encolhimento flex. Acoes sociais sobre video sao transparentes e brancas, com sombra, independentemente do tema; fora do video seguem os tokens claro/escuro. A abertura Remotion permanece em tela inteira e so abre o dialogo quando o player esta montado, sem um icone provisorio antes da composicao. Pular ou atingir o timeout impede uma abertura tardia; reducao de movimento continua respeitada.
+
+Os controles de proporcao e modo do Studio usam a superficie neutra nos itens inativos e a cor de destaque somente no selecionado, com altura minima de toque de 44 px. A galeria tem capturas em 390/1440 px nos temas Claro, Escuro e Enturma; o teste aplica Enturma como tema escuro com a paleta propria, conforme o aplicativo.
 
 ## Feed e Clips
 

@@ -115,7 +115,7 @@ test("mobile dock hides the desktop brand and the gallery opens an editable phot
     editor.getByRole("button", { name: "3:4", exact: true }),
   ).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator(".social-navigation-brand")).toBeHidden();
-  for (const width of [390, 1440]) {
+  for (const width of [1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     for (const theme of ["light", "dark", "enturma"]) {
       await page.evaluate((value) => {
