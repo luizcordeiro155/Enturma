@@ -1,0 +1,40 @@
+name: Social isolated validation workspace
+on:
+  push:
+    branches: [feat/social-3-part1]
+    paths: [.github/workflows/social-workspace-transfer.yml]
+permissions:
+  contents: read
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22.16.0'
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - name: Package source and installed dependencies without credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p /tmp/enturma-workspace
+          git archive HEAD | tar -x -C /tmp/enturma-workspace
+          cp -a node_modules /tmp/enturma-workspace/node_modules
+          for app in apps/* packages/*; do
+            if [ -d "$app/node_modules" ]; then
+              cp -a "$app/node_modules" "/tmp/enturma-workspace/$app/node_modules"
+            fi
+          done
+          printf '%s\n' "$(git rev-parse HEAD)" > /tmp/enturma-workspace/VALIDATION_BASE_SHA
+          tar -C /tmp -czf /tmp/enturma-validation-workspace.tgz enturma-workspace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: social-validation-workspace
+          path: /tmp/enturma-validation-workspace.tgz
+          retention-days: 1
+          compression-level: 0
