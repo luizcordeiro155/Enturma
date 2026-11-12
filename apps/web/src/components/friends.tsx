@@ -7,6 +7,8 @@ import { ChatImage } from "./chat-image-viewer";
 import { VoiceMessage, VoiceRecorder } from "./voice-message";
 import { MessageReceipt, type DeliveryReceipt } from "./message-receipt";
 import { useMessageReceipts } from "@/lib/use-message-receipts";
+import { SocialSharePreview } from "./social/social-share-preview";
+import { sharedSocialPostId } from "@/lib/social-stream-state";
 import { RoomInvitationPreview } from "./room-invitation-preview";
 import { isChatAtLatest } from "@/lib/chat-scroll";
 import {
@@ -1395,6 +1397,8 @@ export function Friends() {
                                   />
                                   <figcaption>GIF via KLIPY</figcaption>
                                 </figure>
+                              ) : sharedSocialPostId(m.text) ? (
+                                <SocialSharePreview text={m.text} />
                               ) : (
                                 <p>
                                   <EmojiText text={m.text} />

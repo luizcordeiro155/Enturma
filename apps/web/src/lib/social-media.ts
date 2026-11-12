@@ -1,9 +1,9 @@
 import type { SocialPost } from "./social";
 
-/** Width / height for the feed, kept between portrait 4:5 and landscape 1.91:1. */
+/** Width / height for the feed, kept between portrait 3:4 and landscape 1.91:1. */
 export function mediaAspect(width?: number, height?: number): number {
   if (!width || !height) return 1;
-  return Math.min(1.91, Math.max(0.8, width / height));
+  return Math.min(1.91, Math.max(0.75, width / height));
 }
 
 export function relativeTime(iso: string, now: Date): string {
@@ -43,6 +43,10 @@ export function storyTapZone(x: number, width: number): "back" | "forward" {
 }
 
 /** Pull to refresh: only from the top of the list, downwards, and clearly vertical. */
-export function pullRefreshes(scrollTop: number, dx: number, dy: number): boolean {
+export function pullRefreshes(
+  scrollTop: number,
+  dx: number,
+  dy: number,
+): boolean {
   return scrollTop <= 0 && dy > 70 && dy > Math.abs(dx) * 1.2;
 }

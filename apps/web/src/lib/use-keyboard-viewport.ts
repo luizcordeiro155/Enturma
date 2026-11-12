@@ -57,7 +57,7 @@ export function useKeyboardViewport() {
       // Chat composers manage their own placement above the IME.
       if (
         active.closest(
-          ".enturma-message-composer, .persistent-composer, .private-composer, .notebook-question",
+          ".enturma-message-composer, .persistent-composer, .private-composer, .notebook-question, .social-comment-form, .social-live-composer",
         )
       )
         return;

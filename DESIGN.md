@@ -33,3 +33,7 @@ Reutilizar Shell, Avatar/UserIdentity, Feedback, playMotion, RoomArtwork, RoomSh
 ## Do's and Don'ts
 
 Não criar números, seguidores, publicações ou aprovação fictícios. Não mudar páginas alheias ao Social. Não iniciar dois vídeos simultaneamente nem tornar gestos a única forma de navegação.
+
+## Studio e interacoes sociais
+
+O Studio visual, capas, comentarios com midia, compartilhamento privado e lives seguem [o contrato de release](docs/SOCIAL_STUDIO_RELEASE.md). Fotos 3:4 permanecem inteiras no feed. Abertura Social em tela inteira; logo e fontes canonicos do Enturma.

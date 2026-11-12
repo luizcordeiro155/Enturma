@@ -25,3 +25,7 @@ Não expor conteúdo privado por prévia, notificação, busca, contador, mídia
 | Scrollbar | globals.css | Tokens de tema | Scroll interno dos diálogos, Feed e Clips | Overflow a 390 e 1440 px no Playwright |
 | Toast | Regiões role=status/alert existentes | Resposta da API | Feedback inline persistente | Estados reais de erro e publicação nos E2E |
 | CRUD | SocialPosts/SocialMedia e editor | PostgreSQL, versão e rascunho IndexedDB | Confirmação de remoção e descarte | Testes de autorização, idempotência e mídia |
+
+## Studio, teclado e transmissao
+
+Ver [Studio Social](docs/SOCIAL_STUDIO_RELEASE.md). O compositor acompanha a area util do teclado sem rolar o shell; interfaces de toque mantem alternativas por teclado. Feed silencioso nao desloca a leitura e reciclagem consulta novamente as permissoes. Lives usam grants distintos para anfitriao/espectador, sem gravacao de chat.

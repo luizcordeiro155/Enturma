@@ -300,4 +300,23 @@ class SocialMediaIntegrationTest {
       media.cleanupFiles();
     }
   }
+
+  @Test
+  void customCoverRequiresOwnershipReadyVideoAndDraftAndStripsMetadata() throws Exception {
+    UUID id=UUID.randomUUID();
+    media.create(owner,new SocialMedia.Upload(id,"VIDEO",100));
+    db.jdbc.update("UPDATE social_media SET state='READY',output_key=?,thumbnail_key=?,output_bytes=100,thumbnail_bytes=1,mime='video/mp4',duration_ms=1000,width=720,height=1280 WHERE id=?",SocialMedia.key(id)+"video.mp4",SocialMedia.key(id)+"old.jpg",id);
+    objects.put(SocialMedia.key(id)+"video.mp4",new byte[100]);objects.put(SocialMedia.key(id)+"old.jpg",new byte[]{0});
+    var bytes=new ByteArrayOutputStream();
+    javax.imageio.ImageIO.write(new java.awt.image.BufferedImage(40,60,java.awt.image.BufferedImage.TYPE_INT_RGB),"jpeg",bytes);
+    assertThatThrownBy(()->media.cover(viewer,id,body(bytes.toByteArray()))).isInstanceOf(ApiException.class);
+    media.cover(owner,id,body(bytes.toByteArray()));
+    var response=new MockHttpServletResponse();media.content(owner,id,true,new MockHttpServletRequest(),response);
+    assertThat(response.getContentType()).isEqualTo("image/jpeg");assertThat(response.getContentAsByteArray().length).isGreaterThan(100);
+    assertThat(objects).doesNotContainKey(SocialMedia.key(id)+"old.jpg");
+    assertThatThrownBy(()->media.cover(owner,id,body("not a jpeg".getBytes()))).isInstanceOf(ApiException.class);
+    UUID post=UUID.randomUUID();var draft=posts.draft(owner,new SocialPosts.Draft(post,"CLIP","Capa escolhida","PUBLIC",null,0,List.of(id)));
+    posts.publish(owner,post,((Number)draft.get("version")).intValue());
+    assertThatThrownBy(()->media.cover(owner,id,body(bytes.toByteArray()))).isInstanceOf(ApiException.class);
+  }
 }

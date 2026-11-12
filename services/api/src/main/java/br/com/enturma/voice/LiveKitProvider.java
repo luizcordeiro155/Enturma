@@ -86,6 +86,17 @@ public class LiveKitProvider implements VoiceProvider {
                 List.of("microphone", "camera", "screen_share", "screen_share_audio"))));
   }
 
+  /** Live viewers receive no microphone, camera, screen-share or room-administration grant. */
+  public String liveToken(String identity,String name,String room,long expires,boolean host) {
+    if(!enabled())throw new ApiException(503,"LIVE_UNAVAILABLE","As lives ainda n\u00e3o est\u00e3o dispon\u00edveis.");
+    Map<String,Object> grants=new LinkedHashMap<>();
+    grants.put("room",room);grants.put("roomJoin",true);grants.put("canSubscribe",true);
+    grants.put("canPublish",host);grants.put("canPublishData",true);grants.put("canUpdateOwnMetadata",false);
+    grants.put("canPublishSources",host?List.of("microphone","camera","screen_share","screen_share_audio"):List.of());
+    return sign(Map.of("iss",env.getRequiredProperty("LIVEKIT_API_KEY"),"sub",identity,"name",name,
+        "nbf",Instant.now().getEpochSecond()-5,"exp",expires,"video",grants));
+  }
+
   private com.fasterxml.jackson.databind.JsonNode call(
       String method, String room, Map<String, String> body) {
     try {

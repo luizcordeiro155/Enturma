@@ -36,10 +36,9 @@ export function SocialNavigation({
         className="social-navigation-brand"
         aria-label="Enturma — voltar ao início"
       >
-        <EnturmaAppIcon size={35} />
+        <EnturmaAppIcon size={40} className="brand-app-icon" />
         <span>
           enturma<span className="dot">.</span>
-          <small>Social</small>
         </span>
       </NavigationLink>
       <nav aria-label="Ambientes do Social" className="social-navigation-items">

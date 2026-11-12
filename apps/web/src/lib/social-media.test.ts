@@ -9,8 +9,10 @@ import {
 } from "./social-media";
 
 const now = new Date("2026-11-11T12:00:00Z");
-it("limita a proporção entre 4:5 e 1,91:1", () => {
-  expect(mediaAspect(1080, 1920)).toBe(0.8);
+it("limita a proporção entre 3:4 e 1,91:1", () => {
+  expect(mediaAspect(1080, 1920)).toBe(0.75);
+  expect(mediaAspect(1080, 1440)).toBe(0.75);
+  expect(mediaAspect(1080, 1350)).toBe(0.8);
   expect(mediaAspect(1920, 800)).toBe(1.91);
   expect(mediaAspect(1080, 1080)).toBe(1);
   expect(mediaAspect()).toBe(1);
