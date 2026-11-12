@@ -371,16 +371,19 @@ html[data-theme]
   > button {
   padding: 7px 12px;
   font-size: 12px;
-  min-height: 34px;
+  min-height: 44px;
   border-radius: 8px;
+  background: var(--soft);
+  color: var(--ink);
+  border-color: var(--border);
 }
 html[data-theme]
   :is(.social-page, .social-dialog)
   :is(.studio-mode-row, .studio-aspects)
   > button[aria-pressed="true"] {
-  background: var(--accent);
-  color: var(--on-accent);
-  border-color: transparent;
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+  border-color: transparent !important;
 }
 .social-video-editor .social-editor-tools {
   min-width: 0;
