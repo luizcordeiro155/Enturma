@@ -49,6 +49,11 @@ it("replaces only the active mention and leaves email addresses and URLs alone",
     start: 3,
     end: 6,
   });
+  expect(mentionAt("Oi @luiz depois", 6)).toEqual({
+    query: "lu",
+    start: 3,
+    end: 8,
+  });
   expect(mentionAt("mail@lu", 7)).toBeNull();
   expect(mentionAt("https://site/@lu", 16)).toBeNull();
   expect(mentionAt("Olá @joão", 9)?.query).toBe("joão");

@@ -18,7 +18,13 @@ export function mentionAt(value: string, caret: number) {
     value.slice(0, caret),
   );
   return match
-    ? { query: match[1], start: caret - match[1].length - 1, end: caret }
+    ? {
+        query: match[1],
+        start: caret - match[1].length - 1,
+        end:
+          caret +
+          (/^[\p{L}\p{M}\p{N}_]*/u.exec(value.slice(caret))?.[0].length ?? 0),
+      }
     : null;
 }
 

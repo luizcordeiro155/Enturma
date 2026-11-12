@@ -155,8 +155,8 @@ it("animates the selected destination when the pager changes view", () => {
     settings: vi.fn(),
   };
   const page = render(<SocialNavigation {...props} view="feed" />);
-  const feed = screen.getByRole("button", { name: "Feed", exact: true });
-  const clips = screen.getByRole("button", { name: "Clips", exact: true });
+  const feed = screen.getByRole("button", { name: "Feed" });
+  const clips = screen.getByRole("button", { name: "Clips" });
   const feedBox = vi
     .spyOn(feed, "getBoundingClientRect")
     .mockReturnValue({ x: 100, y: 0 } as DOMRect);
