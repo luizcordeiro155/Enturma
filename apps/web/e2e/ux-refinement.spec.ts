@@ -655,9 +655,19 @@ test("private call rings in another route, connects real LiveKit peers and relea
       canvas.width = 640;
       canvas.height = 360;
       const context = canvas.getContext("2d")!;
-      context.fillStyle = "#173f36";
-      context.fillRect(0, 0, 640, 360);
-      return canvas.captureStream(10);
+      const stream = canvas.captureStream(10);
+      const track = stream.getVideoTracks()[0];
+      let frame = 0;
+      const draw = () => {
+        if (track.readyState !== "live") return;
+        context.fillStyle = "#173f36";
+        context.fillRect(0, 0, 640, 360);
+        context.fillStyle = "#d8ef79";
+        context.fillRect(frame++ % 600, 160, 40, 40);
+        requestAnimationFrame(draw);
+      };
+      draw();
+      return stream;
     };
   });
   await authenticate(a, alice);
@@ -715,6 +725,14 @@ test("private call rings in another route, connects real LiveKit peers and relea
       callee.locator('.call-member[data-camera="true"] video'),
     ).toBeVisible({ timeout: 20000 });
     await caller.getByTitle("Compartilhar tela").click();
+    const screenPicker = caller.getByRole("dialog", {
+      name: "Transmitir a tela",
+    });
+    await expect(screenPicker).toBeVisible();
+    await screenPicker
+      .getByRole("button", { name: "Escolher e transmitir", exact: true })
+      .click();
+    await expect(screenPicker).toHaveCount(0);
     await expect(caller.getByTitle("Parar compartilhamento")).toBeVisible();
     await expect(
       callee.getByRole("button", { name: "Ver transmissão", exact: true }),
@@ -724,6 +742,11 @@ test("private call rings in another route, connects real LiveKit peers and relea
       .getByRole("button", { name: "Ver transmissão", exact: true })
       .click();
     await expect(callee.locator(".call-video-stage video")).toBeVisible();
+    await expect(callee.locator(".call-video-stage video")).toHaveJSProperty(
+      "readyState",
+      4,
+      { timeout: 20000 },
+    );
     await expect(
       callee.locator('.call-member[data-camera="true"] video'),
     ).toBeVisible();
