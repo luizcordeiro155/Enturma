@@ -355,6 +355,12 @@ export function SocialLiveDialog({
           topic: TOPIC,
         },
       );
+      // Keep already-open clients receiving during rollout. Both transports
+      // carry the same message ID; receivers deduplicate before rendering.
+      await room.current.localParticipant.publishData(bytes, {
+        reliable: !heart,
+        topic: TOPIC,
+      });
       const message = decodeLiveMessage(bytes)!;
       setChat((previous) => [
         ...previous.slice(-79),
