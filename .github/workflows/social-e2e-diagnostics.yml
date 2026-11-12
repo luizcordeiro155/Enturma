@@ -1,0 +1,47 @@
+name: Social E2E failure diagnostics
+on:
+  push:
+    branches: [qa/social-photo-http-20261112]
+    paths: [.github/workflows/social-e2e-diagnostics.yml]
+permissions:
+  contents: read
+  actions: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: test-diagnostics
+          path: /tmp/diagnostics
+          github-token: ${{ github.token }}
+          run-id: 43207858515
+      - name: Print only failing-test context and media negotiation errors
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, zipfile, json
+          root = Path('/tmp/diagnostics')
+          for p in root.rglob('error-context.md'):
+              if 'social-studio-release' in str(p) or 'ux-refinement-private-call' in str(p):
+                  print('\nCONTEXT', p)
+                  print(p.read_text()[-16000:])
+          for p in root.rglob('enturma-livekit.log'):
+              lines = p.read_text().splitlines()
+              chosen = [line for line in lines if any(s in line.lower() for s in ['error', 'warn', 'track published', 'participant active', 'participant closed'])]
+              print('\nLIVEKIT ERRORS', '\n'.join(chosen[-70:]))
+          for p in root.rglob('trace.zip'):
+              if 'social-studio-release' not in str(p) and 'ux-refinement-private-call' not in str(p): continue
+              print('\nTRACE ERRORS', p)
+              with zipfile.ZipFile(p) as z:
+                  for n in z.namelist():
+                      if not n.endswith('.trace'): continue
+                      for line in z.read(n).decode().splitlines():
+                          try: row = json.loads(line)
+                          except ValueError: continue
+                          if row.get('type') == 'console' and row.get('messageType') in ['error','warning']:
+                              print(str(row.get('text',''))[:1500])
+                          if row.get('type') == 'event' and row.get('method') == 'pageError':
+                              print(str(row.get('params',{}))[:1500])
+          PY
