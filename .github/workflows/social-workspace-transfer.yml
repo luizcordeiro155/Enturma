@@ -6,35 +6,42 @@ on:
 permissions:
   contents: read
 jobs:
-  prepare:
+  java:
     runs-on: ubuntu-latest
     timeout-minutes: 12
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-java@v4
         with:
-          node-version: '22.16.0'
-          cache: npm
-      - run: npm ci --ignore-scripts
-      - name: Package source and installed dependencies without credentials
-        shell: bash
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: mvn -B -ntp -f services/api/pom.xml -DskipTests package dependency:go-offline
+      - name: Package offline public dependencies without settings or credentials
         run: |
-          set -euo pipefail
-          mkdir -p /tmp/enturma-workspace
-          git archive HEAD | tar -x -C /tmp/enturma-workspace
-          cp -a node_modules /tmp/enturma-workspace/node_modules
-          for app in apps/* packages/*; do
-            if [ -d "$app/node_modules" ]; then
-              cp -a "$app/node_modules" "/tmp/enturma-workspace/$app/node_modules"
-            fi
-          done
-          printf '%s\n' "$(git rev-parse HEAD)" > /tmp/enturma-workspace/VALIDATION_BASE_SHA
-          tar -C /tmp -czf /tmp/enturma-validation-workspace.tgz enturma-workspace
+          mkdir -p /tmp/enturma-java
+          cp -a "$HOME/.m2/repository" /tmp/enturma-java/repository
+          cp -a /usr/share/apache-maven-* /tmp/enturma-java/ 2>/dev/null || cp -a /usr/share/maven /tmp/enturma-java/maven
+          tar -C /tmp -czf /tmp/enturma-java.tgz enturma-java
       - uses: actions/upload-artifact@v4
         with:
-          name: social-validation-workspace
-          path: /tmp/enturma-validation-workspace.tgz
+          name: social-java-runtime
+          path: /tmp/enturma-java.tgz
+          retention-days: 1
+          compression-level: 0
+  database:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Package disposable Debian PostgreSQL binaries, no database or credentials
+        run: |
+          mkdir -p /tmp/enturma-pg
+          docker run --rm --entrypoint sh -v /tmp/enturma-pg:/out postgres:15-bookworm -c 'tar -C / -czf /out/postgres-runtime.tgz usr/lib/postgresql/15 usr/share/postgresql/15 usr/lib/x86_64-linux-gnu'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: social-postgres-runtime
+          path: /tmp/enturma-pg/postgres-runtime.tgz
           retention-days: 1
           compression-level: 0
