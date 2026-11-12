@@ -1,0 +1,118 @@
+name: Isolated photo HTTP contract
+on:
+  push:
+    branches: [qa/social-photo-http-20261112]
+    paths: [.github/workflows/social-photo-http-probe.yml]
+permissions:
+  contents: read
+jobs:
+  photo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    strategy:
+      fail-fast: false
+      matrix:
+        source: [07f87a9ce8f3e684d83012b713c031791549b01d, 6625d6fd1c5c55aca640c82aa95b59df3d65eb8b]
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: enturma
+          POSTGRES_PASSWORD: ci-ephemeral-only
+          POSTGRES_DB: enturma_test
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd "pg_isready -U enturma -d enturma_test"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/enturma_test
+      TEST_DATABASE_USERNAME: enturma
+      TEST_DATABASE_PASSWORD: ci-ephemeral-only
+      DATABASE_PASSWORD: ci-ephemeral-only
+      SOCIAL_TEST_FFMPEG: 'true'
+      CHAT_ACCOUNT_MASTER_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ matrix.source }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: sudo apt-get update -qq && sudo apt-get install -y ffmpeg fonts-dejavu-core
+      - name: Exercise real HTTP filters and JSON conversion with synthetic users and PNG
+        shell: bash
+        run: |
+          cat > services/api/src/test/java/br/com/enturma/social/SocialGalleryHttpProbeTest.java <<'JAVA'
+          package br.com.enturma.social;
+          import static org.assertj.core.api.Assertions.*;
+          import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+          import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+          import java.io.*;
+          import java.util.*;
+          import javax.imageio.ImageIO;
+          import java.awt.image.BufferedImage;
+          import org.junit.jupiter.api.Test;
+          import org.springframework.beans.factory.annotation.Autowired;
+          import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+          import org.springframework.test.web.servlet.MockMvc;
+          import org.springframework.test.web.servlet.ResultMatcher;
+          import com.fasterxml.jackson.databind.ObjectMapper;
+
+          @AutoConfigureMockMvc
+          class SocialGalleryHttpProbeTest extends SocialMediaIntegrationTest {
+            @Autowired MockMvc mvc;
+            @Autowired ObjectMapper json;
+            private String studentToken() {
+              String tag = UUID.randomUUID().toString().substring(0,8);
+              var credentials = auth.register("Photo HTTP", "photo_"+tag,
+                tag+"@example.test", "password-12345", "isolated-http-test");
+              var actor = auth.authenticate(credentials.accessToken()).orElseThrow();
+              db.jdbc.update("UPDATE academic_identity SET status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE user_id=?",actor.id());
+              return "Bearer "+credentials.accessToken();
+            }
+            private ResultMatcher ok(String phase) {
+              return result -> assertThat(result.getResponse().getStatus())
+                .withFailMessage(phase+": HTTP "+result.getResponse().getStatus()+" "+result.getResponse().getContentAsString())
+                .isEqualTo(200);
+            }
+            @Test void authenticatedGalleryImagePublishesAndIsVisibleToAnotherStudent() throws Exception {
+              String author = studentToken(), reader = studentToken();
+              var buffer = new ByteArrayOutputStream();
+              ImageIO.write(new BufferedImage(120,160,BufferedImage.TYPE_INT_RGB),"png",buffer);
+              byte[] image = buffer.toByteArray();
+              String mediaId = UUID.randomUUID().toString(), postId = UUID.randomUUID().toString();
+              mvc.perform(post("/api/v1/social/media").header("Authorization",author)
+                .contentType("application/json").content(json.writeValueAsBytes(Map.of("id",mediaId,"kind","IMAGE","size",image.length))))
+                .andExpect(ok("create"));
+              mvc.perform(put("/api/v1/social/media/"+mediaId+"/parts/0").header("Authorization",author)
+                .contentType("application/octet-stream").content(image)).andExpect(ok("upload"));
+              String recipe = "{\"recipe\":{\"segments\":[{\"start\":0,\"end\":1}],\"zoom\":1,\"x\":0.5,\"y\":0.5,\"rotation\":0,\"volume\":1,\"mute\":false,\"cover\":0,\"captions\":[],\"aspect\":\"4:5\",\"filter\":\"ORIGINAL\",\"speed\":1}}";
+              mvc.perform(post("/api/v1/social/media/"+mediaId+"/export").header("Authorization",author)
+                .contentType("application/json").content(recipe)).andExpect(ok("export"));
+              var draft = mvc.perform(put("/api/v1/social/drafts").header("Authorization",author)
+                .contentType("application/json").content(json.writeValueAsBytes(Map.of("id",postId,"kind","POST","body","Photo HTTP","visibility","PUBLIC","version",0,"mediaIds",List.of(mediaId)))))
+                .andExpect(ok("draft")).andReturn();
+              media.processOne();
+              mvc.perform(get("/api/v1/social/media/"+mediaId).header("Authorization",author))
+                .andExpect(ok("processed")).andExpect(jsonPath("$.state").value("READY"));
+              int version = json.readTree(draft.getResponse().getContentAsString()).path("version").asInt();
+              mvc.perform(post("/api/v1/social/posts/"+postId+"/publish").header("Authorization",author)
+                .contentType("application/json").content("{\"version\":"+version+"}"))
+                .andExpect(ok("publish"));
+              var published = mvc.perform(get("/api/v1/social/media/"+mediaId+"/content").header("Authorization",reader))
+                .andExpect(ok("read as second student")).andExpect(content().contentType("image/jpeg")).andReturn();
+              assertThat(ImageIO.read(new ByteArrayInputStream(published.getResponse().getContentAsByteArray()))).isNotNull();
+              System.out.println("PHOTO_HTTP_PIPELINE_CONFIRMED: upload -> JSON export -> draft -> FFmpeg -> publish -> authorized image read");
+            }
+          }
+          JAVA
+          mvn -B -ntp -f services/api/pom.xml -Dtest=SocialGalleryHttpProbeTest test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: photo-http-${{ matrix.source }}
+          path: services/api/target/surefire-reports
+          retention-days: 3
