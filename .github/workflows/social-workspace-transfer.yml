@@ -6,42 +6,17 @@ on:
 permissions:
   contents: read
 jobs:
-  java:
+  livekit-runtime:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 5
     steps:
-      - uses: actions/checkout@v4
-        with:
-          persist-credentials: false
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: maven
-      - run: mvn -B -ntp -f services/api/pom.xml -DskipTests package dependency:go-offline
-      - name: Package offline public dependencies without settings or credentials
+      - name: Fetch and verify official test runtime
         run: |
-          mkdir -p /tmp/enturma-java
-          cp -a "$HOME/.m2/repository" /tmp/enturma-java/repository
-          cp -a /usr/share/apache-maven-* /tmp/enturma-java/ 2>/dev/null || cp -a /usr/share/maven /tmp/enturma-java/maven
-          tar -C /tmp -czf /tmp/enturma-java.tgz enturma-java
+          curl --fail --location --retry 2 'https://github.com/livekit/livekit/releases/download/v1.13.11/livekit_1.13.11_linux_amd64.tar.gz' --output /tmp/livekit-runtime.tgz
+          echo '1e9ee90ca301e1842b2887fc77cb122759756a9c8aeb4334ee91de3325ec43fb  /tmp/livekit-runtime.tgz' | sha256sum --check
       - uses: actions/upload-artifact@v4
         with:
-          name: social-java-runtime
-          path: /tmp/enturma-java.tgz
-          retention-days: 1
-          compression-level: 0
-  database:
-    runs-on: ubuntu-latest
-    timeout-minutes: 10
-    steps:
-      - name: Package disposable Debian PostgreSQL binaries, no database or credentials
-        run: |
-          mkdir -p /tmp/enturma-pg
-          docker run --rm --entrypoint sh -v /tmp/enturma-pg:/out postgres:15-bookworm -c 'tar -C / -czf /out/postgres-runtime.tgz usr/lib/postgresql/15 usr/share/postgresql/15 usr/lib/x86_64-linux-gnu'
-      - uses: actions/upload-artifact@v4
-        with:
-          name: social-postgres-runtime
-          path: /tmp/enturma-pg/postgres-runtime.tgz
+          name: social-livekit-runtime
+          path: /tmp/livekit-runtime.tgz
           retention-days: 1
           compression-level: 0
