@@ -95,9 +95,11 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
     "/friends",
   );
   await expect(
-    page.locator(".social-header").getByRole("link", { name: "Mensagens" }),
-  ).toHaveAttribute("href", "/friends");
-  // Three width bands: bottom dock, icon-only rail, labelled rail.
+    page
+      .locator(".social-header")
+      .getByRole("button", { name: "Explorar", exact: true }),
+  ).toBeVisible();
+  // The approved Figma layout uses a bottom dock and a 76px icon rail.
   for (const width of [390, 820, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     const nav = page.locator(".social-navigation");
@@ -110,7 +112,7 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
       .last()
       .boundingBox();
     // The compact rail keeps the label for assistive technology but clips it visually.
-    expect(label!.width > 2).toBe(width <= 760 || width >= 1200);
+    expect(label!.width > 2).toBe(width <= 760);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth + 1,
@@ -679,7 +681,7 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
                   body: "Uma descoberta no feed geral",
                   media: [],
                 },
-                posts[0],
+                posts[2],
               ]
             : posts,
         nextCursor: "",
@@ -692,6 +694,11 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
       return route.fulfill({ status: 204 });
     return route.fulfill({ contentType: "video/mp4", body: bytes });
   });
+  await page.route("**/api/backend/social/posts/*", (route) => {
+    const id = new URL(route.request().url()).pathname.split("/").at(-1);
+    const item = posts.find((post) => post.id === id);
+    return item ? route.fulfill({ json: item }) : route.fallback();
+  });
   await page.goto("/social");
   const navigation = page.getByRole("navigation", {
     name: "Ambientes do Social",
@@ -702,8 +709,53 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   const logo = page.locator(".social-navigation-brand");
   await logo.hover();
   await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
-  await navigation.getByRole("button", { name: "Clips", exact: true }).click();
+  for (const width of [390, 1366, 1920]) {
+    const height = width === 1366 ? 768 : 844;
+    await page.setViewportSize({ width, height });
+    await expect
+      .poll(async () => {
+        const box = (await page.locator(".social-feed-scroll").boundingBox())!;
+        return Math.abs(width - box.x - box.width);
+      })
+      .toBeLessThanOrEqual(1);
+    const video = feed.locator("video");
+    await expect(video).toHaveCSS("object-fit", "contain");
+    expect((await video.boundingBox())!.height).toBeLessThanOrEqual(
+      Math.min(640, height - 180) + 1,
+    );
+    expect(
+      (await feed.locator('[data-kind="CLIP"]').boundingBox())!.width,
+    ).toBeLessThanOrEqual(501);
+    await page.screenshot({
+      path: info.outputPath(`social-feed-video-${width}.png`),
+    });
+  }
+  const scroll = page.locator(".social-feed-scroll");
+  await scroll.evaluate((el) => {
+    el.scrollTop = 180;
+  });
+  const before = await scroll.evaluate((el) => el.scrollTop);
+  await feed.getByRole("link", { name: "Assistir nos Clips" }).click();
+  await expect(page).toHaveURL(new RegExp(`post=${posts[2].id}`));
+  await expect(
+    navigation.getByRole("button", { name: "Clips", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
   const clips = page.locator(".social-clips");
+  await expect(clips.locator('[data-clip-index="0"]')).toHaveAttribute(
+    "data-clip-id",
+    posts[2].id,
+  );
+  await expect(clips.locator(`[data-clip-id="${posts[2].id}"]`)).toHaveCount(1);
+  await page.goBack();
+  await expect(
+    navigation.getByRole("button", { name: "Feed", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  expect(await scroll.evaluate((el) => el.scrollTop)).toBe(before);
+  // Opening the same Clip again starts there, rather than resuming another item.
+  await feed.getByRole("link", { name: "Assistir nos Clips" }).click();
+  await expect(
+    navigation.getByRole("button", { name: "Clips", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
   const playing = () =>
     clips
       .locator("video")

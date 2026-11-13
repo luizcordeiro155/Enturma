@@ -1475,3 +1475,52 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
   html[data-theme] dialog.social-dialog-sheet { border-radius: 24px 24px 0 0; background: var(--surface); }
   html[data-theme] :is(.social-dialog-panel, .social-dialog-sheet) > header { background: var(--surface); }
 }
+
+/* Keep the scroll owner at the window edge; constrain only the reading content. */
+.social-page {
+  max-width: none;
+  padding-inline: 0;
+  padding-bottom: 0;
+}
+.social-page .social-feed-view {
+  max-width: none;
+}
+.social-page .social-header {
+  width: calc(100% - 32px);
+}
+.social-feed-scroll {
+  scrollbar-width: auto;
+  scrollbar-gutter: stable;
+}
+.social-feed-layout {
+  padding-inline: 16px;
+}
+.social-feed-aside > footer {
+  display: block;
+  padding: 0;
+}
+/* All feed videos retain the same card width and show the complete frame. */
+:is(.social-page, .social-dialog) .social-post .social-carousel[data-has-video="true"] {
+  max-height: min(640px, max(220px, calc(100dvh - 180px)));
+}
+:is(.social-page, .social-dialog) .social-post .social-carousel video {
+  object-fit: contain;
+}
+.social-carousel-track > figure {
+  position: relative;
+  min-width: 0;
+}
+.social-feed-clip-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.social-feed-clip-link:focus-visible {
+  outline-offset: -4px;
+}
+html[data-theme] .social-media-sound {
+  z-index: 2;
+}
+@media (max-width: 760px) {
+  .social-feed-layout { padding-inline: 0; }
+}

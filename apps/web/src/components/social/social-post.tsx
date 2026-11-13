@@ -432,6 +432,11 @@ export function SocialPost({
             media={item.media}
             authorName={item.name}
             autoplay={autoplay}
+            clipHref={
+              item.kind === "CLIP"
+                ? `/social?post=${encodeURIComponent(item.id)}`
+                : undefined
+            }
           />
           {burst > 0 && (
             <Heart

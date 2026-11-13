@@ -1,10 +1,16 @@
 import "@testing-library/jest-dom/vitest";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor,
+} from "@testing-library/react";
 import type { ComponentProps } from "react";
 import type { SocialPost as Post } from "@/lib/social";
 import { SocialPost } from "./social-post";
-import { post, stubIntersectionObserver } from "./social-test-kit";
+import { post, stubIntersectionObserver, video } from "./social-test-kit";
 
 const socialWrite = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/social", async (original) => ({
@@ -14,6 +20,9 @@ vi.mock("@/lib/social", async (original) => ({
 vi.mock("@/lib/api", () => ({ api: vi.fn(), post: vi.fn() }));
 vi.mock("@/lib/send-room-invitation", () => ({ preparePrivateShare: vi.fn() }));
 vi.mock("../user-identity", () => ({ Avatar: () => <span>AS</span> }));
+vi.mock("../navigation-link", () => ({
+  NavigationLink: (props: ComponentProps<"a">) => <a {...props} />,
+}));
 vi.mock("../forum-links", () => ({
   ConfirmedLink: (props: ComponentProps<"a"> & { label: string }) => (
     <a href={props.href}>{props.label}</a>
@@ -38,7 +47,9 @@ function doubleTap(element: Element) {
 beforeEach(() => {
   stubIntersectionObserver();
   changed.mockReset();
-  socialWrite.mockReset().mockResolvedValue(post("p1", { mine: ["LIKE"], likes: 1 }));
+  socialWrite
+    .mockReset()
+    .mockResolvedValue(post("p1", { mine: ["LIKE"], likes: 1 }));
   HTMLDialogElement.prototype.showModal = function () {
     this.setAttribute("open", "");
   };
@@ -110,4 +121,17 @@ it("mantém os nomes acessíveis das ações", () => {
     "Opções da publicação",
   ])
     expect(screen.getByRole("button", { name })).toBeVisible();
+});
+
+it("abre o Clip selecionado pelo vídeo sem confundir o botão de som", () => {
+  renderPost({ kind: "CLIP", media: [video("v1")] });
+  expect(
+    screen.getByRole("link", { name: "Assistir nos Clips" }),
+  ).toHaveAttribute("href", "/social?post=p1");
+  const sound = screen.getByRole("button", { name: "Ativar som do vídeo" });
+  fireEvent.click(sound);
+  expect(
+    screen.getByRole("button", { name: "Silenciar vídeo" }),
+  ).toHaveAttribute("aria-pressed", "true");
+  expect(socialWrite).not.toHaveBeenCalled();
 });

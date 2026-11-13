@@ -15,8 +15,9 @@ export function useSocialStream(
   query: string,
   active: boolean,
   prependFresh?: () => boolean,
+  initialItems: Post[] = [],
 ) {
-  const [items, setItems] = useState<Post[]>([]),
+  const [items, setItems] = useState<Post[]>(initialItems),
     [cursor, setCursor] = useState<string | null>(null);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");

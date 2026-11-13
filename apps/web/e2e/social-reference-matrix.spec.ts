@@ -208,7 +208,7 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
       expect((await profile.boundingBox())!.width).toBeGreaterThan(1100);
     expect(
       await profile
-        .locator(".social-profile-grid")
+        .locator(".social-profile-grid:visible")
         .evaluate(
           (el) => getComputedStyle(el).gridTemplateColumns.split(" ").length,
         ),

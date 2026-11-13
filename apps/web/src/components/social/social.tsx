@@ -145,6 +145,11 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     [refresh, setRefresh] = useState(0),
     [highlight, setHighlight] = useState<SocialView | null>(null);
   const [explore, setExplore] = useState(false);
+  const [clipEntry, setClipEntry] = useState<{
+    post: Post;
+    sequence: number;
+  }>();
+  const routedClip = useRef(false);
   const [searchOpen, setSearchOpen] = useState(false),
     [upload, setUpload] = useState<SocialEditorProgress>({
       state: "idle",
@@ -184,11 +189,39 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     return () => clearTimeout(timer);
   }, [incomingPerson, incomingSettings, incomingQuery]);
   useEffect(() => {
-    if (!incomingPost || !/^[a-f0-9-]{36}$/i.test(incomingPost)) return;
+    if (!incomingPost) {
+      if (routedClip.current) {
+        routedClip.current = false;
+        const timer = setTimeout(() => setView("feed"), 0);
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+    if (!/^[a-f0-9-]{36}$/i.test(incomingPost)) return;
     let alive = true;
     void api<Post>(`/social/posts/${incomingPost}`, { cache: "no-store" })
       .then((post) => {
-        if (alive) setDetail(post);
+        if (!alive) return;
+        setError("");
+        if (post.kind === "CLIP") {
+          // Revalidate access before seeding the selected Clip into the paged feed.
+          routedClip.current = true;
+          setClipEntry((previous) => ({
+            post,
+            sequence: (previous?.sequence ?? 0) + 1,
+          }));
+          setDetail(undefined);
+          setPerson(null);
+          setExplore(false);
+          setSettings(false);
+          setOpened((previous) =>
+            previous.includes("clips") ? previous : [...previous, "clips"],
+          );
+          setView("clips");
+          document
+            .querySelectorAll<HTMLVideoElement>(".social-page video")
+            .forEach((video) => video.pause());
+        } else setDetail(post);
       })
       .catch((cause) => {
         if (alive) setError(cause.message);
@@ -198,6 +231,16 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     };
   }, [incomingPost]);
   function select(next: SocialView, contentKind?: typeof kind) {
+    if (incomingPost && next !== "clips") {
+      routedClip.current = false;
+      const url = new URL(window.location.href);
+      url.searchParams.delete("post");
+      window.history.replaceState(
+        null,
+        "",
+        url.pathname + url.search + url.hash,
+      );
+    }
     setView(next);
     setOpened((previous) =>
       previous.includes(next) ? previous : [...previous, next],
@@ -450,6 +493,8 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
               ) : page === "clips" ? (
                 opened.includes("clips") && (
                   <SocialClips
+                    key={clipEntry?.sequence ?? 0}
+                    initialClip={clipEntry?.post}
                     active={view === "clips" && !person && !settings && !detail}
                     me={ready.me.id}
                     autoplay={prefs.autoplay}

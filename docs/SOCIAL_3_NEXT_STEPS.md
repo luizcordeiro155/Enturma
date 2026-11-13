@@ -1,5 +1,16 @@
 # Enturma Social 3.0 — retomada operacional
 
+
+## Checkpoint — ajuste de Feed e entrada em Clips, 13/11/2026
+
+Continuação da PR #151 a partir de `5d5b1d9`. Corrigidos o limite de largura do scroll owner (barra na borda da janela), enquadramento completo dos vídeos com altura limitada no Feed, rodapé lateral e entrada pelo vídeo selecionado. O link canônico `/social?post=ID` revalida a publicação antes de abrir Clips; o item entra primeiro, sem duplicação, mantendo o cursor e o retorno ao mesmo Feed. O player de Clips mantém o enquadramento `contain` existente.
+
+Teste de regressão do link falhou antes da correção e passou depois. Suíte Web anterior deste incremento: 305 testes aprovados; três testes adicionais de entrada, acesso negado e retorno também passaram. TypeScript/lint/build executados; repetir o typecheck após adicionar o teste de entrada. E2E ampliado para 390/1366/1920px, altura do vídeo, barra na borda, seleção fora da primeira posição do ranking e Voltar. Corrigidas expectativas antigas da CI: Mensagens migrou para o dock, rail desktop é compacto, avatar desktop é 140px e apenas a grade visível deve ser medida.
+
+Validação visual local bloqueada: Browser sem contexto conectado; navegador remoto não alcança localhost; Chromium local falha em socket e a política rejeita permissões elevadas. Usar a CI e seus screenshots, sem declarar inspeção visual local. Vercel ainda não conectada nesta sessão; integração sugerida. Não integrar/promover até CI final e controle do gate API V72/V73. Nenhum deploy novo confirmado.
+
+Próxima ação: enviar o incremento na branch existente, acompanhar a CI do novo SHA, inspecionar screenshots, corrigir eventuais falhas; então executar API → Web → distribuidores conforme `SOCIAL_3_RELEASE_READINESS.md`.
+
 ## Checkpoint vigente — histórico de painéis, 13/11/2026
 
 CI `43369840229` do SHA `416fbcd`: Java, auditoria, lint, TypeScript, unitários, builds, Android e Windows aprovados; 73/74 E2E aprovados. As 160 capturas da matriz concluíram, inclusive largura desktop >1100px. A falha remanescente revelou bug real no histórico compartilhado: substituir Opções por Coleções fechava também Explorar/visualizador. Corrigido em `useOverlayHistory`: somente o painel superior atende Voltar; travessia causada por fechamento não fecha ancestrais. Três testes reproduziram a falha antes e passaram depois; 12 testes focados de histórico/chat aprovados, TypeScript e lint aprovados. Nenhum teste removido ou limite de API relaxado.

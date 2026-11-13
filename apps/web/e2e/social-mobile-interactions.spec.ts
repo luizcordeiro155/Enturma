@@ -181,7 +181,7 @@ test("Social: mentions, keyboard, swipes and compact profile/inbox", async ({
         nameBox.x + nameBox.width <= buttons.x + 1,
     ).toBe(true);
     const avatar = (await author.locator(".identity-avatar").boundingBox())!;
-    expect(avatar.width).toBeLessThanOrEqual(88);
+    expect(avatar.width).toBeLessThanOrEqual(width >= 1200 ? 140 : 88);
     expect(Math.abs(avatar.width - avatar.height)).toBeLessThan(1);
     await page.screenshot({
       path: info.outputPath(`social-profile-fixed-${width}.png`),

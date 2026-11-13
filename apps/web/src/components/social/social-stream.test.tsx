@@ -24,3 +24,38 @@ it("reconciles new publications without moving the existing queue or losing pagi
   );
   expect(result.current.cursor).toBe("older");
 });
+
+it("starts with the selected Clip and deduplicates it while keeping cursor pagination", async () => {
+  const selected = post("selected", { kind: "CLIP" });
+  api
+    .mockReset()
+    .mockResolvedValueOnce({
+      items: [post("ranked-first"), selected],
+      nextCursor: "next",
+    })
+    .mockResolvedValueOnce({ items: [post("next-page")], nextCursor: "" });
+  const { result } = renderHook(() =>
+    useSocialStream("kind=CLIP", true, undefined, [selected]),
+  );
+  expect(result.current.items[0].id).toBe("selected");
+  await waitFor(() => expect(result.current.cursor).toBe("next"));
+  expect(result.current.items.map((row) => row.id)).toEqual([
+    "selected",
+    "ranked-first",
+  ]);
+  await act(async () => {
+    await result.current.load();
+  });
+  expect(result.current.items.map((row) => row.id)).toEqual([
+    "selected",
+    "ranked-first",
+    "next-page",
+  ]);
+  expect(api).toHaveBeenLastCalledWith("/social/feed?kind=CLIP&cursor=next", {
+    cache: "no-store",
+  });
+  await act(async () => {
+    result.current.change({ ...selected, mine: ["HIDE"] });
+  });
+  expect(result.current.items[0].mine).toEqual(["HIDE"]);
+});

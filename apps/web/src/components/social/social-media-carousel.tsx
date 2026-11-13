@@ -5,13 +5,16 @@ import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import { mediaUrl, type SocialMedia } from "@/lib/social";
 import { mediaAspect } from "@/lib/social-media";
 import { useAutoplayInView } from "./use-autoplay-in-view";
+import { NavigationLink } from "../navigation-link";
 
 function FeedVideo({
   media,
   autoplay,
+  clipHref,
 }: {
   media: SocialMedia;
   autoplay: boolean;
+  clipHref?: string;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
@@ -37,6 +40,14 @@ function FeedVideo({
           else video.pause();
         }}
       />
+      {clipHref && (
+        <NavigationLink
+          href={clipHref}
+          scroll={false}
+          className="social-feed-clip-link"
+          aria-label="Assistir nos Clips"
+        />
+      )}
       {autoplay && (
         <button
           type="button"
@@ -63,10 +74,12 @@ export function SocialMediaCarousel({
   media,
   authorName,
   autoplay,
+  clipHref,
 }: {
   media: SocialMedia[];
   authorName: string;
   autoplay: boolean;
+  clipHref?: string;
 }) {
   const track = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -86,6 +99,7 @@ export function SocialMediaCarousel({
     <div
       className="social-carousel"
       data-single={!many}
+      data-has-video={media.some((item) => item.kind === "VIDEO")}
       data-social-gesture={many ? "ignore" : undefined}
       aria-label="Mídias da publicação"
       style={
@@ -115,7 +129,7 @@ export function SocialMediaCarousel({
         {media.map((item, position) => (
           <figure key={item.id}>
             {item.kind === "VIDEO" ? (
-              <FeedVideo media={item} autoplay={autoplay} />
+              <FeedVideo media={item} autoplay={autoplay} clipHref={clipHref} />
             ) : (
               <img
                 src={mediaUrl(item.id)}
