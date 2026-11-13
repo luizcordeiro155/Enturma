@@ -1503,9 +1503,10 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
 :is(.social-page, .social-dialog) .social-post .social-carousel[data-has-video="true"] {
   max-height: min(640px, max(220px, calc(100dvh - 180px)));
 }
-:is(.social-page, .social-dialog) .social-post .social-carousel video {
-  /* Percentage height can resolve against an indefinite aspect-ratio frame,
-     causing tall videos to overflow even when the carousel is capped. */
+.social-page .social-post:not(.social-post-clip) .social-carousel[data-has-video="true"] video,
+.social-dialog .social-post .social-carousel[data-has-video="true"] video {
+  /* Override the earlier high-specificity height:100%/max-height:none rule.
+     Tall portrait videos must not enlarge beyond the available viewport. */
   height: auto;
   max-height: min(640px, max(220px, calc(100dvh - 180px)));
   object-fit: contain;
