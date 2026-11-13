@@ -64,6 +64,24 @@ class SocialIntegrationTest {
   }
 
   @Test
+  void publicReleaseProbeRequiresBothMigrationsAndProtectedTables() throws Exception {
+    mvc.perform(get("/api/v1/public/social-release"))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
+        .andExpect(content().json("{\"release\":\"social-figma-2026-11-13\",\"ready\":true}", true));
+    db.jdbc.execute("ALTER TABLE social_collection DISABLE ROW LEVEL SECURITY");
+    mvc.perform(get("/api/v1/public/social-release"))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.ready").value(false));
+    db.jdbc.execute("ALTER TABLE social_collection ENABLE ROW LEVEL SECURITY");
+    db.jdbc.update("UPDATE flyway_schema_history SET success=false WHERE version='72'");
+    mvc.perform(get("/api/v1/public/social-release"))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.ready").value(false));
+    // The test transaction rolls back the simulated incomplete rollout.
+  }
+
+  @Test
   void namedCollectionsArePrivateIdempotentAndRespectLostPostAccess() {
     UUID post = publish(a, "POST", "Ideia para estudar"), collection = UUID.randomUUID();
     collections.save(b, collection, new SocialCollections.Name("Estudos"));

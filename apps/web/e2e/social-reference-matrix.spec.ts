@@ -155,18 +155,20 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
     ).toBe(true);
     const dock = await page.locator(".social-navigation").boundingBox();
     expect(dock!.width).toBeLessThanOrEqual(width);
-    for (const item of await nav.locator("button,a").all()) {
+    for (const item of await nav.locator("button:visible,a:visible").all()) {
       const box = await item.boundingBox();
       expect(box!.width).toBeGreaterThanOrEqual(44);
       expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
     }
+    expect(await nav.locator("button:visible,a:visible").count()).toBe(width < 761 ? 5 : 6);
+    if (width >= 761) expect(dock!.width).toBe(76);
     await captureThemes("feed", width);
     await scroller.evaluate((el) => {
       el.scrollTop = 360;
     });
     const position = await scroller.evaluate((el) => el.scrollTop);
     expect(position).toBeGreaterThan(0);
-    await nav.getByRole("button", { name: "Explorar", exact: true }).click();
+    await page.getByRole("button", { name: "Explorar", exact: true }).click();
     const explore = page.getByRole("dialog", {
       name: "Explorar",
       exact: true,
@@ -191,6 +193,7 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
     ).toBe(true);
     if (width >= 1200)
       expect((await profile.boundingBox())!.width).toBeGreaterThan(1100);
+    expect(await profile.locator(".social-profile-grid").evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(3);
     await captureThemes("profile", width);
     await profile.getByRole("button", { name: "Fechar", exact: true }).click();
     await nav.getByRole("button", { name: "Criar", exact: true }).click();
@@ -204,7 +207,7 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
     ).toBe(true);
     await captureThemes("create", width);
   }
-  await nav.getByRole("button", { name: "Explorar", exact: true }).click();
+  await page.getByRole("button", { name: "Explorar", exact: true }).click();
   const explore = page.getByRole("dialog", { name: "Explorar", exact: true });
   await explore.getByRole("searchbox").fill(`#matriz${tag}`);
   await explore.getByRole("button", { name: "Pesquisar no Explorar" }).click();
@@ -218,7 +221,7 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
   await nav.getByRole("button", { name: "Feed", exact: true }).click();
   await page.setViewportSize({ width: 390, height: 844 });
   // Find our real publication through discovery, independent of feed ranking.
-  await nav.getByRole("button", { name: "Explorar", exact: true }).click();
+  await page.getByRole("button", { name: "Explorar", exact: true }).click();
   await explore.getByRole("searchbox").fill(`#matriz${tag}`);
   await explore.getByRole("button", { name: "Pesquisar no Explorar" }).click();
   await expect(explore.locator(".social-profile-cell")).toHaveCount(8);
@@ -281,5 +284,7 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
     .getByRole("button", { name: "Fechar", exact: true })
     .click();
   await expect(profile.locator(".social-profile-cell:visible")).toHaveCount(1);
+  // Await in-flight artwork routes before Playwright disposes the request context.
+  await page.unrouteAll({ behavior: "wait" });
   expect(errors).toEqual([]);
 });

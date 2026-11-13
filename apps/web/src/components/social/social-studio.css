@@ -351,7 +351,7 @@ html[data-theme] .social-navigation-brand {
     display: flex;
   }
 }
-@media (min-width: 761px) and (max-width: 1199px) {
+@media (min-width: 761px) {
   html[data-theme] .social-navigation-brand > span {
     display: none;
   }
@@ -1411,12 +1411,13 @@ html[data-theme] .social-explore-search .icon-control { background: transparent;
 html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-profile-grid-square .social-profile-cell { aspect-ratio: 3 / 4; }
 @media (min-width: 1200px) {
   html[data-theme] dialog.social-dialog-profile { width: min(1240px, calc(100vw - 64px)); max-width: calc(100vw - 64px); }
-  :is(.social-dialog-profile, .social-dialog-explore) .social-profile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .social-dialog-explore .social-profile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .social-dialog-profile .social-profile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 900px; width: 100%; margin-inline: auto; }
   .social-profile-intro { width: min(728px, 100%); margin-inline: auto; }
-  .social-profile-intro .identity-avatar { width: 150px; height: 150px; }
+  html[data-theme] .social-profile-intro .identity-avatar { width: 140px; height: 140px; min-width: 140px; min-height: 140px; flex-basis: 140px; }
 }
 @media (max-width: 760px) {
-  .social-navigation-items { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  .social-navigation-items { grid-template-columns: repeat(5, minmax(0, 1fr)); }
   html[data-theme] .social-navigation-items > :is(button, a) { min-width: 0; padding-inline: 2px; }
   html[data-theme] dialog.social-dialog-explore {
     inset: var(--social-viewport-top, 0px) 0 auto;
@@ -1435,3 +1436,42 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
 .social-collection-list button { overflow-wrap: anywhere; }
 .social-collections-open { align-self: start; margin: 12px; }
 .social-collections .social-profile-grid-scroll { min-height: 260px; }
+
+/* Approved Figma board: rail, reading column and real connection sidebar. */
+.social-feed-layout { width: min(100%, 920px); margin-inline: auto; }
+.social-feed-reading { min-width: 0; }
+.social-feed-aside { display: none; }
+.social-mobile-explore { display: none !important; }
+@media (min-width: 761px) {
+  .social-navigation { background: var(--bg); }
+  .social-navigation-brand { margin-bottom: 64px; }
+  .social-navigation-footer p { display: none; }
+  .social-navigation-items > :is(button, a) { min-height: 48px; }
+  .social-page .social-stories { max-width: 580px; margin-inline: auto; border: 0; }
+  .social-page .social-feed-toolbar { max-width: 580px; margin-inline: auto; }
+  .social-page .social-story-ring { width: 64px; height: 64px; padding: 3px; }
+  .social-page .social-story-ring .avatar { width: 54px; height: 54px; }
+}
+@media (min-width: 1200px) {
+  .social-feed-layout { display: grid; grid-template-columns: minmax(0, 580px) 290px; gap: 50px; align-items: start; }
+  .social-page .social-header { max-width: 920px; }
+  .social-feed-aside { display: grid; gap: 24px; padding: 16px 0; position: sticky; top: 0; }
+  .social-feed-aside > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .social-feed-aside h2 { font-size: 14px; margin: 0; }
+  .social-feed-aside p { font-size: 13px; line-height: 1.5; margin: 0; color: var(--muted); }
+  .social-feed-aside ul { list-style: none; display: grid; gap: 20px; margin: 0; padding: 0; }
+  .social-feed-aside li { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-width: 0; }
+  .social-feed-aside .social-author { min-width: 0; }
+  .social-feed-aside .social-author > span:last-child { min-width: 0; overflow: hidden; }
+  .social-feed-aside .social-author :is(strong, small) { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .social-feed-aside > footer { color: var(--muted); font-size: 12px; line-height: 1.8; }
+  .social-feed-aside > footer a { color: inherit; }
+}
+@media (max-width: 760px) {
+  .social-navigation-items > .social-navigation-explore { display: none !important; }
+  .social-mobile-explore { display: grid !important; }
+  html[data-theme] dialog.social-dialog-panel,
+  html[data-theme] dialog.social-dialog-sheet { border-radius: 24px 24px 0 0; background: var(--surface); }
+  :is(.social-dialog-panel, .social-dialog-sheet)::before { content: ""; display: block; flex: none; width: 36px; height: 4px; margin: 10px auto 2px; background: var(--muted); border-radius: 4px; }
+  html[data-theme] :is(.social-dialog-panel, .social-dialog-sheet) > header { background: var(--surface); }
+}

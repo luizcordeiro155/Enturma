@@ -2,7 +2,6 @@
 import { useEffect, useRef } from "react";
 import { playMotion } from "@/lib/motion";
 import {
-  Aperture,
   Film,
   Plus,
   Home,
@@ -16,7 +15,7 @@ import { Avatar } from "../user-identity";
 import { EnturmaAppIcon } from "../enturma-app-icon";
 
 const destinations = {
-  feed: { label: "Feed", icon: Aperture },
+  feed: { label: "Feed", icon: Home },
   clips: { label: "Clips", icon: Film },
   create: { label: "Criar", icon: Plus },
 };
@@ -107,7 +106,7 @@ export function SocialNavigation({
             </button>
           );
         })}
-        <button type="button" onClick={explore} title="Explorar">
+        <button className="social-navigation-explore" type="button" onClick={explore} title="Explorar">
           <span className="social-nav-glyph">
             <Search size={24} />
           </span>
