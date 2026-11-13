@@ -68,3 +68,10 @@ Se alterar API, rodar Maven/Java21 e integração com `enturma_social3_test` iso
 Nenhuma nova credencial deve ser solicitada sem verificar configuração existente de modo sigiloso. Configuração R2/FFmpeg/LiveKit/flags em produção ainda precisa de confirmação. Não ativar cobrança nova, trocar credenciais nem executar migração destrutiva. Não usar REA. Não afirmar que Android/Windows foram instalados/testados fisicamente com base somente em export/build.
 
 Antes de encerrar ou transferir contexto, atualizar estes documentos com próximo comando exato, Git, testes, bloqueios e estado real da publicação.
+
+## Checkpoint prioritário — retomada e correção de altura, 13/11/2026
+
+CI 43373088044 (c25c2a2) aprovada. Recuperados por fast-forward todos os commits posteriores até 9c81906, preservando premium-audit.json. PR #150 segue incorporada na #151; nenhum merge em main nesta etapa. CI 43472337435 de 9c81906: 73/75 E2E aprovados, duas falhas de altura de vídeo. Reproduzida localmente em Chromium isolado: frame de 565px e vídeo de 888,875px. Causa: min-height:auto intrínseco do vídeo como item de grid. Corrigido no responsável com min-height:0; E2E existente de CSS real passou nas oito resoluções/zoom, sem relaxar asserções. Chromium isolado funciona nesta sessão; não houve Computer Use nem reinicialização da API bloqueada.
+
+Próxima tarefa: acompanhar CI do commit desta correção, inspecionar evidências visuais, integrar apenas após checks finais; aguardar probe público API/V72/V73 antes de promover Web e atualizar distribuidores oficiais. Produção ainda não atualizada nesta retomada.
+

@@ -1517,6 +1517,8 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
 .social-dialog .social-post .social-carousel[data-has-video="true"] video {
   width: 100%;
   height: 100%;
+  /* A grid item's intrinsic video height must not override the frame's cap. */
+  min-height: 0;
   max-height: 100%;
   object-fit: contain;
 }

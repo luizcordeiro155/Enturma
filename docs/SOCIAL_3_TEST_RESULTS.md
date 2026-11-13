@@ -30,3 +30,10 @@ O startup local da API/SMTP foi rejeitado pela revisão automática com `blocked
 Configuração JUnit local confirmada: usuário `enturma`, senha do arquivo local protegido, `JAVA_TOOL_OPTIONS=-Djdk.net.unixdomain.tmpdir=C:\Temp\enturma-java`. Uma repetição usou usuário incorreto e outra omitiu a opção Windows, falhando no startup; ambas foram corrigidas sem alteração de credenciais. A execução final passou às 01:50 de 13/11.
 
 Próxima prova: concluir o E2E da CI, baixar `interface-evidence`/diagnósticos, inspecionar as capturas e corrigir falhas; enviar coleções e executar todos os checks no novo SHA.
+
+## Checkpoint prioritário — retomada e correção de altura, 13/11/2026
+
+CI 43373088044 (c25c2a2) aprovada. Recuperados por fast-forward todos os commits posteriores até 9c81906, preservando premium-audit.json. PR #150 segue incorporada na #151; nenhum merge em main nesta etapa. CI 43472337435 de 9c81906: 73/75 E2E aprovados, duas falhas de altura de vídeo. Reproduzida localmente em Chromium isolado: frame de 565px e vídeo de 888,875px. Causa: min-height:auto intrínseco do vídeo como item de grid. Corrigido no responsável com min-height:0; E2E existente de CSS real passou nas oito resoluções/zoom, sem relaxar asserções. Chromium isolado funciona nesta sessão; não houve Computer Use nem reinicialização da API bloqueada.
+
+Próxima tarefa: acompanhar CI do commit desta correção, inspecionar evidências visuais, integrar apenas após checks finais; aguardar probe público API/V72/V73 antes de promover Web e atualizar distribuidores oficiais. Produção ainda não atualizada nesta retomada.
+

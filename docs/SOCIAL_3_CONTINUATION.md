@@ -168,3 +168,10 @@ Inspecionado em 13/11/2026: branch `codex/social-instagram-parity`, HEAD `e1c2d3
 Ler este arquivo, próximos passos, Git e contratos `README.md`, `DESIGN.md`, `UX-CONTRACT.md`, `docs/SOCIAL_2_IMPLEMENTATION.md`, `docs/STATUS.md` e AGENTS aplicáveis. `docs/SOCIAL_STUDIO_RELEASE.md` não foi encontrado anteriormente; verificar sem inventar seu conteúdo. `apps/web/AGENTS.md` exige consultar documentação instalada do Next antes de alterações pertinentes.
 
 Preservar todas as alterações existentes. Não usar reset hard/clean. Não inserir segredos, conteúdo privado, logs sensíveis ou imagens de terceiros em commits. Diferenciar implementado, testado, habilitado, publicado e testado fisicamente. Atualizar estes dois documentos após correções, testes, commits, bloqueios e release e antes de encerrar. Continuar desenvolvimento após checkpoint; não substituir implementação por relatório.
+
+## Checkpoint prioritário — retomada e correção de altura, 13/11/2026
+
+CI 43373088044 (c25c2a2) aprovada. Recuperados por fast-forward todos os commits posteriores até 9c81906, preservando premium-audit.json. PR #150 segue incorporada na #151; nenhum merge em main nesta etapa. CI 43472337435 de 9c81906: 73/75 E2E aprovados, duas falhas de altura de vídeo. Reproduzida localmente em Chromium isolado: frame de 565px e vídeo de 888,875px. Causa: min-height:auto intrínseco do vídeo como item de grid. Corrigido no responsável com min-height:0; E2E existente de CSS real passou nas oito resoluções/zoom, sem relaxar asserções. Chromium isolado funciona nesta sessão; não houve Computer Use nem reinicialização da API bloqueada.
+
+Próxima tarefa: acompanhar CI do commit desta correção, inspecionar evidências visuais, integrar apenas após checks finais; aguardar probe público API/V72/V73 antes de promover Web e atualizar distribuidores oficiais. Produção ainda não atualizada nesta retomada.
+
