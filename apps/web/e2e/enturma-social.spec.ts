@@ -13,7 +13,12 @@ test("feed video CSS preserves the full frame at mobile and desktop sizes", asyn
   const styles = ["social.css", "social-3.css", "social-3-continuation.css", "social-studio.css"]
     .map((file) => readFileSync(`src/components/social/${file}`, "utf8"))
     .join("\n");
-  for (const [width, height] of [[390, 844], [1366, 596], [1366, 768], [1920, 1080]]) {
+  // Browser zoom changes the CSS viewport. Include the effective viewports of
+  // a 1348x596 window at 80%, 100%, 125%, 150% and 200%, plus phone/wide screens.
+  for (const [width, height] of [
+    [1685, 745], [1348, 596], [1078, 477], [899, 397], [674, 298],
+    [390, 844], [1366, 768], [1920, 1080],
+  ]) {
     await page.setViewportSize({ width, height });
     await page.setContent(`<style>${styles}</style>
       <main class="social-page"><article class="social-post" style="width:min(500px,100%)">
@@ -25,9 +30,11 @@ test("feed video CSS preserves the full frame at mobile and desktop sizes", asyn
     await expect(video).toHaveCSS("object-fit", "contain", { timeout: 1000 });
     const frame = (await page.locator(".social-carousel").boundingBox())!;
     const bounds = (await video.boundingBox())!;
-    expect(bounds.height).toBeLessThanOrEqual(Math.min(640, height - 180) + 1);
+    expect(bounds.height).toBeLessThanOrEqual(Math.min(640, Math.max(220, height - 180)) + 1);
     expect(bounds.width).toBeLessThanOrEqual(501);
     expect(bounds.x).toBeGreaterThanOrEqual(frame.x);
+    expect(bounds.y).toBeGreaterThanOrEqual(frame.y);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(frame.x + frame.width + 1);
     expect(bounds.y + bounds.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
   }
 });
