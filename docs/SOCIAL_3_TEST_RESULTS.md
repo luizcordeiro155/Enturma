@@ -1,5 +1,11 @@
 # Social 3 — resultados de testes
 
+## Checkpoint vigente — histórico de painéis, 13/11/2026
+
+CI `43369840229` do SHA `416fbcd`: Java, auditoria, lint, TypeScript, unitários, builds, Android e Windows aprovados; 73/74 E2E aprovados. As 160 capturas da matriz concluíram, inclusive largura desktop >1100px. A falha remanescente revelou bug real no histórico compartilhado: substituir Opções por Coleções fechava também Explorar/visualizador. Corrigido em `useOverlayHistory`: somente o painel superior atende Voltar; travessia causada por fechamento não fecha ancestrais. Três testes reproduziram a falha antes e passaram depois; 12 testes focados de histórico/chat aprovados, TypeScript e lint aprovados. Nenhum teste removido ou limite de API relaxado.
+
+Próximo passo: acompanhar CI do próximo commit, concluir E2E de criação/renomeação/exclusão de coleção, inspecionar capturas, integrar #151 preservando #150 e publicar. Produção ainda permanece na base anterior; V72/V73 não aplicadas. `premium-audit.json` permanece intocado.
+
 ## Incremento após `8af2e3c`
 
 - CI `43366672237`: 72/74 E2E aprovados; matriz HTTP429 e medida de Clips durante transição. Java, lint, TypeScript, unitários, build, export Expo, compilação Android e segurança do instalador Windows passaram nessa CI. Correções aguardam nova CI.

@@ -1,5 +1,11 @@
 # Enturma Social 3.0 — checkpoint de continuidade
 
+## Checkpoint vigente — histórico de painéis, 13/11/2026
+
+CI `43369840229` do SHA `416fbcd`: Java, auditoria, lint, TypeScript, unitários, builds, Android e Windows aprovados; 73/74 E2E aprovados. As 160 capturas da matriz concluíram, inclusive largura desktop >1100px. A falha remanescente revelou bug real no histórico compartilhado: substituir Opções por Coleções fechava também Explorar/visualizador. Corrigido em `useOverlayHistory`: somente o painel superior atende Voltar; travessia causada por fechamento não fecha ancestrais. Três testes reproduziram a falha antes e passaram depois; 12 testes focados de histórico/chat aprovados, TypeScript e lint aprovados. Nenhum teste removido ou limite de API relaxado.
+
+Próximo passo: acompanhar CI do próximo commit, concluir E2E de criação/renomeação/exclusão de coleção, inspecionar capturas, integrar #151 preservando #150 e publicar. Produção ainda permanece na base anterior; V72/V73 não aplicadas. `premium-audit.json` permanece intocado.
+
 ## Checkpoint vigente — correções da CI em 13/11/2026
 
 Branch `codex/social-instagram-parity`; coleções privadas commitadas em `8af2e3c`. PRs #150/#151 confirmadas abertas Draft, sem merge; #150 preservada no histórico da #151. CI `43366672237` terminou com 72 E2E aprovados e 2 falhas: matriz atingiu HTTP 429 após reabrir telas por tema; teste de Clips capturou posição durante a transição de breakpoint. Correções: capturar quatro temas por montagem, aguardar animação antes da medida. Capturas também revelaram max-width herdado de 600px em Explorar/Perfil; corrigido e coberto por asserção desktop >1100px.

@@ -1,5 +1,11 @@
 # Social 3 — progresso verificável
 
+## Checkpoint vigente — histórico de painéis, 13/11/2026
+
+CI `43369840229` do SHA `416fbcd`: Java, auditoria, lint, TypeScript, unitários, builds, Android e Windows aprovados; 73/74 E2E aprovados. As 160 capturas da matriz concluíram, inclusive largura desktop >1100px. A falha remanescente revelou bug real no histórico compartilhado: substituir Opções por Coleções fechava também Explorar/visualizador. Corrigido em `useOverlayHistory`: somente o painel superior atende Voltar; travessia causada por fechamento não fecha ancestrais. Três testes reproduziram a falha antes e passaram depois; 12 testes focados de histórico/chat aprovados, TypeScript e lint aprovados. Nenhum teste removido ou limite de API relaxado.
+
+Próximo passo: acompanhar CI do próximo commit, concluir E2E de criação/renomeação/exclusão de coleção, inspecionar capturas, integrar #151 preservando #150 e publicar. Produção ainda permanece na base anterior; V72/V73 não aplicadas. `premium-audit.json` permanece intocado.
+
 ## Complemento: exportação, proteção do banco e geometria
 
 V73 habilita RLS default-deny e revoga PUBLIC em tabelas V71/V72, seguindo V62/V69. API confiável dona das tabelas mantém autorização por objeto; nenhum FORCE RLS, exclusão ou alteração de dados. Caso runtime restrito tenha sido configurado pelo operador, confirmar grants/policies antes do release. Rollback mantém tabelas aditivas e dados.
