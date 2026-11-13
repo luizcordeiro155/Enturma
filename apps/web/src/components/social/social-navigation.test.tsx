@@ -104,6 +104,7 @@ it("Social uses the existing selection handlers, persisted order and explicit ex
       me={{ id: "me", name: "Eu", username: "eu" }}
       profile={profile}
       settings={vi.fn()}
+      explore={vi.fn()}
     />,
   );
   const nav = screen.getByRole("navigation", { name: "Ambientes do Social" });
@@ -121,9 +122,12 @@ it("Social uses the existing selection handlers, persisted order and explicit ex
   expect(
     screen.getByRole("link", { name: "Início do Enturma" }),
   ).toHaveAttribute("href", "/home");
-  // Messages moved to the Feed header; the dock keeps only the Social places.
-  expect(within(nav).queryByRole("link", { name: "Mensagens" })).toBeNull();
-  expect(within(nav).getAllByRole("button")).toHaveLength(4);
+  expect(within(nav).getByRole("link", { name: "Mensagens" })).toHaveAttribute(
+    "href",
+    "/friends",
+  );
+  expect(within(nav).getByRole("button", { name: "Explorar" })).toBeVisible();
+  expect(within(nav).getAllByRole("button")).toHaveLength(5);
   expect(within(nav).getByRole("button", { name: "Criar" })).toHaveAttribute(
     "title",
     "Criar (Alt + 3)",
@@ -153,6 +157,7 @@ it("animates the selected destination when the pager changes view", () => {
     me: { id: "me", name: "Eu", username: "eu" },
     profile: vi.fn(),
     settings: vi.fn(),
+    explore: vi.fn(),
   };
   const page = render(<SocialNavigation {...props} view="feed" />);
   const feed = screen.getByRole("button", { name: "Feed" });

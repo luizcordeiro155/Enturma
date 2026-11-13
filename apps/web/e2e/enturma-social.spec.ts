@@ -90,7 +90,10 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
   await expect(
     social.getByRole("button", { name: "Meu perfil social" }),
   ).toBeVisible();
-  await expect(social.getByRole("link", { name: "Mensagens" })).toHaveCount(0);
+  await expect(social.getByRole("link", { name: "Mensagens" })).toHaveAttribute(
+    "href",
+    "/friends",
+  );
   await expect(
     page.locator(".social-header").getByRole("link", { name: "Mensagens" }),
   ).toHaveAttribute("href", "/friends");

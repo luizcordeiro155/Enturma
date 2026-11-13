@@ -1,7 +1,15 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { playMotion } from "@/lib/motion";
-import { Aperture, Film, Plus, Home, Settings2 } from "lucide-react";
+import {
+  Aperture,
+  Film,
+  Plus,
+  Home,
+  Settings2,
+  Search,
+  Send,
+} from "lucide-react";
 import type { SocialPerson, SocialView } from "@/lib/social";
 import { NavigationLink } from "../navigation-link";
 import { Avatar } from "../user-identity";
@@ -22,6 +30,7 @@ export function SocialNavigation({
   me,
   profile,
   settings,
+  explore,
 }: {
   view: SocialView;
   order: SocialView[];
@@ -30,6 +39,7 @@ export function SocialNavigation({
   me: SocialPerson;
   profile: () => void;
   settings: () => void;
+  explore: () => void;
 }) {
   const navigation = useRef<HTMLElement>(null);
   const previous = useRef<SocialView>(view);
@@ -97,6 +107,18 @@ export function SocialNavigation({
             </button>
           );
         })}
+        <button type="button" onClick={explore} title="Explorar">
+          <span className="social-nav-glyph">
+            <Search size={24} />
+          </span>
+          <span>Explorar</span>
+        </button>
+        <NavigationLink href="/friends" title="Mensagens">
+          <span className="social-nav-glyph">
+            <Send size={24} />
+          </span>
+          <span>Mensagens</span>
+        </NavigationLink>
         <button
           type="button"
           onClick={profile}

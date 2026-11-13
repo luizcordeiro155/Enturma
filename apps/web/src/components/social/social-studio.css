@@ -1374,3 +1374,54 @@ html[data-theme] .social-comment-like[aria-pressed="true"] {
     margin-inline: auto;
   }
 }
+
+/* Reference-led discovery and profile grids share the authorized thumbnail UI. */
+html[data-theme] dialog.social-dialog-explore {
+  position: fixed;
+  inset: 16px;
+  width: min(1240px, calc(100vw - 32px));
+  height: calc(100dvh - 32px);
+  max-height: var(--social-viewport, 100dvh);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: 16px;
+}
+html[data-theme] dialog.social-dialog-explore[open] { display: flex; flex-direction: column; }
+.social-dialog-explore > header { flex: none; }
+.social-explore-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  width: min(694px, calc(100% - 32px));
+  margin: 12px auto 20px;
+  padding: 0 12px;
+  min-height: 44px;
+  border-radius: 24px;
+  background: var(--soft);
+}
+.social-explore-search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); padding: 10px 0; }
+html[data-theme] .social-explore-search .icon-control { background: transparent; border: 0; flex: none; }
+.social-explore-people { flex: none; max-height: 180px; overflow-y: auto; padding: 0 16px 12px; display: flex; flex-wrap: wrap; gap: 16px; }
+.social-explore-people h3, .social-explore-people [role=alert] { flex-basis: 100%; margin: 0; font-size: 14px; }
+html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-profile-grid-square .social-profile-cell { aspect-ratio: 3 / 4; }
+@media (min-width: 1200px) {
+  html[data-theme] dialog.social-dialog-profile { width: min(1240px, calc(100vw - 64px)); }
+  :is(.social-dialog-profile, .social-dialog-explore) .social-profile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .social-profile-intro { width: min(728px, 100%); margin-inline: auto; }
+  .social-profile-intro .identity-avatar { width: 150px; height: 150px; }
+}
+@media (max-width: 760px) {
+  .social-navigation-items { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  html[data-theme] .social-navigation-items > :is(button, a) { min-width: 0; padding-inline: 2px; }
+  html[data-theme] dialog.social-dialog-explore {
+    inset: var(--social-viewport-top, 0px) 0 auto;
+    width: 100%; max-width: 100%; height: var(--social-viewport, 100dvh);
+    margin: 0; border: 0; border-radius: 0;
+  }
+  .social-dialog-explore > header { padding-top: max(12px, env(safe-area-inset-top, 0px), var(--native-safe-top, 0px)); }
+  .social-explore-search { margin-block: 8px 16px; }
+}

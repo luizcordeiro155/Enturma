@@ -87,3 +87,39 @@ it("puxar para atualizar só recarrega com a página no topo", async () => {
   pull();
   await waitFor(() => expect(feedCalls()).toBe(2));
 });
+
+it("não antepõe novas publicações quando o contêiner do Feed está em leitura", async () => {
+  render(
+    <div data-social-scroller data-testid="page">
+      {stream}
+    </div>,
+  );
+  await screen.findByText("Ana Souza");
+  screen.getByTestId("page").scrollTop = 120;
+  api.mockResolvedValue({
+    items: [post("p2"), post("p1")],
+    nextCursor: "next",
+    snapshot: "s",
+  });
+  fireEvent(window, new Event("enturma-social_changed"));
+  await waitFor(() =>
+    expect(document.querySelectorAll(".social-post")).toHaveLength(2),
+  );
+  expect(
+    Array.from(document.querySelectorAll(".social-post")).map((node) =>
+      node.getAttribute("data-post"),
+    ),
+  ).toEqual(["p1", "p2"]);
+  expect(screen.getByTestId("page").scrollTop).toBe(120);
+});
+
+it("cancela atualização por gesto interrompido ou com vários toques", async () => {
+  render(stream);
+  await screen.findByText("Ana Souza");
+  fireEvent.touchStart(list(), { touches: [point(200, 200)] });
+  fireEvent.touchCancel(list());
+  fireEvent.touchEnd(list(), { changedTouches: [point(200, 340)] });
+  fireEvent.touchStart(list(), { touches: [point(200, 200), point(220, 200)] });
+  fireEvent.touchEnd(list(), { changedTouches: [point(200, 340)] });
+  expect(feedCalls()).toBe(1);
+});

@@ -152,6 +152,9 @@ export function SocialStream({
   autoplay?: boolean;
 }) {
   const panel = useRef<HTMLDivElement>(null);
+  // Stories and tabs scroll with the Feed; other lists own their scroll area.
+  const scroller = () =>
+    panel.current?.closest<HTMLElement>("[data-social-scroller]") ?? panel.current;
   const stream = useSocialStream(
       query,
       active,
@@ -161,11 +164,6 @@ export function SocialStream({
     latest = useRef(stream.load),
     pull = useRef<{ x: number; y: number } | null>(null);
   const [newContent, setNewContent] = useState(false);
-  // In the Feed the whole page scrolls (Stories and tabs travel with the list);
-  // elsewhere, such as a profile, the list is its own scroll area.
-  const scroller = () =>
-    panel.current?.closest<HTMLElement>("[data-social-scroller]") ??
-    panel.current;
   useEffect(() => {
     latest.current = stream.load;
   }, [stream.load]);

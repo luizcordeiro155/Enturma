@@ -35,6 +35,7 @@ import { SocialPager } from "./social-pager";
 import { SocialOpening } from "./social-opening";
 import { useSocialViewport } from "./use-social-viewport";
 import { SocialLiveProvider } from "./social-live-context";
+import { SocialExplore } from "./social-explore";
 type Ready = {
   me: SocialPerson & { role: string };
   preferences: SocialPreferences;
@@ -143,6 +144,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     [people, setPeople] = useState<SocialPerson[]>([]),
     [refresh, setRefresh] = useState(0),
     [highlight, setHighlight] = useState<SocialView | null>(null);
+  const [explore, setExplore] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false),
     [upload, setUpload] = useState<SocialEditorProgress>({
       state: "idle",
@@ -257,6 +259,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
           me={ready.me}
           profile={() => setPerson(ready.me.id)}
           settings={() => setSettings(true)}
+          explore={() => setExplore(true)}
         />
       }
     >
@@ -492,6 +495,13 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                 </button>
               )}
             </div>
+          )}
+          {explore && (
+            <SocialExplore
+              me={ready.me.id}
+              person={setPerson}
+              close={() => setExplore(false)}
+            />
           )}
           {person && (
             <SocialProfile
