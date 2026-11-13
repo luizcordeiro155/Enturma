@@ -187,6 +187,11 @@ html[data-theme] .social-header-actions > a:hover {
   width: 100%;
   height: 100%;
   max-height: none;
+  object-fit: contain;
+}
+/* Image crops fill the carousel; videos must always keep their entire frame. */
+.social-page .social-post:not(.social-post-clip) .social-carousel img,
+.social-dialog .social-carousel img {
   object-fit: cover;
 }
 html[data-theme] .social-carousel-arrow,

@@ -6,6 +6,32 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
+
+// Exercise the real stylesheet cascade without requiring an API or account.
+// A lower-specificity contain rule must not leave feed videos using cover.
+test("feed video CSS preserves the full frame at mobile and desktop sizes", async ({ page }) => {
+  const styles = ["social.css", "social-3.css", "social-3-continuation.css", "social-studio.css"]
+    .map((file) => readFileSync(`src/components/social/${file}`, "utf8"))
+    .join("\n");
+  for (const [width, height] of [[390, 844], [1366, 596], [1366, 768], [1920, 1080]]) {
+    await page.setViewportSize({ width, height });
+    await page.setContent(`<style>${styles}</style>
+      <main class="social-page"><article class="social-post" style="width:min(500px,100%)">
+        <div class="social-post-media"><div class="social-carousel" data-single="true" data-has-video="true" style="--social-media-aspect:.75">
+          <div class="social-carousel-track"><figure><video width="180" height="320"></video></figure></div>
+        </div></div>
+      </article></main>`);
+    const video = page.locator("video");
+    await expect(video).toHaveCSS("object-fit", "contain", { timeout: 1000 });
+    const frame = (await page.locator(".social-carousel").boundingBox())!;
+    const bounds = (await video.boundingBox())!;
+    expect(bounds.height).toBeLessThanOrEqual(Math.min(640, height - 180) + 1);
+    expect(bounds.width).toBeLessThanOrEqual(501);
+    expect(bounds.x).toBeGreaterThanOrEqual(frame.x);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
+  }
+});
+
 async function student(request: APIRequestContext, name: string) {
   const tag = randomUUID().slice(0, 8);
   const response = await request.post(`${backend}/api/v1/auth/register`, {

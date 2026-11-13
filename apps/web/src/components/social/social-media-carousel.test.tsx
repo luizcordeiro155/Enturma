@@ -2,6 +2,7 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { SocialMediaCarousel } from "./social-media-carousel";
+import { readFileSync } from "node:fs";
 import {
   img,
   intersect,
@@ -58,6 +59,29 @@ it("as setas e os pontos trocam a mídia selecionada", () => {
 it("com autoplay desligado o vídeo não recebe o observador", () => {
   render(<SocialMediaCarousel media={[video("v")]} authorName="Ana" autoplay={false} />);
   expect(Observer).not.toHaveBeenCalled();
+});
+it("a cascata real preserva o quadro inteiro dos vídeos no feed e no modal", () => {
+  const style = document.createElement("style");
+  style.textContent = ["social.css", "social-3.css", "social-3-continuation.css", "social-studio.css"]
+    .map((file) => readFileSync(`src/components/social/${file}`, "utf8"))
+    .join("\n");
+  document.head.append(style);
+  try {
+    const { rerender } = render(
+      <main className="social-page"><article className="social-post">
+        <SocialMediaCarousel media={[video("v")]} authorName="Ana" autoplay={false} />
+      </article></main>,
+    );
+    expect(getComputedStyle(screen.getByTestId("post-video")).objectFit).toBe("contain");
+    rerender(
+      <div className="social-dialog"><article className="social-post">
+        <SocialMediaCarousel media={[video("v")]} authorName="Ana" autoplay={false} />
+      </article></div>,
+    );
+    expect(getComputedStyle(screen.getByTestId("post-video")).objectFit).toBe("contain");
+  } finally {
+    style.remove();
+  }
 });
 it("vídeo 60% visível toca sem som e pausa ao sair", () => {
   const play = vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
