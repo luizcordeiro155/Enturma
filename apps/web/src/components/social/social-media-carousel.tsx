@@ -6,7 +6,13 @@ import { mediaUrl, type SocialMedia } from "@/lib/social";
 import { mediaAspect } from "@/lib/social-media";
 import { useAutoplayInView } from "./use-autoplay-in-view";
 
-function FeedVideo({ media, autoplay }: { media: SocialMedia; autoplay: boolean }) {
+function FeedVideo({
+  media,
+  autoplay,
+}: {
+  media: SocialMedia;
+  autoplay: boolean;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
   useAutoplayInView(ref, autoplay);
@@ -20,6 +26,7 @@ function FeedVideo({ media, autoplay }: { media: SocialMedia; autoplay: boolean 
         muted={muted}
         loop
         playsInline
+        draggable={false}
         preload="none"
         // Without autoplay the person starts playback, so the native controls stay.
         controls={!autoplay}
@@ -78,11 +85,15 @@ export function SocialMediaCarousel({
   return (
     <div
       className="social-carousel"
+      data-single={!many}
       data-social-gesture={many ? "ignore" : undefined}
       aria-label="Mídias da publicação"
       style={
         {
-          "--social-media-aspect": mediaAspect(media[0]?.width, media[0]?.height),
+          "--social-media-aspect": mediaAspect(
+            media[0]?.width,
+            media[0]?.height,
+          ),
         } as React.CSSProperties
       }
     >

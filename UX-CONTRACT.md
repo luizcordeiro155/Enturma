@@ -32,3 +32,8 @@ No mobile, arrastar para a esquerda abre Clips e para a direita abre Criar a par
 ## Studio, teclado e transmissao
 
 Ver [Studio Social](docs/SOCIAL_STUDIO_RELEASE.md). O compositor acompanha a area util do teclado sem rolar o shell; interfaces de toque mantem alternativas por teclado. Feed silencioso nao desloca a leitura e reciclagem consulta novamente as permissoes. Lives usam grants distintos para anfitriao/espectador, sem gravacao de chat.
+
+
+## Feed geral e revisão de publicação
+
+`SocialPosts` já define `kind=ALL` como POST e CLIP, com as mesmas permissões, filtros, busca e ranking. `Social` usa esse contrato no feed geral; o perfil mantém coleções e filtros próprios. `SocialDraftPreview` só lê a mídia privada do rascunho, revoga URLs locais e mostra a capa/quadro selecionado sem reaplicar cortes à capa importada ou à mídia já exportada. Publicar permanece explícito e confirmado pela API. A prévia de reprodução não pode ser arrastada; o recorte na etapa Editar permanece intencional e acessível por controles alternativos. A lista de seguidores conserva todas as ações e o nome acessível completo, mesmo quando o texto visual precisa de reticências.

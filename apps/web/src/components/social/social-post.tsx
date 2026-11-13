@@ -408,7 +408,7 @@ export function SocialPost({
     </div>
   );
   return (
-    <article className="social-post" data-post={item.id}>
+    <article className="social-post" data-post={item.id} data-kind={item.kind}>
       <header>
         <SocialAuthor user={postPerson(item)} open={person} />
         <button

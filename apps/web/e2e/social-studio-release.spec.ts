@@ -187,7 +187,7 @@ test("Studio visual: long video, drag trimming, timed text, cover and theme snap
   await expect(
     editor.getByText("Capa selecionada: capa.png", { exact: false }),
   ).toBeVisible();
-  for (const width of [1440, 390]) {
+  for (const width of [1366, 1440, 390]) {
     await page.setViewportSize({ width, height: 900 });
     await editor.scrollIntoViewIfNeeded();
     for (const theme of ["light", "dark"]) {
@@ -205,6 +205,35 @@ test("Studio visual: long video, drag trimming, timed text, cover and theme snap
       ).toBe(true);
     }
   }
+  await page.getByRole("button", { name: "Avançar", exact: true }).click();
+  await expect(
+    page.getByRole("img", { name: "Prévia da publicação", exact: true }),
+  ).toBeVisible();
+  await expect(page.locator(".social-draft-preview img")).toHaveJSProperty(
+    "naturalWidth",
+    1,
+  );
+  for (const width of [390, 1366, 1920]) {
+    await page.setViewportSize({ width, height: 768 });
+    const preview = (await page
+      .locator(".social-create-preview")
+      .boundingBox())!;
+    const captionField = (await page
+      .locator(".social-caption-field")
+      .boundingBox())!;
+    if (width > 760)
+      expect(preview.x + preview.width).toBeLessThanOrEqual(captionField.x);
+    else expect(preview.y + preview.height).toBeLessThanOrEqual(captionField.y);
+    expect(
+      await page
+        .locator(".social-editor")
+        .evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBe(true);
+    await page.screenshot({
+      path: info.outputPath(`social-publish-review-${width}.png`),
+    });
+  }
+  await page.getByRole("button", { name: "Voltar", exact: true }).click();
   // A page switch must preserve edits, text and the imported cover.
   const nav = page.getByRole("navigation", { name: "Ambientes do Social" });
   await nav.getByRole("button", { name: "Feed", exact: true }).click();

@@ -77,7 +77,7 @@ html[data-theme] .social-navigation-footer > :is(button, a) {
   cursor: pointer;
   position: relative;
 }
-html[data-theme] .social-navigation :is(button, a):hover {
+html[data-theme] .social-navigation :is(button, a):not(.social-navigation-brand):hover {
   background: var(--soft);
 }
 html[data-theme] .social-navigation-items [aria-current="page"] {

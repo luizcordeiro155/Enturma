@@ -188,6 +188,36 @@ test("Social: mentions, keyboard, swipes and compact profile/inbox", async ({
     });
   }
   await profile.getByRole("button", { name: "Fechar", exact: true }).click();
+  await page.getByRole("button", { name: "Meu perfil social" }).click();
+  await profile.getByRole("button", { name: /Seguidores/ }).click();
+  const followers = page.getByRole("dialog", {
+    name: "Seguidores",
+    exact: true,
+  });
+  const row = followers.locator(".social-person-row").first();
+  await expect(row.locator("strong")).toHaveText(
+    "Pessoa com nome longo para conferir o perfil",
+  );
+  await expect(
+    row.getByRole("button", { name: "Remover seguidor" }),
+  ).toBeVisible();
+  for (const width of [360, 390, 1366]) {
+    await page.setViewportSize({ width, height: 768 });
+    const name = (await row.locator("strong").boundingBox())!;
+    const actions = (await row
+      .locator(".social-person-actions")
+      .boundingBox())!;
+    expect(name.width).toBeGreaterThan(150);
+    expect(actions.y).toBeGreaterThanOrEqual(name.y + name.height);
+    expect(
+      await row.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBe(true);
+    await page.screenshot({
+      path: info.outputPath(`social-followers-${width}.png`),
+    });
+  }
+  await followers.getByRole("button", { name: "Fechar", exact: true }).click();
+  await profile.getByRole("button", { name: "Fechar", exact: true }).click();
   await page.getByRole("button", { name: /^Notificações/ }).click();
   const inbox = page.getByRole("dialog", { name: "Sua caixa de entrada" });
   await expect(inbox.locator(".notification-item").first()).toBeVisible();

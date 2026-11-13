@@ -430,59 +430,61 @@ export function SocialProfile({
             {people.map((user) => (
               <div className="social-person-row" key={user.id}>
                 <SocialAuthor user={user} open={person} />
-                {connections === "requests" ? (
-                  <>
-                    {[true, false].map((accept) => (
-                      <button
-                        key={String(accept)}
-                        className={accept ? undefined : "secondary"}
-                        disabled={busy}
-                        onClick={() =>
-                          void perform(
-                            () =>
-                              socialWrite(`/people/${user.id}/request`, {
-                                active: accept,
-                              }),
-                            () =>
-                              setPeople((previous) =>
-                                previous.filter(
-                                  (value) => value.id !== user.id,
+                <div className="social-person-actions">
+                  {connections === "requests" ? (
+                    <>
+                      {[true, false].map((accept) => (
+                        <button
+                          key={String(accept)}
+                          className={accept ? undefined : "secondary"}
+                          disabled={busy}
+                          onClick={() =>
+                            void perform(
+                              () =>
+                                socialWrite(`/people/${user.id}/request`, {
+                                  active: accept,
+                                }),
+                              () =>
+                                setPeople((previous) =>
+                                  previous.filter(
+                                    (value) => value.id !== user.id,
+                                  ),
                                 ),
-                              ),
-                          )
-                        }
-                      >
-                        {accept ? "Aceitar" : "Recusar"}
-                      </button>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    <FollowButton id={user.id} me={me} />
-                    {me === id && connections === "followers" && (
-                      <button
-                        className="text-button"
-                        disabled={busy}
-                        onClick={() =>
-                          void perform(
-                            () =>
-                              socialWrite(`/people/${user.id}/request`, {
-                                active: false,
-                              }),
-                            () =>
-                              setPeople((previous) =>
-                                previous.filter(
-                                  (value) => value.id !== user.id,
+                            )
+                          }
+                        >
+                          {accept ? "Aceitar" : "Recusar"}
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <FollowButton id={user.id} me={me} />
+                      {me === id && connections === "followers" && (
+                        <button
+                          className="text-button"
+                          disabled={busy}
+                          onClick={() =>
+                            void perform(
+                              () =>
+                                socialWrite(`/people/${user.id}/request`, {
+                                  active: false,
+                                }),
+                              () =>
+                                setPeople((previous) =>
+                                  previous.filter(
+                                    (value) => value.id !== user.id,
+                                  ),
                                 ),
-                              ),
-                          )
-                        }
-                      >
-                        Remover seguidor
-                      </button>
-                    )}
-                  </>
-                )}
+                            )
+                          }
+                        >
+                          Remover seguidor
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             ))}
             {loadingPeople ? (

@@ -162,6 +162,7 @@ function ClipVideo({
         src={near ? mediaUrl(media.id) : undefined}
         poster={near ? mediaUrl(media.id, true) : undefined}
         playsInline
+        draggable={false}
         muted={muted}
         preload={near ? "metadata" : "none"}
         loop

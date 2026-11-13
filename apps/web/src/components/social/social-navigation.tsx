@@ -60,10 +60,11 @@ export function SocialNavigation({
     <aside className="social-navigation">
       <NavigationLink
         href="/home"
-        className="social-navigation-brand"
+        className="brand social-navigation-brand"
+        draggable={false}
         aria-label="Enturma — voltar ao início"
       >
-        <EnturmaAppIcon size={40} className="brand-app-icon" />
+        <EnturmaAppIcon size={44} className="brand-app-icon" />
         <span>
           enturma<span className="dot">.</span>
         </span>

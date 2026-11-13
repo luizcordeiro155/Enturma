@@ -118,3 +118,13 @@ html[data-theme="dark"][data-palette="enturma"][data-high-contrast="true"] {
   --muted: #e1f5e8;
   --border: #a6d8b7;
 }
+
+/* Preserve the desktop workspace on common 1366 x 768 laptop screens. */
+@media (min-width: 1201px) and (max-width: 1440px) {
+  .app-shell:not(.ride-active-shell):not(.social-active-shell) > .workspace > main { padding: 28px 24px; }
+  .app-shell:not(.ride-active-shell) > .workspace > .topbar { padding-inline: 24px; }
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr) 300px; gap: 24px; }
+  .dashboard-intro h1 { font-size: 40px; line-height: 1.12; }
+  .dashboard-intro .lead { margin-bottom: 24px; }
+  .study-guide.study-journey { padding: 20px; }
+}

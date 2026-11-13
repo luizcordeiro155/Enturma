@@ -57,7 +57,7 @@ test("login contrast and navigation remain accessible at every viewport", async 
   );
   for (const [width, height] of [
     [1376, 766],
-    [1376, 768],
+    [1366, 768],
     [1920, 1080],
     [3440, 1440],
     [1024, 600],

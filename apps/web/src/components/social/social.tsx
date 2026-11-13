@@ -388,7 +388,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                       hidden={tab !== key || !!searched}
                     >
                       <SocialStream
-                        query={`tab=${key}&kind=POST`}
+                        query={`tab=${key}&kind=ALL`}
                         active={view === "feed" && tab === key && !searched}
                         me={ready.me.id}
                         person={setPerson}
@@ -401,7 +401,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                     <div className="social-feed-tab">
                       <SocialStream
                         key={`${tab}:${searched}`}
-                        query={`tab=${tab}&kind=POST&q=${encodeURIComponent(searched)}`}
+                        query={`tab=${tab}&kind=ALL&q=${encodeURIComponent(searched)}`}
                         active={view === "feed"}
                         me={ready.me.id}
                         person={setPerson}
