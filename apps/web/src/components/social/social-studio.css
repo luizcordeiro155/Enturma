@@ -1504,6 +1504,10 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
   max-height: min(640px, max(220px, calc(100dvh - 180px)));
 }
 :is(.social-page, .social-dialog) .social-post .social-carousel video {
+  /* Percentage height can resolve against an indefinite aspect-ratio frame,
+     causing tall videos to overflow even when the carousel is capped. */
+  height: auto;
+  max-height: min(640px, max(220px, calc(100dvh - 180px)));
   object-fit: contain;
 }
 .social-carousel-track > figure {
