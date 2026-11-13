@@ -1,4 +1,8 @@
 /* This workspace owns its scroll surfaces, just like rooms and private chat. */
+html:has(.social-active-shell) {
+  /* The Feed owns scrolling; the document must not reserve a second scrollbar. */
+  scrollbar-gutter: auto;
+}
 html .social-active-shell {
   height: calc(100dvh - var(--social-chrome, 0px));
   min-height: 0;

@@ -7,6 +7,16 @@ import { readFileSync, writeFileSync } from "node:fs";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
 
+test("Social scroll owner uses the viewport without changing other page gutters", async ({ page }) => {
+  const styles = ["src/app/responsive-shell.css", "src/components/social/social.css"]
+    .map((file) => readFileSync(file, "utf8")).join("\n");
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.setContent(`<style>${styles}</style><div class="social-active-shell"></div>`);
+  await expect(page.locator("html")).toHaveCSS("scrollbar-gutter", "auto");
+  await page.locator(".social-active-shell").evaluate((el) => el.remove());
+  await expect(page.locator("html")).toHaveCSS("scrollbar-gutter", "stable");
+});
+
 // Exercise the real stylesheet cascade without requiring an API or account.
 // A lower-specificity contain rule must not leave feed videos using cover.
 test("feed video CSS preserves the full frame at mobile and desktop sizes", async ({ page }) => {
