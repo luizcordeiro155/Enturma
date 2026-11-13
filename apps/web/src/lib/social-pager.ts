@@ -1,7 +1,7 @@
 import type { SocialView } from "./social";
 
 /** Mobile pages laid out left to right. The Feed sits in the middle. */
-export const PAGER_ORDER: readonly SocialView[] = ["clips", "feed", "create"];
+export const PAGER_ORDER: readonly SocialView[] = ["create", "feed", "clips"];
 /** Leave the system back gesture alone near either screen edge. */
 export const EDGE_GUARD = 28;
 export const AXIS_LOCK = 10;

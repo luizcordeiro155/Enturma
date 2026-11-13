@@ -76,6 +76,8 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Toast
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -929,24 +931,8 @@ class MainActivity : Activity() {
                 fileChooserCallback = callback
                 pendingFileChooserParams = params
 
-                if (acceptsImages(params)) {
-                    val permission =
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                            Manifest.permission.READ_MEDIA_IMAGES
-                        else Manifest.permission.READ_EXTERNAL_STORAGE
-
-                    if (
-                        Build.VERSION.SDK_INT >= Build.VERSION_CODES.M &&
-                        checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED
-                    ) {
-                        requestPermissions(
-                            arrayOf(permission),
-                            GALLERY_PERMISSION_REQUEST,
-                        )
-                        return true
-                    }
-                }
-
+                // System pickers grant access to selected URIs only.
+                // No blanket storage permission is needed to choose a photo or video.
                 launchFileChooser(params)
                 return true
             }
@@ -1633,54 +1619,61 @@ class MainActivity : Activity() {
         else request.grant(granted.toTypedArray())
     }
 
-    private fun acceptsImages(params: WebChromeClient.FileChooserParams?): Boolean {
-        val accepted = params?.acceptTypes ?: emptyArray()
-        if (accepted.isEmpty()) return false
-        return accepted.any { value ->
-            value.split(",").any { type ->
-                type.trim().startsWith("image/", ignoreCase = true)
+    private fun acceptedMimeTypes(params: WebChromeClient.FileChooserParams?): List<String> =
+        (params?.acceptTypes ?: emptyArray()).flatMap { it.split(",") }
+            .map { it.trim().lowercase(java.util.Locale.ROOT) }.filter { it.isNotEmpty() }
+
+    private fun documentPicker(params: WebChromeClient.FileChooserParams?): Intent {
+        val types = acceptedMimeTypes(params)
+        return Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = when {
+                types.isNotEmpty() && types.all { it.startsWith("image/") } -> "image/*"
+                types.isNotEmpty() && types.all { it.startsWith("video/") } -> "video/*"
+                types.size == 1 && types[0].contains("/") -> types[0]
+                else -> "*/*"
             }
+            val mimeTypes = types.filter { it.contains("/") }
+            if (mimeTypes.size > 1) putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes.toTypedArray())
+            putExtra(Intent.EXTRA_ALLOW_MULTIPLE,
+                params?.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
     }
 
     private fun launchFileChooser(params: WebChromeClient.FileChooserParams?) {
         pendingFileChooserParams = null
+        val types = acceptedMimeTypes(params)
+        val visualOnly = types.isNotEmpty() && types.all {
+            it.startsWith("image/") || it.startsWith("video/")
+        }
         try {
-            val intent =
-                if (acceptsImages(params)) {
-                    Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                    ).apply {
-                        type = "image/*"
-                        if (params?.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE) {
-                            putExtra(Intent.EXTRA_ALLOW_MULTIPLE, true)
-                        }
-                    }
-                } else {
-                    params?.createIntent()
-                        ?: Intent(Intent.ACTION_GET_CONTENT).apply {
-                            type = "*/*"
-                            addCategory(Intent.CATEGORY_OPENABLE)
-                        }
+            val intent = if (visualOnly && params?.isCaptureEnabled != true) {
+                val mediaType = when {
+                    types.all { it.startsWith("image/") } -> ActivityResultContracts.PickVisualMedia.ImageOnly
+                    types.all { it.startsWith("video/") } -> ActivityResultContracts.PickVisualMedia.VideoOnly
+                    else -> ActivityResultContracts.PickVisualMedia.ImageAndVideo
                 }
+                val request = PickVisualMediaRequest(mediaType)
+                if (params?.mode == WebChromeClient.FileChooserParams.MODE_OPEN_MULTIPLE)
+                    ActivityResultContracts.PickMultipleVisualMedia(10).createIntent(this, request)
+                else ActivityResultContracts.PickVisualMedia().createIntent(this, request)
+            } else if (params?.isCaptureEnabled == true) {
+                params.createIntent()
+            } else documentPicker(params)
             startActivityForResult(intent, FILE_CHOOSER_REQUEST)
         } catch (_: ActivityNotFoundException) {
             try {
-                val fallback = Intent(Intent.ACTION_GET_CONTENT).apply {
-                    type = if (acceptsImages(params)) "image/*" else "*/*"
-                    addCategory(Intent.CATEGORY_OPENABLE)
-                }
-                startActivityForResult(fallback, FILE_CHOOSER_REQUEST)
+                startActivityForResult(documentPicker(params), FILE_CHOOSER_REQUEST)
             } catch (_: ActivityNotFoundException) {
                 fileChooserCallback?.onReceiveValue(null)
                 fileChooserCallback = null
-                Toast.makeText(
-                    this,
-                    "Nenhum seletor de imagens ou arquivos foi encontrado.",
-                    Toast.LENGTH_SHORT,
-                ).show()
+                Toast.makeText(this, "Nenhuma galeria ou seletor de arquivos foi encontrado.", Toast.LENGTH_SHORT).show()
             }
+        } catch (_: SecurityException) {
+            fileChooserCallback?.onReceiveValue(null)
+            fileChooserCallback = null
+            Toast.makeText(this, "Não foi possível abrir a galeria. Tente novamente.", Toast.LENGTH_SHORT).show()
         }
     }
 

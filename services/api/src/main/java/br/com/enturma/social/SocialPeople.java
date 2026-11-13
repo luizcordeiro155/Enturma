@@ -144,6 +144,24 @@ public class SocialPeople {
         a.id());
   }
 
+  public Object mentionSuggestions(Actor a, String query) {
+    access.require();
+    if (query.length() > 80) throw ApiException.invalid("Busca muito longa.");
+    String term = query.strip();
+    // A bare @ suggests existing connections. Typed handles use the same
+    // active-account and bidirectional-block rules as people search.
+    return db.list(
+        "SELECT u.id,u.name,u.username,u.avatar_bytes IS NOT NULL has_avatar,"
+            + " coalesce(s.verified,false) verified FROM app_user u LEFT JOIN social_profile s"
+            + " ON s.user_id=u.id WHERE u.status='ACTIVE' AND u.id<>?"
+            + " AND (u.username ILIKE ? OR u.name ILIKE ?)"
+            + " AND (?<>'' OR EXISTS(SELECT 1 FROM social_follow f WHERE f.follower_id=?"
+            + " AND f.followed_id=u.id AND f.status='ACCEPTED'))"
+            + " AND NOT EXISTS(SELECT 1 FROM user_block b WHERE (b.user_id=? AND b.blocked_id=u.id)"
+            + " OR (b.blocked_id=? AND b.user_id=u.id)) ORDER BY u.username,u.id LIMIT 6",
+        a.id(), "%" + term + "%", "%" + term + "%", term, a.id(), a.id(), a.id());
+  }
+
   public Object connections(Actor a, UUID user, String kind, int page) {
     access.unblocked(a.id(), user);
     if (!Set.of("followers", "following", "requests").contains(kind))

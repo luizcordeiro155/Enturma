@@ -29,7 +29,9 @@ import { SocialText } from "./social-text";
 import { SocialMediaCarousel } from "./social-media-carousel";
 import { usePostActions } from "./use-post-actions";
 import { SocialPostOptions } from "./social-post-options";
-
+import { SocialComments } from "./social-comments";
+import { useSocialLives } from "./social-live-context";
+export { SocialComments } from "./social-comments";
 export function SocialAuthor({
   user,
   open,
@@ -37,8 +39,14 @@ export function SocialAuthor({
   user: SocialPerson;
   open: (id: string) => void;
 }) {
+  const live = useSocialLives().items.some(
+    (item) => item.authorId === user.id && item.state === "LIVE",
+  );
   return (
-    <button className="social-author" onClick={() => open(user.id)}>
+    <button
+      className={`social-author ${live ? "social-author-live" : ""}`}
+      onClick={() => open(user.id)}
+    >
       <Avatar user={user} />
       <span>
         <strong>
@@ -70,12 +78,12 @@ export function FollowButton({
   useEffect(() => {
     let active = true;
     if (id === me) return;
-    api<{ relationship: NonNullable<typeof relation> }>(
+    void api<{ relationship: NonNullable<typeof relation> }>(
       `/social/people/${id}`,
       { cache: "no-store" },
     )
-      .then((r) => {
-        if (active) setRelation(r.relationship);
+      .then((result) => {
+        if (active) setRelation(result.relationship);
       })
       .catch(() => {});
     return () => {
@@ -98,8 +106,8 @@ export function FollowButton({
               }),
             );
             changed?.();
-          } catch (e) {
-            setError((e as Error).message);
+          } catch (cause) {
+            setError((cause as Error).message);
           } finally {
             setBusy(false);
           }
@@ -135,24 +143,28 @@ export function SocialShare({
     [error, setError] = useState(""),
     [sent, setSent] = useState<string[]>([]),
     [busy, setBusy] = useState("");
+  const [selected, setSelected] = useState<string[]>([]),
+    [notice, setNotice] = useState(""),
+    [lockedNote, setLockedNote] = useState(false);
+  const sending = useRef(false);
   const pending = useRef(
     new Map<string, Awaited<ReturnType<typeof preparePrivateShare>>>(),
   );
   useEffect(() => {
     let active = true;
-    api<typeof friends>("/friends", { cache: "no-store" })
-      .then((r) => {
+    void api<typeof friends>("/friends", { cache: "no-store" })
+      .then((result) => {
         if (active)
           setFriends(
-            r.filter(
-              (f) =>
-                f.status === "ACCEPTED" &&
-                (!reply || f.userId === item.authorId),
+            result.filter(
+              (friend) =>
+                friend.status === "ACCEPTED" &&
+                (!reply || friend.userId === item.authorId),
             ),
           );
       })
-      .catch((e) => {
-        if (active) setError(e.message);
+      .catch((cause) => {
+        if (active) setError(cause.message);
       });
     return () => {
       active = false;
@@ -172,13 +184,33 @@ export function SocialShare({
           crypto.randomUUID(),
         );
         pending.current.set(friend, body);
+        setLockedNote(true);
       }
       await post(`/friends/${friend}/messages`, body);
       pending.current.delete(friend);
-      setSent((s) => [...s, friend]);
-    } catch (e) {
-      setError((e as Error).message);
+      setLockedNote(pending.current.size > 0);
+      setSent((previous) => [...previous, friend]);
+      setSelected((previous) => previous.filter((id) => id !== friend));
+      return true;
+    } catch (cause) {
+      setError((cause as Error).message);
+      return false;
     } finally {
+      setBusy("");
+    }
+  }
+  async function sendSelected() {
+    if (sending.current) return;
+    sending.current = true;
+    setNotice("");
+    try {
+      for (const friend of selected) {
+        if (sent.includes(friend)) continue;
+        if (!(await send(friend))) return;
+      }
+      setNotice("Enviado com sucesso.");
+    } finally {
+      sending.current = false;
       setBusy("");
     }
   }
@@ -186,17 +218,21 @@ export function SocialShare({
     <SocialDialog
       title={reply ? "Responder ao Story" : "Compartilhar com a turma"}
       close={close}
+      variant="sheet"
     >
       <div className="social-dialog-body">
         <p>
-          A privacidade da publicação continua valendo para quem receber o link.
+          {
+            "A privacidade da publica\u00e7\u00e3o continua valendo para quem receber o link."
+          }
         </p>
         <label>
           Mensagem opcional
           <input
+            disabled={!!busy || lockedNote}
             value={note}
             maxLength={500}
-            onChange={(e) => setNote(e.target.value)}
+            onChange={(event) => setNote(event.target.value)}
           />
         </label>
         <label>
@@ -204,242 +240,97 @@ export function SocialShare({
           <input
             type="search"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(event) => setQuery(event.target.value)}
           />
         </label>
-        {friends
-          .filter((f) =>
-            `${f.name} ${f.username}`
-              .toLowerCase()
-              .includes(query.toLowerCase()),
-          )
-          .map((f) => (
-            <div className="social-person-row" key={f.id}>
-              <Avatar user={{ ...f, id: f.userId }} />
-              <strong>{f.name}</strong>
+        <div className="social-share-people">
+          {friends
+            .filter((friend) =>
+              `${friend.name} ${friend.username}`
+                .toLowerCase()
+                .includes(query.toLowerCase()),
+            )
+            .map((friend) => (
               <button
-                className="secondary"
-                disabled={!!busy || sent.includes(f.id)}
-                onClick={() => void send(f.id)}
+                type="button"
+                className="social-share-person"
+                key={friend.id}
+                aria-label={`Selecionar ${friend.name}`}
+                aria-pressed={selected.includes(friend.id)}
+                disabled={!!busy || sent.includes(friend.id)}
+                onClick={() =>
+                  setSelected((previous) =>
+                    previous.includes(friend.id)
+                      ? previous.filter((id) => id !== friend.id)
+                      : previous.length < 20
+                        ? [...previous, friend.id]
+                        : previous,
+                  )
+                }
               >
-                {sent.includes(f.id) ? (
-                  <>
-                    <Check size={16} /> Enviado
-                  </>
-                ) : (
-                  "Enviar"
+                <Avatar user={{ ...friend, id: friend.userId }} />
+                <strong>{friend.name}</strong>
+                {sent.includes(friend.id) && (
+                  <small>
+                    <Check size={12} />
+                    Enviado
+                  </small>
                 )}
               </button>
-            </div>
-          ))}
+            ))}
+        </div>
+        {!!selected.length && (
+          <div className="social-share-footer">
+            <span>{selected.length} selecionado(s)</span>
+            <button disabled={!!busy} onClick={() => void sendSelected()}>
+              {busy
+                ? "Enviando..."
+                : `Enviar para ${selected.length} ${selected.length === 1 ? "pessoa" : "pessoas"}`}
+            </button>
+          </div>
+        )}
+        {notice && <p role="status">{notice}</p>}
         {!friends.length && (
           <p>
-            As amizades aceitas aparecerão aqui.
-            {reply && " Para responder, vocês precisam ser amigos no Enturma."}
+            {"As amizades aceitas aparecer\u00e3o aqui."}
+            {reply &&
+              " Para responder, voc\u00eas precisam ser amigos no Enturma."}
           </p>
         )}
         {error && <p role="alert">{error}</p>}
         <div className="social-row">
           <button
             className="secondary"
-            onClick={() => {
+            onClick={() =>
               void navigator.clipboard
                 .writeText(url)
-                .then(() => setError("Link copiado."))
-                .catch(() => setError("Não foi possível copiar o link."));
-            }}
+                .then(() => setNotice("Link copiado."))
+                .catch(() =>
+                  setError("N\u00e3o foi poss\u00edvel copiar o link."),
+                )
+            }
           >
-            <Copy size={16} /> Copiar link
+            <Copy size={16} />
+            Copiar link
           </button>
           {typeof navigator !== "undefined" &&
             typeof navigator.share === "function" && (
               <button
                 className="secondary"
-                onClick={() => {
+                onClick={() =>
                   void navigator
                     .share({ title: "Enturma Social", url })
-                    .catch((e) => {
-                      if (e.name !== "AbortError")
-                        setError("Não foi possível compartilhar.");
-                    });
-                }}
+                    .catch((cause) => {
+                      if (cause.name !== "AbortError")
+                        setError("N\u00e3o foi poss\u00edvel compartilhar.");
+                    })
+                }
               >
-                <Share2 size={16} /> Compartilhar
+                <Share2 size={16} />
+                Compartilhar
               </button>
             )}
         </div>
-      </div>
-    </SocialDialog>
-  );
-}
-type Comment = SocialPerson & {
-  authorId: string;
-  body: string;
-  parentId?: string;
-  createdAt: string;
-};
-export function SocialComments({
-  item,
-  me,
-  close,
-  changed,
-  person,
-}: {
-  item: Post;
-  me: string;
-  close: () => void;
-  changed: (p: Post) => void;
-  person: (id: string) => void;
-}) {
-  const [rows, setRows] = useState<Comment[]>([]),
-    [page, setPage] = useState(0),
-    [more, setMore] = useState(false),
-    [text, setText] = useState(""),
-    [parent, setParent] = useState<Comment>(),
-    [busy, setBusy] = useState(false),
-    [error, setError] = useState("");
-  const clientId = useRef(crypto.randomUUID());
-  useEffect(() => {
-    let active = true;
-    api<Comment[]>(`/social/posts/${item.id}/comments?page=${page}`, {
-      cache: "no-store",
-    })
-      .then((r) => {
-        if (active) {
-          setRows((old) =>
-            page
-              ? [...old, ...r.filter((c) => !old.some((v) => v.id === c.id))]
-              : r,
-          );
-          setMore(r.length === 30);
-        }
-      })
-      .catch((e) => {
-        if (active) setError(e.message);
-      });
-    return () => {
-      active = false;
-    };
-  }, [item.id, page]);
-  async function submit() {
-    if (!text.trim() || busy) return;
-    setBusy(true);
-    try {
-      await socialWrite(
-        `/posts/${item.id}/comments`,
-        {
-          id: clientId.current,
-          body: text,
-          parentId: parent?.parentId ?? parent?.id ?? null,
-        },
-        "POST",
-      );
-      clientId.current = crypto.randomUUID();
-      setText("");
-      setParent(undefined);
-      const fresh = await api<Comment[]>(
-        `/social/posts/${item.id}/comments?page=0`,
-        { cache: "no-store" },
-      );
-      setRows(fresh);
-      setPage(0);
-      setMore(fresh.length === 30);
-      changed(
-        await api<Post>(`/social/posts/${item.id}`, { cache: "no-store" }),
-      );
-    } catch (e) {
-      setError((e as Error).message);
-    } finally {
-      setBusy(false);
-    }
-  }
-  return (
-    <SocialDialog title="Conversa da publicação" close={close}>
-      <div className="social-dialog-body">
-        <div className="social-comment-list">
-          {rows.map((c) => (
-            <article
-              key={c.id}
-              className={c.parentId ? "social-comment-reply" : ""}
-            >
-              <SocialAuthor user={{ ...c, id: c.authorId }} open={person} />
-              <p>
-                <SocialText text={c.body} />
-              </p>
-              <div className="social-row">
-                <small>{new Date(c.createdAt).toLocaleString("pt-BR")}</small>
-                <button className="text-button" onClick={() => setParent(c)}>
-                  Responder
-                </button>
-                {(me === c.authorId || me === item.authorId) && (
-                  <button
-                    className="text-button"
-                    onClick={() => {
-                      void socialWrite(
-                        `/posts/${item.id}/comments/${c.id}`,
-                        undefined,
-                        "DELETE",
-                      )
-                        .then(() =>
-                          setRows((r) => r.filter((v) => v.id !== c.id)),
-                        )
-                        .catch((e) => setError(e.message));
-                    }}
-                  >
-                    Remover
-                  </button>
-                )}
-              </div>
-            </article>
-          ))}
-          {more && (
-            <button className="secondary" onClick={() => setPage((p) => p + 1)}>
-              Mais comentários
-            </button>
-          )}
-          {!rows.length && (
-            <p>Comece a conversa com uma pergunta ou uma ideia.</p>
-          )}
-        </div>
-        {parent && (
-          <p>
-            Respondendo a @{parent.username}{" "}
-            <button
-              className="text-button"
-              onClick={() => setParent(undefined)}
-            >
-              Cancelar
-            </button>
-          </p>
-        )}
-        <form
-          noValidate
-          className="social-comment-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            void submit();
-          }}
-        >
-          <label className="sr-only" htmlFor="social-comment">
-            Seu comentário
-          </label>
-          <textarea
-            className="resize-none"
-            id="social-comment"
-            rows={2}
-            maxLength={1500}
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder="Contribua com a conversa…"
-          />
-          <button
-            disabled={busy || !text.trim()}
-            aria-label="Enviar comentário"
-          >
-            <Send size={20} />
-          </button>
-        </form>
-        {error && <p role="alert">{error}</p>}
       </div>
     </SocialDialog>
   );
@@ -454,7 +345,7 @@ export function SocialPost({
   item: Post;
   me: string;
   person: (id: string) => void;
-  changed: (p: Post) => void;
+  changed: (post: Post) => void;
   autoplay?: boolean;
 }) {
   const [dialog, setDialog] = useState<"comments" | "share" | "more" | null>(
@@ -462,14 +353,14 @@ export function SocialPost({
     ),
     [expanded, setExpanded] = useState(false),
     [burst, setBurst] = useState(0);
-  const lastTap = useRef(0);
-  const actions = usePostActions(item, changed),
+  const lastTap = useRef<number | null>(null),
+    actions = usePostActions(item, changed),
     { busy, error, react } = actions;
   function tapMedia() {
     const now = performance.now();
-    if (now - lastTap.current < 300) {
-      lastTap.current = 0;
-      setBurst((count) => count + 1);
+    if (lastTap.current !== null && now - lastTap.current < 300) {
+      lastTap.current = null;
+      setBurst((value) => value + 1);
       void actions.like();
     } else lastTap.current = now;
   }
@@ -492,7 +383,9 @@ export function SocialPost({
           )}{" "}
           <SocialText
             text={
-              expanded || !long ? item.body : `${item.body.slice(0, limit)}…`
+              expanded || !long
+                ? item.body
+                : `${item.body.slice(0, limit)}\u2026`
             }
           />{" "}
           {long && (
@@ -507,17 +400,20 @@ export function SocialPost({
         </p>
       )}
       {item.projectUrl && (
-        <ConfirmedLink href={item.projectUrl} label="Conhecer o projeto ↗" />
+        <ConfirmedLink
+          href={item.projectUrl}
+          label={"Conhecer o projeto \u2197"}
+        />
       )}
     </div>
   );
   return (
-    <article className="social-post" data-post={item.id}>
+    <article className="social-post" data-post={item.id} data-kind={item.kind}>
       <header>
         <SocialAuthor user={postPerson(item)} open={person} />
         <button
           className="icon-control"
-          aria-label="Opções da publicação"
+          aria-label={"Op\u00e7\u00f5es da publica\u00e7\u00e3o"}
           onClick={() => setDialog("more")}
         >
           <MoreHorizontal size={20} />
@@ -527,7 +423,10 @@ export function SocialPost({
         <div
           className="social-post-media"
           data-testid="post-media"
-          onClick={tapMedia}
+          onClick={(event) => {
+            if (!(event.target as HTMLElement).closest("button,a,input"))
+              tapMedia();
+          }}
         >
           <SocialMediaCarousel
             media={item.media}
@@ -551,7 +450,7 @@ export function SocialPost({
         <button
           className="icon-control"
           aria-pressed={item.mine.includes("LIKE")}
-          aria-label={`Curtir · ${item.likes}`}
+          aria-label={`Curtir \u00b7 ${item.likes}`}
           disabled={busy}
           onClick={() => void react("LIKE")}
         >
@@ -559,18 +458,20 @@ export function SocialPost({
             size={24}
             fill={item.mine.includes("LIKE") ? "currentColor" : "none"}
           />
+          {item.likes > 0 && <span aria-hidden="true">{item.likes}</span>}
         </button>
         <button
           className="icon-control"
-          aria-label={`Comentários · ${item.comments}`}
+          aria-label={`Coment\u00e1rios \u00b7 ${item.comments}`}
           onClick={() => setDialog("comments")}
         >
           <MessageCircle size={24} />
+          {item.comments > 0 && <span aria-hidden="true">{item.comments}</span>}
         </button>
         <button
           className="icon-control"
           aria-pressed={item.mine.includes("REPOST")}
-          aria-label={`Republicar · ${item.reposts}`}
+          aria-label={`Republicar \u00b7 ${item.reposts}`}
           disabled={busy}
           onClick={() => void react("REPOST")}
         >
@@ -579,14 +480,14 @@ export function SocialPost({
         </button>
         <button
           className="icon-control"
-          aria-label="Compartilhar publicação"
+          aria-label={"Compartilhar publica\u00e7\u00e3o"}
           onClick={() => setDialog("share")}
         >
           <Send size={23} />
         </button>
         <button
           className="icon-control social-save"
-          aria-label="Salvar publicação"
+          aria-label={"Salvar publica\u00e7\u00e3o"}
           aria-pressed={item.mine.includes("SAVE")}
           disabled={busy}
           onClick={() => void react("SAVE")}
@@ -611,12 +512,12 @@ export function SocialPost({
             onClick={() => setDialog("comments")}
           >
             {item.comments === 1
-              ? "Ver 1 comentário"
-              : `Ver todos os ${item.comments} comentários`}
+              ? "Ver 1 coment\u00e1rio"
+              : `Ver todos os ${item.comments} coment\u00e1rios`}
           </button>
         )}
         <small>
-          {item.pinned && "Fixado · "}
+          {item.pinned && "Fixado \u00b7 "}
           <time dateTime={item.publishedAt}>
             {relativeTime(item.publishedAt, new Date())}
           </time>

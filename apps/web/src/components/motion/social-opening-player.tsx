@@ -4,7 +4,13 @@ import { useEffect, useRef } from "react";
 import { reducedMotion } from "@/lib/motion";
 import { SocialOpeningComposition } from "./social-opening-composition";
 
-export default function SocialOpeningPlayer({ ended }: { ended: () => void }) {
+export default function SocialOpeningPlayer({
+  ready,
+  ended,
+}: {
+  ready: () => void;
+  ended: () => void;
+}) {
   const ref = useRef<PlayerRef>(null);
   useEffect(() => {
     const player = ref.current;
@@ -14,7 +20,10 @@ export default function SocialOpeningPlayer({ ended }: { ended: () => void }) {
         player?.pause();
         ended();
       } else if (document.hidden) player?.pause();
-      else void player?.play();
+      else {
+        ready();
+        void player?.play();
+      }
     };
     player?.addEventListener("ended", ended);
     const settings = new MutationObserver(update);
@@ -32,7 +41,7 @@ export default function SocialOpeningPlayer({ ended }: { ended: () => void }) {
       media.removeEventListener("change", update);
       document.removeEventListener("visibilitychange", update);
     };
-  }, [ended]);
+  }, [ready, ended]);
   return (
     <Player
       ref={ref}

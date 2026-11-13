@@ -542,9 +542,9 @@ test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; control
   await expect(
     page.getByRole("button", { name: "Enviar e publicar", exact: true }),
   ).toBeEnabled();
-  await expect(
-    page.getByRole("button", { name: "Publicar Clip" }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Publicar Clip" })).toHaveCount(
+    0,
+  );
 });
 
 test("câmera: gravação WebM real sem Duration abre o editor e preserva o rascunho", async ({
@@ -662,11 +662,23 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   // Isolated player contract fixture, not a publication bypass. Spring tests exercise
   // actual authorization, export, storage, duration and publication independently.
   await page.route("**/api/backend/social/feed?**", (route) => {
-    if (new URL(route.request().url()).searchParams.get("kind") !== "CLIP")
-      return route.fallback();
+    const kind = new URL(route.request().url()).searchParams.get("kind");
+    if (kind !== "CLIP" && kind !== "ALL") return route.fallback();
     return route.fulfill({
       json: {
-        items: posts,
+        items:
+          kind === "ALL"
+            ? [
+                {
+                  ...posts[0],
+                  id: "text-post",
+                  kind: "POST",
+                  body: "Uma descoberta no feed geral",
+                  media: [],
+                },
+                posts[0],
+              ]
+            : posts,
         nextCursor: "",
         snapshot: new Date().toISOString(),
       },
@@ -681,6 +693,12 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   const navigation = page.getByRole("navigation", {
     name: "Ambientes do Social",
   });
+  const feed = page.locator(".social-feed-view .social-stream:visible");
+  await expect(feed.locator('[data-kind="POST"]')).toBeVisible();
+  await expect(feed.locator('[data-kind="CLIP"]')).toBeVisible();
+  const logo = page.locator(".social-navigation-brand");
+  await logo.hover();
+  await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await navigation.getByRole("button", { name: "Clips", exact: true }).click();
   const clips = page.locator(".social-clips");
   const playing = () =>
@@ -694,8 +712,8 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   await page.keyboard.press("ArrowDown");
   await expect.poll(playing).toEqual([false, true, false, false]);
   await expect(clips.locator("video").nth(3)).not.toHaveAttribute("src", /.+/);
-  for (const width of [1440, 390]) {
-    await page.setViewportSize({ width, height: 844 });
+  for (const width of [1366, 1920, 390]) {
+    await page.setViewportSize({ width, height: width === 1366 ? 768 : 844 });
     const selected = clips.locator('[data-clip-index="1"]');
     await expect.poll(playing).toEqual([false, true, false, false]);
     await expect
@@ -716,7 +734,35 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
     if (width === 390) {
       expect(size.width).toBeGreaterThanOrEqual(389);
       expect(size.height).toBeGreaterThan(844 * 0.8);
-    } else expect(size.width / size.height).toBeCloseTo(9 / 16, 1);
+    } else {
+      const frame = (await selected
+        .locator(".social-clip-video")
+        .boundingBox())!;
+      expect(frame.width / frame.height).toBeCloseTo(9 / 16, 1);
+      const caption = (await selected
+        .locator(".social-clip-caption")
+        .boundingBox())!;
+      const rail = (await selected.locator(".social-clip-rail").boundingBox())!;
+      expect(caption.x + caption.width).toBeLessThanOrEqual(frame.x);
+      expect(rail.x).toBeGreaterThanOrEqual(frame.x + frame.width);
+    }
+    const videoBox = (await selected.locator("video").boundingBox())!;
+    await selected.locator("video").evaluate((video) => {
+      (video as HTMLVideoElement).currentTime = 1;
+    });
+    await expect
+      .poll(async () => {
+        const next = (await selected.locator("video").boundingBox())!;
+        return (
+          Math.abs(next.x - videoBox.x) +
+          Math.abs(next.width - videoBox.width) +
+          Math.abs(next.y - videoBox.y)
+        );
+      })
+      .toBeLessThan(1);
+    expect(
+      await clips.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBe(true);
     await expect(
       selected.getByRole("progressbar", { name: "Progresso do Clip" }),
     ).toBeVisible();
@@ -776,16 +822,19 @@ test("Social: autor consegue excluir seu Story com confirmação", async ({
   await expect(story).toBeVisible();
   await story.click();
   const viewer = page.getByRole("dialog", { name: "Stories da turma" });
-  await expect(viewer.getByRole("button", { name: "Excluir meu Story" })).toBeVisible();
+  await expect(
+    viewer.getByRole("button", { name: "Excluir meu Story" }),
+  ).toBeVisible();
   await viewer.getByRole("button", { name: "Excluir meu Story" }).click();
   const confirm = page.getByRole("dialog", { name: "Excluir este Story?" });
   await expect(confirm).toBeVisible();
-  await confirm.getByRole("button", { name: "Excluir Story", exact: true }).click();
+  await confirm
+    .getByRole("button", { name: "Excluir Story", exact: true })
+    .click();
   await expect(viewer).not.toBeVisible();
   await expect(story).toHaveCount(0);
-  const deleted = await request.get(
-    `${backend}/api/v1/social/posts/${id}`,
-    { headers: asUser(author.accessToken) },
-  );
+  const deleted = await request.get(`${backend}/api/v1/social/posts/${id}`, {
+    headers: asUser(author.accessToken),
+  });
   expect(deleted.status()).toBe(404);
 });

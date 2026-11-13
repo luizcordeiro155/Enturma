@@ -1,4 +1,11 @@
 import { defineConfig, devices } from "@playwright/test";
+// The isolated LiveKit fixture advertises loopback. Without this test-only
+// switch, receive-only Chromium peers offer mDNS candidates that the fixture
+// filters out, then attempt an unreachable public STUN address instead.
+const isolatedRtcArgs =
+  process.env.E2E_LIVEKIT === "true"
+    ? ["--disable-features=WebRtcHideLocalIpsWithMdns"]
+    : [];
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -41,13 +48,15 @@ export default defineConfig({
           args: [
             "--use-fake-ui-for-media-stream",
             "--use-fake-device-for-media-stream",
+            ...isolatedRtcArgs,
           ],
         },
       },
     },
     {
       name: "chromium-social",
-      testMatch: /(?:forum|friends|enturma-social)\.spec\.ts/,
+      testMatch:
+        /(?:forum|friends|enturma-social|social-core-screens|social-studio-release|social-gallery-mobile|social-opening|social-mobile-interactions)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },
@@ -55,6 +64,7 @@ export default defineConfig({
           args: [
             "--use-fake-ui-for-media-stream",
             "--use-fake-device-for-media-stream",
+            ...isolatedRtcArgs,
           ],
         },
       },

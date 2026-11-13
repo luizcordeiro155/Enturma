@@ -1,7 +1,12 @@
 "use client";
 import dynamic from "next/dynamic";
-import { Aperture } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { reducedMotion } from "@/lib/motion";
 import { useAppShellState } from "../app-shell-state";
 
@@ -9,22 +14,32 @@ const SocialOpeningPlayer = dynamic(
   () => import("../motion/social-opening-player"),
   {
     ssr: false,
-    loading: () => <Aperture size={72} aria-hidden="true" />,
+    loading: () => null,
   },
 );
 
-export function SocialOpening() {
+export function SocialOpening({ children }: { children?: ReactNode }) {
   const { claimSocialOpening } = useAppShellState();
   const [visible, setVisible] = useState(false);
+  // Gate the first render too: neither API speed nor lazy-player loading may
+  // reveal a frame of the workspace before the opening has finished.
+  const [finished, setFinished] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
   const closing = useRef(false);
   const animation = useRef<Animation | undefined>(undefined);
+  const ready = useCallback(() => {
+    // Keep the dialog closed while the lazy player loads: a placeholder icon
+    // followed by frame zero looks like the opening has flashed and restarted.
+    if (!closing.current && dialog.current && !dialog.current.open)
+      dialog.current.showModal();
+  }, []);
   const close = useCallback(() => {
     if (closing.current) return;
     closing.current = true;
     const el = dialog.current;
-    if (!el || reducedMotion() || !el.animate) {
+    if (!el?.open || reducedMotion() || !el.animate) {
       setVisible(false);
+      setFinished(true);
       return;
     }
     animation.current = el.animate(
@@ -38,6 +53,7 @@ export function SocialOpening() {
       .then(() => {
         el.style.opacity = "0";
         setVisible(false);
+        setFinished(true);
       })
       .catch(() => {});
   }, []);
@@ -45,13 +61,13 @@ export function SocialOpening() {
   useEffect(() => {
     const timer = setTimeout(() => {
       if (claimSocialOpening() && !reducedMotion()) setVisible(true);
+      else setFinished(true);
     }, 0);
     return () => clearTimeout(timer);
   }, [claimSocialOpening]);
   useEffect(() => {
     if (!visible) return;
     const el = dialog.current!;
-    el.showModal();
     // Loading or decoding an animation must never block access to the Social.
     const fallback = setTimeout(close, 6000);
     return () => {
@@ -61,31 +77,46 @@ export function SocialOpening() {
     };
   }, [visible, close]);
 
-  if (!visible) return null;
   return (
-    <dialog
-      ref={dialog}
-      className="social-opening"
-      aria-label="Bem-vindo ao Enturma Social"
-      onCancel={(e) => {
-        e.preventDefault();
-        close();
-      }}
-    >
-      <div className="social-opening-art" aria-hidden="true">
-        <SocialOpeningPlayer ended={close} />
+    <>
+      <div
+        className="social-opening-content"
+        hidden={!finished}
+        inert={!finished}
+      >
+        {finished ? children : null}
       </div>
-      <h2>
-        Enturma Social<span>.</span>
-      </h2>
-      <p>
-        Uma ideia vira conversa.
-        <br />
-        Uma turma abre possibilidades.
-      </p>
-      <button type="button" className="button" onClick={close}>
-        Explorar o Social
-      </button>
-    </dialog>
+      {!finished && (
+        <div className="social-opening-pending" role="status">
+          Preparando o Social…
+        </div>
+      )}
+      {visible && (
+        <dialog
+          ref={dialog}
+          className="social-opening"
+          aria-label="Bem-vindo ao Enturma Social"
+          onCancel={(e) => {
+            e.preventDefault();
+            close();
+          }}
+        >
+          <div className="social-opening-art" aria-hidden="true">
+            <SocialOpeningPlayer ready={ready} ended={close} />
+          </div>
+          <h2>
+            Enturma Social<span>.</span>
+          </h2>
+          <p>
+            Uma ideia vira conversa.
+            <br />
+            Uma turma abre possibilidades.
+          </p>
+          <button type="button" className="button" onClick={close}>
+            Explorar o Social
+          </button>
+        </dialog>
+      )}
+    </>
   );
 }

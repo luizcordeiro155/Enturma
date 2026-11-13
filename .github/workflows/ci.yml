@@ -54,7 +54,7 @@ jobs:
           exit $LASTEXITCODE
   verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 25
+    timeout-minutes: 35
     services:
       postgres:
         image: postgres:17-alpine
@@ -115,13 +115,21 @@ jobs:
         with:
           distribution: temurin
           java-version: '25'
+      - name: Prepare isolated LiveKit runtime
+        run: |
+          curl --fail --location --retry 2 https://github.com/livekit/livekit/releases/download/v1.13.11/livekit_1.13.11_linux_amd64.tar.gz --output /tmp/livekit-runtime.tgz
+          echo "1e9ee90ca301e1842b2887fc77cb122759756a9c8aeb4334ee91de3325ec43fb  /tmp/livekit-runtime.tgz" | sha256sum --check
+          mkdir -p /tmp/livekit-runtime
+          tar -xzf /tmp/livekit-runtime.tgz -C /tmp/livekit-runtime
+          printf "port: 17880\nbind_addresses: [127.0.0.1]\nrtc:\n  tcp_port: 17881\n  udp_port: 17882\n  use_external_ip: false\n  node_ip: 127.0.0.1\nkeys:\n  localqa: local-only-test-key-for-livekit-no-credentials\n" > /tmp/livekit-qa.yaml
+          /tmp/livekit-runtime/livekit-server --config /tmp/livekit-qa.yaml --dev > /tmp/enturma-livekit.log 2>&1 &
       - name: Prepare isolated E2E database and services
         env:
           PGPASSWORD: ci-ephemeral-only
         run: |
           psql -h localhost -U enturma -d enturma_test -c 'CREATE DATABASE enturma_e2e'
           node apps/web/e2e/mail-server.cjs > /tmp/enturma-smtp.log 2>&1 &
-          SOCIAL_ENABLED=true DATABASE_URL=jdbc:postgresql://localhost:5432/enturma_e2e DATABASE_USERNAME=enturma APP_URL=http://localhost:3000 AUTH_REGISTER_RATE_LIMIT=500 MAIL_ENABLED=true MAIL_HOST=127.0.0.1 MAIL_PORT=1025 MAIL_AUTH=false MAIL_TLS=false java -jar services/api/target/enturma-api-0.1.0.jar --spring.profiles.active=squarecloud --server.port=8080 > /tmp/enturma-api.log 2>&1 &
+          SOCIAL_ENABLED=true SOCIAL_LIVE_ENABLED=true VOICE_ENABLED=true LIVEKIT_URL=ws://127.0.0.1:17880 LIVEKIT_API_KEY=localqa LIVEKIT_API_SECRET=local-only-test-key-for-livekit-no-credentials DATABASE_URL=jdbc:postgresql://localhost:5432/enturma_e2e DATABASE_USERNAME=enturma APP_URL=http://localhost:3000 AUTH_REGISTER_RATE_LIMIT=500 MAIL_ENABLED=true MAIL_HOST=127.0.0.1 MAIL_PORT=1025 MAIL_AUTH=false MAIL_TLS=false java -jar services/api/target/enturma-api-0.1.0.jar --spring.profiles.active=squarecloud --server.port=8080 > /tmp/enturma-api.log 2>&1 &
           API_URL=http://localhost:8080 APP_URL=http://localhost:3000 npm run start -w @enturma/web > /tmp/enturma-web.log 2>&1 &
           for attempt in $(seq 1 60); do
             if curl -fsS http://localhost:8080/actuator/health && curl -fsS http://localhost:3000/login > /dev/null; then exit 0; fi
@@ -130,6 +138,7 @@ jobs:
           exit 1
       - run: npm run test:e2e -w @enturma/web
         env:
+          E2E_LIVEKIT: 'true'
           E2E_DATABASE_URL: postgresql://enturma:ci-ephemeral-only@localhost:5432/enturma_e2e
       - run: python -m unittest discover -s scripts -p 'test_*.py'
       - run: python scripts/package-squarecloud.py
@@ -156,3 +165,6 @@ jobs:
           path: |
             services/api/target/surefire-reports
             apps/web/test-results
+            /tmp/enturma-api.log
+            /tmp/enturma-web.log
+            /tmp/enturma-livekit.log

@@ -14,7 +14,9 @@ export const test = base.extend({
       !["/enturma_e2e", "/enturma_social3_e2e"].includes(address.pathname) ||
       !["localhost", "127.0.0.1"].includes(backend.hostname)
     )
-      throw new Error("Student fixtures require an explicitly allowed local E2E database");
+      throw new Error(
+        "Student fixtures require an explicitly allowed local E2E database",
+      );
     const db = new pg.Client({ connectionString: connection });
     await db.connect();
     try {
