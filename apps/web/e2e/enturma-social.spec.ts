@@ -257,11 +257,12 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
     "1 Seguidores",
   );
   await profile.getByRole("button", { name: "Fechar", exact: true }).click();
-  await feed.evaluate((el) => {
+  const feedScroller = page.locator(".social-feed-scroll:visible");
+  await feedScroller.evaluate((el) => {
     el.scrollTop = 500;
     el.setAttribute("data-reading-kept", "yes");
   });
-  const position = await feed.evaluate((el) => el.scrollTop);
+  const position = await feedScroller.evaluate((el) => el.scrollTop);
   expect(position).toBeGreaterThan(0);
   const navigation = page.getByRole("navigation", {
     name: "Ambientes do Social",
@@ -269,8 +270,8 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
   await navigation.getByRole("button", { name: "Clips", exact: true }).click();
   await expect(page.locator(".social-clips-shell")).toBeVisible();
   await navigation.getByRole("button", { name: "Feed", exact: true }).click();
-  expect(await feed.evaluate((el) => el.scrollTop)).toBe(position);
-  await expect(feed).toHaveAttribute("data-reading-kept", "yes");
+  expect(await feedScroller.evaluate((el) => el.scrollTop)).toBe(position);
+  await expect(feedScroller).toHaveAttribute("data-reading-kept", "yes");
   await navigation.getByRole("button", { name: "Criar", exact: true }).click();
   const editor = page.getByRole("region", { name: "Central de criação" });
   const draftText = `Meu rascunho continua aqui. #computação ${bia.username}`;

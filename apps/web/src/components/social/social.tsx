@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Aperture, Search, Send, Settings2, ArrowLeft } from "lucide-react";
 import { api } from "@/lib/api";
@@ -95,7 +95,20 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     [people, setPeople] = useState<SocialPerson[]>([]),
     [refresh, setRefresh] = useState(0),
     [highlight, setHighlight] = useState<SocialView | null>(null);
-  const usage = useRef({ feed: 0, clips: 0, create: 0 });
+  const usage = useRef({ feed: 0, clips: 0, create: 0 }),
+    feedScroll = useRef<HTMLDivElement>(null),
+    feedPositions = useRef<Record<string, number>>({});
+  /** The Feed tabs share one scroll area; each keeps its own reading position. */
+  function openTab(next: string) {
+    if (next === tab) return;
+    const area = feedScroll.current;
+    if (area) feedPositions.current[tab] = area.scrollTop;
+    setTab(next);
+  }
+  useLayoutEffect(() => {
+    const area = feedScroll.current;
+    if (area) area.scrollTop = feedPositions.current[tab] ?? 0;
+  }, [tab]);
   useEffect(() => {
     const timer = setTimeout(() => {
       if (incomingQuery) {
@@ -226,7 +239,11 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
           >
             {(page) =>
               page === "feed" ? (
-                <>
+                <div
+                  className="social-feed-scroll"
+                  data-social-scroller
+                  ref={feedScroll}
+                >
             <SocialStories
               me={ready.me}
               create={() => select("create", "STORY")}
@@ -248,7 +265,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                     role="tab"
                     aria-selected={t === tab}
                     key={t}
-                    onClick={() => setTab(t)}
+                    onClick={() => openTab(t)}
                   >
                     {label}
                   </button>
@@ -325,7 +342,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                 />
               </div>
             )}
-                </>
+                </div>
               ) : page === "clips" ? (
                 opened.includes("clips") && (
                   <SocialClips

@@ -43,7 +43,9 @@ export function stubIntersectionObserver() {
   const Observer = vi.fn(function (
     this: IntersectionObserver,
     callback: IntersectionObserverCallback,
+    options?: IntersectionObserverInit,
   ) {
+    Object.defineProperty(this, "root", { value: options?.root ?? null });
     this.observe = (target: Element) => void observed.push({ target, callback });
     this.unobserve = () => {};
     this.disconnect = () => {};

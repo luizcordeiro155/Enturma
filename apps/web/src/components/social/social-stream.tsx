@@ -82,6 +82,11 @@ export function SocialStream({
     latest = useRef(stream.load),
     pull = useRef<{ x: number; y: number } | null>(null);
   const [newContent, setNewContent] = useState(false);
+  // In the Feed the whole page scrolls (Stories and tabs travel with the list);
+  // elsewhere, such as a profile, the list is its own scroll area.
+  const scroller = () =>
+    panel.current?.closest<HTMLElement>("[data-social-scroller]") ??
+    panel.current;
   useEffect(() => {
     latest.current = stream.load;
   }, [stream.load]);
@@ -92,7 +97,12 @@ export function SocialStream({
       (entries) => {
         if (entries.some((e) => e.isIntersecting)) void latest.current();
       },
-      { root: panel.current, rootMargin: "350px" },
+      {
+        root:
+          panel.current?.closest<HTMLElement>("[data-social-scroller]") ??
+          panel.current,
+        rootMargin: "350px",
+      },
     );
     observer.observe(sentinel.current);
     return () => observer.disconnect();
@@ -119,10 +129,13 @@ export function SocialStream({
       tabIndex={0}
       aria-label="Publicações"
       aria-busy={stream.busy}
+      onTouchCancel={() => {
+        pull.current = null;
+      }}
       onTouchStart={(event) => {
         const touch = event.touches[0];
         pull.current =
-          event.touches.length === 1 && event.currentTarget.scrollTop <= 0
+          event.touches.length === 1 && (scroller()?.scrollTop ?? 0) <= 0
             ? { x: touch.clientX, y: touch.clientY }
             : null;
       }}
@@ -135,7 +148,7 @@ export function SocialStream({
           touch &&
           !stream.busy &&
           pullRefreshes(
-            event.currentTarget.scrollTop,
+            scroller()?.scrollTop ?? 0,
             touch.clientX - start.x,
             touch.clientY - start.y,
           )
@@ -151,7 +164,7 @@ export function SocialStream({
             className="social-fresh secondary"
             onClick={() => {
               setNewContent(false);
-              panel.current?.scrollTo({ top: 0, behavior: "auto" });
+              scroller()?.scrollTo({ top: 0, behavior: "auto" });
               void stream.load(true);
             }}
           >
