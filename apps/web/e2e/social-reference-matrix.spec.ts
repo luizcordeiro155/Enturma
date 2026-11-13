@@ -156,6 +156,10 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
       ),
     ).toBe(true);
     const dock = await page.locator(".social-navigation").boundingBox();
+    const title = (await page.locator(".social-header h1").boundingBox())!;
+    const actions = (await page.locator(".social-header-actions").boundingBox())!;
+    expect(title.x + title.width).toBeLessThanOrEqual(actions.x + 1);
+    expect(actions.x + actions.width).toBeLessThanOrEqual(width + 1);
     expect(dock!.width).toBeLessThanOrEqual(width);
     for (const item of await nav.locator("button:visible,a:visible").all()) {
       const box = await item.boundingBox();

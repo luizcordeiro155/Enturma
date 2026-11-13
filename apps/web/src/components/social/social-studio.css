@@ -1488,6 +1488,14 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
 .social-page .social-header {
   width: calc(100% - 32px);
 }
+@media (max-width: 760px) {
+  .social-page .social-header {
+    width: 100%;
+  }
+  .social-page .social-header h1 {
+    white-space: normal;
+  }
+}
 .social-feed-scroll {
   /* Keep the scrollport flush with the viewport; avoid a permanent 15px gutter. */
   scrollbar-width: thin;
