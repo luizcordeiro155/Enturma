@@ -1,5 +1,6 @@
 # Matriz de paridade — inventário inicial
 
+> Registro histórico do primeiro incremento. O estado atual está em [Prontidão de publicação](SOCIAL_3_RELEASE_READINESS.md) e [contrato Studio](SOCIAL_STUDIO_RELEASE.md). A PR consolidada inclui V72/V73; as observações abaixo sobre ausência de migrations/arquivo de release descrevem apenas a base original.
 Base: feat/social-3-part1, e1c2d39. Alterações locais de Feed preservadas em codex/social-instagram-parity. Não houve deploy. SOCIAL_STUDIO_RELEASE.md não existe nesta revisão. Implementação não equivale a habilitação ou homologação em produção.
 
 | Recurso | Referência | Enturma atual / Desktop e Mobile | Backend / evidência | Prioridade / testes / status |

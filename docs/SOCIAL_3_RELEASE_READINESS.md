@@ -14,7 +14,7 @@
 ## Gates restantes
 
 1. E2E completo no SHA final, revisão visual e regressões; checks obrigatórios e revisões do GitHub.
-2. API/V72 antes do cliente de coleções; validar autorização, persistência e exportação. Ver mapa de migração em `SOCIAL_3_IMPLEMENTATION_PROGRESS.md`.
+2. API/V72/V73 antes do cliente de coleções; validar autorização, persistência e exportação. Ver mapa de migração em `SOCIAL_3_IMPLEMENTATION_PROGRESS.md`.
 3. Confirmar capacidades reais de R2, FFmpeg e LiveKit sem imprimir segredos. Não habilitar flag de recurso indisponível.
 4. Merge da PR consolidada, confirmar main e deployments oficiais; smoke autenticado e logs.
 5. Verificar manifesto/download/hash dos distribuidores e registrar o alcance dos testes Android/Windows.
@@ -22,3 +22,13 @@
 ## Rollback
 
 Vercel anterior conhecido: `dpl_3iLK7SKQf5K2mjedqV9epPszxR1d` (2743072); o deployment atual acima também pode ser preservado como base imediatamente anterior. Reverter cliente e API mantendo dados/tabelas aditivas. Não trocar credenciais, contratar recursos ou executar restauração destrutiva de produção. Backup/restauração sintéticos passaram na CI; isso não comprova backup externo recente de dados reais.
+
+## Continuação autorizada — layout Figma e gate de schema
+
+O usuário autorizou implementar o layout aprovado e publicar em produção. O incremento adapta rail de 76 px, dock de cinco destinos, perfil de três colunas, coluna lateral de conexões reais e painéis móveis, preservando os fluxos completos já presentes na PR.
+
+Antes da promoção da Web, chamar `GET /api/backend/public/social-release` no domínio atual da Vercel. O BFF encaminha à API SquareCloud. Exigir HTTP 200 e `{"release":"social-figma-2026-11-13","ready":true}`. A resposta confirma o código do probe, V72/V73 bem-sucedidas no histórico Flyway e RLS nas cinco tabelas protegidas. Não comprova capacidades de mídia, concessões de papéis, LiveKit ou a versão do frontend: estes gates permanecem separados. Falha responde 503; API antiga não responde com esse contrato. Nenhum segredo ou dado pessoal é exposto.
+
+O deploy automático deve construir a produção sem atribuir os domínios até a API estar pronta (`autoAssignCustomDomains=false` durante o gate). Promover somente o deployment de produção do SHA integrado com CI aprovada e restaurar a atribuição automática após a promoção. Em falha, manter o domínio na produção anterior e registrar o bloqueio; não executar down migrations.
+
+Validação local do incremento: build Web, typecheck, lint sem erros e 303 testes Web aprovados. O SHA final ainda depende da CI integrada, evidência visual e observação do deploy. Este parágrafo não declara publicação concluída.

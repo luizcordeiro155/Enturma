@@ -292,7 +292,12 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
               >
                 <Search size={21} />
               </button>
-              <button type="button" className="icon-control social-mobile-explore" aria-label="Explorar" onClick={() => setExplore(true)}>
+              <button
+                type="button"
+                className="icon-control social-mobile-explore"
+                aria-label="Explorar"
+                onClick={() => setExplore(true)}
+              >
                 <Aperture size={21} aria-hidden="true" />
               </button>
               <button
@@ -326,7 +331,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                   ref={feedScroll}
                 >
                   <div className="social-feed-layout">
-                  <div className="social-feed-reading">
+                    <div className="social-feed-reading">
                       <SocialStories
                         me={ready.me}
                         create={() => select("create", "STORY")}
@@ -374,7 +379,10 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                             value={query}
                             onChange={(event) => setQuery(event.target.value)}
                           />
-                          <button className="icon-control" aria-label="Pesquisar">
+                          <button
+                            className="icon-control"
+                            aria-label="Pesquisar"
+                          >
                             <Search size={18} />
                           </button>
                         </form>
@@ -431,8 +439,12 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                           />
                         </div>
                       )}
-                  </div>
-                  <SocialFeedAside me={ready.me} person={setPerson} explore={() => setExplore(true)} />
+                    </div>
+                    <SocialFeedAside
+                      me={ready.me}
+                      person={setPerson}
+                      explore={() => setExplore(true)}
+                    />
                   </div>
                 </div>
               ) : page === "clips" ? (

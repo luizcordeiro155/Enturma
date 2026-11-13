@@ -1,14 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { playMotion } from "@/lib/motion";
-import {
-  Film,
-  Plus,
-  Home,
-  Settings2,
-  Search,
-  Send,
-} from "lucide-react";
+import { Film, Plus, Home, Settings2, Search, Send } from "lucide-react";
 import type { SocialPerson, SocialView } from "@/lib/social";
 import { NavigationLink } from "../navigation-link";
 import { Avatar } from "../user-identity";
@@ -106,7 +99,12 @@ export function SocialNavigation({
             </button>
           );
         })}
-        <button className="social-navigation-explore" type="button" onClick={explore} title="Explorar">
+        <button
+          className="social-navigation-explore"
+          type="button"
+          onClick={explore}
+          title="Explorar"
+        >
           <span className="social-nav-glyph">
             <Search size={24} />
           </span>

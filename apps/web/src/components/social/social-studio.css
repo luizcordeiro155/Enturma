@@ -1453,6 +1453,7 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
   .social-page .social-story-ring .avatar { width: 54px; height: 54px; }
 }
 @media (min-width: 1200px) {
+  .social-page .social-feed-view { max-width: 920px; }
   .social-feed-layout { display: grid; grid-template-columns: minmax(0, 580px) 290px; gap: 50px; align-items: start; }
   .social-page .social-header { max-width: 920px; }
   .social-feed-aside { display: grid; gap: 24px; padding: 16px 0; position: sticky; top: 0; }
@@ -1472,6 +1473,5 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
   .social-mobile-explore { display: grid !important; }
   html[data-theme] dialog.social-dialog-panel,
   html[data-theme] dialog.social-dialog-sheet { border-radius: 24px 24px 0 0; background: var(--surface); }
-  :is(.social-dialog-panel, .social-dialog-sheet)::before { content: ""; display: block; flex: none; width: 36px; height: 4px; margin: 10px auto 2px; background: var(--muted); border-radius: 4px; }
   html[data-theme] :is(.social-dialog-panel, .social-dialog-sheet) > header { background: var(--surface); }
 }

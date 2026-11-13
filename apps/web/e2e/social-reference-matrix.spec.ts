@@ -118,7 +118,9 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
           reducedMotion: true,
         });
         localStorage.setItem(key, value);
-        window.dispatchEvent(new StorageEvent("storage", { key, newValue: value }));
+        window.dispatchEvent(
+          new StorageEvent("storage", { key, newValue: value }),
+        );
       }, theme);
       await expect(page.locator("html")).toHaveAttribute(
         "data-theme",
@@ -160,8 +162,19 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
       expect(box!.width).toBeGreaterThanOrEqual(44);
       expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
     }
-    expect(await nav.locator("button:visible,a:visible").count()).toBe(width < 761 ? 5 : 6);
+    expect(await nav.locator("button:visible,a:visible").count()).toBe(
+      width < 761 ? 5 : 6,
+    );
     if (width >= 761) expect(dock!.width).toBe(76);
+    if (width >= 1200) {
+      expect(
+        (await page.locator(".social-feed-aside").boundingBox())!.width,
+      ).toBe(290);
+      expect(
+        (await page.locator(".social-post:visible").first().boundingBox())!
+          .width,
+      ).toBe(500);
+    }
     await captureThemes("feed", width);
     await scroller.evaluate((el) => {
       el.scrollTop = 360;
@@ -193,7 +206,13 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
     ).toBe(true);
     if (width >= 1200)
       expect((await profile.boundingBox())!.width).toBeGreaterThan(1100);
-    expect(await profile.locator(".social-profile-grid").evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(" ").length)).toBe(3);
+    expect(
+      await profile
+        .locator(".social-profile-grid")
+        .evaluate(
+          (el) => getComputedStyle(el).gridTemplateColumns.split(" ").length,
+        ),
+    ).toBe(3);
     await captureThemes("profile", width);
     await profile.getByRole("button", { name: "Fechar", exact: true }).click();
     await nav.getByRole("button", { name: "Criar", exact: true }).click();
