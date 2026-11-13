@@ -1,5 +1,11 @@
 # Social 3 — progresso verificável
 
+## Complemento: exportação, proteção do banco e geometria
+
+V73 habilita RLS default-deny e revoga PUBLIC em tabelas V71/V72, seguindo V62/V69. API confiável dona das tabelas mantém autorização por objeto; nenhum FORCE RLS, exclusão ou alteração de dados. Caso runtime restrito tenha sido configurado pelo operador, confirmar grants/policies antes do release. Rollback mantém tabelas aditivas e dados.
+
+Catálogo autenticado `/account/privacy/export/sections` torna a API dona da lista exportável, incluindo coleções e dados Studio. Cliente consulta catálogo e usa lista anterior somente em 404, permitindo sobreposição de versões. Teste verifica isolamento de exportação entre donos. Max-width legado corrigido para grades desktop; matriz reaproveita montagem entre temas para evitar requisições redundantes.
+
 Atualizado em 13/11/2026 durante a execução; publicação deste incremento ainda pendente.
 
 ## Recuperação e integração

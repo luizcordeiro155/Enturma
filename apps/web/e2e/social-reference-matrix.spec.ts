@@ -102,11 +102,9 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
     nav.getByRole("button", { name: "Explorar", exact: true }),
   ).toBeVisible();
   await expect(page.locator(".social-post:visible").first()).toBeVisible();
-  for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1366, 1440, 1920]) {
-    await page.setViewportSize({
-      width,
-      height: width < 761 ? 844 : width === 1366 ? 768 : 1080,
-    });
+  // Compare themes on the same mounted surface. Reopening each dialog for every
+  // screenshot needlessly repeats authenticated reads and exhausts the real quota.
+  async function captureThemes(surface: string, width: number) {
     for (const theme of ["light", "dark", "enturma", "system"]) {
       await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
       await page.evaluate((theme) => {
@@ -115,79 +113,81 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
         if (theme === "enturma") root.dataset.palette = "enturma";
         else delete root.dataset.palette;
       }, theme);
-      await nav.getByRole("button", { name: "Feed", exact: true }).click();
-      const scroller = page.locator(".social-feed-scroll:visible");
-      await scroller.evaluate((el) => {
-        el.scrollTop = 0;
-      });
-      expect(
-        await page.evaluate(
-          () => document.documentElement.scrollWidth <= innerWidth + 1,
-        ),
-      ).toBe(true);
-      const dock = await page.locator(".social-navigation").boundingBox();
-      expect(dock!.width).toBeLessThanOrEqual(width);
-      for (const item of await nav.locator("button,a").all()) {
-        const box = await item.boundingBox();
-        expect(box!.width).toBeGreaterThanOrEqual(44);
-        expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
-      }
-      await page.screenshot({
-        path: info.outputPath(`reference-feed-${width}-${theme}.png`),
-      });
-      await scroller.evaluate((el) => {
-        el.scrollTop = 360;
-      });
-      const position = await scroller.evaluate((el) => el.scrollTop);
-      expect(position).toBeGreaterThan(0);
-      await nav.getByRole("button", { name: "Explorar", exact: true }).click();
-      const explore = page.getByRole("dialog", {
-        name: "Explorar",
-        exact: true,
-      });
-      await expect(
-        explore.locator(".social-profile-cell").first(),
-      ).toBeVisible();
-      expect(
-        await explore.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
-      ).toBe(true);
-      await page.screenshot({
-        path: info.outputPath(`reference-explore-${width}-${theme}.png`),
-      });
-      await explore
-        .getByRole("button", { name: "Fechar", exact: true })
-        .click();
-      expect(await scroller.evaluate((el) => el.scrollTop)).toBe(position);
-      await nav.getByRole("button", { name: "Meu perfil social" }).click();
-      const profile = page.getByRole("dialog", {
-        name: "Perfil social",
-        exact: true,
-      });
-      await expect(
-        profile.locator(".social-profile-cell").first(),
-      ).toBeVisible();
-      expect(
-        await profile.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
-      ).toBe(true);
-      await page.screenshot({
-        path: info.outputPath(`reference-profile-${width}-${theme}.png`),
-      });
-      await profile
-        .getByRole("button", { name: "Fechar", exact: true })
-        .click();
-      await nav.getByRole("button", { name: "Criar", exact: true }).click();
-      await expect(
-        page.getByRole("region", { name: "Central de criação" }),
-      ).toBeVisible();
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth + 1,
         ),
       ).toBe(true);
       await page.screenshot({
-        path: info.outputPath(`reference-create-${width}-${theme}.png`),
+        path: info.outputPath(`reference-${surface}-${width}-${theme}.png`),
       });
     }
+  }
+  for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1366, 1440, 1920]) {
+    await page.setViewportSize({
+      width,
+      height: width < 761 ? 844 : width === 1366 ? 768 : 1080,
+    });
+    await nav.getByRole("button", { name: "Feed", exact: true }).click();
+    const scroller = page.locator(".social-feed-scroll:visible");
+    await scroller.evaluate((el) => {
+      el.scrollTop = 0;
+    });
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+    const dock = await page.locator(".social-navigation").boundingBox();
+    expect(dock!.width).toBeLessThanOrEqual(width);
+    for (const item of await nav.locator("button,a").all()) {
+      const box = await item.boundingBox();
+      expect(box!.width).toBeGreaterThanOrEqual(44);
+      expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
+    }
+    await captureThemes("feed", width);
+    await scroller.evaluate((el) => {
+      el.scrollTop = 360;
+    });
+    const position = await scroller.evaluate((el) => el.scrollTop);
+    expect(position).toBeGreaterThan(0);
+    await nav.getByRole("button", { name: "Explorar", exact: true }).click();
+    const explore = page.getByRole("dialog", {
+      name: "Explorar",
+      exact: true,
+    });
+    await expect(explore.locator(".social-profile-cell").first()).toBeVisible();
+    expect(
+      await explore.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBe(true);
+    if (width >= 1200)
+      expect((await explore.boundingBox())!.width).toBeGreaterThan(1100);
+    await captureThemes("explore", width);
+    await explore.getByRole("button", { name: "Fechar", exact: true }).click();
+    expect(await scroller.evaluate((el) => el.scrollTop)).toBe(position);
+    await nav.getByRole("button", { name: "Meu perfil social" }).click();
+    const profile = page.getByRole("dialog", {
+      name: "Perfil social",
+      exact: true,
+    });
+    await expect(profile.locator(".social-profile-cell").first()).toBeVisible();
+    expect(
+      await profile.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBe(true);
+    if (width >= 1200)
+      expect((await profile.boundingBox())!.width).toBeGreaterThan(1100);
+    await captureThemes("profile", width);
+    await profile.getByRole("button", { name: "Fechar", exact: true }).click();
+    await nav.getByRole("button", { name: "Criar", exact: true }).click();
+    await expect(
+      page.getByRole("region", { name: "Central de criação" }),
+    ).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+    await captureThemes("create", width);
   }
   await nav.getByRole("button", { name: "Explorar", exact: true }).click();
   const explore = page.getByRole("dialog", { name: "Explorar", exact: true });
@@ -208,7 +208,10 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
   await explore.getByRole("button", { name: "Pesquisar no Explorar" }).click();
   await expect(explore.locator(".social-profile-cell")).toHaveCount(8);
   await explore.locator(".social-profile-cell").first().click();
-  await viewer.getByRole("button", { name: "Opções da publicação" }).first().click();
+  await viewer
+    .getByRole("button", { name: "Opções da publicação" })
+    .first()
+    .click();
   await page.getByRole("button", { name: "Organizar em coleção" }).click();
   const collections = page.getByRole("dialog", { name: "Coleções privadas" });
   await collections.getByLabel("Nome da coleção").fill("Referências de estudo");

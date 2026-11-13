@@ -1,5 +1,12 @@
 # Social 3 — resultados de testes
 
+## Incremento após `8af2e3c`
+
+- CI `43366672237`: 72/74 E2E aprovados; matriz HTTP429 e medida de Clips durante transição. Java, lint, TypeScript, unitários, build, export Expo, compilação Android e segurança do instalador Windows passaram nessa CI. Correções aguardam nova CI.
+- Integração Java de coleções/exportação/RLS: 17 testes passaram (`.local/social3-collections-java.log`); RLS reforçada, registro visível ao dono na mesma transação, passou isoladamente (`.local/social3-collection-rls.log`).
+- TypeScript e lint focado das correções passaram. Matriz reorganizada mantém 160 capturas (10 larguras × 4 temas × 4 telas), sem alterar rate limits nem simular respostas da API de autorização/dados.
+- Capturas reais inspecionadas: Feed mobile 390 e Explorar desktop 1280 escuros. Explorar limitado a 600px; max-width corrigido e asserção adicionada. Validação final pendente.
+
 13/11/2026. Resultados históricos não substituem o check do commit final.
 
 | Prova | Resultado observado |

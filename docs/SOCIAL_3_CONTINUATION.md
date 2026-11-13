@@ -1,5 +1,11 @@
 # Enturma Social 3.0 — checkpoint de continuidade
 
+## Checkpoint vigente — correções da CI em 13/11/2026
+
+Branch `codex/social-instagram-parity`; coleções privadas commitadas em `8af2e3c`. PRs #150/#151 confirmadas abertas Draft, sem merge; #150 preservada no histórico da #151. CI `43366672237` terminou com 72 E2E aprovados e 2 falhas: matriz atingiu HTTP 429 após reabrir telas por tema; teste de Clips capturou posição durante a transição de breakpoint. Correções: capturar quatro temas por montagem, aguardar animação antes da medida. Capturas também revelaram max-width herdado de 600px em Explorar/Perfil; corrigido e coberto por asserção desktop >1100px.
+
+Exportação agora consulta catálogo de seções da API (fallback 404 para API anterior). V73 aplica RLS default-deny às tabelas novas conforme padrão V62/V69. Integração Java: 17 aprovados; prova RLS reforçada com registro existente na mesma transação passou isoladamente. TypeScript e lint focado passaram. Próximo passo: enviar incremento, aguardar CI do SHA final, inspecionar 160 capturas e fluxo de coleções, revisar gates e integrar. API SquareCloud atualiza automaticamente pela main, confirmado pelo usuário. Nenhuma publicação nova comprovada. Não descartar `premium-audit.json`.
+
 ## Atualização prioritária — 13/11/2026, execução em andamento
 
 O registro abaixo desta atualização é histórico. Estado atual: branch `codex/social-instagram-parity`, PR consolidada #151; último push `ecb2215`, com PR #150 incorporada no merge `1bb0ff0` e alterações anteriores preservadas em `4f096e5`. Coleções privadas V72 estão implementadas no working tree e passaram 14 testes Java de integração; ainda precisam do E2E/commit. Não descartar `premium-audit.json`, arquivo preexistente não rastreado.

@@ -39,7 +39,7 @@ export function AccountPrivacyCard() {
     setMessage("");
     try {
       const result: Record<string, unknown[]> = {};
-      for (const section of [
+      let sections = [
         "account",
         "portfolio",
         "notebooks",
@@ -50,7 +50,17 @@ export function AccountPrivacyCard() {
         "social-posts", "social-interactions", "social-preferences", "social-comments",
         "social-following", "social-followers", "social-feedback", "social-mutes",
         "social-verification", "social-reports",
-      ]) {
+      ];
+      // Ask the API which data exists in its deployed version. Older APIs
+      // keep their original export contract during an overlapping rollout.
+      try {
+        sections = await api<string[]>("/account/privacy/export/sections", {
+          cache: "no-store",
+        });
+      } catch (error) {
+        if (!(error instanceof ApiError) || error.status !== 404) throw error;
+      }
+      for (const section of sections) {
         result[section] = [];
         let offset = 0;
         while (offset >= 0) {

@@ -474,4 +474,40 @@ class SocialIntegrationTest {
         .isInstanceOf(ApiException.class);
     assertThat(((List<?>) collections.list(a, null))).hasSize(50);
   }
+
+  @Autowired br.com.enturma.auth.PersonalDataExport personalExport;
+
+  @Test
+  void collectionExportIncludesOnlyOwnersRecords() {
+    UUID collection = UUID.randomUUID(), post = publish(a, "POST", "Fonte de pesquisa");
+    collections.save(b, collection, new SocialCollections.Name("Pesquisa privada"));
+    collections.member(b, collection, post, new SocialCollections.Membership(true));
+    assertThat(personalExport.sections()).contains("social-collections", "social-collection-items");
+    for (String section : List.of("social-collections", "social-collection-items")) {
+      assertThat((List<?>) ((Map<?, ?>) personalExport.export(b, section, 0).getBody()).get("items")).hasSize(1);
+      assertThat((List<?>) ((Map<?, ?>) personalExport.export(c, section, 0).getBody()).get("items")).isEmpty();
+    }
+  }
+
+  @Test
+  void privateCollectionRowsStayHiddenAfterAnAccidentalDatabaseGrant() throws Exception {
+    UUID collection = UUID.randomUUID();
+    collections.save(a, collection, new SocialCollections.Name("Privada"));
+    assertThat(db.jdbc.queryForObject("SELECT count(*) FROM social_collection WHERE id=?", Integer.class, collection)).isEqualTo(1);
+    db.jdbc.execute((org.springframework.jdbc.core.ConnectionCallback<Void>) connection -> {
+      String role = "collection_probe_" + UUID.randomUUID().toString().replace("-", "");
+      try (var statement = connection.createStatement()) {
+        statement.execute("CREATE ROLE " + role + " NOLOGIN");
+        statement.execute("GRANT USAGE ON SCHEMA public TO " + role);
+        statement.execute("GRANT SELECT ON public.social_collection,public.social_collection_item TO " + role);
+        statement.execute("SET LOCAL ROLE " + role);
+        try (var result = statement.executeQuery("SELECT count(*) FROM public.social_collection")) {
+          result.next();
+          assertThat(result.getInt(1)).isZero();
+        }
+        statement.execute("RESET ROLE");
+      }
+      return null;
+    });
+  }
 }

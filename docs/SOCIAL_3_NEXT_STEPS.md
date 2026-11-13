@@ -1,5 +1,9 @@
 # Enturma Social 3.0 — retomada operacional
 
+## Próxima ação exata (substitui histórico abaixo)
+
+Enviar correções de CI, exportação e RLS após `8af2e3c`; acompanhar checks do novo SHA na PR #151. A CI antiga `43366672237` teve 72/74 E2E aprovados; causas comprovadas: HTTP429 na matriz e captura durante animação no teste de Clips. Inspecionar capturas finais, validar coleções pela UI, revisar PRs/gates, merge e publicação oficial. SquareCloud acompanha main (confirmado pelo usuário); verificar migrações V72/V73, commit Web e versões nativas. Não declarar produção antes dos smokes.
+
 ## Próxima tarefa vigente — 13/11/2026
 
 PR #150 já incorporada à branch `codex/social-instagram-parity`, PR #151 aberta. Consultar a CI `43366672237` (`ecb2215`), baixar screenshots e diagnósticos, corrigir E2E. Coleções privadas V72 estão no working tree: 14 testes Java aprovados, E2E novo ainda não executado. Finalizar testes, commit/push, checks do SHA final, revisar/integrar e publicar API → Web → distribuição nativa conforme pipelines, verificando versão/health/downloads. Não encerrar após código. Os detalhes históricos seguintes não substituem os documentos atuais `SOCIAL_3_IMPLEMENTATION_PROGRESS.md`, `SOCIAL_3_TEST_RESULTS.md`, `SOCIAL_3_RELEASE_READINESS.md`.

@@ -717,6 +717,13 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   await expect(clips.locator("video").nth(3)).not.toHaveAttribute("src", /.+/);
   for (const width of [1366, 1920, 390]) {
     await page.setViewportSize({ width, height: width === 1366 ? 768 : 844 });
+    // Crossing the mobile breakpoint starts the pager's transform transition.
+    // Measure the media only after that movement, independently of playback.
+    await page.locator(".social-pager-track").evaluate(async (track) => {
+      await Promise.all(
+        track.getAnimations().map((animation) => animation.finished),
+      );
+    });
     const selected = clips.locator('[data-clip-index="1"]');
     await expect.poll(playing).toEqual([false, true, false, false]);
     await expect

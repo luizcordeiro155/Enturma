@@ -1380,6 +1380,7 @@ html[data-theme] dialog.social-dialog-explore {
   position: fixed;
   inset: 16px;
   width: min(1240px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
   height: calc(100dvh - 32px);
   max-height: var(--social-viewport, 100dvh);
   margin: auto;
@@ -1409,7 +1410,7 @@ html[data-theme] .social-explore-search .icon-control { background: transparent;
 .social-explore-people h3, .social-explore-people [role=alert] { flex-basis: 100%; margin: 0; font-size: 14px; }
 html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-profile-grid-square .social-profile-cell { aspect-ratio: 3 / 4; }
 @media (min-width: 1200px) {
-  html[data-theme] dialog.social-dialog-profile { width: min(1240px, calc(100vw - 64px)); }
+  html[data-theme] dialog.social-dialog-profile { width: min(1240px, calc(100vw - 64px)); max-width: calc(100vw - 64px); }
   :is(.social-dialog-profile, .social-dialog-explore) .social-profile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
   .social-profile-intro { width: min(728px, 100%); margin-inline: auto; }
   .social-profile-intro .identity-avatar { width: 150px; height: 150px; }

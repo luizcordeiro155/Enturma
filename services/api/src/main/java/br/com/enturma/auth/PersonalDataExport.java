@@ -38,6 +38,9 @@ public class PersonalDataExport {
     SECTIONS.put("social-verification", "SELECT id,reason,status,decision,created_at,reviewed_at FROM social_verification WHERE user_id=? ORDER BY created_at,id");
     SECTIONS.put("social-reports", "SELECT id,post_id,reason,status,created_at FROM social_report WHERE reporter_id=? ORDER BY created_at,id");
   }
+  @GetMapping("/sections")
+  public Set<String> sections() { return Collections.unmodifiableSet(SECTIONS.keySet()); }
+
   @GetMapping
   public ResponseEntity<?> export(@AuthenticationPrincipal Actor actor,
       @RequestParam(defaultValue="account") String section,@RequestParam(defaultValue="0") int offset) {
