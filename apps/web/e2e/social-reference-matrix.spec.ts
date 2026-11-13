@@ -108,11 +108,26 @@ test("Social reference matrix: feed, discovery, profile and creation at ten widt
     for (const theme of ["light", "dark", "enturma", "system"]) {
       await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
       await page.evaluate((theme) => {
-        const root = document.documentElement;
-        root.dataset.theme = theme === "light" ? "light" : "dark";
-        if (theme === "enturma") root.dataset.palette = "enturma";
-        else delete root.dataset.palette;
+        // Use the shared preference owner, as a theme change from another tab
+        // does. Mutating root attributes races ThemeSync's media change listener.
+        const key = "enturma-experience";
+        const preference = JSON.parse(localStorage.getItem(key) ?? "{}");
+        const value = JSON.stringify({
+          ...preference,
+          theme: theme.toUpperCase(),
+          reducedMotion: true,
+        });
+        localStorage.setItem(key, value);
+        window.dispatchEvent(new StorageEvent("storage", { key, newValue: value }));
       }, theme);
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-theme",
+        theme === "light" ? "light" : "dark",
+      );
+      await expect(page.locator("html")).toHaveAttribute(
+        "data-palette",
+        theme === "enturma" ? "enturma" : "default",
+      );
       expect(
         await page.evaluate(
           () => document.documentElement.scrollWidth <= innerWidth + 1,
