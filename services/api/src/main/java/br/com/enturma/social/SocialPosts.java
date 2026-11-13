@@ -282,6 +282,11 @@ public class SocialPosts {
       String cursor,
       UUID author,
       String collection) {
+    return feed(a, tab, kind, query, cursor, author, collection, null);
+  }
+
+  public Object feed(Actor a, String tab, String kind, String query, String cursor,
+      UUID author, String collection, UUID collectionId) {
     access.profile(a.id());
     if (!Set.of("for-you", "following", "campus").contains(tab)
         || !Set.of("POST", "CLIP", "STORY", "ALL").contains(kind)
@@ -291,9 +296,17 @@ public class SocialPosts {
     if (collection.equals("saved") && (author == null || !author.equals(a.id())))
       throw ApiException.forbidden();
     String scope = tab + ":" + kind + ":" + query.hashCode() + ":" + author + ":" + collection;
+    if (collectionId != null) {
+      db.one("SELECT id FROM social_collection WHERE id=? AND owner_id=?", collectionId, a.id());
+      scope += ":" + collectionId;
+    }
     var boundary = SocialCursor.read(cursor, scope);
     var args = new ArrayList<Object>(List.of(a.id(), a.id(), a.id(), a.id(), a.id(), a.id()));
     String filters = " WHERE " + SocialAccess.published("p") + " AND " + SocialAccess.visible("p");
+    if (collectionId != null) {
+      filters += " AND EXISTS(SELECT 1 FROM social_collection_item ci WHERE ci.collection_id=? AND ci.post_id=p.id)";
+      args.add(collectionId);
+    }
     if (kind.equals("ALL")) filters += " AND p.kind IN ('POST','CLIP')";
     else {
       filters += " AND p.kind=?";
@@ -430,6 +443,10 @@ public class SocialPosts {
 
   @Transactional
   public Object react(Actor a, UUID id, String kind, boolean active) {
+    if ("SAVE".equals(kind)) {
+      access.profile(a.id());
+      db.one("SELECT user_id FROM social_profile WHERE user_id=? FOR UPDATE", a.id());
+    }
     var p = access.post(a, id);
     if (!Set.of("LIKE", "SAVE", "REPOST", "HIDE").contains(kind))
       throw ApiException.invalid("Interação inválida.");
@@ -445,6 +462,8 @@ public class SocialPosts {
     else
       db.jdbc.update(
           "DELETE FROM social_reaction WHERE post_id=? AND user_id=? AND kind=?", id, a.id(), kind);
+    if (!active && "SAVE".equals(kind))
+      db.jdbc.update("DELETE FROM social_collection_item i USING social_collection c WHERE i.collection_id=c.id AND c.owner_id=? AND i.post_id=?", a.id(), id);
     if (inserted > 0 && Set.of("LIKE", "REPOST").contains(kind))
       notices.send(
           a.id(),

@@ -1,5 +1,9 @@
 # Enturma Social 3.0 — retomada operacional
 
+## Próxima tarefa vigente — 13/11/2026
+
+PR #150 já incorporada à branch `codex/social-instagram-parity`, PR #151 aberta. Consultar a CI `43366672237` (`ecb2215`), baixar screenshots e diagnósticos, corrigir E2E. Coleções privadas V72 estão no working tree: 14 testes Java aprovados, E2E novo ainda não executado. Finalizar testes, commit/push, checks do SHA final, revisar/integrar e publicar API → Web → distribuição nativa conforme pipelines, verificando versão/health/downloads. Não encerrar após código. Os detalhes históricos seguintes não substituem os documentos atuais `SOCIAL_3_IMPLEMENTATION_PROGRESS.md`, `SOCIAL_3_TEST_RESULTS.md`, `SOCIAL_3_RELEASE_READINESS.md`.
+
 Atualizado em 13/11/2026. Leia primeiro `docs/SOCIAL_3_CONTINUATION.md` e confira o Git. Não reinicie o projeto.
 
 ## Tarefa imediata

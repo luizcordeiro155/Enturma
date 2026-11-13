@@ -148,6 +148,7 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM social_story_view WHERE user_id=?",userId);
     db.jdbc.update("DELETE FROM social_report WHERE reporter_id=?",userId);
     db.jdbc.update("DELETE FROM social_verification WHERE user_id=?",userId);
+    db.jdbc.update("DELETE FROM social_collection WHERE owner_id=?",userId);
     db.jdbc.update("DELETE FROM social_profile WHERE user_id=?",userId);
 
     db.jdbc.update("DELETE FROM profile_featured_badge WHERE user_id=?", userId);

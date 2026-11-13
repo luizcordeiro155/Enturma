@@ -4,11 +4,11 @@ import { expect } from "@playwright/test";
 import { randomUUID } from "node:crypto";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
-test("Social reference matrix: feed, discovery, profile and creation at nine widths", async ({
+test("Social reference matrix: feed, discovery, profile and creation at ten widths", async ({
   page,
   request,
 }, info) => {
-  test.setTimeout(180000);
+  test.setTimeout(240000);
   const tag = randomUUID().slice(0, 8);
   const registration = await request.post(`${backend}/api/v1/auth/register`, {
     data: {
@@ -102,8 +102,11 @@ test("Social reference matrix: feed, discovery, profile and creation at nine wid
     nav.getByRole("button", { name: "Explorar", exact: true }),
   ).toBeVisible();
   await expect(page.locator(".social-post:visible").first()).toBeVisible();
-  for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1440, 1920]) {
-    await page.setViewportSize({ width, height: width < 761 ? 844 : 1080 });
+  for (const width of [320, 360, 390, 430, 768, 1024, 1280, 1366, 1440, 1920]) {
+    await page.setViewportSize({
+      width,
+      height: width < 761 ? 844 : width === 1366 ? 768 : 1080,
+    });
     for (const theme of ["light", "dark", "enturma", "system"]) {
       await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
       await page.evaluate((theme) => {
@@ -196,5 +199,69 @@ test("Social reference matrix: feed, discovery, profile and creation at nine wid
   await expect(viewer).toBeVisible();
   await viewer.getByRole("button", { name: "Fechar", exact: true }).click();
   await expect(explore).toBeVisible();
+  await explore.getByRole("button", { name: "Fechar", exact: true }).click();
+  await nav.getByRole("button", { name: "Feed", exact: true }).click();
+  await page.setViewportSize({ width: 390, height: 844 });
+  // Find our real publication through discovery, independent of feed ranking.
+  await nav.getByRole("button", { name: "Explorar", exact: true }).click();
+  await explore.getByRole("searchbox").fill(`#matriz${tag}`);
+  await explore.getByRole("button", { name: "Pesquisar no Explorar" }).click();
+  await expect(explore.locator(".social-profile-cell")).toHaveCount(8);
+  await explore.locator(".social-profile-cell").first().click();
+  await viewer.getByRole("button", { name: "Opções da publicação" }).first().click();
+  await page.getByRole("button", { name: "Organizar em coleção" }).click();
+  const collections = page.getByRole("dialog", { name: "Coleções privadas" });
+  await collections.getByLabel("Nome da coleção").fill("Referências de estudo");
+  await collections
+    .getByRole("button", { name: "Criar coleção", exact: true })
+    .click();
+  const named = collections.getByRole("button", {
+    name: "Referências de estudo",
+    exact: true,
+  });
+  await named.click();
+  await expect(named).toHaveAttribute("aria-pressed", "true");
+  await page.screenshot({
+    path: info.outputPath("reference-private-collection-390.png"),
+  });
+  await collections
+    .getByRole("button", { name: "Fechar", exact: true })
+    .click();
+  await page
+    .getByRole("dialog", { name: "Esta publicação" })
+    .getByRole("button", { name: "Fechar", exact: true })
+    .click();
+  await viewer.getByRole("button", { name: "Fechar", exact: true }).click();
+  await explore.getByRole("button", { name: "Fechar", exact: true }).click();
+  await nav.getByRole("button", { name: "Meu perfil social" }).click();
+  const profile = page.getByRole("dialog", {
+    name: "Perfil social",
+    exact: true,
+  });
+  await profile.getByRole("tab", { name: "Salvos", exact: true }).click();
+  await profile.getByRole("button", { name: "Minhas coleções" }).click();
+  await named.click();
+  await expect(collections.locator(".social-profile-cell")).toHaveCount(1);
+  await collections.getByLabel("Nome da coleção").fill("Pesquisa acadêmica");
+  await collections.getByRole("button", { name: "Renomear coleção" }).click();
+  await expect(
+    collections.getByRole("button", {
+      name: "Pesquisa acadêmica",
+      exact: true,
+    }),
+  ).toBeVisible();
+  await collections
+    .getByRole("button", { name: "Excluir esta coleção" })
+    .click();
+  await collections
+    .getByRole("button", { name: "Excluir coleção", exact: true })
+    .click();
+  await expect(
+    collections.getByText("Nenhuma coleção ainda.", { exact: false }),
+  ).toBeVisible();
+  await collections
+    .getByRole("button", { name: "Fechar", exact: true })
+    .click();
+  await expect(profile.locator(".social-profile-cell:visible")).toHaveCount(1);
   expect(errors).toEqual([]);
 });

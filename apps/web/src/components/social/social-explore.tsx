@@ -22,6 +22,7 @@ export function SocialExplore({
   const [query, setQuery] = useState("");
   const [people, setPeople] = useState<SocialPerson[]>([]);
   const [error, setError] = useState("");
+  const [retry, setRetry] = useState(0);
   const [viewer, setViewer] = useState<{
     items: SocialPost[];
     start: number;
@@ -42,7 +43,7 @@ export function SocialExplore({
     return () => {
       current = false;
     };
-  }, [query]);
+  }, [query, retry]);
   function search(value: string) {
     if (value.trim() === query) return;
     setPeople([]);
@@ -80,7 +81,20 @@ export function SocialExplore({
       {query && (
         <div className="social-explore-people">
           <h3>Resultados para “{query}”</h3>
-          {error && <p role="alert">{error}</p>}
+          {error && (
+            <div role="alert">
+              <p>{error}</p>
+              <button
+                className="secondary"
+                onClick={() => {
+                  setError("");
+                  setRetry((value) => value + 1);
+                }}
+              >
+                Tentar novamente
+              </button>
+            </div>
+          )}
           {people.map((user) => (
             <SocialAuthor key={user.id} user={user} open={person} />
           ))}

@@ -1425,3 +1425,12 @@ html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-pro
   .social-dialog-explore > header { padding-top: max(12px, env(safe-area-inset-top, 0px), var(--native-safe-top, 0px)); }
   .social-explore-search { margin-block: 8px 16px; }
 }
+.social-collections { min-height: 220px; max-height: 75dvh; overflow-y: auto; }
+.social-collections > p { color: var(--muted); font-size: 13px; }
+.social-collection-form { display: flex; align-items: end; flex-wrap: wrap; gap: 10px; }
+.social-collection-form label { display: grid; gap: 6px; flex: 1 1 180px; min-width: 0; }
+.social-collection-form input { min-width: 0; width: 100%; }
+.social-collection-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.social-collection-list button { overflow-wrap: anywhere; }
+.social-collections-open { align-self: start; margin: 12px; }
+.social-collections .social-profile-grid-scroll { min-height: 260px; }

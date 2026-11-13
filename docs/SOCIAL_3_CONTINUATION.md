@@ -1,5 +1,13 @@
 # Enturma Social 3.0 — checkpoint de continuidade
 
+## Atualização prioritária — 13/11/2026, execução em andamento
+
+O registro abaixo desta atualização é histórico. Estado atual: branch `codex/social-instagram-parity`, PR consolidada #151; último push `ecb2215`, com PR #150 incorporada no merge `1bb0ff0` e alterações anteriores preservadas em `4f096e5`. Coleções privadas V72 estão implementadas no working tree e passaram 14 testes Java de integração; ainda precisam do E2E/commit. Não descartar `premium-audit.json`, arquivo preexistente não rastreado.
+
+Leia `SOCIAL_3_IMPLEMENTATION_PROGRESS.md`, `SOCIAL_3_TEST_RESULTS.md` e `SOCIAL_3_RELEASE_READINESS.md` para o estado vigente. CI `43366672237` executa E2E de `ecb2215`; baixar e inspecionar evidências antes de declarar fidelidade. A matriz agora inclui 1366×768. O startup local da API/SMTP foi rejeitado por revisão automática; não contornar. Integração PostgreSQL isolada funciona. Nenhum deploy desta execução foi confirmado ainda.
+
+Próxima ação exata: consultar jobs da CI acima, corrigir falhas, inspecionar screenshots, validar e enviar coleções, aguardar todos os checks do novo SHA; somente então integrar e publicar pela infraestrutura existente. O objetivo continua produção verificada, não apenas código.
+
 Atualizado em 13/11/2026. Este registro distingue evidência local de publicação. Não contém credenciais. Caminhos abaixo são relativos à raiz do repositório Enturma.
 
 ## 1. Objetivo principal

@@ -17,6 +17,7 @@ import { FollowButton, SocialAuthor } from "./social-post";
 import { SocialProfileGrid } from "./social-profile-grid";
 import { SocialPostViewer } from "./social-post-viewer";
 import { StoryViewer } from "./social-stories";
+import { SocialCollections } from "./social-collections";
 
 type Profile = SocialPerson & {
   privateAccount: boolean;
@@ -67,6 +68,7 @@ export function SocialProfile({
     null,
   );
   const writing = useRef(false);
+  const [collections, setCollections] = useState(false);
   useEffect(() => {
     let alive = true;
     void api<Profile>(`/social/people/${id}`, { cache: "no-store" })
@@ -380,6 +382,14 @@ export function SocialProfile({
                     ))}
                   </section>
                 )}
+                {key === "saved" && id === me && (
+                  <button
+                    className="secondary social-collections-open"
+                    onClick={() => setCollections(true)}
+                  >
+                    Minhas coleções
+                  </button>
+                )}
                 <SocialProfileGrid
                   query={`author=${id}&kind=${key === "clips" ? "CLIP" : key === "posts" ? "POST" : "ALL"}&collection=${key === "clips" ? "posts" : key}`}
                   pinnedQuery={
@@ -414,6 +424,16 @@ export function SocialProfile({
           </div>
         )}
       </div>
+      {collections && (
+        <SocialCollections
+          me={me}
+          person={person}
+          close={() => {
+            setCollections(false);
+            setRevision((value) => value + 1);
+          }}
+        />
+      )}
       {connections && (
         <SocialDialog
           title={

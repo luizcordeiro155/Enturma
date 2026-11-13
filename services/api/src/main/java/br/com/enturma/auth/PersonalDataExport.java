@@ -25,6 +25,8 @@ public class PersonalDataExport {
     "social-preferences", "SELECT private_account,recommendations,autoplay,interests,navigation FROM social_profile WHERE user_id=? ORDER BY user_id"
   ));
   static {
+    SECTIONS.put("social-collections", "SELECT id,name,created_at FROM social_collection WHERE owner_id=? ORDER BY created_at,id");
+    SECTIONS.put("social-collection-items", "SELECT i.collection_id,i.post_id,i.created_at FROM social_collection_item i JOIN social_collection c ON c.id=i.collection_id WHERE c.owner_id=? ORDER BY i.created_at,i.collection_id,i.post_id");
     SECTIONS.put("social-lives", "SELECT id,title,visibility,state,started_at,ended_at,peak_viewers FROM social_live WHERE author_id=? ORDER BY started_at,id");
     SECTIONS.put("social-comment-likes", "SELECT comment_id,created_at FROM social_comment_like WHERE user_id=? ORDER BY created_at,comment_id");
     SECTIONS.put("social-comment-media", "SELECT id,post_id,mime,octet_length(data) size,created_at FROM social_comment_media WHERE owner_id=? ORDER BY created_at,id");
