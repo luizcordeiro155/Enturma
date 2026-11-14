@@ -1,5 +1,11 @@
 # Enturma Social 3.0 — retomada operacional
 
+## Próximo passo atual — 13/11/2026
+
+Prevalece sobre o histórico: HEAD `ab5ce73`, PR #151 aberta/pronta, #150 já incorporada. Acompanhar CI `43504798163` (PR) e `43504791475` (push). Última falha real era gutter externo de 15px; corrigida apenas no Social, com prova Chromium de preservação das outras telas. Testes anteriores 74/75 E2E; não declarar a nova suíte aprovada antes do término.
+
+Após aprovação: inspecionar artefatos visuais finais; merge com expected head; aguardar API `/api/v1/public/social-release` HTTP200/ready (V72/V73); promover deployment production Vercel do SHA integrado; restaurar autoAssignCustomDomains; builds Railway oficiais main para Android/Windows e verificar artefatos com `.local/social3-verify-native.cjs <SHA_MAIN>`. Produção anterior preservada até o gate. Não usar preview como produção nem afirmar homologação física.
+
 
 ## Checkpoint — ajuste de Feed e entrada em Clips, 13/11/2026
 
@@ -75,3 +81,7 @@ CI 43373088044 (c25c2a2) aprovada. Recuperados por fast-forward todos os commits
 
 Próxima tarefa: acompanhar CI do commit desta correção, inspecionar evidências visuais, integrar apenas após checks finais; aguardar probe público API/V72/V73 antes de promover Web e atualizar distribuidores oficiais. Produção ainda não atualizada nesta retomada.
 
+
+### Correção da medição de retorno — 13/11/2026
+
+CI ab5ce73: 75/76 E2E aprovados; geometria e matriz visual passaram. Única falha: teste registrava 180px antes de click(), que rolava automaticamente o link parcialmente visível para 387px. Trace comprova 387px antes da navegação e os mesmos 387px após Voltar. Portanto, o produto preservou a posição. Teste agora chama scrollIntoViewIfNeeded antes de guardar a posição e mantém igualdade exata e posição maior que zero. Prova Chromium isolada reproduziu a discrepância antes e igualdade depois; TypeScript aprovado. Próxima ação: acompanhar a CI do novo commit antes de integrar. Produção ainda preservada.

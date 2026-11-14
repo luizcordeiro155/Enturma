@@ -1,5 +1,14 @@
 # Social 3 — resultados de testes
 
+## Evidência atual — 13/11/2026
+
+- `43373088044` aprovado, mas antecede os oito commits remotos recuperados até `9c81906`.
+- `43472337435` (`9c81906`): 73/75 E2E; vídeos extrapolavam o frame por min-height intrínseco do grid. Corrigido em `53999fc` e reproduzido antes/depois em Chromium.
+- `43501468847` (`981695c`): 74/75 E2E; Java, unitários, lint, TypeScript, builds, Android e segurança Windows aprovados. Matriz visual/altura aprovadas. Falha de borda do scroll owner: 15px reservados no documento.
+- `ab5ce73`: remove gutter externo somente com shell Social. Dois testes Playwright isolados de CSS real aprovados, incluindo restauração do gutter nas outras páginas. CI final `43504798163`/`43504791475` ainda em execução neste registro.
+- Local: 309 testes Web em 79 arquivos e TypeScript aprovados antes da última correção CSS. Inspeção das 160 capturas da matriz de `9c81906`, além de telas em tamanho real, identificou colisão do título a 320px, corrigida em `981695c` com asserções geométricas adicionais.
+- Smoke público de produção anterior: login/cadastro → downloads Android/Windows → Voltar, sem overflow nem pageerror, e downloads HEAD200. Não é validação autenticada do incremento ainda não publicado.
+
 ## Checkpoint vigente — histórico de painéis, 13/11/2026
 
 CI `43369840229` do SHA `416fbcd`: Java, auditoria, lint, TypeScript, unitários, builds, Android e Windows aprovados; 73/74 E2E aprovados. As 160 capturas da matriz concluíram, inclusive largura desktop >1100px. A inspeção visual posterior encontrou algumas capturas light ainda escuras: a mutação direta do DOM disputava com ThemeSync. Matriz corrigida para atualizar preferências pela sincronização existente e afirmar tema/paleta antes de capturar; evidência de quatro temas deve ser regenerada. A falha remanescente revelou bug real no histórico compartilhado: substituir Opções por Coleções fechava também Explorar/visualizador. Corrigido em `useOverlayHistory`: somente o painel superior atende Voltar; travessia causada por fechamento não fecha ancestrais. Três testes reproduziram a falha antes e passaram depois; 12 testes focados de histórico/chat aprovados, TypeScript e lint aprovados. Nenhum teste removido ou limite de API relaxado.
@@ -37,3 +46,7 @@ CI 43373088044 (c25c2a2) aprovada. Recuperados por fast-forward todos os commits
 
 Próxima tarefa: acompanhar CI do commit desta correção, inspecionar evidências visuais, integrar apenas após checks finais; aguardar probe público API/V72/V73 antes de promover Web e atualizar distribuidores oficiais. Produção ainda não atualizada nesta retomada.
 
+
+### Correção da medição de retorno — 13/11/2026
+
+CI ab5ce73: 75/76 E2E aprovados; geometria e matriz visual passaram. Única falha: teste registrava 180px antes de click(), que rolava automaticamente o link parcialmente visível para 387px. Trace comprova 387px antes da navegação e os mesmos 387px após Voltar. Portanto, o produto preservou a posição. Teste agora chama scrollIntoViewIfNeeded antes de guardar a posição e mantém igualdade exata e posição maior que zero. Prova Chromium isolada reproduziu a discrepância antes e igualdade depois; TypeScript aprovado. Próxima ação: acompanhar a CI do novo commit antes de integrar. Produção ainda preservada.

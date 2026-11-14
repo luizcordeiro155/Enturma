@@ -777,8 +777,13 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   await scroll.evaluate((el) => {
     el.scrollTop = 180;
   });
+  const clipLink = feed.getByRole("link", { name: "Assistir nos Clips" });
+  // click() scrolls a partially visible video into view before navigating.
+  // Record the reading position after that actionability scroll, not before it.
+  await clipLink.scrollIntoViewIfNeeded();
   const before = await scroll.evaluate((el) => el.scrollTop);
-  await feed.getByRole("link", { name: "Assistir nos Clips" }).click();
+  expect(before).toBeGreaterThan(0);
+  await clipLink.click();
   await expect(page).toHaveURL(new RegExp(`post=${posts[2].id}`));
   await expect(
     navigation.getByRole("button", { name: "Clips", exact: true }),

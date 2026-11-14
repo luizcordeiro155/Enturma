@@ -1,5 +1,17 @@
 # Enturma Social 3.0 — checkpoint de continuidade
 
+## Estado atual — 13/11/2026, publicação em acompanhamento
+
+Este bloco prevalece sobre os checkpoints históricos abaixo. Branch `codex/social-instagram-parity`, HEAD `ab5ce731a11b1a5dffe1563fcc9ed336b2ff60e2`. PR #150 incorporada integralmente à #151; main permanece `ed43287` enquanto os checks finais executam. `premium-audit.json` preservado e não rastreado.
+
+Recuperados todos os commits remotos até `9c81906` por fast-forward. A CI antiga `43373088044` passou, mas o código posterior apresentou falhas novas. Corrigidas as causas no CSS responsável: `53999fc` permite encolher o vídeo dentro do grid limitado; `981695c` evita colisão do título com ações em 320px; `ab5ce73` remove a reserva duplicada de scrollbar somente na tela Social. Nenhuma asserção afrouxada. CI `43501468847`: 74/75 E2E; falha restante de 15px motivou `ab5ce73`. CI final em acompanhamento: `43504798163` e `43504791475`.
+
+Chromium isolado voltou a funcionar: dois E2E de CSS real passaram localmente (vídeo em oito resoluções/zoom e gutter preservado fora do Social). Web: 309 testes/79 arquivos e TypeScript aprovados antes da última regra CSS; a CI confirma o conjunto final. Inspecionadas 160 capturas nas dez larguras/quatro temas da CI de `9c81906`; conferir novamente evidências finais. Não reiniciar serviços cuja execução foi bloqueada, nem usar Computer Use/REA.
+
+Gate de publicação preparado: Vercel `autoAssignCustomDomains=false`. Após merge, aguardar API SquareCloud automática pela main e probe público `social-figma-2026-11-13` pronto (V72/V73/RLS). Promover apenas deployment **production** do SHA integrado e restaurar `autoAssignCustomDomains=true`. Depois atualizar distribuidores Railway oficiais da main e conferir manifesto, versão, tamanho e SHA256. Script local `.local/social3-verify-native.cjs <SHA_MAIN>` preparado. Ainda não houve merge/deploy novo neste checkpoint; não confundir preview READY com produção.
+
+Próxima ação exata: consultar `gh run view 43504798163`, corrigir qualquer falha real, baixar `interface-evidence`, conferir PR #151 no mesmo SHA; integrar e executar a sequência API → Web → Android/Windows. Atualizar este bloco com os resultados efetivamente observados.
+
 
 ## Checkpoint — ajuste de Feed e entrada em Clips, 13/11/2026
 
@@ -175,3 +187,7 @@ CI 43373088044 (c25c2a2) aprovada. Recuperados por fast-forward todos os commits
 
 Próxima tarefa: acompanhar CI do commit desta correção, inspecionar evidências visuais, integrar apenas após checks finais; aguardar probe público API/V72/V73 antes de promover Web e atualizar distribuidores oficiais. Produção ainda não atualizada nesta retomada.
 
+
+### Correção da medição de retorno — 13/11/2026
+
+CI ab5ce73: 75/76 E2E aprovados; geometria e matriz visual passaram. Única falha: teste registrava 180px antes de click(), que rolava automaticamente o link parcialmente visível para 387px. Trace comprova 387px antes da navegação e os mesmos 387px após Voltar. Portanto, o produto preservou a posição. Teste agora chama scrollIntoViewIfNeeded antes de guardar a posição e mantém igualdade exata e posição maior que zero. Prova Chromium isolada reproduziu a discrepância antes e igualdade depois; TypeScript aprovado. Próxima ação: acompanhar a CI do novo commit antes de integrar. Produção ainda preservada.
