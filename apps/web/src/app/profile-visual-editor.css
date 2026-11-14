@@ -722,3 +722,12 @@ html .profile-shared-surface .profile-dialog-actions {
     overflow: visible;
   }
 }
+
+/* The live preview avatar stays round: a generic 40px avatar height won over 88px. */
+html[data-theme] .profile-studio .profile-preview-combined .public-profile-body > .identity-avatar {
+  flex: none;
+  width: 88px !important;
+  height: 88px !important;
+  min-height: 88px;
+  aspect-ratio: 1;
+}
