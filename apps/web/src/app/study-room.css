@@ -1,0 +1,437 @@
+/* Enturma Study sessions: the room with the AI tutor, its quiz and the "time to study" invitation.
+   Colours come only from theme tokens so the light, dark, system and Enturma palettes all read well. */
+
+@keyframes study-rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to { opacity: 1; transform: none; }
+}
+@keyframes study-dot {
+  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
+  40% { opacity: 1; transform: translateY(-3px); }
+}
+@keyframes study-glow {
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--study-study) 34%, transparent); }
+  50% { box-shadow: 0 0 0 14px color-mix(in srgb, var(--study-study) 0%, transparent); }
+}
+@keyframes study-shimmer {
+  from { background-position: -240px 0; }
+  to { background-position: 240px 0; }
+}
+
+.study-room {
+  --room-width: 880px;
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  gap: 14px;
+  width: min(100%, var(--room-width));
+  margin: 0 auto;
+  min-height: calc(100dvh - 120px);
+  padding: 4px 0 18px;
+  color: var(--ink);
+}
+.study-room-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 14px;
+}
+html .study-room .study-room-back,
+html .study-room .study-room-send {
+  display: inline-grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  padding: 0 !important;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+.study-room-back:hover { transform: translateX(-2px); background: var(--soft); }
+.study-room-title { min-width: 0; }
+.study-room-title h1 {
+  margin: 2px 0 0;
+  font-size: clamp(1.3rem, 3vw, 1.75rem);
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  overflow-wrap: anywhere;
+}
+.study-room-title p { margin: 4px 0 0; color: var(--muted); }
+.study-room-meta { display: flex; gap: 8px; flex-wrap: wrap; justify-content: end; }
+.study-room-timer,
+.study-room-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 999px;
+  background: var(--soft);
+  border: 1px solid var(--border);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.study-room-timer small { color: var(--muted); font-weight: 600; }
+.study-room-pill.done {
+  color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, var(--surface));
+  border-color: color-mix(in srgb, var(--success) 30%, var(--border));
+}
+
+.study-room-personality {
+  display: inline-flex;
+  justify-self: start;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 999px;
+  background: var(--soft);
+  border: 1px solid var(--border);
+}
+html .study-room-personality button {
+  padding: 7px 14px !important;
+  border-radius: 999px;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-weight: 700;
+  transition: background-color 180ms ease, color 180ms ease;
+}
+html .study-room-personality button[aria-checked="true"] {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 1px 3px color-mix(in srgb, var(--ink) 16%, transparent);
+}
+.study-room-error { margin: 0; }
+
+.study-room-intro,
+.study-room-done,
+.study-room-next {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: clamp(22px, 5vw, 40px);
+  text-align: center;
+  border-radius: 24px;
+  border: 1px solid var(--border);
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--study-study) 14%, transparent), transparent 70%),
+    var(--surface);
+  animation: study-rise 320ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.study-room-intro h1,
+.study-room-intro h2,
+.study-room-done h2 { margin: 6px 0 0; font-size: clamp(1.2rem, 2.6vw, 1.5rem); }
+.study-room-intro p,
+.study-room-done p { margin: 0; max-width: 52ch; color: var(--muted); line-height: 1.55; }
+.study-room-orb,
+.study-due-orb {
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  color: var(--study-study);
+  background: color-mix(in srgb, var(--study-study) 14%, var(--surface));
+  animation: study-glow 2.4s ease-in-out infinite;
+}
+.study-room-intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+.study-room-intro-actions > * { display: inline-flex; align-items: center; gap: 8px; }
+.study-room-done svg { color: var(--study-study); }
+.study-room-next { justify-items: stretch; text-align: left; padding: 18px; }
+.study-room-next p { margin: 0; color: var(--ink); }
+.study-room-next .study-room-intro-actions { justify-content: start; }
+.study-room-scheduled { display: flex; gap: 8px; align-items: center; color: var(--success); font-weight: 700; }
+
+.study-room-chat {
+  display: grid;
+  align-content: start;
+  gap: 16px;
+  min-height: 0;
+  padding: 4px 2px 8px;
+}
+.study-room-turn { display: grid; gap: 12px; animation: study-rise 260ms ease both; }
+.study-room-student {
+  justify-self: end;
+  max-width: min(78%, 560px);
+  margin: 0;
+  padding: 11px 15px;
+  border-radius: 18px 18px 6px 18px;
+  background: var(--ink);
+  color: var(--bg);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.study-room-tutor {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  animation: study-rise 260ms ease both;
+}
+.study-room-avatar {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: var(--study-study);
+  background: color-mix(in srgb, var(--study-study) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--study-study) 28%, var(--border));
+}
+.study-room-bubble {
+  justify-self: start;
+  max-width: min(100%, 640px);
+  padding: 12px 16px;
+  border-radius: 6px 18px 18px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+.study-room-bubble > p,
+.study-room-bubble .study-answer p { margin: 0 0 8px; }
+.study-room-bubble > p:last-child,
+.study-room-bubble .study-answer p:last-child { margin-bottom: 0; }
+.study-room-typing { display: inline-flex; gap: 5px; padding: 4px 0; }
+.study-room-typing i {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--study-study);
+  animation: study-dot 1.2s ease-in-out infinite;
+}
+.study-room-typing i:nth-child(2) { animation-delay: 0.15s; }
+.study-room-typing i:nth-child(3) { animation-delay: 0.3s; }
+
+.study-room-composer {
+  position: sticky;
+  bottom: calc(10px + env(safe-area-inset-bottom));
+  z-index: 3;
+  display: grid;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 22px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 34px color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.study-room-composer textarea {
+  width: 100%;
+  min-height: 46px;
+  max-height: 180px;
+  field-sizing: content;
+  resize: none;
+  padding: 10px 12px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--soft);
+  color: var(--ink);
+  font: inherit;
+  line-height: 1.45;
+}
+.study-room-composer textarea:focus-visible { outline: 2px solid var(--study-study); outline-offset: 1px; }
+.study-room-composer-actions { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.study-room-composer-actions .secondary { display: inline-flex; align-items: center; gap: 8px; }
+html .study-room .study-room-send {
+  border: 0;
+  background: var(--study-study);
+  color: var(--surface);
+}
+html .study-room .study-room-send:disabled { opacity: 0.45; }
+html .study-room .study-room-send:not(:disabled):hover { transform: scale(1.06); }
+
+.study-quiz {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  border: 1px solid color-mix(in srgb, var(--study-study) 32%, var(--border));
+  background: var(--surface);
+  animation: study-rise 300ms ease both;
+}
+.study-quiz header { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+.study-quiz header > svg { color: var(--study-study); }
+.study-quiz h3 { margin: 0; font-size: 1.05rem; }
+.study-quiz header p { margin: 2px 0 0; color: var(--muted); }
+.study-quiz-score {
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  background: var(--soft);
+}
+.study-quiz-score.perfect { color: var(--success); background: color-mix(in srgb, var(--success) 14%, var(--surface)); }
+.study-quiz ol { display: grid; gap: 14px; margin: 0; padding: 0; list-style: none; }
+.study-quiz fieldset { display: grid; gap: 8px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.study-quiz legend { display: grid; gap: 2px; padding: 0; margin-bottom: 4px; font-weight: 700; line-height: 1.45; }
+.study-quiz legend small {
+  color: var(--study-study);
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.study-quiz-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease, transform 160ms ease;
+}
+.study-quiz-option:hover { border-color: color-mix(in srgb, var(--study-study) 45%, var(--border)); }
+.study-quiz-option:not([data-state]):has(input:checked) {
+  border-color: var(--study-study);
+  background: color-mix(in srgb, var(--study-study) 10%, var(--surface));
+}
+.study-quiz-option input { accent-color: var(--study-study); width: 18px; height: 18px; margin: 0; }
+.study-quiz-option span { overflow-wrap: anywhere; }
+.study-quiz-option[data-state="right"] {
+  border-color: var(--success);
+  background: color-mix(in srgb, var(--success) 12%, var(--surface));
+}
+.study-quiz-option[data-state="right"] svg { color: var(--success); }
+.study-quiz-option[data-state="wrong"] {
+  border-color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, var(--surface));
+}
+.study-quiz-option[data-state="wrong"] svg { color: var(--danger); }
+.study-quiz fieldset:disabled .study-quiz-option { cursor: default; }
+.study-quiz-explanation {
+  margin: 2px 0 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--ink);
+  line-height: 1.5;
+}
+.study-quiz > .button { justify-self: start; }
+
+.study-room-skeleton { display: grid; gap: 12px; }
+.study-room-skeleton span {
+  height: 64px;
+  border-radius: 18px;
+  background: linear-gradient(90deg, var(--soft), var(--surface-raised), var(--soft));
+  background-size: 480px 100%;
+  animation: study-shimmer 1.2s linear infinite;
+}
+.study-room-skeleton span:first-child { height: 40px; width: 55%; }
+
+/* Calendar entry points */
+.study-room-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--study-study);
+  font-weight: 800;
+  text-decoration: none;
+}
+.study-room-link:hover { text-decoration: underline; text-underline-offset: 3px; }
+.study-sessions-card .study-list li { grid-template-columns: minmax(0, 1fr) auto; }
+.study-sessions-card .study-list li > .study-room-link { grid-row: 1 / span 2; grid-column: 2; align-self: center; }
+html .study-schedule-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 14px;
+  border: 1px dashed color-mix(in srgb, var(--study-study) 50%, var(--border));
+  background: color-mix(in srgb, var(--study-study) 7%, var(--surface));
+  color: var(--ink);
+  font-weight: 700;
+}
+.study-session-form-intro {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.study-session-form-intro svg { flex: none; margin-top: 2px; color: var(--study-study); }
+.study-session-goal { grid-column: 1 / -1; }
+
+/* "Time to study" invitation */
+dialog.study-due-invite {
+  position: fixed;
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  width: min(420px, calc(100vw - 32px));
+  padding: 28px 24px 22px;
+  border: 1px solid var(--border);
+  border-radius: 28px;
+  background:
+    radial-gradient(120% 70% at 50% 0%, color-mix(in srgb, var(--study-study) 16%, transparent), transparent 70%),
+    var(--surface);
+  color: var(--ink);
+  text-align: center;
+  box-shadow: 0 24px 70px color-mix(in srgb, #000 30%, transparent);
+}
+dialog.study-due-invite[open] { display: grid; justify-items: center; gap: 8px; animation: study-rise 340ms cubic-bezier(0.2, 0.8, 0.2, 1) both; }
+dialog.study-due-invite::backdrop { background: color-mix(in srgb, #000 46%, transparent); backdrop-filter: blur(4px); }
+dialog.study-due-invite h2 { margin: 0; font-size: 1.45rem; letter-spacing: -0.02em; overflow-wrap: anywhere; }
+dialog.study-due-invite p { margin: 0; color: var(--muted); line-height: 1.5; }
+.study-due-when { display: inline-flex; gap: 6px; align-items: center; font-weight: 700; color: var(--ink) !important; }
+.study-due-goal { padding: 8px 12px; border-radius: 12px; background: var(--soft); color: var(--ink) !important; }
+.study-due-actions { display: grid; gap: 8px; width: 100%; margin-top: 10px; }
+.study-due-actions > * { width: 100%; justify-content: center; }
+html dialog.study-due-invite .study-due-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 50%;
+  background: var(--soft);
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .study-room { min-height: calc(100dvh - 96px); gap: 12px; }
+  .study-room-head { grid-template-columns: auto minmax(0, 1fr); }
+  .study-room-meta { grid-column: 1 / -1; justify-content: start; }
+  .study-room-personality { justify-self: stretch; }
+  html .study-room-personality button { flex: 1; padding: 8px 6px !important; font-size: 0.86rem; }
+  .study-room-student { max-width: 88%; }
+  .study-room-composer { bottom: calc(8px + env(safe-area-inset-bottom)); border-radius: 18px; }
+  .study-room-composer-actions .secondary { padding: 9px 12px !important; }
+  .study-quiz { padding: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .study-room *,
+  dialog.study-due-invite,
+  .study-room-orb,
+  .study-due-orb { animation: none !important; transition: none !important; }
+}
+
+/* Study sessions use the "Estudo" colour everywhere the calendar shows them. */
+.study-day-items span[data-kind="STUDY"],
+.study-day-events > li[data-kind="STUDY"],
+.study-list li[data-kind="STUDY"] {
+  --kind: var(--study-study);
+}
+.study-timeline li[data-kind="STUDY"]::before {
+  border-color: var(--study-study);
+}

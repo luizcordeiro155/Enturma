@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Bell, CalendarClock, GraduationCap, Settings2, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, Bell, Brain, CalendarClock, GraduationCap, Settings2, Sparkles } from "lucide-react";
 import type { Profile } from "@enturma/contracts";
 import {
   addDays,
@@ -15,7 +16,7 @@ import {
   type Routine,
 } from "@/lib/planner";
 import { StudyCalendar, dayLabel, type CalendarView } from "./study-calendar";
-import { StudyDayPanel } from "./study-day-panel";
+import { StudyDayPanel, type DayForm } from "./study-day-panel";
 import { StudyRoutinePanel } from "./study-routine-panel";
 
 function requestedDay() {
@@ -34,6 +35,7 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
   const [routine, setRoutine] = useState<Routine>();
   const [calendar, setCalendar] = useState<Calendar>();
   const [editingRoutine, setEditingRoutine] = useState(false);
+  const [dayForm, setDayForm] = useState<DayForm>(null);
   const [error, setError] = useState("");
   const range = useMemo(() => {
     if (view === "week") {
@@ -86,6 +88,13 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
   const nextHolidays = holidays.filter((holiday) => holiday.date >= today).slice(0, 3);
   const reminder = routine ? reminderLabel(routine.classReminderMinutes) : null;
   const hasClasses = events.some((event) => event.kind === "CLASS");
+  const sessions = events
+    .filter(
+      (event) =>
+        event.kind === "STUDY" &&
+        (event.status === "ACTIVE" || (event.status === "SCHEDULED" && Date.parse(event.endsAt) > now)),
+    )
+    .slice(0, 3);
 
   function move(direction: -1 | 1) {
     if (view === "week") setCursor(addDays(cursor, 7 * direction));
@@ -132,7 +141,10 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
             selected={selected}
             holidays={holidays}
             events={events}
-            select={(day) => setSelected((current) => (current === day ? null : day))}
+            select={(day) => {
+              setDayForm(null);
+              setSelected((current) => (current === day ? null : day));
+            }}
             move={move}
             goToday={() => {
               setCursor(today);
@@ -154,7 +166,8 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
           )}
           {selected && routine && (
             <StudyDayPanel
-              key={selected}
+              key={`${selected}:${dayForm ?? ""}`}
+              initialForm={dayForm}
               day={selected}
               routine={routine}
               subjects={profile.subjects}
@@ -208,6 +221,44 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
                 ? `O Enturma vai te notificar ${reminder} de cada aula.`
                 : "Lembretes de aula desligados na sua rotina."}
             </p>
+          </section>
+          <section className="study-card study-sessions-card" aria-label="Sessões de estudo">
+            <div className="study-card-title">
+              <Brain aria-hidden />
+              <div>
+                <h3>Sessões de estudo</h3>
+                <p>Estude com um tutor de IA no horário que você marcar.</p>
+              </div>
+            </div>
+            {sessions.length ? (
+              <ul className="study-list">
+                {sessions.map((event) => (
+                  <li key={event.id} data-kind="STUDY" data-status={event.status}>
+                    <strong>{event.subjectName ?? event.title}</strong>
+                    <span>
+                      {event.status === "ACTIVE"
+                        ? "Em andamento"
+                        : `${event.occursOn === today ? "Hoje" : dayLabel(event.occursOn)} · ${timeIn(event.startsAt, zone)}`}
+                    </span>
+                    <Link className="study-room-link" href={`/study/${event.id}`}>
+                      Abrir sala <ArrowRight size={14} aria-hidden />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="study-muted">Nenhum estudo marcado. Escolha um dia e deixe a IA te ajudar.</p>
+            )}
+            <button
+              type="button"
+              className="study-schedule-button"
+              onClick={() => {
+                setDayForm("study");
+                setSelected(selected ?? today);
+              }}
+            >
+              <CalendarClock size={16} aria-hidden /> Agendar estudo
+            </button>
           </section>
           <section className="study-card" aria-label="Agenda de hoje">
             <div className="study-card-title">

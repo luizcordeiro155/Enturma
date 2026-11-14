@@ -31,6 +31,7 @@ import {
 import { MobileNavigation } from "./mobile-navigation";
 import { SocialEntry } from "./social/social-entry";
 import { RideDesktopNavigation, RideMobileNavigation } from "./ride-navigation";
+import { StudyDueInvite } from "./study/study-due-invite";
 const links = [
   { href: "/home", label: "Início", icon: Home },
   { href: "/rooms", label: "Salas", icon: Users },
@@ -58,6 +59,7 @@ export function Shell({
   const guest = useVisitor();
   const path = visitor ? guest.path.split("?")[0] : pathname;
   const inStudyRoom = path.startsWith("/rooms/") && path !== "/rooms/new";
+  const inStudySession = path.startsWith("/study/");
   const inRideHub = path.startsWith("/caronas");
   const inSocial = path === "/social";
   const updateState = useAppUpdateState();
@@ -264,9 +266,10 @@ export function Shell({
 
       {inRideHub ? (
         <RideMobileNavigation />
-      ) : !inStudyRoom && !inSocial ? (
+      ) : !inStudyRoom && !inSocial && !inStudySession ? (
         <MobileNavigation />
       ) : null}
+      {!visitor && !path.startsWith("/study/") ? <StudyDueInvite /> : null}
       {emailCelebration ? (
         <div
           className="account-celebration-backdrop"
