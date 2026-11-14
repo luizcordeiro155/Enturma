@@ -44,6 +44,9 @@ public class PersonalDataExport {
     SECTIONS.put("study-reminders", "SELECT id,kind,source_id,occurrence_at,fire_at,status,sent_at FROM academic_reminder_job WHERE user_id=? ORDER BY fire_at,id");
     SECTIONS.put("study-tasks", "SELECT id,subject_id,kind,title,notes,due_at,estimated_minutes,priority,completed_at,created_at FROM campus_task WHERE user_id=? ORDER BY due_at,id");
     SECTIONS.put("study-focus", "SELECT id,subject_id,label,planned_minutes,started_at,finished_at,actual_seconds FROM focus_session WHERE user_id=? ORDER BY started_at,id");
+    SECTIONS.put("study-sessions", "SELECT id,subject_id,notebook_id,starts_at,minutes,goal,status,personality,difficulty,started_at,finished_at,created_at FROM study_session WHERE user_id=? ORDER BY starts_at,id");
+    SECTIONS.put("study-quiz-attempts", "SELECT id,session_id,generation_id,answers,score,total,wrong_topics,created_at FROM study_quiz_attempt WHERE user_id=? ORDER BY created_at,id");
+    SECTIONS.put("study-mastery", "SELECT subject_id,level,evidence,updated_at FROM subject_mastery WHERE user_id=? ORDER BY subject_id");
     SECTIONS.put("social-reports", "SELECT id,post_id,reason,status,created_at FROM social_report WHERE reporter_id=? ORDER BY created_at,id");
   }
   @GetMapping("/sections")
