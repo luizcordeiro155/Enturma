@@ -180,6 +180,10 @@ test("feed, volume, comment picker and profile detail remain usable across theme
   const viewer = page.getByRole("dialog", { name: "Publicações", exact: true });
   await expect(viewer.locator(".social-comment-form")).toBeVisible();
   const mediaBox = (await viewer.locator(".social-post-media").boundingBox())!;
+  const viewerBox = (await viewer.boundingBox())!;
+  // The media, not the conversation, takes most of the desktop viewer.
+  expect(viewerBox.width).toBeGreaterThan(1000);
+  expect(mediaBox.width / viewerBox.width).toBeGreaterThan(0.55);
   const composerBox = (await viewer
     .locator(".social-comment-form")
     .boundingBox())!;

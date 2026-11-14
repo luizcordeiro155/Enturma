@@ -1966,6 +1966,8 @@ html[data-theme] .social-preview-surfaces button[aria-pressed="true"] {
 @media (min-width: 761px) {
   html[data-theme] dialog.social-dialog-viewer {
     width: min(1240px, calc(100vw - 48px));
+    /* .social-dialog caps every dialog at 600 px; the viewer needs the room. */
+    max-width: none;
     height: min(940px, calc(100dvh - 48px));
   }
   .social-dialog-viewer .social-post-viewer-scroll {
