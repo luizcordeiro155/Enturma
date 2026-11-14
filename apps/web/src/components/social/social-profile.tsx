@@ -17,6 +17,7 @@ import { FollowButton, SocialAuthor } from "./social-post";
 import { SocialProfileGrid } from "./social-profile-grid";
 import { SocialPostViewer } from "./social-post-viewer";
 import { StoryViewer } from "./social-stories";
+import { SocialCollections } from "./social-collections";
 
 type Profile = SocialPerson & {
   privateAccount: boolean;
@@ -67,6 +68,7 @@ export function SocialProfile({
     null,
   );
   const writing = useRef(false);
+  const [collections, setCollections] = useState(false);
   useEffect(() => {
     let alive = true;
     void api<Profile>(`/social/people/${id}`, { cache: "no-store" })
@@ -380,6 +382,14 @@ export function SocialProfile({
                     ))}
                   </section>
                 )}
+                {key === "saved" && id === me && (
+                  <button
+                    className="secondary social-collections-open"
+                    onClick={() => setCollections(true)}
+                  >
+                    Minhas coleções
+                  </button>
+                )}
                 <SocialProfileGrid
                   query={`author=${id}&kind=${key === "clips" ? "CLIP" : key === "posts" ? "POST" : "ALL"}&collection=${key === "clips" ? "posts" : key}`}
                   pinnedQuery={
@@ -414,6 +424,16 @@ export function SocialProfile({
           </div>
         )}
       </div>
+      {collections && (
+        <SocialCollections
+          me={me}
+          person={person}
+          close={() => {
+            setCollections(false);
+            setRevision((value) => value + 1);
+          }}
+        />
+      )}
       {connections && (
         <SocialDialog
           title={
@@ -430,59 +450,61 @@ export function SocialProfile({
             {people.map((user) => (
               <div className="social-person-row" key={user.id}>
                 <SocialAuthor user={user} open={person} />
-                {connections === "requests" ? (
-                  <>
-                    {[true, false].map((accept) => (
-                      <button
-                        key={String(accept)}
-                        className={accept ? undefined : "secondary"}
-                        disabled={busy}
-                        onClick={() =>
-                          void perform(
-                            () =>
-                              socialWrite(`/people/${user.id}/request`, {
-                                active: accept,
-                              }),
-                            () =>
-                              setPeople((previous) =>
-                                previous.filter(
-                                  (value) => value.id !== user.id,
+                <div className="social-person-actions">
+                  {connections === "requests" ? (
+                    <>
+                      {[true, false].map((accept) => (
+                        <button
+                          key={String(accept)}
+                          className={accept ? undefined : "secondary"}
+                          disabled={busy}
+                          onClick={() =>
+                            void perform(
+                              () =>
+                                socialWrite(`/people/${user.id}/request`, {
+                                  active: accept,
+                                }),
+                              () =>
+                                setPeople((previous) =>
+                                  previous.filter(
+                                    (value) => value.id !== user.id,
+                                  ),
                                 ),
-                              ),
-                          )
-                        }
-                      >
-                        {accept ? "Aceitar" : "Recusar"}
-                      </button>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    <FollowButton id={user.id} me={me} />
-                    {me === id && connections === "followers" && (
-                      <button
-                        className="text-button"
-                        disabled={busy}
-                        onClick={() =>
-                          void perform(
-                            () =>
-                              socialWrite(`/people/${user.id}/request`, {
-                                active: false,
-                              }),
-                            () =>
-                              setPeople((previous) =>
-                                previous.filter(
-                                  (value) => value.id !== user.id,
+                            )
+                          }
+                        >
+                          {accept ? "Aceitar" : "Recusar"}
+                        </button>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      <FollowButton id={user.id} me={me} />
+                      {me === id && connections === "followers" && (
+                        <button
+                          className="text-button"
+                          disabled={busy}
+                          onClick={() =>
+                            void perform(
+                              () =>
+                                socialWrite(`/people/${user.id}/request`, {
+                                  active: false,
+                                }),
+                              () =>
+                                setPeople((previous) =>
+                                  previous.filter(
+                                    (value) => value.id !== user.id,
+                                  ),
                                 ),
-                              ),
-                          )
-                        }
-                      >
-                        Remover seguidor
-                      </button>
-                    )}
-                  </>
-                )}
+                            )
+                          }
+                        >
+                          Remover seguidor
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
               </div>
             ))}
             {loadingPeople ? (

@@ -66,7 +66,7 @@
   transition: none;
 }
 
-/* ---------- Navigation: dock, icon rail, labelled rail ---------- */
+/* ---------- Navigation: five-place dock and icon rail ---------- */
 .social-header-actions {
   display: flex;
   align-items: center;
@@ -92,9 +92,9 @@ html[data-theme] .social-header-actions > a:hover {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
 }
-@media (min-width: 761px) and (max-width: 1199px) {
+@media (min-width: 761px) {
   html .social-active-shell {
-    grid-template-columns: 72px minmax(0, 1fr);
+    grid-template-columns: 76px minmax(0, 1fr);
   }
   .social-navigation {
     padding: 18px 8px;
@@ -114,7 +114,7 @@ html[data-theme] .social-header-actions > a:hover {
     padding: 8px 0;
   }
   /* Icon-only rail: the label stays available to assistive technology and as a tooltip. */
-  .social-navigation-items > :is(button, a) > span:not(.social-nav-glyph),
+  .social-navigation-items > :is(button, a) > span:not(.social-nav-glyph):not(.social-nav-selection),
   .social-navigation-footer > :is(button, a) > span {
     position: absolute;
     width: 1px;
@@ -187,6 +187,11 @@ html[data-theme] .social-header-actions > a:hover {
   width: 100%;
   height: 100%;
   max-height: none;
+  object-fit: contain;
+}
+/* Image crops fill the carousel; videos must always keep their entire frame. */
+.social-page .social-post:not(.social-post-clip) .social-carousel img,
+.social-dialog .social-carousel img {
   object-fit: cover;
 }
 html[data-theme] .social-carousel-arrow,
@@ -309,9 +314,6 @@ html[data-theme] .social-carousel-dots > button[aria-selected="true"] {
   min-width: 44px;
   min-height: 44px;
   padding: 8px;
-}
-.social-post-actions .icon-control[aria-pressed="true"] {
-  color: var(--accent);
 }
 .social-post-meta {
   display: grid;
@@ -558,5 +560,62 @@ html[data-theme] .social-clip-rail .icon-control[aria-pressed="true"] {
     height: 1px;
     overflow: hidden;
     clip-path: inset(50%);
+  }
+}
+
+/* ---------- Feed page scrolls as one area ---------- */
+.social-feed-scroll {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  scrollbar-width: thin;
+}
+.social-feed-scroll > * {
+  width: 100%;
+  flex: none;
+}
+.social-page .social-feed-scroll .social-feed-tab {
+  overflow: visible;
+}
+.social-page .social-feed-scroll .social-stream {
+  flex: none;
+  overflow: visible;
+  scrollbar-gutter: auto;
+}
+
+/* ---------- Corrections after the first look at the preview ---------- */
+/* Caption author and toggles are text, not filled buttons, in every theme. */
+html[data-theme] :is(.social-page, .social-dialog) button.social-caption-author {
+  color: var(--ink) !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+html[data-theme] :is(.social-page, .social-dialog) button.social-caption-toggle,
+html[data-theme] :is(.social-page, .social-dialog) button.social-post-all-comments {
+  color: var(--muted) !important;
+  background: transparent !important;
+  border: 0 !important;
+}
+/* Feed actions are bare icons; a filled icon marks the active state. */
+html[data-theme] .social-page .social-post .social-post-actions .icon-control,
+html[data-theme] .social-dialog .social-post .social-post-actions .icon-control {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+}
+html[data-theme] .social-page .social-post .social-post-actions .icon-control:hover {
+  background: var(--soft) !important;
+}
+@media (max-width: 760px) {
+  .social-page .social-post .social-post-meta,
+  .social-page .social-post:not(.social-post-clip) > .social-post-copy {
+    padding-inline: 12px;
   }
 }

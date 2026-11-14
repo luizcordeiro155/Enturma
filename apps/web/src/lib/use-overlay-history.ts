@@ -2,6 +2,7 @@
 import { useEffect, useLayoutEffect, useRef } from "react";
 
 let pendingBack: Promise<void> | undefined;
+const overlays: string[] = [];
 
 /** Focus restoration must follow the asynchronous Back traversal. */
 export function waitForOverlayHistory() {
@@ -20,7 +21,14 @@ export function useOverlayHistory(onClose: () => void, enabled = true) {
     let disposed = false;
     let installed = false;
     const back = () => {
-      if (history.state?.enturmaOverlay !== id) close.current();
+      // Only the top panel owns Back. A programmatic close/replacement already
+      // removed its owner; its history traversal must not dismiss an ancestor.
+      if (
+        !pendingBack &&
+        overlays.at(-1) === id &&
+        history.state?.enturmaOverlay !== id
+      )
+        close.current();
     };
     // Defer installation through React's development effect replay, and wait
     // for the previous overlay's asynchronous history traversal to finish.
@@ -32,12 +40,15 @@ export function useOverlayHistory(onClose: () => void, enabled = true) {
         "",
         location.href,
       );
+      overlays.push(id);
       installed = true;
       window.addEventListener("popstate", back);
     });
     return () => {
       disposed = true;
       window.removeEventListener("popstate", back);
+      const index = overlays.indexOf(id);
+      if (index !== -1) overlays.splice(index, 1);
       if (!installed || history.state?.enturmaOverlay !== id) return;
       pendingBack = new Promise<void>((resolve) => {
         const finish = () => {

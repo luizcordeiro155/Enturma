@@ -1,5 +1,6 @@
 "use client";
 import { SocialMentionInput } from "./social-mention-input";
+import { SocialDraftPreview } from "./social-draft-preview";
 /* eslint-disable @next/next/no-img-element -- local files and authenticated media */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
@@ -195,6 +196,7 @@ export function SocialEditor({
   const [capture, setCapture] = useState(false),
     [discard, setDiscard] = useState(false),
     [step, setStep] = useState<Step>("pick");
+  const [reviewIndex, setReviewIndex] = useState(0);
   const busyRef = useRef(false),
     alive = useRef(true),
     current = useRef(draft),
@@ -679,6 +681,7 @@ export function SocialEditor({
       className="social-editor social-create-flow"
       aria-label="Central de criação"
       data-step={step}
+      data-has-media={draft.files.length > 0}
     >
       <header className="social-create-heading">
         <h2>
@@ -974,6 +977,41 @@ export function SocialEditor({
             </>
           )}
         </div>
+        {step === "details" && draft.files.length > 0 && (
+          <div className="social-create-preview">
+            <SocialDraftPreview
+              key={
+                draft.files[Math.min(reviewIndex, draft.files.length - 1)].id
+              }
+              item={draft.files[Math.min(reviewIndex, draft.files.length - 1)]}
+              overlay={
+                draft.kind === "STORY" ? (
+                  <StoryDecorations items={draft.storyOverlays ?? []} />
+                ) : undefined
+              }
+            />
+            {draft.files.length > 1 && (
+              <div
+                className="social-review-pages"
+                aria-label="Mídias da publicação"
+              >
+                {draft.files.map((file, index) => (
+                  <button
+                    key={file.id}
+                    type="button"
+                    aria-label={`Revisar mídia ${index + 1}`}
+                    aria-pressed={
+                      index === Math.min(reviewIndex, draft.files.length - 1)
+                    }
+                    onClick={() => setReviewIndex(index)}
+                  >
+                    {index + 1}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
         <div className="social-caption-field">
           <label htmlFor="social-caption">O que você quer compartilhar?</label>
           <SocialMentionInput

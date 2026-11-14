@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   Aperture,
@@ -9,7 +9,6 @@ import {
   LoaderCircle,
   Plus,
   Search,
-  Send,
   Settings2,
   X,
 } from "lucide-react";
@@ -35,6 +34,8 @@ import { SocialPager } from "./social-pager";
 import { SocialOpening } from "./social-opening";
 import { useSocialViewport } from "./use-social-viewport";
 import { SocialLiveProvider } from "./social-live-context";
+import { SocialExplore } from "./social-explore";
+import { SocialFeedAside } from "./social-feed-aside";
 type Ready = {
   me: SocialPerson & { role: string };
   preferences: SocialPreferences;
@@ -143,6 +144,12 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     [people, setPeople] = useState<SocialPerson[]>([]),
     [refresh, setRefresh] = useState(0),
     [highlight, setHighlight] = useState<SocialView | null>(null);
+  const [explore, setExplore] = useState(false);
+  const [clipEntry, setClipEntry] = useState<{
+    post: Post;
+    sequence: number;
+  }>();
+  const routedClip = useRef(false);
   const [searchOpen, setSearchOpen] = useState(false),
     [upload, setUpload] = useState<SocialEditorProgress>({
       state: "idle",
@@ -150,7 +157,20 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       percent: 0,
     }),
     [dismissedUpload, setDismissedUpload] = useState(false);
-  const usage = useRef({ feed: 0, clips: 0, create: 0 });
+  const usage = useRef({ feed: 0, clips: 0, create: 0 }),
+    feedScroll = useRef<HTMLDivElement>(null),
+    feedPositions = useRef<Record<string, number>>({});
+  /** The Feed tabs share one scroll area; each keeps its own reading position. */
+  function openTab(next: string) {
+    if (next === tab) return;
+    const area = feedScroll.current;
+    if (area) feedPositions.current[tab] = area.scrollTop;
+    setTab(next);
+  }
+  useLayoutEffect(() => {
+    const area = feedScroll.current;
+    if (area) area.scrollTop = feedPositions.current[tab] ?? 0;
+  }, [tab]);
   useEffect(() => {
     const timer = setTimeout(() => {
       if (incomingQuery) {
@@ -169,11 +189,39 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     return () => clearTimeout(timer);
   }, [incomingPerson, incomingSettings, incomingQuery]);
   useEffect(() => {
-    if (!incomingPost || !/^[a-f0-9-]{36}$/i.test(incomingPost)) return;
+    if (!incomingPost) {
+      if (routedClip.current) {
+        routedClip.current = false;
+        const timer = setTimeout(() => setView("feed"), 0);
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+    if (!/^[a-f0-9-]{36}$/i.test(incomingPost)) return;
     let alive = true;
     void api<Post>(`/social/posts/${incomingPost}`, { cache: "no-store" })
       .then((post) => {
-        if (alive) setDetail(post);
+        if (!alive) return;
+        setError("");
+        if (post.kind === "CLIP") {
+          // Revalidate access before seeding the selected Clip into the paged feed.
+          routedClip.current = true;
+          setClipEntry((previous) => ({
+            post,
+            sequence: (previous?.sequence ?? 0) + 1,
+          }));
+          setDetail(undefined);
+          setPerson(null);
+          setExplore(false);
+          setSettings(false);
+          setOpened((previous) =>
+            previous.includes("clips") ? previous : [...previous, "clips"],
+          );
+          setView("clips");
+          document
+            .querySelectorAll<HTMLVideoElement>(".social-page video")
+            .forEach((video) => video.pause());
+        } else setDetail(post);
       })
       .catch((cause) => {
         if (alive) setError(cause.message);
@@ -183,6 +231,16 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     };
   }, [incomingPost]);
   function select(next: SocialView, contentKind?: typeof kind) {
+    if (incomingPost && next !== "clips") {
+      routedClip.current = false;
+      const url = new URL(window.location.href);
+      url.searchParams.delete("post");
+      window.history.replaceState(
+        null,
+        "",
+        url.pathname + url.search + url.hash,
+      );
+    }
     setView(next);
     setOpened((previous) =>
       previous.includes(next) ? previous : [...previous, next],
@@ -244,6 +302,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
           me={ready.me}
           profile={() => setPerson(ready.me.id)}
           settings={() => setSettings(true)}
+          explore={() => setExplore(true)}
         />
       }
     >
@@ -276,9 +335,14 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
               >
                 <Search size={21} />
               </button>
-              <NavigationLink href="/friends" aria-label="Mensagens">
-                <Send size={21} aria-hidden="true" />
-              </NavigationLink>
+              <button
+                type="button"
+                className="icon-control social-mobile-explore"
+                aria-label="Explorar"
+                onClick={() => setExplore(true)}
+              >
+                <Aperture size={21} aria-hidden="true" />
+              </button>
               <button
                 className="icon-control"
                 aria-label="Preferências do Social"
@@ -304,115 +368,133 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
           >
             {(page) =>
               page === "feed" ? (
-                <>
-                  <SocialStories
-                    me={ready.me}
-                    create={() => select("create", "STORY")}
-                    person={setPerson}
-                    refreshKey={refresh}
-                  />
-                  <div className="social-feed-toolbar">
-                    <div
-                      className="social-tabs"
-                      role="tablist"
-                      aria-label="Filtrar publicações"
-                    >
-                      {[
-                        ["for-you", "Para Você"],
-                        ["following", "Seguindo"],
-                        ["campus", "Minha Faculdade"],
-                      ].map(([key, label]) => (
-                        <button
-                          role="tab"
-                          aria-selected={key === tab}
-                          key={key}
-                          onClick={() => setTab(key)}
-                        >
-                          {label}
-                        </button>
-                      ))}
-                    </div>
-                    <form
-                      noValidate
-                      className={`social-search ${searchOpen || searched ? "is-open" : ""}`}
-                      onSubmit={(event) => {
-                        event.preventDefault();
-                        setSearched(query.trim());
-                      }}
-                    >
-                      <label className="sr-only" htmlFor="social-search">
-                        Pesquisar pessoas, hashtags e publicações
-                      </label>
-                      <Search size={18} />
-                      <input
-                        id="social-search"
-                        type="search"
-                        maxLength={80}
-                        placeholder="Pessoas, assuntos, #ideias"
-                        value={query}
-                        onChange={(event) => setQuery(event.target.value)}
-                      />
-                      <button className="icon-control" aria-label="Pesquisar">
-                        <Search size={18} />
-                      </button>
-                    </form>
-                  </div>
-                  {searched && (
-                    <div className="social-search-results">
-                      <button
-                        className="text-button"
-                        onClick={() => {
-                          setSearched("");
-                          setQuery("");
-                        }}
-                      >
-                        <ArrowLeft size={16} />
-                        Voltar à leitura
-                      </button>
-                      <h2>{`Resultados para “${searched}”`}</h2>
-                      <div>
-                        {people.map((user) => (
-                          <SocialAuthor
-                            key={user.id}
-                            user={user}
-                            open={setPerson}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  {["for-you", "following", "campus"].map((key) => (
-                    <div
-                      className="social-feed-tab"
-                      key={key}
-                      hidden={tab !== key || !!searched}
-                    >
-                      <SocialStream
-                        query={`tab=${key}&kind=POST`}
-                        active={view === "feed" && tab === key && !searched}
-                        me={ready.me.id}
+                <div
+                  className="social-feed-scroll"
+                  data-social-scroller
+                  ref={feedScroll}
+                >
+                  <div className="social-feed-layout">
+                    <div className="social-feed-reading">
+                      <SocialStories
+                        me={ready.me}
+                        create={() => select("create", "STORY")}
                         person={setPerson}
                         refreshKey={refresh}
-                        autoplay={prefs.autoplay}
                       />
+                      <div className="social-feed-toolbar">
+                        <div
+                          className="social-tabs"
+                          role="tablist"
+                          aria-label="Filtrar publicações"
+                        >
+                          {[
+                            ["for-you", "Para Você"],
+                            ["following", "Seguindo"],
+                            ["campus", "Minha Faculdade"],
+                          ].map(([key, label]) => (
+                            <button
+                              role="tab"
+                              aria-selected={key === tab}
+                              key={key}
+                              onClick={() => openTab(key)}
+                            >
+                              {label}
+                            </button>
+                          ))}
+                        </div>
+                        <form
+                          noValidate
+                          className={`social-search ${searchOpen || searched ? "is-open" : ""}`}
+                          onSubmit={(event) => {
+                            event.preventDefault();
+                            setSearched(query.trim());
+                          }}
+                        >
+                          <label className="sr-only" htmlFor="social-search">
+                            Pesquisar pessoas, hashtags e publicações
+                          </label>
+                          <Search size={18} />
+                          <input
+                            id="social-search"
+                            type="search"
+                            maxLength={80}
+                            placeholder="Pessoas, assuntos, #ideias"
+                            value={query}
+                            onChange={(event) => setQuery(event.target.value)}
+                          />
+                          <button
+                            className="icon-control"
+                            aria-label="Pesquisar"
+                          >
+                            <Search size={18} />
+                          </button>
+                        </form>
+                      </div>
+                      {searched && (
+                        <div className="social-search-results">
+                          <button
+                            className="text-button"
+                            onClick={() => {
+                              setSearched("");
+                              setQuery("");
+                            }}
+                          >
+                            <ArrowLeft size={16} />
+                            Voltar à leitura
+                          </button>
+                          <h2>{`Resultados para “${searched}”`}</h2>
+                          <div>
+                            {people.map((user) => (
+                              <SocialAuthor
+                                key={user.id}
+                                user={user}
+                                open={setPerson}
+                              />
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {["for-you", "following", "campus"].map((key) => (
+                        <div
+                          className="social-feed-tab"
+                          key={key}
+                          hidden={tab !== key || !!searched}
+                        >
+                          <SocialStream
+                            query={`tab=${key}&kind=ALL`}
+                            active={view === "feed" && tab === key && !searched}
+                            me={ready.me.id}
+                            person={setPerson}
+                            refreshKey={refresh}
+                            autoplay={prefs.autoplay}
+                          />
+                        </div>
+                      ))}
+                      {searched && (
+                        <div className="social-feed-tab">
+                          <SocialStream
+                            key={`${tab}:${searched}`}
+                            query={`tab=${tab}&kind=ALL&q=${encodeURIComponent(searched)}`}
+                            active={view === "feed"}
+                            me={ready.me.id}
+                            person={setPerson}
+                            autoplay={prefs.autoplay}
+                          />
+                        </div>
+                      )}
                     </div>
-                  ))}
-                  {searched && (
-                    <div className="social-feed-tab">
-                      <SocialStream
-                        key={`${tab}:${searched}`}
-                        query={`tab=${tab}&kind=POST&q=${encodeURIComponent(searched)}`}
-                        active={view === "feed"}
-                        me={ready.me.id}
-                        person={setPerson}
-                        autoplay={prefs.autoplay}
-                      />
-                    </div>
-                  )}
-                </>
+                    <SocialFeedAside
+                      me={ready.me}
+                      person={setPerson}
+                      explore={() => setExplore(true)}
+                    />
+                  </div>
+                </div>
               ) : page === "clips" ? (
                 opened.includes("clips") && (
                   <SocialClips
+                    key={clipEntry?.sequence ?? 0}
+                    initialClip={clipEntry?.post}
                     active={view === "clips" && !person && !settings && !detail}
                     me={ready.me.id}
                     autoplay={prefs.autoplay}
@@ -475,6 +557,13 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                 </button>
               )}
             </div>
+          )}
+          {explore && (
+            <SocialExplore
+              me={ready.me.id}
+              person={setPerson}
+              close={() => setExplore(false)}
+            />
           )}
           {person && (
             <SocialProfile

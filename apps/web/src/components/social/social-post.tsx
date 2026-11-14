@@ -408,7 +408,7 @@ export function SocialPost({
     </div>
   );
   return (
-    <article className="social-post" data-post={item.id}>
+    <article className="social-post" data-post={item.id} data-kind={item.kind}>
       <header>
         <SocialAuthor user={postPerson(item)} open={person} />
         <button
@@ -432,6 +432,11 @@ export function SocialPost({
             media={item.media}
             authorName={item.name}
             autoplay={autoplay}
+            clipHref={
+              item.kind === "CLIP"
+                ? `/social?post=${encodeURIComponent(item.id)}`
+                : undefined
+            }
           />
           {burst > 0 && (
             <Heart

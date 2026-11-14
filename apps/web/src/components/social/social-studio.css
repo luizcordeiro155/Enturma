@@ -1,4 +1,107 @@
 /* Native Enturma surfaces. Media overlays deliberately stay white on arbitrary video. */
+.social-dialog .social-person-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  padding-block: 14px;
+}
+html[data-theme] .social-person-row > .social-author {
+  width: 100%;
+  min-width: 0;
+  justify-content: flex-start;
+}
+.social-person-row .social-author > span:last-child {
+  flex: 1;
+  overflow: hidden;
+}
+.social-person-row .social-author strong,
+.social-person-row .social-author small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.social-person-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  padding-left: 50px;
+  min-width: 0;
+}
+html[data-theme] .social-person-actions :is(button, .text-button) {
+  margin: 0;
+  min-height: 40px;
+  padding: 8px 10px;
+  font-size: 12px;
+  white-space: normal;
+}
+.social-person-actions .social-follow {
+  flex-wrap: wrap;
+}
+.social-draft-preview {
+  margin: 0;
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+}
+.social-draft-preview figcaption {
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+.social-draft-preview .studio-caption {
+  cursor: default;
+}
+.social-create-preview {
+  min-width: 0;
+}
+.social-review-pages {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+.social-review-pages button {
+  min-width: 40px;
+  min-height: 40px;
+  padding: 8px;
+}
+.social-review-pages button[aria-pressed="true"] {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+/* A single media item is a fixed frame, never a second scroll surface. */
+.social-carousel-track {
+  overflow-y: hidden;
+}
+.social-carousel-track > figure {
+  position: relative;
+  min-width: 0;
+  overflow: hidden;
+}
+.social-carousel[data-single="true"] .social-carousel-track {
+  overflow: clip;
+}
+.social-carousel video,
+.social-clips video {
+  object-position: center;
+  -webkit-user-drag: none;
+}
+.social-page .social-clips {
+  overflow-x: hidden;
+  overflow-anchor: none;
+}
+.social-page .social-clip-video {
+  overflow: hidden;
+}
+.social-page .social-clip-video video {
+  object-fit: contain;
+}
+.social-active-shell:has(.social-pager[data-view="clips"]) .social-header {
+  display: none;
+}
 .social-opening-content:not([hidden]) {
   display: contents;
 }
@@ -236,7 +339,9 @@ html[data-theme] .social-profile-buttons {
 html[data-theme] .social-navigation-brand {
   display: none;
   align-items: center;
-  gap: 10px;
+  gap: 11px;
+  user-select: none;
+  background: transparent;
   white-space: nowrap;
   line-height: 1;
   text-decoration: none;
@@ -246,20 +351,20 @@ html[data-theme] .social-navigation-brand {
     display: flex;
   }
 }
-@media (min-width: 761px) and (max-width: 1199px) {
+@media (min-width: 761px) {
   html[data-theme] .social-navigation-brand > span {
     display: none;
   }
 }
 html[data-theme] .social-navigation-brand .brand-app-icon {
-  width: 40px !important;
-  height: 40px !important;
-  flex: 0 0 40px;
+  width: 44px !important;
+  height: 44px !important;
+  flex: 0 0 44px;
 }
 html[data-theme] .social-navigation-brand > span {
   font-weight: 800;
-  font-size: 29px;
-  letter-spacing: -0.04em;
+  font-size: 32px;
+  letter-spacing: -0.035em;
 }
 html[data-theme] .social-navigation-brand > span > .dot {
   display: inline;
@@ -1083,4 +1188,363 @@ html[data-theme] .social-comment-like[aria-pressed="true"] {
   .social-dialog :is(textarea, input) {
     font-size: 16px;
   }
+}
+
+@media (min-width: 761px) {
+  .social-page .social-header,
+  .social-page .social-feed-view {
+    max-width: 760px;
+  }
+  .social-page .social-stream-inner {
+    max-width: 500px;
+    padding-top: 0;
+    gap: 20px;
+  }
+  .social-page .social-stories {
+    padding-block: 8px 12px;
+  }
+  .social-page .social-feed-toolbar {
+    flex-wrap: wrap;
+  }
+  .social-page .social-clips {
+    width: 100%;
+    max-width: 980px;
+    aspect-ratio: auto;
+    background: transparent;
+    border-radius: 0;
+    container-type: size;
+  }
+  .social-page .social-clip-page {
+    display: grid;
+    grid-template-columns: minmax(120px, 240px) minmax(0, 56.25cqh) 56px;
+    grid-template-rows: minmax(0, 1fr);
+    justify-content: center;
+    gap: 20px;
+    background: transparent;
+  }
+  .social-page .social-clip-video {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 2;
+    height: 100%;
+    border-radius: 8px;
+    background: #000;
+  }
+  .social-page .social-clip-overlay {
+    display: contents;
+  }
+  .social-page .social-clip-caption {
+    grid-area: 1 / 1;
+    align-self: end;
+    padding: 16px 0;
+  }
+  .social-page .social-clip-rail {
+    grid-area: 1 / 3;
+    align-self: end;
+  }
+  html[data-theme]
+    .social-page
+    .social-clip-caption
+    :is(.social-author, strong, small, p, a, .social-caption-toggle),
+  html[data-theme] .social-page .social-clip-rail .icon-control,
+  html[data-theme] .social-page .social-clip-caption .social-follow > button {
+    color: var(--ink) !important;
+    text-shadow: none;
+    filter: none;
+  }
+  html[data-theme] .social-page .social-clip-rail .icon-control svg {
+    filter: none;
+  }
+  html[data-theme]
+    .social-page
+    .social-clip-rail
+    .icon-control[aria-pressed="true"] {
+    color: var(--accent) !important;
+  }
+  html[data-theme] .social-page .social-clip-caption .social-follow > small {
+    color: var(--muted);
+  }
+  html[data-theme] .social-page .social-clips-tabs button {
+    color: var(--ink) !important;
+    text-shadow: none;
+  }
+  .social-page .social-clip-progress {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 2;
+    align-self: end;
+    width: 100%;
+  }
+  .social-page .social-clip-controls {
+    right: 0;
+  }
+  html[data-theme] .social-page .social-clip-controls .icon-control {
+    color: var(--ink) !important;
+    background: var(--soft) !important;
+  }
+}
+
+/* The same creation flow, with media and details side by side on a desktop. */
+@media (min-width: 761px) {
+  .social-page .social-create-flow {
+    max-width: 1060px;
+    gap: 12px;
+    padding: 20px 24px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: var(--surface);
+  }
+  .social-page .social-create-flow > .social-create-heading h2 {
+    font-size: 20px;
+  }
+  .social-active-shell:has(.social-pager[data-view="create"]) .social-header {
+    display: none;
+  }
+  html[data-theme] .social-create-flow .social-create-step-actions > button {
+    min-height: 40px;
+    padding-block: 8px;
+  }
+  .social-create-flow .social-create-steps {
+    padding-block: 8px;
+  }
+  .social-create-flow .social-video-editor {
+    grid-template-columns: minmax(0, 1.3fr) minmax(260px, 1fr);
+    gap: 24px;
+  }
+  .social-create-flow .studio-image-editor {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(260px, 1fr);
+    gap: 16px 24px;
+    align-items: start;
+  }
+  .social-create-flow .studio-image-editor > .studio-preview {
+    grid-column: 1;
+    grid-row: 1 / 4;
+  }
+  .social-create-flow .studio-image-editor > :not(.studio-preview) {
+    grid-column: 2;
+  }
+  .social-create-flow .studio-image-editor > .social-edit-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  html[data-theme] .social-create-flow .studio-preview {
+    width: min(100%, calc(54dvh * var(--studio-aspect, 0.8)));
+    margin-inline: auto;
+  }
+  .social-create-flow[data-step="details"][data-has-media="true"]
+    .social-editor-fields {
+    grid-template-columns: minmax(0, 1.3fr) minmax(260px, 1fr);
+    align-items: start;
+  }
+  .social-create-flow[data-step="details"] .social-create-preview {
+    grid-column: 1;
+    grid-row: 1 / 4;
+    position: sticky;
+    top: 0;
+  }
+  .social-create-flow[data-step="details"][data-has-media="true"]
+    .social-caption-field,
+  .social-create-flow[data-step="details"][data-has-media="true"]
+    .social-create-details,
+  .social-create-flow[data-step="details"][data-has-media="true"]
+    .social-editor-fields
+    > .social-note {
+    grid-column: 2;
+  }
+  .social-create-flow[data-step="details"]
+    .social-editor-fields
+    > :is(footer, [role="alert"], [role="status"], progress) {
+    grid-column: 1 / -1;
+  }
+  .social-create-flow[data-step="details"]
+    .social-create-details
+    .social-edit-controls {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .social-page .social-create-flow .social-create-publish-actions {
+    justify-content: flex-end;
+    border-top: 1px solid var(--border);
+    padding-top: 16px;
+    background: var(--surface);
+  }
+}
+@media (max-width: 760px) {
+  html[data-theme] .social-create-preview .studio-preview {
+    width: min(100%, calc(38dvh * var(--studio-aspect, 0.8)));
+    margin-inline: auto;
+  }
+}
+
+/* Reference-led discovery and profile grids share the authorized thumbnail UI. */
+html[data-theme] dialog.social-dialog-explore {
+  position: fixed;
+  inset: 16px;
+  width: min(1240px, calc(100vw - 32px));
+  max-width: calc(100vw - 32px);
+  height: calc(100dvh - 32px);
+  max-height: var(--social-viewport, 100dvh);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--ink);
+  border-radius: 16px;
+}
+html[data-theme] dialog.social-dialog-explore[open] { display: flex; flex-direction: column; }
+.social-dialog-explore > header { flex: none; }
+.social-explore-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  width: min(694px, calc(100% - 32px));
+  margin: 12px auto 20px;
+  padding: 0 12px;
+  min-height: 44px;
+  border-radius: 24px;
+  background: var(--soft);
+}
+.social-explore-search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); padding: 10px 0; }
+html[data-theme] .social-explore-search .icon-control { background: transparent; border: 0; flex: none; }
+.social-explore-people { flex: none; max-height: 180px; overflow-y: auto; padding: 0 16px 12px; display: flex; flex-wrap: wrap; gap: 16px; }
+.social-explore-people h3, .social-explore-people [role=alert] { flex-basis: 100%; margin: 0; font-size: 14px; }
+html[data-theme] :is(.social-dialog-profile, .social-dialog-explore) .social-profile-grid-square .social-profile-cell { aspect-ratio: 3 / 4; }
+@media (min-width: 1200px) {
+  html[data-theme] dialog.social-dialog-profile { width: min(1240px, calc(100vw - 64px)); max-width: calc(100vw - 64px); }
+  .social-dialog-explore .social-profile-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .social-dialog-profile .social-profile-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 900px; width: 100%; margin-inline: auto; }
+  .social-profile-intro { width: min(728px, 100%); margin-inline: auto; }
+  html[data-theme] .social-profile-intro .identity-avatar { width: 140px; height: 140px; min-width: 140px; min-height: 140px; flex-basis: 140px; }
+}
+@media (max-width: 760px) {
+  .social-navigation-items { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  html[data-theme] .social-navigation-items > :is(button, a) { min-width: 0; padding-inline: 2px; }
+  html[data-theme] dialog.social-dialog-explore {
+    inset: var(--social-viewport-top, 0px) 0 auto;
+    width: 100%; max-width: 100%; height: var(--social-viewport, 100dvh);
+    margin: 0; border: 0; border-radius: 0;
+  }
+  .social-dialog-explore > header { padding-top: max(12px, env(safe-area-inset-top, 0px), var(--native-safe-top, 0px)); }
+  .social-explore-search { margin-block: 8px 16px; }
+}
+.social-collections { min-height: 220px; max-height: 75dvh; overflow-y: auto; }
+.social-collections > p { color: var(--muted); font-size: 13px; }
+.social-collection-form { display: flex; align-items: end; flex-wrap: wrap; gap: 10px; }
+.social-collection-form label { display: grid; gap: 6px; flex: 1 1 180px; min-width: 0; }
+.social-collection-form input { min-width: 0; width: 100%; }
+.social-collection-list { display: flex; flex-wrap: wrap; gap: 8px; }
+.social-collection-list button { overflow-wrap: anywhere; }
+.social-collections-open { align-self: start; margin: 12px; }
+.social-collections .social-profile-grid-scroll { min-height: 260px; }
+
+/* Approved Figma board: rail, reading column and real connection sidebar. */
+.social-feed-layout { width: min(100%, 920px); margin-inline: auto; }
+.social-feed-reading { min-width: 0; }
+.social-feed-aside { display: none; }
+.social-mobile-explore { display: none !important; }
+@media (min-width: 761px) {
+  .social-navigation { background: var(--bg); }
+  .social-navigation-brand { margin-bottom: 64px; }
+  .social-navigation-footer p { display: none; }
+  .social-navigation-items > :is(button, a) { min-height: 48px; }
+  .social-page .social-stories { max-width: 580px; margin-inline: auto; border: 0; }
+  .social-page .social-feed-toolbar { max-width: 580px; margin-inline: auto; }
+  .social-page .social-story-ring { width: 64px; height: 64px; padding: 3px; }
+  .social-page .social-story-ring .avatar { width: 54px; height: 54px; }
+}
+@media (min-width: 1200px) {
+  .social-page .social-feed-view { max-width: 920px; }
+  .social-feed-layout { display: grid; grid-template-columns: minmax(0, 580px) 290px; gap: 50px; align-items: start; }
+  .social-page .social-header { max-width: 920px; }
+  .social-feed-aside { display: grid; gap: 24px; padding: 16px 0; position: sticky; top: 0; }
+  .social-feed-aside > header { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .social-feed-aside h2 { font-size: 14px; margin: 0; }
+  .social-feed-aside p { font-size: 13px; line-height: 1.5; margin: 0; color: var(--muted); }
+  .social-feed-aside ul { list-style: none; display: grid; gap: 20px; margin: 0; padding: 0; }
+  .social-feed-aside li { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-width: 0; }
+  .social-feed-aside .social-author { min-width: 0; }
+  .social-feed-aside .social-author > span:last-child { min-width: 0; overflow: hidden; }
+  .social-feed-aside .social-author :is(strong, small) { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .social-feed-aside > footer { color: var(--muted); font-size: 12px; line-height: 1.8; }
+  .social-feed-aside > footer a { color: inherit; }
+}
+@media (max-width: 760px) {
+  .social-navigation-items > .social-navigation-explore { display: none !important; }
+  .social-mobile-explore { display: grid !important; }
+  html[data-theme] dialog.social-dialog-panel,
+  html[data-theme] dialog.social-dialog-sheet { border-radius: 24px 24px 0 0; background: var(--surface); }
+  html[data-theme] :is(.social-dialog-panel, .social-dialog-sheet) > header { background: var(--surface); }
+}
+
+/* Keep the scroll owner at the window edge; constrain only the reading content. */
+.social-page {
+  max-width: none;
+  padding-inline: 0;
+  padding-bottom: 0;
+}
+.social-page .social-feed-view {
+  max-width: none;
+}
+.social-page .social-header {
+  width: calc(100% - 32px);
+}
+@media (max-width: 760px) {
+  .social-page .social-header {
+    width: 100%;
+  }
+  .social-page .social-header h1 {
+    white-space: normal;
+  }
+}
+.social-feed-scroll {
+  /* Keep the scrollport flush with the viewport; avoid a permanent 15px gutter. */
+  scrollbar-width: thin;
+  scrollbar-gutter: auto;
+}
+.social-feed-layout {
+  padding-inline: 16px;
+}
+.social-feed-aside > footer {
+  display: block;
+  padding: 0;
+}
+/* All feed videos retain the same card width and show the complete frame. */
+:is(.social-page, .social-dialog) .social-post .social-carousel[data-has-video="true"] {
+  max-height: min(640px, max(220px, calc(100dvh - 180px)));
+}
+/* The absolute strip takes its height from the *clamped* frame, not its
+   aspect-ratio's unclamped preferred height. This prevents portrait videos
+   from pushing past the frame at narrow windows and browser zoom levels. */
+:is(.social-page, .social-dialog) .social-post .social-carousel[data-has-video="true"] > .social-carousel-track {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.social-page .social-post:not(.social-post-clip) .social-carousel[data-has-video="true"] video,
+.social-dialog .social-post .social-carousel[data-has-video="true"] video {
+  width: 100%;
+  height: 100%;
+  /* A grid item's intrinsic video height must not override the frame's cap. */
+  min-height: 0;
+  max-height: 100%;
+  object-fit: contain;
+}
+.social-carousel-track > figure {
+  position: relative;
+  min-width: 0;
+}
+.social-feed-clip-link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.social-feed-clip-link:focus-visible {
+  outline-offset: -4px;
+}
+html[data-theme] .social-media-sound {
+  z-index: 2;
+}
+@media (max-width: 760px) {
+  .social-feed-layout { padding-inline: 0; }
 }

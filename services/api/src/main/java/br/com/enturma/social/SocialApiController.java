@@ -38,8 +38,9 @@ public class SocialApiController {
       @RequestParam(defaultValue = "") String q,
       @RequestParam(defaultValue = "") String cursor,
       @RequestParam(required = false) UUID author,
-      @RequestParam(defaultValue = "posts") String collection) {
-    return posts.feed(a, tab, kind, q, cursor, author, collection);
+      @RequestParam(defaultValue = "posts") String collection,
+      @RequestParam(required = false) UUID collectionId) {
+    return posts.feed(a, tab, kind, q, cursor, author, collection, collectionId);
   }
 
   @GetMapping("/posts/{id}")

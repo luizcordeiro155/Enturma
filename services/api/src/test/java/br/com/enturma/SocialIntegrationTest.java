@@ -30,6 +30,7 @@ class SocialIntegrationTest {
   @Autowired SocialAccess access;
   @Autowired SocialReview review;
   @Autowired SocialMaintenance maintenance;
+  @Autowired SocialCollections collections;
   @Autowired MockMvc mvc;
   @Autowired org.springframework.transaction.PlatformTransactionManager transactions;
   Actor a, b, c;
@@ -60,6 +61,63 @@ class SocialIntegrationTest {
         posts.draft(author, new SocialPosts.Draft(id, kind, body, "PUBLIC", null, 0, List.of()));
     posts.publish(author, id, ((Number) draft.get("version")).intValue());
     return id;
+  }
+
+  @Test
+  void publicReleaseProbeRequiresBothMigrationsAndProtectedTables() throws Exception {
+    mvc.perform(get("/api/v1/public/social-release"))
+        .andExpect(status().isOk())
+        .andExpect(header().string("Cache-Control", "no-store"))
+        .andExpect(content().json("{\"release\":\"social-figma-2026-11-13\",\"ready\":true}", true));
+    db.jdbc.execute("ALTER TABLE social_collection DISABLE ROW LEVEL SECURITY");
+    mvc.perform(get("/api/v1/public/social-release"))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.ready").value(false));
+    db.jdbc.execute("ALTER TABLE social_collection ENABLE ROW LEVEL SECURITY");
+    db.jdbc.update("UPDATE flyway_schema_history SET success=false WHERE version='72'");
+    mvc.perform(get("/api/v1/public/social-release"))
+        .andExpect(status().isServiceUnavailable())
+        .andExpect(jsonPath("$.ready").value(false));
+    // The test transaction rolls back the simulated incomplete rollout.
+  }
+
+  @Test
+  void namedCollectionsArePrivateIdempotentAndRespectLostPostAccess() {
+    UUID post = publish(a, "POST", "Ideia para estudar"), collection = UUID.randomUUID();
+    collections.save(b, collection, new SocialCollections.Name("Estudos"));
+    collections.save(b, collection, new SocialCollections.Name("Projetos"));
+    collections.member(b, collection, post, new SocialCollections.Membership(true));
+    collections.member(b, collection, post, new SocialCollections.Membership(true));
+    assertThat(db.jdbc.queryForObject("SELECT count(*) FROM social_collection_item WHERE collection_id=?", Integer.class, collection)).isEqualTo(1);
+    assertThat((List<?>) collections.list(b, post)).hasSize(1);
+    assertThat((List<?>) collections.list(c, null)).isEmpty();
+    var own = (Map<?, ?>) posts.feed(b, "for-you", "ALL", "", "", b.id(), "saved", collection);
+    assertThat((List<?>) own.get("items")).hasSize(1);
+    assertThatThrownBy(() -> posts.feed(c, "for-you", "ALL", "", "", c.id(), "saved", collection)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> collections.save(c, collection, new SocialCollections.Name("Não é minha"))).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> collections.member(c, collection, post, new SocialCollections.Membership(false))).isInstanceOf(ApiException.class);
+    db.jdbc.update("UPDATE social_profile SET private_account=true WHERE user_id=?", a.id());
+    var privateFeed = (Map<?, ?>) posts.feed(b, "for-you", "ALL", "", "", b.id(), "saved", collection);
+    assertThat((List<?>) privateFeed.get("items")).isEmpty();
+    assertThatThrownBy(() -> collections.member(b, collection, post, new SocialCollections.Membership(true))).isInstanceOf(ApiException.class);
+    // Removal remains possible after access is revoked, without reading the post.
+    collections.member(b, collection, post, new SocialCollections.Membership(false));
+    assertThat(db.jdbc.queryForObject("SELECT count(*) FROM social_collection_item WHERE collection_id=?", Integer.class, collection)).isZero();
+  }
+
+  @Test
+  void unsavingRemovesMembershipButDeletingACollectionPreservesSavedPosts() {
+    UUID post = publish(a, "POST", "Outra ideia"), collection = UUID.randomUUID();
+    collections.save(b, collection, new SocialCollections.Name("Leituras"));
+    collections.member(b, collection, post, new SocialCollections.Membership(true));
+    posts.react(b, post, "SAVE", false);
+    assertThat(db.jdbc.queryForObject("SELECT count(*) FROM social_collection_item WHERE collection_id=?", Integer.class, collection)).isZero();
+    collections.member(b, collection, post, new SocialCollections.Membership(true));
+    collections.remove(b, collection);
+    collections.remove(b, collection);
+    assertThat((List<?>) collections.list(b, null)).isEmpty();
+    var saved = (Map<?, ?>) posts.feed(b, "for-you", "ALL", "", "", b.id(), "saved");
+    assertThat((List<?>) saved.get("items")).hasSize(1);
   }
 
   @Test
@@ -417,5 +475,57 @@ class SocialIntegrationTest {
                         List.of(),
                         elements)))
         .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void collectionQuotaAllowsRetryAndRenameButRejectsInvalidNames() {
+    UUID first = UUID.randomUUID();
+    collections.save(a, first, new SocialCollections.Name("Primeira"));
+    for (int index = 1; index < 50; index++)
+      collections.save(a, UUID.randomUUID(), new SocialCollections.Name("Coleção " + index));
+    collections.save(a, first, new SocialCollections.Name("Renomeada"));
+    assertThatThrownBy(() -> collections.save(a, UUID.randomUUID(), new SocialCollections.Name("Extra")))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> collections.save(a, first, new SocialCollections.Name(" ")))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> collections.save(a, first, new SocialCollections.Name("a".repeat(61))))
+        .isInstanceOf(ApiException.class);
+    assertThat(((List<?>) collections.list(a, null))).hasSize(50);
+  }
+
+  @Autowired br.com.enturma.auth.PersonalDataExport personalExport;
+
+  @Test
+  void collectionExportIncludesOnlyOwnersRecords() {
+    UUID collection = UUID.randomUUID(), post = publish(a, "POST", "Fonte de pesquisa");
+    collections.save(b, collection, new SocialCollections.Name("Pesquisa privada"));
+    collections.member(b, collection, post, new SocialCollections.Membership(true));
+    assertThat(personalExport.sections()).contains("social-collections", "social-collection-items");
+    for (String section : List.of("social-collections", "social-collection-items")) {
+      assertThat((List<?>) ((Map<?, ?>) personalExport.export(b, section, 0).getBody()).get("items")).hasSize(1);
+      assertThat((List<?>) ((Map<?, ?>) personalExport.export(c, section, 0).getBody()).get("items")).isEmpty();
+    }
+  }
+
+  @Test
+  void privateCollectionRowsStayHiddenAfterAnAccidentalDatabaseGrant() throws Exception {
+    UUID collection = UUID.randomUUID();
+    collections.save(a, collection, new SocialCollections.Name("Privada"));
+    assertThat(db.jdbc.queryForObject("SELECT count(*) FROM social_collection WHERE id=?", Integer.class, collection)).isEqualTo(1);
+    db.jdbc.execute((org.springframework.jdbc.core.ConnectionCallback<Void>) connection -> {
+      String role = "collection_probe_" + UUID.randomUUID().toString().replace("-", "");
+      try (var statement = connection.createStatement()) {
+        statement.execute("CREATE ROLE " + role + " NOLOGIN");
+        statement.execute("GRANT USAGE ON SCHEMA public TO " + role);
+        statement.execute("GRANT SELECT ON public.social_collection,public.social_collection_item TO " + role);
+        statement.execute("SET LOCAL ROLE " + role);
+        try (var result = statement.executeQuery("SELECT count(*) FROM public.social_collection")) {
+          result.next();
+          assertThat(result.getInt(1)).isZero();
+        }
+        statement.execute("RESET ROLE");
+      }
+      return null;
+    });
   }
 }

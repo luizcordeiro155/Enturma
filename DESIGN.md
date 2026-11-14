@@ -32,8 +32,19 @@ Reutilizar Shell, Avatar/UserIdentity, Feedback, playMotion, RoomArtwork, RoomSh
 
 ## Do's and Don'ts
 
-Não criar números, seguidores, publicações ou aprovação fictícios. Não mudar páginas alheias ao Social. Não iniciar dois vídeos simultaneamente nem tornar gestos a única forma de navegação.
+Não criar números, seguidores, publicações ou aprovação fictícios. Fora do Social, limitar esta revisão aos encaixes de desktop em 1366×768 solicitados pelo usuário. Não iniciar dois vídeos simultaneamente nem tornar gestos a única forma de navegação.
 
 ## Studio e interacoes sociais
 
 O Studio visual, capas, comentarios com midia, compartilhamento privado e lives seguem [o contrato de release](docs/SOCIAL_STUDIO_RELEASE.md). Fotos 3:4 permanecem inteiras no feed. Abertura Social em tela inteira; logo e fontes canonicos do Enturma.
+
+## Revisão de feed e desktop — 12/11/2026
+
+As referências fornecidas pelo usuário orientam a composição: feed geral central de até 500 px com posts e Clips, preservando filtros e ranking da API; visualizador de Clips com vídeo 9:16 estável, legenda à esquerda e ações à direita no desktop, sobreposição no mobile. A marca usa o mesmo SVG, peso, tamanho e tokens da Shell, sem superfície de hover exclusiva.
+
+No Studio, manter Escolher → Editar → Detalhes e os rascunhos existentes. Editar e revisar usam prévia à esquerda e ferramentas/detalhes à direita no desktop; o mobile empilha. A revisão exibe a capa escolhida, inclusive a importada, e permite voltar ao vídeo sem perder mudanças. Seguidores separam identidade e ações em linhas para nomes longos. A Shell e o painel de estudo mantêm duas colunas a 1366×768 com espaçamento compacto, sem zoom global.
+
+## Layout aprovado no Figma — 13/11/2026
+
+Referência: https://www.figma.com/design/ayr0c9xHqgoOHSTqDI3M51?node-id=5-2.
+No desktop, rail de 76 px e Feed com leitura de até 500 px, Stories de 64 px e coluna lateral de 290 px a partir de 1200 px. A coluna usa conexões reais (Sua turma), com convite para descobrir pessoas quando vazia; não simula sugestões algorítmicas. No mobile, cinco destinos no dock e Explorar no cabeçalho. O perfil mantém grade de três colunas com fotos 3:4; Explorar pode usar quatro colunas em telas largas. Painéis móveis usam alça visual e cantos de 24 px, preservando teclado, safe areas e fechamento acessível. Clips, editor, mensagens, câmera e compartilhamento reutilizam os fluxos existentes desta PR. A aparência herda os temas escolhidos pelo usuário.

@@ -162,6 +162,7 @@ function ClipVideo({
         src={near ? mediaUrl(media.id) : undefined}
         poster={near ? mediaUrl(media.id, true) : undefined}
         playsInline
+        draggable={false}
         muted={muted}
         preload={near ? "metadata" : "none"}
         loop
@@ -290,11 +291,13 @@ export function SocialClips({
   me,
   autoplay,
   person,
+  initialClip,
 }: {
   active: boolean;
   me: string;
   autoplay: boolean;
   person: (id: string) => void;
+  initialClip?: Post;
 }) {
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("for-you"),
     [opened, setOpened] = useState<string[]>(["for-you"]);
@@ -357,6 +360,7 @@ export function SocialClips({
                 person={person}
                 muted={muted}
                 toggleMuted={toggleMuted}
+                initialClip={key === "for-you" ? initialClip : undefined}
               />
             </div>
           ),
@@ -372,6 +376,7 @@ function ClipsFeed({
   person,
   muted,
   toggleMuted,
+  initialClip,
 }: {
   query: string;
   active: boolean;
@@ -380,8 +385,14 @@ function ClipsFeed({
   person: (id: string) => void;
   muted: boolean;
   toggleMuted: () => void;
+  initialClip?: Post;
 }) {
-  const stream = useSocialStream(query, active),
+  const stream = useSocialStream(
+      query,
+      active,
+      undefined,
+      initialClip ? [initialClip] : [],
+    ),
     container = useRef<HTMLDivElement>(null),
     latestLoad = useRef(stream.load);
   const items = stream.items.filter(
@@ -541,6 +552,7 @@ function ClipsFeed({
           <section
             key={item.id}
             data-clip-index={i}
+            data-clip-id={item.id}
             className="social-clip-page"
           >
             <ClipPage

@@ -1,4 +1,8 @@
 /* This workspace owns its scroll surfaces, just like rooms and private chat. */
+html:has(.social-active-shell) {
+  /* The Feed owns scrolling; the document must not reserve a second scrollbar. */
+  scrollbar-gutter: auto;
+}
 html .social-active-shell {
   height: calc(100dvh - var(--social-chrome, 0px));
   min-height: 0;
@@ -77,7 +81,7 @@ html[data-theme] .social-navigation-footer > :is(button, a) {
   cursor: pointer;
   position: relative;
 }
-html[data-theme] .social-navigation :is(button, a):hover {
+html[data-theme] .social-navigation :is(button, a):not(.social-navigation-brand):hover {
   background: var(--soft);
 }
 html[data-theme] .social-navigation-items [aria-current="page"] {

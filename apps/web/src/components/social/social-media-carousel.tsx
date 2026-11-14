@@ -5,8 +5,17 @@ import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
 import { mediaUrl, type SocialMedia } from "@/lib/social";
 import { mediaAspect } from "@/lib/social-media";
 import { useAutoplayInView } from "./use-autoplay-in-view";
+import { NavigationLink } from "../navigation-link";
 
-function FeedVideo({ media, autoplay }: { media: SocialMedia; autoplay: boolean }) {
+function FeedVideo({
+  media,
+  autoplay,
+  clipHref,
+}: {
+  media: SocialMedia;
+  autoplay: boolean;
+  clipHref?: string;
+}) {
   const ref = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
   useAutoplayInView(ref, autoplay);
@@ -20,6 +29,7 @@ function FeedVideo({ media, autoplay }: { media: SocialMedia; autoplay: boolean 
         muted={muted}
         loop
         playsInline
+        draggable={false}
         preload="none"
         // Without autoplay the person starts playback, so the native controls stay.
         controls={!autoplay}
@@ -30,6 +40,14 @@ function FeedVideo({ media, autoplay }: { media: SocialMedia; autoplay: boolean 
           else video.pause();
         }}
       />
+      {clipHref && (
+        <NavigationLink
+          href={clipHref}
+          scroll={false}
+          className="social-feed-clip-link"
+          aria-label="Assistir nos Clips"
+        />
+      )}
       {autoplay && (
         <button
           type="button"
@@ -56,10 +74,12 @@ export function SocialMediaCarousel({
   media,
   authorName,
   autoplay,
+  clipHref,
 }: {
   media: SocialMedia[];
   authorName: string;
   autoplay: boolean;
+  clipHref?: string;
 }) {
   const track = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -78,11 +98,16 @@ export function SocialMediaCarousel({
   return (
     <div
       className="social-carousel"
+      data-single={!many}
+      data-has-video={media.some((item) => item.kind === "VIDEO")}
       data-social-gesture={many ? "ignore" : undefined}
       aria-label="Mídias da publicação"
       style={
         {
-          "--social-media-aspect": mediaAspect(media[0]?.width, media[0]?.height),
+          "--social-media-aspect": mediaAspect(
+            media[0]?.width,
+            media[0]?.height,
+          ),
         } as React.CSSProperties
       }
     >
@@ -104,7 +129,7 @@ export function SocialMediaCarousel({
         {media.map((item, position) => (
           <figure key={item.id}>
             {item.kind === "VIDEO" ? (
-              <FeedVideo media={item} autoplay={autoplay} />
+              <FeedVideo media={item} autoplay={autoplay} clipHref={clipHref} />
             ) : (
               <img
                 src={mediaUrl(item.id)}

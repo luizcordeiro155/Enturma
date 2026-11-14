@@ -11,10 +11,12 @@ export const test = base.extend({
     const address = new URL(connection);
     if (
       !["localhost", "127.0.0.1"].includes(address.hostname) ||
-      address.pathname !== "/enturma_e2e" ||
+      !["/enturma_e2e", "/enturma_social3_e2e"].includes(address.pathname) ||
       !["localhost", "127.0.0.1"].includes(backend.hostname)
     )
-      throw new Error("Student fixtures are restricted to local enturma_e2e");
+      throw new Error(
+        "Student fixtures require an explicitly allowed local E2E database",
+      );
     const db = new pg.Client({ connectionString: connection });
     await db.connect();
     try {

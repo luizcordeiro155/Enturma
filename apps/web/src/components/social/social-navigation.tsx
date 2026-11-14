@@ -1,14 +1,14 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { playMotion } from "@/lib/motion";
-import { Aperture, Film, Plus, Home, Settings2 } from "lucide-react";
+import { Film, Plus, Home, Settings2, Search, Send } from "lucide-react";
 import type { SocialPerson, SocialView } from "@/lib/social";
 import { NavigationLink } from "../navigation-link";
 import { Avatar } from "../user-identity";
 import { EnturmaAppIcon } from "../enturma-app-icon";
 
 const destinations = {
-  feed: { label: "Feed", icon: Aperture },
+  feed: { label: "Feed", icon: Home },
   clips: { label: "Clips", icon: Film },
   create: { label: "Criar", icon: Plus },
 };
@@ -22,6 +22,7 @@ export function SocialNavigation({
   me,
   profile,
   settings,
+  explore,
 }: {
   view: SocialView;
   order: SocialView[];
@@ -30,6 +31,7 @@ export function SocialNavigation({
   me: SocialPerson;
   profile: () => void;
   settings: () => void;
+  explore: () => void;
 }) {
   const navigation = useRef<HTMLElement>(null);
   const previous = useRef<SocialView>(view);
@@ -60,10 +62,11 @@ export function SocialNavigation({
     <aside className="social-navigation">
       <NavigationLink
         href="/home"
-        className="social-navigation-brand"
+        className="brand social-navigation-brand"
+        draggable={false}
         aria-label="Enturma — voltar ao início"
       >
-        <EnturmaAppIcon size={40} className="brand-app-icon" />
+        <EnturmaAppIcon size={44} className="brand-app-icon" />
         <span>
           enturma<span className="dot">.</span>
         </span>
@@ -96,6 +99,23 @@ export function SocialNavigation({
             </button>
           );
         })}
+        <button
+          className="social-navigation-explore"
+          type="button"
+          onClick={explore}
+          title="Explorar"
+        >
+          <span className="social-nav-glyph">
+            <Search size={24} />
+          </span>
+          <span>Explorar</span>
+        </button>
+        <NavigationLink href="/friends" title="Mensagens">
+          <span className="social-nav-glyph">
+            <Send size={24} />
+          </span>
+          <span>Mensagens</span>
+        </NavigationLink>
         <button
           type="button"
           onClick={profile}

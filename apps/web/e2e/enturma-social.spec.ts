@@ -6,6 +6,49 @@ import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
+
+test("Social scroll owner uses the viewport without changing other page gutters", async ({ page }) => {
+  const styles = ["src/app/responsive-shell.css", "src/components/social/social.css"]
+    .map((file) => readFileSync(file, "utf8")).join("\n");
+  await page.setViewportSize({ width: 1366, height: 768 });
+  await page.setContent(`<style>${styles}</style><div class="social-active-shell"></div>`);
+  await expect(page.locator("html")).toHaveCSS("scrollbar-gutter", "auto");
+  await page.locator(".social-active-shell").evaluate((el) => el.remove());
+  await expect(page.locator("html")).toHaveCSS("scrollbar-gutter", "stable");
+});
+
+// Exercise the real stylesheet cascade without requiring an API or account.
+// A lower-specificity contain rule must not leave feed videos using cover.
+test("feed video CSS preserves the full frame at mobile and desktop sizes", async ({ page }) => {
+  const styles = ["social.css", "social-3.css", "social-3-continuation.css", "social-studio.css"]
+    .map((file) => readFileSync(`src/components/social/${file}`, "utf8"))
+    .join("\n");
+  // Browser zoom changes the CSS viewport. Include the effective viewports of
+  // a 1348x596 window at 80%, 100%, 125%, 150% and 200%, plus phone/wide screens.
+  for (const [width, height] of [
+    [1685, 745], [1348, 596], [1078, 477], [899, 397], [674, 298],
+    [390, 844], [1366, 768], [1920, 1080],
+  ]) {
+    await page.setViewportSize({ width, height });
+    await page.setContent(`<style>${styles}</style>
+      <main class="social-page"><article class="social-post" style="width:min(500px,100%)">
+        <div class="social-post-media"><div class="social-carousel" data-single="true" data-has-video="true" style="--social-media-aspect:.75">
+          <div class="social-carousel-track"><figure><video width="180" height="320"></video></figure></div>
+        </div></div>
+      </article></main>`);
+    const video = page.locator("video");
+    await expect(video).toHaveCSS("object-fit", "contain", { timeout: 1000 });
+    const frame = (await page.locator(".social-carousel").boundingBox())!;
+    const bounds = (await video.boundingBox())!;
+    expect(bounds.height).toBeLessThanOrEqual(Math.min(640, Math.max(220, height - 180)) + 1);
+    expect(bounds.width).toBeLessThanOrEqual(501);
+    expect(bounds.x).toBeGreaterThanOrEqual(frame.x);
+    expect(bounds.y).toBeGreaterThanOrEqual(frame.y);
+    expect(bounds.x + bounds.width).toBeLessThanOrEqual(frame.x + frame.width + 1);
+    expect(bounds.y + bounds.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
+  }
+});
+
 async function student(request: APIRequestContext, name: string) {
   const tag = randomUUID().slice(0, 8);
   const response = await request.post(`${backend}/api/v1/auth/register`, {
@@ -90,11 +133,16 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
   await expect(
     social.getByRole("button", { name: "Meu perfil social" }),
   ).toBeVisible();
-  await expect(social.getByRole("link", { name: "Mensagens" })).toHaveCount(0);
+  await expect(social.getByRole("link", { name: "Mensagens" })).toHaveAttribute(
+    "href",
+    "/friends",
+  );
   await expect(
-    page.locator(".social-header").getByRole("link", { name: "Mensagens" }),
-  ).toHaveAttribute("href", "/friends");
-  // Three width bands: bottom dock, icon-only rail, labelled rail.
+    page
+      .locator(".social-header")
+      .getByRole("button", { name: "Explorar", exact: true }),
+  ).toBeVisible();
+  // The approved Figma layout uses a bottom dock and a 76px icon rail.
   for (const width of [390, 820, 1440]) {
     await page.setViewportSize({ width, height: 844 });
     const nav = page.locator(".social-navigation");
@@ -107,7 +155,7 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
       .last()
       .boundingBox();
     // The compact rail keeps the label for assistive technology but clips it visually.
-    expect(label!.width > 2).toBe(width <= 760 || width >= 1200);
+    expect(label!.width > 2).toBe(width <= 760);
     expect(
       await page.evaluate(
         () => document.documentElement.scrollWidth <= innerWidth + 1,
@@ -257,11 +305,12 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
     "1 Seguidores",
   );
   await profile.getByRole("button", { name: "Fechar", exact: true }).click();
-  await feed.evaluate((el) => {
+  const feedScroller = page.locator(".social-feed-scroll:visible");
+  await feedScroller.evaluate((el) => {
     el.scrollTop = 500;
     el.setAttribute("data-reading-kept", "yes");
   });
-  const position = await feed.evaluate((el) => el.scrollTop);
+  const position = await feedScroller.evaluate((el) => el.scrollTop);
   expect(position).toBeGreaterThan(0);
   const navigation = page.getByRole("navigation", {
     name: "Ambientes do Social",
@@ -269,8 +318,8 @@ test("Social real: publicar, comentar, seguir, preservar leitura e rascunho em t
   await navigation.getByRole("button", { name: "Clips", exact: true }).click();
   await expect(page.locator(".social-clips-shell")).toBeVisible();
   await navigation.getByRole("button", { name: "Feed", exact: true }).click();
-  expect(await feed.evaluate((el) => el.scrollTop)).toBe(position);
-  await expect(feed).toHaveAttribute("data-reading-kept", "yes");
+  expect(await feedScroller.evaluate((el) => el.scrollTop)).toBe(position);
+  await expect(feedScroller).toHaveAttribute("data-reading-kept", "yes");
   await navigation.getByRole("button", { name: "Criar", exact: true }).click();
   const editor = page.getByRole("region", { name: "Central de criação" });
   const draftText = `Meu rascunho continua aqui. #computação ${bia.username}`;
@@ -541,9 +590,9 @@ test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; control
   await expect(
     page.getByRole("button", { name: "Enviar e publicar", exact: true }),
   ).toBeEnabled();
-  await expect(
-    page.getByRole("button", { name: "Publicar Clip" }),
-  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Publicar Clip" })).toHaveCount(
+    0,
+  );
 });
 
 test("câmera: gravação WebM real sem Duration abre o editor e preserva o rascunho", async ({
@@ -661,11 +710,23 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   // Isolated player contract fixture, not a publication bypass. Spring tests exercise
   // actual authorization, export, storage, duration and publication independently.
   await page.route("**/api/backend/social/feed?**", (route) => {
-    if (new URL(route.request().url()).searchParams.get("kind") !== "CLIP")
-      return route.fallback();
+    const kind = new URL(route.request().url()).searchParams.get("kind");
+    if (kind !== "CLIP" && kind !== "ALL") return route.fallback();
     return route.fulfill({
       json: {
-        items: posts,
+        items:
+          kind === "ALL"
+            ? [
+                {
+                  ...posts[0],
+                  id: "text-post",
+                  kind: "POST",
+                  body: "Uma descoberta no feed geral",
+                  media: [],
+                },
+                posts[2],
+              ]
+            : posts,
         nextCursor: "",
         snapshot: new Date().toISOString(),
       },
@@ -676,12 +737,73 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
       return route.fulfill({ status: 204 });
     return route.fulfill({ contentType: "video/mp4", body: bytes });
   });
+  await page.route("**/api/backend/social/posts/*", (route) => {
+    const id = new URL(route.request().url()).pathname.split("/").at(-1);
+    const item = posts.find((post) => post.id === id);
+    return item ? route.fulfill({ json: item }) : route.fallback();
+  });
   await page.goto("/social");
   const navigation = page.getByRole("navigation", {
     name: "Ambientes do Social",
   });
-  await navigation.getByRole("button", { name: "Clips", exact: true }).click();
+  const feed = page.locator(".social-feed-view .social-stream:visible");
+  await expect(feed.locator('[data-kind="POST"]')).toBeVisible();
+  await expect(feed.locator('[data-kind="CLIP"]')).toBeVisible();
+  const logo = page.locator(".social-navigation-brand");
+  await logo.hover();
+  await expect(logo).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  for (const width of [390, 1366, 1920]) {
+    const height = width === 1366 ? 768 : 844;
+    await page.setViewportSize({ width, height });
+    await expect
+      .poll(async () => {
+        const box = (await page.locator(".social-feed-scroll").boundingBox())!;
+        return Math.abs(width - box.x - box.width);
+      })
+      .toBeLessThanOrEqual(1);
+    const video = feed.locator("video");
+    await expect(video).toHaveCSS("object-fit", "contain");
+    expect((await video.boundingBox())!.height).toBeLessThanOrEqual(
+      Math.min(640, height - 180) + 1,
+    );
+    expect(
+      (await feed.locator('[data-kind="CLIP"]').boundingBox())!.width,
+    ).toBeLessThanOrEqual(501);
+    await page.screenshot({
+      path: info.outputPath(`social-feed-video-${width}.png`),
+    });
+  }
+  const scroll = page.locator(".social-feed-scroll");
+  await scroll.evaluate((el) => {
+    el.scrollTop = 180;
+  });
+  const clipLink = feed.getByRole("link", { name: "Assistir nos Clips" });
+  // click() scrolls a partially visible video into view before navigating.
+  // Record the reading position after that actionability scroll, not before it.
+  await clipLink.scrollIntoViewIfNeeded();
+  const before = await scroll.evaluate((el) => el.scrollTop);
+  expect(before).toBeGreaterThan(0);
+  await clipLink.click();
+  await expect(page).toHaveURL(new RegExp(`post=${posts[2].id}`));
+  await expect(
+    navigation.getByRole("button", { name: "Clips", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
   const clips = page.locator(".social-clips");
+  await expect(clips.locator('[data-clip-index="0"]')).toHaveAttribute(
+    "data-clip-id",
+    posts[2].id,
+  );
+  await expect(clips.locator(`[data-clip-id="${posts[2].id}"]`)).toHaveCount(1);
+  await page.goBack();
+  await expect(
+    navigation.getByRole("button", { name: "Feed", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  expect(await scroll.evaluate((el) => el.scrollTop)).toBe(before);
+  // Opening the same Clip again starts there, rather than resuming another item.
+  await feed.getByRole("link", { name: "Assistir nos Clips" }).click();
+  await expect(
+    navigation.getByRole("button", { name: "Clips", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
   const playing = () =>
     clips
       .locator("video")
@@ -693,8 +815,15 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   await page.keyboard.press("ArrowDown");
   await expect.poll(playing).toEqual([false, true, false, false]);
   await expect(clips.locator("video").nth(3)).not.toHaveAttribute("src", /.+/);
-  for (const width of [1440, 390]) {
-    await page.setViewportSize({ width, height: 844 });
+  for (const width of [1366, 1920, 390]) {
+    await page.setViewportSize({ width, height: width === 1366 ? 768 : 844 });
+    // Crossing the mobile breakpoint starts the pager's transform transition.
+    // Measure the media only after that movement, independently of playback.
+    await page.locator(".social-pager-track").evaluate(async (track) => {
+      await Promise.all(
+        track.getAnimations().map((animation) => animation.finished),
+      );
+    });
     const selected = clips.locator('[data-clip-index="1"]');
     await expect.poll(playing).toEqual([false, true, false, false]);
     await expect
@@ -715,7 +844,35 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
     if (width === 390) {
       expect(size.width).toBeGreaterThanOrEqual(389);
       expect(size.height).toBeGreaterThan(844 * 0.8);
-    } else expect(size.width / size.height).toBeCloseTo(9 / 16, 1);
+    } else {
+      const frame = (await selected
+        .locator(".social-clip-video")
+        .boundingBox())!;
+      expect(frame.width / frame.height).toBeCloseTo(9 / 16, 1);
+      const caption = (await selected
+        .locator(".social-clip-caption")
+        .boundingBox())!;
+      const rail = (await selected.locator(".social-clip-rail").boundingBox())!;
+      expect(caption.x + caption.width).toBeLessThanOrEqual(frame.x);
+      expect(rail.x).toBeGreaterThanOrEqual(frame.x + frame.width);
+    }
+    const videoBox = (await selected.locator("video").boundingBox())!;
+    await selected.locator("video").evaluate((video) => {
+      (video as HTMLVideoElement).currentTime = 1;
+    });
+    await expect
+      .poll(async () => {
+        const next = (await selected.locator("video").boundingBox())!;
+        return (
+          Math.abs(next.x - videoBox.x) +
+          Math.abs(next.width - videoBox.width) +
+          Math.abs(next.y - videoBox.y)
+        );
+      })
+      .toBeLessThan(1);
+    expect(
+      await clips.evaluate((el) => el.scrollWidth <= el.clientWidth + 1),
+    ).toBe(true);
     await expect(
       selected.getByRole("progressbar", { name: "Progresso do Clip" }),
     ).toBeVisible();
@@ -775,16 +932,19 @@ test("Social: autor consegue excluir seu Story com confirmação", async ({
   await expect(story).toBeVisible();
   await story.click();
   const viewer = page.getByRole("dialog", { name: "Stories da turma" });
-  await expect(viewer.getByRole("button", { name: "Excluir meu Story" })).toBeVisible();
+  await expect(
+    viewer.getByRole("button", { name: "Excluir meu Story" }),
+  ).toBeVisible();
   await viewer.getByRole("button", { name: "Excluir meu Story" }).click();
   const confirm = page.getByRole("dialog", { name: "Excluir este Story?" });
   await expect(confirm).toBeVisible();
-  await confirm.getByRole("button", { name: "Excluir Story", exact: true }).click();
+  await confirm
+    .getByRole("button", { name: "Excluir Story", exact: true })
+    .click();
   await expect(viewer).not.toBeVisible();
   await expect(story).toHaveCount(0);
-  const deleted = await request.get(
-    `${backend}/api/v1/social/posts/${id}`,
-    { headers: asUser(author.accessToken) },
-  );
+  const deleted = await request.get(`${backend}/api/v1/social/posts/${id}`, {
+    headers: asUser(author.accessToken),
+  });
   expect(deleted.status()).toBe(404);
 });
