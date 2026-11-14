@@ -1,10 +1,12 @@
 # Estado atual — 11/11/2026
 
-## Enturma Social 2.0 — PR #144
+## Enturma Social 2.0 — PRs #144, #145 e #146
 
 A [PR #144](https://github.com/luizcordeiro155/Enturma/pull/144) adiciona Feed, Clips, Stories, seguidores, editor de vídeo e compartilhamento mobile de salas. O Fórum permanece independente. A navegação Social tem barra própria, saída para o início e abertura Remotion exclusiva; a navegação principal mobile inclui Social Entu e move Cadernos IA para Mais, com Programação limitada à elegibilidade acadêmica.
 
-A integração na `main` foi autorizada em 11/11/2026 e depende da aprovação dos checks desta revisão. `SOCIAL_ENABLED` e `SOCIAL_MEDIA_ENABLED` permanecem desligadas por padrão. O bucket R2 privado foi testado; credenciais e runtime de processamento na API de produção ainda precisam ser configurados. [Implementação, contratos, testes e limites](SOCIAL_2_IMPLEMENTATION.md).
+As PRs #144, [#145](https://github.com/luizcordeiro155/Enturma/pull/145) (excluir Stories, ação única "Enviar e publicar", Feed/Clips redesenhados) e [#146](https://github.com/luizcordeiro155/Enturma/pull/146) (worker FFmpeg no Railway) estão na `main` em `07f87a9`, cada uma com a CI da própria PR aprovada. O Social foi **ativado em produção em 11/11/2026**: `SOCIAL_ENABLED=true` e `SOCIAL_MEDIA_ENABLED=true` na API da SquareCloud, processamento pelo worker Railway e armazenamento no bucket R2 privado. Em produção, `GET /social/capabilities` retornou `enabled:true, media:true`. As flags continuam `false` por padrão no código; desligá-las é o rollback.
+
+Conferência manual em produção no mesmo dia, com conta real, em 449 px de largura: post de texto, foto (JPEG exportado em 1280×1600), Clip MP4 de 6,5 s (720×1280, reproduzindo no player), Story com imagem, curtida e comentário. Cada exportação terminou em menos de 10 s. Depois da #145, o botão "Excluir meu Story" e a ação "Enviar e publicar" estavam presentes; em 1440 px a navegação lateral renderizou sem overflow horizontal. **Não conferidos nessa passada:** exclusão pela interface até o fim, temas, arquivos grandes, uso simultâneo, câmera e os aplicativos instalados. O worker Railway ainda compila a partir da branch `feat/railway-social-ffmpeg-worker`; apontar o serviço para `main` antes de remover essa branch. [Implementação, contratos, testes e limites](SOCIAL_2_IMPLEMENTATION.md) · [Worker de mídia](SOCIAL_RAILWAY_FFMPEG.md).
 
 Os manifests públicos Windows/Android consultados em 11/11/2026 ainda informam **0.4.424**, commit `9270a5f`. Essa verificação não equivale à publicação dos novos binários da PR #144.
 

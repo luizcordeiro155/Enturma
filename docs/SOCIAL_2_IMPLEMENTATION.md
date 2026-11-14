@@ -2,6 +2,8 @@
 
 Branch `codex/enturma-social-2`, baseada na main `410a740`, entregue pela PR #144. O Social usa `/social`; o Fórum continua independente em `/forum`. O responsável autorizou a integração na main em 11/11/2026, condicionada às validações. Ativar mídia exige a configuração externa descrita abaixo.
 
+> **Atualização de 11/11/2026 (noite):** o Social e a mídia foram ativados em produção depois das PRs #145 e #146. O processamento passou a usar o worker FFmpeg no Railway ([detalhes](SOCIAL_RAILWAY_FFMPEG.md)), não o FFmpeg local da SquareCloud. As seções abaixo descrevem a entrega da PR #144 e mantêm o texto original; onde afirmam que nada foi ativado ou implantado, vale o registro de ativação e a conferência em [STATUS](STATUS.md).
+
 ## Implementação
 
 | Área | Comportamento entregue no código |
