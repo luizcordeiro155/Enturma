@@ -213,6 +213,11 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM ride_recurrence WHERE owner_id=?", userId);
     db.jdbc.update("DELETE FROM ride_vehicle_profile WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM ride WHERE owner_id=?", userId);
+    db.jdbc.update("DELETE FROM academic_reminder_job WHERE user_id=?", userId);
+    db.jdbc.update("DELETE FROM academic_class_exception WHERE user_id=?", userId);
+    db.jdbc.update("DELETE FROM academic_class_schedule WHERE user_id=?", userId);
+    db.jdbc.update("DELETE FROM calendar_holiday WHERE user_id=?", userId);
+    db.jdbc.update("DELETE FROM academic_routine WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM focus_session WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM campus_task WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM study_match_profile WHERE user_id=?", userId);
