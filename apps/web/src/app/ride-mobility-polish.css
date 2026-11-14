@@ -1437,3 +1437,9 @@ html[data-enhanced-focus="true"] .ride-unified-search-box:focus-within {
     padding-bottom: 68px;
   }
 }
+
+/* The map's round buttons hold only an icon: the app-wide button padding left 2px
+   for the recentre icon, which showed as a dot. */
+html .ride-mobility-app button.ride-circle-button {
+  padding: 0 !important;
+}

@@ -329,3 +329,45 @@
 .journey-finished.journey-compact {
   margin: 10px 0 4px;
 }
+.journey-heading .journey-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.journey-toggle svg {
+  transition: transform 0.22s ease;
+}
+.journey-toggle[aria-expanded="true"] svg {
+  transform: rotate(180deg);
+}
+.journey-pending.journey-compact {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0 4px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--soft);
+  color: var(--ink);
+  font-weight: 600;
+}
+.study-journey .journey-steps,
+.study-journey .journey-meter {
+  animation: journey-open 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes journey-open {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .journey-toggle svg,
+  .study-journey .journey-steps,
+  .study-journey .journey-meter {
+    transition: none;
+    animation: none;
+  }
+}

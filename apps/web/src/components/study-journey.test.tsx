@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { afterEach, expect, it, vi } from "vitest";
-import { cleanup, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { StudyJourney } from "./study-journey";
 
 const post = vi.hoisted(() => vi.fn());
@@ -33,4 +33,28 @@ it("com 2 de 3 mantém as etapas e a barra", async () => {
   render(<StudyJourney enrolled />);
   expect(await screen.findByRole("progressbar")).toBeVisible();
   expect(screen.getAllByRole("listitem")).toHaveLength(3);
+});
+
+it("concluída: expande para ver as etapas e reduz de novo", async () => {
+  localStorage.clear();
+  post.mockResolvedValue(journey(3));
+  render(<StudyJourney enrolled />);
+  const expand = await screen.findByRole("button", { name: "Ver etapas" });
+  expect(expand).toHaveAttribute("aria-expanded", "false");
+  fireEvent.click(expand);
+  expect(screen.getAllByRole("listitem")).toHaveLength(3);
+  expect(screen.getByRole("progressbar")).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Reduzir" }));
+  expect(screen.queryByRole("progressbar")).toBeNull();
+  expect(screen.getByText(/Jornada concluída/)).toBeVisible();
+});
+
+it("com pendências também reduz, mostrando quantas faltam", async () => {
+  localStorage.clear();
+  post.mockResolvedValue(journey(1));
+  render(<StudyJourney enrolled />);
+  fireEvent.click(await screen.findByRole("button", { name: "Reduzir" }));
+  expect(screen.getByText("Faltam 2 etapas · Nível 12 · 2887 XP")).toBeVisible();
+  expect(screen.queryByRole("progressbar")).toBeNull();
+  expect(screen.getByRole("button", { name: "Ver etapas" })).toBeVisible();
 });
