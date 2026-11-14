@@ -12,6 +12,7 @@ import {
   ArrowRight,
   CircleHelp,
   Trophy,
+  ChevronDown,
   X,
   Users,
   MessageCircle,
@@ -137,6 +138,16 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
   const mounted = useRef(true),
     running = useRef(false);
   const complete = data?.completed === 3;
+  // Remembered per device: a finished journey starts compact, a pending one open.
+  const [view, setView] = useState<"compact" | "full" | null>(null);
+  const compact = data ? (view ?? (complete ? "compact" : "full")) === "compact" : false;
+  function toggleView() {
+    const next = compact ? "full" : "compact";
+    setView(next);
+    try {
+      localStorage.setItem("enturma-journey-view", next);
+    } catch {}
+  }
   async function refresh() {
     if (running.current) return;
     running.current = true;
@@ -144,6 +155,15 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
       const result = await post<Journey>("/study-journey/sync");
       if (!mounted.current) return;
       setData(result);
+      setView((current) => {
+        if (current) return current;
+        try {
+          const stored = localStorage.getItem("enturma-journey-view");
+          return stored === "compact" || stored === "full" ? stored : null;
+        } catch {
+          return null;
+        }
+      });
       setError("");
       if (result.xpAwarded) setReward(result.xpAwarded);
     } catch {
@@ -218,14 +238,27 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
       ref={panel}
       id="enturma-study-guide"
       tabIndex={-1}
-      className={`study-guide study-journey${complete ? " is-complete" : ""}`}
+      className={`study-guide study-journey${compact ? " is-complete" : ""}`}
       aria-labelledby="journey-title"
     >
       <div className="journey-heading">
         <h2 id="journey-title">Seu espaço de estudo</h2>
-        <Trophy size={24} aria-hidden="true" />
+        {data ? (
+          <button
+            type="button"
+            className="text-button journey-toggle"
+            aria-expanded={!compact}
+            aria-controls="journey-details"
+            onClick={toggleView}
+          >
+            {compact ? "Ver etapas" : "Reduzir"}
+            <ChevronDown size={16} aria-hidden="true" />
+          </button>
+        ) : (
+          <Trophy size={24} aria-hidden="true" />
+        )}
       </div>
-      {complete ? null : (
+      {compact ? null : (
         <p className="journey-intro">
           Três passos para estudar em companhia. Até 100 XP para começar.
         </p>
@@ -239,17 +272,24 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
         </p>
       ) : null}
       {!data && !error ? <p role="status">Carregando seu progresso…</p> : null}
-      {data && complete ? (
-        <p className="journey-finished journey-compact">
-          <Check size={18} /> Jornada concluída · Nível {data.level} · {data.totalXp} XP
-        </p>
+      {data && compact ? (
+        complete ? (
+          <p className="journey-finished journey-compact">
+            <Check size={18} /> Jornada concluída · Nível {data.level} · {data.totalXp} XP
+          </p>
+        ) : (
+          <p className="journey-pending journey-compact">
+            <Trophy size={18} /> Faltam {3 - data.completed}{" "}
+            {3 - data.completed === 1 ? "etapa" : "etapas"} · Nível {data.level} · {data.totalXp} XP
+          </p>
+        )
       ) : null}
       {data && complete && reward ? (
         <p className="journey-reward" aria-live="polite">
           <Sparkles size={17} /> +{reward} XP recebidos nesta jornada!
         </p>
       ) : null}
-      {data && !complete ? (
+      {data && !compact ? (
         <>
           <div className="journey-progress-label">
             <strong>{data.completed} de 3 concluídos</strong>
@@ -270,7 +310,7 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
               style={{ width: `${(data.completed / 3) * 100}%` }}
             />
           </div>
-          <ol className="journey-steps">
+          <ol id="journey-details" className="journey-steps">
             {steps.map((step, i) => {
               const saved = data.steps[i],
                 href = !enrolled && i === 0 ? "/onboarding" : step.href;

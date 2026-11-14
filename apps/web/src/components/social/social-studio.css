@@ -2465,3 +2465,114 @@ html[data-theme] .social-hashtag-list li button{display:flex;align-items:center;
 .social-hashtag-hero p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
 .social-text-hashtag{font-weight:600}
 @media (prefers-reduced-motion:reduce){.social-hashtag-list li,.social-hashtag-avatar{animation:none}}
+
+/* ---------- Phones: Clips never draw under the status bar ----------
+   A band in the theme background keeps the clock and battery readable in every
+   theme (light icons on dark themes, dark icons on Claro), like the Início. */
+@media (max-width: 760px) {
+  html[data-theme] .social-page .social-clips-tabbed {
+    padding-top: var(--enturma-safe-top, 0px);
+    background: var(--bg);
+  }
+  html[data-theme] .social-page .social-clips-tabs {
+    padding-top: 10px;
+  }
+  html[data-theme] .social-page .social-clips-exit,
+  html[data-theme] .social-page .social-clip-controls .social-video-volume {
+    top: auto;
+  }
+  html[data-theme] .social-page .social-clips-exit {
+    top: calc(8px + var(--enturma-safe-top, 0px)) !important;
+    left: 10px;
+  }
+}
+/* Round glass buttons over video, matching the Feed's round header buttons. */
+html[data-theme] .social-page .social-clips-exit,
+html[data-theme] .social-page .social-clip-controls .social-video-volume {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  min-width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  border: 1px solid rgb(255 255 255 / 0.2) !important;
+  border-radius: 999px !important;
+  background: rgb(10 14 16 / 0.46) !important;
+  color: #fff !important;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.28) !important;
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  filter: none;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+html[data-theme] .social-page .social-clips-exit:active,
+html[data-theme] .social-page .social-clip-controls .social-video-volume:active {
+  transform: scale(0.94);
+}
+html[data-theme] .social-page .social-clip-controls .social-video-volume[data-open="true"] {
+  height: auto;
+  padding: 4px 0;
+}
+html[data-theme] .social-page .social-clips-exit svg {
+  width: 22px;
+  height: 22px;
+}
+@media (max-width: 760px) {
+  html[data-theme] .social-page .social-clips-tabs {
+    top: var(--enturma-safe-top, 0px);
+    background: linear-gradient(rgb(0 0 0 / 0.38), transparent);
+  }
+}
+
+/* Stories: a dark stage in every theme, with readable controls, and the status bar
+   band in the theme background on phones. */
+html[data-theme] dialog.social-dialog-story {
+  background: #050807 !important;
+  color: #fff;
+}
+html[data-theme] dialog.social-dialog-story .social-story-actions {
+  background: transparent !important;
+}
+@media (max-width: 760px) {
+  html[data-theme] dialog.social-dialog-story {
+    background: linear-gradient(var(--bg) 0 var(--enturma-safe-top, 0px), #050807 0) !important;
+  }
+  html[data-theme] .social-story-immersive {
+    background: linear-gradient(var(--bg) 0 var(--enturma-safe-top, 0px), #000 0) !important;
+  }
+}
+
+/* The Feed's back control is a link and the Clips/Criar one a button: same soft round look. */
+html[data-theme] .social-page .social-header button.social-back {
+  min-height: 0;
+  padding: 0;
+  border: 0 !important;
+  background: color-mix(in srgb, var(--ink) 7%, transparent) !important;
+  color: var(--ink) !important;
+  box-shadow: none !important;
+}
+html[data-theme] .social-page .social-header button.social-back:hover {
+  background: color-mix(in srgb, var(--ink) 13%, transparent) !important;
+}
+
+/* Profile: the name sits below the banner (readable in every theme), and the four
+   counters line up whether they are buttons or plain numbers. */
+html[data-theme] .social-profile-heading .social-author {
+  align-items: flex-end;
+}
+html[data-theme] .social-profile-heading .social-author > span {
+  padding-bottom: 4px;
+}
+html[data-theme] .social-profile-intro .social-profile-counts > :is(span, button) {
+  display: grid;
+  justify-items: center;
+  align-content: start;
+  gap: 2px;
+  min-height: 0;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  text-align: center;
+  box-shadow: none;
+}
