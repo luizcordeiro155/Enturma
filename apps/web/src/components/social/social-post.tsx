@@ -5,6 +5,7 @@ import {
   Bookmark,
   Check,
   Copy,
+  Eye,
   Heart,
   MessageCircle,
   MoreHorizontal,
@@ -31,6 +32,7 @@ import { usePostActions } from "./use-post-actions";
 import { SocialPostOptions } from "./social-post-options";
 import { SocialComments } from "./social-comments";
 import { useSocialLives } from "./social-live-context";
+import { popLike } from "@/lib/motion";
 export { SocialComments } from "./social-comments";
 export function SocialAuthor({
   user,
@@ -341,12 +343,14 @@ export function SocialPost({
   person,
   changed,
   autoplay = true,
+  detail = false,
 }: {
   item: Post;
   me: string;
   person: (id: string) => void;
   changed: (post: Post) => void;
   autoplay?: boolean;
+  detail?: boolean;
 }) {
   const [dialog, setDialog] = useState<"comments" | "share" | "more" | null>(
       null,
@@ -408,7 +412,11 @@ export function SocialPost({
     </div>
   );
   return (
-    <article className="social-post" data-post={item.id} data-kind={item.kind}>
+    <article
+      className={`social-post${detail ? " social-post-detail" : ""}`}
+      data-post={item.id}
+      data-kind={item.kind}
+    >
       <header>
         <SocialAuthor user={postPerson(item)} open={person} />
         <button
@@ -429,11 +437,12 @@ export function SocialPost({
           }}
         >
           <SocialMediaCarousel
+            postId={item.id}
             media={item.media}
             authorName={item.name}
             autoplay={autoplay}
             clipHref={
-              item.kind === "CLIP"
+              item.kind === "CLIP" && !detail
                 ? `/social?post=${encodeURIComponent(item.id)}`
                 : undefined
             }
@@ -457,7 +466,10 @@ export function SocialPost({
           aria-pressed={item.mine.includes("LIKE")}
           aria-label={`Curtir \u00b7 ${item.likes}`}
           disabled={busy}
-          onClick={() => void react("LIKE")}
+          onClick={(event) => {
+            if (!item.mine.includes("LIKE")) popLike(event.currentTarget);
+            void react("LIKE");
+          }}
         >
           <Heart
             size={24}
@@ -468,7 +480,14 @@ export function SocialPost({
         <button
           className="icon-control"
           aria-label={`Coment\u00e1rios \u00b7 ${item.comments}`}
-          onClick={() => setDialog("comments")}
+          onClick={(event) => {
+            if (detail)
+              event.currentTarget
+                .closest("article")
+                ?.querySelector("textarea")
+                ?.focus();
+            else setDialog("comments");
+          }}
         >
           <MessageCircle size={24} />
           {item.comments > 0 && <span aria-hidden="true">{item.comments}</span>}
@@ -504,6 +523,13 @@ export function SocialPost({
         </button>
       </div>
       <div className="social-post-meta">
+        {item.media.some((media) => media.kind === "VIDEO") &&
+          item.views !== undefined && (
+            <p className="social-post-views">
+              <Eye size={15} aria-hidden="true" />{" "}
+              {item.views.toLocaleString("pt-BR")} visualizações
+            </p>
+          )}
         {item.likes > 0 && (
           <p className="social-post-likes">
             {item.likes} {item.likes === 1 ? "curtida" : "curtidas"}
@@ -514,7 +540,14 @@ export function SocialPost({
           <button
             type="button"
             className="text-button social-post-all-comments"
-            onClick={() => setDialog("comments")}
+            onClick={(event) => {
+              if (detail)
+                event.currentTarget
+                  .closest("article")
+                  ?.querySelector("textarea")
+                  ?.focus();
+              else setDialog("comments");
+            }}
           >
             {item.comments === 1
               ? "Ver 1 coment\u00e1rio"
@@ -528,6 +561,16 @@ export function SocialPost({
           </time>
         </small>
       </div>
+      {detail && (
+        <SocialComments
+          item={item}
+          me={me}
+          close={() => {}}
+          changed={changed}
+          person={person}
+          inline
+        />
+      )}
       {error && (
         <p className="social-error" role="alert">
           {error}

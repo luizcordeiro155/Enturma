@@ -246,7 +246,7 @@ public class SocialPosts {
                + " FROM social_reaction r WHERE r.post_id=p.id AND r.kind='LIKE') likes,(SELECT"
                + " count(*) FROM social_reaction r WHERE r.post_id=p.id AND r.kind='REPOST')"
                + " reposts,(SELECT count(*) FROM social_comment c WHERE c.post_id=p.id AND NOT"
-               + " c.deleted) comments,coalesce((SELECT jsonb_agg(r.kind) FROM social_reaction r"
+               + " c.deleted) comments,(SELECT count(*) FROM social_video_view v WHERE v.post_id=p.id) views,coalesce((SELECT jsonb_agg(r.kind) FROM social_reaction r"
                + " WHERE r.post_id=p.id AND r.user_id=?),'[]'::jsonb) mine,(SELECT h.title FROM"
                + " social_highlight h WHERE h.post_id=p.id) highlight_title,EXISTS(SELECT 1 FROM"
                + " social_story_view sv WHERE sv.post_id=p.id AND sv.user_id=?)"
@@ -640,6 +640,13 @@ public class SocialPosts {
   public void view(Actor a, UUID id, int watchedMs, boolean completed) {
     var p = access.post(a, id);
     if (watchedMs < 0 || watchedMs > 90000) throw ApiException.invalid("Tempo inválido.");
+    if (!"STORY".equals(p.get("kind")) && !a.id().equals(p.get("authorId"))
+        && (watchedMs >= 3000 || (completed && watchedMs > 0)))
+      db.jdbc.update(
+          "INSERT INTO social_video_view(post_id,user_id) SELECT ?,? WHERE EXISTS"
+              + " (SELECT 1 FROM social_media WHERE post_id=? AND kind='VIDEO' AND state='READY')"
+              + " ON CONFLICT DO NOTHING",
+          id, a.id(), id);
     access.profile(a.id());
     // Serialize with consent withdrawal: it must erase every preceding feedback event,
     // and a later event must observe the new preference before recording anything.

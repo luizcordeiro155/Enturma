@@ -56,7 +56,7 @@ export default defineConfig({
     {
       name: "chromium-social",
       testMatch:
-        /(?:forum|friends|enturma-social|social-core-screens|social-studio-release|social-gallery-mobile|social-opening|social-mobile-interactions|social-reference-matrix)\.spec\.ts/,
+        /(?:forum|friends|enturma-social|social-core-screens|social-studio-release|social-gallery-mobile|social-opening|social-mobile-interactions|social-reference-matrix|social-polish)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },

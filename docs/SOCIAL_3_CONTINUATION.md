@@ -1,5 +1,11 @@
 # Enturma Social 3.0 — checkpoint de continuidade
 
+## Release atual — 13/11/2026 (prevalece sobre o histórico)
+
+PRs #150/#151 integradas na main `30a434b299645b38ed96ce78b56aa79b3c5a7036`. CIs finais da PR `43535098339`/`43535103011` aprovadas: 76 E2E, 309 Web e 191 Java (um ignorado). Web publicada no deployment production `dpl_7XJmiMENyhdpSAtpn7Qq1Cydd2iq`; domínio oficial confirmado no SHA integrado. API atualizou automaticamente; V72/V73 e probe ready=true verificados. AutoAssignCustomDomains restaurado. Windows 0.4.519 publicado; ZIP/EXE baixados e hashes conferidos. Android build `2003de78-64c1-4dc2-812f-c576e7da8b60` ainda em acompanhamento. Não afirmar instalação física ou smoke autenticado de produção.
+
+Próximo comando exato: consultar o deployment Android acima e, após SUCCESS, executar `node .local/social3-verify-native.cjs 30a434b299645b38ed96ce78b56aa79b3c5a7036 android`; confirmar também CI da main `43540279660`. Atualizar o resultado no documento `SOCIAL_3_RELEASE_READINESS.md`, que contém URLs, evidências, rollback e limitações. Nenhum dado de teste foi gravado em produção; premium-audit.json preservado.
+
 ## Estado atual — 13/11/2026, publicação em acompanhamento
 
 Este bloco prevalece sobre os checkpoints históricos abaixo. Branch `codex/social-instagram-parity`, HEAD `ab5ce731a11b1a5dffe1563fcc9ed336b2ff60e2`. PR #150 incorporada integralmente à #151; main permanece `ed43287` enquanto os checks finais executam. `premium-audit.json` preservado e não rastreado.

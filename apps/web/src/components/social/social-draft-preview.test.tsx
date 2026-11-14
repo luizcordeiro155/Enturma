@@ -23,6 +23,27 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
+it("previews the feed crop and lets the author inspect the full video", () => {
+  const { container } = render(
+    <SocialDraftPreview
+      showFeedPreview
+      item={{
+        id: "clip",
+        media: { id: "clip", kind: "VIDEO", state: "READY" },
+        recipe: defaultRecipe(10),
+      }}
+    />,
+  );
+  expect(container.querySelector(".social-draft-frame")).toHaveAttribute(
+    "data-feed",
+    "true",
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Vídeo completo" }));
+  expect(container.querySelector(".social-draft-frame")).toHaveAttribute(
+    "data-feed",
+    "false",
+  );
+});
 
 it("reviews the selected cover in source time without modifying the recipe", async () => {
   const recipe = {

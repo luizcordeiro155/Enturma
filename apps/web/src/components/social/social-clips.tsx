@@ -6,13 +6,13 @@ import {
   ChevronUp,
   Heart,
   Play,
-  Volume2,
-  VolumeX,
 } from "lucide-react";
 import { mediaUrl, socialWrite, type SocialPost as Post } from "@/lib/social";
 import { useSocialStream } from "./social-stream";
 import { SocialClipOverlay } from "./social-clip-overlay";
 import { NavigationLink } from "../navigation-link";
+import { useVideoView } from "./use-video-view";
+import { SocialVideoVolume } from "./social-video-volume";
 
 function ClipVideo({
   item,
@@ -36,8 +36,8 @@ function ClipVideo({
   const tapTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const manualPause = useRef(false),
     manualStart = useRef(false),
-    liking = useRef(false),
-    watched = useRef(0);
+    liking = useRef(false);
+  useVideoView(ref, item.id);
   const [playing, setPlaying] = useState(false),
     [error, setError] = useState("");
   const [burst, setBurst] = useState(0);
@@ -99,12 +99,6 @@ function ClipVideo({
       window.removeEventListener("focus", sync);
       window.removeEventListener("enturma-social-overlay-changed", sync);
       document.removeEventListener("visibilitychange", sync);
-      if (watched.current > 0)
-        void socialWrite(`/posts/${item.id}/view`, {
-          watchedMs: Math.min(90000, Math.round(watched.current * 1000)),
-          completed:
-            !!video.duration && watched.current >= video.duration * 0.9,
-        }).catch(() => {});
     };
   }, [active, autoplay, item.id]);
   function toggle() {
@@ -170,8 +164,6 @@ function ClipVideo({
           const video = event.currentTarget;
           if (active && Number.isFinite(video.duration) && video.duration > 0)
             progress(video.currentTime / video.duration);
-          if (active && !video.paused)
-            watched.current = Math.max(watched.current, video.currentTime);
         }}
         onPlay={(event) => {
           if (
@@ -282,6 +274,12 @@ function ClipPage({
   );
 }
 const MUTED_KEY = "enturma-social-clips-muted";
+// The sound setting is shared by every Clip in the session, not one video.
+const CLIPS_VOLUME_LABELS = {
+  unmute: "Ativar som dos Clips",
+  mute: "Silenciar Clips",
+  volume: "Volume dos Clips",
+};
 const TABS = [
   ["for-you", "Para você"],
   ["following", "Seguindo"],
@@ -466,6 +464,10 @@ function ClipsFeed({
     return () => observer.disconnect();
   }, [active, stream.cursor, stream.error, items.length]);
   const activeIndex = Math.max(0, Math.min(index, items.length - 1));
+  const [volume, setVolume] = useState(1);
+  useEffect(() => {
+    container.current?.querySelectorAll("video").forEach(video => { video.volume = volume; });
+  }, [volume, activeIndex, items.length]);
   const currentIndex = useRef(activeIndex);
   useEffect(() => {
     latestLoad.current = stream.load;
@@ -608,13 +610,7 @@ function ClipsFeed({
         )}
       </div>
       <div className="social-clip-controls">
-        <button
-          className="icon-control"
-          aria-label={muted ? "Ativar som dos Clips" : "Silenciar Clips"}
-          onClick={toggleMuted}
-        >
-          {muted ? <VolumeX /> : <Volume2 />}
-        </button>
+        <SocialVideoVolume volume={volume} onVolumeChange={setVolume} muted={muted} onMutedChange={value => { if (value !== muted) toggleMuted(); }} labels={CLIPS_VOLUME_LABELS} />
         <button
           className="icon-control"
           aria-label="Clip anterior"

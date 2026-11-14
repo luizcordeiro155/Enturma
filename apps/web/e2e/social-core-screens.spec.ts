@@ -49,9 +49,11 @@ test("Social 3: Stories por autor, perfil em grade e comentarios no painel",asyn
   }
   await grid.getByRole("button").first().click();
   const viewer=page.getByRole("dialog",{name:"Publicações",exact:true});await expect(viewer).toBeVisible();
+  // The viewer shows the conversation beside the media; Comentários focuses its field.
   await viewer.getByRole("button",{name:/Comentários/}).first().click();
-  const comments=page.getByRole("dialog",{name:"Conversa da publicação"});await expect(comments).toHaveClass(/social-dialog-panel/);
-  await comments.getByRole("textbox",{name:"Seu comentário"}).fill("Comentario real da verificacao");
-  await comments.getByRole("button",{name:"Enviar comentário"}).click();await expect(comments.getByText("Comentario real da verificacao",{exact:true})).toBeVisible();
+  const comments=viewer.getByRole("textbox",{name:"Seu comentário"});await expect(comments).toBeFocused();
+  await expect(page.getByRole("dialog",{name:"Conversa da publicação"})).toHaveCount(0);
+  await comments.fill("Comentario real da verificacao");
+  await viewer.getByRole("button",{name:"Enviar comentário"}).click();await expect(viewer.getByText("Comentario real da verificacao",{exact:true})).toBeVisible();
   await page.screenshot({path:info.outputPath("social3-comments-desktop.png")});
 });

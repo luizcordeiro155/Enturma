@@ -980,6 +980,14 @@ export function SocialEditor({
         {step === "details" && draft.files.length > 0 && (
           <div className="social-create-preview">
             <SocialDraftPreview
+              showFeedPreview={
+                draft.kind !== "STORY" &&
+                (draft.files[
+                  Math.min(reviewIndex, draft.files.length - 1)
+                ].file?.type.startsWith("video/") === true ||
+                  draft.files[Math.min(reviewIndex, draft.files.length - 1)]
+                    .media?.kind === "VIDEO")
+              }
               key={
                 draft.files[Math.min(reviewIndex, draft.files.length - 1)].id
               }

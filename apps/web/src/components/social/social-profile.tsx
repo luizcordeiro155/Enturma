@@ -18,16 +18,20 @@ import { SocialProfileGrid } from "./social-profile-grid";
 import { SocialPostViewer } from "./social-post-viewer";
 import { StoryViewer } from "./social-stories";
 import { SocialCollections } from "./social-collections";
+import { type PublicProfile, profileStyle } from "../user-identity";
+import { ForumLinks, ConfirmedLink } from "../forum-links";
+import { useLiveRefresh } from "@/lib/live-updates";
 
-type Profile = SocialPerson & {
-  privateAccount: boolean;
-  followers: number;
-  following: number;
-  posts: number;
-  likesReceived: number;
-  bio?: string;
-  relationship: { status: string; notify: boolean; muted: boolean };
-};
+type Profile = SocialPerson &
+  PublicProfile & {
+    privateAccount: boolean;
+    followers: number;
+    following: number;
+    posts: number;
+    likesReceived: number;
+    bio?: string;
+    relationship: { status: string; notify: boolean; muted: boolean };
+  };
 const TABS = [
   ["posts", "Posts"],
   ["clips", "Clips"],
@@ -69,6 +73,15 @@ export function SocialProfile({
   );
   const writing = useRef(false);
   const [collections, setCollections] = useState(false);
+  useLiveRefresh(
+    "profile_changed",
+    async () => {
+      setProfile(
+        await api<Profile>(`/social/people/${id}`, { cache: "no-store" }),
+      );
+    },
+    8000,
+  );
   useEffect(() => {
     let alive = true;
     void api<Profile>(`/social/people/${id}`, { cache: "no-store" })
@@ -159,6 +172,18 @@ export function SocialProfile({
         {!profile && !error && <p role="status">{"Carregando perfil\u2026"}</p>}
         {profile && (
           <>
+            <div
+              className="social-profile-banner"
+              style={profileStyle(profile)}
+            >
+              {profile.hasBanner && (
+                <img
+                  key={`${id}-${profile.mediaVersion}`}
+                  src={`/api/backend/users/${id}/banner?v=${profile.mediaVersion ?? 0}`}
+                  alt={`Banner de ${profile.name}`}
+                />
+              )}
+            </div>
             <div className="social-profile-intro">
               <div className="social-profile-heading">
                 <SocialAuthor user={profile} open={person} />
@@ -209,6 +234,11 @@ export function SocialProfile({
                   </button>
                 </div>
               </div>
+              {profile.profileDetails?.statusText && (
+                <p className="social-profile-status">
+                  {profile.profileDetails.statusText}
+                </p>
+              )}
               <div className="social-profile-counts">
                 <span>
                   <strong>{profile.posts}</strong> {"Publica\u00e7\u00f5es"}
@@ -224,7 +254,22 @@ export function SocialProfile({
                 </span>
               </div>
               {profile.bio && (
-                <p className="social-profile-bio">{profile.bio}</p>
+                <p className="social-profile-bio">
+                  <ForumLinks text={profile.bio} />
+                </p>
+              )}
+              {profile.profileDetails?.interests && (
+                <p className="social-profile-bio">
+                  <strong>Interesses</strong>
+                  <br />
+                  {profile.profileDetails.interests}
+                </p>
+              )}
+              {profile.profileDetails?.website && (
+                <ConfirmedLink
+                  href={profile.profileDetails.website}
+                  label="Site pessoal ↗"
+                />
               )}
               {profile.privateAccount && (
                 <p className="social-private-notice">

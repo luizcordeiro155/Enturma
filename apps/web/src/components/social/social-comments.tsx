@@ -77,12 +77,14 @@ export function SocialComments({
   close,
   changed,
   person,
+  inline = false,
 }: {
   item: Post;
   me: string;
   close: () => void;
   changed: (post: Post) => void;
   person: (id: string) => void;
+  inline?: boolean;
 }) {
   const [rows, setRows] = useState<Comment[]>([]),
     [page, setPage] = useState(0),
@@ -272,182 +274,184 @@ export function SocialComments({
       setBusy(false);
     }
   }
-  return (
+  const content = (
+    <div className="social-dialog-body social-comments-body">
+      <div className="social-comment-list" aria-busy={loading}>
+        {loading && !rows.length && (
+          <p role="status">{"Carregando coment\u00e1rios\u2026"}</p>
+        )}
+        {rows.map((comment) => (
+          <article
+            key={comment.id}
+            className={comment.parentId ? "social-comment-reply" : ""}
+          >
+            <SocialAuthor
+              user={{ ...comment, id: comment.authorId }}
+              open={person}
+            />
+            <button
+              className="icon-control social-comment-like"
+              aria-label={`Curtir coment\u00e1rio \u00b7 ${comment.likes ?? 0}`}
+              aria-pressed={comment.liked === true}
+              disabled={liking.includes(comment.id)}
+              onClick={() => void like(comment)}
+            >
+              <Heart size={18} fill={comment.liked ? "currentColor" : "none"} />
+              {(comment.likes ?? 0) > 0 && <small>{comment.likes}</small>}
+            </button>
+            <CommentBody item={comment} post={item.id} />
+            <div className="social-row">
+              <time dateTime={comment.createdAt}>
+                {new Date(comment.createdAt).toLocaleString("pt-BR")}
+              </time>
+              <button
+                className="text-button"
+                onClick={() => {
+                  setParent(comment);
+                  field.current?.focus({ preventScroll: true });
+                }}
+              >
+                Responder
+              </button>
+              {(me === comment.authorId || me === item.authorId) && (
+                <button
+                  className="text-button"
+                  disabled={busy}
+                  onClick={() => void remove(comment)}
+                >
+                  Remover
+                </button>
+              )}
+            </div>
+          </article>
+        ))}
+        {more && (
+          <button
+            className="secondary"
+            disabled={loading}
+            onClick={() => {
+              setLoading(true);
+              setPage((value) => value + 1);
+            }}
+          >
+            {"Mais coment\u00e1rios"}
+          </button>
+        )}
+        {!loading && !rows.length && !error && (
+          <p>Comece a conversa com uma pergunta ou uma ideia.</p>
+        )}
+      </div>
+      <div className="social-comment-composer">
+        <div className="social-comment-reactions" aria-label="Emojis">
+          {QUICK.map((emoji) => (
+            <button
+              type="button"
+              key={emoji}
+              disabled={busy}
+              aria-label={`Inserir emoji ${emoji}`}
+              onClick={() => insert(emoji)}
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+        {attachment && (
+          <div className="social-comment-attachment">
+            {attachmentUrl && (
+              <img src={attachmentUrl} alt="Anexo selecionado" />
+            )}
+            <span>{attachment.name}</span>
+            <button
+              type="button"
+              className="icon-control"
+              aria-label="Remover anexo"
+              disabled={busy}
+              onClick={discardAttachment}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+        {parent && (
+          <div className="social-comment-replying">
+            <span>Respondendo a @{parent.username}</span>
+            <button
+              type="button"
+              className="icon-control"
+              aria-label="Cancelar resposta"
+              onClick={() => setParent(undefined)}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+        <form
+          noValidate
+          className="social-comment-form"
+          onSubmit={(event) => {
+            event.preventDefault();
+            void submit();
+          }}
+        >
+          <label className="sr-only" htmlFor={id}>
+            {"Seu coment\u00e1rio"}
+          </label>
+          <SocialMentionInput
+            id={id}
+            inputRef={field}
+            className="resize-none"
+            rows={1}
+            maxLength={1500}
+            value={text}
+            disabled={busy}
+            onValueChange={setText}
+            placeholder={"Adicione um coment\u00e1rio\u2026"}
+          />
+          <ComposerMedia
+            disabled={busy}
+            onEmoji={insert}
+            onFile={choose}
+            onMedia={async (file) => choose(file)}
+            onKlipy={async (gif) => {
+              const url = providerMessageUrl(gif.url);
+              if (url) insert(`${text.trim() ? "\n" : ""}${url}`);
+            }}
+          />
+          <button
+            disabled={busy || (!text.trim() && !attachment)}
+            aria-label={"Enviar coment\u00e1rio"}
+          >
+            <Send size={22} />
+          </button>
+        </form>
+        {error && (
+          <div role="alert" className="social-error">
+            <p>{error}</p>
+            <button
+              type="button"
+              className="text-button"
+              disabled={loading || busy}
+              onClick={() => {
+                setLoading(true);
+                setRevision((value) => value + 1);
+              }}
+            >
+              Tentar novamente
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+  return inline ? (
+    content
+  ) : (
     <SocialDialog
       title={"Conversa da publica\u00e7\u00e3o"}
       close={close}
       variant="panel"
     >
-      <div className="social-dialog-body social-comments-body">
-        <div className="social-comment-list" aria-busy={loading}>
-          {loading && !rows.length && (
-            <p role="status">{"Carregando coment\u00e1rios\u2026"}</p>
-          )}
-          {rows.map((comment) => (
-            <article
-              key={comment.id}
-              className={comment.parentId ? "social-comment-reply" : ""}
-            >
-              <SocialAuthor
-                user={{ ...comment, id: comment.authorId }}
-                open={person}
-              />
-              <button
-                className="icon-control social-comment-like"
-                aria-label={`Curtir coment\u00e1rio \u00b7 ${comment.likes ?? 0}`}
-                aria-pressed={comment.liked === true}
-                disabled={liking.includes(comment.id)}
-                onClick={() => void like(comment)}
-              >
-                <Heart
-                  size={18}
-                  fill={comment.liked ? "currentColor" : "none"}
-                />
-                {(comment.likes ?? 0) > 0 && <small>{comment.likes}</small>}
-              </button>
-              <CommentBody item={comment} post={item.id} />
-              <div className="social-row">
-                <time dateTime={comment.createdAt}>
-                  {new Date(comment.createdAt).toLocaleString("pt-BR")}
-                </time>
-                <button
-                  className="text-button"
-                  onClick={() => {
-                    setParent(comment);
-                    field.current?.focus({ preventScroll: true });
-                  }}
-                >
-                  Responder
-                </button>
-                {(me === comment.authorId || me === item.authorId) && (
-                  <button
-                    className="text-button"
-                    disabled={busy}
-                    onClick={() => void remove(comment)}
-                  >
-                    Remover
-                  </button>
-                )}
-              </div>
-            </article>
-          ))}
-          {more && (
-            <button
-              className="secondary"
-              disabled={loading}
-              onClick={() => {
-                setLoading(true);
-                setPage((value) => value + 1);
-              }}
-            >
-              {"Mais coment\u00e1rios"}
-            </button>
-          )}
-          {!loading && !rows.length && !error && (
-            <p>Comece a conversa com uma pergunta ou uma ideia.</p>
-          )}
-        </div>
-        <div className="social-comment-composer">
-          <div className="social-comment-reactions" aria-label="Emojis">
-            {QUICK.map((emoji) => (
-              <button
-                type="button"
-                key={emoji}
-                disabled={busy}
-                aria-label={`Inserir emoji ${emoji}`}
-                onClick={() => insert(emoji)}
-              >
-                {emoji}
-              </button>
-            ))}
-          </div>
-          {attachment && (
-            <div className="social-comment-attachment">
-              {attachmentUrl && (
-                <img src={attachmentUrl} alt="Anexo selecionado" />
-              )}
-              <span>{attachment.name}</span>
-              <button
-                type="button"
-                className="icon-control"
-                aria-label="Remover anexo"
-                disabled={busy}
-                onClick={discardAttachment}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
-          {parent && (
-            <div className="social-comment-replying">
-              <span>Respondendo a @{parent.username}</span>
-              <button
-                type="button"
-                className="icon-control"
-                aria-label="Cancelar resposta"
-                onClick={() => setParent(undefined)}
-              >
-                <X size={16} />
-              </button>
-            </div>
-          )}
-          <form
-            noValidate
-            className="social-comment-form"
-            onSubmit={(event) => {
-              event.preventDefault();
-              void submit();
-            }}
-          >
-            <label className="sr-only" htmlFor={id}>
-              {"Seu coment\u00e1rio"}
-            </label>
-            <SocialMentionInput
-              id={id}
-              inputRef={field}
-              className="resize-none"
-              rows={1}
-              maxLength={1500}
-              value={text}
-              disabled={busy}
-              onValueChange={setText}
-              placeholder={"Adicione um coment\u00e1rio\u2026"}
-            />
-            <ComposerMedia
-              disabled={busy}
-              onEmoji={insert}
-              onFile={choose}
-              onMedia={async (file) => choose(file)}
-              onKlipy={async (gif) => {
-                const url = providerMessageUrl(gif.url);
-                if (url) insert(`${text.trim() ? "\n" : ""}${url}`);
-              }}
-            />
-            <button
-              disabled={busy || (!text.trim() && !attachment)}
-              aria-label={"Enviar coment\u00e1rio"}
-            >
-              <Send size={22} />
-            </button>
-          </form>
-          {error && (
-            <div role="alert" className="social-error">
-              <p>{error}</p>
-              <button
-                type="button"
-                className="text-button"
-                disabled={loading || busy}
-                onClick={() => {
-                  setLoading(true);
-                  setRevision((value) => value + 1);
-                }}
-              >
-                Tentar novamente
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
+      {content}
     </SocialDialog>
   );
 }

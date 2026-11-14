@@ -26,3 +26,17 @@ export function playMotion(
   animation.addEventListener("cancel", clear, { once: true });
   return animation;
 }
+
+/** Heart pop shared by every Social like button; runs only when a like is added. */
+export function popLike(el: Element) {
+  playMotion(
+    el,
+    [
+      { transform: "scale(1)" },
+      { transform: "scale(1.3)" },
+      { transform: "scale(.9)" },
+      { transform: "scale(1)" },
+    ],
+    { duration: 360 },
+  );
+}

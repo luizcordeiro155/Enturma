@@ -60,3 +60,18 @@ it("limita o progresso entre 0 e 100", () => {
   renderOverlay({}, "me", 1.7);
   expect(screen.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "100");
 });
+it("anima o coração ao curtir o Clip, mas não ao descurtir", () => {
+  const animate = vi.fn(() => ({ finished: Promise.resolve(), cancel() {}, addEventListener() {} }));
+  Object.defineProperty(HTMLElement.prototype, "animate", { value: animate, configurable: true });
+  vi.stubGlobal("matchMedia", () => ({ matches: false, addEventListener() {}, removeEventListener() {} }));
+  const { unmount } = renderOverlay({ mine: [], likes: 0 });
+  fireEvent.click(screen.getByRole("button", { name: "Curtir · 0" }));
+  expect(animate).toHaveBeenCalledOnce();
+  unmount();
+  animate.mockClear();
+  renderOverlay({ mine: ["LIKE"], likes: 1 });
+  fireEvent.click(screen.getByRole("button", { name: "Curtir · 1" }));
+  expect(animate).not.toHaveBeenCalled();
+  vi.unstubAllGlobals();
+  delete (HTMLElement.prototype as { animate?: unknown }).animate;
+});

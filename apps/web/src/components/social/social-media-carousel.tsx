@@ -1,24 +1,30 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- private authenticated social media */
 import { useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, Volume2, VolumeX } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { mediaUrl, type SocialMedia } from "@/lib/social";
 import { mediaAspect } from "@/lib/social-media";
 import { useAutoplayInView } from "./use-autoplay-in-view";
 import { NavigationLink } from "../navigation-link";
+import { SocialVideoVolume } from "./social-video-volume";
+import { useVideoView } from "./use-video-view";
 
 function FeedVideo({
   media,
   autoplay,
   clipHref,
+  postId,
 }: {
   media: SocialMedia;
   autoplay: boolean;
   clipHref?: string;
+  postId?: string;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(true);
+  const [volume, setVolume] = useState(1);
   useAutoplayInView(ref, autoplay);
+  useVideoView(ref, postId);
   return (
     <>
       <video
@@ -49,18 +55,11 @@ function FeedVideo({
         />
       )}
       {autoplay && (
-        <button
-          type="button"
-          className="social-media-sound"
-          aria-label={muted ? "Ativar som do vídeo" : "Silenciar vídeo"}
-          aria-pressed={!muted}
-          onClick={(event) => {
-            event.stopPropagation();
-            setMuted((value) => !value);
-          }}
-        >
-          {muted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-        </button>
+        <SocialVideoVolume volume={volume} onVolumeChange={value => {
+          setVolume(value);
+          const video = ref.current;
+          if (video) video.volume = value;
+        }} muted={muted} onMutedChange={setMuted} />
       )}
     </>
   );
@@ -75,11 +74,13 @@ export function SocialMediaCarousel({
   authorName,
   autoplay,
   clipHref,
+  postId,
 }: {
   media: SocialMedia[];
   authorName: string;
   autoplay: boolean;
   clipHref?: string;
+  postId?: string;
 }) {
   const track = useRef<HTMLDivElement>(null);
   const [index, setIndex] = useState(0);
@@ -129,7 +130,12 @@ export function SocialMediaCarousel({
         {media.map((item, position) => (
           <figure key={item.id}>
             {item.kind === "VIDEO" ? (
-              <FeedVideo media={item} autoplay={autoplay} clipHref={clipHref} />
+              <FeedVideo
+                media={item}
+                autoplay={autoplay}
+                clipHref={clipHref}
+                postId={postId}
+              />
             ) : (
               <img
                 src={mediaUrl(item.id)}

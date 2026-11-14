@@ -1,8 +1,16 @@
 "use client";
-import { useLayoutEffect, useRef, type PointerEvent, type ReactNode } from "react";
+import {
+  useLayoutEffect,
+  useRef,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import { createPortal } from "react-dom";
 import { playMotion } from "@/lib/motion";
-import { composerKeyboardVisible, isTextEntryControl } from "@/lib/native-chat-ime";
+import {
+  composerKeyboardVisible,
+  isTextEntryControl,
+} from "@/lib/native-chat-ime";
 import {
   useOverlayHistory,
   waitForOverlayHistory,
@@ -55,11 +63,18 @@ export function MessageActionPopover({
       const current = anchor.element?.isConnected
         ? anchor.element.getBoundingClientRect()
         : anchor;
-      const nativeTop = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--native-safe-top")) || 0;
+      const nativeTop =
+        parseFloat(
+          getComputedStyle(document.documentElement).getPropertyValue(
+            "--native-safe-top",
+          ),
+        ) || 0;
       const visibleTop = Math.max(offset, nativeTop) + 12;
       const visibleBottom = offset + height - 12;
       const composerTop = composer
-        ? anchor.element?.closest(".enturma-message-composer")?.getBoundingClientRect().top ?? current.top
+        ? (anchor.element
+            ?.closest(".enturma-message-composer")
+            ?.getBoundingClientRect().top ?? current.top)
         : current.top;
       const aboveBottom = Math.min(composerTop - 8, visibleBottom);
       const width = Math.min(wide ? 408 : 296, viewportWidth - 24);
@@ -68,7 +83,10 @@ export function MessageActionPopover({
       el.dataset.compact = String(composer && aboveBottom - visibleTop < 400);
       const left = Math.max(
         offsetLeft + 12,
-        Math.min(offsetLeft + viewportWidth - width - 12, current.right - width),
+        Math.min(
+          offsetLeft + viewportWidth - width - 12,
+          current.right - width,
+        ),
       );
       const below = current.bottom + 8;
       const top =
@@ -89,9 +107,14 @@ export function MessageActionPopover({
     const owner = anchor.element?.closest(".enturma-message-composer");
     if (owner) resize.observe(owner);
     window.visualViewport?.addEventListener("resize", schedulePlace);
-    window.visualViewport?.addEventListener("scroll", schedulePlace, { passive: true });
+    window.visualViewport?.addEventListener("scroll", schedulePlace, {
+      passive: true,
+    });
     window.addEventListener("resize", schedulePlace);
-    window.addEventListener("scroll", schedulePlace, { capture: true, passive: true });
+    window.addEventListener("scroll", schedulePlace, {
+      capture: true,
+      passive: true,
+    });
     const animation = playMotion(
       el,
       [
@@ -101,7 +124,8 @@ export function MessageActionPopover({
       { duration: 210 },
     );
     // Moving focus to a dialog hides Android/iOS's software keyboard.
-    if (!composer || !isTextEntryControl(previous)) el.focus({ preventScroll: true });
+    if (!composer || !isTextEntryControl(previous))
+      el.focus({ preventScroll: true });
     const keys = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
@@ -142,14 +166,21 @@ export function MessageActionPopover({
       window.visualViewport?.removeEventListener("scroll", schedulePlace);
       keyTarget.removeEventListener("keydown", keys as EventListener);
       // Restore the composer before a focused search field is unmounted.
-      if (composer && composerKeyboardVisible() && previous?.isConnected && isTextEntryControl(previous) &&
-          (el.contains(document.activeElement) || document.activeElement === document.body)) {
+      if (
+        composer &&
+        composerKeyboardVisible() &&
+        previous?.isConnected &&
+        isTextEntryControl(previous) &&
+        (el.contains(document.activeElement) ||
+          document.activeElement === document.body)
+      ) {
         previous.focus({ preventScroll: true });
       }
       void waitForOverlayHistory().then(() =>
         requestAnimationFrame(() => {
           if (
-            previous?.isConnected && (!composer || composerKeyboardVisible()) &&
+            previous?.isConnected &&
+            (!composer || composerKeyboardVisible()) &&
             (!document.activeElement ||
               document.activeElement === document.body)
           )
@@ -159,9 +190,14 @@ export function MessageActionPopover({
     };
   }, [anchor, wide, composer]);
   const preserveTextFocus = (event: PointerEvent) => {
-    if (composer && isTextEntryControl(document.activeElement) &&
-        event.target instanceof Element &&
-        !event.target.closest("input,textarea,select,label,[contenteditable='true']")) {
+    if (
+      composer &&
+      isTextEntryControl(document.activeElement) &&
+      event.target instanceof Element &&
+      !event.target.closest(
+        "input,textarea,select,label,[contenteditable='true']",
+      )
+    ) {
       event.preventDefault();
     }
   };
@@ -187,6 +223,8 @@ export function MessageActionPopover({
         {children}
       </div>
     </div>,
-    document.body,
+    // A body portal is inert and below the browser's top layer while a modal
+    // dialog is open. Keep nested pickers inside their owning dialog.
+    anchor.element?.closest("dialog[open]") ?? document.body,
   );
 }
