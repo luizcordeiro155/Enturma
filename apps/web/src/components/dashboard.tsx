@@ -20,6 +20,7 @@ import { ForumHighlights } from "./forum-highlights";
 import { StudyJourney } from "./study-journey";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { EnturmaIntroExperience } from "./intro/enturma-intro-experience";
+import { EnturmaStudy } from "./study/enturma-study";
 import { useVisitor } from "@/lib/visitor-context";
 export function Dashboard({ visitor = false }: { visitor?: boolean }) {
   const guest = useVisitor();
@@ -149,6 +150,7 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
             ) : null}
           </div>
           {profile ? <EnturmaIntroExperience profile={profile} /> : null}
+          {profile ? <EnturmaStudy profile={profile} /> : null}
           {profile ? (
             <section
               id="minhas-materias"

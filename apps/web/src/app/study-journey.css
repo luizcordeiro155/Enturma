@@ -318,3 +318,14 @@
     font-size: 0.9rem;
   }
 }
+
+/* Finished journey: one line, keeping the guide and the presentation at hand. */
+.study-guide.study-journey.is-complete {
+  padding: 16px 20px;
+}
+.study-journey.is-complete .journey-heading h2 {
+  font-size: 1.05rem;
+}
+.journey-finished.journey-compact {
+  margin: 10px 0 4px;
+}

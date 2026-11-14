@@ -37,6 +37,13 @@ public class PersonalDataExport {
     SECTIONS.put("social-video-views", "SELECT post_id,created_at FROM social_video_view WHERE user_id=? ORDER BY created_at,post_id");
     SECTIONS.put("social-mutes", "SELECT creator_id FROM social_mute WHERE user_id=? ORDER BY creator_id");
     SECTIONS.put("social-verification", "SELECT id,reason,status,decision,created_at,reviewed_at FROM social_verification WHERE user_id=? ORDER BY created_at,id");
+    SECTIONS.put("study-routine", "SELECT timezone,default_start,default_end,weekdays,semester_start,semester_end,class_reminder_minutes,quiet_start,quiet_end,tutor_personality,state,city,updated_at FROM academic_routine WHERE user_id=? ORDER BY user_id");
+    SECTIONS.put("study-classes", "SELECT id,subject_id,weekday,starts_at,ends_at,valid_from,valid_until,room,created_at FROM academic_class_schedule WHERE user_id=? ORDER BY created_at,id");
+    SECTIONS.put("study-class-exceptions", "SELECT id,schedule_id,occurs_on,kind,moved_to,minutes,note,created_at FROM academic_class_exception WHERE user_id=? ORDER BY occurs_on,id");
+    SECTIONS.put("study-holidays", "SELECT id,date,name,scope,created_at FROM calendar_holiday WHERE user_id=? ORDER BY date,id");
+    SECTIONS.put("study-reminders", "SELECT id,kind,source_id,occurrence_at,fire_at,status,sent_at FROM academic_reminder_job WHERE user_id=? ORDER BY fire_at,id");
+    SECTIONS.put("study-tasks", "SELECT id,subject_id,kind,title,notes,due_at,estimated_minutes,priority,completed_at,created_at FROM campus_task WHERE user_id=? ORDER BY due_at,id");
+    SECTIONS.put("study-focus", "SELECT id,subject_id,label,planned_minutes,started_at,finished_at,actual_seconds FROM focus_session WHERE user_id=? ORDER BY started_at,id");
     SECTIONS.put("social-reports", "SELECT id,post_id,reason,status,created_at FROM social_report WHERE reporter_id=? ORDER BY created_at,id");
   }
   @GetMapping("/sections")

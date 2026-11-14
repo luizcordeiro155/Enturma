@@ -295,6 +295,7 @@ const categoryNames: Record<string, string> = {
   SOCIAL_RELATIONSHIP: "Seguidores e solicitações",
   SOCIAL_INTERACTION: "Curtidas, comentários e marcações",
   SOCIAL_VERIFICATION: "Verificação social",
+  STUDY_REMINDER: "Lembretes de aulas e estudos",
 };
 
 type Preference = {

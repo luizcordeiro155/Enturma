@@ -1,0 +1,597 @@
+/* Enturma Study on the home page. Kind colors always come with an icon or a text label. */
+:root {
+  --study-class: #1d5fbf;
+  --study-study: #6b3fb4;
+  --study-exam: #b45309;
+  --study-holiday: #b4233a;
+  --study-done: var(--success);
+}
+html[data-theme="dark"],
+html[data-palette="enturma"] {
+  --study-class: #8ab4ff;
+  --study-study: #c9adff;
+  --study-exam: #ffb36b;
+  --study-holiday: #ff8f9a;
+}
+
+.enturma-study {
+  display: grid;
+  gap: 18px;
+  margin: 8px 0 28px;
+  min-width: 0;
+  scroll-margin-top: 88px;
+}
+.enturma-study-head {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.enturma-study-head h2 {
+  margin: 4px 0 6px;
+  font-size: clamp(1.35rem, 2.6vw, 1.9rem);
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+}
+.enturma-study-head p {
+  margin: 0;
+  color: var(--muted);
+}
+.enturma-study-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.enturma-study-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(260px, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+.enturma-study-side {
+  display: grid;
+  gap: 16px;
+  min-width: 0;
+}
+.study-card {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  animation: study-rise 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.enturma-study-side .study-card:nth-child(2) {
+  animation-delay: 0.08s;
+}
+@keyframes study-rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+.study-card-title {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+}
+.study-card-title > svg {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 2px;
+}
+.study-card-title h3,
+.study-day-panel h3,
+.study-routine-panel h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+.study-card-title p {
+  margin: 2px 0 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+/* Calendar */
+.study-calendar {
+  display: grid;
+  gap: 12px;
+}
+.study-calendar-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.study-calendar-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.study-calendar-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.study-calendar-title {
+  min-width: 132px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+html[data-theme] .enturma-study button.study-icon,
+html[data-theme] .enturma-study button.study-today,
+html[data-theme] .enturma-study .study-segmented button {
+  display: inline-grid;
+  place-items: center;
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  box-shadow: none;
+  font-weight: 700;
+}
+html[data-theme] .enturma-study button.study-icon {
+  width: 34px;
+  padding: 0;
+}
+.study-segmented {
+  display: inline-flex;
+  padding: 3px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--soft);
+}
+html[data-theme] .enturma-study .study-segmented button {
+  min-height: 28px;
+  border: 0;
+  background: transparent !important;
+}
+html[data-theme] .enturma-study .study-segmented button[aria-pressed="true"] {
+  background: var(--surface) !important;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.12);
+}
+.study-calendar-weekdays,
+.study-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 6px;
+}
+.study-calendar-weekdays span {
+  text-align: center;
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+html[data-theme] .enturma-study button.study-day {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 4px;
+  min-height: 46px;
+  padding: 6px 2px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  background: var(--soft) !important;
+  color: var(--ink) !important;
+  box-shadow: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  transition: transform 0.16s ease, border-color 0.16s ease, background 0.16s ease;
+}
+.study-calendar[data-view="week"] .study-day {
+  min-height: 120px;
+  align-content: start;
+}
+html[data-theme] .enturma-study button.study-day.is-outside {
+  opacity: 0.45;
+}
+html[data-theme] .enturma-study button.study-day.is-holiday {
+  background: color-mix(in srgb, var(--study-holiday) 16%, var(--surface)) !important;
+  color: var(--study-holiday) !important;
+  border-color: color-mix(in srgb, var(--study-holiday) 40%, transparent);
+}
+html[data-theme] .enturma-study button.study-day.is-today {
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+html[data-theme] .enturma-study button.study-day[aria-pressed="true"] {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+@media (hover: hover) {
+  html[data-theme] .enturma-study button.study-day:hover {
+    border-color: var(--border);
+    transform: translateY(-1px);
+  }
+}
+.study-day-dots {
+  display: flex;
+  gap: 3px;
+  min-height: 6px;
+}
+.study-day-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--study-class);
+}
+.study-day-dots i[data-kind="study"] {
+  background: var(--study-study);
+}
+.study-day-dots i[data-kind="exam"] {
+  background: var(--study-exam);
+}
+.study-day-items {
+  display: grid;
+  gap: 3px;
+  width: 100%;
+  padding: 0 4px;
+}
+.study-day-items span {
+  overflow: hidden;
+  padding: 2px 4px;
+  border-radius: 6px;
+  --kind: var(--study-class);
+  background: color-mix(in srgb, var(--kind) 16%, var(--surface));
+  font-size: 0.68rem;
+  font-weight: 600;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.study-day-items span[data-kind="EXAM"],
+.study-day-items span[data-kind="ASSIGNMENT"] {
+  --kind: var(--study-exam);
+}
+.study-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.study-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.study-legend li::before {
+  content: "";
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--study-class);
+}
+.study-legend li[data-kind="study"]::before {
+  background: var(--study-study);
+}
+.study-legend li[data-kind="exam"]::before {
+  background: var(--study-exam);
+}
+.study-legend li[data-kind="holiday"]::before {
+  background: var(--study-holiday);
+}
+.study-next-holidays h4 {
+  margin: 0 0 6px;
+  font-size: 0.85rem;
+}
+.study-next-holidays ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.85rem;
+}
+.study-next-holidays li span {
+  color: var(--study-holiday);
+  font-weight: 700;
+}
+
+/* Day and routine panels */
+.study-day-panel,
+.study-routine-panel {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-raised, var(--soft));
+  animation: study-rise 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.study-day-panel > header,
+.study-routine-panel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.study-day-panel h3::first-letter {
+  text-transform: uppercase;
+}
+.study-routine-panel h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.study-holiday-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: var(--study-holiday);
+}
+.study-holiday-line .text-button {
+  margin-left: auto;
+}
+.study-day-events,
+.study-list,
+.study-timeline {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.study-day-events > li {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: 10px;
+  padding: 10px 12px;
+  --kind: var(--study-class);
+  border: 1px solid color-mix(in srgb, var(--kind) 35%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--kind) 8%, var(--surface));
+}
+.study-day-events > li[data-kind="EXAM"],
+.study-day-events > li[data-kind="ASSIGNMENT"],
+.study-day-events > li[data-kind="EVENT"],
+.study-list li[data-kind="EXAM"] {
+  --kind: var(--study-exam);
+}
+.study-day-events > li[data-status="CANCELLED"] strong {
+  text-decoration: line-through;
+  color: var(--muted);
+}
+.study-event-time {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.study-event-body {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+.study-event-kind {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.study-holiday-warning {
+  color: var(--study-holiday);
+  font-weight: 700;
+}
+.study-event-actions,
+.study-day-add {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+html[data-theme] .enturma-study .study-event-actions button,
+html[data-theme] .enturma-study .study-day-add button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  box-shadow: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+html[data-theme] .enturma-study .study-day-add button[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--soft) !important;
+}
+html[data-theme] .enturma-study .study-event-actions button.danger {
+  border-color: transparent;
+  background: #a12c3c !important;
+  color: #fff !important;
+}
+.study-inline-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  align-items: end;
+}
+.study-inline-form label {
+  display: grid;
+  gap: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+.study-inline-form label.study-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.study-inline-form .study-muted,
+.study-inline-form [role="alert"] {
+  grid-column: 1 / -1;
+}
+.study-weekdays {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.study-weekdays legend {
+  margin-bottom: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+html[data-theme] .enturma-study .study-weekdays button {
+  min-width: 46px;
+  min-height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  box-shadow: none;
+  font-weight: 700;
+}
+html[data-theme] .enturma-study .study-weekdays button[aria-pressed="true"] {
+  border-color: transparent;
+  background: var(--accent) !important;
+  color: var(--on-accent) !important;
+}
+.study-muted {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Side cards */
+.study-list li {
+  display: grid;
+  gap: 2px;
+  padding: 10px 12px;
+  --kind: var(--study-class);
+  border: 1px solid color-mix(in srgb, var(--kind) 35%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--kind) 8%, var(--surface));
+}
+.study-list li span {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+.study-empty {
+  display: grid;
+  gap: 10px;
+  justify-items: start;
+}
+.study-empty p {
+  margin: 0;
+  color: var(--muted);
+}
+.study-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--success) 45%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--success) 12%, var(--surface));
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+.study-notice svg {
+  flex: none;
+}
+.study-timeline li {
+  position: relative;
+  display: grid;
+  gap: 2px;
+  padding-left: 22px;
+}
+.study-timeline li::before {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 6px;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--study-class);
+  border-radius: 999px;
+  background: var(--surface);
+}
+.study-timeline li[data-kind="EXAM"]::before,
+.study-timeline li[data-kind="ASSIGNMENT"]::before {
+  border-color: var(--study-exam);
+}
+.study-timeline li span {
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 900px) {
+  .enturma-study-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 520px) {
+  .study-card {
+    padding: 14px;
+  }
+  .study-calendar-controls {
+    width: 100%;
+  }
+  .study-calendar-nav {
+    order: -1;
+    flex: 1 0 100%;
+    justify-content: space-between;
+  }
+  .study-calendar-controls .study-today {
+    margin-left: auto;
+  }
+  .study-calendar-weekdays,
+  .study-calendar-grid {
+    gap: 4px;
+  }
+  html[data-theme] .enturma-study button.study-day {
+    min-height: 40px;
+    border-radius: 10px;
+  }
+  .study-calendar[data-view="week"] .study-day-items {
+    display: none;
+  }
+  .study-calendar[data-view="week"] .study-day {
+    min-height: 56px;
+  }
+  .study-day-events > li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .study-card,
+  .study-day-panel,
+  .study-routine-panel {
+    animation: none;
+  }
+}
+:root[data-reduced-motion="true"] .study-card,
+:root[data-reduced-motion="true"] .study-day-panel,
+:root[data-reduced-motion="true"] .study-routine-panel {
+  animation: none;
+}
+
+/* Phones and tablets stack the home page; Study sits right below the Enturma video. */
+@media (max-width: 1200px) {
+  .enturma-study {
+    order: 2;
+  }
+}

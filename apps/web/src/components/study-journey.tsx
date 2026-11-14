@@ -136,6 +136,7 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
   const panel = useRef<HTMLElement>(null);
   const mounted = useRef(true),
     running = useRef(false);
+  const complete = data?.completed === 3;
   async function refresh() {
     if (running.current) return;
     running.current = true;
@@ -217,16 +218,18 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
       ref={panel}
       id="enturma-study-guide"
       tabIndex={-1}
-      className="study-guide study-journey"
+      className={`study-guide study-journey${complete ? " is-complete" : ""}`}
       aria-labelledby="journey-title"
     >
       <div className="journey-heading">
         <h2 id="journey-title">Seu espaço de estudo</h2>
         <Trophy size={24} aria-hidden="true" />
       </div>
-      <p className="journey-intro">
-        Três passos para estudar em companhia. Até 100 XP para começar.
-      </p>
+      {complete ? null : (
+        <p className="journey-intro">
+          Três passos para estudar em companhia. Até 100 XP para começar.
+        </p>
+      )}
       {error ? (
         <p role="alert">
           {error}{" "}
@@ -236,7 +239,17 @@ export function StudyJourney({ enrolled }: { enrolled: boolean }) {
         </p>
       ) : null}
       {!data && !error ? <p role="status">Carregando seu progresso…</p> : null}
-      {data ? (
+      {data && complete ? (
+        <p className="journey-finished journey-compact">
+          <Check size={18} /> Jornada concluída · Nível {data.level} · {data.totalXp} XP
+        </p>
+      ) : null}
+      {data && complete && reward ? (
+        <p className="journey-reward" aria-live="polite">
+          <Sparkles size={17} /> +{reward} XP recebidos nesta jornada!
+        </p>
+      ) : null}
+      {data && !complete ? (
         <>
           <div className="journey-progress-label">
             <strong>{data.completed} de 3 concluídos</strong>
