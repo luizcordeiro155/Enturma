@@ -56,6 +56,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.view.KeyEvent
 import android.view.View
 import android.view.WindowManager
 import com.google.firebase.FirebaseApp
@@ -2081,6 +2082,22 @@ class MainActivity : Activity() {
     override fun onSaveInstanceState(outState: Bundle) {
         webView.saveState(outState)
         super.onSaveInstanceState(outState)
+    }
+
+    // The phone's volume keys still change the system volume; the page is told so a
+    // muted Social video can turn its sound on, like Instagram.
+    override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
+        if ((keyCode == KeyEvent.KEYCODE_VOLUME_UP || keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) &&
+            ::webView.isInitialized && (event?.repeatCount ?: 0) == 0
+        ) {
+            val direction = if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) "up" else "down"
+            webView.evaluateJavascript(
+                "window.dispatchEvent(new CustomEvent('enturma-native-volume-key',{detail:{direction:'" +
+                    direction + "'}}))",
+                null,
+            )
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     @Deprecated("Deprecated in Java")

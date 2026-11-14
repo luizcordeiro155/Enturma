@@ -5,6 +5,7 @@ import {
   resetSocialSound,
   setSocialSound,
   subscribeSocialSound,
+  unmuteOnVolumeKeys,
 } from "./social-sound";
 
 beforeEach(() => {
@@ -38,4 +39,25 @@ it("keeps the Clips choice saved before the shared setting existed", () => {
 it("ignores a damaged saved value", () => {
   sessionStorage.setItem("enturma-social-sound", '{"muted":"x","volume":7}');
   expect(readSavedSocialSound()).toEqual({ muted: true, volume: 1 });
+});
+
+it("the phone's volume key turns Social sound on while a Social video is on screen", () => {
+  const stop = unmuteOnVolumeKeys();
+  window.dispatchEvent(new CustomEvent("enturma-native-volume-key", { detail: { direction: "up" } }));
+  expect(getSocialSound().muted).toBe(true);
+
+  document.body.innerHTML = '<div class="social-page"><video></video></div>';
+  setSocialSound({ volume: 0 });
+  window.dispatchEvent(new CustomEvent("enturma-native-volume-key", { detail: { direction: "down" } }));
+  expect(getSocialSound()).toEqual({ muted: false, volume: 1 });
+
+  setSocialSound({ muted: true });
+  window.dispatchEvent(new KeyboardEvent("keydown", { key: "AudioVolumeUp" }));
+  expect(getSocialSound().muted).toBe(false);
+
+  stop();
+  setSocialSound({ muted: true });
+  window.dispatchEvent(new CustomEvent("enturma-native-volume-key", { detail: { direction: "up" } }));
+  expect(getSocialSound().muted).toBe(true);
+  document.body.innerHTML = "";
 });

@@ -780,10 +780,10 @@ html[data-theme] .social-comments-body .composer-media-buttons button {
 }
 .social-comment-media {
   display: block;
-  max-width: min(220px, 100%);
+  max-width: min(200px, 100%);
   max-height: 220px;
   object-fit: contain;
-  border-radius: 8px;
+  border-radius: 14px;
   margin: 8px 0;
 }
 .social-comment-attachment {
@@ -2477,18 +2477,13 @@ html[data-theme] .social-hashtag-list li button{display:flex;align-items:center;
   html[data-theme] .social-page .social-clips-tabs {
     padding-top: 10px;
   }
-  html[data-theme] .social-page .social-clips-exit,
-  html[data-theme] .social-page .social-clip-controls .social-video-volume {
-    top: auto;
-  }
   html[data-theme] .social-page .social-clips-exit {
     top: calc(8px + var(--enturma-safe-top, 0px)) !important;
     left: 10px;
   }
 }
 /* Round glass buttons over video, matching the Feed's round header buttons. */
-html[data-theme] .social-page .social-clips-exit,
-html[data-theme] .social-page .social-clip-controls .social-video-volume {
+html[data-theme] .social-page .social-clips-exit {
   display: grid;
   place-items: center;
   width: 44px;
@@ -2506,13 +2501,8 @@ html[data-theme] .social-page .social-clip-controls .social-video-volume {
   filter: none;
   transition: transform 0.16s ease, background 0.16s ease;
 }
-html[data-theme] .social-page .social-clips-exit:active,
-html[data-theme] .social-page .social-clip-controls .social-video-volume:active {
+html[data-theme] .social-page .social-clips-exit:active {
   transform: scale(0.94);
-}
-html[data-theme] .social-page .social-clip-controls .social-video-volume[data-open="true"] {
-  height: auto;
-  padding: 4px 0;
 }
 html[data-theme] .social-page .social-clips-exit svg {
   width: 22px;
@@ -2575,4 +2565,83 @@ html[data-theme] .social-profile-intro .social-profile-counts > :is(span, button
   background: transparent;
   text-align: center;
   box-shadow: none;
+}
+
+/* Clips sound: one round glass button on the video's top-right corner, level with the
+   back arrow on phones. The volume slider unfolds below it without moving anything. */
+.social-page .social-clip-sound {
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  z-index: 6;
+  width: 44px;
+  height: 44px;
+}
+html[data-theme] .social-page .social-clip-sound .social-video-volume {
+  position: absolute;
+  inset: 0 0 auto auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 44px;
+  min-height: 44px;
+  padding: 0;
+  gap: 0;
+  border: 1px solid rgb(255 255 255 / 0.2);
+  border-radius: 22px;
+  background: rgb(10 14 16 / 0.46);
+  color: #fff;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 0.28);
+  backdrop-filter: blur(14px) saturate(1.2);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  overflow: hidden;
+}
+html[data-theme] .social-page .social-clip-sound .social-video-volume .social-media-sound {
+  order: -1;
+  position: static;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 42px;
+  height: 42px;
+  min-width: 42px;
+  min-height: 42px;
+  margin: 0;
+  padding: 0 !important;
+  border: 0;
+  border-radius: 50%;
+  background: transparent !important;
+  color: #fff !important;
+  box-shadow: none;
+  transform: none;
+  transition: transform 0.16s ease;
+}
+html[data-theme] .social-page .social-clip-sound .social-media-sound:active {
+  transform: scale(0.9);
+}
+html[data-theme] .social-page .social-clip-sound .social-media-sound svg {
+  width: 20px;
+  height: 20px;
+}
+.social-page .social-clip-sound .social-volume-slider {
+  width: 100%;
+  height: 0;
+}
+.social-page .social-clip-sound .social-video-volume[data-open="true"] .social-volume-slider,
+.social-page .social-clip-sound .social-video-volume:has(:focus-visible) .social-volume-slider {
+  height: 104px;
+  padding-bottom: 10px;
+}
+@media (hover: hover) and (pointer: fine) {
+  .social-page .social-clip-sound .social-video-volume:hover .social-volume-slider {
+    height: 104px;
+    padding-bottom: 10px;
+  }
+}
+html[data-theme] .social-page .social-clip-sound .social-volume-slider input[type="range"] {
+  writing-mode: vertical-lr;
+  height: 88px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-page .social-clip-sound .social-volume-slider { transition: none; }
 }

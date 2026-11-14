@@ -94,7 +94,8 @@ class StudySessionIntegrationTest {
   @Test
   @SuppressWarnings("unchecked")
   void schedulingCreatesANotebookAndTheCalendarShowsTheStudy() {
-    var startsAt = OffsetDateTime.parse("2026-12-03T19:00:00-03:00");
+    var day = LocalDate.now(java.time.ZoneOffset.ofHours(-3)).plusDays(20);
+    var startsAt = day.atTime(19, 0).atOffset(java.time.ZoneOffset.ofHours(-3));
     UUID id = study.create(a, new NewSession(subject, startsAt, 60, "Revisar limites"));
     var session = (Map<String, Object>) ((Map<String, Object>) study.detail(a, id)).get("session");
     assertThat(session).containsEntry("status", "PLANNED").containsEntry("goal", "Revisar limites");
@@ -105,7 +106,7 @@ class StudySessionIntegrationTest {
         .startsWith("Estudo · ");
     var events =
         (List<Map<String, Object>>)
-            planner.calendar(a, LocalDate.parse("2026-12-01"), LocalDate.parse("2026-12-31")).get("events");
+            planner.calendar(a, day.minusDays(2), day.plusDays(2)).get("events");
     assertThat(events)
         .anySatisfy(
             e ->
@@ -113,11 +114,18 @@ class StudySessionIntegrationTest {
                     .containsEntry("kind", "STUDY")
                     .containsEntry("id", id)
                     .containsEntry("status", "SCHEDULED")
-                    .containsEntry("startsAt", "2026-12-03T22:00:00Z"));
+                    .containsEntry("startsAt", startsAt.toInstant().toString()));
     assertThatThrownBy(() -> study.create(b, new NewSession(subject, startsAt, 60, "")))
         .isInstanceOf(ApiException.class);
     assertThatThrownBy(() -> study.create(a, new NewSession(subject, startsAt, 5, "")))
         .isInstanceOf(ApiException.class);
+    // A day or time that already passed cannot be scheduled.
+    assertThatThrownBy(() -> study.create(a, new NewSession(subject, inMinutes(-30), 30, "")))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("já passou");
+    assertThatThrownBy(() -> study.continueLater(a, id, inMinutes(-24 * 60), 30))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("já passou");
   }
 
   @Test
@@ -217,7 +225,7 @@ class StudySessionIntegrationTest {
   @SuppressWarnings("unchecked")
   void continuingLaterKeepsTheSameNotebook() {
     UUID id = study.create(a, new NewSession(subject, inMinutes(5), 30, "Derivadas"));
-    UUID next = study.continueLater(a, id, OffsetDateTime.parse("2026-12-10T19:00:00-03:00"), 45);
+    UUID next = study.continueLater(a, id, inMinutes(7 * 24 * 60), 45);
     var first = (Map<String, Object>) ((Map<String, Object>) study.detail(a, id)).get("session");
     var second = (Map<String, Object>) ((Map<String, Object>) study.detail(a, next)).get("session");
     assertThat(second)

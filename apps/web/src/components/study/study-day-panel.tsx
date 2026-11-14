@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import type { AcademicEntry } from "@enturma/contracts";
 import {
+  isoDate,
   isoWeekday,
   planner,
   timeIn,
@@ -68,6 +69,7 @@ export function StudyDayPanel({
   const [moving, setMoving] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const weekday = WEEKDAYS.find((item) => item.value === isoWeekday(day))!.long;
+  const past = day < isoDate(new Date());
   const title = `${weekday}, ${dayLabel(day)}`;
   const zone = routine.timezone;
 
@@ -241,7 +243,13 @@ export function StudyDayPanel({
         <p className="study-muted">Nada marcado para este dia.</p>
       )}
       <div className="study-day-add" role="group" aria-label="Adicionar ao dia">
-        <button type="button" aria-pressed={form === "study"} onClick={() => setForm(form === "study" ? null : "study")}>
+        <button
+          type="button"
+          aria-pressed={form === "study" && !past}
+          disabled={past}
+          title={past ? "Esse dia já passou" : undefined}
+          onClick={() => setForm(form === "study" ? null : "study")}
+        >
           <Brain size={16} aria-hidden /> Agendar estudo com IA
         </button>
         <button type="button" aria-pressed={form === "class"} onClick={() => setForm(form === "class" ? null : "class")}>
@@ -254,7 +262,10 @@ export function StudyDayPanel({
           <PartyPopper size={16} aria-hidden /> Feriado da cidade
         </button>
       </div>
-      {form === "study" && (
+      {past && (
+        <p className="study-muted study-past-note">Esse dia já passou. Escolha hoje ou um dia futuro para agendar estudos.</p>
+      )}
+      {form === "study" && !past && (
         <StudyForm
           day={day}
           routine={routine}
@@ -456,21 +467,44 @@ function StudyForm({
   busy: boolean;
   submit: (body: Parameters<typeof study.create>[0]) => void;
 }) {
+  const [error, setError] = useState("");
   if (!subjects.length)
     return (
       <p className="study-muted">
         Salve suas matérias no perfil acadêmico para agendar estudos com a IA.
       </p>
     );
+  const now = new Date();
+  const today = day === isoDate(now);
+  const earliest = new Date(now.getTime() + 60000);
+  const earliestTime = today ? clockTime(earliest) : undefined;
+  const rounded = new Date(Math.ceil(earliest.getTime() / 300000) * 300000);
+  const suggested =
+    today && isoDate(rounded) === day && clockTime(rounded) > routine.defaultStart
+      ? clockTime(rounded)
+      : today && clockTime(earliest) > routine.defaultStart
+        ? clockTime(earliest)
+        : routine.defaultStart;
   return (
     <form
       className="study-inline-form study-session-form"
+      noValidate
       onSubmit={(event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
+        const startsAt = new Date(`${day}T${String(data.get("time"))}`);
+        if (Number.isNaN(startsAt.getTime())) {
+          setError("Informe o horário do estudo.");
+          return;
+        }
+        if (startsAt.getTime() < Date.now()) {
+          setError("Esse horário já passou. Escolha um horário a partir de agora.");
+          return;
+        }
+        setError("");
         submit({
           subjectId: String(data.get("subject")),
-          startsAt: new Date(`${day}T${String(data.get("time"))}`).toISOString(),
+          startsAt: startsAt.toISOString(),
           minutes: Number(data.get("minutes")),
           goal: String(data.get("goal") ?? "").trim(),
         });
@@ -492,7 +526,7 @@ function StudyForm({
       </label>
       <label>
         Horário
-        <input name="time" type="time" required defaultValue={routine.defaultStart} />
+        <input name="time" type="time" required min={earliestTime} defaultValue={suggested} />
       </label>
       <label>
         Duração
@@ -508,9 +542,17 @@ function StudyForm({
         O que você quer estudar? (opcional)
         <input name="goal" maxLength={300} placeholder="Ex.: Limites laterais e continuidade" />
       </label>
+      {error && (
+        <p role="alert" className="error study-session-error">
+          {error}
+        </p>
+      )}
       <button type="submit" disabled={busy}>
         <CalendarPlus size={16} aria-hidden /> Agendar estudo
       </button>
     </form>
   );
 }
+
+const clockTime = (date: Date) =>
+  `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;

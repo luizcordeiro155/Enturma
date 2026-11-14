@@ -41,8 +41,11 @@ export function useSocialViewport() {
         (viewport?.height ?? innerHeight) + (viewport?.offsetTop ?? 0),
         innerHeight - inset,
       );
-      const overflow = control.getBoundingClientRect().bottom - bottom + 16;
-      if (overflow > 0) page.scrollTop += overflow;
+      // Keep the field resting on the keyboard, like a message composer: scroll it
+      // down into view, or back up when the page went further than needed.
+      const offset = control.getBoundingClientRect().bottom - bottom + 16;
+      if (offset > 0 || (inset > 100 && offset < -24))
+        page.scrollTop = Math.max(0, page.scrollTop + offset);
     }
     function sync() {
       cancelAnimationFrame(frame);

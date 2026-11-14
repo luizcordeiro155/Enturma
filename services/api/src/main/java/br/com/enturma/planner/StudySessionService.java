@@ -467,6 +467,8 @@ public class StudySessionService {
 
   private void validate(OffsetDateTime startsAt, Integer minutes) {
     if (startsAt == null) throw ApiException.invalid("Informe o dia e o horário do estudo.");
+    if (startsAt.isBefore(OffsetDateTime.now().minusMinutes(1)))
+      throw ApiException.invalid("Esse horário já passou. Escolha um dia e horário a partir de agora.");
     if (minutes == null || minutes < 15 || minutes > 240)
       throw ApiException.invalid("A sessão de estudo vai de 15 a 240 minutos.");
   }
