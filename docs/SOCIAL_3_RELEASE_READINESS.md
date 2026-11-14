@@ -1,6 +1,29 @@
 # Social 3 — prontidão de publicação
 
-13/11/2026. A missão autoriza publicação não destrutiva após os gates. Este registro ainda não declara o incremento publicado.
+## Publicação verificada — 13/11/2026
+
+Este estado prevalece sobre o histórico abaixo. PRs #150 e #151 **MERGED**; main `30a434b299645b38ed96ce78b56aa79b3c5a7036`, incluindo integralmente o trabalho anterior. Head aprovado da #151: `e2276665a57c6b57d674b9da4d894c89c1bbc19e`; CIs `43535098339` e `43535103011` aprovadas, todos os checks verdes antes do merge. CI adicional da main `43540279660` em acompanhamento.
+
+| Entrega | Resultado comprovado |
+| --- | --- |
+| API SquareCloud | Atualização automática pela main observada. `/actuator/health` 200/UP; `/api/v1/public/social-release` 200, release `social-figma-2026-11-13`, ready=true. Consulta READ ONLY confirmou V72/V73 bem-sucedidas e RLS. O probe comprova contrato/schema, não expõe SHA do binário. |
+| Web Vercel | Deployment production `dpl_7XJmiMENyhdpSAtpn7Qq1Cydd2iq`, READY, SHA `30a434b`. Promovido após API pronta. Domínios `enturma-flax.vercel.app` e `enturmaa.vercel.app` com aliases concluídos. Atribuição automática restaurada. |
+| Windows Railway | Deployment `ddebac78-a503-46e4-882c-59abe5ed0710` SUCCESS; versão **0.4.519**, sourceCommit `30a434b`. ZIP e EXE baixados: tamanhos e SHA256 conferem com manifesto. |
+| Android Railway | Build oficial `2003de78-64c1-4dc2-812f-c576e7da8b60`, sourceCommit `30a434b`, em acompanhamento. Primeiro agendamento `619bf045-7aef-4418-87ae-32e8d010f9c2` foi SKIPPED pelo filtro de mudanças; reexecutado esse mesmo novo SHA, sem reutilizar o commit antigo. |
+
+URLs oficiais: [Web](https://enturma-flax.vercel.app), [API](https://enturma-api.squareweb.app/actuator/health), [downloads](https://enturma-flax.vercel.app/download), [manifesto Android](https://enturma-android-download-v3-production.up.railway.app/latest-android.json), [manifesto Windows](https://enturma-desktop-download-v5-production.up.railway.app/latest.json).
+
+Provas: 191 testes Java, zero falhas/erros e um ignorado; 309 testes Web/79 arquivos; 76 E2E aprovados, incluindo fluxo de coleções, retorno ao Feed, exportação de mídia e LiveKit isolado. Lint, TypeScript, builds, exportações mobile, compilação Android e teste de segurança do instalador Windows aprovados. Matriz de 160 capturas em dez larguras/quatro temas inspecionada; capturas finais de Clips 390/1366/1920 presentes. Os últimos ajustes corrigiram altura intrínseca dos vídeos, cabeçalho 320px e gutter duplicado. A última falha era a medição antes da rolagem automática do Playwright; o trace comprovou posição idêntica antes/depois da navegação, mantendo a asserção exata corrigida.
+
+Smoke em produção: saúde Web/API 200; gate de schema via BFF 200/ready; Feed/coleções sem autenticação respondem 401. Chromium real validou login desktop e cadastro mobile, acesso aos downloads e Voltar, sem overflow/pageerror. Vercel sem registros error/fatal na janela consultada após promoção. Nenhuma operação de teste gravou publicações ou contas em produção.
+
+Limites: não houve smoke autenticado com conta de produção nem instalação física Android/Windows. Lives passaram com LiveKit isolado na CI; a flag de produção estava desativada na observação anterior e não foi alterada. Não declarar paridade visual integral com Instagram: composição e identidade Enturma são preservadas; perfil/menus/editor apresentam diferenças registradas. Enquetes/perguntas de Stories, grupos sociais e ferramentas avançadas de descoberta/criadores não foram declarados concluídos. A auditoria npm desta release registra 22 entradas (6 altas, 15 moderadas, 1 baixa, 0 críticas), com cadeias Expo já triadas em `DEPENDENCY_AUDIT.md`; não é auditoria limpa. RLS não substitui autorização da API: o papel runtime observado tem bypass RLS.
+
+Rollback imediato Web: `dpl_CnFppYpQTuihAFHHmeE6A5fcyQRa` (`ed43287`). Manter tabelas aditivas V72/V73 em qualquer reversão de código. Distribuidores anteriores preservados no histórico Railway. Não houve troca de segredos, nova infraestrutura, contratação ou migração destrutiva.
+
+## Histórico anterior à publicação
+
+13/11/2026. A missão autoriza publicação não destrutiva após os gates. Os registros seguintes descrevem a preparação anterior.
 
 ## Estado observado
 

@@ -29,6 +29,7 @@ export type SocialPost = SocialPerson & {
   likes: number;
   reposts: number;
   comments: number;
+  views?: number;
   mine: string[];
   media: SocialMedia[];
   seen?: boolean;

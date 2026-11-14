@@ -277,6 +277,38 @@ class SocialIntegrationTest {
   }
 
   @Test
+  void videoReachCountsQualifiedUniqueViewersAndHonorsVisibility() {
+    UUID id = publish(a, "POST", "Vídeo com alcance");
+    db.jdbc.update("INSERT INTO social_media(id,owner_id,post_id,kind,state,expected_bytes,duration_ms) VALUES (?,?,?,'VIDEO','READY',100,10000)",
+        UUID.randomUUID(), a.id(), id);
+    posts.view(a, id, 5000, false);
+    posts.view(b, id, 2999, false);
+    assertThat(((Number) posts.detail(a, id).get("views")).intValue()).isZero();
+    posts.view(b, id, 3000, false);
+    posts.view(b, id, 9000, true);
+    posts.view(c, id, 4000, false);
+    assertThat(((Number) posts.detail(a, id).get("views")).intValue()).isEqualTo(2);
+    UUID text = publish(a, "POST", "Texto não é reprodução");
+    posts.view(b, text, 4000, false);
+    assertThat(((Number) posts.detail(a, text).get("views")).intValue()).isZero();
+    people.preferences(a, true, false, true, List.of(), false, List.of("feed", "clips", "create"));
+    assertThatThrownBy(() -> posts.view(b, id, 4000, false)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> posts.detail(b, id)).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void socialProfileReadsTheCanonicalProfileFields() {
+    db.jdbc.update("UPDATE app_user SET bio=?,profile_details=?::jsonb,media_version=7 WHERE id=?",
+        "Bio do perfil principal", "{\"statusText\":\"Estudando Java\",\"interests\":\"Programação\"}", a.id());
+    var profile = (Map<String, Object>) people.profile(b, a.id());
+    assertThat(profile.get("bio")).isEqualTo("Bio do perfil principal");
+    assertThat(((Number) profile.get("mediaVersion")).intValue()).isEqualTo(7);
+    assertThat(((com.fasterxml.jackson.databind.JsonNode) profile.get("profileDetails")).path("statusText").asText()).isEqualTo("Estudando Java");
+    db.jdbc.update("UPDATE app_user SET bio=? WHERE id=?", "Bio atualizada", a.id());
+    assertThat((Map<String, Object>) people.profile(b, a.id())).containsEntry("bio", "Bio atualizada");
+  }
+
+  @Test
   void privateFollowApprovalRemovalAndBlockingApplyEverywhere() {
     people.preferences(
         a, true, false, true, List.of("java"), false, List.of("feed", "clips", "create"));

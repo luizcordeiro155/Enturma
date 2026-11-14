@@ -199,7 +199,7 @@ public class SocialPeople {
     access.unblocked(a.id(), user);
     var row =
         db.one(
-            "SELECT u.id,u.name,u.username,u.avatar_bytes IS NOT NULL has_avatar,u.banner_bytes IS"
+            "SELECT u.id,u.name,u.username,u.bio,u.accent_color,u.profile_details,u.media_version,u.avatar_bytes IS NOT NULL has_avatar,u.banner_bytes IS"
                 + " NOT NULL has_banner,coalesce(s.private_account,false)"
                 + " private_account,coalesce(s.verified,false) verified,(SELECT count(*) FROM"
                 + " social_follow f JOIN app_user fuser ON fuser.id=f.follower_id WHERE"

@@ -1,5 +1,11 @@
 # Social 3 — progresso verificável
 
+## Release atual — 13/11/2026 (prevalece sobre o histórico)
+
+PRs #150/#151 integradas na main `30a434b299645b38ed96ce78b56aa79b3c5a7036`. CIs finais da PR `43535098339`/`43535103011` aprovadas: 76 E2E, 309 Web e 191 Java (um ignorado). Web publicada no deployment production `dpl_7XJmiMENyhdpSAtpn7Qq1Cydd2iq`; domínio oficial confirmado no SHA integrado. API atualizou automaticamente; V72/V73 e probe ready=true verificados. AutoAssignCustomDomains restaurado. Windows 0.4.519 publicado; ZIP/EXE baixados e hashes conferidos. Android build `2003de78-64c1-4dc2-812f-c576e7da8b60` ainda em acompanhamento. Não afirmar instalação física ou smoke autenticado de produção.
+
+Próximo comando exato: consultar o deployment Android acima e, após SUCCESS, executar `node .local/social3-verify-native.cjs 30a434b299645b38ed96ce78b56aa79b3c5a7036 android`; confirmar também CI da main `43540279660`. Atualizar o resultado no documento `SOCIAL_3_RELEASE_READINESS.md`, que contém URLs, evidências, rollback e limitações. Nenhum dado de teste foi gravado em produção; premium-audit.json preservado.
+
 ## Checkpoint vigente — histórico de painéis, 13/11/2026
 
 CI `43369840229` do SHA `416fbcd`: Java, auditoria, lint, TypeScript, unitários, builds, Android e Windows aprovados; 73/74 E2E aprovados. As 160 capturas da matriz concluíram, inclusive largura desktop >1100px. A falha remanescente revelou bug real no histórico compartilhado: substituir Opções por Coleções fechava também Explorar/visualizador. Corrigido em `useOverlayHistory`: somente o painel superior atende Voltar; travessia causada por fechamento não fecha ancestrais. Três testes reproduziram a falha antes e passaram depois; 12 testes focados de histórico/chat aprovados, TypeScript e lint aprovados. Nenhum teste removido ou limite de API relaxado.
