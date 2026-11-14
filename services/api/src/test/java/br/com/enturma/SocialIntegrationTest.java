@@ -296,6 +296,23 @@ class SocialIntegrationTest {
     assertThatThrownBy(() -> posts.detail(b, id)).isInstanceOf(ApiException.class);
   }
 
+  @Autowired br.com.enturma.auth.AccountPrivacyController privacy;
+
+  @Test
+  void videoViewsAreExportedAndErasedWithTheViewersAccount() {
+    UUID id = publish(a, "POST", "Vídeo assistido");
+    db.jdbc.update("INSERT INTO social_media(id,owner_id,post_id,kind,state,expected_bytes,duration_ms) VALUES (?,?,?,'VIDEO','READY',100,10000)",
+        UUID.randomUUID(), a.id(), id);
+    posts.view(b, id, 4000, false);
+    assertThat(personalExport.sections()).contains("social-video-views");
+    assertThat((List<?>) ((Map<?, ?>) personalExport.export(b, "social-video-views", 0).getBody()).get("items")).hasSize(1);
+    assertThat((List<?>) ((Map<?, ?>) personalExport.export(c, "social-video-views", 0).getBody()).get("items")).isEmpty();
+    // Erasure anonymizes app_user instead of deleting it, so ON DELETE CASCADE never runs.
+    privacy.now(b);
+    assertThat(db.jdbc.queryForObject("SELECT count(*) FROM social_video_view WHERE user_id=?", Integer.class, b.id())).isZero();
+    assertThat(((Number) posts.detail(a, id).get("views")).intValue()).isZero();
+  }
+
   @Test
   void socialProfileReadsTheCanonicalProfileFields() {
     db.jdbc.update("UPDATE app_user SET bio=?,profile_details=?::jsonb,media_version=7 WHERE id=?",

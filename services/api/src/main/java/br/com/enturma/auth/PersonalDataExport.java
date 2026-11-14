@@ -34,6 +34,7 @@ public class PersonalDataExport {
     SECTIONS.put("social-following", "SELECT followed_id,status,notify,created_at FROM social_follow WHERE follower_id=? ORDER BY created_at,followed_id");
     SECTIONS.put("social-followers", "SELECT follower_id,status,created_at FROM social_follow WHERE followed_id=? ORDER BY created_at,follower_id");
     SECTIONS.put("social-feedback", "SELECT post_id,watched_ms,completed,updated_at FROM social_feedback WHERE user_id=? ORDER BY updated_at,post_id");
+    SECTIONS.put("social-video-views", "SELECT post_id,created_at FROM social_video_view WHERE user_id=? ORDER BY created_at,post_id");
     SECTIONS.put("social-mutes", "SELECT creator_id FROM social_mute WHERE user_id=? ORDER BY creator_id");
     SECTIONS.put("social-verification", "SELECT id,reason,status,decision,created_at,reviewed_at FROM social_verification WHERE user_id=? ORDER BY created_at,id");
     SECTIONS.put("social-reports", "SELECT id,post_id,reason,status,created_at FROM social_report WHERE reporter_id=? ORDER BY created_at,id");
