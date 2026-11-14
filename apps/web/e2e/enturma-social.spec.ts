@@ -167,10 +167,20 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
     ).toBe(true);
   }
   await page.setViewportSize({ width: 390, height: 844 });
-  await page
-    .locator(".topbar")
-    .getByRole("link", { name: "Início do Enturma" })
-    .click();
+  // One top bar: the app-wide bar is hidden and the Social bar leads home.
+  await expect(page.locator(".topbar")).toHaveCount(0);
+  const header = page.locator(".social-header");
+  await expect(
+    header.getByRole("heading", { level: 1, name: "Enturma Social." }),
+  ).toHaveText("Enturma");
+  await expect(
+    header.getByRole("button", { name: "Abrir busca do Social" }),
+  ).toHaveCount(0);
+  const wordmark = (await header.locator(".social-wordmark").boundingBox())!;
+  // Centred on the phone, like Instagram.
+  expect(Math.abs(wordmark.x + wordmark.width / 2 - 195)).toBeLessThan(24);
+  await page.screenshot({ path: info.outputPath("social-header-390.png") });
+  await header.getByRole("link", { name: "Voltar ao início do Enturma" }).click();
   await expect(page).toHaveURL(/\/home$/);
   await expect(page.locator(".enturma-launch-overlay")).toHaveCount(0, {
     timeout: 15000,

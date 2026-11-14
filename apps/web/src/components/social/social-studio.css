@@ -2066,3 +2066,76 @@ html[data-reduced-motion="true"]
 html[data-reduced-motion="true"] button[aria-pressed="true"] > .lucide-heart {
   animation: none;
 }
+
+/* ---------- One Social top bar (the app-wide bar is hidden here) ---------- */
+html[data-theme] .social-page .social-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding-top: calc(6px + var(--enturma-safe-top));
+}
+.social-page .social-header-brand {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.social-page .social-header-actions {
+  justify-self: end;
+}
+html[data-theme] .social-back {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+html[data-theme] .social-back:hover {
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+.social-back:active {
+  transform: scale(0.92);
+}
+.social-back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+html[data-theme] .social-page .social-header h1.social-wordmark {
+  margin: 0;
+  font-family: "Grand Hotel", "Brush Script MT", cursive;
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-shadow: none;
+  color: var(--ink);
+}
+html[data-theme] .social-header-actions > .notification-bell {
+  border: 0;
+  background: transparent;
+}
+@media (min-width: 761px) {
+  html[data-theme] .social-page .social-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  html[data-theme] .social-page .social-header h1.social-wordmark {
+    justify-self: start;
+    padding-left: 6px;
+  }
+}
+@media (max-width: 760px) {
+  html[data-theme] .social-page .social-header h1.social-wordmark {
+    font-size: 31px;
+  }
+  .social-page .social-header-brand {
+    gap: 2px;
+  }
+}

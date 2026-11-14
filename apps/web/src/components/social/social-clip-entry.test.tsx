@@ -88,6 +88,7 @@ vi.mock("./social-stories", () => ({
   StoryViewer: () => null,
 }));
 vi.mock("./social-feed-aside", () => ({ SocialFeedAside: () => null }));
+vi.mock("../notifications", () => ({ NotificationBell: () => null }));
 vi.mock("./social-editor", () => ({ SocialEditor: () => null }));
 vi.mock("./social-explore", () => ({ SocialExplore: () => null }));
 vi.mock("./social-profile", () => ({ SocialProfile: () => null }));
