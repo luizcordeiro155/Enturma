@@ -183,3 +183,17 @@ it("press and hold on a conversation offers to remove the friend", async () => {
   expect(props.remove).toHaveBeenCalledWith(ana);
   expect(props.open).not.toHaveBeenCalled();
 });
+
+it("shows your own last message as 'Você:' and never the raw ciphertext", () => {
+  inbox({
+    previews: { f1: { id: "m1", text: "Até amanhã", mine: true } },
+    friends: [bia, friend({ id: "f9", userId: "u9", name: "Rui", username: "rui", lastMessageId: "z" })],
+  });
+  expect(screen.getByRole("button", { name: /^Conversar com Bía/ })).toHaveTextContent(
+    "Você: Até amanhã",
+  );
+  // Still decrypting on this device: a neutral label, not "criptografada".
+  const rui = screen.getByRole("button", { name: /^Conversar com Rui/ });
+  expect(rui).toHaveTextContent("Mensagem privada");
+  expect(rui).not.toHaveTextContent(/criptografada/);
+});

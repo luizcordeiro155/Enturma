@@ -58,6 +58,7 @@ import {
 import { MessageMenu } from "./message-menu";
 import { EmojiText, AnimatedEmoji } from "./emoji-picker";
 import { FriendsInbox } from "./friends-inbox";
+import { latestPreview } from "@/lib/private-chat-preview";
 import { useAppShellState } from "./app-shell-state";
 type Friend = Omit<PublicProfile, "id"> & {
   id: string;
@@ -130,7 +131,7 @@ export function Friends() {
   const [password, setPassword] = useState("");
   const [messages, setMessages] = useState<PrivateMessage[]>([]);
   const [previews, setPreviews] = useState<
-    Record<string, { id: string; text: string }>
+    Record<string, { id: string; text: string; mine?: boolean }>
   >({});
   const [page, setPage] = useState(0);
   const [older, setOlder] = useState(false);
@@ -182,6 +183,64 @@ export function Friends() {
   const identity = useRef<Awaited<ReturnType<typeof createIdentity>> | null>(
     null,
   );
+  // The Amigos list shows each conversation's last message. It is decrypted here,
+  // on this device, with the same key used when the conversation is opened.
+  const previewKeys = useRef(new Map<string, CryptoKey>());
+  const previewing = useRef(new Set<string>());
+  const latestPreviews = useRef(previews);
+  useEffect(() => {
+    latestPreviews.current = previews;
+  });
+  useEffect(() => {
+    const keyPair = identity.current;
+    if (!ready || !keyPair || !me) return;
+    let active = true;
+    const pending = friends
+      .filter(
+        (f) =>
+          f.status === "ACCEPTED" &&
+          f.lastMessageId &&
+          latestPreviews.current[f.id]?.id !== f.lastMessageId &&
+          !previewing.current.has(`${f.id}:${f.lastMessageId}`),
+      )
+      .slice(0, 40);
+    void (async () => {
+      for (const f of pending) {
+        if (!active) return;
+        const mark = `${f.id}:${f.lastMessageId}`;
+        previewing.current.add(mark);
+        try {
+          let key = previewKeys.current.get(f.id);
+          if (!key) {
+            const peer = await api<{ publicKey: JsonWebKey }>(
+              `/friends/${f.id}/identity`,
+              { signal: AbortSignal.timeout(12000) },
+            );
+            key = await conversationKey(keyPair, peer.publicKey, f.id);
+            previewKeys.current.set(f.id, key);
+          }
+          const conversation = key;
+          const rows = await api<Envelope[]>(
+            `/friends/${f.id}/messages?page=0`,
+            { signal: AbortSignal.timeout(12000) },
+          );
+          const preview = await latestPreview(rows, me.id, (m) =>
+            decryptMessage(conversation, m, f.id),
+          );
+          if (preview)
+            setPreviews((old) =>
+              old[f.id]?.id === preview.id ? old : { ...old, [f.id]: preview },
+            );
+        } catch {
+          // Try again on the next list refresh.
+          previewing.current.delete(mark);
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [ready, friends, me]);
   const refresh = useCallback(
     () => api<Friend[]>("/friends").then(setFriends),
     [],
@@ -307,6 +366,7 @@ export function Friends() {
           ...old,
           [friend.id]: {
             id: newest.id,
+            mine: newest.senderId !== friend.userId,
             text:
               newest.text ||
               (newest.attachmentMime?.startsWith("audio/")
@@ -816,6 +876,7 @@ export function Friends() {
       ...old,
       [friend.id]: {
         id: clientId,
+        mine: true,
         text:
           text ||
           (selectedImage?.type.startsWith("audio/")

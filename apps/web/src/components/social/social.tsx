@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Aperture,
   ArrowLeft,
@@ -35,6 +35,7 @@ import { SocialLiveProvider } from "./social-live-context";
 import { SocialExplore } from "./social-explore";
 import { SocialFeedAside } from "./social-feed-aside";
 import { SocialHeader } from "./social-header";
+import { useSocialBack } from "./use-social-back";
 type Ready = {
   me: SocialPerson & { role: string };
   preferences: SocialPreferences;
@@ -228,6 +229,14 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       alive = false;
     };
   }, [incomingPost]);
+  const router = useRouter();
+  // The phone's Back stays inside the Social: Clips/Criar return to the Feed, and
+  // only a second Back on the Feed goes to the Enturma home.
+  const back = useSocialBack({
+    view,
+    toFeed: () => select("feed"),
+    exit: () => router.replace("/home"),
+  });
   function select(next: SocialView, contentKind?: typeof kind) {
     if (incomingPost && next !== "clips") {
       routedClip.current = false;
@@ -240,6 +249,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       );
     }
     setView(next);
+    back.entered(next);
     setOpened((previous) =>
       previous.includes(next) ? previous : [...previous, next],
     );
@@ -322,6 +332,11 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
           {error && (
             <p className="social-error" role="alert">
               {error}
+            </p>
+          )}
+          {back.hint && (
+            <p className="social-exit-hint" role="status">
+              Volte de novo para sair do Social
             </p>
           )}
           <SocialPager

@@ -2218,3 +2218,36 @@ html[data-theme] .social-story-menu > :is(a, button):is(:hover, :focus-visible) 
 :root[data-reduced-motion="true"] .social-story-menu {
   animation: none;
 }
+
+/* ---------- Back on the Feed: "press again to leave" ---------- */
+.social-exit-hint {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(86px + var(--enturma-safe-bottom));
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink) 92%, transparent);
+  color: var(--bg);
+  font-size: 0.86rem;
+  font-weight: 650;
+  white-space: nowrap;
+  box-shadow: 0 10px 26px color-mix(in srgb, #000 30%, transparent);
+  transform: translateX(-50%);
+  animation: social-exit-hint 0.2s ease-out;
+}
+@media (min-width: 761px) {
+  .social-exit-hint {
+    bottom: 28px;
+  }
+}
+@keyframes social-exit-hint {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+:root[data-reduced-motion="true"] .social-exit-hint {
+  animation: none;
+}

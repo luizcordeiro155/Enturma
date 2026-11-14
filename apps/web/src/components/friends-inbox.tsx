@@ -63,7 +63,7 @@ export function FriendsInbox({
 }: {
   me: Pick<PublicProfile, "id" | "name" | "username"> & Partial<PublicProfile>;
   friends: InboxFriend[];
-  previews: Record<string, { id: string; text: string }>;
+  previews: Record<string, { id: string; text: string; mine?: boolean }>;
   selectedId?: string;
   socialEnabled: boolean;
   open: (friend: InboxFriend) => void;
@@ -231,8 +231,8 @@ export function FriendsInbox({
             preview={
               f.lastMessageId
                 ? previews[f.id]?.id === f.lastMessageId
-                  ? previews[f.id].text
-                  : "Mensagem privada criptografada"
+                  ? `${previews[f.id].mine ? "Você: " : ""}${previews[f.id].text}`
+                  : "Mensagem privada"
                 : `@${f.username}`
             }
             selected={selectedId === f.id}

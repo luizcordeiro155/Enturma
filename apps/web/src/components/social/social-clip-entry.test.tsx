@@ -17,6 +17,7 @@ const { api, route } = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/api", () => ({ api }));
 vi.mock("next/navigation", () => ({
+  useRouter: () => ({ replace: vi.fn(), push: vi.fn() }),
   useSearchParams: () => ({
     get: (key: string) =>
       key === "post" ? route.post : key === "create" ? route.create : null,
