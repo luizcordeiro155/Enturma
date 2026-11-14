@@ -588,3 +588,10 @@ html[data-theme] .enturma-study .study-weekdays button[aria-pressed="true"] {
 :root[data-reduced-motion="true"] .study-routine-panel {
   animation: none;
 }
+
+/* Phones and tablets stack the home page; Study sits right below the Enturma video. */
+@media (max-width: 1200px) {
+  .enturma-study {
+    order: 2;
+  }
+}
