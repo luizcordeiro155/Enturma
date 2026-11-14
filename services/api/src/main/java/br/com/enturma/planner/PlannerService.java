@@ -397,6 +397,39 @@ public class PlannerService {
       event.put("holiday", holidayDates.contains(date));
       events.add(event);
     }
+    for (var study :
+        db.list(
+            "SELECT ss.id,ss.subject_id,s.name subject_name,ss.notebook_id,ss.starts_at,ss.minutes,"
+                + "ss.goal,ss.status FROM study_session ss JOIN academic_entry s ON s.id=ss.subject_id"
+                + " WHERE ss.user_id=? AND ss.starts_at>=? AND ss.starts_at<? ORDER BY ss.starts_at",
+            a.id(),
+            from.atStartOfDay(zone).toOffsetDateTime(),
+            to.plusDays(1).atStartOfDay(zone).toOffsetDateTime())) {
+      var starts = Instant.parse((String) study.get("startsAt"));
+      var event = new LinkedHashMap<String, Object>();
+      event.put("id", study.get("id"));
+      event.put("kind", "STUDY");
+      String goal = (String) study.get("goal");
+      event.put("title", goal == null || goal.isBlank() ? "Estudar " + study.get("subjectName") : goal);
+      event.put("subjectId", study.get("subjectId"));
+      event.put("subjectName", study.get("subjectName"));
+      event.put("notebookId", study.get("notebookId"));
+      event.put("startsAt", starts.toString());
+      event.put(
+          "endsAt", starts.plus(((Number) study.get("minutes")).longValue(), ChronoUnit.MINUTES).toString());
+      String date = starts.atZone(zone).toLocalDate().toString();
+      event.put("occursOn", date);
+      event.put(
+          "status",
+          switch ((String) study.get("status")) {
+            case "DONE" -> "DONE";
+            case "SKIPPED" -> "CANCELLED";
+            case "ACTIVE" -> "ACTIVE";
+            default -> "SCHEDULED";
+          });
+      event.put("holiday", holidayDates.contains(date));
+      events.add(event);
+    }
     events.sort(Comparator.comparing(e -> (String) e.get("startsAt")));
     var result = new LinkedHashMap<String, Object>();
     result.put("timezone", zone.getId());

@@ -1,7 +1,10 @@
 "use client";
 import { useState, type FormEvent } from "react";
+import Link from "next/link";
 import {
+  ArrowRight,
   BookOpenCheck,
+  Brain,
   CalendarPlus,
   ClipboardList,
   Flag,
@@ -19,6 +22,7 @@ import {
   type CalendarHoliday,
   type Routine,
 } from "@/lib/planner";
+import { study } from "@/lib/study";
 import { dayLabel } from "./study-calendar";
 
 const KIND_LABEL: Record<CalendarEvent["kind"], string> = {
@@ -33,9 +37,10 @@ const STATUS_LABEL: Partial<Record<CalendarEvent["status"], string>> = {
   MOVED: "Remarcada",
   EXTRA: "Reposição",
   DONE: "Concluído",
+  ACTIVE: "Em andamento",
 };
 
-type Form = "class" | "task" | "holiday" | null;
+export type DayForm = "class" | "task" | "holiday" | "study" | null;
 
 /** Everything about one day: what happens, and the actions to change it. */
 export function StudyDayPanel({
@@ -46,6 +51,7 @@ export function StudyDayPanel({
   events,
   changed,
   close,
+  initialForm = null,
 }: {
   day: string;
   routine: Routine;
@@ -54,8 +60,9 @@ export function StudyDayPanel({
   events: CalendarEvent[];
   changed: () => Promise<void>;
   close: () => void;
+  initialForm?: DayForm;
 }) {
-  const [form, setForm] = useState<Form>(null);
+  const [form, setForm] = useState<DayForm>(initialForm);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [moving, setMoving] = useState<string | null>(null);
@@ -168,7 +175,35 @@ export function StudyDayPanel({
                     )}
                   </div>
                 )}
-                {event.kind !== "CLASS" && (
+                {event.kind === "STUDY" && (
+                  <div className="study-event-actions">
+                    {event.status !== "CANCELLED" && (
+                      <Link className="study-room-link" href={`/study/${event.id}`}>
+                        {event.status === "DONE" ? "Revisar sala" : "Abrir sala"} <ArrowRight size={15} aria-hidden />
+                      </Link>
+                    )}
+                    {event.status === "SCHEDULED" && (
+                      <button type="button" disabled={busy} onClick={() => run(() => study.skip(event.id))}>
+                        Desistir desta sessão
+                      </button>
+                    )}
+                    {confirmDelete === event.id ? (
+                      <button
+                        type="button"
+                        className="danger"
+                        disabled={busy}
+                        onClick={() => run(() => study.remove(event.id))}
+                      >
+                        Excluir sessão e caderno
+                      </button>
+                    ) : (
+                      <button type="button" disabled={busy} onClick={() => setConfirmDelete(event.id)}>
+                        Excluir
+                      </button>
+                    )}
+                  </div>
+                )}
+                {event.kind !== "CLASS" && event.kind !== "STUDY" && (
                   <div className="study-event-actions">
                     <button type="button" disabled={busy} onClick={() => run(() => planner.deleteTask(event.id))}>
                       Excluir
@@ -206,6 +241,9 @@ export function StudyDayPanel({
         <p className="study-muted">Nada marcado para este dia.</p>
       )}
       <div className="study-day-add" role="group" aria-label="Adicionar ao dia">
+        <button type="button" aria-pressed={form === "study"} onClick={() => setForm(form === "study" ? null : "study")}>
+          <Brain size={16} aria-hidden /> Agendar estudo com IA
+        </button>
         <button type="button" aria-pressed={form === "class"} onClick={() => setForm(form === "class" ? null : "class")}>
           <BookOpenCheck size={16} aria-hidden /> Adicionar aula
         </button>
@@ -216,6 +254,15 @@ export function StudyDayPanel({
           <PartyPopper size={16} aria-hidden /> Feriado da cidade
         </button>
       </div>
+      {form === "study" && (
+        <StudyForm
+          day={day}
+          routine={routine}
+          subjects={subjects}
+          busy={busy}
+          submit={(body) => run(() => study.create(body))}
+        />
+      )}
       {form === "class" && (
         <ClassForm day={day} routine={routine} subjects={subjects} busy={busy} submit={(body) => run(() => planner.addClasses(body))} />
       )}
@@ -391,6 +438,78 @@ function ClassForm({
       </label>
       <button type="submit" disabled={busy || !days.length}>
         Salvar aulas
+      </button>
+    </form>
+  );
+}
+
+function StudyForm({
+  day,
+  routine,
+  subjects,
+  busy,
+  submit,
+}: {
+  day: string;
+  routine: Routine;
+  subjects: AcademicEntry[];
+  busy: boolean;
+  submit: (body: Parameters<typeof study.create>[0]) => void;
+}) {
+  if (!subjects.length)
+    return (
+      <p className="study-muted">
+        Salve suas matérias no perfil acadêmico para agendar estudos com a IA.
+      </p>
+    );
+  return (
+    <form
+      className="study-inline-form study-session-form"
+      onSubmit={(event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        submit({
+          subjectId: String(data.get("subject")),
+          startsAt: new Date(`${day}T${String(data.get("time"))}`).toISOString(),
+          minutes: Number(data.get("minutes")),
+          goal: String(data.get("goal") ?? "").trim(),
+        });
+      }}
+    >
+      <p className="study-session-form-intro">
+        <Brain size={16} aria-hidden /> O Enturma cria um caderno com um tutor de IA para esta matéria e te chama na hora
+        marcada.
+      </p>
+      <label>
+        Matéria
+        <select name="subject" required defaultValue={subjects[0].id}>
+          {subjects.map((subject) => (
+            <option key={subject.id} value={subject.id}>
+              {subject.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      <label>
+        Horário
+        <input name="time" type="time" required defaultValue={routine.defaultStart} />
+      </label>
+      <label>
+        Duração
+        <select name="minutes" defaultValue="45">
+          {[15, 25, 30, 45, 60, 90, 120].map((minutes) => (
+            <option key={minutes} value={minutes}>
+              {minutes} min
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="study-session-goal">
+        O que você quer estudar? (opcional)
+        <input name="goal" maxLength={300} placeholder="Ex.: Limites laterais e continuidade" />
+      </label>
+      <button type="submit" disabled={busy}>
+        <CalendarPlus size={16} aria-hidden /> Agendar estudo
       </button>
     </form>
   );

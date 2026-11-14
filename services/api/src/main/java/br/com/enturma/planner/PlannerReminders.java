@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class PlannerReminders {
   static final int WINDOW_DAYS = 14;
+  static final int STUDY_LEAD_MINUTES = 10;
   private static final DateTimeFormatter HOUR = DateTimeFormatter.ofPattern("HH:mm");
   private final Db db;
   private final PlannerService planner;
@@ -68,6 +69,34 @@ public class PlannerReminders {
         keep.add(source + "@" + starts.getEpochSecond());
       }
     }
+    var studies = new ArrayList<String>();
+    for (var session :
+        db.list(
+            "SELECT id,starts_at FROM study_session WHERE user_id=? AND status='PLANNED' AND"
+                + " starts_at>now() AND starts_at<now()+make_interval(days=>?)",
+            user,
+            WINDOW_DAYS)) {
+      var starts = Instant.parse((String) session.get("startsAt"));
+      var fire = starts.minus(Duration.ofMinutes(STUDY_LEAD_MINUTES));
+      if (fire.isBefore(Instant.now())) fire = Instant.now();
+      db.jdbc.update(
+          "INSERT INTO academic_reminder_job(id,user_id,kind,source_id,occurrence_at,fire_at)"
+              + " VALUES (?,?,'STUDY',?,?,?) ON CONFLICT(user_id,kind,source_id,occurrence_at) DO"
+              + " UPDATE SET fire_at=EXCLUDED.fire_at,status='PENDING',lease_until=NULL WHERE"
+              + " academic_reminder_job.status<>'SENT'",
+          UUID.randomUUID(),
+          user,
+          session.get("id"),
+          OffsetDateTime.ofInstant(starts, ZoneOffset.UTC),
+          OffsetDateTime.ofInstant(fire, ZoneOffset.UTC));
+      studies.add(session.get("id") + "@" + starts.getEpochSecond());
+    }
+    db.jdbc.update(
+        "UPDATE academic_reminder_job SET status='CANCELLED' WHERE user_id=? AND kind='STUDY' AND"
+            + " status='PENDING' AND NOT (source_id::text||'@'||extract(epoch FROM"
+            + " occurrence_at)::bigint = ANY(?::text[]))",
+        user,
+        "{" + String.join(",", studies) + "}");
     db.jdbc.update(
         "UPDATE academic_reminder_job SET status='CANCELLED' WHERE user_id=? AND kind='CLASS' AND"
             + " status='PENDING' AND NOT (source_id::text||'@'||extract(epoch FROM"
@@ -101,10 +130,13 @@ public class PlannerReminders {
   public int deliverDue() {
     var due =
         db.list(
-            "SELECT j.id,j.user_id,j.occurrence_at,s.name subject_name,coalesce(r.timezone,"
-                + "'America/Sao_Paulo') timezone FROM academic_reminder_job j LEFT JOIN"
-                + " academic_class_schedule c ON c.id=j.source_id LEFT JOIN academic_entry s ON"
-                + " s.id=c.subject_id LEFT JOIN academic_routine r ON r.user_id=j.user_id WHERE"
+            "SELECT j.id,j.user_id,j.kind,j.source_id,j.occurrence_at,coalesce(s.name,st.name)"
+                + " subject_name,ss.status study_status,coalesce(r.timezone,'America/Sao_Paulo')"
+                + " timezone FROM academic_reminder_job j LEFT JOIN academic_class_schedule c ON"
+                + " j.kind='CLASS' AND c.id=j.source_id LEFT JOIN academic_entry s ON s.id=c.subject_id"
+                + " LEFT JOIN study_session ss ON j.kind='STUDY' AND ss.id=j.source_id LEFT JOIN"
+                + " academic_entry st ON st.id=ss.subject_id LEFT JOIN academic_routine r ON"
+                + " r.user_id=j.user_id WHERE"
                 + " j.status='PENDING' AND j.fire_at<=now() AND (j.lease_until IS NULL OR"
                 + " j.lease_until<now()) ORDER BY j.fire_at LIMIT 50 FOR UPDATE OF j SKIP LOCKED");
     int sent = 0;
@@ -115,6 +147,27 @@ public class PlannerReminders {
         continue;
       }
       var local = starts.atZone(PlannerService.zone((String) job.get("timezone")));
+      if ("STUDY".equals(job.get("kind"))) {
+        if (!"PLANNED".equals(job.get("studyStatus"))) {
+          db.jdbc.update("UPDATE academic_reminder_job SET status='CANCELLED' WHERE id=?", job.get("id"));
+          continue;
+        }
+        notifications.send(
+            null,
+            (UUID) job.get("userId"),
+            "STUDY_REMINDER",
+            "study:session",
+            (UUID) job.get("id"),
+            "/study/" + job.get("sourceId"),
+            "Hora de estudar " + job.get("subjectName") + " às " + HOUR.format(local)
+                + ". Sua sala de estudo com a IA está pronta.");
+        db.jdbc.update(
+            "UPDATE academic_reminder_job SET status='SENT',sent_at=now(),attempts=attempts+1 WHERE"
+                + " id=?",
+            job.get("id"));
+        sent++;
+        continue;
+      }
       notifications.send(
           null,
           (UUID) job.get("userId"),
@@ -135,7 +188,10 @@ public class PlannerReminders {
   /** Keeps the two-week window filled for everyone with classes. */
   @Scheduled(cron = "0 15 3 * * *", zone = "America/Sao_Paulo")
   public void extendWindow() {
-    for (var row : db.list("SELECT DISTINCT user_id FROM academic_class_schedule"))
+    for (var row :
+        db.list(
+            "SELECT user_id FROM academic_class_schedule UNION SELECT user_id FROM study_session WHERE"
+                + " status='PLANNED' AND starts_at>now()"))
       reschedule((UUID) row.get("userId"));
   }
 }

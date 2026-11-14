@@ -1175,7 +1175,7 @@ function NotebookWorkspace({ id }: { id?: string }) {
     </Shell>
   );
 }
-function StudyAnswer({
+export function StudyAnswer({
   content,
   onCitation,
 }: {

@@ -36,10 +36,11 @@ export type CalendarEvent = {
   version?: number;
   room?: string;
   note?: string;
+  notebookId?: string | null;
   occursOn: string;
   startsAt: string;
   endsAt: string;
-  status: "SCHEDULED" | "CANCELLED" | "MOVED" | "EXTRA" | "DONE";
+  status: "SCHEDULED" | "CANCELLED" | "MOVED" | "EXTRA" | "DONE" | "ACTIVE";
   holiday: boolean;
 };
 
