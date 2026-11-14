@@ -1,16 +1,30 @@
 "use client";
 import { Volume2, VolumeX } from "lucide-react";
 
+export type SocialVolumeLabels = {
+  unmute: string;
+  mute: string;
+  volume: string;
+};
+
+const VIDEO_LABELS: SocialVolumeLabels = {
+  unmute: "Ativar som do vídeo",
+  mute: "Silenciar vídeo",
+  volume: "Volume do vídeo",
+};
+
 export function SocialVideoVolume({
   volume,
   onVolumeChange,
   muted,
   onMutedChange,
+  labels = VIDEO_LABELS,
 }: {
   volume: number;
   onVolumeChange: (volume: number) => void;
   muted: boolean;
   onMutedChange: (muted: boolean) => void;
+  labels?: SocialVolumeLabels;
 }) {
   return (
     <div
@@ -23,7 +37,7 @@ export function SocialVideoVolume({
           min="0"
           max="1"
           step="0.01"
-          aria-label="Volume do vídeo"
+          aria-label={labels.volume}
           aria-valuetext={`${Math.round((muted ? 0 : volume) * 100)}%`}
           value={muted ? 0 : volume}
           onChange={(event) => {
@@ -36,7 +50,7 @@ export function SocialVideoVolume({
       <button
         type="button"
         className="social-media-sound"
-        aria-label={muted ? "Ativar som do vídeo" : "Silenciar vídeo"}
+        aria-label={muted ? labels.unmute : labels.mute}
         aria-pressed={!muted}
         onClick={() => {
           if (muted && volume === 0) {

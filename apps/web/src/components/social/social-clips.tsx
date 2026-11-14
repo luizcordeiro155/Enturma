@@ -274,6 +274,12 @@ function ClipPage({
   );
 }
 const MUTED_KEY = "enturma-social-clips-muted";
+// The sound setting is shared by every Clip in the session, not one video.
+const CLIPS_VOLUME_LABELS = {
+  unmute: "Ativar som dos Clips",
+  mute: "Silenciar Clips",
+  volume: "Volume dos Clips",
+};
 const TABS = [
   ["for-you", "Para você"],
   ["following", "Seguindo"],
@@ -604,7 +610,7 @@ function ClipsFeed({
         )}
       </div>
       <div className="social-clip-controls">
-        <SocialVideoVolume volume={volume} onVolumeChange={setVolume} muted={muted} onMutedChange={value => { if (value !== muted) toggleMuted(); }} />
+        <SocialVideoVolume volume={volume} onVolumeChange={setVolume} muted={muted} onMutedChange={value => { if (value !== muted) toggleMuted(); }} labels={CLIPS_VOLUME_LABELS} />
         <button
           className="icon-control"
           aria-label="Clip anterior"
