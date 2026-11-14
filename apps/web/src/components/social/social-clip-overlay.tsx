@@ -8,6 +8,7 @@ import {
   Repeat2,
   Send,
 } from "lucide-react";
+import { popLike } from "@/lib/motion";
 import { postPerson, type SocialPost as Post } from "@/lib/social";
 import {
   FollowButton,
@@ -84,7 +85,10 @@ export function SocialClipOverlay({
           aria-pressed={item.mine.includes("LIKE")}
           aria-label={`Curtir · ${item.likes}`}
           disabled={busy}
-          onClick={() => void react("LIKE")}
+          onClick={(event) => {
+            if (!item.mine.includes("LIKE")) popLike(event.currentTarget);
+            void react("LIKE");
+          }}
         >
           <Heart
             size={28}

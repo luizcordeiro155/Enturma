@@ -32,7 +32,7 @@ import { usePostActions } from "./use-post-actions";
 import { SocialPostOptions } from "./social-post-options";
 import { SocialComments } from "./social-comments";
 import { useSocialLives } from "./social-live-context";
-import { playMotion } from "@/lib/motion";
+import { popLike } from "@/lib/motion";
 export { SocialComments } from "./social-comments";
 export function SocialAuthor({
   user,
@@ -467,17 +467,7 @@ export function SocialPost({
           aria-label={`Curtir \u00b7 ${item.likes}`}
           disabled={busy}
           onClick={(event) => {
-            if (!item.mine.includes("LIKE"))
-              playMotion(
-                event.currentTarget,
-                [
-                  { transform: "scale(1)" },
-                  { transform: "scale(1.3)" },
-                  { transform: "scale(.9)" },
-                  { transform: "scale(1)" },
-                ],
-                { duration: 360 },
-              );
+            if (!item.mine.includes("LIKE")) popLike(event.currentTarget);
             void react("LIKE");
           }}
         >
