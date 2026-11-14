@@ -181,8 +181,12 @@ public class SocialPosts {
   public Object drafts(Actor a) {
     access.require();
     return db.list(
-        "SELECT id,kind,body,version,updated_at FROM social_post WHERE author_id=? AND"
-            + " state='DRAFT' ORDER BY updated_at DESC LIMIT 40",
+        "SELECT p.id,p.kind,p.body,p.version,p.updated_at,c.id cover_id,c.kind cover_kind,"
+            + "c.state cover_state,(SELECT count(*) FROM social_media m WHERE m.post_id=p.id AND"
+            + " m.state<>'DELETING') media_count FROM social_post p LEFT JOIN LATERAL (SELECT"
+            + " id,kind,state FROM social_media m WHERE m.post_id=p.id AND m.state<>'DELETING'"
+            + " ORDER BY ordinal LIMIT 1) c ON true WHERE p.author_id=? AND p.state='DRAFT' ORDER BY"
+            + " p.updated_at DESC LIMIT 40",
         a.id());
   }
 

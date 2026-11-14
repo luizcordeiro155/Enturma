@@ -1,14 +1,10 @@
 "use client";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Aperture,
   ArrowLeft,
-  Check,
-  CircleAlert,
-  LoaderCircle,
   Search,
-  X,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
@@ -36,6 +32,7 @@ import { SocialExplore } from "./social-explore";
 import { SocialFeedAside } from "./social-feed-aside";
 import { SocialHeader } from "./social-header";
 import { useSocialBack } from "./use-social-back";
+import { SocialPublishToast } from "./social-publish-toast";
 type Ready = {
   me: SocialPerson & { role: string };
   preferences: SocialPreferences;
@@ -156,7 +153,18 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       message: "",
       percent: 0,
     }),
-    [dismissedUpload, setDismissedUpload] = useState(false);
+    [dismissedUpload, setDismissedUpload] = useState(false),
+    [publishedPost, setPublishedPost] = useState<string>();
+  const dismissUpload = useCallback(() => setDismissedUpload(true), []);
+  // The editor announces the new post; the toast uses it to open the post.
+  useEffect(() => {
+    const own = (event: Event) => {
+      const id = (event as CustomEvent<{ id?: string }>).detail?.id;
+      if (id) setPublishedPost(id);
+    };
+    window.addEventListener("enturma-social-published", own);
+    return () => window.removeEventListener("enturma-social-published", own);
+  }, []);
   const usage = useRef({ feed: 0, clips: 0, create: 0 }),
     feedScroll = useRef<HTMLDivElement>(null),
     feedPositions = useRef<Record<string, number>>({});
@@ -187,21 +195,9 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     }, 0);
     return () => clearTimeout(timer);
   }, [incomingPerson, incomingSettings, incomingQuery]);
-  useEffect(() => {
-    if (!incomingPost) {
-      if (routedClip.current) {
-        routedClip.current = false;
-        const timer = setTimeout(() => setView("feed"), 0);
-        return () => clearTimeout(timer);
-      }
-      return;
-    }
-    if (!/^[a-f0-9-]{36}$/i.test(incomingPost)) return;
-    let alive = true;
-    void api<Post>(`/social/posts/${incomingPost}`, { cache: "no-store" })
-      .then((post) => {
-        if (!alive) return;
-        setError("");
+  /** Shows one post: Clips open in the Clips player, everything else in a dialog. */
+  function showPost(post: Post) {
+    setError("");
         if (post.kind === "CLIP") {
           // Revalidate access before seeding the selected Clip into the paged feed.
           routedClip.current = true;
@@ -221,6 +217,27 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
             .querySelectorAll<HTMLVideoElement>(".social-page video")
             .forEach((video) => video.pause());
         } else setDetail(post);
+  }
+  function openPost(id: string) {
+    void api<Post>(`/social/posts/${id}`, { cache: "no-store" })
+      .then(showPost)
+      .catch((cause) => setError((cause as Error).message));
+  }
+  useEffect(() => {
+    if (!incomingPost) {
+      if (routedClip.current) {
+        routedClip.current = false;
+        const timer = setTimeout(() => setView("feed"), 0);
+        return () => clearTimeout(timer);
+      }
+      return;
+    }
+    if (!/^[a-f0-9-]{36}$/i.test(incomingPost)) return;
+    let alive = true;
+    void api<Post>(`/social/posts/${incomingPost}`, { cache: "no-store" })
+      .then((post) => {
+        if (!alive) return;
+        showPost(post);
       })
       .catch((cause) => {
         if (alive) setError(cause.message);
@@ -493,7 +510,10 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                     initialKind={kind}
                     onProgress={(value) => {
                       setUpload(value);
-                      if (value.state === "working") setDismissedUpload(false);
+                      if (value.state === "working") {
+                        setDismissedUpload(false);
+                        setPublishedPost(undefined);
+                      }
                     }}
                     published={(publishedKind) => {
                       setRefresh((value) => value + 1);
@@ -506,41 +526,16 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
             }
           </SocialPager>
           {view !== "create" && upload.state !== "idle" && !dismissedUpload && (
-            <div
-              className={`social-upload-banner social-upload-${upload.state}`}
-            >
-              <button
-                type="button"
-                className="social-upload-banner-main"
-                onClick={() => select("create")}
-                aria-label="Abrir progresso da publicação"
-              >
-                {upload.state === "working" ? (
-                  <LoaderCircle className="social-upload-spinning" />
-                ) : upload.state === "done" ? (
-                  <Check />
-                ) : (
-                  <CircleAlert />
-                )}
-                <span role="status">{upload.message}</span>
-                {upload.state === "working" && (
-                  <progress
-                    value={upload.percent}
-                    max={100}
-                    aria-label="Progresso do envio"
-                  />
-                )}
-              </button>
-              {upload.state !== "working" && (
-                <button
-                  className="icon-control"
-                  aria-label="Dispensar aviso"
-                  onClick={() => setDismissedUpload(true)}
-                >
-                  <X size={18} />
-                </button>
-              )}
-            </div>
+            <SocialPublishToast
+              progress={upload}
+              postId={upload.state === "done" ? publishedPost : undefined}
+              openProgress={() => select("create")}
+              openPost={(id) => {
+                setDismissedUpload(true);
+                openPost(id);
+              }}
+              dismiss={dismissUpload}
+            />
           )}
           {explore && (
             <SocialExplore

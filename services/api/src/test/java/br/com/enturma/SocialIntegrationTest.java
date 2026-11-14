@@ -167,6 +167,28 @@ class SocialIntegrationTest {
   }
 
   @Test
+  void draftListPreviewsMediaAndDeletedDraftsLeaveIt() {
+    UUID kept = UUID.randomUUID(), gone = UUID.randomUUID(), media = UUID.randomUUID();
+    posts.draft(a, new SocialPosts.Draft(kept, "POST", "Legenda guardada", "PUBLIC", null, 0, List.of()));
+    posts.draft(a, new SocialPosts.Draft(gone, "CLIP", "Vai sumir", "PUBLIC", null, 0, List.of()));
+    db.jdbc.update(
+        "INSERT INTO social_media(id,owner_id,post_id,kind,state,expected_bytes,ordinal) VALUES"
+            + " (?,?,?,'IMAGE','READY',10,0)",
+        media,
+        a.id(),
+        kept);
+    @SuppressWarnings("unchecked")
+    var list = (List<Map<String, Object>>) posts.drafts(a);
+    assertThat(list).extracting(d -> d.get("id")).containsExactlyInAnyOrder(kept, gone);
+    var first = list.stream().filter(d -> kept.equals(d.get("id"))).findFirst().orElseThrow();
+    assertThat(first).containsEntry("mediaCount", 1L).containsEntry("coverId", media)
+        .containsEntry("coverKind", "IMAGE").containsKey("updatedAt");
+    posts.remove(a, gone);
+    assertThat((List<?>) posts.drafts(a)).hasSize(1);
+    assertThat((List<?>) posts.drafts(b)).isEmpty();
+  }
+
+  @Test
   void draftsArePrivateAndPublishingIsIdempotent() {
     UUID id = UUID.randomUUID();
     var d =
