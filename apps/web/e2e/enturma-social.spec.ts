@@ -167,10 +167,30 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
     ).toBe(true);
   }
   await page.setViewportSize({ width: 390, height: 844 });
-  await page
-    .locator(".topbar")
-    .getByRole("link", { name: "Início do Enturma" })
-    .click();
+  // The phone's Back stays inside the Social: Clips returns to the Feed, and the
+  // Feed only warns on the first Back.
+  await social.getByRole("button", { name: "Clips", exact: true }).click();
+  await page.goBack();
+  await expect(
+    social.getByRole("button", { name: "Feed", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
+  await page.goBack();
+  await expect(page.getByText("Volte de novo para sair do Social")).toBeVisible();
+  await expect(page).toHaveURL(/\/social/);
+  // One top bar: the app-wide bar is hidden and the Social bar leads home.
+  await expect(page.locator(".topbar")).toHaveCount(0);
+  const header = page.locator(".social-header");
+  await expect(
+    header.getByRole("heading", { level: 1, name: "Enturma Social." }),
+  ).toHaveText("Enturma");
+  await expect(
+    header.getByRole("button", { name: "Abrir busca do Social" }),
+  ).toHaveCount(0);
+  const wordmark = (await header.locator(".social-wordmark").boundingBox())!;
+  // Centred on the phone, like Instagram.
+  expect(Math.abs(wordmark.x + wordmark.width / 2 - 195)).toBeLessThan(24);
+  await page.screenshot({ path: info.outputPath("social-header-390.png") });
+  await header.getByRole("link", { name: "Voltar ao início do Enturma" }).click();
   await expect(page).toHaveURL(/\/home$/);
   await expect(page.locator(".enturma-launch-overlay")).toHaveCount(0, {
     timeout: 15000,
@@ -818,6 +838,31 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   await clips.focus();
   await page.keyboard.press("ArrowDown");
   await expect.poll(playing).toEqual([false, true, false, false]);
+  // The Clip left behind starts over when you come back to it.
+  expect(
+    await clips
+      .locator("video")
+      .first()
+      .evaluate((video) => (video as HTMLVideoElement).currentTime),
+  ).toBe(0);
+  // Tapping the thin progress line reveals a handle to move through the Clip.
+  const current = clips.locator('[data-clip-index="1"]');
+  await current
+    .getByRole("button", { name: "Mostrar controle de tempo do Clip" })
+    .click();
+  const scrubber = current.getByRole("slider", {
+    name: "Avançar ou voltar o Clip",
+  });
+  await expect(scrubber).toBeVisible();
+  await scrubber.fill("900");
+  await expect
+    .poll(() =>
+      current
+        .locator("video")
+        .evaluate((video) => (video as HTMLVideoElement).currentTime),
+    )
+    .toBeGreaterThan(2);
+  await expect(scrubber).toBeHidden({ timeout: 6000 });
   await expect(clips.locator("video").nth(3)).not.toHaveAttribute("src", /.+/);
   for (const width of [1366, 1920, 390]) {
     await page.setViewportSize({ width, height: width === 1366 ? 768 : 844 });
@@ -929,10 +974,8 @@ test("Social: autor consegue excluir seu Story com confirmação", async ({
   if (await opening.isVisible()) {
     await opening.getByRole("button", { name: "Explorar o Social" }).click();
   }
-  const story = page
-    .locator(".social-stories .social-story")
-    .filter({ hasText: author.username })
-    .first();
+  // Your own Stories open from the "Seu Story" circle; there is no second one.
+  const story = page.getByRole("button", { name: "Ver seus Stories", exact: true });
   await expect(story).toBeVisible();
   await story.click();
   const viewer = page.getByRole("dialog", { name: "Stories da turma" });
@@ -946,7 +989,11 @@ test("Social: autor consegue excluir seu Story com confirmação", async ({
     .getByRole("button", { name: "Excluir Story", exact: true })
     .click();
   await expect(viewer).not.toBeVisible();
+  // With no Stories left, the circle offers to create one again.
   await expect(story).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Criar seu Story", exact: true }),
+  ).toBeVisible();
   const deleted = await request.get(`${backend}/api/v1/social/posts/${id}`, {
     headers: asUser(author.accessToken),
   });

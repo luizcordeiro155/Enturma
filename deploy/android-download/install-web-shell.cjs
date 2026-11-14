@@ -86,6 +86,26 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.UUID
+import android.app.Person
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffXfermode
+import android.graphics.Rect
+import android.graphics.drawable.Icon
+import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
+import android.util.Base64
+import org.json.JSONArray
+import java.io.File
+import java.security.KeyStore
+import javax.crypto.Cipher
+import javax.crypto.KeyGenerator
+import javax.crypto.SecretKey
+import javax.crypto.spec.GCMParameterSpec
+import javax.crypto.spec.SecretKeySpec
 
 private const val ANDROID_UPDATE_ORIGIN =
     "https://enturma-android-download-v3-production.up.railway.app"
@@ -103,6 +123,17 @@ private const val PUSH_CHANNEL_ID = "enturma_social"
 private const val PUSH_PREFS = "enturma_push_state"
 private const val PREF_PUSH_INSTALLATION_ID = "installation_id"
 private const val PREF_PUSH_TOKEN = "push_token"
+private const val PUSH_EXTRA_CONVERSATION = "conversation"
+private const val NOTIFICATION_WEB_ORIGIN = ${kotlinString(webOrigin)}
+private const val PRIVATE_KEYS_PREFS = "enturma_private_notification_keys"
+private const val PREF_PRIVATE_KEYS_BLOB = "blob"
+private const val NOTIFICATION_VAULT_ALIAS = "enturma_private_notification_keys_v1"
+private const val MESSAGE_HISTORY_PREFS = "enturma_message_notifications"
+private const val MESSAGE_GROUP = "br.com.enturma.app.MESSAGES"
+private const val MESSAGE_SUMMARY_ID = 4810
+private const val MESSAGE_HISTORY_LIMIT = 8
+private const val MESSAGE_HISTORY_MAX_AGE_MS = 86_400_000L
+private val UUID_PATTERN = Regex("^[0-9a-fA-F-]{36}$")
 private const val FIREBASE_PROJECT_ID = ${kotlinString(firebaseProjectId)}
 private const val FIREBASE_APP_ID = ${kotlinString(firebaseAppId)}
 private const val FIREBASE_API_KEY = ${kotlinString(firebaseApiKey)}
@@ -199,6 +230,280 @@ private fun ensurePushNotificationChannel(context: Context) {
     )
 }
 
+/**
+ * Private messages are end-to-end encrypted. The page hands this app each
+ * conversation's key (kept encrypted under the Android Keystore), so the phone
+ * decrypts a message notification itself and stacks the messages of each person
+ * in one notification, like WhatsApp. The server never has the text.
+ */
+private object EnturmaPrivateNotifications {
+    private fun keystoreKey(): SecretKey {
+        val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
+        (store.getKey(NOTIFICATION_VAULT_ALIAS, null) as? SecretKey)?.let { return it }
+        val generator =
+            KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
+        generator.init(
+            KeyGenParameterSpec.Builder(
+                NOTIFICATION_VAULT_ALIAS,
+                KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
+            )
+                .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
+                .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+                .setKeySize(256)
+                .build(),
+        )
+        return generator.generateKey()
+    }
+
+    fun store(context: Context, json: String) {
+        val incoming = JSONObject(json)
+        val user = incoming.optString("user")
+        val keys = incoming.optJSONObject("keys") ?: return
+        if (!UUID_PATTERN.matches(user) || keys.length() > 500) return
+        val clean = JSONObject()
+        val names = keys.keys()
+        while (names.hasNext()) {
+            val id = names.next()
+            val value = keys.optString(id)
+            if (!UUID_PATTERN.matches(id)) continue
+            val raw = runCatching { Base64.decode(value, Base64.DEFAULT) }.getOrNull() ?: continue
+            if (raw.size != 32) continue
+            clean.put(id, value)
+        }
+        val payload = JSONObject().put("user", user).put("keys", clean).toString()
+        val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+        cipher.init(Cipher.ENCRYPT_MODE, keystoreKey())
+        val sealed = cipher.doFinal(payload.toByteArray(Charsets.UTF_8))
+        val blob =
+            Base64.encodeToString(cipher.iv, Base64.NO_WRAP) + "." +
+                Base64.encodeToString(sealed, Base64.NO_WRAP)
+        context.getSharedPreferences(PRIVATE_KEYS_PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .putString(PREF_PRIVATE_KEYS_BLOB, blob)
+            .apply()
+    }
+
+    private fun keys(context: Context): JSONObject? {
+        val blob = context.getSharedPreferences(PRIVATE_KEYS_PREFS, Context.MODE_PRIVATE)
+            .getString(PREF_PRIVATE_KEYS_BLOB, null) ?: return null
+        val parts = blob.split(".")
+        if (parts.size != 2) return null
+        return runCatching {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(
+                Cipher.DECRYPT_MODE,
+                keystoreKey(),
+                GCMParameterSpec(128, Base64.decode(parts[0], Base64.NO_WRAP)),
+            )
+            JSONObject(
+                String(cipher.doFinal(Base64.decode(parts[1], Base64.NO_WRAP)), Charsets.UTF_8),
+            )
+        }.getOrNull()
+    }
+
+    /** Same scheme as the web app: AES-256-GCM, additional data "conversation:sender:client". */
+    private fun decrypt(context: Context, data: Map<String, String>): String? {
+        val conversation = data["conversation"] ?: return null
+        val ciphertext = data["ciphertext"] ?: return null
+        val iv = data["iv"] ?: return null
+        val sender = data["senderId"] ?: return null
+        val client = data["clientId"] ?: return null
+        val raw = keys(context)?.optJSONObject("keys")?.optString(conversation)
+            ?.takeIf { it.isNotBlank() } ?: return null
+        return runCatching {
+            val cipher = Cipher.getInstance("AES/GCM/NoPadding")
+            cipher.init(
+                Cipher.DECRYPT_MODE,
+                SecretKeySpec(Base64.decode(raw, Base64.DEFAULT), "AES"),
+                GCMParameterSpec(128, Base64.decode(iv, Base64.DEFAULT)),
+            )
+            cipher.updateAAD((conversation + ":" + sender + ":" + client).toByteArray(Charsets.UTF_8))
+            String(cipher.doFinal(Base64.decode(ciphertext, Base64.DEFAULT)), Charsets.UTF_8)
+        }.getOrNull()?.trim()?.takeIf { it.isNotEmpty() }
+    }
+
+    private fun line(data: Map<String, String>, text: String?): String {
+        if (!text.isNullOrBlank()) return text.take(400)
+        val mime = data["attachmentMime"] ?: ""
+        return when {
+            data["mediaKind"] == "STICKER" -> "Figurinha"
+            data["mediaKind"] == "GIF" -> "GIF"
+            mime.startsWith("audio/") -> "Mensagem de voz"
+            mime.startsWith("image/") -> "Imagem"
+            else -> "Nova mensagem"
+        }
+    }
+
+    fun notificationId(conversation: String): Int = ("message:" + conversation).hashCode()
+
+    private fun remember(context: Context, conversation: String, entry: JSONObject): JSONArray {
+        val prefs = context.getSharedPreferences(MESSAGE_HISTORY_PREFS, Context.MODE_PRIVATE)
+        val history = runCatching { JSONArray(prefs.getString(conversation, "[]")) }
+            .getOrDefault(JSONArray())
+        val id = entry.optString("id")
+        val now = System.currentTimeMillis()
+        val kept = JSONArray()
+        for (i in 0 until history.length()) {
+            val item = history.optJSONObject(i) ?: continue
+            if (item.optString("id") == id) continue
+            if (now - item.optLong("at") > MESSAGE_HISTORY_MAX_AGE_MS) continue
+            kept.put(item)
+        }
+        kept.put(entry)
+        val trimmed = JSONArray()
+        for (i in maxOf(0, kept.length() - MESSAGE_HISTORY_LIMIT) until kept.length())
+            trimmed.put(kept.get(i))
+        prefs.edit().putString(conversation, trimmed.toString()).apply()
+        return trimmed
+    }
+
+    private fun circle(source: Bitmap): Bitmap {
+        val size = minOf(source.width, source.height)
+        val output = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(output)
+        val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        canvas.drawCircle(size / 2f, size / 2f, size / 2f, paint)
+        paint.xfermode = PorterDuffXfermode(PorterDuff.Mode.SRC_IN)
+        val left = (source.width - size) / 2
+        val top = (source.height - size) / 2
+        canvas.drawBitmap(source, Rect(left, top, left + size, top + size), Rect(0, 0, size, size), paint)
+        return output
+    }
+
+    private fun avatar(context: Context, sender: String?): Bitmap? {
+        if (sender == null || !UUID_PATTERN.matches(sender)) return null
+        val folder = File(context.cacheDir, "notification-avatars").apply { mkdirs() }
+        val file = File(folder, sender + ".png")
+        if (file.exists() && System.currentTimeMillis() - file.lastModified() < 86_400_000L)
+            BitmapFactory.decodeFile(file.absolutePath)?.let { return it }
+        val downloaded = runCatching {
+            val connection =
+                URL(NOTIFICATION_WEB_ORIGIN + "/api/backend/users/" + sender + "/avatar").openConnection()
+                    as HttpURLConnection
+            connection.connectTimeout = 5000
+            connection.readTimeout = 5000
+            CookieManager.getInstance().getCookie(NOTIFICATION_WEB_ORIGIN)?.let {
+                connection.setRequestProperty("Cookie", it)
+            }
+            try {
+                if (connection.responseCode !in 200..299) null
+                else connection.inputStream.use { BitmapFactory.decodeStream(it) }
+            } finally {
+                connection.disconnect()
+            }
+        }.getOrNull() ?: return null
+        val round = circle(downloaded)
+        runCatching { file.outputStream().use { round.compress(Bitmap.CompressFormat.PNG, 100, it) } }
+        return round
+    }
+
+    private fun builder(context: Context): Notification.Builder =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            Notification.Builder(context, PUSH_CHANNEL_ID)
+        else Notification.Builder(context)
+
+    fun show(context: Context, data: Map<String, String>, open: PendingIntent) {
+        val conversation = data["conversation"] ?: return
+        val senderName = data["senderName"]?.take(80)?.takeIf { it.isNotBlank() } ?: "Enturma"
+        val text = line(data, decrypt(context, data))
+        val at = data["sentAt"]?.toLongOrNull() ?: System.currentTimeMillis()
+        val history = remember(
+            context,
+            conversation,
+            JSONObject()
+                .put("id", data["messageId"] ?: UUID.randomUUID().toString())
+                .put("text", text)
+                .put("at", at),
+        )
+        val photo = avatar(context, data["senderId"])
+        // The lock screen only shows the text if the person allows sensitive content.
+        val hidden = builder(context)
+            .setSmallIcon(android.R.drawable.stat_notify_chat)
+            .setContentTitle("Enturma")
+            .setContentText("Nova mensagem")
+            .build()
+        val notification = builder(context)
+            .setSmallIcon(android.R.drawable.stat_notify_chat)
+            .setContentTitle(senderName)
+            .setContentText(text)
+            .setNumber(history.length())
+            .setWhen(at)
+            .setShowWhen(true)
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            .setGroup(MESSAGE_GROUP)
+            .setCategory(Notification.CATEGORY_MESSAGE)
+            .setVisibility(Notification.VISIBILITY_PRIVATE)
+            .setPublicVersion(hidden)
+        if (photo != null) notification.setLargeIcon(photo)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            val sender = Person.Builder().setName(senderName).setKey(data["senderId"])
+            if (photo != null) sender.setIcon(Icon.createWithBitmap(photo))
+            val person = sender.build()
+            val style = Notification.MessagingStyle(Person.Builder().setName("Você").build())
+            for (i in 0 until history.length()) {
+                val item = history.optJSONObject(i) ?: continue
+                style.addMessage(
+                    Notification.MessagingStyle.Message(item.optString("text"), item.optLong("at"), person),
+                )
+            }
+            notification.setStyle(style)
+        } else {
+            val style = Notification.InboxStyle()
+            for (i in 0 until history.length())
+                style.addLine(history.optJSONObject(i)?.optString("text") ?: "")
+            notification.setStyle(style)
+        }
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(notificationId(conversation), notification.build())
+        updateSummary(context)
+    }
+
+    private fun updateSummary(context: Context) {
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        val prefs = context.getSharedPreferences(MESSAGE_HISTORY_PREFS, Context.MODE_PRIVATE)
+        val conversations = prefs.all
+        if (conversations.size < 2) {
+            manager.cancel(MESSAGE_SUMMARY_ID)
+            return
+        }
+        var messages = 0
+        for (value in conversations.values)
+            messages += runCatching { JSONArray(value as String).length() }.getOrDefault(0)
+        val summary = builder(context)
+            .setSmallIcon(android.R.drawable.stat_notify_chat)
+            .setContentTitle("Enturma")
+            .setContentText(messages.toString() + " mensagens de " + conversations.size + " conversas")
+            .setGroup(MESSAGE_GROUP)
+            .setGroupSummary(true)
+            .setAutoCancel(true)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+            summary.setGroupAlertBehavior(Notification.GROUP_ALERT_CHILDREN)
+        manager.notify(MESSAGE_SUMMARY_ID, summary.build())
+    }
+
+    /** The conversation was opened: its stacked notification is done. */
+    fun forget(context: Context, conversation: String) {
+        context.getSharedPreferences(MESSAGE_HISTORY_PREFS, Context.MODE_PRIVATE)
+            .edit()
+            .remove(conversation)
+            .apply()
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.cancel(notificationId(conversation))
+        updateSummary(context)
+    }
+
+    /** Signing out: no keys, texts or message notifications stay on the phone. */
+    fun clear(context: Context) {
+        val history = context.getSharedPreferences(MESSAGE_HISTORY_PREFS, Context.MODE_PRIVATE)
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        for (conversation in history.all.keys) manager.cancel(notificationId(conversation))
+        manager.cancel(MESSAGE_SUMMARY_ID)
+        history.edit().clear().apply()
+        context.getSharedPreferences(PRIVATE_KEYS_PREFS, Context.MODE_PRIVATE).edit().clear().apply()
+    }
+}
+
 class EnturmaMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         storePushToken(this, token)
@@ -220,22 +525,30 @@ class EnturmaMessagingService : FirebaseMessagingService() {
         val href = safePushHref(data["href"])
         ensurePushNotificationChannel(this)
 
+        val conversation = data["conversation"]?.takeIf { UUID_PATTERN.matches(it) }
         val open = Intent(this, MainActivity::class.java).apply {
             action = PUSH_ACTION_OPEN
             putExtra(PUSH_EXTRA_HREF, href)
+            if (conversation != null) putExtra(PUSH_EXTRA_CONVERSATION, conversation)
             flags =
                 Intent.FLAG_ACTIVITY_NEW_TASK or
                     Intent.FLAG_ACTIVITY_CLEAR_TOP or
                     Intent.FLAG_ACTIVITY_SINGLE_TOP
         }
         val requestCode =
-            (data["notificationId"] ?: href + body).hashCode()
+            if (conversation != null) EnturmaPrivateNotifications.notificationId(conversation)
+            else (data["notificationId"] ?: href + body).hashCode()
         val pending = PendingIntent.getActivity(
             this,
             requestCode,
             open,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
         )
+        val kind = data["kind"]
+        if (conversation != null && (kind == "PRIVATE_MESSAGE" || kind == "MENTION")) {
+            EnturmaPrivateNotifications.show(this, data, pending)
+            return
+        }
         val builder =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                 Notification.Builder(this, PUSH_CHANNEL_ID)
@@ -654,6 +967,27 @@ class MainActivity : Activity() {
         }
 
         @JavascriptInterface
+        fun storeConversationKeys(json: String) {
+            if (json.length > 200_000) return
+            runOnUiThread {
+                if (webView.url?.startsWith(${kotlinString(webOrigin + "/")}) != true) return@runOnUiThread
+                val context = applicationContext
+                Thread {
+                    runCatching { EnturmaPrivateNotifications.store(context, json) }
+                }.start()
+            }
+        }
+
+        @JavascriptInterface
+        fun clearConversationNotifications(conversation: String) {
+            if (!UUID_PATTERN.matches(conversation)) return
+            runOnUiThread {
+                if (webView.url?.startsWith(${kotlinString(webOrigin + "/")}) != true) return@runOnUiThread
+                EnturmaPrivateNotifications.forget(this@MainActivity, conversation)
+            }
+        }
+
+        @JavascriptInterface
         fun setChatComposerFocused(focused: Boolean) {
             runOnUiThread {
                 chatComposerFocused = focused
@@ -1029,6 +1363,9 @@ class MainActivity : Activity() {
             return "/settings?update=1"
         }
         if (intent?.action == PUSH_ACTION_OPEN) {
+            intent.getStringExtra(PUSH_EXTRA_CONVERSATION)
+                ?.takeIf { UUID_PATTERN.matches(it) }
+                ?.let { EnturmaPrivateNotifications.forget(this, it) }
             return safePushHref(intent.getStringExtra(PUSH_EXTRA_HREF))
         }
         val uri = intent?.data ?: return null
@@ -1084,6 +1421,7 @@ class MainActivity : Activity() {
     }
 
     private fun clearNativePushToken() {
+        EnturmaPrivateNotifications.clear(this)
         getSharedPreferences(PUSH_PREFS, Context.MODE_PRIVATE)
             .edit()
             .remove(PREF_PUSH_TOKEN)

@@ -35,6 +35,7 @@ import { mentionsUser } from "@/lib/mentions";
 import { api, post, peekApiSnapshot } from "@/lib/api";
 import {
   conversationKey,
+  conversationKeyBytes,
   createIdentity,
   decryptAttachment,
   decryptMessage,
@@ -57,6 +58,14 @@ import {
 } from "./message-action-popover";
 import { MessageMenu } from "./message-menu";
 import { EmojiText, AnimatedEmoji } from "./emoji-picker";
+import { FriendsInbox } from "./friends-inbox";
+import { latestPreview } from "@/lib/private-chat-preview";
+import {
+  canSyncNotificationKeys,
+  clearConversationNotifications,
+  syncNotificationKeys,
+} from "@/lib/native-private-notifications";
+import { useAppShellState } from "./app-shell-state";
 type Friend = Omit<PublicProfile, "id"> & {
   id: string;
   userId: string;
@@ -97,6 +106,7 @@ export function Friends() {
   const router = useRouter();
   const requestedChat = params.get("chat");
   useNotificationTarget();
+  const { socialEnabled } = useAppShellState();
   const [me, setMe] = useState<PublicProfile | undefined>(() =>
     peekApiSnapshot<PublicProfile>("/users/me"),
   );
@@ -109,7 +119,6 @@ export function Friends() {
   useMobileWebChatViewport(Boolean(selected || requestedChat), "private");
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [username, setUsername] = useState("");
   const [draft, setDraft] = useState("");
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
@@ -128,7 +137,7 @@ export function Friends() {
   const [password, setPassword] = useState("");
   const [messages, setMessages] = useState<PrivateMessage[]>([]);
   const [previews, setPreviews] = useState<
-    Record<string, { id: string; text: string }>
+    Record<string, { id: string; text: string; mine?: boolean }>
   >({});
   const [page, setPage] = useState(0);
   const [older, setOlder] = useState(false);
@@ -180,6 +189,89 @@ export function Friends() {
   const identity = useRef<Awaited<ReturnType<typeof createIdentity>> | null>(
     null,
   );
+  // The Amigos list shows each conversation's last message. It is decrypted here,
+  // on this device, with the same key used when the conversation is opened.
+  // In the Android app, hand the phone each conversation's key (kept under the
+  // Android Keystore) so it can decrypt and stack message notifications itself.
+  const syncedNotificationKeys = useRef("");
+  useEffect(() => {
+    const keyPair = identity.current;
+    if (!ready || !keyPair || !me || !canSyncNotificationKeys()) return;
+    const ids = friends
+      .filter((f) => f.status === "ACCEPTED")
+      .map((f) => f.id)
+      .sort();
+    const signature = `${me.id}:${ids.join(",")}`;
+    if (syncedNotificationKeys.current === signature) return;
+    syncedNotificationKeys.current = signature;
+    void syncNotificationKeys(me.id, ids, async (id) => {
+      const peer = await api<{ publicKey: JsonWebKey }>(
+        `/friends/${id}/identity`,
+        { signal: AbortSignal.timeout(12000) },
+      );
+      return conversationKeyBytes(keyPair, peer.publicKey, id);
+    });
+  }, [ready, friends, me]);
+  const openConversation = selected?.id;
+  useEffect(() => {
+    if (openConversation) clearConversationNotifications(openConversation);
+  }, [openConversation]);
+  const previewKeys = useRef(new Map<string, CryptoKey>());
+  const previewing = useRef(new Set<string>());
+  const latestPreviews = useRef(previews);
+  useEffect(() => {
+    latestPreviews.current = previews;
+  });
+  useEffect(() => {
+    const keyPair = identity.current;
+    if (!ready || !keyPair || !me) return;
+    let active = true;
+    const pending = friends
+      .filter(
+        (f) =>
+          f.status === "ACCEPTED" &&
+          f.lastMessageId &&
+          latestPreviews.current[f.id]?.id !== f.lastMessageId &&
+          !previewing.current.has(`${f.id}:${f.lastMessageId}`),
+      )
+      .slice(0, 40);
+    void (async () => {
+      for (const f of pending) {
+        if (!active) return;
+        const mark = `${f.id}:${f.lastMessageId}`;
+        previewing.current.add(mark);
+        try {
+          let key = previewKeys.current.get(f.id);
+          if (!key) {
+            const peer = await api<{ publicKey: JsonWebKey }>(
+              `/friends/${f.id}/identity`,
+              { signal: AbortSignal.timeout(12000) },
+            );
+            key = await conversationKey(keyPair, peer.publicKey, f.id);
+            previewKeys.current.set(f.id, key);
+          }
+          const conversation = key;
+          const rows = await api<Envelope[]>(
+            `/friends/${f.id}/messages?page=0`,
+            { signal: AbortSignal.timeout(12000) },
+          );
+          const preview = await latestPreview(rows, me.id, (m) =>
+            decryptMessage(conversation, m, f.id),
+          );
+          if (preview)
+            setPreviews((old) =>
+              old[f.id]?.id === preview.id ? old : { ...old, [f.id]: preview },
+            );
+        } catch {
+          // Try again on the next list refresh.
+          previewing.current.delete(mark);
+        }
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [ready, friends, me]);
   const refresh = useCallback(
     () => api<Friend[]>("/friends").then(setFriends),
     [],
@@ -305,6 +397,7 @@ export function Friends() {
           ...old,
           [friend.id]: {
             id: newest.id,
+            mine: newest.senderId !== friend.userId,
             text:
               newest.text ||
               (newest.attachmentMime?.startsWith("audio/")
@@ -814,6 +907,7 @@ export function Friends() {
       ...old,
       [friend.id]: {
         id: clientId,
+        mine: true,
         text:
           text ||
           (selectedImage?.type.startsWith("audio/")
@@ -891,11 +985,6 @@ export function Friends() {
           selected ? "friends-page mobile-private-chat-open" : "friends-page"
         }
       >
-        <h1>Amigos e conversas</h1>
-        <p>
-          Conecte-se com sua turma. Mensagens privadas são cifradas no seu
-          dispositivo.
-        </p>
         {error ? (
           <p role="alert" className="error">
             {error}
@@ -907,203 +996,132 @@ export function Friends() {
           </p>
         ) : null}
         <p role="status">{notice}</p>
-        <form
-          className="friend-invite"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            try {
-              await post("/friends", { username });
-              setUsername("");
-              setNotice("Convite enviado.");
-              await refresh();
-            } catch (e) {
-              setError((e as Error).message);
-            }
-          }}
-        >
-          <label>
-            Adicionar pelo nome de usuário
-            <input
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              maxLength={40}
-              placeholder="@colega"
-              required
-            />
-          </label>
-          <button>Enviar convite</button>
-        </form>
         {me && (
           <PrivateKeySync userId={me.id} ready={ready} onUnlock={unlock} />
         )}
-        <details className="private-backup" id="private-backup">
-          <summary>Chaves e backup das conversas</summary>
-          <p>
-            Além da sincronização, você pode guardar um backup cifrado para
-            recuperar sua chave em outro dispositivo. Sem a chave ou o backup,
-            não é possível recuperar as mensagens. Compare o código de segurança
-            com seu amigo por outro canal.
-          </p>
-          <label>
-            Senha do backup
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-              minLength={12}
-            />
-          </label>
-          <div className="actions">
-            <button
-              disabled={!ready}
-              onClick={async () => {
-                try {
-                  const raw = await exportBackup(identity.current!, password);
-                  const url = URL.createObjectURL(
-                    new Blob([raw], { type: "application/json" }),
-                  );
-                  const a = document.createElement("a");
-                  a.href = url;
-                  a.download = "enturma-chave-cifrada.json";
-                  a.click();
-                  setTimeout(() => URL.revokeObjectURL(url), 1000);
-                  setNotice("Backup baixado. Guarde a senha separadamente.");
-                } catch (e) {
-                  setError((e as Error).message);
-                }
-              }}
-            >
-              Baixar backup cifrado
-            </button>
-            <label>
-              Restaurar backup
-              <input
-                type="file"
-                accept="application/json,.json"
-                onChange={async (e) => {
-                  const file = e.target.files?.[0];
-                  if (!file || !me) return;
-                  try {
-                    if (file.size > 20000)
-                      throw Error("Arquivo de backup inválido.");
-                    const restored = await importBackup(
-                      await file.text(),
-                      password,
-                    );
-                    await api("/private-identity", {
-                      method: "PUT",
-                      body: JSON.stringify(publicFields(restored.publicKey)),
-                    });
-                    await storeIdentity(me.id, restored);
-                    identity.current = restored;
-                    setReady(true);
-                    setIdentityError("");
-                    setConnectionAttempt((n) => n + 1);
-                    setError("");
-                    setNotice("Chave restaurada.");
-                  } catch {
-                    setError(
-                      "Não foi possível restaurar: confira senha, arquivo e conta.",
-                    );
-                  }
-                }}
-              />
-            </label>
-          </div>
-        </details>
         <div className="friends-workspace">
           <aside aria-label="Lista de amigos">
-            {friends.length === 0 ? (
-              <p>Nenhuma amizade ainda. Convide alguém pelo nome de usuário.</p>
-            ) : (
-              friends.map((f) => (
-                <article
-                  key={f.id}
-                  className="friend-conversation-row"
-                  data-selected={selected?.id === f.id}
-                >
-                  <UserIdentity user={{ ...f, id: f.userId }} />
-                  {f.status === "ACCEPTED" && (
-                    <div className="friend-conversation-meta">
-                      <small className={f.online ? "friend-online" : "muted"}>
-                        {f.online ? "Online" : "Offline"}
-                      </small>
-                      {f.lastMessageAt && (
-                        <time dateTime={f.lastMessageAt}>
-                          {new Date(f.lastMessageAt).toLocaleString("pt-BR", {
-                            day: "2-digit",
-                            month: "2-digit",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </time>
-                      )}
-                      {!!f.unreadCount && (
-                        <span
-                          className="friend-unread"
-                          aria-label={`${f.unreadCount} mensagens não lidas`}
-                        >
-                          {f.unreadCount}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  {f.lastMessageId && (
-                    <p className="friend-message-preview">
-                      {previews[f.id]?.id === f.lastMessageId
-                        ? previews[f.id].text
-                        : "Mensagem privada criptografada"}
-                    </p>
-                  )}
-                  {f.status === "ACCEPTED" ? (
-                    <button
-                      className="secondary"
-                      aria-pressed={selected?.id === f.id}
-                      onClick={() => choose(f)}
-                    >
-                      Conversar
-                    </button>
-                  ) : f.recipient === me?.id ? (
-                    <button
-                      onClick={async () => {
-                        try {
-                          await post(`/friends/${f.id}/accept`);
-                          await refresh();
-                        } catch (e) {
-                          setError((e as Error).message);
-                        }
-                      }}
-                    >
-                      Aceitar convite
-                    </button>
-                  ) : (
-                    <small>Convite enviado</small>
-                  )}
-                  <button
-                    className="text-button"
-                    onClick={async () => {
-                      if (
-                        !confirm(
-                          "Remover amizade/convite e o histórico privado desta conversa?",
-                        )
-                      )
-                        return;
-                      try {
-                        await api(`/friends/${f.id}`, { method: "DELETE" });
-                        if (selected?.id === f.id) setSelected(undefined);
-                        await refresh();
-                      } catch (e) {
-                        setError((e as Error).message);
-                      }
-                    }}
-                  >
-                    {f.status === "ACCEPTED"
-                      ? "Remover amizade"
-                      : "Cancelar / recusar"}
-                  </button>
-                </article>
-              ))
+            {me && (
+              <FriendsInbox
+                me={me}
+                friends={friends}
+                previews={previews}
+                selectedId={selected?.id}
+                socialEnabled={socialEnabled}
+                open={choose}
+                accept={async (f) => {
+                  try {
+                    await post(`/friends/${f.id}/accept`);
+                    await refresh();
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
+                }}
+                remove={async (f) => {
+                  if (
+                    !confirm(
+                      f.status === "ACCEPTED"
+                        ? "Remover amizade e o histórico privado desta conversa?"
+                        : "Cancelar ou recusar este convite?",
+                    )
+                  )
+                    return;
+                  try {
+                    await api(`/friends/${f.id}`, { method: "DELETE" });
+                    if (selected?.id === f.id) setSelected(undefined);
+                    await refresh();
+                  } catch (e) {
+                    setError((e as Error).message);
+                  }
+                }}
+                invite={async (name) => {
+                  try {
+                    await post("/friends", { username: name });
+                    setNotice("Convite enviado.");
+                    await refresh();
+                  } catch (e) {
+                    setError((e as Error).message);
+                    throw e;
+                  }
+                }}
+                backup={
+                  <div className="private-backup" id="private-backup">
+                            <p>
+                              Além da sincronização, você pode guardar um backup cifrado para
+                              recuperar sua chave em outro dispositivo. Sem a chave ou o backup,
+                              não é possível recuperar as mensagens. Compare o código de segurança
+                              com seu amigo por outro canal.
+                            </p>
+                            <label>
+                              Senha do backup
+                              <input
+                                type="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                autoComplete="new-password"
+                                minLength={12}
+                              />
+                            </label>
+                            <div className="actions">
+                              <button
+                                disabled={!ready}
+                                onClick={async () => {
+                                  try {
+                                    const raw = await exportBackup(identity.current!, password);
+                                    const url = URL.createObjectURL(
+                                      new Blob([raw], { type: "application/json" }),
+                                    );
+                                    const a = document.createElement("a");
+                                    a.href = url;
+                                    a.download = "enturma-chave-cifrada.json";
+                                    a.click();
+                                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                                    setNotice("Backup baixado. Guarde a senha separadamente.");
+                                  } catch (e) {
+                                    setError((e as Error).message);
+                                  }
+                                }}
+                              >
+                                Baixar backup cifrado
+                              </button>
+                              <label>
+                                Restaurar backup
+                                <input
+                                  type="file"
+                                  accept="application/json,.json"
+                                  onChange={async (e) => {
+                                    const file = e.target.files?.[0];
+                                    if (!file || !me) return;
+                                    try {
+                                      if (file.size > 20000)
+                                        throw Error("Arquivo de backup inválido.");
+                                      const restored = await importBackup(
+                                        await file.text(),
+                                        password,
+                                      );
+                                      await api("/private-identity", {
+                                        method: "PUT",
+                                        body: JSON.stringify(publicFields(restored.publicKey)),
+                                      });
+                                      await storeIdentity(me.id, restored);
+                                      identity.current = restored;
+                                      setReady(true);
+                                      setIdentityError("");
+                                      setConnectionAttempt((n) => n + 1);
+                                      setError("");
+                                      setNotice("Chave restaurada.");
+                                    } catch {
+                                      setError(
+                                        "Não foi possível restaurar: confira senha, arquivo e conta.",
+                                      );
+                                    }
+                                  }}
+                                />
+                              </label>
+                            </div>
+                  </div>
+                }
+              />
             )}
           </aside>
           <section

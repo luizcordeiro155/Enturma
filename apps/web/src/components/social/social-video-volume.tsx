@@ -1,5 +1,7 @@
 "use client";
+import { useEffect, useRef, useState } from "react";
 import { Volume2, VolumeX } from "lucide-react";
+import { useLongPress } from "./use-long-press";
 
 export type SocialVolumeLabels = {
   unmute: string;
@@ -26,9 +28,23 @@ export function SocialVideoVolume({
   onMutedChange: (muted: boolean) => void;
   labels?: SocialVolumeLabels;
 }) {
+  // On a phone a tap turns sound on or off; pressing and holding shows the volume.
+  const [open, setOpen] = useState(false);
+  const control = useRef<HTMLDivElement>(null);
+  const press = useLongPress(() => setOpen(true));
+  useEffect(() => {
+    if (!open) return;
+    const outside = (event: PointerEvent) => {
+      if (!control.current?.contains(event.target as Node)) setOpen(false);
+    };
+    document.addEventListener("pointerdown", outside);
+    return () => document.removeEventListener("pointerdown", outside);
+  }, [open]);
   return (
     <div
+      ref={control}
       className="social-video-volume"
+      data-open={open}
       onClick={(event) => event.stopPropagation()}
     >
       <div className="social-volume-slider">
@@ -52,6 +68,7 @@ export function SocialVideoVolume({
         className="social-media-sound"
         aria-label={muted ? labels.unmute : labels.mute}
         aria-pressed={!muted}
+        {...press}
         onClick={() => {
           if (muted && volume === 0) {
             onVolumeChange(1);

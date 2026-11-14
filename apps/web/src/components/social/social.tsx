@@ -1,15 +1,13 @@
 "use client";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Aperture,
   ArrowLeft,
   Check,
   CircleAlert,
   LoaderCircle,
-  Plus,
   Search,
-  Settings2,
   X,
 } from "lucide-react";
 import { api } from "@/lib/api";
@@ -36,6 +34,8 @@ import { useSocialViewport } from "./use-social-viewport";
 import { SocialLiveProvider } from "./social-live-context";
 import { SocialExplore } from "./social-explore";
 import { SocialFeedAside } from "./social-feed-aside";
+import { SocialHeader } from "./social-header";
+import { useSocialBack } from "./use-social-back";
 type Ready = {
   me: SocialPerson & { role: string };
   preferences: SocialPreferences;
@@ -129,7 +129,8 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     incomingPost = params.get("post"),
     incomingPerson = params.get("person"),
     incomingQuery = params.get("q"),
-    incomingSettings = params.get("settings");
+    incomingSettings = params.get("settings"),
+    incomingCreate = params.get("create");
   const [view, setView] = useState<SocialView>("feed"),
     [opened, setOpened] = useState<SocialView[]>(["feed"]),
     [tab, setTab] = useState("for-you");
@@ -150,8 +151,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     sequence: number;
   }>();
   const routedClip = useRef(false);
-  const [searchOpen, setSearchOpen] = useState(false),
-    [upload, setUpload] = useState<SocialEditorProgress>({
+  const [upload, setUpload] = useState<SocialEditorProgress>({
       state: "idle",
       message: "",
       percent: 0,
@@ -176,7 +176,6 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       if (incomingQuery) {
         setQuery(incomingQuery.slice(0, 80));
         setSearched(incomingQuery.slice(0, 80));
-        setSearchOpen(true);
         setPerson(null);
         setDetail(undefined);
         setSettings(false);
@@ -230,6 +229,14 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       alive = false;
     };
   }, [incomingPost]);
+  const router = useRouter();
+  // The phone's Back stays inside the Social: Clips/Criar return to the Feed, and
+  // only a second Back on the Feed goes to the Enturma home.
+  const back = useSocialBack({
+    view,
+    toFeed: () => select("feed"),
+    exit: () => router.replace("/home"),
+  });
   function select(next: SocialView, contentKind?: typeof kind) {
     if (incomingPost && next !== "clips") {
       routedClip.current = false;
@@ -242,6 +249,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       );
     }
     setView(next);
+    back.entered(next);
     setOpened((previous) =>
       previous.includes(next) ? previous : [...previous, next],
     );
@@ -257,6 +265,14 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       .querySelectorAll<HTMLVideoElement>(".social-page video")
       .forEach((video) => video.pause());
   }
+  // Another page (Amigos) can ask to start a new Story right away.
+  useEffect(() => {
+    if (incomingCreate !== "story") return;
+    const timer = setTimeout(() => select("create", "STORY"), 0);
+    return () => clearTimeout(timer);
+    // select only reads refs and state setters; run once per request.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingCreate]);
   useEffect(() => {
     let alive = true;
     if (!searched) return;
@@ -308,53 +324,19 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     >
       <div className="social-page">
         <div className="social-workspace">
-          <header className="social-header">
-            <div className="social-header-brand">
-              <button
-                type="button"
-                className="icon-control"
-                aria-label="Criar publicação"
-                onClick={() => select("create")}
-              >
-                <Plus size={24} />
-              </button>
-              <h1>
-                Enturma <span>Social.</span>
-              </h1>
-            </div>
-            <div className="social-header-actions">
-              <button
-                type="button"
-                className="icon-control social-search-toggle"
-                aria-label="Abrir busca do Social"
-                aria-expanded={searchOpen}
-                onClick={() => {
-                  select("feed");
-                  setSearchOpen((value) => !value);
-                }}
-              >
-                <Search size={21} />
-              </button>
-              <button
-                type="button"
-                className="icon-control social-mobile-explore"
-                aria-label="Explorar"
-                onClick={() => setExplore(true)}
-              >
-                <Aperture size={21} aria-hidden="true" />
-              </button>
-              <button
-                className="icon-control"
-                aria-label="Preferências do Social"
-                onClick={() => setSettings(true)}
-              >
-                <Settings2 size={21} />
-              </button>
-            </div>
-          </header>
+          <SocialHeader
+            create={() => select("create")}
+            explore={() => setExplore(true)}
+            settings={() => setSettings(true)}
+          />
           {error && (
             <p className="social-error" role="alert">
               {error}
+            </p>
+          )}
+          {back.hint && (
+            <p className="social-exit-hint" role="status">
+              Volte de novo para sair do Social
             </p>
           )}
           <SocialPager
@@ -404,7 +386,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                         </div>
                         <form
                           noValidate
-                          className={`social-search ${searchOpen || searched ? "is-open" : ""}`}
+                          className={`social-search ${searched ? "is-open" : ""}`}
                           onSubmit={(event) => {
                             event.preventDefault();
                             setSearched(query.trim());

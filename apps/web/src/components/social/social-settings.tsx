@@ -4,6 +4,7 @@ import { ArrowDown, ArrowUp, BadgeCheck } from "lucide-react";
 import { api } from "@/lib/api";
 import { socialWrite, type SocialPreferences } from "@/lib/social";
 import { SocialDialog } from "./social-dialog";
+import { ExperiencePanel } from "../experience-controls";
 
 type Review = {
   id: string;
@@ -80,6 +81,13 @@ export function SocialSettings({
   return (
     <SocialDialog title="Seu Social, do seu jeito" close={close}>
       <div className="social-dialog-body social-settings">
+        <section
+          className="social-settings-appearance"
+          aria-labelledby="social-settings-appearance"
+        >
+          <h3 id="social-settings-appearance">Aparência e acessibilidade</h3>
+          <ExperiencePanel />
+        </section>
         <h3>Privacidade e reprodução</h3>
         {[
           [

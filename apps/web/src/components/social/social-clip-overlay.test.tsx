@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import type { SocialPost as Post } from "@/lib/social";
 import { SocialClipOverlay } from "./social-clip-overlay";
 import { post, video } from "./social-test-kit";
@@ -74,4 +74,53 @@ it("anima o coração ao curtir o Clip, mas não ao descurtir", () => {
   expect(animate).not.toHaveBeenCalled();
   vi.unstubAllGlobals();
   delete (HTMLElement.prototype as { animate?: unknown }).animate;
+});
+
+function renderSeekable(seek = vi.fn(), progress = 0.4) {
+  render(
+    <SocialClipOverlay
+      item={post("c1", { kind: "CLIP", media: [video("v1")] })}
+      me="me"
+      person={() => {}}
+      changed={() => {}}
+      progress={progress}
+      duration={6}
+      seek={seek}
+    />,
+  );
+  return seek;
+}
+
+it("a bolinha de tempo só aparece depois de tocar na barrinha", () => {
+  renderSeekable();
+  expect(screen.queryByRole("slider", { name: "Avançar ou voltar o Clip" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar controle de tempo do Clip" }));
+  const slider = screen.getByRole("slider", { name: "Avançar ou voltar o Clip" });
+  expect(slider).toHaveAttribute("aria-valuetext", "0:02 de 0:06");
+  expect(screen.getByText("0:02")).toBeInTheDocument();
+  expect(screen.getByText("0:06")).toBeInTheDocument();
+});
+
+it("arrastar a bolinha adianta ou volta o Clip", () => {
+  const seek = renderSeekable();
+  fireEvent.click(screen.getByRole("button", { name: "Mostrar controle de tempo do Clip" }));
+  const slider = screen.getByRole("slider", { name: "Avançar ou voltar o Clip" });
+  fireEvent.change(slider, { target: { value: "750" } });
+  expect(seek).toHaveBeenLastCalledWith(0.75);
+  fireEvent.change(slider, { target: { value: "100" } });
+  expect(seek).toHaveBeenLastCalledWith(0.1);
+});
+
+it("a bolinha some sozinha depois de um tempo parada", () => {
+  vi.useFakeTimers();
+  try {
+    renderSeekable();
+    fireEvent.click(screen.getByRole("button", { name: "Mostrar controle de tempo do Clip" }));
+    act(() => {
+      vi.advanceTimersByTime(3500);
+    });
+    expect(screen.queryByRole("slider", { name: "Avançar ou voltar o Clip" })).toBeNull();
+  } finally {
+    vi.useRealTimers();
+  }
 });

@@ -8,6 +8,7 @@ import { api } from "@/lib/api";
 import { Check, Gamepad2, MailCheck } from "lucide-react";
 import { NotificationBell } from "./notifications";
 import { ExperienceControls } from "./experience-controls";
+import { syncExperience } from "@/lib/experience-preferences";
 import { usePathname } from "next/navigation";
 import { useVisitor } from "@/lib/visitor-context";
 import {
@@ -127,6 +128,12 @@ export function Shell({
     };
   }, [visitor]);
 
+  // The Social has its own top bar; keep appearance preferences in sync without
+  // the app-wide bar (whose controls normally do this).
+  useEffect(() => {
+    if (inSocial && !visitor) void syncExperience().catch(() => {});
+  }, [inSocial, visitor]);
+
   useEffect(() => {
     if (!emailCelebration) return;
     const tick = window.setInterval(() => {
@@ -199,10 +206,10 @@ export function Shell({
         </aside>
       )}
       <div className="workspace">
-        {!inRideHub ? (
+        {!inRideHub && !inSocial ? (
           <header className="topbar">
             <span>
-              {inSocial ? <Link href="/home" className="social-exit-link"><Home size={18} /> Início do Enturma</Link> : links.find((l) => l.href === path)?.label ?? "Seu espaço"}
+              {links.find((l) => l.href === path)?.label ?? "Seu espaço"}
             </span>
             <div className="topbar-actions">
               {visitor ? (

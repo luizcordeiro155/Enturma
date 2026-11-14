@@ -161,3 +161,17 @@ it("opens the same account identity on a new device without a separate chat pass
     identity,
   );
 });
+
+it("hands the phone the same conversation key, so it can decrypt notifications", async () => {
+  const { conversationKeyBytes } = await import("./private-chat-crypto");
+  const ana = await createIdentity();
+  const bia = await createIdentity();
+  const key = await conversationKey(ana, bia.publicKey, "friendship-1");
+  const sealed = await encryptMessage(key, "Bora estudar às 19h?", "friendship-1", "ana", "c1");
+  const raw = await conversationKeyBytes(bia, ana.publicKey, "friendship-1");
+  expect(raw).toHaveLength(32);
+  const imported = await crypto.subtle.importKey("raw", raw, "AES-GCM", false, ["decrypt"]);
+  expect(
+    await decryptMessage(imported, { ...sealed, senderId: "ana" }, "friendship-1"),
+  ).toBe("Bora estudar às 19h?");
+});

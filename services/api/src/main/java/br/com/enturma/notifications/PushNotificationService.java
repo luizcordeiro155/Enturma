@@ -126,7 +126,15 @@ public class PushNotificationService {
   }
 
 
-  private Delivery send(String deviceToken, PushRequested event, String title) throws Exception {
+  /** FCM data messages are limited to 4 KB; longer messages show the generic text. */
+  static final int MAX_PUSH_CIPHERTEXT = 2400;
+
+  /**
+   * The data sent to the phone. Private messages stay end-to-end encrypted: the
+   * payload carries the still-encrypted message so the recipient's phone can
+   * decrypt it with its own key and show it like a messenger. The body stays generic.
+   */
+  public Map<String, String> payload(PushRequested event, String title) {
     Map<String, String> data = new HashMap<>();
     data.put("title", title);
     data.put("body", event.message() == null ? "Você tem uma nova notificação." : event.message());
@@ -135,6 +143,52 @@ public class PushNotificationService {
     data.put("category", event.category() == null ? "ROOM_NOTICE" : event.category());
     data.put("showInForeground", Boolean.toString(!preferences.enabled(event.user(), event.category(), false)));
     if (event.target() != null) data.put("notificationId", event.target().toString());
+    if (("PRIVATE_MESSAGE".equals(event.kind()) || "MENTION".equals(event.kind()))
+        && event.target() != null) addPrivateMessage(data, event);
+    return data;
+  }
+
+  private void addPrivateMessage(Map<String, String> data, PushRequested event) {
+    var rows =
+        db.list(
+            "SELECT m.friendship_id,m.sender_id,m.client_id,m.ciphertext,m.iv,m.attachment_mime,"
+                + " m.media_kind,m.created_at,u.name FROM private_message m"
+                + " JOIN friendship f ON f.id=m.friendship_id AND f.status='ACCEPTED'"
+                + " AND (f.requester=? OR f.recipient=?)"
+                + " JOIN app_user u ON u.id=m.sender_id"
+                + " WHERE m.id=? AND m.deleted_at IS NULL AND m.sender_id<>?",
+            event.user(),
+            event.user(),
+            event.target(),
+            event.user());
+    if (rows.isEmpty()) return;
+    var row = rows.getFirst(); // Db.list returns camelCase keys.
+    data.put("conversation", row.get("friendshipId").toString());
+    data.put("messageId", event.target().toString());
+    data.put("senderId", row.get("senderId").toString());
+    data.put("senderName", String.valueOf(row.get("name")));
+    data.put("clientId", String.valueOf(row.get("clientId")));
+    try {
+      // Db.list turns timestamps into ISO-8601 text.
+      data.put(
+          "sentAt",
+          Long.toString(java.time.Instant.parse(String.valueOf(row.get("createdAt"))).toEpochMilli()));
+    } catch (RuntimeException ignored) {
+      // The phone falls back to the time it received the push.
+    }
+    if (row.get("attachmentMime") != null)
+      data.put("attachmentMime", String.valueOf(row.get("attachmentMime")));
+    if (row.get("mediaKind") != null) data.put("mediaKind", String.valueOf(row.get("mediaKind")));
+    String ciphertext = (String) row.get("ciphertext");
+    String iv = (String) row.get("iv");
+    if (ciphertext != null && iv != null && ciphertext.length() <= MAX_PUSH_CIPHERTEXT) {
+      data.put("ciphertext", ciphertext);
+      data.put("iv", iv);
+    }
+  }
+
+  private Delivery send(String deviceToken, PushRequested event, String title) throws Exception {
+    Map<String, String> data = payload(event, title);
 
     Map<String, Object> message = new HashMap<>();
     message.put("token", deviceToken);

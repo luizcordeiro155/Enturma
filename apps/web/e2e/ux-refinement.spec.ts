@@ -52,10 +52,15 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
   await authenticate(otherContext, bob);
   for (const p of [page, other]) {
     await p.goto("/friends");
-    await p.getByText("Chaves e backup das conversas").click();
+    await p.getByRole("button", { name: "Mais opções" }).click();
+    await p
+      .getByRole("menuitem", { name: "Chaves e backup das conversas" })
+      .click();
     await expect(
       p.getByRole("button", { name: "Baixar backup cifrado" }),
     ).toBeEnabled();
+    // Keys and backup now live in a dialog behind ⋮; close it to continue.
+    await p.keyboard.press("Escape");
   }
   const invitation = await request.post(`${backend}/api/v1/friends`, {
     headers: { Authorization: `Bearer ${alice.accessToken}` },

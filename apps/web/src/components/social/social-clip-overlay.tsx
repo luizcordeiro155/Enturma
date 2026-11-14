@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Bookmark,
   Heart,
@@ -32,12 +32,18 @@ export function SocialClipOverlay({
   person,
   changed,
   progress,
+  duration = 0,
+  seek,
 }: {
   item: Post;
   me: string;
   person: (id: string) => void;
   changed: (p: Post) => void;
   progress: number;
+  /** Length of the Clip in seconds, once known. */
+  duration?: number;
+  /** Jumps to a point of the Clip (0 to 1). */
+  seek?: (fraction: number) => void;
 }) {
   const [dialog, setDialog] = useState<"comments" | "share" | "more" | null>(
       null,
@@ -151,6 +157,9 @@ export function SocialClipOverlay({
       >
         <span style={{ width: `${percent}%` }} />
       </div>
+      {seek && duration > 0 && (
+        <ClipScrubber progress={progress} duration={duration} seek={seek} />
+      )}
       {dialog === "comments" && (
         <SocialComments
           item={item}
@@ -171,6 +180,86 @@ export function SocialClipOverlay({
           close={() => setDialog(null)}
         />
       )}
+    </div>
+  );
+}
+
+function clock(seconds: number) {
+  const whole = Math.max(0, Math.floor(seconds));
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
+}
+
+/**
+ * Tapping the thin progress line reveals a handle to move through the Clip,
+ * with the current time and the length on each side, like Instagram Reels.
+ * It hides again after a few seconds without use.
+ */
+function ClipScrubber({
+  progress,
+  duration,
+  seek,
+}: {
+  progress: number;
+  duration: number;
+  seek: (fraction: number) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [dragging, setDragging] = useState<number | null>(null);
+  const timer = useRef<number | undefined>(undefined);
+  useEffect(() => () => window.clearTimeout(timer.current), []);
+  function keepOpen() {
+    window.clearTimeout(timer.current);
+    timer.current = window.setTimeout(() => {
+      setOpen(false);
+      setDragging(null);
+    }, 3000);
+  }
+  const fraction = Math.min(1, Math.max(0, dragging ?? progress ?? 0));
+  const stop = (event: React.SyntheticEvent) => event.stopPropagation();
+  if (!open)
+    return (
+      <button
+        type="button"
+        className="social-clip-progress-hit"
+        aria-label="Mostrar controle de tempo do Clip"
+        data-social-gesture="ignore"
+        onPointerDown={stop}
+        onClick={(event) => {
+          event.stopPropagation();
+          const box = event.currentTarget.getBoundingClientRect();
+          if (box.width > 0 && event.clientX > 0)
+            seek((event.clientX - box.left) / box.width);
+          setOpen(true);
+          keepOpen();
+        }}
+      />
+    );
+  return (
+    <div
+      className="social-clip-scrubber"
+      data-social-gesture="ignore"
+      onPointerDown={stop}
+      onClick={stop}
+    >
+      <span className="social-clip-time">{clock(fraction * duration)}</span>
+      <input
+        type="range"
+        min={0}
+        max={1000}
+        step={1}
+        value={Math.round(fraction * 1000)}
+        aria-label="Avançar ou voltar o Clip"
+        aria-valuetext={`${clock(fraction * duration)} de ${clock(duration)}`}
+        onChange={(event) => {
+          const next = Number(event.target.value) / 1000;
+          setDragging(next);
+          seek(next);
+          keepOpen();
+        }}
+        onPointerUp={() => setDragging(null)}
+        onKeyDown={keepOpen}
+      />
+      <span className="social-clip-time">{clock(duration)}</span>
     </div>
   );
 }

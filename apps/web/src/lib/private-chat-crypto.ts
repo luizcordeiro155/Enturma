@@ -109,11 +109,7 @@ export async function createIdentity(): Promise<Identity> {
 export function publicFields(key: JsonWebKey) {
   return { kty: key.kty!, crv: key.crv!, x: key.x!, y: key.y! };
 }
-export async function conversationKey(
-  identity: Identity,
-  peer: JsonWebKey,
-  thread: string,
-) {
+async function conversationMaterial(identity: Identity, peer: JsonWebKey) {
   const privateKey = await crypto.subtle.importKey(
     "jwk",
     identity.privateKey,
@@ -133,20 +129,48 @@ export async function conversationKey(
     privateKey,
     256,
   );
-  const material = await crypto.subtle.importKey("raw", secret, "HKDF", false, [
+  return crypto.subtle.importKey("raw", secret, "HKDF", false, [
     "deriveKey",
+    "deriveBits",
   ]);
+}
+function conversationHkdf(thread: string) {
+  return {
+    name: "HKDF",
+    hash: "SHA-256",
+    salt: enc.encode(thread),
+    info: enc.encode("enturma-private-v1"),
+  };
+}
+export async function conversationKey(
+  identity: Identity,
+  peer: JsonWebKey,
+  thread: string,
+) {
   return crypto.subtle.deriveKey(
-    {
-      name: "HKDF",
-      hash: "SHA-256",
-      salt: enc.encode(thread),
-      info: enc.encode("enturma-private-v1"),
-    },
-    material,
+    conversationHkdf(thread),
+    await conversationMaterial(identity, peer),
     { name: "AES-GCM", length: 256 },
     false,
     ["encrypt", "decrypt"],
+  );
+}
+/**
+ * The same AES-256 key as conversationKey, as bytes. Only for the Android app,
+ * which keeps it under the Android Keystore to decrypt message notifications on
+ * the phone; it never leaves the device.
+ */
+export async function conversationKeyBytes(
+  identity: Identity,
+  peer: JsonWebKey,
+  thread: string,
+) {
+  return new Uint8Array(
+    await crypto.subtle.deriveBits(
+      conversationHkdf(thread),
+      await conversationMaterial(identity, peer),
+      256,
+    ),
   );
 }
 export async function fingerprint(a: JsonWebKey, b: JsonWebKey) {

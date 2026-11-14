@@ -1789,9 +1789,18 @@ html[data-theme] .social-video-volume .social-media-sound {
     opacity 160ms ease;
 }
 .social-clip-controls .social-video-volume { position: relative; inset: auto; }
-.social-video-volume:is(:hover, :focus-within) .social-volume-slider {
+/* Phones: tap toggles sound, press and hold opens the volume (data-open).
+   Computers: hovering opens it; keyboard focus opens it too. */
+.social-video-volume[data-open="true"] .social-volume-slider,
+.social-video-volume:has(:focus-visible) .social-volume-slider {
   height: 100px;
   opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .social-video-volume:hover .social-volume-slider {
+    height: 100px;
+    opacity: 1;
+  }
 }
 html[data-theme] .social-volume-slider input[type="range"] {
   appearance: auto;
@@ -2065,4 +2074,277 @@ html[data-reduced-motion="true"]
 }
 html[data-reduced-motion="true"] button[aria-pressed="true"] > .lucide-heart {
   animation: none;
+}
+
+/* ---------- One Social top bar (the app-wide bar is hidden here) ---------- */
+html[data-theme] .social-page .social-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding-top: calc(6px + var(--enturma-safe-top));
+}
+.social-page .social-header-brand {
+  justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.social-page .social-header-actions {
+  justify-self: end;
+}
+html[data-theme] .social-back {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  transition:
+    background-color 0.18s ease,
+    transform 0.18s ease;
+}
+html[data-theme] .social-back:hover {
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+.social-back:active {
+  transform: scale(0.92);
+}
+.social-back:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+html[data-theme] .social-page .social-header h1.social-wordmark {
+  margin: 0;
+  font-family: "Grand Hotel", "Brush Script MT", cursive;
+  font-weight: 400;
+  font-size: 34px;
+  line-height: 1;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  text-shadow: none;
+  color: var(--ink);
+}
+/* Bare icons like Instagram: the generic Social .icon-control box comes later in
+   the cascade, so these need the extra specificity. */
+html[data-theme]
+  .social-page
+  .social-header
+  :is(.social-header-brand, .social-header-actions)
+  > .icon-control {
+  /* A global theme hotfix forces .icon-control surfaces with !important. */
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none;
+  color: var(--ink);
+}
+html[data-theme]
+  .social-page
+  .social-header
+  :is(.social-header-brand, .social-header-actions)
+  > .icon-control:hover {
+  background: color-mix(in srgb, var(--ink) 8%, transparent) !important;
+}
+@media (min-width: 761px) {
+  html[data-theme] .social-page .social-header {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+  }
+  html[data-theme] .social-page .social-header h1.social-wordmark {
+    justify-self: start;
+    padding-left: 6px;
+  }
+}
+@media (max-width: 760px) {
+  html[data-theme] .social-page .social-header h1.social-wordmark {
+    font-size: 31px;
+  }
+  .social-page .social-header-brand {
+    gap: 2px;
+  }
+}
+
+/* ---------- Your Story: tap to watch, press and hold for options ---------- */
+.social-story-own {
+  position: relative;
+  flex: none;
+}
+.social-stories .social-story {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+html[data-theme] .social-page .social-story-create:not(.has-story) .social-story-ring {
+  border-color: transparent;
+}
+.social-story-menu {
+  position: fixed;
+  z-index: 40;
+  display: grid;
+  min-width: 184px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 14px 34px color-mix(in srgb, #000 28%, transparent);
+  animation: social-story-menu-in 0.16s ease-out;
+}
+html[data-theme] .social-story-menu > :is(a, button) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+}
+html[data-theme] .social-story-menu > :is(a, button):is(:hover, :focus-visible) {
+  background: var(--soft);
+  outline: none;
+}
+@keyframes social-story-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+:root[data-reduced-motion="true"] .social-story-menu {
+  animation: none;
+}
+
+/* ---------- Back on the Feed: "press again to leave" ---------- */
+.social-exit-hint {
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(86px + var(--enturma-safe-bottom));
+  margin: 0;
+  padding: 10px 18px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink) 92%, transparent);
+  color: var(--bg);
+  font-size: 0.86rem;
+  font-weight: 650;
+  white-space: nowrap;
+  box-shadow: 0 10px 26px color-mix(in srgb, #000 30%, transparent);
+  transform: translateX(-50%);
+  animation: social-exit-hint 0.2s ease-out;
+}
+@media (min-width: 761px) {
+  .social-exit-hint {
+    bottom: 28px;
+  }
+}
+@keyframes social-exit-hint {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+}
+:root[data-reduced-motion="true"] .social-exit-hint {
+  animation: none;
+}
+
+/* ---------- Clips: tap the progress line to scrub, like Reels ---------- */
+html[data-theme] .social-page button.social-clip-progress-hit {
+  position: absolute;
+  z-index: 5;
+  inset: auto 0 0;
+  height: 26px;
+  min-height: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  cursor: pointer;
+}
+.social-page .social-clip-scrubber {
+  position: absolute;
+  z-index: 6;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 12px 4px;
+  background: linear-gradient(transparent, #000a);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  animation: social-clip-scrubber-in 0.16s ease-out;
+}
+.social-clip-time {
+  min-width: 34px;
+  text-align: center;
+  text-shadow: 0 1px 2px #000a;
+}
+html[data-theme] .social-page .social-clip-scrubber input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: #fff;
+  cursor: pointer;
+}
+@keyframes social-clip-scrubber-in {
+  from {
+    opacity: 0;
+  }
+}
+:root[data-reduced-motion="true"] .social-clip-scrubber {
+  animation: none;
+}
+@media (min-width: 761px) {
+  html[data-theme] .social-page button.social-clip-progress-hit,
+  .social-page .social-clip-scrubber {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 2;
+    align-self: end;
+    width: 100%;
+  }
+}
+
+/* Small phones (320–380px): smaller icons and wordmark keep "Enturma" centred
+   without touching the actions. */
+@media (max-width: 380px) {
+  html[data-theme] .social-page .social-header {
+    gap: 4px;
+    padding-inline: 4px;
+  }
+  .social-page .social-header-actions,
+  .social-page .social-header-brand {
+    gap: 0;
+  }
+  html[data-theme]
+    .social-page
+    .social-header
+    :is(.social-header-brand, .social-header-actions)
+    > :is(a, button) {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 6px;
+  }
+  html[data-theme] .social-back {
+    width: 32px;
+    height: 32px;
+  }
+  html[data-theme] .social-page .social-header h1.social-wordmark {
+    font-size: 27px;
+  }
 }
