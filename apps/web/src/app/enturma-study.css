@@ -241,8 +241,8 @@ html[data-theme] .enturma-study button.study-day[aria-pressed="true"] {
   overflow: hidden;
   padding: 2px 4px;
   border-radius: 6px;
-  border-left: 3px solid var(--study-class);
-  background: var(--surface);
+  --kind: var(--study-class);
+  background: color-mix(in srgb, var(--kind) 16%, var(--surface));
   font-size: 0.68rem;
   font-weight: 600;
   text-align: left;
@@ -251,7 +251,7 @@ html[data-theme] .enturma-study button.study-day[aria-pressed="true"] {
 }
 .study-day-items span[data-kind="EXAM"],
 .study-day-items span[data-kind="ASSIGNMENT"] {
-  border-left-color: var(--study-exam);
+  --kind: var(--study-exam);
 }
 .study-legend {
   display: flex;
@@ -351,15 +351,16 @@ html[data-theme] .enturma-study button.study-day[aria-pressed="true"] {
   grid-template-columns: 96px minmax(0, 1fr);
   gap: 10px;
   padding: 10px 12px;
-  border-left: 4px solid var(--study-class);
+  --kind: var(--study-class);
+  border: 1px solid color-mix(in srgb, var(--kind) 35%, transparent);
   border-radius: 12px;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--kind) 8%, var(--surface));
 }
 .study-day-events > li[data-kind="EXAM"],
 .study-day-events > li[data-kind="ASSIGNMENT"],
 .study-day-events > li[data-kind="EVENT"],
 .study-list li[data-kind="EXAM"] {
-  border-left-color: var(--study-exam);
+  --kind: var(--study-exam);
 }
 .study-day-events > li[data-status="CANCELLED"] strong {
   text-decoration: line-through;
@@ -477,9 +478,10 @@ html[data-theme] .enturma-study .study-weekdays button[aria-pressed="true"] {
   display: grid;
   gap: 2px;
   padding: 10px 12px;
-  border-left: 4px solid var(--study-class);
+  --kind: var(--study-class);
+  border: 1px solid color-mix(in srgb, var(--kind) 35%, transparent);
   border-radius: 12px;
-  background: var(--soft);
+  background: color-mix(in srgb, var(--kind) 8%, var(--surface));
 }
 .study-list li span {
   color: var(--muted);
