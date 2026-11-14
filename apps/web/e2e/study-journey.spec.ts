@@ -150,13 +150,21 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
       ).ok(),
     ).toBe(true);
     await page.reload();
-    await expect(journey.getByText("3 de 3 concluídos")).toBeVisible();
-    await expect(journey.getByText("Nível 1 · 100 XP")).toBeVisible();
+    // A finished journey shrinks to one line, keeping the guide and the presentation.
     await expect(
-      journey.getByText("Jornada concluída. Bom estudo!"),
+      journey.getByText("Jornada concluída · Nível 1 · 100 XP"),
+    ).toBeVisible();
+    await expect(journey.getByRole("progressbar")).toHaveCount(0);
+    await expect(
+      journey.getByRole("button", { name: /Guia do Enturma/ }),
+    ).toBeVisible();
+    await expect(
+      journey.getByRole("button", { name: "Ver apresentação novamente" }),
     ).toBeVisible();
     await page.reload();
-    await expect(journey.getByText("Nível 1 · 100 XP")).toBeVisible();
+    await expect(
+      journey.getByText("Jornada concluída · Nível 1 · 100 XP"),
+    ).toBeVisible();
     // Read and unread notifications can be cleared together, and new ones still arrive.
     const insertNotice = () =>
       db.query(
@@ -196,7 +204,7 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
       );
     });
     await page.reload();
-    await expect(journey.getByText("3 de 3 concluídos")).toBeVisible();
+    await expect(journey.getByText(/Jornada concluída · Nível 1/)).toBeVisible();
     await page.screenshot({
       path: "../../.local/journey-desktop-dark.png",
       fullPage: true,
@@ -249,7 +257,7 @@ test("journey, tutorial, accessible motion and inbox clearing persist", async ({
       );
     });
     await page.reload();
-    await expect(journey.getByText("3 de 3 concluídos")).toBeVisible();
+    await expect(journey.getByText(/Jornada concluída · Nível 1/)).toBeVisible();
     await expect(page.locator(".onboarding-banner h2")).toBeVisible();
     await page.screenshot({
       path: "../../.local/journey-mobile-light.png",
