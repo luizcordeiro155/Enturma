@@ -46,6 +46,16 @@ export function SocialNavigation({
       ?.getBoundingClientRect();
     const changed = previous.current !== view;
     previous.current = view;
+    // A swipe changes the page without a tap: drop focus left on another destination so
+    // only the current page reads as selected.
+    const focused = document.activeElement as HTMLElement | null;
+    if (
+      changed &&
+      focused &&
+      navigation.current?.contains(focused) &&
+      focused !== active
+    )
+      focused.blur();
     const indicator = active.querySelector(".social-nav-selection");
     if (!changed || !from || !indicator) return;
     const animation = playMotion(

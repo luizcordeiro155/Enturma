@@ -111,7 +111,7 @@ html[data-theme] .social-navigation-items [aria-current="page"] {
   height: 28px;
   font-size: 10px;
 }
-html[data-theme] .social-create-action .social-nav-glyph {
+html[data-theme] .social-create-action[aria-current="page"] .social-nav-glyph {
   background: var(--accent);
   color: #143d32;
   border-radius: 10px;

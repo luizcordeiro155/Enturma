@@ -40,3 +40,19 @@ it("searches only through Explorar: there is no separate magnifier", () => {
   header();
   expect(screen.queryByRole("button", { name: "Abrir busca do Social" })).toBeNull();
 });
+
+it("outside the Feed the arrow returns to the Feed instead of leaving the Social", () => {
+  const toFeed = vi.fn();
+  render(<SocialHeader create={() => {}} explore={() => {}} settings={() => {}} back={toFeed} />);
+  expect(screen.queryByRole("link", { name: "Voltar ao início do Enturma" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Voltar ao Feed" }));
+  expect(toFeed).toHaveBeenCalledOnce();
+});
+
+it("tapping the Enturma wordmark refreshes the Feed", () => {
+  const refresh = vi.fn();
+  render(<SocialHeader create={() => {}} explore={() => {}} settings={() => {}} refresh={refresh} />);
+  fireEvent.click(screen.getByRole("button", { name: "Atualizar o Feed" }));
+  expect(refresh).toHaveBeenCalledOnce();
+  expect(screen.getByRole("heading", { level: 1, name: "Enturma Social." })).toBeInTheDocument();
+});

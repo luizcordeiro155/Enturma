@@ -220,3 +220,22 @@ it("respects reduced motion without delaying access", async () => {
   expect(state.claimSocialOpening).toHaveBeenCalledOnce();
   expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
 });
+
+it("ao deslizar para outra página, o botão tocado antes não continua marcado", () => {
+  const props = {
+    order: ["feed", "clips", "create"] as ("feed" | "clips" | "create")[],
+    highlight: null,
+    select: vi.fn(),
+    me: { id: "me", name: "Eu", username: "eu" },
+    profile: vi.fn(),
+    settings: vi.fn(),
+    explore: vi.fn(),
+  };
+  const page = render(<SocialNavigation {...props} view="feed" />);
+  const feed = screen.getByRole("button", { name: "Feed" });
+  feed.focus();
+  expect(feed).toHaveFocus();
+  page.rerender(<SocialNavigation {...props} view="clips" />);
+  expect(feed).not.toHaveFocus();
+  expect(screen.getAllByRole("button").filter((b) => b.getAttribute("aria-current") === "page")).toHaveLength(1);
+});

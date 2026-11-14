@@ -38,3 +38,28 @@ it("uma falha no envio conserva o texto e nao anuncia publicacao",async()=>{
   expect(await screen.findByRole("alert")).toHaveTextContent("Servidor indisponivel");
   expect(screen.getByRole("textbox",{name:/compartilhar/i})).toHaveValue("Nao perder meu texto");expect(published).not.toHaveBeenCalled();
 });
+const savedDraft={id:"d1",kind:"POST",body:"Rascunho com foto",updatedAt:new Date().toISOString(),coverId:"m1",coverKind:"IMAGE",coverState:"READY",mediaCount:1};
+function withSavedDraft(){api.mockImplementation((path:string,options?:RequestInit)=>{
+  if(options?.method)return Promise.resolve({version:1});
+  if(path==="/portfolio/me")return Promise.resolve({username:"eu",publicProfile:false,projects:[]});
+  if(path==="/social/drafts")return Promise.resolve([savedDraft]);
+  if(path==="/social/drafts/d1")return Promise.resolve({id:"d1",kind:"POST",body:"Rascunho com foto",visibility:"PUBLIC",version:3,
+    media:[{id:"m1",kind:"IMAGE",state:"READY",ordinal:0}]});
+  return Promise.resolve([]);
+});}
+it("remover a ultima midia volta para Escolher em vez de ficar em Editar",async()=>{
+  withSavedDraft();editor();
+  fireEvent.click(await screen.findByRole("button",{name:/Abrir rascunho: Rascunho com foto/}));
+  const region=screen.getByRole("region",{name:"Central de criação"});
+  await waitFor(()=>expect(region).toHaveAttribute("data-step","edit"));
+  fireEvent.click(screen.getByRole("button",{name:"Remover mídia 1"}));
+  await waitFor(()=>expect(region).toHaveAttribute("data-step","pick"));
+  expect(api).toHaveBeenCalledWith("/social/media/m1",expect.objectContaining({method:"DELETE"}));
+});
+it("exclui um rascunho salvo pela API e o tira da lista",async()=>{
+  withSavedDraft();editor();
+  fireEvent.click(await screen.findByRole("button",{name:"Excluir rascunho"}));
+  fireEvent.click(screen.getByRole("button",{name:"Excluir de vez"}));
+  await waitFor(()=>expect(screen.queryByRole("list",{name:"Rascunhos salvos"})).toBeNull());
+  expect(api).toHaveBeenCalledWith("/social/posts/d1",expect.objectContaining({method:"DELETE"}));
+});

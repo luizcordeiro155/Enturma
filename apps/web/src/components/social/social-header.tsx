@@ -13,22 +13,40 @@ export function SocialHeader({
   create,
   explore,
   settings,
+  back,
+  refresh,
 }: {
   create: () => void;
   explore: () => void;
   settings: () => void;
+  /** Away from the Feed, the arrow returns to the Feed; only the Feed leads home. */
+  back?: () => void;
+  /** Tapping the wordmark brings fresh posts, like Instagram. */
+  refresh?: () => void;
 }) {
   return (
     <header className="social-header">
       <div className="social-header-brand">
-        <NavigationLink
-          href="/home"
-          className="social-back"
-          aria-label="Voltar ao início do Enturma"
-          title="Início do Enturma"
-        >
-          <ChevronLeft size={22} aria-hidden="true" />
-        </NavigationLink>
+        {back ? (
+          <button
+            type="button"
+            className="social-back"
+            aria-label="Voltar ao Feed"
+            title="Voltar ao Feed"
+            onClick={back}
+          >
+            <ChevronLeft size={22} aria-hidden="true" />
+          </button>
+        ) : (
+          <NavigationLink
+            href="/home"
+            className="social-back"
+            aria-label="Voltar ao início do Enturma"
+            title="Início do Enturma"
+          >
+            <ChevronLeft size={22} aria-hidden="true" />
+          </NavigationLink>
+        )}
         <button
           type="button"
           className="icon-control"
@@ -39,7 +57,18 @@ export function SocialHeader({
         </button>
       </div>
       <h1 className="social-wordmark" aria-label="Enturma Social.">
-        Enturma
+        {refresh ? (
+          <button
+            type="button"
+            className="social-wordmark-refresh"
+            aria-label="Atualizar o Feed"
+            onClick={refresh}
+          >
+            Enturma
+          </button>
+        ) : (
+          "Enturma"
+        )}
       </h1>
       <div className="social-header-actions">
         <button

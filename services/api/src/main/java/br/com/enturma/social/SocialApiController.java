@@ -152,6 +152,12 @@ public class SocialApiController {
     return posts.viewers(a, id, page);
   }
 
+  @GetMapping("/hashtags")
+  public Object hashtags(
+      @AuthenticationPrincipal Actor a, @RequestParam(defaultValue = "") String q) {
+    return posts.hashtags(a, q);
+  }
+
   @GetMapping("/people")
   public Object search(
       @AuthenticationPrincipal Actor a, @RequestParam(defaultValue = "") String q) {

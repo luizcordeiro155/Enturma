@@ -1,13 +1,13 @@
 "use client";
 import { SocialMentionInput } from "./social-mention-input";
 import { SocialDraftPreview } from "./social-draft-preview";
+import { SocialDraftsShelf, type SavedDraft } from "./social-drafts-shelf";
 /* eslint-disable @next/next/no-img-element -- local files and authenticated media */
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   ArrowRight,
   Camera,
-  CloudUpload,
   Film,
   ImagePlus,
   Save,
@@ -184,9 +184,7 @@ export function SocialEditor({
   onProgress?: (progress: SocialEditorProgress) => void;
 }) {
   const [draft, setDraft] = useState<SocialDraft | null>(null),
-    [savedDrafts, setSavedDrafts] = useState<
-      { id: string; body: string; kind: string }[]
-    >([]);
+    [savedDrafts, setSavedDrafts] = useState<SavedDraft[]>([]);
   const [portfolio, setPortfolio] = useState<Portfolio>(),
     [portfolioError, setPortfolioError] = useState("");
   const [error, setError] = useState(""),
@@ -532,7 +530,16 @@ export function SocialEditor({
       await localSocialDraft(user, work).catch(() => {});
       if (!alive.current) return;
       setSavedDrafts((previous) => [
-        { id: work.id, kind: work.kind, body: work.body },
+        {
+          id: work.id,
+          kind: work.kind,
+          body: work.body,
+          updatedAt: new Date().toISOString(),
+          mediaCount: work.files.length,
+          coverId: work.files[0]?.media?.id ?? null,
+          coverKind: work.files[0]?.media?.kind ?? null,
+          coverState: work.files[0]?.media?.state ?? null,
+        },
         ...previous.filter((value) => value.id !== work.id),
       ]);
       if (publishAfter) {
@@ -636,6 +643,29 @@ export function SocialEditor({
       if (alive.current) setBusy(false);
     }
   }
+  async function deleteSaved(id: string) {
+    if (busyRef.current) return;
+    busyRef.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      await socialWrite(`/posts/${id}`, undefined, "DELETE");
+      if (!alive.current) return;
+      setSavedDrafts((previous) => previous.filter((value) => value.id !== id));
+      // Deleting the draft that is open here leaves a clean editor behind.
+      if (current.current?.id === id) {
+        await localSocialDraft(user, null).catch(() => {});
+        setDraft({ ...emptySocialDraft(), kind: current.current.kind });
+        setStep("pick");
+      }
+      setStatus("Rascunho excluído.");
+    } catch (cause) {
+      if (alive.current) setError((cause as Error).message);
+    } finally {
+      busyRef.current = false;
+      if (alive.current) setBusy(false);
+    }
+  }
   async function remove(item: DraftFile) {
     if (!draft || busyRef.current) return;
     busyRef.current = true;
@@ -644,7 +674,8 @@ export function SocialEditor({
     try {
       if (item.media)
         await socialWrite(`/media/${item.id}`, undefined, "DELETE");
-      if (alive.current)
+      if (alive.current) {
+        const remaining = draft.files.filter((file) => file.id !== item.id);
         setDraft((value) =>
           value
             ? {
@@ -653,6 +684,12 @@ export function SocialEditor({
               }
             : value,
         );
+        // With nothing left to edit, the flow starts again at Escolher.
+        if (!remaining.length) {
+          setStep("pick");
+          setReviewIndex(0);
+        }
+      }
     } catch (cause) {
       if (alive.current) setError((cause as Error).message);
     } finally {
@@ -834,32 +871,20 @@ export function SocialEditor({
               </button>
             </div>
           </div>
-          {!!savedDrafts.length && (
-            <details>
-              <summary>
-                <CloudUpload size={16} />
-                Rascunhos salvos na conta
-              </summary>
-              {savedDrafts.map((saved) => (
-                <button
-                  className="secondary"
-                  key={saved.id}
-                  disabled={busy}
-                  onClick={() => {
-                    if (draft.body || draft.files.length) {
-                      setError(
-                        "Salve seu rascunho atual e use Novo rascunho antes de abrir outro.",
-                      );
-                      return;
-                    }
-                    void load(saved.id);
-                  }}
-                >
-                  {saved.kind} · {saved.body.slice(0, 70) || "Sem legenda"}
-                </button>
-              ))}
-            </details>
-          )}
+          <SocialDraftsShelf
+            drafts={savedDrafts}
+            busy={busy}
+            onDelete={(id) => void deleteSaved(id)}
+            onOpen={(id) => {
+              if (draft.id !== id && (draft.body || draft.files.length)) {
+                setError(
+                  "Salve seu rascunho atual e use Novo rascunho antes de abrir outro.",
+                );
+                return;
+              }
+              void load(id);
+            }}
+          />
         </div>
         <div hidden={step !== "edit"} className="social-create-edit">
           {draft.files.map((item, index) => (
