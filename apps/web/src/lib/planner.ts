@@ -129,7 +129,28 @@ export const planner = {
   calendar: (from: string, to: string) =>
     api<Calendar>(`/planner/calendar?from=${from}&to=${to}`, { cache: "no-store" }),
   routine: () => api<Routine>("/planner/routine", { cache: "no-store" }),
-  saveRoutine: (routine: Routine) => api<Routine>("/planner/routine", json(routine, "PUT")),
+  saveRoutine: (routine: Routine) =>
+    api<Routine>(
+      "/planner/routine",
+      // The API rejects unknown fields, so send exactly the editable ones.
+      json(
+        {
+          timezone: routine.timezone,
+          defaultStart: routine.defaultStart,
+          defaultEnd: routine.defaultEnd,
+          weekdays: routine.weekdays,
+          semesterStart: routine.semesterStart,
+          semesterEnd: routine.semesterEnd,
+          classReminderMinutes: routine.classReminderMinutes,
+          quietStart: routine.quietStart,
+          quietEnd: routine.quietEnd,
+          tutorPersonality: routine.tutorPersonality,
+          state: routine.state,
+          city: routine.city,
+        },
+        "PUT",
+      ),
+    ),
   addClasses: (body: {
     subjectId: string;
     weekdays: number[];

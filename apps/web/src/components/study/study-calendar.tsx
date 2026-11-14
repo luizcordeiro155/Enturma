@@ -69,7 +69,7 @@ export function StudyCalendar({
     holidayByDay.set(holiday.date, [...(holidayByDay.get(holiday.date) ?? []), holiday]);
   const title =
     view === "month"
-      ? `${MONTHS[base.getMonth()]} de ${base.getFullYear()}`
+      ? `${MONTHS[base.getMonth()][0].toUpperCase()}${MONTHS[base.getMonth()].slice(1)} de ${base.getFullYear()}`
       : `Semana de ${dayLabel(cells[0].date)}`;
   return (
     <div className="study-calendar" data-view={view}>
@@ -94,15 +94,17 @@ export function StudyCalendar({
               </button>
             ))}
           </div>
-          <button type="button" className="study-icon" aria-label="Anterior" onClick={() => move(-1)}>
-            <ChevronLeft size={18} />
-          </button>
-          <strong className="study-calendar-title" aria-live="polite">
-            {title}
-          </strong>
-          <button type="button" className="study-icon" aria-label="Próximo" onClick={() => move(1)}>
-            <ChevronRight size={18} />
-          </button>
+          <div className="study-calendar-nav">
+            <button type="button" className="study-icon" aria-label="Anterior" onClick={() => move(-1)}>
+              <ChevronLeft size={18} />
+            </button>
+            <strong className="study-calendar-title" aria-live="polite">
+              {title}
+            </strong>
+            <button type="button" className="study-icon" aria-label="Próximo" onClick={() => move(1)}>
+              <ChevronRight size={18} />
+            </button>
+          </div>
           <button type="button" className="study-today" onClick={goToday}>
             Hoje
           </button>

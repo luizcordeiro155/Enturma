@@ -114,10 +114,14 @@ html[data-palette="enturma"] {
   gap: 6px;
   flex-wrap: wrap;
 }
+.study-calendar-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
 .study-calendar-title {
   min-width: 132px;
   text-align: center;
-  text-transform: capitalize;
   font-variant-numeric: tabular-nums;
 }
 html[data-theme] .enturma-study button.study-icon,
@@ -540,6 +544,17 @@ html[data-theme] .enturma-study .study-weekdays button[aria-pressed="true"] {
 @media (max-width: 520px) {
   .study-card {
     padding: 14px;
+  }
+  .study-calendar-controls {
+    width: 100%;
+  }
+  .study-calendar-nav {
+    order: -1;
+    flex: 1 0 100%;
+    justify-content: space-between;
+  }
+  .study-calendar-controls .study-today {
+    margin-left: auto;
   }
   .study-calendar-weekdays,
   .study-calendar-grid {
