@@ -1,4 +1,5 @@
 "use client";
+import { FriendsChatPlaceholder, useEscapeClosesChat } from "./friends-desktop";
 import { usePrivateTyping } from "@/lib/use-private-typing";
 import { useMobileWebChatViewport } from "@/lib/use-room-browser-viewport";
 import { TypingIndicator } from "./typing-indicator";
@@ -565,6 +566,7 @@ export function Friends() {
     setNativeChatComposerFocused(false);
     router.replace("/friends", { scroll: false });
   }, [router]);
+  useEscapeClosesChat(Boolean(selected), closeConversation);
 
   useEffect(() => {
     const root = document.documentElement;
@@ -1614,7 +1616,7 @@ export function Friends() {
                 </form>
               </>
             ) : (
-              <p>Escolha um amigo para conversar.</p>
+              <FriendsChatPlaceholder />
             )}
           </section>
         </div>
