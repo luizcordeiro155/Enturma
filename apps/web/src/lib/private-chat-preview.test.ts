@@ -65,3 +65,19 @@ it("never shows text it could not authenticate", async () => {
 it("has nothing to show for an empty conversation", async () => {
   expect(await latestPreview([], "me", async () => "")).toBeNull();
 });
+
+it("names a GIF or a shared Social post instead of showing the raw link", async () => {
+  const at = "2026-11-14T10:00:00Z";
+  const gif = await latestPreview([row("g", at)], "me", async () =>
+    "https://static.klipy.com/ii/c3a19a0b747a76e/aa/bb.gif",
+  );
+  expect(gif).toMatchObject({ text: "GIF" });
+  const shared = await latestPreview([row("p", at)], "me", async () =>
+    "https://enturma-flax.vercel.app/social?post=8a6c2f9e-0000-4000-8000-000000000001",
+  );
+  expect(shared).toMatchObject({ text: "Publicação do Social" });
+  const talk = await latestPreview([row("t", at)], "me", async () =>
+    "olha isso https://enturma-flax.vercel.app/social?post=8a6c2f9e-0000-4000-8000-000000000001",
+  );
+  expect(talk).toMatchObject({ text: "olha isso https://enturma-flax.vercel.app/social?post=8a6c2f9e-0000-4000-8000-000000000001" });
+});

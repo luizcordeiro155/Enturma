@@ -3,6 +3,9 @@
  * end-to-end encrypted: the text is decrypted here, on the person's device, with
  * the same conversation key used when the chat is opened.
  */
+import { providerMessageUrl } from "./klipy";
+import { sharedSocialPostId } from "./social-stream-state";
+
 export type PreviewRow = {
   id: string;
   createdAt: string;
@@ -30,8 +33,16 @@ export async function latestPreview<Row extends PreviewRow>(
   return {
     id: newest.id,
     mine: newest.senderId === me,
-    text: text.trim() || attachmentLabel(newest),
+    text: textLabel(text.trim()) || attachmentLabel(newest),
   };
+}
+
+/** A message that is only a GIF or a shared post reads as such, like WhatsApp. */
+function textLabel(text: string) {
+  if (!text) return "";
+  if (providerMessageUrl(text)) return "GIF";
+  if (/^\S+$/.test(text) && sharedSocialPostId(text)) return "Publicação do Social";
+  return text;
 }
 
 function attachmentLabel(row: PreviewRow) {
