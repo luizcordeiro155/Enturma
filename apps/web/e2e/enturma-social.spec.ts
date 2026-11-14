@@ -167,15 +167,21 @@ test("Social navigation: mobile dock, academic menu and opening once per app doc
     ).toBe(true);
   }
   await page.setViewportSize({ width: 390, height: 844 });
-  // The phone's Back stays inside the Social: Clips returns to the Feed, and the
-  // Feed only warns on the first Back.
+  // Inside the Social everything returns to the Feed: the phone's Back and the
+  // arrows on Clips and Criar.
   await social.getByRole("button", { name: "Clips", exact: true }).click();
   await page.goBack();
   await expect(
     social.getByRole("button", { name: "Feed", exact: true }),
   ).toHaveAttribute("aria-current", "page");
-  await page.goBack();
-  await expect(page.getByText("Volte de novo para sair do Social")).toBeVisible();
+  await social.getByRole("button", { name: "Criar", exact: true }).click();
+  await page
+    .locator(".social-header")
+    .getByRole("button", { name: "Voltar ao Feed" })
+    .click();
+  await expect(
+    social.getByRole("button", { name: "Feed", exact: true }),
+  ).toHaveAttribute("aria-current", "page");
   await expect(page).toHaveURL(/\/social/);
   // One top bar: the app-wide bar is hidden and the Social bar leads home.
   await expect(page.locator(".topbar")).toHaveCount(0);

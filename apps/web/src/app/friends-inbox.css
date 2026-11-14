@@ -410,3 +410,134 @@ dialog.friends-security-dialog::backdrop {
     transition: none;
   }
 }
+/* ---------- Amigos on wide screens: WhatsApp Web style, edge to edge ----------
+   List and conversation fill the whole work area, with or without an open chat. */
+@media (min-width: 1000px) {
+  html[data-enturma-friends="true"] {
+    height: 100%;
+    overflow: hidden !important;
+    scrollbar-gutter: auto !important;
+  }
+  html[data-enturma-friends="true"] body {
+    height: 100dvh;
+    overflow: hidden !important;
+    scrollbar-gutter: auto !important;
+  }
+  html[data-enturma-friends="true"] .app-shell:not(.ride-active-shell) {
+    height: calc(100dvh - var(--private-desktop-titlebar, 0px)) !important;
+    min-height: 0 !important;
+    max-height: calc(100dvh - var(--private-desktop-titlebar, 0px)) !important;
+    overflow: hidden !important;
+  }
+  html[data-desktop-chrome="true"][data-enturma-friends="true"] {
+    --private-desktop-titlebar: 32px;
+  }
+  html[data-enturma-friends="true"] .app-shell > .workspace {
+    min-height: 0 !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+  }
+  html[data-enturma-friends="true"] .workspace > .app-legal-footer {
+    display: none !important;
+  }
+  html[data-enturma-friends="true"] .workspace > main {
+    flex: 1 1 auto;
+    min-height: 0 !important;
+    height: auto !important;
+    overflow: hidden !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  html[data-theme][data-enturma-friends="true"] .friends-page {
+    position: relative;
+    display: flex !important;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+  }
+  /* Status lines stay readable by screen readers without opening a gap above the panes. */
+  html[data-theme][data-enturma-friends="true"] .friends-page > p[role="status"] {
+    position: absolute !important;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+    margin: 0;
+  }
+  html[data-theme][data-enturma-friends="true"] .friends-page > .friends-workspace {
+    display: grid !important;
+    grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+    gap: 0 !important;
+    flex: 1 1 auto;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden !important;
+    border: 0;
+    border-radius: 0;
+  }
+  html[data-theme][data-enturma-friends="true"] .friends-page > .friends-workspace > aside {
+    display: block !important;
+    min-height: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 16px 12px;
+    border-right: 1px solid var(--border);
+  }
+  html[data-theme][data-enturma-friends="true"] .friends-page > .friends-workspace > .private-chat {
+    display: flex !important;
+    flex-direction: column;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    overflow: hidden !important;
+  }
+  html[data-theme] .friends-page.mobile-private-chat-open .private-chat-header > button.private-chat-back {
+    display: none !important;
+  }
+}
+.friends-empty-chat { display: none; }
+@media (min-width: 761px) {
+  html[data-theme] .friends-page .private-chat > .friends-empty-chat {
+    display: grid;
+    place-content: center;
+    justify-items: center;
+    gap: 10px;
+    min-height: 100%;
+    padding: 32px;
+    text-align: center;
+    animation: friends-empty-in 0.4s ease both;
+  }
+  .friends-empty-chat-mark {
+    display: grid;
+    place-items: center;
+    width: 76px;
+    height: 76px;
+    margin-bottom: 6px;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--soft);
+    color: var(--ink);
+  }
+  html[data-theme] .friends-empty-chat h2 { margin: 0; font-size: 1.3rem; color: var(--ink); }
+  .friends-empty-chat p { max-width: 34ch; margin: 0; color: var(--muted); line-height: 1.5; }
+  .friends-empty-chat small { display: inline-flex; align-items: center; gap: 6px; margin-top: 8px; color: var(--muted); font-size: 0.8rem; }
+}
+@keyframes friends-empty-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { html[data-theme] .friends-page .private-chat > .friends-empty-chat { animation: none; } }

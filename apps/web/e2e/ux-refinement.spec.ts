@@ -92,10 +92,15 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
       const main = document.querySelector(".workspace > main")!;
       const messageList = document.querySelector(".private-messages")!;
       const composer = document.querySelector(".private-composer")!;
+      const list = document.querySelector(".friends-workspace > aside")!;
       const wr = workspace.getBoundingClientRect(),
-        cr = chat.getBoundingClientRect();
+        cr = chat.getBoundingClientRect(),
+        lr = list.getBoundingClientRect();
       return {
-        leftGap: Math.abs(cr.left - wr.left),
+        // Wide screens show Amigos like WhatsApp Web: the list at the edge, the chat beside it.
+        listLeftGap: Math.abs(lr.left - wr.left),
+        listWidth: lr.width,
+        leftGap: Math.abs(cr.left - lr.right),
         rightGap: Math.abs(cr.right - wr.right),
         documentOverflow:
           document.documentElement.scrollHeight - window.innerHeight,
@@ -105,6 +110,8 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
         messageScroll: getComputedStyle(messageList).overflowY,
       };
     });
+    expect(shellMetrics.listLeftGap).toBeLessThan(2);
+    expect(shellMetrics.listWidth).toBeGreaterThanOrEqual(300);
     expect(shellMetrics.leftGap).toBeLessThan(2);
     expect(shellMetrics.rightGap).toBeLessThan(2);
     expect(shellMetrics.documentOverflow).toBeLessThanOrEqual(2);
@@ -116,7 +123,8 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     const headerBounds = await header.boundingBox();
     expect(headerBounds!.height).toBeLessThanOrEqual(65);
     const back = header.getByRole("button", { name: "Voltar para conversas" });
-    await expect(back).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+    // Wide screens keep the list beside the chat, so there is no back button (Esc closes).
+    await expect(back).toBeHidden();
     await expect(header.locator(".private-call-buttons button")).toHaveCount(2);
 
     const send = async (text: string) => {

@@ -7,6 +7,7 @@ import {
   type SocialPost as Post,
 } from "@/lib/social";
 import { pullRefreshes } from "@/lib/social-media";
+import { SocialPullRefresh } from "./social-pull-refresh";
 import { SocialPost } from "./social-post";
 import { useLiveRefresh } from "@/lib/live-updates";
 import { mergeFreshPosts } from "@/lib/social-stream-state";
@@ -165,6 +166,13 @@ export function SocialStream({
     latest = useRef(stream.load),
     pull = useRef<{ x: number; y: number } | null>(null);
   const [newContent, setNewContent] = useState(false);
+  const [pulled, setPulled] = useState(0);
+  const [refreshing, setRefreshing] = useState(false);
+  const refreshNow = useCallback(() => {
+    setNewContent(false);
+    setRefreshing(true);
+    void latest.current(true).finally(() => setRefreshing(false));
+  }, []);
   useEffect(() => {
     latest.current = stream.load;
   }, [stream.load]);
@@ -195,10 +203,14 @@ export function SocialStream({
     };
   }, []);
   useEffect(() => {
-    if (refreshKey) {
-      void latest.current(true);
-    }
-  }, [refreshKey]);
+    if (!refreshKey) return;
+    // Tapping "Enturma": back to the top, then fresh posts with the spinner.
+    panel.current
+      ?.closest<HTMLElement>("[data-social-scroller]")
+      ?.scrollTo?.({ top: 0, behavior: "smooth" });
+    const frame = requestAnimationFrame(refreshNow);
+    return () => cancelAnimationFrame(frame);
+  }, [refreshKey, refreshNow]);
   // An explicit refresh never moves a student in the middle of reading.
   return (
     <div
@@ -209,6 +221,15 @@ export function SocialStream({
       aria-busy={stream.busy}
       onTouchCancel={() => {
         pull.current = null;
+        setPulled(0);
+      }}
+      onTouchMove={(event) => {
+        const start = pull.current,
+          touch = event.touches[0];
+        if (!start || !touch || refreshing) return;
+        const dy = touch.clientY - start.y;
+        // Resistance, like Instagram: the ring follows at half the finger's speed.
+        setPulled(dy > 0 && dy > Math.abs(touch.clientX - start.x) ? dy * 0.5 : 0);
       }}
       onTouchStart={(event) => {
         const touch = event.touches[0];
@@ -221,29 +242,29 @@ export function SocialStream({
         const start = pull.current,
           touch = event.changedTouches[0];
         pull.current = null;
+        setPulled(0);
         if (
           start &&
           touch &&
           !stream.busy &&
+          !refreshing &&
           pullRefreshes(
             scroller()?.scrollTop ?? 0,
             touch.clientX - start.x,
             touch.clientY - start.y,
           )
-        ) {
-          setNewContent(false);
-          void stream.load(true);
-        }
+        )
+          refreshNow();
       }}
     >
+      <SocialPullRefresh distance={pulled} refreshing={refreshing} />
       <div className="social-stream-inner">
         {newContent && (
           <button
             className="social-fresh secondary"
             onClick={() => {
-              setNewContent(false);
-              scroller()?.scrollTo({ top: 0, behavior: "auto" });
-              void stream.load(true);
+              scroller()?.scrollTo({ top: 0, behavior: "smooth" });
+              refreshNow();
             }}
           >
             Novas publicações · atualizar

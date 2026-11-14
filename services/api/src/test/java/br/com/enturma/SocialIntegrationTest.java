@@ -167,6 +167,49 @@ class SocialIntegrationTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
+  void hashtagsRankByUseAndOpenOnlyPostsCarryingThatTag() {
+    String tag = "tag" + UUID.randomUUID().toString().substring(0, 8);
+    UUID one = publish(a, "POST", "Feira de ciências #" + tag);
+    UUID two = publish(b, "POST", "Robôs #" + tag.toUpperCase() + " #z" + tag);
+    publish(c, "POST", "Escrevi " + tag + " sem cerquilha");
+    var found = posts.hashtags(a, "#" + tag);
+    assertThat(found.getFirst()).containsEntry("tag", tag).containsEntry("posts", 2L);
+    assertThat(found).extracting(h -> h.get("tag")).doesNotContain("z" + tag);
+    var trending = posts.hashtags(a, "");
+    assertThat(trending).isNotEmpty().hasSizeLessThanOrEqualTo(12);
+    assertThat(trending)
+        .extracting(h -> ((Number) h.get("posts")).longValue())
+        .isSortedAccordingTo(Comparator.reverseOrder());
+    var feed = (Map<String, Object>) posts.feed(a, "for-you", "ALL", "#" + tag, "", null, "posts");
+    assertThat((List<Map<String, Object>>) feed.get("items"))
+        .extracting(p -> p.get("id"))
+        .containsExactlyInAnyOrder(one, two);
+  }
+
+  @Test
+  void draftListPreviewsMediaAndDeletedDraftsLeaveIt() {
+    UUID kept = UUID.randomUUID(), gone = UUID.randomUUID(), media = UUID.randomUUID();
+    posts.draft(a, new SocialPosts.Draft(kept, "POST", "Legenda guardada", "PUBLIC", null, 0, List.of()));
+    posts.draft(a, new SocialPosts.Draft(gone, "CLIP", "Vai sumir", "PUBLIC", null, 0, List.of()));
+    db.jdbc.update(
+        "INSERT INTO social_media(id,owner_id,post_id,kind,state,expected_bytes,ordinal) VALUES"
+            + " (?,?,?,'IMAGE','READY',10,0)",
+        media,
+        a.id(),
+        kept);
+    @SuppressWarnings("unchecked")
+    var list = (List<Map<String, Object>>) posts.drafts(a);
+    assertThat(list).extracting(d -> d.get("id")).containsExactlyInAnyOrder(kept, gone);
+    var first = list.stream().filter(d -> kept.equals(d.get("id"))).findFirst().orElseThrow();
+    assertThat(first).containsEntry("mediaCount", 1L).containsEntry("coverId", media)
+        .containsEntry("coverKind", "IMAGE").containsKey("updatedAt");
+    posts.remove(a, gone);
+    assertThat((List<?>) posts.drafts(a)).hasSize(1);
+    assertThat((List<?>) posts.drafts(b)).isEmpty();
+  }
+
+  @Test
   void draftsArePrivateAndPublishingIsIdempotent() {
     UUID id = UUID.randomUUID();
     var d =

@@ -10,7 +10,6 @@ import {
 import { mediaUrl, socialWrite, type SocialPost as Post } from "@/lib/social";
 import { useSocialStream } from "./social-stream";
 import { SocialClipOverlay } from "./social-clip-overlay";
-import { NavigationLink } from "../navigation-link";
 import { useVideoView } from "./use-video-view";
 import { SocialVideoVolume } from "./social-video-volume";
 import { useSocialSound } from "@/lib/social-sound";
@@ -316,12 +315,15 @@ export function SocialClips({
   autoplay,
   person,
   initialClip,
+  toFeed,
 }: {
   active: boolean;
   me: string;
   autoplay: boolean;
   person: (id: string) => void;
   initialClip?: Post;
+  /** The arrow on Clips returns to the Feed; only the Feed leads home. */
+  toFeed?: () => void;
 }) {
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("for-you"),
     [opened, setOpened] = useState<string[]>(["for-you"]);
@@ -330,13 +332,14 @@ export function SocialClips({
   const toggleMuted = () => setMuted(!muted);
   return (
     <div className="social-clips-tabbed">
-      <NavigationLink
-        href="/home"
+      <button
+        type="button"
         className="social-clips-exit"
-        aria-label="Início do Enturma"
+        aria-label="Voltar ao Feed"
+        onClick={toFeed}
       >
         <ArrowLeft size={24} />
-      </NavigationLink>
+      </button>
       <div
         className="social-tabs social-clips-tabs"
         role="tablist"
