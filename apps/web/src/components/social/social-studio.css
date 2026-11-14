@@ -2443,3 +2443,25 @@ html[data-theme] .social-publish-toast .social-publish-toast-close{display:grid;
 @keyframes social-toast-timer{to{transform:scaleX(0)}}
 @media (prefers-reduced-motion:reduce){.social-publish-toast,.social-publish-done .social-publish-toast-icon{animation:none}.social-publish-toast-timer{display:none}}
 :root[data-reduced-motion="true"] .social-publish-toast{animation:none}
+
+/* Hashtags: trending list in Explorar and the tag page header. */
+.social-hashtag-list{display:grid;gap:10px;margin:4px 0 16px}
+.social-hashtag-list h3{display:flex;align-items:center;gap:6px;margin:0;font-size:.95rem;color:var(--ink)}
+.social-hashtag-list ul{display:flex;gap:8px;margin:0;padding:2px 2px 6px;list-style:none;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
+.social-explore-people .social-hashtag-list ul{display:grid;overflow:visible}
+.social-hashtag-list li{scroll-snap-align:start;animation:social-draft-in .3s cubic-bezier(.2,.8,.2,1) both}
+html[data-theme] .social-hashtag-list li button{display:flex;align-items:center;gap:10px;width:100%;min-height:0;padding:8px 14px 8px 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface)!important;color:var(--ink)!important;text-align:left;white-space:nowrap;box-shadow:none;transition:transform .18s ease,border-color .18s ease}
+.social-explore-people .social-hashtag-list li button{border-radius:14px}
+@media (hover:hover){html[data-theme] .social-hashtag-list li button:hover{border-color:var(--ink);transform:translateY(-1px)}}
+.social-hashtag-list li button:active{transform:scale(.97)}
+.social-hashtag-list li button>span:last-child{display:grid;line-height:1.2}
+.social-hashtag-list strong{font-size:.86rem;color:var(--ink)}
+.social-hashtag-list small{font-size:.72rem;color:var(--muted)}
+.social-hashtag-mark,.social-hashtag-avatar{display:grid;place-items:center;flex:0 0 auto;border-radius:999px;border:1px solid var(--border);background:var(--soft);color:var(--ink);font-weight:800}
+.social-hashtag-mark{width:32px;height:32px;font-size:1rem}
+.social-hashtag-hero{display:flex;align-items:center;gap:16px;padding:6px 4px 18px}
+.social-hashtag-avatar{width:76px;height:76px;font-size:2.2rem;animation:social-toast-pop .45s cubic-bezier(.3,1.6,.4,1) both}
+.social-hashtag-hero h3{margin:0;font-size:1.35rem;color:var(--ink);overflow-wrap:anywhere}
+.social-hashtag-hero p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+.social-text-hashtag{font-weight:600}
+@media (prefers-reduced-motion:reduce){.social-hashtag-list li,.social-hashtag-avatar{animation:none}}

@@ -178,6 +178,39 @@ public class SocialPosts {
     return row;
   }
 
+  /**
+   * Hashtags with how many posts the student can see use them: the most used of the last 30
+   * days when {@code q} is blank, otherwise the tags starting with {@code q}.
+   */
+  public List<Map<String, Object>> hashtags(Actor a, String q) {
+    access.require();
+    String prefix = q == null ? "" : q.strip().replaceFirst("^#", "").toLowerCase(Locale.ROOT);
+    if (!prefix.matches("[\\p{L}\\p{N}_]{0,40}")) return List.of();
+    var args = new ArrayList<Object>(List.of(a.id(), a.id(), a.id(), a.id()));
+    String where;
+    if (prefix.isEmpty()) where = " AND p.published_at>now()-interval '30 days'";
+    else {
+      where = " AND left(t.tag,?)=?";
+      args.add(prefix.length());
+      args.add(prefix);
+    }
+    return db.list(
+        "SELECT t.tag,count(*) posts FROM social_post p CROSS JOIN LATERAL unnest(p.tags) t(tag)"
+            + " WHERE "
+            + SocialAccess.published("p")
+            + " AND "
+            + SocialAccess.visible("p")
+            + where
+            + " GROUP BY t.tag ORDER BY (t.tag=?) DESC,count(*) DESC,t.tag LIMIT 12",
+        concat(args, prefix));
+  }
+
+  private static Object[] concat(List<Object> args, Object last) {
+    var all = new ArrayList<>(args);
+    all.add(last);
+    return all.toArray();
+  }
+
   public Object drafts(Actor a) {
     access.require();
     return db.list(
@@ -351,7 +384,11 @@ public class SocialPosts {
               + " status='STUDENT_VERIFIED')";
       args.add(a.id());
     }
-    if (!query.isBlank()) {
+    if (query.startsWith("#") && query.length() > 1) {
+      // A hashtag page shows exactly the posts that carry that tag, like Instagram.
+      filters += " AND ?=ANY(p.tags)";
+      args.add(query.substring(1).toLowerCase(Locale.ROOT));
+    } else if (!query.isBlank()) {
       filters +=
           " AND (to_tsvector('portuguese',p.body) @@ websearch_to_tsquery('portuguese',?) OR"
               + " ?=ANY(p.tags))";

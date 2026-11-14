@@ -33,6 +33,7 @@ import { SocialFeedAside } from "./social-feed-aside";
 import { SocialHeader } from "./social-header";
 import { useSocialBack } from "./use-social-back";
 import { SocialPublishToast } from "./social-publish-toast";
+import { HASHTAG_EVENT, SocialHashtagPage } from "./social-hashtag";
 type Ready = {
   me: SocialPerson & { role: string };
   preferences: SocialPreferences;
@@ -126,6 +127,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     incomingPost = params.get("post"),
     incomingPerson = params.get("person"),
     incomingQuery = params.get("q"),
+    incomingTag = params.get("tag"),
     incomingSettings = params.get("settings"),
     incomingCreate = params.get("create");
   const [view, setView] = useState<SocialView>("feed"),
@@ -142,7 +144,24 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     [people, setPeople] = useState<SocialPerson[]>([]),
     [refresh, setRefresh] = useState(0),
     [highlight, setHighlight] = useState<SocialView | null>(null);
-  const [explore, setExplore] = useState(false);
+  const [explore, setExplore] = useState(false),
+    [hashtag, setHashtag] = useState<string | null>(null);
+  // A tapped #tag anywhere in the Social opens its page right here.
+  useEffect(() => {
+    const open = (event: Event) => {
+      const tag = (event as CustomEvent<string>).detail;
+      if (!tag) return;
+      event.preventDefault();
+      setHashtag(tag);
+    };
+    window.addEventListener(HASHTAG_EVENT, open);
+    return () => window.removeEventListener(HASHTAG_EVENT, open);
+  }, []);
+  useEffect(() => {
+    if (!incomingTag) return;
+    const timer = setTimeout(() => setHashtag(incomingTag.slice(0, 40).toLowerCase()), 0);
+    return () => clearTimeout(timer);
+  }, [incomingTag]);
   const [clipEntry, setClipEntry] = useState<{
     post: Post;
     sequence: number;
@@ -541,7 +560,27 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
             <SocialExplore
               me={ready.me.id}
               person={setPerson}
+              openTag={setHashtag}
               close={() => setExplore(false)}
+            />
+          )}
+          {hashtag && (
+            <SocialHashtagPage
+              key={hashtag}
+              tag={hashtag}
+              me={ready.me.id}
+              person={(id) => {
+                setHashtag(null);
+                setPerson(id);
+              }}
+              close={() => {
+                setHashtag(null);
+                if (new URLSearchParams(location.search).has("tag")) {
+                  const url = new URL(location.href);
+                  url.searchParams.delete("tag");
+                  history.replaceState(history.state, "", url.pathname + url.search + url.hash);
+                }
+              }}
             />
           )}
           {person && (

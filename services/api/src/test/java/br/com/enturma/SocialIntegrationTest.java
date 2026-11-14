@@ -167,6 +167,27 @@ class SocialIntegrationTest {
   }
 
   @Test
+  @SuppressWarnings("unchecked")
+  void hashtagsRankByUseAndOpenOnlyPostsCarryingThatTag() {
+    String tag = "tag" + UUID.randomUUID().toString().substring(0, 8);
+    UUID one = publish(a, "POST", "Feira de ciências #" + tag);
+    UUID two = publish(b, "POST", "Robôs #" + tag.toUpperCase() + " #z" + tag);
+    publish(c, "POST", "Escrevi " + tag + " sem cerquilha");
+    var found = posts.hashtags(a, "#" + tag);
+    assertThat(found.getFirst()).containsEntry("tag", tag).containsEntry("posts", 2L);
+    assertThat(found).extracting(h -> h.get("tag")).doesNotContain("z" + tag);
+    var trending = posts.hashtags(a, "");
+    assertThat(trending).isNotEmpty().hasSizeLessThanOrEqualTo(12);
+    assertThat(trending)
+        .extracting(h -> ((Number) h.get("posts")).longValue())
+        .isSortedAccordingTo(Comparator.reverseOrder());
+    var feed = (Map<String, Object>) posts.feed(a, "for-you", "ALL", "#" + tag, "", null, "posts");
+    assertThat((List<Map<String, Object>>) feed.get("items"))
+        .extracting(p -> p.get("id"))
+        .containsExactlyInAnyOrder(one, two);
+  }
+
+  @Test
   void draftListPreviewsMediaAndDeletedDraftsLeaveIt() {
     UUID kept = UUID.randomUUID(), gone = UUID.randomUUID(), media = UUID.randomUUID();
     posts.draft(a, new SocialPosts.Draft(kept, "POST", "Legenda guardada", "PUBLIC", null, 0, List.of()));

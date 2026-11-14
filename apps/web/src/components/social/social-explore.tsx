@@ -7,15 +7,18 @@ import { SocialDialog } from "./social-dialog";
 import { SocialAuthor } from "./social-post";
 import { SocialProfileGrid } from "./social-profile-grid";
 import { SocialPostViewer } from "./social-post-viewer";
+import { SocialHashtagList } from "./social-hashtag";
 
 /** Discovery uses the same authorized feed, ranking and media proxy as reading. */
 export function SocialExplore({
   me,
   person,
+  openTag,
   close,
 }: {
   me: string;
   person: (id: string) => void;
+  openTag: (tag: string) => void;
   close: () => void;
 }) {
   const [input, setInput] = useState("");
@@ -78,6 +81,7 @@ export function SocialExplore({
           <Search size={20} />
         </button>
       </form>
+      {!query && <SocialHashtagList open={openTag} />}
       {query && (
         <div className="social-explore-people">
           <h3>Resultados para “{query}”</h3>
@@ -95,6 +99,7 @@ export function SocialExplore({
               </button>
             </div>
           )}
+          <SocialHashtagList query={query} open={openTag} />
           {people.map((user) => (
             <SocialAuthor key={user.id} user={user} open={person} />
           ))}
