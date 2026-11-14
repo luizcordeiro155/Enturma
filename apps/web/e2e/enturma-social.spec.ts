@@ -974,10 +974,8 @@ test("Social: autor consegue excluir seu Story com confirmação", async ({
   if (await opening.isVisible()) {
     await opening.getByRole("button", { name: "Explorar o Social" }).click();
   }
-  const story = page
-    .locator(".social-stories .social-story")
-    .filter({ hasText: author.username })
-    .first();
+  // Your own Stories open from the "Seu Story" circle; there is no second one.
+  const story = page.getByRole("button", { name: "Ver seus Stories", exact: true });
   await expect(story).toBeVisible();
   await story.click();
   const viewer = page.getByRole("dialog", { name: "Stories da turma" });
@@ -991,7 +989,11 @@ test("Social: autor consegue excluir seu Story com confirmação", async ({
     .getByRole("button", { name: "Excluir Story", exact: true })
     .click();
   await expect(viewer).not.toBeVisible();
+  // With no Stories left, the circle offers to create one again.
   await expect(story).toHaveCount(0);
+  await expect(
+    page.getByRole("button", { name: "Criar seu Story", exact: true }),
+  ).toBeVisible();
   const deleted = await request.get(`${backend}/api/v1/social/posts/${id}`, {
     headers: asUser(author.accessToken),
   });

@@ -2317,3 +2317,34 @@ html[data-theme] .social-page .social-clip-scrubber input[type="range"] {
     width: 100%;
   }
 }
+
+/* Small phones (320–380px): smaller icons and wordmark keep "Enturma" centred
+   without touching the actions. */
+@media (max-width: 380px) {
+  html[data-theme] .social-page .social-header {
+    gap: 4px;
+    padding-inline: 4px;
+  }
+  .social-page .social-header-actions,
+  .social-page .social-header-brand {
+    gap: 0;
+  }
+  html[data-theme]
+    .social-page
+    .social-header
+    :is(.social-header-brand, .social-header-actions)
+    > :is(a, button) {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
+    min-height: 34px;
+    padding: 6px;
+  }
+  html[data-theme] .social-back {
+    width: 32px;
+    height: 32px;
+  }
+  html[data-theme] .social-page .social-header h1.social-wordmark {
+    font-size: 27px;
+  }
+}
