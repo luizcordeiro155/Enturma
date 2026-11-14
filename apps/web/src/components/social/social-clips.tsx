@@ -13,6 +13,7 @@ import { SocialClipOverlay } from "./social-clip-overlay";
 import { NavigationLink } from "../navigation-link";
 import { useVideoView } from "./use-video-view";
 import { SocialVideoVolume } from "./social-video-volume";
+import { useSocialSound } from "@/lib/social-sound";
 
 function ClipVideo({
   item,
@@ -273,7 +274,6 @@ function ClipPage({
     </>
   );
 }
-const MUTED_KEY = "enturma-social-clips-muted";
 // The sound setting is shared by every Clip in the session, not one video.
 const CLIPS_VOLUME_LABELS = {
   unmute: "Ativar som dos Clips",
@@ -299,23 +299,9 @@ export function SocialClips({
 }) {
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("for-you"),
     [opened, setOpened] = useState<string[]>(["for-you"]);
-  const [muted, setMuted] = useState(() => {
-    try {
-      return sessionStorage.getItem(MUTED_KEY) !== "0";
-    } catch {
-      return true;
-    }
-  });
-  function toggleMuted() {
-    setMuted((value) => {
-      try {
-        sessionStorage.setItem(MUTED_KEY, value ? "0" : "1");
-      } catch {
-        /* Storage may be unavailable. */
-      }
-      return !value;
-    });
-  }
+  // The same sound setting as the Feed: turning it on in one applies to the other.
+  const { muted, setMuted } = useSocialSound();
+  const toggleMuted = () => setMuted(!muted);
   return (
     <div className="social-clips-tabbed">
       <NavigationLink
@@ -464,7 +450,7 @@ function ClipsFeed({
     return () => observer.disconnect();
   }, [active, stream.cursor, stream.error, items.length]);
   const activeIndex = Math.max(0, Math.min(index, items.length - 1));
-  const [volume, setVolume] = useState(1);
+  const { volume, setVolume } = useSocialSound();
   useEffect(() => {
     container.current?.querySelectorAll("video").forEach(video => { video.volume = volume; });
   }, [volume, activeIndex, items.length]);

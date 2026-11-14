@@ -1789,9 +1789,18 @@ html[data-theme] .social-video-volume .social-media-sound {
     opacity 160ms ease;
 }
 .social-clip-controls .social-video-volume { position: relative; inset: auto; }
-.social-video-volume:is(:hover, :focus-within) .social-volume-slider {
+/* Phones: tap toggles sound, press and hold opens the volume (data-open).
+   Computers: hovering opens it; keyboard focus opens it too. */
+.social-video-volume[data-open="true"] .social-volume-slider,
+.social-video-volume:has(:focus-visible) .social-volume-slider {
   height: 100px;
   opacity: 1;
+}
+@media (hover: hover) and (pointer: fine) {
+  .social-video-volume:hover .social-volume-slider {
+    height: 100px;
+    opacity: 1;
+  }
 }
 html[data-theme] .social-volume-slider input[type="range"] {
   appearance: auto;

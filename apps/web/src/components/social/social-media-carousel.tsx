@@ -1,6 +1,6 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- private authenticated social media */
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { mediaUrl, type SocialMedia } from "@/lib/social";
 import { mediaAspect } from "@/lib/social-media";
@@ -8,6 +8,7 @@ import { useAutoplayInView } from "./use-autoplay-in-view";
 import { NavigationLink } from "../navigation-link";
 import { SocialVideoVolume } from "./social-video-volume";
 import { useVideoView } from "./use-video-view";
+import { useSocialSound } from "@/lib/social-sound";
 
 function FeedVideo({
   media,
@@ -21,9 +22,15 @@ function FeedVideo({
   postId?: string;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
-  const [muted, setMuted] = useState(true);
-  const [volume, setVolume] = useState(1);
-  useAutoplayInView(ref, autoplay);
+  // One sound setting for every Social video: turning it on here applies to the next ones.
+  const { muted, volume, setMuted, setVolume } = useSocialSound();
+  useEffect(() => {
+    const video = ref.current;
+    if (!video) return;
+    video.muted = muted;
+    video.volume = volume;
+  }, [muted, volume]);
+  useAutoplayInView(ref, autoplay, () => setMuted(true));
   useVideoView(ref, postId);
   return (
     <>
@@ -55,11 +62,12 @@ function FeedVideo({
         />
       )}
       {autoplay && (
-        <SocialVideoVolume volume={volume} onVolumeChange={value => {
-          setVolume(value);
-          const video = ref.current;
-          if (video) video.volume = value;
-        }} muted={muted} onMutedChange={setMuted} />
+        <SocialVideoVolume
+          volume={volume}
+          onVolumeChange={setVolume}
+          muted={muted}
+          onMutedChange={setMuted}
+        />
       )}
     </>
   );
