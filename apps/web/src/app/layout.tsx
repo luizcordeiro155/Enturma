@@ -9,6 +9,7 @@ import "./social.css";
 import "./forum.css";
 import "./notifications.css";
 import "./study-journey.css";
+import "./enturma-study.css";
 import "./ride-activity.css";
 import "./account-privacy.css";
 import "./student-suite.css";
