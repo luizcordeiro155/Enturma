@@ -127,7 +127,7 @@ private const val PUSH_EXTRA_CONVERSATION = "conversation"
 private const val NOTIFICATION_WEB_ORIGIN = ${kotlinString(webOrigin)}
 private const val PRIVATE_KEYS_PREFS = "enturma_private_notification_keys"
 private const val PREF_PRIVATE_KEYS_BLOB = "blob"
-private const val PRIVATE_KEYSTORE_ALIAS = "enturma_private_notification_keys_v1"
+private const val NOTIFICATION_VAULT_ALIAS = "enturma_private_notification_keys_v1"
 private const val MESSAGE_HISTORY_PREFS = "enturma_message_notifications"
 private const val MESSAGE_GROUP = "br.com.enturma.app.MESSAGES"
 private const val MESSAGE_SUMMARY_ID = 4810
@@ -239,12 +239,12 @@ private fun ensurePushNotificationChannel(context: Context) {
 private object EnturmaPrivateNotifications {
     private fun keystoreKey(): SecretKey {
         val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
-        (store.getKey(PRIVATE_KEYSTORE_ALIAS, null) as? SecretKey)?.let { return it }
+        (store.getKey(NOTIFICATION_VAULT_ALIAS, null) as? SecretKey)?.let { return it }
         val generator =
             KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, "AndroidKeyStore")
         generator.init(
             KeyGenParameterSpec.Builder(
-                PRIVATE_KEYSTORE_ALIAS,
+                NOTIFICATION_VAULT_ALIAS,
                 KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT,
             )
                 .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
