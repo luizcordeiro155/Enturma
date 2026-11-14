@@ -2139,3 +2139,57 @@ html[data-theme] .social-header-actions > .notification-bell {
     gap: 2px;
   }
 }
+
+/* ---------- Your Story: tap to watch, press and hold for options ---------- */
+.social-story-own {
+  position: relative;
+  flex: none;
+}
+.social-stories .social-story {
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+html[data-theme] .social-page .social-story-create:not(.has-story) .social-story-ring {
+  border-color: transparent;
+}
+.social-story-menu {
+  position: fixed;
+  z-index: 40;
+  display: grid;
+  min-width: 184px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 14px 34px color-mix(in srgb, #000 28%, transparent);
+  animation: social-story-menu-in 0.16s ease-out;
+}
+html[data-theme] .social-story-menu > :is(a, button) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  text-align: left;
+  text-decoration: none;
+}
+html[data-theme] .social-story-menu > :is(a, button):is(:hover, :focus-visible) {
+  background: var(--soft);
+  outline: none;
+}
+@keyframes social-story-menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+:root[data-reduced-motion="true"] .social-story-menu {
+  animation: none;
+}
