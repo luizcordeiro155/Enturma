@@ -868,6 +868,57 @@ class PlatformIntegrationTest {
 
   @Autowired br.com.enturma.users.SocialController social;
 
+  @Autowired br.com.enturma.notifications.PushNotificationService push;
+
+  @Test
+  void privateMessagePushCarriesOnlyTheStillEncryptedMessageForTheRecipientsPhone()
+      throws Exception {
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", member.id()).get("username");
+    UUID friendship =
+        (UUID) ((Map<?, ?>) social.invite(host, new SocialController.Invite(username))).get("id");
+    social.accept(member, friendship);
+    social.identity(
+        host, new SocialController.PublicKey("EC", "P-256", "a".repeat(43), "b".repeat(43)));
+    UUID clientId = UUID.randomUUID();
+    social.send(
+        host,
+        friendship,
+        new SocialController.Envelope(clientId, "Y2lwaGVydGV4dA==", "abcdefghijklmnop"));
+    UUID message =
+        (UUID) db.one("SELECT id FROM private_message WHERE friendship_id=?", friendship).get("id");
+    String hostName = (String) db.one("SELECT name FROM app_user WHERE id=?", host.id()).get("name");
+    var event =
+        new br.com.enturma.notifications.PushRequested(
+            member.id(),
+            host.id(),
+            "PRIVATE_MESSAGE",
+            "PRIVATE_MESSAGE",
+            message,
+            "/friends?chat=" + friendship,
+            "Você recebeu uma mensagem privada.");
+    Map<String, String> data = push.payload(event, "título");
+    // The phone decrypts it with its own key; the server never had the text.
+    assertThat(data)
+        .containsEntry("conversation", friendship.toString())
+        .containsEntry("messageId", message.toString())
+        .containsEntry("senderId", host.id().toString())
+        .containsEntry("senderName", hostName)
+        .containsEntry("clientId", clientId.toString())
+        .containsEntry("ciphertext", "Y2lwaGVydGV4dA==")
+        .containsEntry("iv", "abcdefghijklmnop")
+        .containsEntry("body", "Você recebeu uma mensagem privada.")
+        .containsKey("sentAt");
+    // Not for someone outside the conversation.
+    var stranger =
+        new br.com.enturma.notifications.PushRequested(
+            UUID.randomUUID(), host.id(), "PRIVATE_MESSAGE", "PRIVATE_MESSAGE", message, "/", "x");
+    assertThat(push.payload(stranger, "t")).doesNotContainKeys("ciphertext", "conversation");
+    // Nor once it has been deleted.
+    social.deletePrivateMessage(host, friendship, message);
+    assertThat(push.payload(event, "t")).doesNotContainKeys("ciphertext", "iv");
+  }
+
   @Test
   void messageVisibilityAndReactionsAreScopedToTheirConversationAndAccount() throws Exception {
     String username =
