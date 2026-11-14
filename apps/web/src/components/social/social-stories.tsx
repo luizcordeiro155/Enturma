@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { ChevronRight, Plus, SquarePen, UserRoundPen } from "lucide-react";
 import { api } from "@/lib/api";
 import {
@@ -228,7 +229,9 @@ function OwnStoryMenu({
       document.removeEventListener("pointerdown", outside);
     };
   }, [close]);
-  return (
+  // A portal: the Social pager moves with a transform, which would carry a fixed
+  // menu along with it (off screen on the Feed page).
+  return createPortal(
     <div
       ref={menu}
       role="menu"
@@ -245,6 +248,7 @@ function OwnStoryMenu({
       <NavigationLink href="/profile" role="menuitem" onClick={close}>
         <UserRoundPen size={18} aria-hidden="true" /> Editar perfil
       </NavigationLink>
-    </div>
+    </div>,
+    document.body,
   );
 }

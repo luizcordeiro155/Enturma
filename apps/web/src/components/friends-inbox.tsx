@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
 import { EllipsisVertical, KeyRound, Search, UserPlus, UserX, X } from "lucide-react";
 import { api } from "@/lib/api";
 import type { SocialPerson } from "@/lib/social";
@@ -438,7 +439,7 @@ function Menu({
       document.removeEventListener("pointerdown", outside);
     };
   }, [close]);
-  return (
+  const content = (
     <div
       ref={menu}
       role="menu"
@@ -449,6 +450,8 @@ function Menu({
       {children}
     </div>
   );
+  // Screen-positioned menus go to the body so no transformed ancestor can move them.
+  return style ? createPortal(content, document.body) : content;
 }
 
 function SecurityDialog({

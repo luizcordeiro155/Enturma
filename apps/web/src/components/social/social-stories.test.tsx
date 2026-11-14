@@ -89,7 +89,10 @@ it("no computador, o botao direito abre o mesmo menu",async()=>{
   render(<SocialStories me={me} create={()=>{}} person={()=>{}} refreshKey={0}/>);
   const own=await screen.findByRole("button",{name:"Criar seu Story"});
   fireEvent.contextMenu(own);
-  expect(await screen.findByRole("menu",{name:"Opções do seu Story"})).toBeInTheDocument();
+  const menu=await screen.findByRole("menu",{name:"Opções do seu Story"});
+  // The Social pager moves with a CSS transform, which would carry a fixed menu
+  // off screen; the menu lives directly in the page body instead.
+  expect(menu.parentElement).toBe(document.body);
   fireEvent.keyDown(document,{key:"Escape"});
   await waitFor(()=>expect(screen.queryByRole("menu")).toBeNull());
 });

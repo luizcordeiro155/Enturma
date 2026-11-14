@@ -25,7 +25,7 @@ html[data-theme] .friends-inbox-header h1 {
 .friends-inbox-menu {
   position: relative;
 }
-html[data-theme] .friends-inbox-menu > .icon-control {
+html[data-theme] .friends-page .friends-inbox .friends-inbox-menu > button.icon-control:not(.text-button) {
   border: 0;
   background: transparent;
   color: var(--ink);
@@ -48,7 +48,8 @@ html[data-theme] .friends-inbox-menu > .icon-control {
   right: auto;
   min-width: 220px;
 }
-html[data-theme] .friends-menu > button {
+html[data-theme] .friends-menu > button:not(.text-button),
+html[data-theme] .friends-page .friends-inbox .friends-menu > button:not(.text-button) {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -63,11 +64,13 @@ html[data-theme] .friends-menu > button {
   font-weight: 600;
   text-align: left;
 }
-html[data-theme] .friends-menu > button:is(:hover, :focus-visible) {
+html[data-theme] .friends-menu > button:not(.text-button):is(:hover, :focus-visible),
+html[data-theme] .friends-page .friends-inbox .friends-menu > button:not(.text-button):is(:hover, :focus-visible) {
   background: var(--surface-hover);
   outline: none;
 }
-html[data-theme] .friends-menu > button.danger {
+html[data-theme] .friends-menu > button.danger:not(.text-button),
+html[data-theme] .friends-page .friends-inbox .friends-menu > button.danger:not(.text-button) {
   color: var(--danger);
 }
 
@@ -90,15 +93,16 @@ html[data-theme] .friends-menu > button.danger {
   border-color: var(--accent);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
 }
-html[data-theme] .friends-search input {
+/* The dark theme styles every input with high specificity; the pill owns the look. */
+html[data-theme] .friends-page .friends-search input {
   flex: 1;
   min-width: 0;
   min-height: 0;
   padding: 0;
-  border: 0;
+  border: 0 !important;
   outline: none;
-  box-shadow: none;
-  background: transparent;
+  box-shadow: none !important;
+  background: transparent !important;
   color: var(--ink);
   font-size: 1rem;
 }
@@ -119,17 +123,21 @@ html[data-theme] .friends-search input:focus-visible {
   overflow-x: auto;
   scrollbar-width: none;
 }
-html[data-theme] .friends-stories .social-story {
+html[data-theme] .friends-page .friends-inbox .friends-stories button.social-story:not(.text-button) {
   display: flex;
   flex: none;
   flex-direction: column;
   align-items: center;
   gap: 6px;
   width: 70px;
+  min-height: 0;
   padding: 0;
   border: 0;
+  border-radius: 0;
   background: transparent;
+  box-shadow: none;
   color: var(--ink);
+  font-weight: 500;
 }
 .friends-stories .social-story small {
   max-width: 70px;
@@ -232,7 +240,7 @@ html[data-theme] .friends-stories .social-story {
   background: var(--surface-hover);
   color: var(--accent);
 }
-html[data-theme] .friend-row-open {
+html[data-theme] .friends-page .friends-inbox button.friend-row-open:not(.text-button) {
   display: grid;
   gap: 4px;
   min-width: 0;
@@ -243,7 +251,10 @@ html[data-theme] .friend-row-open {
   background: transparent;
   color: var(--ink);
   font: inherit;
+  font-weight: inherit;
   text-align: left;
+  justify-content: stretch;
+  box-shadow: none;
   -webkit-touch-callout: none;
   user-select: none;
 }
@@ -303,8 +314,8 @@ html[data-theme] .friend-row-open {
   align-items: center;
   gap: 6px;
 }
-html[data-theme] .friend-invite-actions > button:first-child,
-html[data-theme] .friend-add {
+html[data-theme] .friends-page .friends-inbox .friend-invite-actions > button:first-child:not(.text-button),
+html[data-theme] .friends-page .friends-inbox button.friend-add:not(.text-button) {
   min-height: 36px;
   padding: 0 14px;
   border: 0;

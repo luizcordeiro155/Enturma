@@ -2127,9 +2127,25 @@ html[data-theme] .social-page .social-header h1.social-wordmark {
   text-shadow: none;
   color: var(--ink);
 }
-html[data-theme] .social-header-actions > .notification-bell {
-  border: 0;
-  background: transparent;
+/* Bare icons like Instagram: the generic Social .icon-control box comes later in
+   the cascade, so these need the extra specificity. */
+html[data-theme]
+  .social-page
+  .social-header
+  :is(.social-header-brand, .social-header-actions)
+  > .icon-control {
+  /* A global theme hotfix forces .icon-control surfaces with !important. */
+  border-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none;
+  color: var(--ink);
+}
+html[data-theme]
+  .social-page
+  .social-header
+  :is(.social-header-brand, .social-header-actions)
+  > .icon-control:hover {
+  background: color-mix(in srgb, var(--ink) 8%, transparent) !important;
 }
 @media (min-width: 761px) {
   html[data-theme] .social-page .social-header {
