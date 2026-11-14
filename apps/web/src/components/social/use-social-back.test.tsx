@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
 import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
-import { SOCIAL_EXIT_WINDOW_MS, useSocialBack } from "./use-social-back";
+import { useSocialBack } from "./use-social-back";
 import type { SocialView } from "@/lib/social";
 
 function back() {
@@ -40,24 +40,11 @@ it("Back from Clips or Criar returns to the Feed instead of leaving the Social",
   expect(exit).not.toHaveBeenCalled();
 });
 
-it("on the Feed, one Back only warns; a second Back right away goes to the Enturma home", async () => {
+it("on the Feed, Back goes straight to the Enturma home, with no second press or warning", async () => {
   const { result, exit } = setup();
-  await back();
-  expect(result.current.hint).toBe(true);
-  expect(exit).not.toHaveBeenCalled();
-  expect(history.state?.enturmaSocial).toBe("guard");
   await back();
   expect(exit).toHaveBeenCalledTimes(1);
-});
-
-it("a second Back after the warning has gone just warns again", async () => {
-  const now = vi.spyOn(Date, "now").mockReturnValue(1_000);
-  const { result, exit } = setup();
-  await back();
-  now.mockReturnValue(1_000 + SOCIAL_EXIT_WINDOW_MS + 1);
-  await back();
-  expect(exit).not.toHaveBeenCalled();
-  expect(result.current.hint).toBe(true);
+  expect(result.current).not.toHaveProperty("hint");
 });
 
 it("going back to the Feed from the bar undoes the extra step", async () => {
@@ -82,6 +69,6 @@ it("leaves dialogs and linked Clips to their own Back handling", async () => {
   history.pushState({}, "", "/social?post=p2");
   await back();
   expect(exit).not.toHaveBeenCalled();
-  expect(result.current.hint).toBe(false);
+  void result;
   await waitFor(() => expect(location.search).toBe("?post=p1"));
 });

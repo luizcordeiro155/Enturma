@@ -2219,38 +2219,6 @@ html[data-theme] .social-story-menu > :is(a, button):is(:hover, :focus-visible) 
   animation: none;
 }
 
-/* ---------- Back on the Feed: "press again to leave" ---------- */
-.social-exit-hint {
-  position: fixed;
-  z-index: 60;
-  left: 50%;
-  bottom: calc(86px + var(--enturma-safe-bottom));
-  margin: 0;
-  padding: 10px 18px;
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--ink) 92%, transparent);
-  color: var(--bg);
-  font-size: 0.86rem;
-  font-weight: 650;
-  white-space: nowrap;
-  box-shadow: 0 10px 26px color-mix(in srgb, #000 30%, transparent);
-  transform: translateX(-50%);
-  animation: social-exit-hint 0.2s ease-out;
-}
-@media (min-width: 761px) {
-  .social-exit-hint {
-    bottom: 28px;
-  }
-}
-@keyframes social-exit-hint {
-  from {
-    opacity: 0;
-    transform: translate(-50%, 8px);
-  }
-}
-:root[data-reduced-motion="true"] .social-exit-hint {
-  animation: none;
-}
 
 /* ---------- Clips: tap the progress line to scrub, like Reels ---------- */
 html[data-theme] .social-page button.social-clip-progress-hit {
@@ -2347,4 +2315,79 @@ html[data-theme] .social-page .social-clip-scrubber input[type="range"] {
   html[data-theme] .social-page .social-header h1.social-wordmark {
     font-size: 27px;
   }
+}
+
+/* ---------- Pull to refresh / tap "Enturma": the spinning ring ---------- */
+.social-stream {
+  position: relative;
+}
+.social-pull-refresh {
+  position: absolute;
+  z-index: 8;
+  top: -6px;
+  left: 50%;
+  display: grid;
+  place-items: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface);
+  box-shadow: 0 8px 22px color-mix(in srgb, #000 22%, transparent);
+  pointer-events: none;
+  transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.social-pull-refresh svg {
+  overflow: visible;
+}
+.social-pull-track {
+  fill: none;
+  stroke: color-mix(in srgb, var(--ink) 14%, transparent);
+  stroke-width: 3;
+}
+.social-pull-arc {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 3;
+  stroke-linecap: round;
+  transform-origin: 18px 18px;
+  transform: rotate(-90deg);
+  transition: stroke-dasharray 0.12s linear;
+}
+.social-pull-refresh[data-ready="true"] .social-pull-arc,
+.social-pull-refresh[data-refreshing="true"] .social-pull-arc {
+  stroke: var(--success);
+}
+@media (prefers-reduced-motion: reduce) {
+  .social-pull-refresh,
+  .social-pull-arc {
+    transition: none;
+  }
+}
+
+/* Touch screens keep :hover after a tap; only the current place stays marked. */
+@media (hover: none), (pointer: coarse) {
+  html[data-theme]
+    .social-navigation
+    :is(button, a):not(.social-navigation-brand):not([aria-current="page"]):hover {
+    background: transparent;
+  }
+}
+
+/* The wordmark is a button that refreshes the Feed; it keeps looking like the logo. */
+html[data-theme] .social-page .social-header .social-wordmark-refresh {
+  min-height: 0;
+  padding: 0 4px;
+  border: 0 !important;
+  border-radius: 8px;
+  background: transparent !important;
+  box-shadow: none;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  transition: transform 0.15s ease;
+}
+html[data-theme] .social-page .social-header .social-wordmark-refresh:active {
+  transform: scale(0.96);
 }

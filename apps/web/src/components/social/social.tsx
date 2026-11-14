@@ -328,17 +328,18 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
             create={() => select("create")}
             explore={() => setExplore(true)}
             settings={() => setSettings(true)}
+            back={view === "feed" ? undefined : () => select("feed")}
+            refresh={() => {
+              if (view !== "feed") select("feed");
+              setRefresh((value) => value + 1);
+            }}
           />
           {error && (
             <p className="social-error" role="alert">
               {error}
             </p>
           )}
-          {back.hint && (
-            <p className="social-exit-hint" role="status">
-              Volte de novo para sair do Social
-            </p>
-          )}
+
           <SocialPager
             view={view}
             select={select}
@@ -481,6 +482,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
                     me={ready.me.id}
                     autoplay={prefs.autoplay}
                     person={setPerson}
+                    toFeed={() => select("feed")}
                   />
                 )
               ) : (

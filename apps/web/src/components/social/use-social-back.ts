@@ -1,9 +1,6 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { SocialView } from "@/lib/social";
-
-/** How long after the first Back on the Feed a second Back leaves the Social. */
-export const SOCIAL_EXIT_WINDOW_MS = 2500;
 
 type Marker = "guard" | "view";
 
@@ -21,8 +18,8 @@ function stateWith(marker: Marker) {
 
 /**
  * The Social behaves like its own app for the phone's Back:
- * - from Clips or Criar, Back returns to the Feed;
- * - on the Feed, the first Back only warns and a second Back right away leaves.
+ * - from Clips, Criar or a profile, Back returns to the Feed;
+ * - only from the Feed does Back leave, straight to the Enturma home.
  *
  * Two history entries carry it: a "guard" on top of the Social's entry, and a
  * "view" entry while away from the Feed. Dialogs (enturmaOverlay) and linked
@@ -37,16 +34,13 @@ export function useSocialBack({
   toFeed: () => void;
   exit: () => void;
 }) {
-  const [hint, setHint] = useState(false);
   const latest = useRef({ view, toFeed, exit });
   useEffect(() => {
     latest.current = { view, toFeed, exit };
   });
-  const lastBack = useRef(Number.NEGATIVE_INFINITY);
   useEffect(() => {
     if (history.state?.enturmaSocial !== "guard")
       history.pushState(stateWith("guard"), "", location.href);
-    let timer: number | undefined;
     const onPop = () => {
       const state = history.state as Record<string, unknown> | null;
       if (state?.enturmaOverlay) return;
@@ -58,28 +52,15 @@ export function useSocialBack({
         return;
       }
       if (new URLSearchParams(location.search).has("post")) return;
-      // Back on the Feed itself.
-      const now = Date.now();
-      if (now - lastBack.current < SOCIAL_EXIT_WINDOW_MS) {
-        window.clearTimeout(timer);
-        setHint(false);
-        latest.current.exit();
-        return;
-      }
-      lastBack.current = now;
-      history.pushState(stateWith("guard"), "", location.href);
-      setHint(true);
-      window.clearTimeout(timer);
-      timer = window.setTimeout(() => setHint(false), SOCIAL_EXIT_WINDOW_MS);
+      // Back on the Feed itself: leave to the Enturma home.
+      latest.current.exit();
     };
     window.addEventListener("popstate", onPop);
     return () => {
       window.removeEventListener("popstate", onPop);
-      window.clearTimeout(timer);
     };
   }, []);
   return {
-    hint,
     /** Call when the visible place changes, so Back can return to the Feed. */
     entered(next: SocialView) {
       // The Back below lands after this change; it must not be read as leaving Clips.
