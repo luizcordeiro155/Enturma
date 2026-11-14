@@ -838,6 +838,31 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   await clips.focus();
   await page.keyboard.press("ArrowDown");
   await expect.poll(playing).toEqual([false, true, false, false]);
+  // The Clip left behind starts over when you come back to it.
+  expect(
+    await clips
+      .locator("video")
+      .first()
+      .evaluate((video) => (video as HTMLVideoElement).currentTime),
+  ).toBe(0);
+  // Tapping the thin progress line reveals a handle to move through the Clip.
+  const current = clips.locator('[data-clip-index="1"]');
+  await current
+    .getByRole("button", { name: "Mostrar controle de tempo do Clip" })
+    .click();
+  const scrubber = current.getByRole("slider", {
+    name: "Avançar ou voltar o Clip",
+  });
+  await expect(scrubber).toBeVisible();
+  await scrubber.fill("900");
+  await expect
+    .poll(() =>
+      current
+        .locator("video")
+        .evaluate((video) => (video as HTMLVideoElement).currentTime),
+    )
+    .toBeGreaterThan(2);
+  await expect(scrubber).toBeHidden({ timeout: 6000 });
   await expect(clips.locator("video").nth(3)).not.toHaveAttribute("src", /.+/);
   for (const width of [1366, 1920, 390]) {
     await page.setViewportSize({ width, height: width === 1366 ? 768 : 844 });

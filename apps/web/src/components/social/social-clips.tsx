@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ChevronDown,
@@ -23,6 +23,7 @@ function ClipVideo({
   muted,
   change,
   progress,
+  seekRef,
 }: {
   item: Post;
   active: boolean;
@@ -30,7 +31,8 @@ function ClipVideo({
   autoplay: boolean;
   muted: boolean;
   change: (post: Post) => void;
-  progress: (fraction: number) => void;
+  progress: (fraction: number, duration: number) => void;
+  seekRef?: React.MutableRefObject<((fraction: number) => void) | null>;
 }) {
   const ref = useRef<HTMLVideoElement>(null),
     lastTap = useRef<number | null>(null);
@@ -48,7 +50,10 @@ function ClipVideo({
     if (!video) return;
     if (!active) {
       video.pause();
+      // A Clip you scrolled past starts over when you come back to it.
+      if (video.currentTime > 0) video.currentTime = 0;
       manualStart.current = false;
+      manualPause.current = false;
       return;
     }
     const sync = () => {
@@ -149,6 +154,18 @@ function ClipVideo({
       toggle();
     }, 280);
   }
+  useEffect(() => {
+    if (!seekRef) return;
+    seekRef.current = (fraction) => {
+      const video = ref.current;
+      if (!video || !Number.isFinite(video.duration) || video.duration <= 0) return;
+      video.currentTime = Math.min(video.duration, Math.max(0, fraction * video.duration));
+      progress(video.currentTime / video.duration, video.duration);
+    };
+    return () => {
+      seekRef.current = null;
+    };
+  }, [seekRef, progress]);
   if (!media) return <p>Vídeo indisponível.</p>;
   return (
     <div className="social-clip-video">
@@ -164,7 +181,7 @@ function ClipVideo({
         onTimeUpdate={(event) => {
           const video = event.currentTarget;
           if (active && Number.isFinite(video.duration) && video.duration > 0)
-            progress(video.currentTime / video.duration);
+            progress(video.currentTime / video.duration, video.duration);
         }}
         onPlay={(event) => {
           if (
@@ -253,6 +270,12 @@ function ClipPage({
   change: (post: Post) => void;
 }) {
   const [progress, setProgress] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const seekRef = useRef<((fraction: number) => void) | null>(null);
+  const report = useCallback((fraction: number, length: number) => {
+    setProgress(fraction);
+    setDuration(length);
+  }, []);
   return (
     <>
       <ClipVideo
@@ -262,7 +285,8 @@ function ClipPage({
         autoplay={autoplay}
         muted={muted}
         change={change}
-        progress={setProgress}
+        progress={report}
+        seekRef={seekRef}
       />
       <SocialClipOverlay
         item={item}
@@ -270,6 +294,8 @@ function ClipPage({
         person={person}
         changed={change}
         progress={active ? progress : 0}
+        duration={active ? duration : 0}
+        seek={(fraction) => seekRef.current?.(fraction)}
       />
     </>
   );

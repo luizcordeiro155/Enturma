@@ -219,3 +219,25 @@ it("se o navegador bloquear o som automático, o vídeo volta a tocar sem som", 
   expect(element.muted).toBe(true);
   expect(play).toHaveBeenCalledTimes(2);
 });
+
+it("um vídeo que saiu da tela recomeça do início ao voltar", () => {
+  vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
+  vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {});
+  render(<SocialMediaCarousel media={[video("v")]} authorName="Ana" autoplay />);
+  const element = screen.getByTestId("post-video") as HTMLVideoElement;
+  intersect(element, 0.8);
+  element.currentTime = 3;
+  intersect(element, 0.2);
+  expect(element.currentTime).toBe(0);
+});
+it("pausar por um diálogo ou outra aba não perde o ponto do vídeo", () => {
+  vi.spyOn(HTMLMediaElement.prototype, "play").mockResolvedValue();
+  vi.spyOn(HTMLMediaElement.prototype, "pause").mockImplementation(() => {});
+  render(<SocialMediaCarousel media={[video("v")]} authorName="Ana" autoplay />);
+  const element = screen.getByTestId("post-video") as HTMLVideoElement;
+  intersect(element, 0.8);
+  element.currentTime = 3;
+  Object.defineProperty(document, "hidden", { value: true, configurable: true });
+  document.dispatchEvent(new Event("visibilitychange"));
+  expect(element.currentTime).toBe(3);
+});

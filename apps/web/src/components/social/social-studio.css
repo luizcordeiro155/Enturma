@@ -2251,3 +2251,69 @@ html[data-theme] .social-story-menu > :is(a, button):is(:hover, :focus-visible) 
 :root[data-reduced-motion="true"] .social-exit-hint {
   animation: none;
 }
+
+/* ---------- Clips: tap the progress line to scrub, like Reels ---------- */
+html[data-theme] .social-page button.social-clip-progress-hit {
+  position: absolute;
+  z-index: 5;
+  inset: auto 0 0;
+  height: 26px;
+  min-height: 0;
+  padding: 0;
+  border: 0 !important;
+  border-radius: 0;
+  background: transparent !important;
+  box-shadow: none;
+  cursor: pointer;
+}
+.social-page .social-clip-scrubber {
+  position: absolute;
+  z-index: 6;
+  inset: auto 0 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 46px;
+  padding: 0 12px 4px;
+  background: linear-gradient(transparent, #000a);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  animation: social-clip-scrubber-in 0.16s ease-out;
+}
+.social-clip-time {
+  min-width: 34px;
+  text-align: center;
+  text-shadow: 0 1px 2px #000a;
+}
+html[data-theme] .social-page .social-clip-scrubber input[type="range"] {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  accent-color: #fff;
+  cursor: pointer;
+}
+@keyframes social-clip-scrubber-in {
+  from {
+    opacity: 0;
+  }
+}
+:root[data-reduced-motion="true"] .social-clip-scrubber {
+  animation: none;
+}
+@media (min-width: 761px) {
+  html[data-theme] .social-page button.social-clip-progress-hit,
+  .social-page .social-clip-scrubber {
+    position: relative;
+    inset: auto;
+    grid-area: 1 / 2;
+    align-self: end;
+    width: 100%;
+  }
+}

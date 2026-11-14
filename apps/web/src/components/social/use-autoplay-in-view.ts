@@ -42,7 +42,14 @@ export function useAutoplayInView(
     const observer = new IntersectionObserver(
       (entries) => {
         const entry = entries[entries.length - 1];
-        visible = !!entry && entry.intersectionRatio >= 0.6;
+        const next = !!entry && entry.intersectionRatio >= 0.6;
+        // Scrolled past: like Instagram, it starts over when it comes back.
+        // Pausing for a dialog or another tab keeps the position.
+        if (visible && !next) {
+          video.pause();
+          video.currentTime = 0;
+        }
+        visible = next;
         sync();
       },
       { threshold: [0, 0.6] },
