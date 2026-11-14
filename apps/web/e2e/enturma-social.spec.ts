@@ -18,8 +18,8 @@ test("Social scroll owner uses the viewport without changing other page gutters"
 });
 
 // Exercise the real stylesheet cascade without requiring an API or account.
-// A lower-specificity contain rule must not leave feed videos using cover.
-test("feed video CSS preserves the full frame at mobile and desktop sizes", async ({ page }) => {
+// Feed videos fill the same frame a photo gets: no letterbox bars, any zoom.
+test("feed video CSS fills the post frame without side bars at mobile and desktop sizes", async ({ page }) => {
   const styles = ["social.css", "social-3.css", "social-3-continuation.css", "social-studio.css"]
     .map((file) => readFileSync(`src/components/social/${file}`, "utf8"))
     .join("\n");
@@ -37,15 +37,19 @@ test("feed video CSS preserves the full frame at mobile and desktop sizes", asyn
         </div></div>
       </article></main>`);
     const video = page.locator("video");
-    await expect(video).toHaveCSS("object-fit", "contain", { timeout: 1000 });
+    await expect(video).toHaveCSS("object-fit", "cover", { timeout: 1000 });
     const frame = (await page.locator(".social-carousel").boundingBox())!;
+    const post = (await page.locator(".social-post").boundingBox())!;
     const bounds = (await video.boundingBox())!;
-    expect(bounds.height).toBeLessThanOrEqual(Math.min(640, Math.max(220, height - 180)) + 1);
-    expect(bounds.width).toBeLessThanOrEqual(501);
-    expect(bounds.x).toBeGreaterThanOrEqual(frame.x);
-    expect(bounds.y).toBeGreaterThanOrEqual(frame.y);
-    expect(bounds.x + bounds.width).toBeLessThanOrEqual(frame.x + frame.width + 1);
-    expect(bounds.y + bounds.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
+    expect(frame.width).toBeLessThanOrEqual(501);
+    // Same frame as a photo: the post's full width at the reserved 3:4 ratio.
+    expect(Math.abs(frame.width - post.width)).toBeLessThanOrEqual(1);
+    expect(frame.width / frame.height).toBeCloseTo(0.75, 2);
+    // The video covers the whole frame, so nothing is left for side bars.
+    expect(Math.abs(bounds.x - frame.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(bounds.y - frame.y)).toBeLessThanOrEqual(1);
+    expect(Math.abs(bounds.width - frame.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(bounds.height - frame.height)).toBeLessThanOrEqual(1);
   }
 });
 
@@ -762,13 +766,13 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
       })
       .toBeLessThanOrEqual(1);
     const video = feed.locator("video");
-    await expect(video).toHaveCSS("object-fit", "contain");
-    expect((await video.boundingBox())!.height).toBeLessThanOrEqual(
-      Math.min(640, height - 180) + 1,
-    );
+    await expect(video).toHaveCSS("object-fit", "cover");
+    const card = (await feed.locator('[data-kind="CLIP"]').boundingBox())!;
+    expect(card.width).toBeLessThanOrEqual(501);
+    // A Clip in the feed is as wide as any other post, with no side bars.
     expect(
-      (await feed.locator('[data-kind="CLIP"]').boundingBox())!.width,
-    ).toBeLessThanOrEqual(501);
+      Math.abs((await video.boundingBox())!.width - card.width),
+    ).toBeLessThanOrEqual(1);
     await page.screenshot({
       path: info.outputPath(`social-feed-video-${width}.png`),
     });
