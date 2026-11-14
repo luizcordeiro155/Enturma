@@ -59,7 +59,8 @@ it("rola junto com a página do Feed quando ela é a área de rolagem", async ()
   expect(Observer.mock.calls.at(-1)![1]).toMatchObject({
     root: screen.getByTestId("page"),
   });
-});
+  // The first render of the whole Feed tree is slow on busy CI runners (~3 s locally).
+}, 15000);
 it("sem uma página de rolagem, a própria lista continua sendo a área de rolagem", async () => {
   render(stream);
   await screen.findByText("Ana Souza");
