@@ -35,6 +35,7 @@ import { mentionsUser } from "@/lib/mentions";
 import { api, post, peekApiSnapshot } from "@/lib/api";
 import {
   conversationKey,
+  conversationKeyBytes,
   createIdentity,
   decryptAttachment,
   decryptMessage,
@@ -59,6 +60,11 @@ import { MessageMenu } from "./message-menu";
 import { EmojiText, AnimatedEmoji } from "./emoji-picker";
 import { FriendsInbox } from "./friends-inbox";
 import { latestPreview } from "@/lib/private-chat-preview";
+import {
+  canSyncNotificationKeys,
+  clearConversationNotifications,
+  syncNotificationKeys,
+} from "@/lib/native-private-notifications";
 import { useAppShellState } from "./app-shell-state";
 type Friend = Omit<PublicProfile, "id"> & {
   id: string;
@@ -185,6 +191,31 @@ export function Friends() {
   );
   // The Amigos list shows each conversation's last message. It is decrypted here,
   // on this device, with the same key used when the conversation is opened.
+  // In the Android app, hand the phone each conversation's key (kept under the
+  // Android Keystore) so it can decrypt and stack message notifications itself.
+  const syncedNotificationKeys = useRef("");
+  useEffect(() => {
+    const keyPair = identity.current;
+    if (!ready || !keyPair || !me || !canSyncNotificationKeys()) return;
+    const ids = friends
+      .filter((f) => f.status === "ACCEPTED")
+      .map((f) => f.id)
+      .sort();
+    const signature = `${me.id}:${ids.join(",")}`;
+    if (syncedNotificationKeys.current === signature) return;
+    syncedNotificationKeys.current = signature;
+    void syncNotificationKeys(me.id, ids, async (id) => {
+      const peer = await api<{ publicKey: JsonWebKey }>(
+        `/friends/${id}/identity`,
+        { signal: AbortSignal.timeout(12000) },
+      );
+      return conversationKeyBytes(keyPair, peer.publicKey, id);
+    });
+  }, [ready, friends, me]);
+  const openConversation = selected?.id;
+  useEffect(() => {
+    if (openConversation) clearConversationNotifications(openConversation);
+  }, [openConversation]);
   const previewKeys = useRef(new Map<string, CryptoKey>());
   const previewing = useRef(new Set<string>());
   const latestPreviews = useRef(previews);
