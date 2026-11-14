@@ -128,7 +128,8 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
     incomingPost = params.get("post"),
     incomingPerson = params.get("person"),
     incomingQuery = params.get("q"),
-    incomingSettings = params.get("settings");
+    incomingSettings = params.get("settings"),
+    incomingCreate = params.get("create");
   const [view, setView] = useState<SocialView>("feed"),
     [opened, setOpened] = useState<SocialView[]>(["feed"]),
     [tab, setTab] = useState("for-you");
@@ -254,6 +255,14 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
       .querySelectorAll<HTMLVideoElement>(".social-page video")
       .forEach((video) => video.pause());
   }
+  // Another page (Amigos) can ask to start a new Story right away.
+  useEffect(() => {
+    if (incomingCreate !== "story") return;
+    const timer = setTimeout(() => select("create", "STORY"), 0);
+    return () => clearTimeout(timer);
+    // select only reads refs and state setters; run once per request.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [incomingCreate]);
   useEffect(() => {
     let alive = true;
     if (!searched) return;

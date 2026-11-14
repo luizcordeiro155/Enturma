@@ -30,10 +30,15 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
 
   async function initializeConversationKeys(p: Page) {
     await p.goto("/friends");
-    await p.getByText("Chaves e backup das conversas").click();
+    await p.getByRole("button", { name: "Mais opções" }).click();
+    await p
+      .getByRole("menuitem", { name: "Chaves e backup das conversas" })
+      .click();
     await expect(
       p.getByRole("button", { name: "Baixar backup cifrado" }),
     ).toBeEnabled();
+    // Keys and backup now live in a dialog behind ⋮; close it to continue.
+    await p.keyboard.press("Escape");
   }
   await register(page, a);
   await page.goto("/profile");
@@ -151,15 +156,16 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
     "connected",
     { timeout: 20000 },
   );
-  await page.getByLabel("Adicionar pelo nome de usuário").fill(b);
-  await page.getByRole("button", { name: "Enviar convite" }).click();
+  // Search by @ and invite, like adding a contact.
+  await page.getByRole("searchbox", { name: "Pesquisar amigos e pessoas" }).fill(`@${b}`);
+  await page.getByRole("button", { name: `Adicionar @${b}` }).click();
   await expect(
     other.getByRole("button", { name: "Aceitar convite" }),
   ).toBeVisible({ timeout: 10000 });
   await other.getByRole("button", { name: "Aceitar convite" }).click();
   await page.bringToFront();
   await expect(
-    page.getByRole("button", { name: "Conversar", exact: true }),
+    page.getByRole("button", { name: /^Conversar com / }),
   ).toBeVisible({ timeout: 10000 });
   let peerNotReady = true;
   await page.route("**/api/backend/friends/*/identity", (route) =>
@@ -174,13 +180,13 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
         })
       : route.continue(),
   );
-  await page.getByRole("button", { name: "Conversar", exact: true }).click();
+  await page.getByRole("button", { name: /^Conversar com / }).click();
   await expect(
     page.getByText("Aguardando seu amigo", { exact: true }),
   ).toBeVisible();
   peerNotReady = false;
 
-  await other.getByRole("button", { name: "Conversar", exact: true }).click();
+  await other.getByRole("button", { name: /^Conversar com / }).click();
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
   await page.getByLabel("Mensagem privada").fill("Rascunho durante o GIF");
@@ -383,12 +389,12 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   await expect(other).toHaveURL(/friends\?chat=/);
   await other.getByRole("button", { name: "Voltar para conversas" }).click();
   await expect(other).toHaveURL(/\/friends$/);
-  await other.getByRole("button", { name: "Conversar", exact: true }).click();
+  await other.getByRole("button", { name: /^Conversar com / }).click();
   await expect(other).toHaveURL(/friends\?chat=/);
   await other.goBack();
   await expect(other).toHaveURL(/\/friends$/);
   await expect(other.getByLabel("Mensagem privada")).not.toBeVisible();
-  await other.getByRole("button", { name: "Conversar", exact: true }).click();
+  await other.getByRole("button", { name: /^Conversar com / }).click();
   await other.setViewportSize({ width: 1487, height: 1058 });
   await other.getByText("Código de segurança", { exact: true }).click();
   await page
@@ -517,7 +523,7 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   await expect(
     fresh.getByLabel("Senha da sua conta", { exact: true }),
   ).toHaveCount(0);
-  await fresh.getByRole("button", { name: "Conversar", exact: true }).click();
+  await fresh.getByRole("button", { name: /^Conversar com / }).click();
   await expect(fresh.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(
     fresh

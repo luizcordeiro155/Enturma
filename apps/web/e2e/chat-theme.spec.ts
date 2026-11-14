@@ -160,7 +160,7 @@ test("two accounts acknowledge private and room messages, with compact themed co
     );
     await other.goto("/friends");
     await page.goto("/friends");
-    await page.getByRole("button", { name: "Conversar", exact: true }).click();
+    await page.getByRole("button", { name: /^Conversar com / }).click();
     const input = page.getByLabel("Mensagem privada", { exact: true });
     await expect(input).toBeEnabled();
     await page.setViewportSize({ width: 390, height: 844 });
@@ -190,7 +190,7 @@ test("two accounts acknowledge private and room messages, with compact themed co
       sent.getByRole("img", { name: "Entregue", exact: true }),
     ).toBeVisible({ timeout: 20000 });
     await other.bringToFront();
-    await other.getByRole("button", { name: "Conversar", exact: true }).click();
+    await other.getByRole("button", { name: /^Conversar com / }).click();
     await expect(
       other
         .getByRole("region", { name: "Conversa privada" })

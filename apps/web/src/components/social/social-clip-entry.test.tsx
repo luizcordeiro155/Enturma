@@ -13,12 +13,13 @@ import { post, video } from "./social-test-kit";
 
 const { api, route } = vi.hoisted(() => ({
   api: vi.fn(),
-  route: { post: null as string | null },
+  route: { post: null as string | null, create: null as string | null },
 }));
 vi.mock("@/lib/api", () => ({ api }));
 vi.mock("next/navigation", () => ({
   useSearchParams: () => ({
-    get: (key: string) => (key === "post" ? route.post : null),
+    get: (key: string) =>
+      key === "post" ? route.post : key === "create" ? route.create : null,
   }),
 }));
 vi.mock("../shell", () => ({
@@ -104,6 +105,7 @@ const id = "22222222-2222-4222-8222-222222222222";
 const clip = post(id, { kind: "CLIP", media: [video("v")] });
 beforeEach(() => {
   route.post = null;
+  route.create = null;
   api.mockReset().mockImplementation(async (path: string) => {
     if (path === "/social/capabilities") return { enabled: true };
     if (path === "/social/preferences")
@@ -169,4 +171,12 @@ it("leaving a linked Clip removes its post query without reloading the Feed", as
   expect(screen.getByTestId("pager")).toHaveAttribute("data-view", "feed");
   expect(replace).toHaveBeenCalled();
   replace.mockRestore();
+});
+
+it("opens straight into a new Story when another page asks for it", async () => {
+  route.create = "story";
+  render(<Social />);
+  await waitFor(() =>
+    expect(screen.getByTestId("pager")).toHaveAttribute("data-view", "create"),
+  );
 });

@@ -372,9 +372,9 @@ test("private invitation fits all themes, requires consent and keeps navigation 
       .click();
     await page.goto("/friends");
     await recipient.goto("/friends");
-    await page.getByRole("button", { name: "Conversar", exact: true }).click();
+    await page.getByRole("button", { name: /^Conversar com / }).click();
     await recipient
-      .getByRole("button", { name: "Conversar", exact: true })
+      .getByRole("button", { name: /^Conversar com / })
       .click();
     await expect(
       page

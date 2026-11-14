@@ -1,0 +1,368 @@
+/* ---------- Amigos: a messenger inbox (search, Social Stories, conversations) ---------- */
+html[data-theme] .friends-workspace > aside {
+  display: block;
+  min-width: 0;
+}
+.friends-inbox {
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  min-width: 0;
+}
+.friends-inbox-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 4px 0;
+}
+html[data-theme] .friends-inbox-header h1 {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.friends-inbox-menu {
+  position: relative;
+}
+html[data-theme] .friends-inbox-menu > .icon-control {
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+}
+.friends-menu {
+  position: absolute;
+  z-index: 30;
+  top: calc(100% + 6px);
+  right: 0;
+  display: grid;
+  min-width: 248px;
+  padding: 6px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: 0 16px 36px color-mix(in srgb, #000 26%, transparent);
+}
+.friends-menu.friends-menu-fixed {
+  position: fixed;
+  right: auto;
+  min-width: 220px;
+}
+html[data-theme] .friends-menu > button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: left;
+}
+html[data-theme] .friends-menu > button:is(:hover, :focus-visible) {
+  background: var(--surface-hover);
+  outline: none;
+}
+html[data-theme] .friends-menu > button.danger {
+  color: var(--danger);
+}
+
+/* Search pill: the whole pill shows focus, never a box inside it. */
+.friends-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 0 16px;
+  border: 1px solid transparent;
+  border-radius: 23px;
+  background: var(--surface-hover);
+  color: var(--muted);
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.friends-search:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+html[data-theme] .friends-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  outline: none;
+  box-shadow: none;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1rem;
+}
+html[data-theme] .friends-search input:focus,
+html[data-theme] .friends-search input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
+/* Social Stories on top, like WhatsApp status from Instagram. */
+.friends-stories {
+  margin-inline: -4px;
+}
+.friends-stories .social-stories {
+  display: flex;
+  gap: 12px;
+  padding: 6px 4px 10px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+html[data-theme] .friends-stories .social-story {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 70px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+}
+.friends-stories .social-story small {
+  max-width: 70px;
+  overflow: hidden;
+  font-size: 0.72rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.friends-stories .social-story-ring {
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 64px;
+  height: 64px;
+  padding: 3px;
+  border: 2px solid var(--accent);
+  border-radius: 50%;
+}
+.friends-stories .social-story.seen .social-story-ring {
+  border-color: var(--border);
+}
+.friends-stories .social-story-create:not(.has-story) .social-story-ring {
+  border-color: transparent;
+}
+.friends-stories .social-story-ring .identity-avatar {
+  width: 54px;
+  height: 54px;
+}
+.friends-stories .social-story-ring > svg {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 22px;
+  height: 22px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.friends-invites h2,
+.friends-people h2 {
+  margin: 10px 8px 4px;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.friends-inbox ul {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.friend-row {
+  display: grid;
+  grid-template-columns: 52px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 72px;
+  padding: 8px;
+  border-radius: 14px;
+}
+.friend-row.friend-conversation {
+  grid-template-columns: 52px minmax(0, 1fr);
+  transition: background-color 0.15s ease;
+}
+.friend-row.friend-conversation:hover,
+.friend-row.friend-conversation[data-selected="true"] {
+  background: var(--surface-hover);
+}
+.friend-row .identity-trigger {
+  position: relative;
+  padding: 0;
+}
+.friend-row .identity-avatar,
+.friend-row > .identity-avatar {
+  width: 52px;
+  height: 52px;
+}
+.friend-row[data-online="true"] .identity-trigger::after {
+  content: "";
+  position: absolute;
+  right: 1px;
+  bottom: 1px;
+  width: 13px;
+  height: 13px;
+  border: 2px solid var(--surface);
+  border-radius: 50%;
+  background: var(--success);
+}
+.friend-row-glyph {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--surface-hover);
+  color: var(--accent);
+}
+html[data-theme] .friend-row-open {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  min-height: 52px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+.friend-row-open:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+  border-radius: 8px;
+}
+.friend-row-top,
+.friend-row-bottom {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+.friend-row-top strong,
+.friend-row-text strong {
+  overflow: hidden;
+  font-size: 1rem;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.friend-row-top time {
+  margin-left: auto;
+  flex: none;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.friend-row-top time[data-unread="true"] {
+  color: var(--accent);
+  font-weight: 700;
+}
+.friend-row-preview,
+.friend-row-text small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.friend-row-preview {
+  flex: 1;
+  min-width: 0;
+}
+.friend-row-text {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.friend-row-bottom .friend-unread {
+  flex: none;
+  border-radius: 11px;
+}
+.friend-invite-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+html[data-theme] .friend-invite-actions > button:first-child,
+html[data-theme] .friend-add {
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+.friend-invite-sent {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.friends-empty {
+  margin: 12px 8px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+dialog.friends-security-dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: min(88dvh, 720px);
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--ink);
+}
+dialog.friends-security-dialog::backdrop {
+  background: color-mix(in srgb, #000 55%, transparent);
+}
+.friends-security-dialog > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.friends-security-dialog h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+.friends-security-dialog .private-backup {
+  display: grid;
+  gap: 12px;
+}
+
+@media (max-width: 760px) {
+  /* Like WhatsApp: the list is the whole screen until a conversation opens. */
+  .friends-page:not(.mobile-private-chat-open) .private-chat {
+    display: none;
+  }
+  .friend-row {
+    padding-inline: 4px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .friends-search,
+  .friend-row.friend-conversation {
+    transition: none;
+  }
+}
