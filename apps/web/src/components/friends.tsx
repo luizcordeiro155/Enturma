@@ -567,6 +567,14 @@ export function Friends() {
     router.replace("/friends", { scroll: false });
   }, [router]);
   useEscapeClosesChat(Boolean(selected), closeConversation);
+  // Wide screens show Amigos edge to edge (list + conversation), WhatsApp Web style.
+  useEffect(() => {
+    const root = document.documentElement;
+    root.dataset.enturmaFriends = "true";
+    return () => {
+      delete root.dataset.enturmaFriends;
+    };
+  }, []);
 
   useEffect(() => {
     const root = document.documentElement;
