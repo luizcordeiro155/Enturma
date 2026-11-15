@@ -107,7 +107,14 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
     .getByRole("button", { name: "Aplicar", exact: true })
     .click();
   await page.goto("/portfolio");
-  await page.getByRole("button", { name: "Adicionar", exact: true }).click();
+  await page.getByRole("button", { name: "Adicionar projeto", exact: true }).click();
+  // A new project opens empty with its name field ready to type.
+  await expect(
+    page.getByLabel("Nome do projeto 1", { exact: true }),
+  ).toBeFocused();
+  await expect(
+    page.getByLabel("Nome do projeto 1", { exact: true }),
+  ).toHaveValue("");
   await page
     .getByLabel("Nome do projeto 1", { exact: true })
     .fill("Pesquisa acadêmica");

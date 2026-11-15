@@ -1,0 +1,479 @@
+/* Portfolio projects: the editor cards and the public project cards.
+   Theme tokens only, so light, dark, system and the Enturma palette all follow. */
+
+/* ---------- Editor ---------- */
+.portfolio-project-editor .portfolio-projects-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.portfolio-projects-heading h2 {
+  margin: 0;
+}
+.portfolio-projects-heading p {
+  margin: 4px 0 0;
+  font-size: 0.85rem;
+}
+.portfolio-projects-heading > button {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.portfolio-project-editor > article.portfolio-project-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px 18px 18px;
+  margin: 0 0 12px;
+  border: 1px solid var(--border);
+  border-top: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface-raised, var(--soft));
+  color: var(--ink);
+}
+html[data-theme="dark"]
+  .portfolio-project-editor
+  > article.portfolio-project-card {
+  background: var(--soft);
+}
+.portfolio-project-card > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.portfolio-project-number {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: var(--on-accent, var(--ink));
+  background: var(--accent);
+}
+.portfolio-project-editor .portfolio-project-remove {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    color 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease;
+}
+.portfolio-project-editor .portfolio-project-remove:hover,
+.portfolio-project-editor .portfolio-project-remove:focus-visible {
+  color: var(--danger);
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  border-color: color-mix(in srgb, var(--danger) 30%, transparent);
+}
+html[data-theme="dark"]
+  .portfolio-project-editor
+  .portfolio-project-remove:hover,
+html[data-theme="dark"]
+  .portfolio-project-editor
+  .portfolio-project-remove:focus-visible {
+  color: #ff9aa8;
+}
+
+.portfolio-project-fields {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 12px 14px;
+}
+.portfolio-project-card .portfolio-field {
+  display: grid;
+  gap: 6px;
+  min-width: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.portfolio-project-card .portfolio-field > span {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.portfolio-project-card .portfolio-field small {
+  font-weight: 500;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.portfolio-project-card .portfolio-field-wide {
+  grid-column: 1 / -1;
+}
+.portfolio-project-editor .portfolio-project-card :is(input, textarea) {
+  width: 100%;
+  min-height: 44px;
+  box-sizing: border-box;
+  font-weight: 400;
+  background: var(--surface);
+  color: var(--ink);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.portfolio-project-editor .portfolio-project-card textarea {
+  min-height: 92px;
+  resize: vertical;
+  line-height: 1.5;
+}
+.portfolio-project-editor
+  .portfolio-project-card
+  :is(input, textarea)::placeholder {
+  color: color-mix(in srgb, var(--muted) 80%, transparent);
+}
+
+.portfolio-project-files {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.portfolio-field-title {
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.portfolio-project-files .portfolio-attachment-section {
+  display: grid;
+  gap: 10px;
+}
+.portfolio-project-files .portfolio-gallery:empty {
+  display: none;
+}
+.portfolio-project-card .portfolio-gallery,
+.public-portfolio .portfolio-gallery {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 150px), 1fr));
+  gap: 10px;
+}
+.portfolio-project-card .portfolio-gallery figure,
+.public-portfolio .portfolio-gallery figure {
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+.portfolio-project-card .portfolio-document {
+  min-height: 94px;
+  padding: 14px;
+  gap: 10px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--ink);
+}
+.portfolio-project-card .portfolio-document small {
+  color: var(--muted);
+  font-weight: 500;
+}
+.portfolio-project-card .portfolio-gallery figure > button {
+  width: 30px;
+  height: 30px;
+  min-height: 30px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: 0 2px 8px color-mix(in srgb, #000 18%, transparent);
+}
+.portfolio-project-card .portfolio-upload {
+  margin: 0;
+  padding: 14px 16px;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 28%, var(--border));
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 700;
+  font-size: 0.88rem;
+  transition:
+    border-color 160ms ease,
+    background 160ms ease;
+}
+.portfolio-project-card .portfolio-upload > svg {
+  flex-shrink: 0;
+  display: grid;
+  width: 36px;
+  height: 36px;
+  padding: 9px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  background: var(--soft);
+}
+.portfolio-project-card .portfolio-upload small {
+  color: var(--muted);
+}
+.portfolio-project-card .portfolio-upload:hover,
+.portfolio-project-card .portfolio-upload:focus-within {
+  border-color: var(--ink);
+  background: var(--surface-hover, var(--soft));
+}
+.portfolio-project-card .portfolio-upload[data-disabled="true"] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.portfolio-project-card .portfolio-upload[data-disabled="true"] input {
+  cursor: not-allowed;
+}
+.portfolio-upload-error {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--danger);
+}
+html[data-theme="dark"] .portfolio-upload-error {
+  color: #ff9aa8;
+}
+
+.portfolio-projects-empty {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 28px 18px;
+  text-align: center;
+  border: 1.5px dashed var(--border);
+  border-radius: 16px;
+  color: var(--muted);
+}
+.portfolio-projects-empty > svg {
+  color: var(--ink);
+}
+.portfolio-projects-empty p {
+  margin: 0;
+  max-width: 46ch;
+  line-height: 1.5;
+}
+.portfolio-projects-empty > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 680px) {
+  .portfolio-project-editor .portfolio-projects-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .portfolio-projects-heading > button {
+    width: 100%;
+    justify-content: center;
+  }
+  .portfolio-project-editor > article.portfolio-project-card {
+    padding: 14px;
+    gap: 14px;
+  }
+  .portfolio-project-fields {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* ---------- Public portfolio ---------- */
+.public-portfolio .public-projects {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+.public-portfolio .public-projects article.public-project {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+.public-portfolio .public-projects article.public-project:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px color-mix(in srgb, #000 12%, transparent);
+}
+.public-project-cover {
+  display: block;
+  aspect-ratio: 16 / 9;
+  background: var(--soft);
+  border-bottom: 1px solid var(--border);
+}
+.public-project-cover img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.public-project-body {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px 18px 18px;
+}
+.public-project-body h3 {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.3;
+}
+.public-project-body > p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+.portfolio-file-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 2px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.portfolio-file-chips a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-height: 32px;
+  padding: 0 11px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--soft);
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+.portfolio-file-chips a > span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 22ch;
+}
+.portfolio-file-chips a small {
+  color: var(--muted);
+  font-weight: 500;
+}
+.portfolio-file-chips a:hover,
+.portfolio-file-chips a:focus-visible {
+  border-color: var(--ink);
+}
+.public-portfolio .public-projects a.public-project-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  margin-top: auto;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  background: var(--portfolio-accent, var(--ink));
+  color: #fff;
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+.public-project-link small {
+  font-weight: 500;
+  opacity: 0.8;
+}
+html[data-theme="dark"]
+  .public-portfolio
+  .public-projects
+  a.public-project-link {
+  background: var(--accent);
+  color: var(--on-accent, #183f36);
+}
+.public-portfolio .public-projects a.public-project-link:hover,
+.public-portfolio .public-projects a.public-project-link:focus-visible {
+  filter: brightness(1.08);
+}
+
+@media print {
+  .public-portfolio .public-projects article.public-project {
+    break-inside: avoid;
+    box-shadow: none;
+    transform: none;
+  }
+  .public-portfolio .public-projects a.public-project-link {
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+}
+
+/* Older rules give every project link a top margin and inline layout. */
+.public-portfolio .public-projects a.public-project-cover {
+  display: block;
+  margin: 0;
+}
+.public-project-cover-placeholder {
+  display: grid;
+  place-items: center;
+  aspect-ratio: 16 / 9;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+  background:
+    radial-gradient(
+      120% 90% at 0% 0%,
+      color-mix(in srgb, var(--accent) 45%, transparent),
+      transparent 60%
+    ),
+    var(--soft);
+}
+.public-project-cover-placeholder > span {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  font-size: 1.1rem;
+  font-weight: 800;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.public-portfolio .public-projects a.public-project-link small {
+  color: inherit;
+  opacity: 0.75;
+}
+
+/* Editor: some global button rules repaint plain buttons in dark mode. */
+html[data-theme="dark"]
+  .app-shell
+  .portfolio-project-editor
+  .portfolio-project-remove {
+  background: transparent;
+  color: var(--muted);
+  border-color: transparent;
+}
+html[data-theme="dark"]
+  .app-shell
+  .portfolio-project-editor
+  .portfolio-project-remove:hover,
+html[data-theme="dark"]
+  .app-shell
+  .portfolio-project-editor
+  .portfolio-project-remove:focus-visible {
+  color: #ff9aa8;
+  background: color-mix(in srgb, #ff9aa8 12%, transparent);
+  border-color: color-mix(in srgb, #ff9aa8 35%, transparent);
+}
+/* Leave room for the remove control so it never covers the file name. */
+.portfolio-project-card .portfolio-gallery .portfolio-document {
+  padding-right: 44px;
+}
+.portfolio-project-card .portfolio-document > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -4,6 +4,7 @@ import { FormEvent, useEffect, useRef, useState } from "react";
 import {
   BriefcaseBusiness,
   ExternalLink,
+  FolderGit2,
   Plus,
   Printer,
   Trash2,
@@ -16,6 +17,8 @@ import {
 } from "./portfolio-attachments";
 import { Shell } from "./shell";
 import { PortfolioBack, PublicPortfolioLink } from "./portfolio-navigation";
+
+const MAX_PROJECTS = 12;
 
 type Project = {
   id?: string;
@@ -52,6 +55,25 @@ export function PortfolioEditor() {
   const [busy, setBusy] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const initialRevealDone = useRef(false);
+  // A new project's name field takes focus once it is on screen.
+  const focusProject = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const id = focusProject.current;
+    if (!id) return;
+    focusProject.current = undefined;
+    root.current
+      ?.querySelector<HTMLInputElement>(`[data-project-name="${id}"]`)
+      ?.focus();
+  }, [projects]);
+  function addProject() {
+    const id = crypto.randomUUID();
+    setProjects((v) =>
+      v.length >= MAX_PROJECTS
+        ? v
+        : [...v, { id, name: "", description: "", url: "", assets: [] }],
+    );
+    focusProject.current = id;
+  }
   useEffect(() => {
     void api<Portfolio>("/portfolio/me", { cache: "no-store" })
       .then((v) => {
@@ -184,100 +206,152 @@ export function PortfolioEditor() {
             </label>
           </section>
 
-          <section className="portfolio-project-editor" data-portfolio-reveal>
-            <div className="section-heading">
-              <h2>Projetos</h2>
-              <button
-                type="button"
-                className="secondary"
-                disabled={projects.length >= 12}
-                onClick={() =>
-                  setProjects((v) => [
-                    ...v,
-                    {
-                      id: crypto.randomUUID(),
-                      name: "Novo projeto",
-                      description: "",
-                      url: "",
-                      assets: [],
-                    },
-                  ])
-                }
-              >
-                <Plus size={16} /> Adicionar
-              </button>
-            </div>
-            {projects.map((p, i) => (
-              <article key={p.id ?? i}>
-                <input
-                  aria-label={"Nome do projeto " + (i + 1)}
-                  value={p.name}
-                  maxLength={120}
-                  onChange={(e) =>
-                    setProjects((v) =>
-                      v.map((x, n) =>
-                        n === i ? { ...x, name: e.target.value } : x,
-                      ),
-                    )
-                  }
-                />
-                <textarea
-                  aria-label={"Descrição do projeto " + (i + 1)}
-                  value={p.description ?? ""}
-                  maxLength={500}
-                  onChange={(e) =>
-                    setProjects((v) =>
-                      v.map((x, n) =>
-                        n === i ? { ...x, description: e.target.value } : x,
-                      ),
-                    )
-                  }
-                />
-                <input
-                  type="url"
-                  aria-label={"Link do projeto " + (i + 1)}
-                  value={p.url ?? ""}
-                  maxLength={300}
-                  placeholder="https://"
-                  onChange={(e) =>
-                    setProjects((v) =>
-                      v.map((x, n) =>
-                        n === i ? { ...x, url: e.target.value } : x,
-                      ),
-                    )
-                  }
-                />
-                <PortfolioAttachments
-                  ids={p.assets}
-                  assets={data.assets ?? []}
-                  owner
-                  onUpload={(asset) =>
-                    setData((d) =>
-                      d ? { ...d, assets: [...(d.assets ?? []), asset] } : d,
-                    )
-                  }
-                  onChange={(ids) =>
-                    setProjects((v) =>
-                      v.map((x) => (x.id === p.id ? { ...x, assets: ids } : x)),
-                    )
-                  }
-                />
+          <section
+            className="portfolio-project-editor"
+            data-portfolio-reveal
+            aria-labelledby="portfolio-projects-title"
+          >
+            <div className="section-heading portfolio-projects-heading">
+              <div>
+                <h2 id="portfolio-projects-title">Projetos</h2>
+                <p className="muted">
+                  {projects.length
+                    ? `${projects.length} de ${MAX_PROJECTS} projetos`
+                    : "Mostre o que você já construiu."}
+                </p>
+              </div>
+              {projects.length ? (
                 <button
                   type="button"
-                  className="text-button"
-                  onClick={() =>
-                    setProjects((v) => v.filter((_, n) => n !== i))
-                  }
+                  className="secondary"
+                  disabled={projects.length >= MAX_PROJECTS}
+                  onClick={addProject}
                 >
-                  <Trash2 size={15} /> Remover
+                  <Plus size={16} /> Adicionar projeto
                 </button>
+              ) : null}
+            </div>
+            {projects.map((p, i) => (
+              <article
+                key={p.id ?? i}
+                className="portfolio-project-card"
+                aria-label={`Projeto ${i + 1}`}
+              >
+                <header>
+                  <span className="portfolio-project-number">
+                    Projeto {i + 1}
+                  </span>
+                  <button
+                    type="button"
+                    className="portfolio-project-remove"
+                    aria-label={`Remover projeto ${i + 1}`}
+                    onClick={() =>
+                      setProjects((v) => v.filter((_, n) => n !== i))
+                    }
+                  >
+                    <Trash2 size={15} aria-hidden="true" />
+                    <span>Remover</span>
+                  </button>
+                </header>
+                <div className="portfolio-project-fields">
+                  <label className="portfolio-field">
+                    <span>Nome do projeto</span>
+                    <input
+                      aria-label={"Nome do projeto " + (i + 1)}
+                      data-project-name={p.id}
+                      value={p.name}
+                      maxLength={120}
+                      required
+                      placeholder="Ex.: App de caronas universitárias"
+                      onChange={(e) =>
+                        setProjects((v) =>
+                          v.map((x, n) =>
+                            n === i ? { ...x, name: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </label>
+                  <label className="portfolio-field">
+                    <span>
+                      Link <small>opcional</small>
+                    </span>
+                    <input
+                      type="url"
+                      aria-label={"Link do projeto " + (i + 1)}
+                      value={p.url ?? ""}
+                      maxLength={300}
+                      placeholder="https://github.com/voce/projeto"
+                      onChange={(e) =>
+                        setProjects((v) =>
+                          v.map((x, n) =>
+                            n === i ? { ...x, url: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </label>
+                  <label className="portfolio-field portfolio-field-wide">
+                    <span>
+                      Descrição
+                      <small aria-hidden="true">
+                        {(p.description ?? "").length}/500
+                      </small>
+                    </span>
+                    <textarea
+                      aria-label={"Descrição do projeto " + (i + 1)}
+                      value={p.description ?? ""}
+                      maxLength={500}
+                      rows={3}
+                      placeholder="O que você fez, com quem e qual foi o resultado."
+                      onChange={(e) =>
+                        setProjects((v) =>
+                          v.map((x, n) =>
+                            n === i ? { ...x, description: e.target.value } : x,
+                          ),
+                        )
+                      }
+                    />
+                  </label>
+                </div>
+                <div className="portfolio-project-files">
+                  <span className="portfolio-field-title">Imagens e PDFs</span>
+                  <PortfolioAttachments
+                    ids={p.assets}
+                    assets={data.assets ?? []}
+                    owner
+                    onUpload={(asset) =>
+                      setData((d) =>
+                        d ? { ...d, assets: [...(d.assets ?? []), asset] } : d,
+                      )
+                    }
+                    onChange={(ids) =>
+                      setProjects((v) =>
+                        v.map((x) =>
+                          x.id === p.id ? { ...x, assets: ids } : x,
+                        ),
+                      )
+                    }
+                  />
+                </div>
               </article>
             ))}
             {!projects.length ? (
-              <p className="muted">
-                Adicione projetos da faculdade, pessoais, open source ou
-                trabalhos em equipe.
-              </p>
+              <div className="portfolio-projects-empty">
+                <FolderGit2 size={28} aria-hidden="true" />
+                <p>
+                  Adicione projetos da faculdade, pessoais, open source ou
+                  trabalhos em equipe. Cada projeto pode ter link, imagens e
+                  PDFs.
+                </p>
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={addProject}
+                >
+                  <Plus size={16} /> Adicionar projeto
+                </button>
+              </div>
             ) : null}
           </section>
           <div className="portfolio-actions">
@@ -384,19 +458,11 @@ export function PublicPortfolio({ username }: { username: string }) {
           <h2>Projetos</h2>
           <div className="public-projects">
             {data.projects.map((p, i) => (
-              <article key={p.id ?? i} id={p.id ? `projeto-${p.id}` : undefined}>
-                <PortfolioAttachments
-                  ids={p.assets}
-                  assets={data.assets ?? []}
-                />
-                <h3>{p.name}</h3>
-                <p>{p.description}</p>
-                {p.url && /^https?:\/\//i.test(p.url) ? (
-                  <a href={p.url} target="_blank" rel="noreferrer">
-                    Abrir projeto <ExternalLink size={14} />
-                  </a>
-                ) : null}
-              </article>
+              <PublicProject
+                key={p.id ?? i}
+                project={p}
+                assets={data.assets ?? []}
+              />
             ))}
           </div>
         </section>
@@ -427,4 +493,82 @@ export function PublicPortfolio({ username }: { username: string }) {
       ) : null}
     </main>
   );
+}
+
+function PublicProject({
+  project: p,
+  assets,
+}: {
+  project: Project;
+  assets: PortfolioAsset[];
+}) {
+  const files = (p.assets ?? []).filter((id) =>
+    assets.some((a) => a.id === id),
+  );
+  // The first image becomes the cover; the rest stay one tap away.
+  const cover = files.find((id) =>
+    assets.find((a) => a.id === id)?.mime.startsWith("image/"),
+  );
+  const coverAsset = assets.find((a) => a.id === cover);
+  const rest = files.filter((id) => id !== cover);
+  const link = p.url && /^https?:\/\//i.test(p.url) ? p.url : undefined;
+  let host = "";
+  try {
+    host = link ? new URL(link).host.replace(/^www\./, "") : "";
+  } catch {
+    host = "";
+  }
+  return (
+    <article
+      className="public-project"
+      id={p.id ? `projeto-${p.id}` : undefined}
+    >
+      {coverAsset ? (
+        <a
+          className="public-project-cover"
+          href={`/api/backend/public/portfolio/assets/${coverAsset.id}`}
+          target="_blank"
+          rel="noreferrer"
+        >
+          <img
+            src={`/api/backend/public/portfolio/assets/${coverAsset.id}`}
+            alt={coverAsset.name}
+            loading="lazy"
+          />
+        </a>
+      ) : (
+        <div className="public-project-cover-placeholder" aria-hidden="true">
+          <span>{initials(p.name)}</span>
+        </div>
+      )}
+      <div className="public-project-body">
+        <h3>{p.name}</h3>
+        {p.description ? <p>{p.description}</p> : null}
+        {rest.length ? (
+          <PortfolioAttachments ids={rest} assets={assets} compact />
+        ) : null}
+        {link ? (
+          <a
+            className="public-project-link"
+            href={link}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Abrir projeto
+            {host ? <small>{host}</small> : null}
+            <ExternalLink size={14} aria-hidden="true" />
+          </a>
+        ) : null}
+      </div>
+    </article>
+  );
+}
+
+function initials(name: string) {
+  const words = name
+    .trim()
+    .split(/\s+/)
+    .filter((w) => w.length > 2);
+  const picked = (words.length ? words : name.trim().split(/\s+/)).slice(0, 2);
+  return picked.map((w) => w[0]?.toUpperCase() ?? "").join("") || "P";
 }
