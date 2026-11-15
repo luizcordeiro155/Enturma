@@ -597,12 +597,8 @@ test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; control
   await expect(editor.getByRole("button", { name: /Trecho 2/ })).toBeVisible();
   await editor.getByRole("button", { name: "Desfazer edição" }).click();
   await expect(editor.getByRole("button", { name: /Trecho 2/ })).toHaveCount(0);
-  await editor.getByText("Textos e legendas", { exact: true }).click();
-  await editor.getByLabel("Nova legenda").fill("Uma ideia puxa outra");
-  await editor.getByRole("button", { name: "Adicionar texto" }).click();
-  await expect(editor.locator(".social-edit-caption")).toHaveText(
-    "Uma ideia puxa outra",
-  );
+  // The Social editor no longer has a texts-and-captions section.
+  await expect(editor.getByText("Textos e legendas", { exact: true })).toHaveCount(0);
   await page.setViewportSize({ width: 390, height: 844 });
   expect(
     await page.evaluate(
@@ -936,8 +932,9 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
     await expect(selected.locator(".social-post-actions")).toBeInViewport({
       ratio: 0.99,
     });
+    // Clips open with sound; a browser that blocks it falls back to muted.
     await expect(
-      page.getByRole("button", { name: "Ativar som dos Clips" }),
+      selected.getByRole("button", { name: /^(Ativar som dos Clips|Silenciar Clips)$/ }),
     ).toBeInViewport({ ratio: 0.99 });
     expect(
       await page.evaluate(
