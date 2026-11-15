@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  bestAspect,
   captionRange,
   cropAfterDrag,
   frameTimes,
@@ -31,14 +32,15 @@ describe("visual media editing", () => {
     expect(frameTimes(0, 12)).toEqual([]);
   });
   it("trims long originals by dragging either edge without crossing handles", () => {
-    const recipe = defaultRecipe(240);
-    const next = trimSegment(recipe, 0, "end", 180, 240);
-    expect(exportDuration(next)).toBe(90);
+    const recipe = defaultRecipe(400);
+    const next = trimSegment(recipe, 0, "end", 300, 400);
+    // The selection never grows past the 3-minute limit.
+    expect(exportDuration(next)).toBe(180);
     expect(
-      trimSegment(recipe, 0, "start", 100, 240).segments[0].start,
-    ).toBeCloseTo(89.9);
-    const shifted = trimSegment(recipe, 0, "move", 120, 240);
-    expect(shifted.segments[0]).toEqual({ start: 120, end: 210 });
+      trimSegment(recipe, 0, "start", 250, 400).segments[0].start,
+    ).toBeCloseTo(179.9);
+    const shifted = trimSegment(recipe, 0, "move", 120, 400);
+    expect(shifted.segments[0]).toEqual({ start: 120, end: 300 });
     expect(sourceTime(shifted, 10)).toBe(130);
   });
   it("moves media using actual crop overflow and clamps its bounds", () => {
@@ -70,5 +72,23 @@ describe("visual media editing", () => {
       captionRange({ text: "Oi", start: 1, end: 3, y: 0.5 }, "start", 5, 8)
         .start,
     ).toBeCloseTo(2.9);
+  });
+});
+
+describe("automatic framing", () => {
+  it("Stories and Clips always fill the vertical screen", () => {
+    expect(bestAspect("STORY", 1920, 1080)).toBe("9:16");
+    expect(bestAspect("CLIP", 1080, 1080)).toBe("9:16");
+  });
+  it("a Post keeps as much of the original as the feed can show", () => {
+    expect(bestAspect("POST", 1080, 1920)).toBe("3:4"); // phone video
+    expect(bestAspect("POST", 1080, 1350)).toBe("4:5");
+    expect(bestAspect("POST", 1200, 1180)).toBe("1:1");
+    expect(bestAspect("POST", 1920, 1080)).toBe("1.91:1"); // landscape
+    expect(bestAspect("POST", 4000, 3000)).toBe("1:1");
+  });
+  it("falls back to the feed default when the size is unknown", () => {
+    expect(bestAspect("POST", 0, 0)).toBe("4:5");
+    expect(bestAspect("POST", Number.NaN, 100)).toBe("4:5");
   });
 });

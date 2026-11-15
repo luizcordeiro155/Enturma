@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Eye, Heart, Pause, Play, Send, Star, Trash2, Volume2, VolumeX } from "lucide-react";
 import { api } from "@/lib/api";
-import { mediaUrl, postPerson, socialWrite, storyDuration, type SocialPerson, type SocialPost } from "@/lib/social";
+import { MAX_VIDEO_SECONDS, mediaUrl, postPerson, socialWrite, storyDuration, type SocialPerson, type SocialPost } from "@/lib/social";
 import { groupStories } from "@/lib/social-media";
 import { navigateStory, resolveStoryGesture, type StoryAction } from "@/lib/social-story-controls";
 import { ForumLinks, ConfirmedLink } from "../forum-links";
@@ -75,7 +75,7 @@ export function StoryViewer({ stories, start = 0, me, close, person, onDeleted, 
       setProgress(Math.min(1, fraction));
       if (fraction >= 1 && completed.current !== currentId) {
         completed.current = currentId;
-        void socialWrite(`/posts/${currentId}/view`, { watchedMs: Math.min(90000, duration), completed: true }).catch(() => {});
+        void socialWrite(`/posts/${currentId}/view`, { watchedMs: Math.min(MAX_VIDEO_SECONDS * 1000, duration), completed: true }).catch(() => {});
         moveNext.current();
       }
     }, 100);

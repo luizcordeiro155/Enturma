@@ -73,7 +73,11 @@ it("exports framing and audio choices and exposes invalid final duration", () =>
     }),
     { target: { value: "100" } },
   );
-  expect(screen.getByRole("alert")).toHaveTextContent("até 90 segundos");
+  // 100 s at half speed would export 200 s, past the 3-minute limit.
+  fireEvent.change(screen.getByLabelText("Velocidade"), {
+    target: { value: "0.5" },
+  });
+  expect(screen.getByRole("alert")).toHaveTextContent("até 3 minutos");
 });
 
 it("selects a cover only inside the edited output, not discarded source frames", () => {

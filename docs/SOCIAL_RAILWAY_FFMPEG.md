@@ -7,7 +7,7 @@
 - O serviço Railway `enturma-social-media / enturma-ffmpeg-worker` executa FFmpeg e FFprobe em contêiner Java 21 com acesso público HTTPS protegido por Bearer para operações de processamento. Os arquivos são transmitidos pela API, não lidos diretamente do bucket.
 - O worker NÃO recebe credenciais de R2, PostgreSQL, JWT de usuários ou segredos do BFF. Só contém `SOCIAL_FFMPEG_WORKER_TOKEN`.
 - A API envia o arquivo de origem temporário ao worker, recebe ZIP com conteúdo/miniatura/metadados, valida o retorno e grava os resultados no R2; o restante do fluxo permanece inalterado.
-- Os limites do pipeline original são mantidos: fonte até 128 MiB, exportação até 90 segundos, no máximo uma transcodificação por instância, verificação dos formatos por FFprobe, controles de CPU e limite de execução.
+- Os limites do pipeline original são mantidos: fonte até 128 MiB, exportação até 3 minutos (180 s, `VideoRecipe.MAX_SECONDS`), no máximo uma transcodificação por instância, verificação dos formatos por FFprobe, controles de CPU e limite de execução.
 
 ## Railway — serviço criado
 

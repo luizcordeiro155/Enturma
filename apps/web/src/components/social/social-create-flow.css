@@ -1,0 +1,360 @@
+/* Create flow (Escolher → Editar → Detalhes). Theme tokens only, so light,
+   dark, system and the Enturma palette all follow. Loaded after social-studio. */
+
+/* ---------- Steps ---------- */
+.social-page .social-create-flow .social-create-steps {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  padding: 6px 0 14px;
+  border-bottom: 1px solid var(--border);
+}
+.social-page .social-create-flow .social-create-steps > li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+}
+/* The line between steps fills as the person moves forward. */
+.social-page .social-create-flow .social-create-steps > li:not(:first-child)::before {
+  content: "";
+  position: absolute;
+  top: 14px;
+  right: calc(50% + 20px);
+  width: calc(100% - 40px);
+  height: 2px;
+  border-radius: 2px;
+  background: var(--border);
+  transition: background 220ms ease;
+}
+.social-page .social-create-flow .social-create-steps > li:is([data-state="done"], [data-state="current"]):not(:first-child)::before {
+  background: var(--accent);
+}
+.social-page .social-create-flow .social-create-steps > li > span {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 800;
+  transition: background 220ms ease, color 220ms ease, border-color 220ms ease,
+    box-shadow 220ms ease;
+}
+.social-page .social-create-flow .social-create-steps > li[data-state="current"] {
+  color: var(--ink);
+}
+.social-page .social-create-flow .social-create-steps > li[data-state="current"] > span {
+  background: var(--accent);
+  border-color: transparent;
+  color: var(--on-accent);
+  box-shadow: 0 0 0 5px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.social-page .social-create-flow .social-create-steps > li[data-state="done"] {
+  color: var(--ink);
+}
+.social-page .social-create-flow .social-create-steps > li[data-state="done"] > span {
+  background: color-mix(in srgb, var(--accent) 35%, var(--surface));
+  border-color: transparent;
+  color: var(--ink);
+}
+
+/* ---------- Escolher ---------- */
+.social-page .social-create-flow .social-create-pick .social-segments {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card {
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  gap: 4px;
+  min-height: 92px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+  text-align: left;
+  transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+.social-format-card > svg {
+  margin-bottom: 4px;
+  color: var(--ink);
+}
+.social-format-card > strong {
+  font-size: 15px;
+}
+.social-format-card > small {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+  line-height: 1.35;
+}
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--ink) 40%, var(--border));
+  transform: translateY(-1px);
+}
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+  box-shadow: 0 0 0 1px var(--accent) inset;
+}
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card[aria-pressed="true"] > svg {
+  color: var(--ink);
+}
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card:disabled:not([aria-pressed="true"]) {
+  opacity: 0.55;
+}
+
+html[data-theme] .social-page .social-create-flow .social-create-pick .social-upload {
+  gap: 8px;
+  min-height: 220px;
+  padding: 28px 20px;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 25%, var(--border));
+  border-radius: 18px;
+  background:
+    radial-gradient(120% 90% at 50% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 65%),
+    var(--soft);
+  color: var(--ink);
+  transition: border-color 160ms ease;
+}
+html[data-theme] .social-page .social-create-flow .social-create-pick .social-upload:hover {
+  border-color: var(--ink);
+}
+.social-page .social-create-pick .social-upload > svg {
+  padding: 12px;
+  box-sizing: content-box;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+.social-page .social-create-pick .social-upload > strong {
+  font-size: 17px;
+}
+.social-page .social-create-pick .social-upload > span {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: center;
+}
+.social-page .social-create-pick .social-upload > .social-upload-auto {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 600;
+}
+.social-page .social-create-pick .social-upload > .social-row {
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 6px;
+}
+html[data-theme] .social-page .social-create-pick .social-file-button,
+html[data-theme] .social-page .social-create-pick .social-upload .social-row > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 14px;
+  font-weight: 700;
+}
+html[data-theme] .social-page .social-create-pick .social-file-button.social-file-button-primary {
+  background: var(--accent);
+  border-color: transparent;
+  color: var(--on-accent);
+}
+
+/* ---------- Editar ---------- */
+.social-page .social-create-edit .social-edit-media > .social-row:first-child {
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--soft);
+}
+.social-page .social-create-edit .social-edit-media > .social-row:first-child > strong {
+  margin-right: auto;
+  font-size: 14px;
+}
+.social-framing-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  order: -1;
+  min-height: 28px;
+  padding: 0 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 30%, var(--surface));
+  color: var(--ink);
+  font-size: 12px;
+  font-weight: 700;
+}
+.social-page .social-create-edit .social-edit-media > .social-row:first-child > .social-framing-chip {
+  order: 0;
+}
+
+/* ---------- Detalhes ---------- */
+html[data-theme] .social-page .social-create-flow .social-create-details {
+  gap: 14px;
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--soft);
+}
+.social-page .social-create-flow .social-create-selected {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  color: var(--ink);
+  font-weight: 600;
+}
+.social-page .social-create-flow .social-create-selected .text-button {
+  margin-left: auto;
+}
+.social-page .social-create-flow .social-create-details details {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.social-page .social-create-flow .social-create-details summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+html[data-theme] .social-page .social-create-flow .social-create-preview {
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  background: var(--soft);
+}
+
+/* ---------- All steps ---------- */
+.social-page .social-create-flow .social-caption-field > label {
+  font-size: 14px;
+  font-weight: 700;
+}
+.social-page .social-create-flow .social-create-privacy {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+.social-page .social-create-flow .social-create-privacy > svg {
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--ink);
+}
+html[data-theme] .social-page .social-create-flow .social-create-publish-actions > button:not(.secondary) {
+  box-shadow: 0 8px 20px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+@media (max-width: 760px) {
+  .social-page .social-create-flow .social-create-pick .social-segments {
+    gap: 8px;
+  }
+  html[data-theme] .social-page .social-editor .social-segments > button.social-format-card {
+    min-height: 0;
+    padding: 12px 10px;
+    justify-items: center;
+    text-align: center;
+  }
+  .social-format-card > small {
+    font-size: 11px;
+  }
+  html[data-theme] .social-page .social-create-flow .social-create-pick .social-upload {
+    min-height: 0;
+    padding: 22px 14px;
+  }
+  .social-page .social-create-pick .social-upload > .social-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    width: 100%;
+  }
+  .social-page .social-create-pick .social-upload > .social-row > :first-child {
+    grid-column: 1 / -1;
+    justify-content: center;
+  }
+  .social-page .social-create-pick .social-upload > .social-row > * {
+    justify-content: center;
+  }
+  /* Actions stay reachable at the bottom of the screen while editing. */
+  .social-page .social-create-flow .social-create-publish-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 3;
+    margin-inline: -4px;
+    padding: 10px 4px calc(10px + var(--enturma-safe-bottom, 0px));
+    border-top: 1px solid var(--border);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(10px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .social-page .social-create-flow .social-create-steps > li > span,
+  html[data-theme] .social-page .social-editor .social-segments > button.social-format-card {
+    transition: none;
+  }
+}
+
+/* Selected format: its hint stays readable on the accent background. */
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card[aria-pressed="true"] > small {
+  color: color-mix(in srgb, var(--ink) 78%, transparent);
+}
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card,
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card > * {
+  margin-inline: 0;
+}
+html[data-theme] .social-page .social-create-pick .social-file-button {
+  justify-content: center;
+  padding-block: 0;
+  line-height: 1.2;
+}
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card {
+  justify-content: start;
+}
+@media (max-width: 760px) {
+  html[data-theme] .social-page .social-editor .social-segments > button.social-format-card {
+    justify-content: center;
+  }
+}
+/* On the accent background, text and icon use the accent's own text color. */
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card[aria-pressed="true"],
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card[aria-pressed="true"] > :is(svg, strong) {
+  color: var(--on-accent);
+}
+html[data-theme] .social-page .social-editor .social-segments > button.social-format-card[aria-pressed="true"] > small {
+  color: color-mix(in srgb, var(--on-accent) 75%, transparent);
+}
+/* "Voltar" always sits on the left, even when it is the only step action. */
+.social-page .social-create-flow .social-create-step-actions > button.secondary:first-child {
+  margin-left: 0;
+}

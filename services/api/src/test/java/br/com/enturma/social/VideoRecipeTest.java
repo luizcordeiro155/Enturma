@@ -12,16 +12,17 @@ class VideoRecipeTest {
   }
 
   @Test
-  void acceptsNinetySecondsFromALongerOriginal() {
-    assertThat(recipe(60, 150).validated(180).duration()).isEqualTo(90);
+  void acceptsThreeMinutesFromALongerOriginal() {
+    assertThat(recipe(60, 240).validated(300).duration()).isEqualTo(180);
+    assertThat(VideoRecipe.MAX_SECONDS).isEqualTo(180);
   }
 
   @Test
   void rejectsOverlongOutputOutOfBoundsAndNonFiniteValues() {
     for (var r :
         List.of(
-            recipe(0, 90.1), recipe(-1, 10), recipe(2, 1), recipe(0, Double.NaN), recipe(0, 91)))
-      assertThatThrownBy(() -> r.validated(100))
+            recipe(0, 180.1), recipe(-1, 10), recipe(2, 1), recipe(0, Double.NaN), recipe(0, 181)))
+      assertThatThrownBy(() -> r.validated(200))
           .isInstanceOf(br.com.enturma.common.ApiException.class);
     assertThatThrownBy(() -> recipe(20, 30).validated(25))
         .isInstanceOf(br.com.enturma.common.ApiException.class);

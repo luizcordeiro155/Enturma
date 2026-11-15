@@ -27,7 +27,7 @@ public class SocialApiController {
 
   @GetMapping("/capabilities")
   public Object capabilities() {
-    return Map.of("enabled", access.enabled(), "media", media.enabled(), "maxClipSeconds", 90, "live", lives.enabled());
+    return Map.of("enabled", access.enabled(), "media", media.enabled(), "maxClipSeconds", VideoRecipe.MAX_SECONDS, "live", lives.enabled());
   }
 
   @GetMapping("/feed")
@@ -128,7 +128,7 @@ public class SocialApiController {
     posts.deleteComment(a, id, comment);
   }
 
-  public record View(@Min(0) @Max(90000) int watchedMs, boolean completed) {}
+  public record View(@Min(0) @Max(VideoRecipe.MAX_MS) int watchedMs, boolean completed) {}
 
   @PutMapping("/posts/{id}/view")
   public void view(

@@ -222,7 +222,7 @@ public class SocialTranscoder {
           image.path("height").asInt());
     }
     if (!Double.isFinite(seconds) || seconds <= 0 || seconds > 3600 || recipe == null)
-      throw ApiException.invalid("Importe um vídeo de até uma hora e selecione até 90 segundos.");
+      throw ApiException.invalid("Importe um vídeo de até uma hora e selecione até 3 minutos.");
     recipe.validated(seconds);
     StringBuilder graph = new StringBuilder();
     int count = recipe.segments().size();
@@ -292,6 +292,11 @@ public class SocialTranscoder {
             "veryfast",
             "-crf",
             "25",
+            // 3 minutes at this ceiling stay well under the 128 MiB output limit.
+            "-maxrate",
+            "4500k",
+            "-bufsize",
+            "9000k",
             "-pix_fmt",
             "yuv420p",
             "-threads",
@@ -299,7 +304,7 @@ public class SocialTranscoder {
             "-map_metadata",
             "-1",
             "-t",
-            "90",
+            String.valueOf(VideoRecipe.MAX_SECONDS),
             "-movflags",
             "+faststart",
             "-fs",
@@ -309,7 +314,7 @@ public class SocialTranscoder {
     var output = probe(dir, "video.mp4");
     int ms = (int) Math.round(output.path("format").path("duration").asDouble() * 1000);
     // Never accept an incomplete/truncated output as a successful export.
-    if (ms <= 0 || ms > 90000 || Math.abs(ms - Math.round(recipe.duration() * 1000)) > 120)
+    if (ms <= 0 || ms > VideoRecipe.MAX_MS || Math.abs(ms - Math.round(recipe.duration() * 1000)) > 120)
       throw ApiException.invalid("O vídeo exportado não passou pela validação de duração.");
     run(
         dir,
@@ -415,7 +420,7 @@ public class SocialTranscoder {
         throw new IOException("Unexpected media type from worker");
       int duration = result.path("durationMs").asInt(-1);
       int width = result.path("width").asInt(-1), height = result.path("height").asInt(-1);
-      if (duration < 0 || duration > 90000 || width < 1 || height < 1)
+      if (duration < 0 || duration > VideoRecipe.MAX_MS || width < 1 || height < 1)
         throw new IOException("Invalid transcode metadata");
       return new Result(dir.resolve("media"), dir.resolve("thumbnail"), mime,
           duration, width, height);

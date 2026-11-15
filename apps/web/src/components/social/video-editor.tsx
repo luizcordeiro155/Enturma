@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import {
   exportDuration,
+  MAX_VIDEO_SECONDS,
   sourceTime,
   videoPreviewFrame,
   type VideoRecipe,
@@ -700,9 +701,9 @@ export function VideoEditor({
             </label>
           </div>
         </details>
-        {duration > 90 && (
+        {duration > MAX_VIDEO_SECONDS && (
           <p role="alert">
-            Reduza os trechos para até 90 segundos antes de exportar.
+            Reduza os trechos para até 3 minutos antes de exportar.
           </p>
         )}
         <small>

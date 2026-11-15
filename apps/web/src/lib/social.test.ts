@@ -57,9 +57,9 @@ it("opens canonical Social shares inside the client without trusting lookalike h
   expect(socialPath("javascript:alert(1)", "https://localhost")).toBeNull();
 });
 
-it("maps the output playhead through reordered cuts without extending the 90 second default", () => {
+it("maps the output playhead through reordered cuts without extending the 3-minute default", () => {
   const recipe = defaultRecipe(600);
-  expect(exportDuration(recipe)).toBe(90);
+  expect(exportDuration(recipe)).toBe(180);
   recipe.segments = [
     { start: 40, end: 50 },
     { start: 2, end: 7 },

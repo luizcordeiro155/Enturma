@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, type RefObject } from "react";
 import { socialWrite } from "@/lib/social";
+import { MAX_VIDEO_SECONDS } from "@/lib/social-limits";
 
 /** Count watched playback, never the seek position. The API deduplicates viewers. */
 export function useVideoView(
@@ -32,7 +33,7 @@ export function useVideoView(
         return;
       pending = true;
       void socialWrite(`/posts/${postId}/view`, {
-        watchedMs: Math.min(90000, Math.round(watched * 1000)),
+        watchedMs: Math.min(MAX_VIDEO_SECONDS * 1000, Math.round(watched * 1000)),
         completed,
       })
         .then(() => {

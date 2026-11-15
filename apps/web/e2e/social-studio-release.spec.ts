@@ -99,7 +99,7 @@ test("Studio visual: long video, drag trimming, cover and theme snapshots", asyn
     .getByRole("navigation", { name: "Ambientes do Social" })
     .getByRole("button", { name: "Criar", exact: true })
     .click();
-  await page.getByRole("button", { name: "Clip \u00b7 at\u00e9 90s" }).click();
+  await page.getByRole("button", { name: "Clip \u00b7 at\u00e9 3 min" }).click();
   const file = info.outputPath("studio-long.mp4");
   execFileSync(
     "ffmpeg",
@@ -113,7 +113,7 @@ test("Studio visual: long video, drag trimming, cover and theme snapshots", asyn
       "-i",
       "testsrc2=size=320x180:rate=2",
       "-t",
-      "120",
+      "240",
       "-c:v",
       "libx264",
       "-preset",
@@ -130,7 +130,8 @@ test("Studio visual: long video, drag trimming, cover and theme snapshots", asyn
   await expect(
     editor.locator(".studio-filmstrip-images img").first(),
   ).toBeVisible({ timeout: 20000 });
-  await expect(editor.getByLabel("Fim (s)", { exact: true })).toHaveValue("90");
+  // A long video starts with its first 3 minutes selected.
+  await expect(editor.getByLabel("Fim (s)", { exact: true })).toHaveValue("180");
   const handle = editor.getByRole("slider", {
     name: "Fim do corte",
     exact: true,
@@ -153,7 +154,7 @@ test("Studio visual: long video, drag trimming, cover and theme snapshots", asyn
     .poll(async () =>
       Number(await editor.getByLabel("Fim (s)", { exact: true }).inputValue()),
     )
-    .toBeLessThan(70);
+    .toBeLessThan(130);
   // The Social editor has no separate texts-and-captions section.
   await expect(editor.getByText("Textos e legendas", { exact: true })).toHaveCount(0);
   await editor
@@ -231,7 +232,7 @@ test("Studio visual: long video, drag trimming, cover and theme snapshots", asyn
     .poll(async () =>
       Number(await editor.getByLabel("Fim (s)", { exact: true }).inputValue()),
     )
-    .toBeLessThan(70);
+    .toBeLessThan(130);
 });
 
 test("Social profile avatar, plain actions, comment media and keyboard overlay", async ({
