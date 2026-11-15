@@ -41,8 +41,9 @@ test("browser displays a system notification once across realtime deliveries", a
       .poll(async () =>
         page.evaluate(async (id) => {
           const registration = await navigator.serviceWorker.ready;
+          // One notice per conversation: the tag is the place, not the event.
           const notices = await registration.getNotifications({
-            tag: "enturma-" + id,
+            tag: "enturma-/friends?chat=test",
           });
           return notices.map((n) => ({
             title: n.title,
@@ -56,6 +57,36 @@ test("browser displays a system notification once across realtime deliveries", a
           title: "Enturma · conversa",
           body: "Uma nova mensagem",
           href: "/friends?chat=test",
+        },
+      ]);
+    // A new message from the same chat stacks into that notice instead of
+    // adding another one.
+    await page.evaluate(async () => {
+      const registration = await navigator.serviceWorker.ready;
+      registration.active!.postMessage({
+        type: "ENTURMA_SHOW_NOTIFICATION",
+        data: {
+          id: crypto.randomUUID(),
+          title: "Enturma · conversa",
+          body: "Outra mensagem",
+          href: "/friends?chat=test",
+        },
+      });
+    });
+    await expect
+      .poll(async () =>
+        page.evaluate(async () => {
+          const registration = await navigator.serviceWorker.ready;
+          return (await registration.getNotifications()).map((n) => ({
+            title: n.title,
+            body: n.body,
+          }));
+        }),
+      )
+      .toEqual([
+        {
+          title: "Enturma · conversa · 2 novas",
+          body: "Uma nova mensagem\nOutra mensagem",
         },
       ]);
     await page.evaluate(async () => {

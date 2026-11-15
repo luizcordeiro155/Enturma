@@ -7,9 +7,15 @@ function worker(
   const handlers: Record<string, ((e: unknown) => void)[]> = {};
   const stored = new Map<string, unknown>();
   const windows = clients.map((c) => ({ ...c, postMessage: vi.fn() }));
-  const showNotification = vi.fn(async (_title: string, _options: unknown) => {
-    void _title;
-    void _options;
+  const shown = new Map<string, { title: string; data: unknown }>();
+  const showNotification = vi.fn(
+    async (title: string, options: { tag?: string; data?: unknown }) => {
+      if (options?.tag) shown.set(options.tag, { title, data: options.data });
+    },
+  );
+  const getNotifications = vi.fn(async ({ tag }: { tag?: string } = {}) => {
+    const notice = tag ? shown.get(tag) : undefined;
+    return notice ? [notice] : [];
   });
   const cache = {
     match: async (r: Request) => stored.get(r.url),
@@ -29,7 +35,7 @@ function worker(
       clients: {
         matchAll: async () => windows,
       },
-      registration: { showNotification },
+      registration: { showNotification, getNotifications },
     },
     caches: { open: async () => cache },
     URL,
@@ -110,4 +116,47 @@ test("notification links cannot navigate to another site", async () => {
   expect(w.showNotification.mock.calls[0]?.[1]).toMatchObject({
     data: { href: "/notifications" },
   });
+});
+test("messages from one conversation stack into one notification, like the phone", async () => {
+  const w = worker([]);
+  const push = (id: string, body: string) =>
+    w.send("push", {
+      data: {
+        json: () => ({
+          id,
+          title: "Ana enviou uma mensagem privada",
+          body,
+          href: "/friends?chat=9",
+        }),
+      },
+    });
+  await push("account:1", "Oi!");
+  await push("account:2", "Tudo bem?");
+  await push("account:3", "Bora estudar?");
+  expect(w.showNotification).toHaveBeenCalledTimes(3);
+  const [title, options] = w.showNotification.mock.calls[2] as [
+    string,
+    { tag: string; body: string; renotify: boolean; silent: boolean },
+  ];
+  const first = w.showNotification.mock.calls[0]?.[1] as { tag: string };
+  // Same tag: the browser replaces the notice instead of adding another one.
+  expect(options.tag).toBe(first.tag);
+  expect(title).toBe("Ana enviou uma mensagem privada · 3 novas");
+  expect(options.body).toBe("Oi!\nTudo bem?\nBora estudar?");
+  // The replacement is quiet; only the first one alerted.
+  expect(options).toMatchObject({ renotify: false, silent: true });
+  expect(w.showNotification.mock.calls[0]?.[1]).toMatchObject({ silent: false });
+});
+test("different conversations keep separate notifications", async () => {
+  const w = worker([]);
+  await w.send("push", {
+    data: { json: () => ({ id: "a:1", title: "Ana", body: "Oi", href: "/friends?chat=1" }) },
+  });
+  await w.send("push", {
+    data: { json: () => ({ id: "a:2", title: "Bia", body: "Olá", href: "/friends?chat=2" }) },
+  });
+  const tags = w.showNotification.mock.calls.map(
+    ([, options]) => (options as { tag: string }).tag,
+  );
+  expect(new Set(tags).size).toBe(2);
 });

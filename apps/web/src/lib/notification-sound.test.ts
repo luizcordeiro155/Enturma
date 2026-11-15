@@ -91,3 +91,46 @@ test("deduplicates service-worker and inbox delivery even after the throttle exp
     vi.useRealTimers();
   }
 });
+test("a busy conversation chimes once, then again only after a pause", async () => {
+  vi.useFakeTimers();
+  const start = vi.fn();
+  vi.stubGlobal(
+    "AudioContext",
+    class {
+      state = "running";
+      currentTime = 0;
+      destination = {};
+      createOscillator = () => ({
+        type: "",
+        frequency: { value: 0 },
+        connect: () => ({ connect: vi.fn() }),
+        start,
+        stop: vi.fn(),
+        disconnect: vi.fn(),
+      });
+      createGain = () => ({
+        gain: {
+          setValueAtTime: vi.fn(),
+          linearRampToValueAtTime: vi.fn(),
+          exponentialRampToValueAtTime: vi.fn(),
+        },
+        disconnect: vi.fn(),
+      });
+    },
+  );
+  try {
+    const sound = await import("./notification-sound");
+    sound.setNotificationSoundEnabled(true);
+    await sound.unlockNotificationSound();
+    expect(sound.playNotificationSound(false, "m1", "chat:1")).toBe(true);
+    vi.advanceTimersByTime(5000);
+    // More messages in the same chat: no new chime yet.
+    expect(sound.playNotificationSound(false, "m2", "chat:1")).toBe(false);
+    // Another conversation still chimes.
+    expect(sound.playNotificationSound(false, "m3", "chat:2")).toBe(true);
+    vi.advanceTimersByTime(30000);
+    expect(sound.playNotificationSound(false, "m4", "chat:1")).toBe(true);
+  } finally {
+    vi.useRealTimers();
+  }
+});

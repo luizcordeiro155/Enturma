@@ -27,6 +27,7 @@ const {
 const { Readable, Transform } = require("node:stream");
 const { pipeline } = require("node:stream/promises");
 const { URL } = require("node:url");
+const { createNotificationStack } = require("./notification-stack.cjs");
 
 function loadLocalEnv() {
   const file = path.join(__dirname, "..", ".env");
@@ -75,6 +76,9 @@ let pendingUpdate = null;
 let desktopNotificationBadge = 0;
 let taskbarAttentionActive = false;
 const nativeNoticeIds = new Set();
+// One notice per conversation or post, like the Android app (see notification-stack.cjs).
+const noticeStack = createNotificationStack();
+const openNotices = new Map();
 let updateState = {
   status: "idle",
   currentVersion: app.getVersion(),
@@ -209,7 +213,13 @@ function setDesktopNotificationBadge(value) {
   desktopNotificationBadge = count;
 
   if (count > previous) requestTaskbarAttention();
-  if (count === 0) clearTaskbarAttention();
+  if (count === 0) {
+    clearTaskbarAttention();
+    // Everything was read: stacked notices are done.
+    noticeStack.clear();
+    for (const notice of openNotices.values()) notice.close();
+    openNotices.clear();
+  }
 
   // macOS/Linux use the native app badge when supported.
   if (process.platform === "darwin" && app.dock) {
@@ -267,26 +277,43 @@ function showDesktopNotification(payload) {
     typeof payload.body === "string"
       ? payload.body.trim().slice(0, 360)
       : "Você tem uma nova notificação.";
-  const target = notificationTarget(payload.href);
+  const href = typeof payload.href === "string" ? payload.href : "";
+  const stacked = noticeStack.add({
+    id,
+    title,
+    body,
+    href,
+    group: typeof payload.group === "string" ? payload.group.slice(0, 300) : "",
+  });
+  if (!stacked) return false;
+  const target = notificationTarget(stacked.href);
   const icon = path.join(__dirname, "..", "assets", "icon.ico");
 
   const notice = new Notification({
-    title,
-    body,
+    title: stacked.title.slice(0, 120),
+    body: stacked.body.slice(0, 600),
     icon,
     timeoutType: "default",
     // The shared renderer plays Enturma's chime according to the user's setting.
     silent: true,
   });
   notice.on("click", () => {
+    noticeStack.forget(stacked.key);
+    openNotices.delete(stacked.key);
     if (target && mainWindow && !mainWindow.isDestroyed())
       void mainWindow.loadURL(target);
     focusMainWindow();
   });
+  notice.on("close", () => {
+    if (openNotices.get(stacked.key) === notice) openNotices.delete(stacked.key);
+  });
 
-  // Start the taskbar attention cue immediately instead of waiting for the
-  // Windows toast "show" event. The cue remains active until the app is focused.
-  requestTaskbarAttention();
+  // The new notice replaces the previous one for the same place, so Windows
+  // keeps a single growing notice instead of one per message.
+  openNotices.get(stacked.key)?.close();
+  openNotices.set(stacked.key, notice);
+  // Only a new place (or one quiet for a while) asks for attention again.
+  if (stacked.alert) requestTaskbarAttention();
   notice.show();
   return true;
 }

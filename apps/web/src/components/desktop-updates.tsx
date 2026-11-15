@@ -57,6 +57,8 @@ type DesktopBridge = {
     title: string;
     body: string;
     href?: string | null;
+    /** Notices with the same group stack into one, like the Android app. */
+    group?: string;
   }) => Promise<unknown>;
 };
 declare global {
