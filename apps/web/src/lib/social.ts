@@ -1,4 +1,6 @@
 import { api } from "./api";
+import { MAX_VIDEO_SECONDS } from "./social-limits";
+export { MAX_VIDEO_SECONDS };
 export type SocialPerson = {
   id: string;
   name: string;
@@ -157,7 +159,7 @@ export function videoPreviewFrame(
 }
 export function defaultRecipe(duration: number): VideoRecipe {
   return {
-    segments: [{ start: 0, end: Math.min(90, duration) }],
+    segments: [{ start: 0, end: Math.min(MAX_VIDEO_SECONDS, duration) }],
     zoom: 1,
     x: 0.5,
     y: 0.5,

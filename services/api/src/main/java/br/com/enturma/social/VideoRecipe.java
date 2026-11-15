@@ -23,6 +23,9 @@ public record VideoRecipe(
     public Caption { x=x==null?.5:x;size=size==null?36:size;color=color==null?"#ffffff":color; }
     public Caption(String text,double start,double end,double y){this(text,start,end,y,.5,36,"#ffffff");}
   }
+  /** Longest exported video for Posts, Stories and Clips (3 minutes). */
+  public static final int MAX_SECONDS = 180;
+  public static final int MAX_MS = MAX_SECONDS * 1000;
   public double duration() {return segments.stream().mapToDouble(s->s.end()-s.start()).sum()/speed;}
   public int outputHeight() {
     return switch(aspect){case "4:5"->900;case "3:4"->960;case "1:1"->720;case "1.91:1"->376;default->1280;};
@@ -36,8 +39,8 @@ public record VideoRecipe(
         || !Set.of("ORIGINAL","VIVID","WARM","COOL","MONO","FADE","CONTRAST").contains(filter)
         || !finite(zoom,x,y,volume,cover,sourceSeconds,speed) || speed<.5||speed>2
         ||zoom<1||zoom>3||x<0||x>1||y<0||y>1||volume<0||volume>2
-        ||!Set.of(0,90,180,270).contains(rotation)||duration()>90.001||cover<0||cover>=duration())
-      throw ApiException.invalid("O resultado deve ter at\u00e9 90 segundos, com enquadramento e \u00e1udio v\u00e1lidos.");
+        ||!Set.of(0,90,180,270).contains(rotation)||duration()>MAX_SECONDS+.001||cover<0||cover>=duration())
+      throw ApiException.invalid("O resultado deve ter at\u00e9 3 minutos, com enquadramento e \u00e1udio v\u00e1lidos.");
     for(var c:captions) if(c==null||c.text()==null||c.text().isBlank()||c.text().length()>240
         ||c.text().codePoints().anyMatch(v->Character.isISOControl(v)&&v!='\n')
         ||!finite(c.start(),c.end(),c.x(),c.y())||c.start()<0||c.end()>duration()||c.end()<=c.start()

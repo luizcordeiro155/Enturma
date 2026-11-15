@@ -8,16 +8,22 @@ import {
   ArrowLeft,
   ArrowRight,
   Camera,
+  Check,
+  Clock3,
+  Crop,
   Film,
   ImagePlus,
+  LayoutGrid,
   Save,
   Send,
+  ShieldCheck,
   Trash2,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
   defaultRecipe,
   exportDuration,
+  MAX_VIDEO_SECONDS,
   mediaUrl,
   socialWrite,
   type SocialMedia,
@@ -30,6 +36,7 @@ import {
   type DraftFile,
 } from "@/lib/social-draft";
 import { prepareCover } from "@/lib/social-cover";
+import { bestAspect } from "@/lib/social-editing";
 import { normalizeSocialGalleryFile } from "@/lib/social-gallery";
 import { ImageEditor } from "./image-editor";
 import { VideoEditor } from "./video-editor";
@@ -48,6 +55,26 @@ export type SocialEditorProgress = {
   percent: number;
 };
 type Step = "pick" | "edit" | "details";
+const FORMATS = {
+  POST: {
+    name: "Post",
+    title: "Post",
+    hint: "Fotos e vídeos no feed",
+    icon: LayoutGrid,
+  },
+  STORY: {
+    name: "Story · 24h",
+    title: "Story",
+    hint: "Some em 24 horas",
+    icon: Clock3,
+  },
+  CLIP: {
+    name: "Clip · até 3 min",
+    title: "Clip",
+    hint: "Vídeo vertical · até 3 min",
+    icon: Film,
+  },
+} as const;
 const STEPS = [
   ["pick", "Escolher"],
   ["edit", "Editar"],
@@ -118,8 +145,9 @@ function LocalFile({
     />
   );
 }
-async function videoDuration(file: File) {
-  return new Promise<number>((resolve, reject) => {
+async function videoInfo(file: File) {
+  return new Promise<{ duration: number; width: number; height: number }>(
+    (resolve, reject) => {
     const element = document.createElement("video"),
       url = URL.createObjectURL(file);
     let settled = false;
@@ -141,10 +169,12 @@ async function videoDuration(file: File) {
     }, 15000);
     const accept = (duration: number) => {
       if (settled) return;
+      const width = element.videoWidth,
+        height = element.videoHeight;
       done();
       if (!Number.isFinite(duration) || duration <= 0 || duration > 3600)
         reject(new Error("Escolha um vídeo de até uma hora."));
-      else resolve(duration);
+      else resolve({ duration, width, height });
     };
     element.onloadedmetadata = () => {
       if (Number.isFinite(element.duration)) accept(element.duration);
@@ -168,6 +198,37 @@ async function videoDuration(file: File) {
     };
     element.preload = "metadata";
     element.src = url;
+    },
+  );
+}
+/** A photo's own size, used to pick its framing. */
+async function imageSize(file: File): Promise<{ width: number; height: number }> {
+  if (typeof createImageBitmap === "function") {
+    try {
+      const bitmap = await createImageBitmap(file);
+      const size = { width: bitmap.width, height: bitmap.height };
+      bitmap.close();
+      return size;
+    } catch {
+      /* Fall back to an image element below. */
+    }
+  }
+  return new Promise((resolve) => {
+    const image = new Image(),
+      url = URL.createObjectURL(file);
+    let settled = false;
+    const finish = (width: number, height: number) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timer);
+      URL.revokeObjectURL(url);
+      resolve({ width, height });
+    };
+    // Without a size the feed default framing is used.
+    const timer = setTimeout(() => finish(0, 0), 400);
+    image.onload = () => finish(image.naturalWidth, image.naturalHeight);
+    image.onerror = () => finish(0, 0);
+    image.src = url;
   });
 }
 export function SocialEditor({
@@ -391,19 +452,21 @@ export function SocialEditor({
           throw new Error("Use imagem ou vídeo de até 128 MB.");
         if (draft.kind === "CLIP" && !file.type.startsWith("video/"))
           throw new Error("Escolha um vídeo para o Clip.");
-        const duration = file.type.startsWith("video/")
-          ? await videoDuration(file)
+        const video = file.type.startsWith("video/")
+          ? await videoInfo(file)
           : undefined;
+        const size = video ?? (await imageSize(file));
+        // The best framing is chosen for the person: the shape that keeps the
+        // most of the original (always full screen for Stories and Clips).
+        const aspect = bestAspect(draft.kind, size.width, size.height);
         next.push({
           id: crypto.randomUUID(),
           file,
-          duration,
-          recipe: duration
-            ? defaultRecipe(duration)
-            : {
-                ...defaultRecipe(1),
-                aspect: draft.kind === "STORY" ? "9:16" : "4:5",
-              },
+          autoAspect: aspect,
+          duration: video?.duration,
+          recipe: video
+            ? { ...defaultRecipe(video.duration), aspect }
+            : { ...defaultRecipe(1), aspect },
         });
       }
       if (alive.current) {
@@ -507,10 +570,12 @@ export function SocialEditor({
         ) {
           if (
             item.recipe &&
-            (exportDuration(item.recipe) > 90 ||
+            (exportDuration(item.recipe) > MAX_VIDEO_SECONDS ||
               item.recipe.cover >= exportDuration(item.recipe))
           )
-            throw new Error("Revise a duração (até 90s) e a posição da capa.");
+            throw new Error(
+              "Revise a duração (até 3 minutos) e a posição da capa.",
+            );
           work.files[i] = {
             ...item,
             media: await socialWrite<SocialMedia>(
@@ -543,7 +608,8 @@ export function SocialEditor({
         ...previous.filter((value) => value.id !== work.id),
       ]);
       if (publishAfter) {
-        const deadline = Date.now() + 120000;
+        // A 3-minute video can take a few minutes to export.
+        const deadline = Date.now() + 600000;
         for (let i = 0; i < work.files.length; i++) {
           let state = work.files[i].media;
           while (state?.state !== "READY") {
@@ -737,14 +803,25 @@ export function SocialEditor({
         </button>
       </header>
       <ol className="social-create-steps" aria-label="Etapas da publicação">
-        {STEPS.map(([key, label], index) => (
-          <li key={key} aria-current={step === key ? "step" : undefined}>
-            <span>{index + 1}</span>
-            {label}
-          </li>
-        ))}
+        {STEPS.map(([key, label], index) => {
+          const position = STEPS.findIndex(([value]) => value === step);
+          const state =
+            index < position ? "done" : index === position ? "current" : "next";
+          return (
+            <li
+              key={key}
+              data-state={state}
+              aria-current={step === key ? "step" : undefined}
+            >
+              <span aria-hidden="true">
+                {state === "done" ? <Check size={14} /> : index + 1}
+              </span>
+              {label}
+            </li>
+          );
+        })}
       </ol>
-      <div className="social-create-step-actions">
+      <div className="social-create-step-actions" hidden={step === "pick"}>
         {step !== "pick" && (
           <button
             type="button"
@@ -760,15 +837,11 @@ export function SocialEditor({
             Voltar
           </button>
         )}
-        {step !== "details" && (
+        {step === "edit" && (
           <button
             type="button"
             disabled={busy || !canAdvance}
-            onClick={() =>
-              setStep(
-                step === "pick" && draft.files.length ? "edit" : "details",
-              )
-            }
+            onClick={() => setStep("details")}
           >
             Avançar
             <ArrowRight size={18} />
@@ -778,28 +851,31 @@ export function SocialEditor({
       <fieldset disabled={busy} className="social-editor-fields">
         <div hidden={step !== "pick"} className="social-create-pick">
           <div className="social-segments" aria-label="Formato da publicação">
-            {(["POST", "STORY", "CLIP"] as const).map((kind) => (
-              <button
-                type="button"
-                key={kind}
-                className="secondary"
-                disabled={busy || draft.files.length > 0}
-                aria-pressed={draft.kind === kind}
-                onClick={() =>
-                  setDraft({
-                    ...draft,
-                    kind,
-                    storyOverlays: kind === "STORY" ? draft.storyOverlays : [],
-                  })
-                }
-              >
-                {kind === "POST"
-                  ? "Post"
-                  : kind === "STORY"
-                    ? "Story · 24h"
-                    : "Clip · até 90s"}
-              </button>
-            ))}
+            {(["POST", "STORY", "CLIP"] as const).map((kind) => {
+              const format = FORMATS[kind];
+              return (
+                <button
+                  type="button"
+                  key={kind}
+                  className="secondary social-format-card"
+                  aria-label={format.name}
+                  disabled={busy || draft.files.length > 0}
+                  aria-pressed={draft.kind === kind}
+                  onClick={() =>
+                    setDraft({
+                      ...draft,
+                      kind,
+                      storyOverlays:
+                        kind === "STORY" ? draft.storyOverlays : [],
+                    })
+                  }
+                >
+                  <format.icon size={22} aria-hidden="true" />
+                  <strong>{format.title}</strong>
+                  <small>{format.hint}</small>
+                </button>
+              );
+            })}
           </div>
           {!mediaEnabled && (
             <div className="social-media-status" role="status">
@@ -829,10 +905,18 @@ export function SocialEditor({
                 : "Galeria temporariamente indisponível"}
             </strong>
             <span>
-              Até 10 arquivos por post · 1 por Story ou Clip · 128 MB cada
+              {draft.kind === "POST"
+                ? "Até 10 fotos ou vídeos · vídeos de até 3 min · 128 MB cada"
+                : draft.kind === "STORY"
+                  ? "Uma foto ou vídeo de até 3 min · 128 MB"
+                  : "Um vídeo de até 3 min · 128 MB"}
+            </span>
+            <span className="social-upload-auto">
+              <Crop size={14} aria-hidden="true" />
+              O melhor enquadramento é escolhido automaticamente.
             </span>
             <div className="social-row">
-              <label className="social-file-button">
+              <label className="social-file-button social-file-button-primary">
                 Escolher mídia
                 <input
                   type="file"
@@ -896,6 +980,14 @@ export function SocialEditor({
                     ? ` · ${item.media.state === "READY" ? "Pronta" : item.media.state === "FAILED" ? "Falha no processamento" : "Em preparação"}`
                     : ""}
                 </strong>
+                {item.recipe?.aspect && (
+                  <span className="social-framing-chip">
+                    <Crop size={14} aria-hidden="true" />
+                    {item.recipe.aspect === item.autoAspect
+                      ? `Enquadramento automático · ${item.recipe.aspect}`
+                      : `Enquadramento ${item.recipe.aspect}`}
+                  </span>
+                )}
                 {draft.files.length > 1 &&
                   [-1, 1].map((delta) => (
                     <button
@@ -1059,7 +1151,8 @@ export function SocialEditor({
         </div>
         <div hidden={step !== "details"} className="social-create-details">
           {!!draft.files.length && (
-            <p className="social-note">
+            <p className="social-note social-create-selected">
+              <Film size={16} aria-hidden="true" />
               {`${draft.files.length} arquivo${draft.files.length > 1 ? "s" : ""} selecionado${draft.files.length > 1 ? "s" : ""}.`}
               <button
                 type="button"
@@ -1153,7 +1246,8 @@ export function SocialEditor({
             </NavigationLink>
           </details>
         </div>
-        <p className="social-note">
+        <p className="social-note social-create-privacy">
+          <ShieldCheck size={16} aria-hidden="true" />
           {draft.visibility === "PUBLIC"
             ? "Visibilidade: Comunidade Enturma."
             : "Visibilidade: Meus seguidores."}{" "}
@@ -1183,6 +1277,17 @@ export function SocialEditor({
             <Save size={18} />
             Salvar rascunho
           </button>
+          {step === "pick" && (
+            <button
+              type="button"
+              className="secondary"
+              disabled={busy || !canAdvance}
+              onClick={() => setStep(draft.files.length ? "edit" : "details")}
+            >
+              Avançar
+              <ArrowRight size={18} />
+            </button>
+          )}
           {pending && (
             <button
               type="button"

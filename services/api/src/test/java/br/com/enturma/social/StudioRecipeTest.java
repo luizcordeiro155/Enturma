@@ -11,7 +11,7 @@ class StudioRecipeTest {
     assertThat(edited.duration()).isEqualTo(45);
   }
   @Test void rejectsFilterInjectionAndUnsafeSpeed() {
-    for(String settings:new String[]{"\"filter\":\"movie=https://evil.invalid\"","\"aspect\":\"999999:1\"","\"speed\":0","\"speed\":0.5"})
+    for(String settings:new String[]{"\"filter\":\"movie=https://evil.invalid\"","\"aspect\":\"999999:1\"","\"speed\":0","\"speed\":0.4"})
       assertThatThrownBy(()->json.readValue(base+","+settings+"}",VideoRecipe.class).validated(180)).isInstanceOf(Exception.class);
   }
   @Test void acceptsPositionedTimedTextButRejectsInvalidCoordinates() throws Exception {

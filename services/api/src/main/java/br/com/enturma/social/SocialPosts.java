@@ -246,9 +246,9 @@ public class SocialPosts {
         .anyMatch(
             m ->
                 "VIDEO".equals(m.get("kind"))
-                    && (((Number) m.get("durationMs")).intValue() > 90000
+                    && (((Number) m.get("durationMs")).intValue() > VideoRecipe.MAX_MS
                         || ((Number) m.get("durationMs")).intValue() <= 0)))
-      throw ApiException.invalid("O vídeo final deve ter no máximo 90 segundos.");
+      throw ApiException.invalid("O vídeo final deve ter no máximo 3 minutos.");
     db.jdbc.update(
         "UPDATE social_post SET state='PUBLISHED',published_at=now(),expires_at=CASE WHEN"
             + " kind='STORY' THEN now()+interval '24 hours' ELSE NULL END,institution_id=(SELECT"
@@ -680,7 +680,7 @@ public class SocialPosts {
   @Transactional
   public void view(Actor a, UUID id, int watchedMs, boolean completed) {
     var p = access.post(a, id);
-    if (watchedMs < 0 || watchedMs > 90000) throw ApiException.invalid("Tempo inválido.");
+    if (watchedMs < 0 || watchedMs > VideoRecipe.MAX_MS) throw ApiException.invalid("Tempo inválido.");
     if (!"STORY".equals(p.get("kind")) && !a.id().equals(p.get("authorId"))
         && (watchedMs >= 3000 || (completed && watchedMs > 0)))
       db.jdbc.update(

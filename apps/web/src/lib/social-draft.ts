@@ -7,6 +7,8 @@ export type DraftFile = {
   duration?: number;
   coverFile?: File;
   coverUploaded?: boolean;
+  /** The framing Enturma picked from the file's own proportions. */
+  autoAspect?: string;
 };
 export type SocialDraft = {
   id: string;

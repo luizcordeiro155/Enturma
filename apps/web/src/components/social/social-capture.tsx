@@ -2,6 +2,9 @@
 import { useEffect, useRef, useState } from "react";
 import { Camera, Circle, Square, SwitchCamera } from "lucide-react";
 import { SocialDialog } from "./social-dialog";
+import { MAX_VIDEO_SECONDS } from "@/lib/social";
+const clock = (seconds: number) =>
+  `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 export function SocialCapture({
   close,
   captured,
@@ -114,7 +117,7 @@ export function SocialCapture({
       setSeconds(0);
       timer.current = setInterval(() => {
         setSeconds(++elapsed);
-        if (elapsed >= 90 && rec.state === "recording") rec.stop();
+        if (elapsed >= MAX_VIDEO_SECONDS && rec.state === "recording") rec.stop();
       }, 1000);
     } catch {
       setError(
@@ -133,7 +136,7 @@ export function SocialCapture({
         />
         <p role="status">
           {recording
-            ? `Gravando · ${seconds}s / 90s`
+            ? `Gravando · ${clock(seconds)} / 3:00`
             : "Revise e edite sua gravação antes de publicar."}
         </p>
         {error && <p role="alert">{error}</p>}
