@@ -50,6 +50,30 @@ it("oferece seguir o autor, menos no próprio Clip", async () => {
   renderOverlay({ authorId: "me" }, "me");
   expect(screen.queryByRole("button", { name: /Seguir/ })).toBeNull();
 });
+it("um único botão: Seguir vira Seguindo e volta a Seguir ao deixar de seguir", async () => {
+  // The author already follows me: still a plain "Seguir", with nothing beside it.
+  api.mockImplementation((path: string, options?: RequestInit) => {
+    if (!options?.method)
+      return Promise.resolve({
+        relationship: { status: "NONE", followsYou: true },
+      });
+    const active = JSON.parse(String(options.body)).active;
+    return Promise.resolve({
+      status: active ? "ACCEPTED" : "NONE",
+      followsYou: true,
+    });
+  });
+  renderOverlay({ authorId: "author" }, "me");
+  const button = await screen.findByRole("button", { name: "Seguir" });
+  expect(screen.queryByText("Te segue")).toBeNull();
+  expect(screen.getAllByRole("button", { name: /Seguir|Seguindo/ })).toHaveLength(1);
+  await act(async () => fireEvent.click(button));
+  expect(screen.getByRole("button", { name: "Seguindo" })).toBeVisible();
+  await act(async () =>
+    fireEvent.click(screen.getByRole("button", { name: "Seguindo" })),
+  );
+  expect(screen.getByRole("button", { name: "Seguir" })).toBeVisible();
+});
 it("recolhe a legenda longa e expande pelo botão mais", () => {
   renderOverlay({ body: `${"a".repeat(130)} fim-da-legenda` });
   expect(screen.queryByText(/fim-da-legenda/)).toBeNull();

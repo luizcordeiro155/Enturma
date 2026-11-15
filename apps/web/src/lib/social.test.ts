@@ -1,6 +1,7 @@
 import { expect, it } from "vitest";
 import {
   defaultRecipe,
+  playsInClips,
   exportDuration,
   sourceTime,
   mergeSocialPage,
@@ -79,4 +80,13 @@ it("deduplicates retried cursor pages without replacing previously read cards", 
       [{ id: "one", body: "new" } as SocialPost, two, two],
     ),
   ).toEqual([first, two]);
+});
+it("every video post also plays in Clips; photos and text stay in the feed", () => {
+  const video = { kind: "VIDEO" } as SocialPost["media"][number];
+  const image = { kind: "IMAGE" } as SocialPost["media"][number];
+  expect(playsInClips({ kind: "POST", media: [video, image] })).toBe(true);
+  expect(playsInClips({ kind: "CLIP", media: [video] })).toBe(true);
+  expect(playsInClips({ kind: "POST", media: [image, video] })).toBe(false);
+  expect(playsInClips({ kind: "POST", media: [] })).toBe(false);
+  expect(playsInClips({ kind: "STORY", media: [video] })).toBe(false);
 });

@@ -566,7 +566,12 @@ test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; control
     .getByRole("navigation", { name: "Ambientes do Social" })
     .getByRole("button", { name: "Criar", exact: true })
     .click();
-  await page.getByRole("button", { name: "Clip · até 3 min" }).click();
+  // A video is a Post that also plays in Clips: there is no separate Clip format.
+  await expect(page.getByRole("button", { name: /^Clip ·/ })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Post", exact: true })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
   const file = info.outputPath("source.mp4");
   execFileSync(
     "ffmpeg",
@@ -616,7 +621,7 @@ test("editor de vídeo real: importar, cortar, dividir, capa e rascunho; control
   await expect(
     page.getByRole("button", { name: "Enviar e publicar", exact: true }),
   ).toBeEnabled();
-  await expect(page.getByRole("button", { name: "Publicar Clip" })).toHaveCount(
+  await expect(page.getByRole("button", { name: "Publicar Post" })).toHaveCount(
     0,
   );
 });
@@ -640,9 +645,8 @@ test("câmera: gravação WebM real sem Duration abre o editor e preserva o rasc
     name: "Ambientes do Social",
   });
   await navigation.getByRole("button", { name: "Criar", exact: true }).click();
-  await page.getByRole("button", { name: "Clip · até 3 min" }).click();
   await page.getByRole("button", { name: "Gravar", exact: true }).click();
-  const camera = page.getByRole("dialog", { name: "Gravar um Clip" });
+  const camera = page.getByRole("dialog", { name: "Gravar um vídeo" });
   await camera.getByRole("button", { name: "Ativar câmera" }).click();
   await camera.getByRole("button", { name: "Gravar", exact: true }).click();
   await expect(camera.getByRole("status")).toHaveText("Gravando · 0:03 / 3:00");

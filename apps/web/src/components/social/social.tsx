@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
+  playsInClips,
   type SocialPerson,
   type SocialPost as Post,
   type SocialPreferences,
@@ -219,7 +220,7 @@ function SocialWorkspace({ ready }: { ready: Ready }) {
   /** Shows one post: Clips open in the Clips player, everything else in a dialog. */
   function showPost(post: Post) {
     setError("");
-        if (post.kind === "CLIP") {
+        if (playsInClips(post)) {
           // Revalidate access before seeding the selected Clip into the paged feed.
           routedClip.current = true;
           setClipEntry((previous) => ({

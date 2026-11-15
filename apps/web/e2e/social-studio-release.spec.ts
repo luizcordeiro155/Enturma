@@ -99,7 +99,6 @@ test("Studio visual: long video, drag trimming, cover and theme snapshots", asyn
     .getByRole("navigation", { name: "Ambientes do Social" })
     .getByRole("button", { name: "Criar", exact: true })
     .click();
-  await page.getByRole("button", { name: "Clip \u00b7 at\u00e9 3 min" }).click();
   const file = info.outputPath("studio-long.mp4");
   execFileSync(
     "ffmpeg",

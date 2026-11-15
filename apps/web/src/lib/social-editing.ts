@@ -13,27 +13,22 @@ export const MEDIA_ASPECTS: readonly MediaAspect[] = [
   "1:1",
   "1.91:1",
 ];
-// The feed shows Posts between 3:4 and 1.91:1; Stories and Clips are full screen.
-const POST_ASPECTS: readonly [MediaAspect, number][] = [
+const ASPECT_RATIOS: readonly [MediaAspect, number][] = [
+  ["9:16", 9 / 16],
   ["3:4", 3 / 4],
   ["4:5", 4 / 5],
   ["1:1", 1],
   ["1.91:1", 1.91],
 ];
 /**
- * The framing that keeps the most of the original: the allowed shape closest
- * to the photo or video's own proportions.
+ * The framing that keeps the most of the photo or video: the allowed shape
+ * closest to its own proportions, wherever it is shown (Feed, Clips, Story).
  */
-export function bestAspect(
-  kind: "POST" | "STORY" | "CLIP",
-  width: number,
-  height: number,
-): MediaAspect {
-  if (kind !== "POST") return "9:16";
+export function bestAspect(width: number, height: number): MediaAspect {
   if (!(width > 0) || !(height > 0)) return "4:5";
   const ratio = Math.log(width / height);
-  let best = POST_ASPECTS[0];
-  for (const option of POST_ASPECTS)
+  let best = ASPECT_RATIOS[0];
+  for (const option of ASPECT_RATIOS)
     if (Math.abs(Math.log(option[1]) - ratio) < Math.abs(Math.log(best[1]) - ratio))
       best = option;
   return best[0];

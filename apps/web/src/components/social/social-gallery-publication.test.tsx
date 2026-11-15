@@ -56,9 +56,11 @@ it("offers native visual-media selection without forcing camera capture", async 
   expect(input).not.toHaveAttribute("capture");
   expect(input).toHaveAttribute("multiple");
 });
-it("restricts a Clip picker to videos instead of offering incompatible photos", async () => {
+it("creating from Clips opens a Post: videos also go to Clips, so there is no Clip format", async () => {
   render(<SocialEditor user="me" mediaEnabled initialKind="CLIP" published={() => {}} />);
-  expect(await screen.findByLabelText("Escolher mídia")).toHaveAttribute("accept", "video/*");
+  expect(await screen.findByLabelText("Escolher mídia")).toHaveAttribute("accept", "image/*,video/*");
+  expect(screen.getByRole("button", { name: "Post" })).toHaveAttribute("aria-pressed", "true");
+  expect(screen.queryByRole("button", { name: /^Clip ·/ })).toBeNull();
 });
 it("accepts a gallery photo whose provider omits its MIME type", async () => {
   render(<SocialEditor user="me" mediaEnabled initialKind="POST" published={() => {}} />);
