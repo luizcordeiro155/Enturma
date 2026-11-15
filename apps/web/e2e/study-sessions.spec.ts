@@ -6,6 +6,8 @@ import pg from "pg";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
 const shots = process.env.STUDY_SHOTS;
+// The calendar follows the student's routine time zone; keep the browser in it too.
+test.use({ timezoneId: "America/Sao_Paulo" });
 
 const QUIZ = JSON.stringify({
   questions: [
@@ -68,8 +70,11 @@ test("Study session: scheduled on the calendar, invitation, tutor room, quiz and
     await expect(sessions.getByText(/Nenhum estudo marcado/)).toBeVisible();
     await sessions.getByRole("button", { name: "Agendar estudo" }).click();
 
-    const soon = new Date(Date.now() + 5 * 60000);
-    const hhmm = `${String(soon.getHours()).padStart(2, "0")}:${String(soon.getMinutes()).padStart(2, "0")}`;
+    // The time as the student's browser sees it, five minutes from now.
+    const hhmm = await page.evaluate(() => {
+      const soon = new Date(Date.now() + 5 * 60000);
+      return `${String(soon.getHours()).padStart(2, "0")}:${String(soon.getMinutes()).padStart(2, "0")}`;
+    });
     const form = study.locator(".study-session-form");
     await expect(form).toBeVisible();
     await form.getByLabel("Horário").fill(hhmm);
