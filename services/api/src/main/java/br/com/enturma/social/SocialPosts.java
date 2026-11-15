@@ -345,6 +345,13 @@ public class SocialPosts {
       args.add(collectionId);
     }
     if (kind.equals("ALL")) filters += " AND p.kind IN ('POST','CLIP')";
+    else if (kind.equals("CLIP"))
+      // Clips play every video: Clips and Posts whose first media is a video.
+      filters +=
+          " AND (p.kind='CLIP' OR (p.kind='POST' AND EXISTS(SELECT 1 FROM social_media cm"
+              + " WHERE cm.post_id=p.id AND cm.kind='VIDEO' AND cm.state='READY' AND"
+              + " cm.ordinal=(SELECT min(om.ordinal) FROM social_media om WHERE"
+              + " om.post_id=p.id AND om.state<>'DELETING'))))";
     else {
       filters += " AND p.kind=?";
       args.add(kind);

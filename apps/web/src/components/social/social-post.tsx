@@ -17,6 +17,7 @@ import { api, post } from "@/lib/api";
 import {
   socialWrite,
   socialLink,
+  playsInClips,
   postPerson,
   type SocialPerson,
   type SocialPost as Post,
@@ -97,6 +98,7 @@ export function FollowButton({
     <span className="social-follow">
       <button
         className="secondary"
+        data-following={relation?.status === "ACCEPTED" || undefined}
         disabled={!relation || busy}
         onClick={async () => {
           setBusy(true);
@@ -119,11 +121,8 @@ export function FollowButton({
           ? "Seguindo"
           : relation?.status === "PENDING"
             ? "Solicitado"
-            : relation?.followsYou
-              ? "Seguir de volta"
-              : "Seguir"}
+            : "Seguir"}
       </button>
-      {relation?.followsYou && <small>Te segue</small>}
       {error && <small role="alert">{error}</small>}
     </span>
   );
@@ -442,7 +441,7 @@ export function SocialPost({
             authorName={item.name}
             autoplay={autoplay}
             clipHref={
-              item.kind === "CLIP" && !detail
+              playsInClips(item) && !detail
                 ? `/social?post=${encodeURIComponent(item.id)}`
                 : undefined
             }

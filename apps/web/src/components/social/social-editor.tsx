@@ -59,7 +59,7 @@ const FORMATS = {
   POST: {
     name: "Post",
     title: "Post",
-    hint: "Fotos e vídeos no feed",
+    hint: "Fotos e vídeos · vídeos também vão para os Clips",
     icon: LayoutGrid,
   },
   STORY: {
@@ -67,12 +67,6 @@ const FORMATS = {
     title: "Story",
     hint: "Some em 24 horas",
     icon: Clock3,
-  },
-  CLIP: {
-    name: "Clip · até 3 min",
-    title: "Clip",
-    hint: "Vídeo vertical · até 3 min",
-    icon: Film,
   },
 } as const;
 const STEPS = [
@@ -231,6 +225,9 @@ async function imageSize(file: File): Promise<{ width: number; height: number }>
     image.src = url;
   });
 }
+/** Videos are published as Posts and also play in Clips. */
+const composerKind = (kind: SocialDraft["kind"]): "POST" | "STORY" =>
+  kind === "STORY" ? "STORY" : "POST";
 export function SocialEditor({
   user,
   mediaEnabled,
@@ -297,17 +294,16 @@ export function SocialEditor({
     void localSocialDraft(user)
       .then((value) => {
         if (alive.current) {
-          const restored = value ?? {
-            ...emptySocialDraft(),
-            kind: initialKind,
-          };
+          const restored = value
+            ? { ...value, kind: composerKind(value.kind) }
+            : { ...emptySocialDraft(), kind: composerKind(initialKind) };
           setDraft(restored);
           if (restored.files.length) setStep("edit");
         }
       })
       .catch(() => {
         if (alive.current) {
-          setDraft({ ...emptySocialDraft(), kind: initialKind });
+          setDraft({ ...emptySocialDraft(), kind: composerKind(initialKind) });
           setError(
             "Armazenamento local indisponível. Use Salvar rascunho antes de sair.",
           );
@@ -339,7 +335,7 @@ export function SocialEditor({
       () =>
         setDraft((value) =>
           value && !value.body && !value.files.length && !value.version
-            ? { ...value, kind: initialKind }
+            ? { ...value, kind: composerKind(initialKind) }
             : value,
         ),
       0,
@@ -450,15 +446,13 @@ export function SocialEditor({
           file.size > 128 * 1024 * 1024
         )
           throw new Error("Use imagem ou vídeo de até 128 MB.");
-        if (draft.kind === "CLIP" && !file.type.startsWith("video/"))
-          throw new Error("Escolha um vídeo para o Clip.");
         const video = file.type.startsWith("video/")
           ? await videoInfo(file)
           : undefined;
         const size = video ?? (await imageSize(file));
         // The best framing is chosen for the person: the shape that keeps the
-        // most of the original (always full screen for Stories and Clips).
-        const aspect = bestAspect(draft.kind, size.width, size.height);
+        // most of the original, wherever it is shown.
+        const aspect = bestAspect(size.width, size.height);
         next.push({
           id: crypto.randomUUID(),
           file,
@@ -652,7 +646,14 @@ export function SocialEditor({
           setProgress(100);
           window.dispatchEvent(
             new CustomEvent("enturma-social-published", {
-              detail: { id: work.id, kind: work.kind },
+              detail: {
+                id: work.id,
+                kind: work.kind,
+                // A post that starts with a video also plays in Clips.
+                video:
+                  work.files[0]?.media?.kind === "VIDEO" ||
+                  !!work.files[0]?.file?.type.startsWith("video/"),
+              },
             }),
           );
           completed.current(work.kind);
@@ -693,6 +694,7 @@ export function SocialEditor({
       if (alive.current) {
         setDraft({
           ...value,
+          kind: composerKind(value.kind),
           projectUrl: value.projectUrl ?? "",
           files: value.media.map((media) => ({
             id: media.id,
@@ -769,16 +771,11 @@ export function SocialEditor({
   const canPublish =
     hasContent &&
     (!draft.files.length || mediaEnabled) &&
-    draft.files.every((file) => !!file.file || !!file.media) &&
-    (draft.kind !== "CLIP" ||
-      (draft.files.length === 1 &&
-        (draft.files[0].media?.kind === "VIDEO" ||
-          draft.files[0].file?.type.startsWith("video/"))));
-  const canAdvance =
-    hasContent && (draft.kind !== "CLIP" || draft.files.length > 0);
+    draft.files.every((file) => !!file.file || !!file.media);
+  const canAdvance = hasContent;
   const submitLabel = pending
     ? "Enviar e publicar"
-    : `Publicar ${draft.kind === "STORY" ? "Story" : draft.kind === "CLIP" ? "Clip" : "Post"}`;
+    : `Publicar ${draft.kind === "STORY" ? "Story" : "Post"}`;
   return (
     <section
       className="social-editor social-create-flow"
@@ -851,7 +848,7 @@ export function SocialEditor({
       <fieldset disabled={busy} className="social-editor-fields">
         <div hidden={step !== "pick"} className="social-create-pick">
           <div className="social-segments" aria-label="Formato da publicação">
-            {(["POST", "STORY", "CLIP"] as const).map((kind) => {
+            {(["POST", "STORY"] as const).map((kind) => {
               const format = FORMATS[kind];
               return (
                 <button
@@ -905,11 +902,9 @@ export function SocialEditor({
                 : "Galeria temporariamente indisponível"}
             </strong>
             <span>
-              {draft.kind === "POST"
-                ? "Até 10 fotos ou vídeos · vídeos de até 3 min · 128 MB cada"
-                : draft.kind === "STORY"
-                  ? "Uma foto ou vídeo de até 3 min · 128 MB"
-                  : "Um vídeo de até 3 min · 128 MB"}
+              {draft.kind === "STORY"
+                ? "Uma foto ou vídeo de até 3 min · 128 MB"
+                : "Até 10 fotos ou vídeos · vídeos de até 3 min · 128 MB cada"}
             </span>
             <span className="social-upload-auto">
               <Crop size={14} aria-hidden="true" />
@@ -920,7 +915,7 @@ export function SocialEditor({
                 Escolher mídia
                 <input
                   type="file"
-                  accept={draft.kind === "CLIP" ? "video/*" : "image/*,video/*"}
+                  accept="image/*,video/*"
                   multiple={draft.kind === "POST"}
                   disabled={!mediaEnabled || busy}
                   onChange={(event) => {
@@ -929,21 +924,19 @@ export function SocialEditor({
                   }}
                 />
               </label>
-              {draft.kind !== "CLIP" && (
-                <label className="social-file-button">
-                  Fotos da galeria
-                  <input
-                    type="file"
-                    accept="image/*"
-                    multiple={draft.kind === "POST"}
-                    disabled={!mediaEnabled || busy}
-                    onChange={(event) => {
-                      void choose(Array.from(event.target.files ?? []));
-                      event.target.value = "";
-                    }}
-                  />
-                </label>
-              )}
+              <label className="social-file-button">
+                Fotos da galeria
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple={draft.kind === "POST"}
+                  disabled={!mediaEnabled || busy}
+                  onChange={(event) => {
+                    void choose(Array.from(event.target.files ?? []));
+                    event.target.value = "";
+                  }}
+                />
+              </label>
               <button
                 type="button"
                 className="secondary"
@@ -1329,7 +1322,10 @@ export function SocialEditor({
               <button
                 onClick={() => {
                   void localSocialDraft(user, null).catch(() => {});
-                  setDraft({ ...emptySocialDraft(), kind: initialKind });
+                  setDraft({
+                    ...emptySocialDraft(),
+                    kind: composerKind(initialKind),
+                  });
                   setDiscard(false);
                   setStep("pick");
                   setError("");

@@ -157,6 +157,13 @@ export function videoPreviewFrame(
     transform: `translate(-50%, -50%) rotate(${recipe.rotation}deg)`,
   };
 }
+/** Every video plays in Clips: Clips and Posts whose first media is a video. */
+export function playsInClips(post: Pick<SocialPost, "kind" | "media">) {
+  return (
+    post.kind === "CLIP" ||
+    (post.kind === "POST" && post.media?.[0]?.kind === "VIDEO")
+  );
+}
 export function defaultRecipe(duration: number): VideoRecipe {
   return {
     segments: [{ start: 0, end: Math.min(MAX_VIDEO_SECONDS, duration) }],

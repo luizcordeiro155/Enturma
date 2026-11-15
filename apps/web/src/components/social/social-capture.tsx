@@ -126,7 +126,7 @@ export function SocialCapture({
     }
   }
   return (
-    <SocialDialog title="Gravar um Clip" close={close}>
+    <SocialDialog title="Gravar um vídeo" close={close}>
       <div className="social-capture">
         <video
           className="social-capture-preview"

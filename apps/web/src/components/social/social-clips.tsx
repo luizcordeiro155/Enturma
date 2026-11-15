@@ -455,8 +455,11 @@ function ClipsFeed({
   }, [stream.load, stream.busy]);
   useEffect(() => {
     const own = (event: Event) => {
-      const post = (event as CustomEvent<{ id: string; kind: string }>).detail;
-      if (post?.kind === "CLIP") preferred.current = post.id;
+      const post = (
+        event as CustomEvent<{ id: string; kind: string; video?: boolean }>
+      ).detail;
+      // A new video post also opens first in Clips.
+      if (post?.kind === "CLIP" || post?.video) preferred.current = post.id;
     };
     window.addEventListener("enturma-social-published", own);
     return () => window.removeEventListener("enturma-social-published", own);

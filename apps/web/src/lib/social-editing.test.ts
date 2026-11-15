@@ -76,19 +76,16 @@ describe("visual media editing", () => {
 });
 
 describe("automatic framing", () => {
-  it("Stories and Clips always fill the vertical screen", () => {
-    expect(bestAspect("STORY", 1920, 1080)).toBe("9:16");
-    expect(bestAspect("CLIP", 1080, 1080)).toBe("9:16");
-  });
-  it("a Post keeps as much of the original as the feed can show", () => {
-    expect(bestAspect("POST", 1080, 1920)).toBe("3:4"); // phone video
-    expect(bestAspect("POST", 1080, 1350)).toBe("4:5");
-    expect(bestAspect("POST", 1200, 1180)).toBe("1:1");
-    expect(bestAspect("POST", 1920, 1080)).toBe("1.91:1"); // landscape
-    expect(bestAspect("POST", 4000, 3000)).toBe("1:1");
+  it("follows the photo or video itself, wherever it is shown", () => {
+    expect(bestAspect(1080, 1920)).toBe("9:16"); // phone video
+    expect(bestAspect(1080, 1440)).toBe("3:4");
+    expect(bestAspect(1080, 1350)).toBe("4:5");
+    expect(bestAspect(1200, 1180)).toBe("1:1");
+    expect(bestAspect(1920, 1080)).toBe("1.91:1"); // landscape
+    expect(bestAspect(4000, 3000)).toBe("1:1");
   });
   it("falls back to the feed default when the size is unknown", () => {
-    expect(bestAspect("POST", 0, 0)).toBe("4:5");
-    expect(bestAspect("POST", Number.NaN, 100)).toBe("4:5");
+    expect(bestAspect(0, 0)).toBe("4:5");
+    expect(bestAspect(Number.NaN, 100)).toBe("4:5");
   });
 });

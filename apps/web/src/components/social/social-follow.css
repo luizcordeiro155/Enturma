@@ -1,0 +1,45 @@
+/* One follow button, like Instagram: "Seguir" → "Seguindo" → "Seguir".
+   Over a Clip it is outlined in white; elsewhere it follows the theme. */
+html[data-theme] .social-page .social-follow > button {
+  min-height: 34px;
+  padding: 0 16px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 700;
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: var(--on-accent);
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+html[data-theme] .social-page .social-follow > button[data-following] {
+  background: var(--soft);
+  border-color: var(--border);
+  color: var(--ink);
+}
+
+/* Over the video (mobile Clips): white outline on any theme. */
+html[data-theme] .social-page .social-clip-caption .social-follow > button,
+html[data-theme] .social-page .social-clip-caption .social-follow > button[data-following] {
+  min-height: 32px;
+  padding: 0 14px;
+  border: 1.5px solid rgb(255 255 255 / 0.9);
+  background: transparent;
+  color: #fff;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.35);
+}
+html[data-theme] .social-page .social-clip-caption .social-follow > button:hover:not(:disabled) {
+  background: rgb(255 255 255 / 0.14);
+}
+
+/* Desktop Clips show the caption on the page background, not over the video. */
+@media (min-width: 761px) {
+  html[data-theme] .social-page .social-clip-caption .social-follow > button,
+  html[data-theme] .social-page .social-clip-caption .social-follow > button[data-following] {
+    border-color: color-mix(in srgb, var(--ink) 55%, transparent);
+    color: var(--ink) !important;
+    text-shadow: none;
+  }
+  html[data-theme] .social-page .social-clip-caption .social-follow > button:hover:not(:disabled) {
+    background: var(--soft);
+  }
+}

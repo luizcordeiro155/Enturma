@@ -161,8 +161,24 @@ class SocialMediaIntegrationTest {
         posts.draft(
             owner,
             new SocialPosts.Draft(
-                post, "CLIP", "Resultado exportado", "PUBLIC", null, 0, List.of(id)));
+                post, "POST", "Resultado exportado", "PUBLIC", null, 0, List.of(id)));
     posts.publish(owner, post, ((Number) draft.get("version")).intValue());
+    // Every video post also plays in Clips; a text post does not.
+    UUID text = UUID.randomUUID();
+    var textDraft =
+        posts.draft(
+            owner, new SocialPosts.Draft(text, "POST", "Só texto", "PUBLIC", null, 0, List.of()));
+    posts.publish(owner, text, ((Number) textDraft.get("version")).intValue());
+    var clipIds =
+        ((List<?>) ((Map<?, ?>) posts.feed(viewer, "for-you", "CLIP", "", "", null, "posts"))
+                .get("items"))
+            .stream().map(item -> (Object) ((Map<?, ?>) item).get("id")).toList();
+    assertThat(clipIds).contains((Object) post).doesNotContain((Object) text);
+    var feedIds =
+        ((List<?>) ((Map<?, ?>) posts.feed(viewer, "for-you", "ALL", "", "", null, "posts"))
+                .get("items"))
+            .stream().map(item -> (Object) ((Map<?, ?>) item).get("id")).toList();
+    assertThat(feedIds).contains((Object) post, (Object) text);
     media.remove(owner, id);
     assertThat(media.status(owner, id)).containsEntry("state", "READY");
     media.content(viewer, id, true, new MockHttpServletRequest(), new MockHttpServletResponse());
