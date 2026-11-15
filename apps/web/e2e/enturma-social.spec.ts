@@ -954,8 +954,22 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
       });
     }
   }
+  // Turn Clips sound on by hand, then go back: the Feed must not inherit it.
+  const clipSound = page.getByRole("button", { name: "Ativar som dos Clips" });
+  if (await clipSound.isVisible()) await clipSound.click();
+  await expect(
+    page.getByRole("button", { name: "Silenciar Clips" }),
+  ).toBeVisible();
   await navigation.getByRole("button", { name: "Feed", exact: true }).click();
   await expect.poll(playing).toEqual([false, false, false, false]);
+  // Sound turned on in Clips stays in Clips: back on the Feed, videos are muted.
+  const feedVideo = feed.locator("video").first();
+  await expect
+    .poll(() => feedVideo.evaluate((video) => (video as HTMLVideoElement).muted))
+    .toBe(true);
+  await expect(
+    feed.getByRole("button", { name: "Ativar som do vídeo" }).first(),
+  ).toBeAttached();
 });
 
 test("Social: autor consegue excluir seu Story com confirmação", async ({

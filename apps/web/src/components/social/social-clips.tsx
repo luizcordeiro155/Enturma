@@ -71,7 +71,7 @@ function ClipVideo({
           // Without a tap first the browser may refuse sound: keep playing muted.
           if ((error as Error)?.name !== "NotAllowedError" || video.muted) return;
           video.muted = true;
-          setSocialSound({ muted: true });
+          setSocialSound({ muted: true }, "clips");
           void video.play().catch(() => {});
         });
     };
@@ -285,7 +285,7 @@ function ClipPage({
     setProgress(fraction);
     setDuration(length);
   }, []);
-  const sound = useSocialSound();
+  const sound = useSocialSound("clips");
   return (
     <>
       <ClipVideo
@@ -350,13 +350,13 @@ export function SocialClips({
 }) {
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("for-you"),
     [opened, setOpened] = useState<string[]>(["for-you"]);
-  // The same sound setting as the Feed: turning it on in one applies to the other.
-  const { muted } = useSocialSound();
+  // Clips keep their own sound setting: sound here never turns the Feed's on.
+  const { muted } = useSocialSound("clips");
   // Like Reels: every time Clips opens, it plays with sound.
   useEffect(() => {
     if (!active) return;
-    const sound = getSocialSound();
-    setSocialSound({ muted: false, volume: sound.volume || 1 });
+    const sound = getSocialSound("clips");
+    setSocialSound({ muted: false, volume: sound.volume || 1 }, "clips");
   }, [active]);
   return (
     <div className="social-clips-tabbed">
@@ -504,7 +504,7 @@ function ClipsFeed({
     return () => observer.disconnect();
   }, [active, stream.cursor, stream.error, items.length]);
   const activeIndex = Math.max(0, Math.min(index, items.length - 1));
-  const { volume } = useSocialSound();
+  const { volume } = useSocialSound("clips");
   useEffect(() => {
     container.current?.querySelectorAll("video").forEach(video => { video.volume = volume; });
   }, [volume, activeIndex, items.length]);
