@@ -245,6 +245,8 @@ export function NotificationsProvider({
                 title: notice.title,
                 body: notice.message,
                 href: notice.href,
+                // One stacked notice per conversation or post, like the phone.
+                group: notice.href || notice.kind,
               })
               .catch(() => {});
           }
@@ -331,7 +333,11 @@ export function NotificationsProvider({
             !seen.current.has(notice.id) &&
             !contexts.includes(notice.contextKey ?? "")
           )
-            playNotificationSound(false, notice.id);
+            playNotificationSound(
+              false,
+              notice.id,
+              notice.contextKey ?? notice.href ?? notice.kind,
+            );
         }
       }
       initializedInbox.current = true;

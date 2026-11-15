@@ -92,6 +92,41 @@ function safeNotificationTarget(href) {
   } catch {}
   return new URL("/notifications", self.location.origin);
 }
+
+const STACK_VISIBLE_LINES = 4;
+const STACK_REALERT_MS = 30000;
+const STACK_STALE_MS = 15 * 60000;
+async function stackNotice(tag, title, body) {
+  const now = Date.now();
+  let previous;
+  try {
+    const open = await self.registration.getNotifications?.({ tag });
+    previous = open?.[0]?.data?.stack;
+  } catch {}
+  const fresh =
+    !previous ||
+    !Array.isArray(previous.lines) ||
+    now - (previous.updatedAt || 0) > STACK_STALE_MS;
+  const stack = fresh
+    ? { lines: [], count: 0, alertedAt: 0 }
+    : { ...previous, lines: [...previous.lines] };
+  stack.lines.push(String(body));
+  stack.lines = stack.lines.slice(-50);
+  stack.count = (stack.count || 0) + 1;
+  stack.updatedAt = now;
+  const alert = fresh || now - (stack.alertedAt || 0) >= STACK_REALERT_MS;
+  if (alert) stack.alertedAt = now;
+  const lines = stack.lines.slice(-STACK_VISIBLE_LINES);
+  const hidden = stack.count - lines.length;
+  if (hidden > 0) lines.unshift("+" + hidden + " anteriores");
+  return {
+    title: stack.count > 1 ? title + " · " + stack.count + " novas" : title,
+    body: lines.join("\n"),
+    alert,
+    fresh,
+    stack,
+  };
+}
 function deliverNotification(data) {
   deliveryQueue = deliveryQueue
     .catch(() => {})
@@ -132,19 +167,30 @@ function deliverNotification(data) {
       const foreground = windows.find(
         (client) => client.focused && client.visibilityState === "visible",
       );
-      if (!reading && foreground)
-        foreground.postMessage({ type: "ENTURMA_NOTIFICATION_SOUND", id: data.id });
-      if (!reading)
-        await self.registration.showNotification(data.title || "Enturma", {
-          body: data.body || "Você tem uma nova notificação.",
+      if (!reading) {
+        // Like the Android app: one notice per conversation or post that
+        // keeps the latest lines and a count, alerting once per burst.
+        const tag = "enturma-" + target.pathname + target.search;
+        const stacked = await stackNotice(
+          tag,
+          data.title || "Enturma",
+          data.body || "Você tem uma nova notificação.",
+        );
+        if (stacked.alert && foreground)
+          foreground.postMessage({ type: "ENTURMA_NOTIFICATION_SOUND", id: data.id });
+        await self.registration.showNotification(stacked.title, {
+          body: stacked.body,
           icon: "/pwa/enturma-mobile-official-v6.png",
           badge: "/pwa/enturma-mobile-official-v6.png",
-          silent: Boolean(foreground),
-          tag: data.id
-            ? "enturma-" + data.id
-            : "enturma-" + (data.kind || "notification") + target.pathname,
-          data: { href: target.pathname + target.search + target.hash },
+          silent: Boolean(foreground) || !stacked.alert,
+          renotify: stacked.alert && !stacked.fresh,
+          tag,
+          data: {
+            href: target.pathname + target.search + target.hash,
+            stack: stacked.stack,
+          },
         });
+      }
       if (key) {
         await receipts.put(key, new Response("1"));
         const keys = await receipts.keys();

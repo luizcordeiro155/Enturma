@@ -2,6 +2,9 @@ const preferenceKey = "enturma-notification-sound";
 let context: AudioContext | undefined;
 let lastPlayed = 0;
 const delivered = new Set<string>();
+// Like the Android app: a busy conversation chimes once, then again after a pause.
+const GROUP_QUIET_MS = 30000;
+const groupChimedAt = new Map<string, number>();
 export function notificationSoundEnabled() {
   try {
     return localStorage.getItem(preferenceKey) === "true";
@@ -25,7 +28,11 @@ export async function unlockNotificationSound() {
     return false;
   }
 }
-export function playNotificationSound(test = false, notificationId?: string) {
+export function playNotificationSound(
+  test = false,
+  notificationId?: string,
+  group?: string,
+) {
   if (!test && notificationId && delivered.has(notificationId)) return false;
   if (
     !context ||
@@ -39,6 +46,13 @@ export function playNotificationSound(test = false, notificationId?: string) {
       delivered.delete(delivered.values().next().value!);
   }
   if (!test && Date.now() - lastPlayed < 1500) return false;
+  if (!test && group) {
+    const previous = groupChimedAt.get(group);
+    if (previous != null && Date.now() - previous < GROUP_QUIET_MS) return false;
+    groupChimedAt.set(group, Date.now());
+    if (groupChimedAt.size > 200)
+      groupChimedAt.delete(groupChimedAt.keys().next().value!);
+  }
   lastPlayed = Date.now();
   // Original two-note chime, 320 ms, with a quiet envelope and no media download.
   [659.25, 880].forEach((frequency, index) => {

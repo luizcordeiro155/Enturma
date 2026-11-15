@@ -71,7 +71,7 @@ test("foreground inbox sound does not require OS notification permission and ski
   await act(async () => {
     await state.refresh!();
   });
-  expect(state.sound).toHaveBeenCalledExactlyOnceWith(false, "new");
+  expect(state.sound).toHaveBeenCalledExactlyOnceWith(false, "new", "FRIEND_REQUEST");
   await act(async () => {
     await state.refresh!();
   });
@@ -108,7 +108,11 @@ test("desktop chimes in the background without replaying unread notices", async 
   await act(async () => {
     await state.refresh!();
   });
-  expect(state.sound).toHaveBeenCalledExactlyOnceWith(false, "desktop-new");
+  expect(state.sound).toHaveBeenCalledExactlyOnceWith(
+    false,
+    "desktop-new",
+    "friend:other",
+  );
   await act(async () => {
     await state.refresh!();
   });

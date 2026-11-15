@@ -134,6 +134,10 @@ private const val MESSAGE_GROUP = "br.com.enturma.app.MESSAGES"
 private const val MESSAGE_SUMMARY_ID = 4810
 private const val MESSAGE_HISTORY_LIMIT = 8
 private const val MESSAGE_HISTORY_MAX_AGE_MS = 86_400_000L
+private const val GENERAL_HISTORY_PREFS = "enturma_general_notifications"
+private const val GENERAL_VISIBLE_LINES = 4
+private const val GENERAL_REALERT_MS = 30_000L
+private const val GENERAL_STALE_MS = 900_000L
 private val UUID_PATTERN = Regex("^[0-9a-fA-F-]{36}$")
 private const val FIREBASE_PROJECT_ID = ${kotlinString(firebaseProjectId)}
 private const val FIREBASE_APP_ID = ${kotlinString(firebaseAppId)}
@@ -505,6 +509,68 @@ private object EnturmaPrivateNotifications {
     }
 }
 
+/**
+ * Likes, comments, friend requests and reminders: like messages, one notice per
+ * place (post, ride, page) that keeps the latest lines and a count. It alerts
+ * once per burst and again only after a pause, so nothing floods and nothing is
+ * dropped.
+ */
+private object EnturmaGeneralNotifications {
+    fun notificationId(key: String): Int = ("general:" + key).hashCode()
+
+    fun show(context: Context, key: String, title: String, body: String, open: PendingIntent) {
+        val prefs = context.getSharedPreferences(GENERAL_HISTORY_PREFS, Context.MODE_PRIVATE)
+        val now = System.currentTimeMillis()
+        val saved = runCatching { JSONObject(prefs.getString(key, null) ?: "") }.getOrNull()
+        val fresh = saved == null || now - saved.optLong("updatedAt") > GENERAL_STALE_MS
+        val state = if (fresh || saved == null) JSONObject() else saved
+        val lines = state.optJSONArray("lines") ?: JSONArray()
+        lines.put(body)
+        while (lines.length() > 50) lines.remove(0)
+        val count = state.optInt("count") + 1
+        val alert = fresh || now - state.optLong("alertedAt") >= GENERAL_REALERT_MS
+        state.put("lines", lines).put("count", count).put("updatedAt", now)
+        if (alert) state.put("alertedAt", now)
+        prefs.edit().putString(key, state.toString()).apply()
+
+        val heading = if (count > 1) title + " · " + count + " novas" else title
+        val shown = minOf(lines.length(), GENERAL_VISIBLE_LINES)
+        val style: Notification.Style =
+            if (count > 1) {
+                val inbox = Notification.InboxStyle().setBigContentTitle(heading)
+                val hidden = count - shown
+                if (hidden > 0) inbox.addLine("+" + hidden + " anteriores")
+                for (i in lines.length() - shown until lines.length()) inbox.addLine(lines.optString(i))
+                inbox
+            } else Notification.BigTextStyle().bigText(body)
+        val builder =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                Notification.Builder(context, PUSH_CHANNEL_ID)
+            else Notification.Builder(context)
+        val notification = builder
+            .setSmallIcon(android.R.drawable.stat_notify_chat)
+            .setContentTitle(heading)
+            .setContentText(body)
+            .setNumber(count)
+            .setStyle(style)
+            .setContentIntent(open)
+            .setAutoCancel(true)
+            // A replacement only rings when this place has been quiet for a while.
+            .setOnlyAlertOnce(!alert)
+            .build()
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(notificationId(key), notification)
+    }
+
+    /** Signing out: no stacked notices or their lines stay on the phone. */
+    fun clear(context: Context) {
+        val prefs = context.getSharedPreferences(GENERAL_HISTORY_PREFS, Context.MODE_PRIVATE)
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        for (key in prefs.all.keys) manager.cancel(notificationId(key))
+        prefs.edit().clear().apply()
+    }
+}
+
 class EnturmaMessagingService : FirebaseMessagingService() {
     override fun onNewToken(token: String) {
         storePushToken(this, token)
@@ -538,7 +604,7 @@ class EnturmaMessagingService : FirebaseMessagingService() {
         }
         val requestCode =
             if (conversation != null) EnturmaPrivateNotifications.notificationId(conversation)
-            else (data["notificationId"] ?: href + body).hashCode()
+            else EnturmaGeneralNotifications.notificationId(href)
         val pending = PendingIntent.getActivity(
             this,
             requestCode,
@@ -550,24 +616,7 @@ class EnturmaMessagingService : FirebaseMessagingService() {
             EnturmaPrivateNotifications.show(this, data, pending)
             return
         }
-        val builder =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                Notification.Builder(this, PUSH_CHANNEL_ID)
-            else Notification.Builder(this)
-
-        val notification = builder
-            .setSmallIcon(android.R.drawable.stat_notify_chat)
-            .setContentTitle(title)
-            .setContentText(body)
-            .setStyle(Notification.BigTextStyle().bigText(body))
-            .setContentIntent(pending)
-            .setAutoCancel(true)
-            .setOnlyAlertOnce(true)
-            .build()
-
-        val manager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        manager.notify(requestCode, notification)
+        EnturmaGeneralNotifications.show(this, href, title, body, pending)
     }
 }
 
@@ -1578,6 +1627,7 @@ class MainActivity : Activity() {
 
     private fun clearNativePushToken() {
         EnturmaPrivateNotifications.clear(this)
+        EnturmaGeneralNotifications.clear(this)
         getSharedPreferences(PUSH_PREFS, Context.MODE_PRIVATE)
             .edit()
             .remove(PREF_PUSH_TOKEN)
