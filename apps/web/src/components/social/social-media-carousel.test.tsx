@@ -206,7 +206,7 @@ it("ativar o som num vídeo vale para todos os vídeos seguintes, e desativar ta
   expect(second.muted).toBe(true);
 });
 it("se o navegador bloquear o som automático, o vídeo volta a tocar sem som", async () => {
-  sessionStorage.setItem("enturma-social-sound", '{"muted":false,"volume":1}');
+  sessionStorage.setItem("enturma-social-feed-sound", '{"muted":false,"volume":1}');
   resetSocialSound();
   const play = vi
     .spyOn(HTMLMediaElement.prototype, "play")

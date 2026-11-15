@@ -22,8 +22,8 @@ function FeedVideo({
   postId?: string;
 }) {
   const ref = useRef<HTMLVideoElement>(null);
-  // One sound setting for every Social video: turning it on here applies to the next ones.
-  const { muted, volume, setMuted, setVolume } = useSocialSound();
+  // The Feed's own sound setting: turning it on here applies to the next Feed videos.
+  const { muted, volume, setMuted, setVolume } = useSocialSound("feed");
   useEffect(() => {
     const video = ref.current;
     if (!video) return;
