@@ -1,24 +1,54 @@
 "use client";
 /* eslint-disable @next/next/no-img-element -- authenticated attachment URLs */
 import { useState } from "react";
-import { FileText, Upload, X } from "lucide-react";
+import { FileText, ImageIcon, Upload, X } from "lucide-react";
 import { api } from "@/lib/api";
 export type PortfolioAsset = { id: string; name: string; mime: string };
 export function PortfolioAttachments({
   ids = [],
   assets,
   owner = false,
+  compact = false,
   onChange,
   onUpload,
 }: {
   ids?: string[];
   assets: PortfolioAsset[];
   owner?: boolean;
+  /** A row of file chips instead of large previews (public project cards). */
+  compact?: boolean;
   onChange?: (ids: string[]) => void;
   onUpload?: (asset: PortfolioAsset) => void;
 }) {
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  if (compact)
+    return (
+      <ul className="portfolio-file-chips" aria-label="Arquivos do projeto">
+        {ids.map((id) => {
+          const asset = assets.find((a) => a.id === id);
+          if (!asset) return null;
+          const image = asset.mime.startsWith("image/");
+          return (
+            <li key={id}>
+              <a
+                href={`/api/backend/public/portfolio/assets/${id}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                {image ? (
+                  <ImageIcon size={15} aria-hidden="true" />
+                ) : (
+                  <FileText size={15} aria-hidden="true" />
+                )}
+                <span>{asset.name}</span>
+                <small>{image ? "Imagem" : "PDF"}</small>
+              </a>
+            </li>
+          );
+        })}
+      </ul>
+    );
   return (
     <div className="portfolio-attachment-section">
       <div className="portfolio-gallery">
@@ -62,11 +92,20 @@ export function PortfolioAttachments({
         })}
       </div>
       {onChange && onUpload && (
-        <label className="portfolio-upload">
+        <label
+          className="portfolio-upload"
+          data-disabled={busy || ids.length >= 6 ? "true" : undefined}
+        >
           <Upload size={18} />
           <span>
-            {busy ? "Enviando arquivo…" : "Adicionar imagem ou PDF"}
-            <small>Até 6 arquivos por projeto · 3 MB cada</small>
+            {busy
+              ? "Enviando arquivo…"
+              : ids.length >= 6
+                ? "Limite de 6 arquivos atingido"
+                : "Adicionar imagem ou PDF"}
+            <small>
+              {ids.length}/6 arquivos · PNG, JPG, WEBP, GIF ou PDF até 3 MB
+            </small>
           </span>
           <input
             type="file"
@@ -98,7 +137,11 @@ export function PortfolioAttachments({
           />
         </label>
       )}
-      {error && <p role="status">{error}</p>}
+      {error && (
+        <p role="status" className="portfolio-upload-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
