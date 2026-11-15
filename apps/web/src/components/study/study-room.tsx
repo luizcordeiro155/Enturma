@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Clock3,
   ListChecks,
+  LoaderCircle,
   RotateCcw,
   SendHorizontal,
   Sparkles,
@@ -19,6 +20,12 @@ import {
 } from "lucide-react";
 import { Shell } from "../shell";
 import { StudyAnswer } from "../study-notebooks";
+import { ComposerMedia } from "../composer-media";
+import {
+  isMobileTextEntryContext,
+  resizeMessageComposerTextarea,
+  setNativeChatComposerFocused,
+} from "@/lib/native-chat-ime";
 import {
   PERSONALITIES,
   study,
@@ -45,6 +52,7 @@ export function StudyRoom({ id }: { id: string }) {
   const [scheduled, setScheduled] = useState(false);
   const [now, setNow] = useState(() => Date.now());
   const end = useRef<HTMLDivElement>(null);
+  const field = useRef<HTMLTextAreaElement>(null);
   const follow = useRef(true);
 
   const load = useCallback(async () => {
@@ -58,6 +66,7 @@ export function StudyRoom({ id }: { id: string }) {
     }
   }, [id]);
 
+  useEffect(() => () => setNativeChatComposerFocused(false), []);
   useEffect(() => {
     let alive = true;
     void study
@@ -108,7 +117,10 @@ export function StudyRoom({ id }: { id: string }) {
     const text = draft.trim();
     if (!text || busy || pending) return;
     follow.current = true;
-    if (await act(() => study.message(id, newId(), text))) setDraft("");
+    if (await act(() => study.message(id, newId(), text))) {
+      setDraft("");
+      requestAnimationFrame(() => resizeMessageComposerTextarea(field.current));
+    }
   }
 
   const readyChats = room?.messages.filter((message) => message.kind === "CHAT" && message.status === "READY").length ?? 0;
@@ -332,13 +344,19 @@ export function StudyRoom({ id }: { id: string }) {
                   {scheduling && !scheduled ? (
                     <form
                       className="study-inline-form"
+                      noValidate
                       onSubmit={(event) => {
                         event.preventDefault();
                         const data = new FormData(event.currentTarget);
+                        const when = new Date(String(data.get("when")));
+                        if (Number.isNaN(when.getTime()) || when.getTime() < Date.now()) {
+                          setError("Esse horário já passou. Escolha um dia e horário a partir de agora.");
+                          return;
+                        }
                         void act(async () => {
                           await study.continueLater(
                             id,
-                            new Date(String(data.get("when"))).toISOString(),
+                            when.toISOString(),
                             Number(data.get("minutes")),
                           );
                           setScheduled(true);
@@ -347,7 +365,13 @@ export function StudyRoom({ id }: { id: string }) {
                     >
                       <label>
                         Quando
-                        <input name="when" type="datetime-local" required defaultValue={tomorrowAt(session.startsAt)} />
+                        <input
+                          name="when"
+                          type="datetime-local"
+                          required
+                          min={localInput(new Date(now + 60000))}
+                          defaultValue={tomorrowAt(session.startsAt)}
+                        />
                       </label>
                       <label>
                         Duração
@@ -375,36 +399,70 @@ export function StudyRoom({ id }: { id: string }) {
             </div>
 
             {session.status === "ACTIVE" ? (
-              <form className="study-room-composer" onSubmit={(event) => void send(event)}>
-                <textarea
-                  aria-label="Mensagem para o tutor"
-                  value={draft}
-                  maxLength={2000}
-                  rows={1}
-                  placeholder={readyChats ? "Responda ou pergunte algo…" : "Conte qual é a sua dificuldade…"}
-                  onChange={(event) => setDraft(event.target.value)}
-                  onKeyDown={(event) => {
-                    if (event.key === "Enter" && !event.shiftKey && !event.nativeEvent.isComposing) {
-                      event.preventDefault();
-                      void send();
-                    }
-                  }}
-                />
-                <div className="study-room-composer-actions">
+              <form
+                className="study-room-composer enturma-message-composer"
+                onSubmit={(event) => void send(event)}
+              >
+                <div className="composer-main-row">
                   <button
                     type="button"
-                    className="secondary"
+                    className="composer-icon-button study-room-quiz-button"
+                    aria-label="Gerar quiz"
+                    title={readyChats ? "Gerar quiz para avaliar o que você aprendeu" : "Converse com o tutor antes do quiz"}
                     disabled={busy || pending || !readyChats || Boolean(openQuiz)}
-                    title={readyChats ? "Avaliar o que você aprendeu" : "Converse com o tutor antes do quiz"}
+                    onPointerDown={(event) => event.preventDefault()}
                     onClick={() => {
                       follow.current = true;
                       void act(() => study.quiz(id, newId()));
                     }}
                   >
-                    <ListChecks size={16} aria-hidden /> Gerar quiz
+                    <ListChecks size={20} aria-hidden />
                   </button>
-                  <button type="submit" className="study-room-send" aria-label="Enviar" disabled={busy || pending || !draft.trim()}>
-                    <SendHorizontal size={18} aria-hidden />
+                  <label className="composer-text-field">
+                    <span className="sr-only">Mensagem para o tutor</span>
+                    <textarea
+                      ref={field}
+                      aria-label="Mensagem para o tutor"
+                      value={draft}
+                      maxLength={2000}
+                      rows={1}
+                      enterKeyHint="enter"
+                      placeholder={readyChats ? "Responda ao tutor…" : "Qual é a sua dificuldade?"}
+                      onFocus={() => {
+                        setNativeChatComposerFocused(true);
+                        follow.current = true;
+                        requestAnimationFrame(() => end.current?.scrollIntoView?.({ block: "end" }));
+                      }}
+                      onBlur={() => setNativeChatComposerFocused(false)}
+                      onChange={(event) => {
+                        setDraft(event.target.value);
+                        resizeMessageComposerTextarea(event.currentTarget);
+                      }}
+                      onKeyDown={(event) => {
+                        if (
+                          event.key === "Enter" &&
+                          !event.shiftKey &&
+                          !event.nativeEvent.isComposing &&
+                          !isMobileTextEntryContext()
+                        ) {
+                          event.preventDefault();
+                          void send();
+                        }
+                      }}
+                    />
+                  </label>
+                  <ComposerMedia
+                    disabled={busy}
+                    onEmoji={(emoji) => setDraft((value) => (value + emoji).slice(0, 2000))}
+                  />
+                  <button
+                    type="submit"
+                    className="composer-send-button"
+                    aria-label="Enviar"
+                    disabled={busy || pending || !draft.trim()}
+                    onPointerDown={(event) => event.preventDefault()}
+                  >
+                    {busy || pending ? <LoaderCircle size={20} className="spin" /> : <SendHorizontal size={20} />}
                   </button>
                 </div>
               </form>
@@ -416,11 +474,17 @@ export function StudyRoom({ id }: { id: string }) {
   );
 }
 
+function localInput(date: Date) {
+  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+  return local.toISOString().slice(0, 16);
+}
+
+/** Same time on the next day, never in the past. */
 function tomorrowAt(iso: string) {
   const date = new Date(iso);
   date.setDate(date.getDate() + 1);
-  const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
-  return local.toISOString().slice(0, 16);
+  const soon = Date.now() + 24 * 3600000;
+  return localInput(date.getTime() < Date.now() ? new Date(soon) : date);
 }
 
 function TutorBubble({ pending = false, children }: { pending?: boolean; children?: React.ReactNode }) {

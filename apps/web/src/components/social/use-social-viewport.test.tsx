@@ -66,3 +66,39 @@ it("notifies dialogs when an overlay keyboard changes without resizing the app",
   delete (navigator as Navigator & { virtualKeyboard?: unknown })
     .virtualKeyboard;
 });
+
+it("keeps the caption box right above the keyboard instead of far up the page", () => {
+  let frame: FrameRequestCallback = () => {};
+  vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+    frame = callback;
+    return 1;
+  });
+  vi.stubGlobal("cancelAnimationFrame", vi.fn());
+  vi.stubGlobal("matchMedia", () => ({ matches: true }));
+  const keyboard = Object.assign(new EventTarget(), {
+    overlaysContent: false,
+    boundingRect: { height: 0 },
+  });
+  Object.defineProperty(navigator, "virtualKeyboard", { value: keyboard, configurable: true });
+  const page = document.createElement("section");
+  page.className = "social-pager-page";
+  page.dataset.page = "create";
+  const field = document.createElement("textarea");
+  page.append(field);
+  document.body.append(page);
+  page.scrollTop = 400;
+  field.focus();
+  vi.spyOn(field, "getBoundingClientRect").mockReturnValue({ bottom: innerHeight - 600 } as DOMRect);
+  const { unmount } = renderHook(useSocialViewport);
+  act(() => frame(0));
+  keyboard.boundingRect.height = 320;
+  act(() => {
+    keyboard.dispatchEvent(new Event("geometrychange"));
+    frame(1);
+  });
+  // Bottom of the box 16px above the keyboard: 600 - 320 - 16 = 264 back up.
+  expect(page.scrollTop).toBe(136);
+  unmount();
+  page.remove();
+  delete (navigator as Navigator & { virtualKeyboard?: unknown }).virtualKeyboard;
+});

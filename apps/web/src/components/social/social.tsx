@@ -27,6 +27,7 @@ import { SocialNavigation } from "./social-navigation";
 import { SocialPager } from "./social-pager";
 import { SocialOpening } from "./social-opening";
 import { useSocialViewport } from "./use-social-viewport";
+import { unmuteOnVolumeKeys } from "@/lib/social-sound";
 import { SocialLiveProvider } from "./social-live-context";
 import { SocialExplore } from "./social-explore";
 import { SocialFeedAside } from "./social-feed-aside";
@@ -123,6 +124,7 @@ function SocialContent() {
 }
 function SocialWorkspace({ ready }: { ready: Ready }) {
   useSocialViewport();
+  useEffect(() => unmuteOnVolumeKeys(), []);
   const params = useSearchParams(),
     incomingPost = params.get("post"),
     incomingPerson = params.get("person"),

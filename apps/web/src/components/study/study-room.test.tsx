@@ -120,6 +120,13 @@ it("after a graded quiz the student can keep going on the weak topic", async () 
   expect(JSON.parse(String(call?.[1]?.body)).message).toContain("Limites");
 
   fireEvent.click(within(next).getByRole("button", { name: /agendar outra aula/i }));
+  const when = within(next).getByLabelText("Quando");
+  const typed = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+  fireEvent.change(when, { target: { value: typed(new Date(Date.now() - 3600000)) } });
+  await act(async () => fireEvent.click(within(next).getByRole("button", { name: "Agendar" })));
+  expect(screen.getByRole("alert")).toHaveTextContent(/esse horário já passou/i);
+  expect(api.mock.calls.some(([path]) => path === "/study/sessions/s1/continue")).toBe(false);
+  fireEvent.change(when, { target: { value: typed(new Date(Date.now() + 86400000)) } });
   await act(async () => fireEvent.click(within(next).getByRole("button", { name: "Agendar" })));
   expect(api.mock.calls.some(([path]) => path === "/study/sessions/s1/continue")).toBe(true);
   expect(await within(next).findByRole("status")).toHaveTextContent(/próxima aula agendada/i);

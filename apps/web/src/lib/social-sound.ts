@@ -76,3 +76,29 @@ export function useSocialSound() {
     setVolume: (volume: number) => setSocialSound({ volume }),
   };
 }
+
+const VOLUME_KEYS = new Set(["AudioVolumeUp", "AudioVolumeDown", "VolumeUp", "VolumeDown"]);
+
+/**
+ * Like Instagram: pressing the phone's volume key while a Social video is on screen
+ * turns sound on for it and for the next videos, until the person mutes in Enturma.
+ * The Android app forwards the key as `enturma-native-volume-key`; some browsers
+ * report it as a keydown.
+ */
+export function unmuteOnVolumeKeys() {
+  const unmute = () => {
+    if (!document.querySelector(".social-page video, .social-dialog video")) return;
+    const sound = getSocialSound();
+    if (sound.muted || sound.volume === 0)
+      setSocialSound({ muted: false, volume: sound.volume || 1 });
+  };
+  const key = (event: KeyboardEvent) => {
+    if (VOLUME_KEYS.has(event.key)) unmute();
+  };
+  window.addEventListener("enturma-native-volume-key", unmute);
+  window.addEventListener("keydown", key);
+  return () => {
+    window.removeEventListener("enturma-native-volume-key", unmute);
+    window.removeEventListener("keydown", key);
+  };
+}

@@ -12,7 +12,7 @@ import { useSocialStream } from "./social-stream";
 import { SocialClipOverlay } from "./social-clip-overlay";
 import { useVideoView } from "./use-video-view";
 import { SocialVideoVolume } from "./social-video-volume";
-import { useSocialSound } from "@/lib/social-sound";
+import { getSocialSound, setSocialSound, useSocialSound } from "@/lib/social-sound";
 
 function ClipVideo({
   item,
@@ -23,6 +23,7 @@ function ClipVideo({
   change,
   progress,
   seekRef,
+  children,
 }: {
   item: Post;
   active: boolean;
@@ -32,6 +33,7 @@ function ClipVideo({
   change: (post: Post) => void;
   progress: (fraction: number, duration: number) => void;
   seekRef?: React.MutableRefObject<((fraction: number) => void) | null>;
+  children?: React.ReactNode;
 }) {
   const ref = useRef<HTMLVideoElement>(null),
     lastTap = useRef<number | null>(null);
@@ -64,7 +66,14 @@ function ClipVideo({
         document.querySelector("dialog[open]")
       )
         video.pause();
-      else if (video.paused) void video.play().catch(() => {});
+      else if (video.paused)
+        void video.play().catch((error: unknown) => {
+          // Without a tap first the browser may refuse sound: keep playing muted.
+          if ((error as Error)?.name !== "NotAllowedError" || video.muted) return;
+          video.muted = true;
+          setSocialSound({ muted: true });
+          void video.play().catch(() => {});
+        });
     };
     const pause = () => video.pause();
     sync();
@@ -218,6 +227,7 @@ function ClipVideo({
       >
         {!playing && <Play size={40} />}
       </button>
+      {children}
       {burst > 0 && (
         <Heart
           key={burst}
@@ -275,6 +285,7 @@ function ClipPage({
     setProgress(fraction);
     setDuration(length);
   }, []);
+  const sound = useSocialSound();
   return (
     <>
       <ClipVideo
@@ -286,7 +297,19 @@ function ClipPage({
         change={change}
         progress={report}
         seekRef={seekRef}
-      />
+      >
+        {active && (
+          <div className="social-clip-sound">
+            <SocialVideoVolume
+              volume={sound.volume}
+              onVolumeChange={sound.setVolume}
+              muted={sound.muted}
+              onMutedChange={sound.setMuted}
+              labels={CLIPS_VOLUME_LABELS}
+            />
+          </div>
+        )}
+      </ClipVideo>
       <SocialClipOverlay
         item={item}
         me={me}
@@ -328,8 +351,13 @@ export function SocialClips({
   const [tab, setTab] = useState<(typeof TABS)[number][0]>("for-you"),
     [opened, setOpened] = useState<string[]>(["for-you"]);
   // The same sound setting as the Feed: turning it on in one applies to the other.
-  const { muted, setMuted } = useSocialSound();
-  const toggleMuted = () => setMuted(!muted);
+  const { muted } = useSocialSound();
+  // Like Reels: every time Clips opens, it plays with sound.
+  useEffect(() => {
+    if (!active) return;
+    const sound = getSocialSound();
+    setSocialSound({ muted: false, volume: sound.volume || 1 });
+  }, [active]);
   return (
     <div className="social-clips-tabbed">
       <button
@@ -372,7 +400,6 @@ export function SocialClips({
                 autoplay={autoplay}
                 person={person}
                 muted={muted}
-                toggleMuted={toggleMuted}
                 initialClip={key === "for-you" ? initialClip : undefined}
               />
             </div>
@@ -388,7 +415,6 @@ function ClipsFeed({
   autoplay,
   person,
   muted,
-  toggleMuted,
   initialClip,
 }: {
   query: string;
@@ -397,7 +423,6 @@ function ClipsFeed({
   autoplay: boolean;
   person: (id: string) => void;
   muted: boolean;
-  toggleMuted: () => void;
   initialClip?: Post;
 }) {
   const stream = useSocialStream(
@@ -479,7 +504,7 @@ function ClipsFeed({
     return () => observer.disconnect();
   }, [active, stream.cursor, stream.error, items.length]);
   const activeIndex = Math.max(0, Math.min(index, items.length - 1));
-  const { volume, setVolume } = useSocialSound();
+  const { volume } = useSocialSound();
   useEffect(() => {
     container.current?.querySelectorAll("video").forEach(video => { video.volume = volume; });
   }, [volume, activeIndex, items.length]);
@@ -625,7 +650,6 @@ function ClipsFeed({
         )}
       </div>
       <div className="social-clip-controls">
-        <SocialVideoVolume volume={volume} onVolumeChange={setVolume} muted={muted} onMutedChange={value => { if (value !== muted) toggleMuted(); }} labels={CLIPS_VOLUME_LABELS} />
         <button
           className="icon-control"
           aria-label="Clip anterior"

@@ -79,7 +79,7 @@ async function publish(request: APIRequestContext, user: User, body: string) {
   return id;
 }
 
-test("Studio visual: long video, drag trimming, timed text, cover and theme snapshots", async ({
+test("Studio visual: long video, drag trimming, cover and theme snapshots", async ({
   page,
   request,
 }, info) => {
@@ -154,19 +154,8 @@ test("Studio visual: long video, drag trimming, timed text, cover and theme snap
       Number(await editor.getByLabel("Fim (s)", { exact: true }).inputValue()),
     )
     .toBeLessThan(70);
-  await editor.getByText("Textos e legendas", { exact: true }).click();
-  await editor.getByLabel("Nova legenda").fill("Meu projeto no Enturma");
-  await editor
-    .getByRole("button", { name: "Adicionar texto", exact: true })
-    .click();
-  const caption = editor.getByRole("button", {
-    name: "Mover texto 1: Meu projeto no Enturma",
-  });
-  // Movable text retains a keyboard alternative as well as pointer dragging.
-  await caption.focus();
-  const before = await caption.getAttribute("style");
-  await page.keyboard.press("ArrowUp");
-  await expect(caption).not.toHaveAttribute("style", before!);
+  // The Social editor has no separate texts-and-captions section.
+  await expect(editor.getByText("Textos e legendas", { exact: true })).toHaveCount(0);
   await editor
     .getByRole("button", { name: "Escolher capa", exact: true })
     .click();
@@ -238,9 +227,11 @@ test("Studio visual: long video, drag trimming, timed text, cover and theme snap
   const nav = page.getByRole("navigation", { name: "Ambientes do Social" });
   await nav.getByRole("button", { name: "Feed", exact: true }).click();
   await nav.getByRole("button", { name: "Criar", exact: true }).click();
-  await expect(editor.getByLabel("Texto 1", { exact: true })).toHaveValue(
-    "Meu projeto no Enturma",
-  );
+  await expect
+    .poll(async () =>
+      Number(await editor.getByLabel("Fim (s)", { exact: true }).inputValue()),
+    )
+    .toBeLessThan(70);
 });
 
 test("Social profile avatar, plain actions, comment media and keyboard overlay", async ({

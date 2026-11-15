@@ -6,6 +6,8 @@ import pg from "pg";
 
 const backend = process.env.E2E_API_URL ?? "http://localhost:8080";
 const shots = process.env.STUDY_SHOTS;
+// The calendar follows the student's routine time zone; keep the browser in it too.
+test.use({ timezoneId: "America/Sao_Paulo" });
 
 const QUIZ = JSON.stringify({
   questions: [
@@ -68,8 +70,11 @@ test("Study session: scheduled on the calendar, invitation, tutor room, quiz and
     await expect(sessions.getByText(/Nenhum estudo marcado/)).toBeVisible();
     await sessions.getByRole("button", { name: "Agendar estudo" }).click();
 
-    const soon = new Date(Date.now() + 5 * 60000);
-    const hhmm = `${String(soon.getHours()).padStart(2, "0")}:${String(soon.getMinutes()).padStart(2, "0")}`;
+    // The time as the student's browser sees it, five minutes from now.
+    const hhmm = await page.evaluate(() => {
+      const soon = new Date(Date.now() + 5 * 60000);
+      return `${String(soon.getHours()).padStart(2, "0")}:${String(soon.getMinutes()).padStart(2, "0")}`;
+    });
     const form = study.locator(".study-session-form");
     await expect(form).toBeVisible();
     await form.getByLabel("Horário").fill(hhmm);
@@ -102,6 +107,34 @@ test("Study session: scheduled on the calendar, invitation, tutor room, quiz and
     await page.getByRole("button", { name: "Começar estudo" }).click();
     await expect(page.getByText(/qual é a sua maior dificuldade/i)).toBeVisible();
     await expect(page.getByLabel("Mensagem para o tutor")).toBeVisible();
+    // Like the private chats: the page itself does not scroll, the composer rests at the bottom.
+    const composer = page.locator(".study-room-composer");
+    const viewport = page.viewportSize()!;
+    const box = (await composer.boundingBox())!;
+    expect(box.y + box.height).toBeLessThanOrEqual(viewport.height);
+    expect(box.y + box.height).toBeGreaterThan(viewport.height - 64);
+    expect(await page.evaluate(() => document.scrollingElement!.scrollHeight <= innerHeight + 1)).toBe(true);
+    await shoot(page, "room-active");
+    if (viewport.width < 700) {
+      // Android app: the keyboard is reported and the composer rests right above it.
+      await page.evaluate(() => {
+        const root = document.documentElement;
+        root.dataset.enturmaMobile = "true";
+        root.style.setProperty("--native-keyboard-bottom", "300px");
+      });
+      await expect
+        .poll(async () => {
+          const rect = (await composer.boundingBox())!;
+          return Math.round(rect.y + rect.height);
+        })
+        .toBeLessThanOrEqual(viewport.height - 300);
+      expect(await page.evaluate(() => document.scrollingElement!.scrollTop)).toBe(0);
+      await page.evaluate(() => {
+        const root = document.documentElement;
+        delete root.dataset.enturmaMobile;
+        root.style.removeProperty("--native-keyboard-bottom");
+      });
+    }
 
     // The model is not available locally: write the tutor's answers as the queue would.
     const notebook = (await db.query("SELECT notebook_id FROM study_session WHERE id=$1", [id])).rows[0].notebook_id;

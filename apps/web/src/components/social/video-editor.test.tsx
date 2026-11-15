@@ -50,24 +50,20 @@ it("splits, reorders, removes, undoes and redoes the actual export recipe", () =
   fireEvent.click(screen.getByRole("button", { name: "Refazer edição" }));
   expect(recipe().segments).toHaveLength(1);
 });
-it("exports framing, captions and audio choices and exposes invalid final duration", () => {
+it("exports framing and audio choices and exposes invalid final duration", () => {
   render(<Editor />);
   fireEvent.click(screen.getByText("Enquadramento, áudio e capa"));
   fireEvent.change(screen.getByLabelText("Zoom"), { target: { value: "1.5" } });
   fireEvent.click(screen.getByRole("button", { name: "Girar 0°" }));
   fireEvent.click(screen.getByLabelText("Silenciar original"));
-  fireEvent.click(screen.getByText("Textos e legendas"));
-  fireEvent.change(screen.getByLabelText("Nova legenda"), {
-    target: { value: "Conhecimento em companhia" },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Adicionar texto" }));
+  // The Social editor has no separate texts-and-captions section.
+  expect(screen.queryByText("Textos e legendas")).not.toBeInTheDocument();
+  expect(screen.queryByLabelText("Nova legenda")).not.toBeInTheDocument();
   expect(recipe()).toMatchObject({
     zoom: 1.5,
     rotation: 90,
     mute: true,
-    captions: [
-      { text: "Conhecimento em companhia", start: 0, end: 30, y: 0.8 },
-    ],
+    captions: [],
   });
   fireEvent.change(
     screen.getByLabelText("Fim (s)", {

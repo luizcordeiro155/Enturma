@@ -211,22 +211,57 @@ export function SocialComments({
       window.dispatchEvent(new Event("enturma-social_changed"));
     }
   }
+  async function upload(file: File) {
+    const body = new FormData();
+    body.append("file", file);
+    return (
+      await api<{ id: string }>(`/social/posts/${item.id}/comment-media`, {
+        method: "POST",
+        body,
+      })
+    ).id;
+  }
+  /** GIFs and stickers go out at once, like in the private chat; typed text stays. */
+  async function sendMedia(media: { file: File } | { url: string }) {
+    if (writing.current) return;
+    if ("file" in media && (!/^image\/(jpeg|png|gif|webp)$/.test(media.file.type) || media.file.size > 1400 * 1024)) {
+      setError("Use uma imagem ou GIF de at\u00e9 1,4 MB.");
+      return;
+    }
+    writing.current = true;
+    setBusy(true);
+    setError("");
+    try {
+      const mediaId = "file" in media ? await upload(media.file) : null;
+      await socialWrite(
+        `/posts/${item.id}/comments`,
+        {
+          id: crypto.randomUUID(),
+          body: "url" in media ? media.url : "",
+          parentId: parent?.parentId ?? parent?.id ?? null,
+          mediaId,
+        },
+        "POST",
+      );
+      setParent(undefined);
+      setLoading(true);
+      setPage(0);
+      setRevision((value) => value + 1);
+      await refreshPost();
+    } catch (cause) {
+      setError((cause as Error).message);
+    } finally {
+      writing.current = false;
+      setBusy(false);
+    }
+  }
   async function submit() {
     if ((!text.trim() && !attachment) || writing.current) return;
     writing.current = true;
     setBusy(true);
     setError("");
     try {
-      if (attachment && !uploaded.current) {
-        const body = new FormData();
-        body.append("file", attachment);
-        uploaded.current = (
-          await api<{ id: string }>(`/social/posts/${item.id}/comment-media`, {
-            method: "POST",
-            body,
-          })
-        ).id;
-      }
+      if (attachment && !uploaded.current) uploaded.current = await upload(attachment);
       await socialWrite(
         `/posts/${item.id}/comments`,
         {
@@ -411,10 +446,10 @@ export function SocialComments({
             disabled={busy}
             onEmoji={insert}
             onFile={choose}
-            onMedia={async (file) => choose(file)}
+            onMedia={(file) => sendMedia({ file })}
             onKlipy={async (gif) => {
               const url = providerMessageUrl(gif.url);
-              if (url) insert(`${text.trim() ? "\n" : ""}${url}`);
+              if (url) await sendMedia({ url });
             }}
           />
           <button

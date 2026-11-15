@@ -29,7 +29,6 @@ import {
   FILTER_CSS,
   FILTER_LABELS,
   trimSegment,
-  captionRange,
   normalizeRecipe,
   timeLabel,
   frameTimes,
@@ -79,7 +78,6 @@ export function VideoEditor({
     [playing, setPlaying] = useState(false),
     [selected, setSelected] = useState(0),
     [available, setAvailable] = useState({ undo: false, redo: false });
-  const [caption, setCaption] = useState("");
   const [coverMode, setCoverMode] = useState(false);
   const editedDuration = exportDuration(value);
   const coverTimes = frameTimes(editedDuration);
@@ -701,169 +699,6 @@ export function VideoEditor({
               />
             </label>
           </div>
-        </details>
-        <details>
-          <summary>Textos e legendas</summary>
-          {value.captions.map((c, i) => (
-            <div className="social-caption-edit" key={i}>
-              <MediaTimeline
-                duration={duration}
-                frames={[]}
-                start={c.start}
-                end={c.end}
-                position={position}
-                seek={(time) => {
-                  setPlaying(false);
-                  seek(time);
-                }}
-                change={(handle, time, commit) =>
-                  gesture(
-                    {
-                      ...value,
-                      captions: value.captions.map((item, index) =>
-                        index === i
-                          ? captionRange(item, handle, time, duration)
-                          : item,
-                      ),
-                    },
-                    commit,
-                  )
-                }
-              />
-              <div className="social-edit-controls">
-                <label>
-                  Tamanho do texto
-                  <input
-                    type="range"
-                    min={20}
-                    max={72}
-                    step={2}
-                    value={c.size ?? 36}
-                    onChange={(event) =>
-                      edit({
-                        ...value,
-                        captions: value.captions.map((item, index) =>
-                          index === i
-                            ? { ...item, size: Number(event.target.value) }
-                            : item,
-                        ),
-                      })
-                    }
-                  />
-                </label>
-                <label>
-                  Cor do texto
-                  <select
-                    value={c.color ?? "#ffffff"}
-                    onChange={(event) =>
-                      edit({
-                        ...value,
-                        captions: value.captions.map((item, index) =>
-                          index === i
-                            ? { ...item, color: event.target.value }
-                            : item,
-                        ),
-                      })
-                    }
-                  >
-                    {[
-                      ["#ffffff", "Branco"],
-                      ["#000000", "Preto"],
-                      ["#ffeb3b", "Amarelo"],
-                      ["#ff5a7a", "Rosa"],
-                      ["#81e6d9", "Verde"],
-                    ].map(([color, label]) => (
-                      <option key={color} value={color}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              </div>
-              <label>
-                Texto {i + 1}
-                <input
-                  value={c.text}
-                  maxLength={240}
-                  onChange={(e) =>
-                    edit({
-                      ...value,
-                      captions: value.captions.map((v, k) =>
-                        k === i ? { ...v, text: e.target.value } : v,
-                      ),
-                    })
-                  }
-                />
-              </label>
-              <div className="social-edit-controls">
-                {(["start", "end", "y"] as const).map((field) => (
-                  <label key={field}>
-                    {
-                      {
-                        start: "Início (s)",
-                        end: "Fim (s)",
-                        y: "Altura (0–1)",
-                      }[field]
-                    }
-                    <input
-                      type="number"
-                      min={0}
-                      max={field === "y" ? 1 : duration}
-                      step={0.1}
-                      value={c[field]}
-                      onChange={(e) =>
-                        edit({
-                          ...value,
-                          captions: value.captions.map((v, k) =>
-                            k === i
-                              ? { ...v, [field]: Number(e.target.value) }
-                              : v,
-                          ),
-                        })
-                      }
-                    />
-                  </label>
-                ))}
-              </div>
-              <button
-                type="button"
-                className="text-button"
-                onClick={() =>
-                  edit({
-                    ...value,
-                    captions: value.captions.filter((_, k) => k !== i),
-                  })
-                }
-              >
-                Remover texto
-              </button>
-            </div>
-          ))}
-          <label>
-            Nova legenda
-            <input
-              value={caption}
-              maxLength={240}
-              onChange={(e) => setCaption(e.target.value)}
-            />
-          </label>
-          <button
-            type="button"
-            className="secondary"
-            disabled={!caption.trim() || value.captions.length >= 20}
-            onClick={() => {
-              edit({
-                ...value,
-                captions: [
-                  ...value.captions,
-                  { text: caption.trim(), start: 0, end: duration, y: 0.8 },
-                ],
-              });
-              setCaption("");
-            }}
-          >
-            Adicionar texto
-          </button>
         </details>
         {duration > 90 && (
           <p role="alert">
