@@ -13,12 +13,27 @@ public class NotificationService {
   private final Db db;
   private final NotificationPreferences preferences;
   private final ApplicationEventPublisher events;
+  private final br.com.enturma.planner.PlannerService planner;
 
   public NotificationService(
-      Db db, ApplicationEventPublisher events, NotificationPreferences preferences) {
+      Db db,
+      ApplicationEventPublisher events,
+      NotificationPreferences preferences,
+      br.com.enturma.planner.PlannerService planner) {
     this.preferences = preferences;
     this.db = db;
     this.events = events;
+    this.planner = planner;
+  }
+
+  /** In class or in an AI study session with focus mode on, Social waits in the app. */
+  private boolean focusHolds(UUID user, String category) {
+    if (!category.startsWith("SOCIAL_")) return false;
+    try {
+      return planner.focusBlocked(user);
+    } catch (RuntimeException ex) {
+      return false;
+    }
   }
 
   public void forumChanged() {
@@ -67,7 +82,7 @@ public class NotificationService {
     String dedupe = kind + ":" + target + ":" + actor;
     preferences.queue(user, category, dedupe, message);
 
-    if (preferences.pushEnabled(user, category)) {
+    if (preferences.pushEnabled(user, category) && !focusHolds(user, category)) {
       int pushInserted =
           db.jdbc.update(
               "INSERT INTO notification_push_delivery(id,user_id,dedupe_key) VALUES (?,?,?)"

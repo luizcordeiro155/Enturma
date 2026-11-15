@@ -11,6 +11,7 @@ import "./notifications.css";
 import "./study-journey.css";
 import "./enturma-study.css";
 import "./study-room.css";
+import "./focus-mode.css";
 import "./ride-activity.css";
 import "./account-privacy.css";
 import "./student-suite.css";

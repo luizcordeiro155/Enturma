@@ -562,3 +562,72 @@ html[data-desktop-chrome="true"] .academic-page {
   scrollbar-gutter: stable;
   scroll-padding-bottom: 32px;
 }
+
+/* Entering without an academic e-mail: an honest, clearly different (red) path. */
+.academic-personal {
+  display: grid;
+  gap: 12px;
+  margin-top: 18px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+}
+.academic-personal p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.academic-personal p strong { color: var(--ink); }
+.academic-personal-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+html[data-theme] .academic-panel .button.academic-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #8f1d2c !important;
+  border-radius: 12px;
+  background: #b42335 !important;
+  color: #fff !important;
+  font-weight: 800;
+  box-shadow: 0 8px 22px rgb(180 35 53 / 0.22);
+  transition: transform 160ms ease, background-color 160ms ease, box-shadow 160ms ease;
+}
+html[data-theme] .academic-panel .button.academic-danger:hover:not(:disabled) {
+  background: #9e1c2d !important;
+  transform: translateY(-1px);
+}
+html[data-theme] .academic-panel .button.academic-danger:active:not(:disabled) { transform: scale(0.98); }
+html[data-theme] .academic-panel .button.academic-danger:disabled { opacity: 0.6; }
+html[data-theme] .academic-panel .button.academic-danger:focus-visible {
+  outline: 3px solid color-mix(in srgb, #b42335 45%, transparent);
+  outline-offset: 2px;
+}
+.academic-personal-actions .button.academic-danger { width: auto; flex: 1 1 220px; }
+
+/* Links and the footer stay readable in every theme (the Enturma palette included). */
+html[data-theme] .academic-page .academic-text-button,
+html[data-theme] .academic-page .academic-pagination button,
+html[data-theme] .academic-page .academic-footer button,
+html[data-theme] .academic-page .academic-footer a {
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: var(--ink) !important;
+  opacity: 1;
+}
+html[data-theme] .academic-page .academic-text-button:hover,
+html[data-theme] .academic-page .academic-footer a:hover,
+html[data-theme] .academic-page .academic-footer button:hover {
+  color: var(--accent-strong, var(--ink)) !important;
+}
+html[data-theme] .academic-page .academic-footer {
+  background: transparent !important;
+  color: var(--muted);
+}

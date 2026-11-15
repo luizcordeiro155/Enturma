@@ -533,7 +533,9 @@ public class NotebookService {
                   + "\"answer\":0,\"explanation\":\"...\",\"topic\":\"...\"}]} com 5 questões de"
                   + " múltipla escolha sobre o que foi estudado nesta sessão, priorizando as"
                   + " dificuldades do aluno. answer é o índice (0 a 3) da opção correta, explanation"
-                  + " explica em uma ou duas frases e topic é o subtema curto (até 4 palavras).";
+                  + " explica em uma ou duas frases e topic é o subtema curto (até 4 palavras)."
+                  + " Cada quiz deve ser inédito: nunca repita perguntas que as orientações listam"
+                  + " como já respondidas e alterne a posição da alternativa correta.";
           case "LESSON" ->
               "Aula acadêmica: objetivos, pré-requisitos, conceitos explicados passo a passo,"
                   + " analogias, exemplo resolvido, exercícios com gabarito comentado e revisão.";

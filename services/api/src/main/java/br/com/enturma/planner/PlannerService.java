@@ -27,7 +27,8 @@ public class PlannerService {
       String quietEnd,
       String tutorPersonality,
       String state,
-      String city) {}
+      String city,
+      Boolean focusMode) {}
 
   public record ClassSeries(
       UUID subjectId,
@@ -120,7 +121,8 @@ public class PlannerService {
             "SELECT timezone,to_char(default_start,'HH24:MI') default_start,"
                 + "to_char(default_end,'HH24:MI') default_end,weekdays,semester_start,semester_end,"
                 + "class_reminder_minutes,to_char(quiet_start,'HH24:MI') quiet_start,"
-                + "to_char(quiet_end,'HH24:MI') quiet_end,tutor_personality,state,city,updated_at"
+                + "to_char(quiet_end,'HH24:MI') quiet_end,tutor_personality,state,city,focus_mode,"
+                + "updated_at"
                 + " FROM academic_routine WHERE user_id=?",
             user);
     int mask = ((Number) row.get("weekdays")).intValue();
@@ -158,7 +160,8 @@ public class PlannerService {
     db.jdbc.update(
         "UPDATE academic_routine SET timezone=?,default_start=?,default_end=?,weekdays=?,"
             + "semester_start=?,semester_end=?,class_reminder_minutes=?,quiet_start=?,quiet_end=?,"
-            + "tutor_personality=?,state=?,city=?,updated_at=now() WHERE user_id=?",
+            + "tutor_personality=?,state=?,city=?,focus_mode=coalesce(?,focus_mode),updated_at=now()"
+            + " WHERE user_id=?",
         r.timezone() == null ? "America/Sao_Paulo" : r.timezone(),
         start,
         end,
@@ -171,9 +174,74 @@ public class PlannerService {
         personality,
         state,
         r.city() == null ? null : r.city().strip(),
+        r.focusMode(),
         a.id());
     changed(a.id());
     return routine(a.id());
+  }
+
+  // ---------------------------------------------------------------- focus mode
+
+  @Transactional
+  public Map<String, Object> setFocusMode(Actor a, boolean enabled) {
+    routine(a.id());
+    db.jdbc.update(
+        "UPDATE academic_routine SET focus_mode=?,updated_at=now() WHERE user_id=?", enabled, a.id());
+    return focus(a);
+  }
+
+  /** Whether focus mode currently pauses the Social for this student. */
+  public boolean focusBlocked(UUID user) {
+    if (!db.exists("SELECT EXISTS(SELECT 1 FROM academic_routine WHERE user_id=? AND focus_mode)", user))
+      return false;
+    return Boolean.TRUE.equals(focus(new Actor(user, null, "STUDENT")).get("blocked"));
+  }
+
+  /**
+   * Whether the student is in class or in an AI study session right now. While focus mode
+   * is on, the Social pauses until {@code until}. Regular classes on holidays do not count.
+   */
+  public Map<String, Object> focus(Actor a) {
+    var routine = routine(a.id());
+    boolean enabled = Boolean.TRUE.equals(routine.get("focusMode"));
+    var zone = zone((String) routine.get("timezone"));
+    var today = LocalDate.now(zone);
+    var now = Instant.now();
+    @SuppressWarnings("unchecked")
+    var events = (List<Map<String, Object>>) calendar(a, today.minusDays(1), today).get("events");
+    Map<String, Object> current = null;
+    for (var event : events) {
+      String kind = (String) event.get("kind");
+      String status = (String) event.get("status");
+      boolean counts =
+          switch (kind) {
+            case "CLASS" ->
+                "MOVED".equals(status)
+                    || "EXTRA".equals(status)
+                    || ("SCHEDULED".equals(status) && !Boolean.TRUE.equals(event.get("holiday")));
+            case "STUDY" -> "SCHEDULED".equals(status) || "ACTIVE".equals(status);
+            default -> false;
+          };
+      if (!counts || event.get("endsAt") == null) continue;
+      var starts = Instant.parse((String) event.get("startsAt"));
+      var ends = Instant.parse((String) event.get("endsAt"));
+      boolean inside = !now.isBefore(starts) && now.isBefore(ends);
+      // A room opened early is already studying.
+      if ("STUDY".equals(kind) && "ACTIVE".equals(status) && now.isBefore(ends)) inside = true;
+      if (inside && (current == null || ends.isAfter(Instant.parse((String) current.get("endsAt")))))
+        current = event;
+    }
+    var result = new LinkedHashMap<String, Object>();
+    result.put("enabled", enabled);
+    result.put("active", current != null);
+    result.put("blocked", enabled && current != null);
+    if (current != null) {
+      result.put("kind", current.get("kind"));
+      result.put("title", current.get("subjectName") == null ? current.get("title") : current.get("subjectName"));
+      result.put("until", current.get("endsAt"));
+      if ("STUDY".equals(current.get("kind"))) result.put("studyId", current.get("id"));
+    }
+    return result;
   }
 
   // ---------------------------------------------------------------- classes

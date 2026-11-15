@@ -6,9 +6,11 @@ import {
   BookOpenCheck,
   Brain,
   CalendarPlus,
+  Check,
   ClipboardList,
   Flag,
   PartyPopper,
+  Pencil,
   Undo2,
   X,
 } from "lucide-react";
@@ -67,6 +69,7 @@ export function StudyDayPanel({
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [moving, setMoving] = useState<string | null>(null);
+  const [editing, setEditing] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
   const weekday = WEEKDAYS.find((item) => item.value === isoWeekday(day))!.long;
   const past = day < isoDate(new Date());
@@ -81,6 +84,7 @@ export function StudyDayPanel({
       await changed();
       setForm(null);
       setMoving(null);
+      setEditing(null);
       setConfirmDelete(null);
     } catch (cause) {
       setError((cause as Error).message);
@@ -207,10 +211,30 @@ export function StudyDayPanel({
                 )}
                 {event.kind !== "CLASS" && event.kind !== "STUDY" && (
                   <div className="study-event-actions">
+                    <button
+                      type="button"
+                      aria-label={`Editar ${event.title}`}
+                      aria-expanded={editing === event.id}
+                      disabled={busy}
+                      onClick={() => setEditing(editing === event.id ? null : event.id)}
+                    >
+                      <Pencil size={14} aria-hidden /> Editar
+                    </button>
                     <button type="button" disabled={busy} onClick={() => run(() => planner.deleteTask(event.id))}>
                       Excluir
                     </button>
                   </div>
+                )}
+                {editing === event.id && event.kind !== "CLASS" && event.kind !== "STUDY" && (
+                  <TaskForm
+                    day={day}
+                    routine={routine}
+                    subjects={subjects}
+                    busy={busy}
+                    event={event}
+                    zone={zone}
+                    submit={(body) => run(() => planner.updateTask(event.id, body))}
+                  />
                 )}
                 {moving === event.id && (
                   <form
@@ -278,57 +302,13 @@ export function StudyDayPanel({
         <ClassForm day={day} routine={routine} subjects={subjects} busy={busy} submit={(body) => run(() => planner.addClasses(body))} />
       )}
       {form === "task" && (
-        <form
-          className="study-inline-form"
-          onSubmit={(submit: FormEvent<HTMLFormElement>) => {
-            submit.preventDefault();
-            const data = new FormData(submit.currentTarget);
-            run(() =>
-              planner.addTask({
-                kind: String(data.get("kind")) as "EXAM" | "ASSIGNMENT" | "EVENT",
-                title: String(data.get("title")),
-                subjectId: String(data.get("subject")) || null,
-                dueAt: new Date(`${day}T${String(data.get("time"))}`).toISOString(),
-                minutes: Number(data.get("minutes")),
-              }),
-            );
-          }}
-        >
-          <label>
-            Tipo
-            <select name="kind" defaultValue="EXAM">
-              <option value="EXAM">Prova</option>
-              <option value="ASSIGNMENT">Trabalho</option>
-              <option value="EVENT">Lembrete</option>
-            </select>
-          </label>
-          <label>
-            Título
-            <input name="title" required maxLength={180} placeholder="Ex.: Prova de Cálculo" />
-          </label>
-          <label>
-            Matéria
-            <select name="subject" defaultValue="">
-              <option value="">Nenhuma</option>
-              {subjects.map((subject) => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.name}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Horário
-            <input name="time" type="time" required defaultValue={routine.defaultStart} />
-          </label>
-          <label>
-            Duração (min)
-            <input name="minutes" type="number" min={5} max={1440} defaultValue={60} />
-          </label>
-          <button type="submit" disabled={busy}>
-            <CalendarPlus size={16} aria-hidden /> Salvar
-          </button>
-        </form>
+        <TaskForm
+          day={day}
+          routine={routine}
+          subjects={subjects}
+          busy={busy}
+          submit={(body) => run(() => planner.addTask(body))}
+        />
       )}
       {form === "holiday" && (
         <form
@@ -556,3 +536,93 @@ function StudyForm({
 
 const clockTime = (date: Date) =>
   `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+
+type TaskBody = Parameters<typeof planner.addTask>[0];
+
+/** Adds an exam, assignment or reminder, or edits one keeping what it was. */
+function TaskForm({
+  day,
+  routine,
+  subjects,
+  busy,
+  submit,
+  event,
+  zone,
+}: {
+  day: string;
+  routine: Routine;
+  subjects: AcademicEntry[];
+  busy: boolean;
+  submit: (body: TaskBody) => void;
+  event?: CalendarEvent;
+  zone?: string;
+}) {
+  const minutes = event
+    ? Math.max(5, Math.round((Date.parse(event.endsAt) - Date.parse(event.startsAt)) / 60000))
+    : 60;
+  return (
+    <form
+      className={`study-inline-form${event ? " study-task-edit" : ""}`}
+      aria-label={event ? "Editar marcação" : "Nova marcação"}
+      onSubmit={(submitEvent: FormEvent<HTMLFormElement>) => {
+        submitEvent.preventDefault();
+        const data = new FormData(submitEvent.currentTarget);
+        const date = event ? String(data.get("date")) : day;
+        submit({
+          kind: String(data.get("kind")) as TaskBody["kind"],
+          title: String(data.get("title")).trim(),
+          subjectId: String(data.get("subject")) || null,
+          dueAt: new Date(`${date}T${String(data.get("time"))}`).toISOString(),
+          minutes: Number(data.get("minutes")),
+        });
+      }}
+    >
+      <label>
+        Tipo
+        <select name="kind" defaultValue={event?.kind ?? "EXAM"}>
+          <option value="EXAM">Prova</option>
+          <option value="ASSIGNMENT">Trabalho</option>
+          <option value="EVENT">Lembrete</option>
+        </select>
+      </label>
+      <label>
+        Título
+        <input name="title" required maxLength={180} defaultValue={event?.title} placeholder="Ex.: Prova de Cálculo" />
+      </label>
+      <label>
+        Matéria
+        <select name="subject" defaultValue={event?.subjectId ?? ""}>
+          <option value="">Nenhuma</option>
+          {subjects.map((subject) => (
+            <option key={subject.id} value={subject.id}>
+              {subject.name}
+            </option>
+          ))}
+        </select>
+      </label>
+      {event ? (
+        <label>
+          Dia
+          <input name="date" type="date" required defaultValue={event.occursOn} />
+        </label>
+      ) : null}
+      <label>
+        Horário
+        <input
+          name="time"
+          type="time"
+          required
+          defaultValue={event ? timeIn(event.startsAt, zone ?? routine.timezone) : routine.defaultStart}
+        />
+      </label>
+      <label>
+        Duração (min)
+        <input name="minutes" type="number" min={5} max={1440} defaultValue={minutes} />
+      </label>
+      <button type="submit" disabled={busy}>
+        {event ? <Check size={16} aria-hidden /> : <CalendarPlus size={16} aria-hidden />}{" "}
+        {event ? "Salvar alterações" : "Salvar"}
+      </button>
+    </form>
+  );
+}

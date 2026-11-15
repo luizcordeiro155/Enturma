@@ -82,6 +82,24 @@ class AcademicIdentityIntegrationTest {
     assertThat(auth.studentAccess(user)).isFalse();
   }
 
+  @Test void personalEmailEntersWithoutAcademicProofAndKeepsAccessWhileVerifyingLater() throws Exception {
+    String bearer = "Bearer " + credentials.accessToken();
+    mvc.perform(post("/api/v1/auth/academic/personal").header("Authorization", bearer))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.accessAllowed").value(true))
+        .andExpect(jsonPath("$.personalAccess").value(true));
+    assertThat(auth.studentAccess(user)).isTrue();
+    assertThat(identities.status(user)).containsEntry("status", "PENDING").containsEntry("accessAllowed", true);
+    mvc.perform(get("/api/v1/users/me").header("Authorization", bearer))
+        .andExpect(status().isOk()).andExpect(jsonPath("$.academicAccess").value(true));
+    mvc.perform(get("/api/v1/friends").header("Authorization", bearer)).andExpect(status().isOk());
+    assertThat(db.exists("SELECT EXISTS(SELECT 1 FROM academic_verification_audit WHERE user_id=? AND action='PERSONAL_EMAIL_ACCESS')", user.id())).isTrue();
+    // Choosing to confirm the academic e-mail later never locks the student out.
+    String token = send(user, "pessoa@" + domain);
+    assertThat(identities.status(user)).containsEntry("status", "EMAIL_PENDING").containsEntry("accessAllowed", true);
+    identities.confirm(token);
+    assertThat(identities.status(user)).containsEntry("status", "STUDENT_VERIFIED").containsEntry("accessAllowed", true);
+  }
+
   @Test void exactDomainAndRealSingleUseConfirmationAreRequired() throws Exception {
     code(() -> identities.sendEmail(user, "x@gmail.com"), "ACADEMIC_DOMAIN_NOT_ALLOWED");
     code(() -> identities.sendEmail(user, "x@evil" + domain), "ACADEMIC_DOMAIN_NOT_ALLOWED");

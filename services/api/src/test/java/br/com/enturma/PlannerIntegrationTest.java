@@ -389,7 +389,7 @@ class PlannerIntegrationTest {
     var routine = planner.routine(a);
     planner.saveRoutine(
         a,
-        new Routine("America/Sao_Paulo", "19:00", "22:30", List.of(1, 2, 3, 4, 5), null, null, 120, "16:00", "18:00", "BALANCED", null, null));
+        new Routine("America/Sao_Paulo", "19:00", "22:30", List.of(1, 2, 3, 4, 5), null, null, 120, "16:00", "18:00", "BALANCED", null, null, null));
     upcomingClass(a);
     var start = LocalDate.now(SP).plusDays(2).atTime(15, 59).atZone(SP).toInstant();
     assertThat(jobs(a, "PENDING").getFirst()).containsEntry("fireAt", start.toString());
@@ -402,7 +402,7 @@ class PlannerIntegrationTest {
     assertThat(jobs(a, "PENDING")).isNotEmpty();
     planner.saveRoutine(
         a,
-        new Routine("America/Sao_Paulo", "08:00", "12:00", List.of(1, 2, 3, 4, 5), null, null, 0, null, null, "BALANCED", null, null));
+        new Routine("America/Sao_Paulo", "08:00", "12:00", List.of(1, 2, 3, 4, 5), null, null, 0, null, null, "BALANCED", null, null, null));
     assertThat(jobs(a, "PENDING")).isEmpty();
   }
 

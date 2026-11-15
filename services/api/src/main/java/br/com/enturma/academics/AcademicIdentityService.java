@@ -34,7 +34,7 @@ public class AcademicIdentityService {
 
   public Map<String, Object> status(Actor actor) {
     var row = db.one("SELECT a.*,i.name institution_name,c.name campus_name,"
-        + " a.status IN ('LEGACY_APPROVED','STUDENT_VERIFIED') access_allowed,"
+        + " (a.status IN ('LEGACY_APPROVED','STUDENT_VERIFIED') OR a.personal_access) access_allowed,"
         + " t.expires_at token_expires_at,(SELECT CASE WHEN e.sent_at IS NOT NULL THEN 'SENT'"
         + " WHEN e.attempts>=10 THEN 'FAILED' ELSE 'QUEUED' END FROM email_outbox e"
         + " WHERE e.academic_verification_user=a.user_id ORDER BY e.created_at DESC LIMIT 1) delivery,"
@@ -44,6 +44,21 @@ public class AcademicIdentityService {
         + " LEFT JOIN academic_verification_token t ON t.user_id=a.user_id"
         + " LEFT JOIN academic_verification_document d ON d.user_id=a.user_id WHERE a.user_id=?", actor.id());
     return row;
+  }
+
+  /**
+   * Enter with the personal e-mail: no academic proof, no verified badge. The student can
+   * still confirm the academic e-mail or enrolment later without losing access meanwhile.
+   */
+  @Transactional
+  public Map<String, Object> personalAccess(Actor actor) {
+    var row = db.one("SELECT status,personal_access FROM academic_identity WHERE user_id=? FOR UPDATE", actor.id());
+    if (!Boolean.TRUE.equals(row.get("personalAccess"))
+        && !Set.of("LEGACY_APPROVED", "STUDENT_VERIFIED").contains(row.get("status"))) {
+      db.jdbc.update("UPDATE academic_identity SET personal_access=true,revision=revision+1,updated_at=now() WHERE user_id=?", actor.id());
+      audit(actor.id(), actor.id(), "PERSONAL_EMAIL_ACCESS", null);
+    }
+    return status(actor);
   }
 
   public Object institutions(String search, int page) {

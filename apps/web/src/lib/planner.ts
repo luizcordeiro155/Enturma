@@ -178,5 +178,15 @@ export const planner = {
     dueAt: string;
     minutes?: number;
   }) => api<{ id: string }>("/planner/tasks", json(body, "POST")),
+  updateTask: (
+    id: string,
+    body: {
+      kind: "EXAM" | "ASSIGNMENT" | "EVENT";
+      title: string;
+      subjectId?: string | null;
+      dueAt: string;
+      minutes?: number;
+    },
+  ) => api(`/planner/tasks/${id}`, json(body, "PUT")),
   deleteTask: (id: string) => api(`/planner/tasks/${id}`, { method: "DELETE" }),
 };
