@@ -34,6 +34,8 @@ public class AcademicIdentityController {
 
   @GetMapping("/auth/academic/status")
   public Object status(@AuthenticationPrincipal Actor actor) { return service.status(actor); }
+  @PostMapping("/auth/academic/personal")
+  public Object personal(@AuthenticationPrincipal Actor actor) { return service.personalAccess(actor); }
   @GetMapping("/auth/academic/institutions")
   public Object institutions(@RequestParam(defaultValue="") @Size(max=200) String search,
       @RequestParam(defaultValue="0") int page) { return service.institutions(search, page); }

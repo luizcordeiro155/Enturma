@@ -18,6 +18,8 @@ export type AcademicIdentity = {
   campusName: string | null;
   academicEmail: string | null;
   accessAllowed: boolean;
+  /** Entered with the personal e-mail, without academic proof. */
+  personalAccess?: boolean;
   method: string | null;
   confidence: string | null;
   reviewReason: string | null;

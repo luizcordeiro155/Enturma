@@ -32,6 +32,8 @@ import { MobileNavigation } from "./mobile-navigation";
 import { SocialEntry } from "./social/social-entry";
 import { RideDesktopNavigation, RideMobileNavigation } from "./ride-navigation";
 import { StudyDueInvite } from "./study/study-due-invite";
+import { FocusBlock } from "./focus-mode";
+import { useFocusMode } from "@/lib/focus-mode";
 const links = [
   { href: "/home", label: "Início", icon: Home },
   { href: "/rooms", label: "Salas", icon: Users },
@@ -62,6 +64,8 @@ export function Shell({
   const inStudySession = path.startsWith("/study/");
   const inRideHub = path.startsWith("/caronas");
   const inSocial = path === "/social";
+  const { focus } = useFocusMode(!visitor);
+  const socialPaused = inSocial && !visitor && Boolean(focus?.blocked);
   const updateState = useAppUpdateState();
   const updatePending =
     isMobileApp() &&
@@ -246,7 +250,7 @@ export function Shell({
         ) : null}
         <main id="content">
           {!visitor && path.startsWith("/rooms") ? <CommunityFeedback /> : null}
-          {children}
+          {socialPaused && focus ? <FocusBlock focus={focus} /> : children}
         </main>
         {!inRideHub && !inSocial ? (
           <footer className="app-legal-footer">

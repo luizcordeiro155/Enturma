@@ -35,8 +35,9 @@ public class ProfileService {
             a.id());
     var identity =
         db.one(
-            "SELECT status,method,confidence,institution_id,campus_id,verified_at, status IN"
-                + " ('LEGACY_APPROVED','STUDENT_VERIFIED') access_allowed FROM academic_identity"
+            "SELECT status,method,confidence,institution_id,campus_id,verified_at,personal_access,"
+                + " (status IN ('LEGACY_APPROVED','STUDENT_VERIFIED') OR personal_access)"
+                + " access_allowed FROM academic_identity"
                 + " WHERE user_id=?",
             a.id());
     user.put("academicIdentity", identity);

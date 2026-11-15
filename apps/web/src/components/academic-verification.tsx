@@ -14,6 +14,7 @@ import {
   Search,
   ShieldCheck,
   Upload,
+  UserRound,
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { authDestination } from "@/lib/auth-navigation";
@@ -50,8 +51,14 @@ export function AcademicVerification() {
   const [now, setNow] = useState(() => Date.now());
   const panel = useRef<HTMLDivElement>(null);
   const navigating = useRef(false);
+  const [personalAsk, setPersonalAsk] = useState(false);
   const choosing = !identity?.institutionId || editing;
-  const approved = Boolean(identity?.accessAllowed);
+  // Students who entered with their personal e-mail can still come back to verify.
+  const personalOnly =
+    Boolean(identity?.personalAccess) &&
+    identity?.status !== "STUDENT_VERIFIED" &&
+    identity?.status !== "LEGACY_APPROVED";
+  const approved = Boolean(identity?.accessAllowed) && !personalOnly;
   const stage = approved
     ? "approved"
     : choosing
@@ -175,6 +182,18 @@ export function AcademicVerification() {
     } catch (e) {
       setError((e as Error).message);
     } finally {
+      setBusy(false);
+    }
+  }
+  async function enterWithPersonalEmail() {
+    if (busy) return;
+    setBusy(true);
+    setError("");
+    try {
+      await post("/auth/academic/personal");
+      advance();
+    } catch (e) {
+      setError((e as Error).message);
       setBusy(false);
     }
   }
@@ -582,6 +601,60 @@ export function AcademicVerification() {
               )}
             </>
           )}
+          {!approved && !(loading && !identity) ? (
+            personalOnly ? (
+              <div className="academic-personal" data-academic-enter>
+                <p>
+                  <strong>Você já entra com seu e-mail pessoal.</strong>{" "}
+                  Confirme o vínculo acadêmico quando quiser para ganhar o selo
+                  de estudante verificado.
+                </p>
+                <button type="button" className="button" onClick={advance}>
+                  Continuar para o Enturma <ArrowRight size={18} />
+                </button>
+              </div>
+            ) : (
+              <div className="academic-personal" data-academic-enter>
+                {personalAsk ? (
+                  <div role="group" aria-label="Entrar com e-mail pessoal">
+                    <p>
+                      <strong>Entrar sem e-mail acadêmico?</strong> Você usa o
+                      Enturma com o e-mail da sua conta. Seu perfil fica sem o
+                      selo de estudante verificado, e dá para confirmar o
+                      vínculo depois.
+                    </p>
+                    <div className="academic-personal-actions">
+                      <button
+                        type="button"
+                        className="button academic-danger"
+                        disabled={busy}
+                        onClick={() => void enterWithPersonalEmail()}
+                      >
+                        {busy ? "Liberando acesso…" : "Entrar com e-mail pessoal"}
+                        <ArrowRight size={18} />
+                      </button>
+                      <button
+                        type="button"
+                        className="academic-text-button"
+                        disabled={busy}
+                        onClick={() => setPersonalAsk(false)}
+                      >
+                        Voltar
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    className="button academic-danger"
+                    onClick={() => setPersonalAsk(true)}
+                  >
+                    <UserRound size={18} /> Não tenho e-mail acadêmico
+                  </button>
+                )}
+              </div>
+            )
+          ) : null}
           <footer className="academic-footer">
             <Link href="/privacidade">Privacidade</Link>
             <Link href="/academic-verification/support">Preciso de ajuda</Link>

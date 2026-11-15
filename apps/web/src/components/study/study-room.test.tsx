@@ -90,8 +90,7 @@ it("grades the quiz, shows the right answers and offers to continue or schedule"
   render(<StudyRoom id="s1" />);
   const card = await screen.findByRole("heading", { name: "Quiz da sessão" });
   const form = card.closest("form")!;
-  await act(async () => fireEvent.click(within(form).getByRole("button", { name: /enviar respostas/i })));
-  expect(within(form).getByRole("alert")).toHaveTextContent(/responda todas/i);
+  expect(within(form).getByRole("button", { name: /enviar respostas/i })).toBeDisabled();
 
   fireEvent.click(within(form).getAllByRole("radio")[0]);
   fireEvent.click(within(form).getAllByRole("radio")[2]);
@@ -105,12 +104,21 @@ it("grades the quiz, shows the right answers and offers to continue or schedule"
   expect(within(form).queryByRole("button", { name: /enviar respostas/i })).not.toBeInTheDocument();
 });
 
-it("after a graded quiz the student can keep going on the weak topic", async () => {
-  serve({
-    session,
-    messages: [{ ...quiz, quiz: quiz.quiz.map((q, i) => ({ ...q, answer: i ? 0 : 1, explanation: "x" })), attempt: { answers: [0, 0], score: 1, total: 2, wrongTopics: ["Limites"] } }],
-    sources: [],
-    mastery: { level: "DEVELOPING" },
+const graded = {
+  ...quiz,
+  quiz: quiz.quiz.map((q, i) => ({ ...q, answer: i ? 0 : 1, explanation: "x" })),
+  attempt: { answers: [0, 0], score: 1, total: 2, wrongTopics: ["Limites"] },
+};
+
+it("'Continuar agora' sends the weak topics and the panel leaves until the next quiz", async () => {
+  const room = { session, messages: [graded] as unknown[], sources: [], mastery: { level: "DEVELOPING" } };
+  serve(room);
+  api.mockImplementation((path: string, init?: RequestInit) => {
+    if (path === "/study/sessions/s1/messages") {
+      room.messages = [...room.messages, { id: "c1", kind: "CHAT", question: JSON.parse(String(init!.body)).message, answer: "Vamos lá.", status: "READY", createdAt: "" }];
+      return Promise.resolve({ id: "c1" });
+    }
+    return Promise.resolve({ ...room });
   });
   render(<StudyRoom id="s1" />);
   const next = await screen.findByRole("group", { name: "Próximo passo" });
@@ -118,7 +126,15 @@ it("after a graded quiz the student can keep going on the weak topic", async () 
   await act(async () => fireEvent.click(within(next).getByRole("button", { name: /continuar agora/i })));
   const call = api.mock.calls.find(([path]) => path === "/study/sessions/s1/messages");
   expect(JSON.parse(String(call?.[1]?.body)).message).toContain("Limites");
+  expect(screen.queryByRole("group", { name: "Próximo passo" })).not.toBeInTheDocument();
+  // A new quiz can be generated once the lesson moves on.
+  expect(screen.getByRole("button", { name: "Gerar quiz" })).toBeEnabled();
+});
 
+it("scheduling another lesson checks the time, then closes the panel and the lesson goes on", async () => {
+  serve({ session, messages: [graded], sources: [], mastery: { level: "DEVELOPING" } });
+  render(<StudyRoom id="s1" />);
+  const next = await screen.findByRole("group", { name: "Próximo passo" });
   fireEvent.click(within(next).getByRole("button", { name: /agendar outra aula/i }));
   const when = within(next).getByLabelText("Quando");
   const typed = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
@@ -129,7 +145,28 @@ it("after a graded quiz the student can keep going on the weak topic", async () 
   fireEvent.change(when, { target: { value: typed(new Date(Date.now() + 86400000)) } });
   await act(async () => fireEvent.click(within(next).getByRole("button", { name: "Agendar" })));
   expect(api.mock.calls.some(([path]) => path === "/study/sessions/s1/continue")).toBe(true);
-  expect(await within(next).findByRole("status")).toHaveTextContent(/próxima aula agendada/i);
+  expect(await screen.findByRole("status")).toHaveTextContent(/próxima aula agendada/i);
+  expect(screen.queryByRole("group", { name: "Próximo passo" })).not.toBeInTheDocument();
+  expect(screen.getByLabelText("Mensagem para o tutor")).toBeEnabled();
+});
+
+it("a quiz that was still being written can be answered once it arrives, and only sent when complete", { timeout: 10000 }, async () => {
+  const room = { session, messages: [{ ...quiz, status: "PROCESSING", quiz: undefined }] as unknown[], sources: [], mastery: { level: "BEGINNER" } };
+  serve(room);
+  api.mockImplementation((path: string) => Promise.resolve(path.endsWith("/answers") ? { score: 2, total: 2, done: true, weakTopics: [], results: [] } : { ...room }));
+  render(<StudyRoom id="s1" />);
+  await screen.findByLabelText("O tutor está escrevendo");
+  room.messages = [quiz];
+  // The room polls while the tutor writes.
+  const form = (await screen.findByRole("heading", { name: "Quiz da sessão" }, { timeout: 4000 })).closest("form")!;
+  const send = within(form).getByRole("button", { name: /enviar respostas/i });
+  expect(send).toBeDisabled();
+  fireEvent.click(within(form).getAllByRole("radio")[1]);
+  expect(within(form).getAllByRole("radio")[1]).toBeChecked();
+  expect(send).toBeDisabled();
+  expect(within(form).getByText("Falta 1 questão")).toBeInTheDocument();
+  fireEvent.click(within(form).getAllByRole("radio")[2]);
+  expect(send).toBeEnabled();
 });
 
 it("a finished session thanks the student and lets them open or delete the notebook", async () => {

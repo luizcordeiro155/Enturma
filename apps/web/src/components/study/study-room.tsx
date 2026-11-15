@@ -49,7 +49,7 @@ export function StudyRoom({ id }: { id: string }) {
   const [draft, setDraft] = useState("");
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [scheduling, setScheduling] = useState(false);
-  const [scheduled, setScheduled] = useState(false);
+  const [scheduledFor, setScheduledFor] = useState<string>();
   const [now, setNow] = useState(() => Date.now());
   const end = useRef<HTMLDivElement>(null);
   const field = useRef<HTMLTextAreaElement>(null);
@@ -126,6 +126,12 @@ export function StudyRoom({ id }: { id: string }) {
   const readyChats = room?.messages.filter((message) => message.kind === "CHAT" && message.status === "READY").length ?? 0;
   const lastQuiz = [...(room?.messages ?? [])].reverse().find((message) => message.kind === "QUIZ");
   const openQuiz = lastQuiz && lastQuiz.status === "READY" && !lastQuiz.attempt;
+  // The choice after a quiz shows until the student continues, schedules or writes.
+  const showNext =
+    room?.session.status === "ACTIVE" &&
+    Boolean(lastQuiz?.attempt) &&
+    room?.messages.at(-1)?.id === lastQuiz?.id &&
+    scheduledFor !== lastQuiz?.id;
 
   const startedAt = room?.session.startedAt;
   const finishedAt = room?.session.finishedAt;
@@ -315,7 +321,7 @@ export function StudyRoom({ id }: { id: string }) {
                   </div>
                 </div>
               ) : null}
-              {lastQuiz?.attempt && session.status === "ACTIVE" ? (
+              {showNext && lastQuiz?.attempt ? (
                 <div className="study-room-next" role="group" aria-label="Próximo passo">
                   <p>
                     Vamos fechar essas lacunas: <strong>{lastQuiz.attempt.wrongTopics.join(", ") || "revisão"}</strong>.
@@ -341,7 +347,7 @@ export function StudyRoom({ id }: { id: string }) {
                       <CalendarPlus size={16} aria-hidden /> Agendar outra aula
                     </button>
                   </div>
-                  {scheduling && !scheduled ? (
+                  {scheduling ? (
                     <form
                       className="study-inline-form"
                       noValidate
@@ -359,7 +365,8 @@ export function StudyRoom({ id }: { id: string }) {
                             when.toISOString(),
                             Number(data.get("minutes")),
                           );
-                          setScheduled(true);
+                          setScheduling(false);
+                          setScheduledFor(lastQuiz.id);
                         }, false);
                       }}
                     >
@@ -388,12 +395,13 @@ export function StudyRoom({ id }: { id: string }) {
                       </button>
                     </form>
                   ) : null}
-                  {scheduled ? (
-                    <p className="study-room-scheduled" role="status">
-                      <Check size={16} aria-hidden /> Próxima aula agendada no mesmo caderno. Vou te chamar na hora.
-                    </p>
-                  ) : null}
                 </div>
+              ) : null}
+              {scheduledFor && scheduledFor === lastQuiz?.id && room.messages.at(-1)?.id === lastQuiz?.id ? (
+                <p className="study-room-scheduled" role="status">
+                  <Check size={16} aria-hidden /> Próxima aula agendada no mesmo caderno. Vou te chamar na hora. Se
+                  quiser, continue estudando por aqui.
+                </p>
               ) : null}
               <div ref={end} />
             </div>
@@ -520,9 +528,12 @@ function QuizCard({
   graded: () => void;
 }) {
   const questions = message.quiz ?? [];
-  const [answers, setAnswers] = useState<(number | null)[]>(() =>
-    message.attempt ? message.attempt.answers : questions.map(() => null),
-  );
+  // Keyed by question: the card may mount while the quiz is still being written.
+  const [picked, setPicked] = useState<Record<number, number>>({});
+  const answers = message.attempt
+    ? message.attempt.answers
+    : questions.map((_, index) => (index in picked ? picked[index] : null));
+  const missing = answers.filter((answer) => answer === null).length;
   const [grade, setGrade] = useState<QuizGrade>();
   const [error, setError] = useState("");
   const [sending, setSending] = useState(false);
@@ -606,7 +617,7 @@ function QuizCard({
                         name={`${message.id}-${index}`}
                         checked={chosen === optionIndex}
                         onChange={() =>
-                          setAnswers((current) => current.map((value, i) => (i === index ? optionIndex : value)))
+                          setPicked((current) => ({ ...current, [index]: optionIndex }))
                         }
                       />
                       <span>{option}</span>
@@ -627,9 +638,16 @@ function QuizCard({
         </p>
       )}
       {!done ? (
-        <button type="submit" className="button" disabled={disabled || sending}>
-          {sending ? "Corrigindo…" : "Enviar respostas"}
-        </button>
+        <div className="study-quiz-submit">
+          <button type="submit" className="button" disabled={disabled || sending || missing > 0}>
+            {sending ? "Corrigindo…" : "Enviar respostas"}
+          </button>
+          {missing > 0 ? (
+            <span className="study-quiz-missing">
+              {missing === 1 ? "Falta 1 questão" : `Faltam ${missing} questões`}
+            </span>
+          ) : null}
+        </div>
       ) : null}
     </form>
   );

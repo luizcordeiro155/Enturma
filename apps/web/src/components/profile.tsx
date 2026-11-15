@@ -12,6 +12,7 @@ import { Feedback } from "./feedback";
 import { AppUpdateSettingsCard } from "./desktop-updates";
 
 import { NotificationPreferences } from "./community-feedback";
+import { FocusModeSettings } from "./focus-mode";
 import { AppHelp } from "./app-help";
 import { AccountPrivacyCard } from "./account-privacy-card";
 import { useVisitor } from "@/lib/visitor-context";
@@ -283,6 +284,7 @@ export function ProfileView({
                 <AppHelp />
                 <AppUpdateSettingsCard />
                 <NotificationPreferences />
+                <FocusModeSettings />
                 <h2 className="section-heading">Sessões ativas</h2>
                 {sessions.map((s) => (
                   <div className="room-row" key={s.id}>

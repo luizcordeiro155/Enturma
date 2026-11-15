@@ -27,6 +27,18 @@ public class PlannerController {
     return planner.saveRoutine(a, r);
   }
 
+  public record Focus(boolean enabled) {}
+
+  @GetMapping("/focus")
+  public Object focus(@AuthenticationPrincipal Actor a) {
+    return planner.focus(a);
+  }
+
+  @PutMapping("/focus")
+  public Object setFocus(@AuthenticationPrincipal Actor a, @RequestBody Focus f) {
+    return planner.setFocusMode(a, f.enabled());
+  }
+
   @GetMapping("/calendar")
   public Object calendar(
       @AuthenticationPrincipal Actor a,

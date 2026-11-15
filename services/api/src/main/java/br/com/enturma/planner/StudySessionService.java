@@ -229,13 +229,49 @@ public class StudySessionService {
   @Transactional
   public UUID quiz(Actor a, UUID id, UUID messageId) {
     var session = active(a, id);
+    UUID notebook = (UUID) session.get("notebookId");
+    // Every quiz must be new: the tutor sees what was already asked and what was missed.
+    var used = new ArrayList<String>();
+    for (var g :
+        db.list(
+            "SELECT answer FROM notebook_generation WHERE notebook_id=? AND mode='QUIZ_JSON' AND"
+                + " status='READY' ORDER BY created_at",
+            notebook)) {
+      var questions = parseQuiz((String) g.get("answer"));
+      if (questions != null) questions.forEach(q -> used.add((String) q.get("question")));
+    }
+    var weak =
+        db.list(
+            "SELECT wrong_topics FROM study_quiz_attempt WHERE session_id IN (SELECT id FROM"
+                + " study_session WHERE notebook_id=?) ORDER BY created_at DESC LIMIT 1",
+            notebook);
+    int round =
+        db.jdbc.queryForObject(
+                "SELECT count(*) FROM notebook_generation WHERE notebook_id=? AND mode='QUIZ_JSON'",
+                Integer.class,
+                notebook)
+            + 1;
+    var guide = new StringBuilder(orientation(a, session));
+    guide.append("\nQuiz número ").append(round).append(" deste caderno.");
+    if (!used.isEmpty()) {
+      guide.append(
+          "\nPerguntas que o aluno já respondeu (não repita nem reescreva com outras palavras;"
+              + " cubra outros aspectos, exemplos e situações):");
+      used.stream().skip(Math.max(0, used.size() - 30)).forEach(q -> guide.append("\n- ").append(q));
+    }
+    if (!weak.isEmpty() && weak.getFirst().get("wrongTopics") != null) {
+      String topics = String.valueOf(weak.getFirst().get("wrongTopics"));
+      if (!topics.equals("[]"))
+        guide
+            .append("\nTemas em que o aluno errou no último quiz (dedique pelo menos 3 questões a eles,")
+            .append(" com abordagem diferente da anterior): ")
+            .append(topics);
+    }
+    guide.append(
+        "\nVarie o tipo das questões (conceito, aplicação prática, exemplo, erro comum) e a posição"
+            + " da alternativa correta.");
     return notebooks.tutorTurn(
-        a,
-        (UUID) session.get("notebookId"),
-        messageId,
-        "Gerar quiz para avaliar o que estudei",
-        "QUIZ_JSON",
-        orientation(a, session));
+        a, notebook, messageId, "Gerar quiz para avaliar o que estudei", "QUIZ_JSON", guide.toString());
   }
 
   @Transactional

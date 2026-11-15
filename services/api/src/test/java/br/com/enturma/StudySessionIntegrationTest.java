@@ -183,6 +183,15 @@ class StudySessionIntegrationTest {
     UUID second = UUID.randomUUID();
     study.quiz(a, id, second);
     waitReady(id, 2);
+    // A new quiz is asked to be different and to aim at what the student missed.
+    var contexts = org.mockito.ArgumentCaptor.forClass(String.class);
+    verify(ai, atLeastOnce()).answer(contexts.capture(), anyString(), anyString(), eq(false));
+    assertThat(contexts.getValue())
+        .contains("Quiz número 2")
+        .contains("Quanto é o limite de x quando x tende a 2?")
+        .contains("não repita")
+        .contains("Temas em que o aluno errou")
+        .contains("Limites");
     var right = (Map<String, Object>) study.answer(a, id, second, List.of(1, 1, 0));
     assertThat(right).containsEntry("score", 3).containsEntry("done", true);
     var session = (Map<String, Object>) ((Map<String, Object>) study.detail(a, id)).get("session");

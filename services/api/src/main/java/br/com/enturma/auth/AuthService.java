@@ -148,7 +148,7 @@ public class AuthService {
   public boolean studentAccess(Actor actor) {
     return db.exists(
         "SELECT EXISTS(SELECT 1 FROM academic_identity WHERE user_id=?"
-            + " AND status IN ('LEGACY_APPROVED','STUDENT_VERIFIED'))",
+            + " AND (status IN ('LEGACY_APPROVED','STUDENT_VERIFIED') OR personal_access))",
         actor.id());
   }
 

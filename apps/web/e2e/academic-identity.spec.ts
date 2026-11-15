@@ -542,3 +542,50 @@ test("app Desktop mantém confirmação acadêmica rolável em janela compacta",
     page.getByRole("button", { name: "Enviar link de confirmação" }),
   ).toBeInViewport();
 });
+
+test("sem e-mail acadêmico: entra com o e-mail pessoal e pode verificar depois", async ({
+  page,
+  request,
+}, info) => {
+  const account = await register(request, "Estudante sem e-mail acadêmico");
+  const bearer = { Authorization: `Bearer ${account.accessToken}` };
+  const chosen = await request.put(`${backend}/api/v1/auth/academic/institution`, {
+    headers: bearer,
+    data: { institutionId, campusId },
+  });
+  expect(chosen.ok()).toBe(true);
+  await authenticate(page.context(), account);
+  await page.goto("/academic-verification");
+  await expect(page.getByRole("heading", { name: "Confirme seu e-mail acadêmico" })).toBeVisible();
+  const ask = page.getByRole("button", { name: "Não tenho e-mail acadêmico" });
+  await expect(ask).toBeVisible();
+  // Red in every theme, readable white text.
+  for (const theme of ["light", "dark", "enturma", "system"]) {
+    await page.evaluate((value) => {
+      const root = document.documentElement;
+      root.dataset.theme = value === "light" ? "light" : "dark";
+      if (value === "enturma") root.dataset.palette = "enturma";
+      else delete root.dataset.palette;
+    }, theme);
+    const colors = await ask.evaluate((el) => {
+      const style = getComputedStyle(el);
+      return { background: style.backgroundColor, color: style.color };
+    });
+    const [r, g, b] = colors.background.match(/\d+/g)!.map(Number);
+    expect(r, `${theme}: ${colors.background}`).toBeGreaterThan(g + 60);
+    expect(r).toBeGreaterThan(b + 60);
+    expect(colors.color).toBe("rgb(255, 255, 255)");
+    await page.screenshot({ path: info.outputPath(`academic-personal-${theme}.png`), fullPage: true });
+  }
+  await ask.click();
+  const confirm = page.getByRole("group", { name: "Entrar com e-mail pessoal" });
+  await expect(confirm).toContainText("sem o selo de estudante verificado");
+  await confirm.getByRole("button", { name: "Entrar com e-mail pessoal" }).click();
+  await expect(page).not.toHaveURL(/academic-verification/, { timeout: 15000 });
+  const friends = await request.get(`${backend}/api/v1/friends`, { headers: bearer });
+  expect(friends.status()).toBe(200);
+  // Coming back later offers the academic confirmation without locking the account.
+  await page.goto("/academic-verification");
+  await expect(page.getByText("Você já entra com seu e-mail pessoal.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Não tenho e-mail acadêmico" })).toHaveCount(0);
+});

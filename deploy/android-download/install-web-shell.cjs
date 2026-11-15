@@ -594,8 +594,132 @@ private object EnturmaUpdateScheduler {
     }
 }
 
+/**
+ * Study focus: while the student is in class or studying with the AI, Android's
+ * "Não perturbe" lets only calls and conversations (WhatsApp and similar) through.
+ * It needs the person's explicit permission, restores their previous settings and
+ * ends by itself at the end of the period, even if the app is closed.
+ */
+object EnturmaFocus {
+    private const val PREFS = "enturma_focus"
+    private const val END_REQUEST = 4207
+
+    private fun manager(context: Context) =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+
+    fun granted(context: Context): Boolean = manager(context).isNotificationPolicyAccessGranted
+
+    fun start(context: Context, untilMillis: Long) {
+        if (untilMillis <= System.currentTimeMillis()) return stop(context)
+        val manager = manager(context)
+        if (!manager.isNotificationPolicyAccessGranted) return
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (!prefs.getBoolean("active", false)) {
+            val previous = manager.notificationPolicy
+            prefs.edit()
+                .putBoolean("active", true)
+                .putInt("previousFilter", manager.currentInterruptionFilter)
+                .putInt("previousCategories", previous.priorityCategories)
+                .putInt("previousCallSenders", previous.priorityCallSenders)
+                .putInt("previousMessageSenders", previous.priorityMessageSenders)
+                .putInt("previousEffects", previous.suppressedVisualEffects)
+                .putInt(
+                    "previousConversationSenders",
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) previous.priorityConversationSenders else 0,
+                )
+                .apply()
+        }
+        var categories =
+            NotificationManager.Policy.PRIORITY_CATEGORY_CALLS or
+                NotificationManager.Policy.PRIORITY_CATEGORY_REPEAT_CALLERS or
+                NotificationManager.Policy.PRIORITY_CATEGORY_MESSAGES
+        val policy =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                categories = categories or NotificationManager.Policy.PRIORITY_CATEGORY_CONVERSATIONS
+                NotificationManager.Policy(
+                    categories,
+                    NotificationManager.Policy.PRIORITY_SENDERS_ANY,
+                    NotificationManager.Policy.PRIORITY_SENDERS_ANY,
+                    0,
+                    NotificationManager.Policy.CONVERSATION_SENDERS_ANYONE,
+                )
+            } else {
+                NotificationManager.Policy(
+                    categories,
+                    NotificationManager.Policy.PRIORITY_SENDERS_ANY,
+                    NotificationManager.Policy.PRIORITY_SENDERS_ANY,
+                )
+            }
+        runCatching {
+            manager.notificationPolicy = policy
+            manager.setInterruptionFilter(NotificationManager.INTERRUPTION_FILTER_PRIORITY)
+        }
+        prefs.edit().putLong("until", untilMillis).apply()
+        val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarm.setAndAllowWhileIdle(
+            AlarmManager.RTC_WAKEUP,
+            untilMillis,
+            endIntent(context),
+        )
+    }
+
+    fun stop(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val alarm = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarm.cancel(endIntent(context))
+        if (!prefs.getBoolean("active", false)) return
+        val manager = manager(context)
+        if (manager.isNotificationPolicyAccessGranted) {
+            runCatching {
+                manager.notificationPolicy =
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        NotificationManager.Policy(
+                            prefs.getInt("previousCategories", 0),
+                            prefs.getInt("previousCallSenders", 0),
+                            prefs.getInt("previousMessageSenders", 0),
+                            prefs.getInt("previousEffects", 0),
+                            prefs.getInt("previousConversationSenders", 0),
+                        )
+                    } else {
+                        NotificationManager.Policy(
+                            prefs.getInt("previousCategories", 0),
+                            prefs.getInt("previousCallSenders", 0),
+                            prefs.getInt("previousMessageSenders", 0),
+                            prefs.getInt("previousEffects", 0),
+                        )
+                    }
+                val previous = prefs.getInt("previousFilter", NotificationManager.INTERRUPTION_FILTER_ALL)
+                manager.setInterruptionFilter(previous)
+            }
+        }
+        prefs.edit().clear().apply()
+    }
+
+    /** Ends a focus period whose time is over (the alarm may have been delayed). */
+    fun expire(context: Context) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        if (prefs.getBoolean("active", false) && prefs.getLong("until", 0) <= System.currentTimeMillis())
+            stop(context)
+    }
+
+    private fun endIntent(context: Context): PendingIntent =
+        PendingIntent.getBroadcast(
+            context,
+            END_REQUEST,
+            Intent(context, EnturmaFocusEndReceiver::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+}
+
+class EnturmaFocusEndReceiver : BroadcastReceiver() {
+    override fun onReceive(context: Context, intent: Intent?) {
+        EnturmaFocus.stop(context)
+    }
+}
+
 class EnturmaBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent?) {
+        EnturmaFocus.expire(context)
         EnturmaUpdateScheduler.schedule(context)
         EnturmaUpdateScheduler.checkNow(context)
     }
@@ -989,6 +1113,36 @@ class MainActivity : Activity() {
         }
 
         @JavascriptInterface
+        fun getFocusSupport(): String {
+            return "{\\"supported\\":true,\\"granted\\":" + EnturmaFocus.granted(applicationContext) + "}"
+        }
+
+        @JavascriptInterface
+        fun requestFocusPermission() {
+            runOnUiThread {
+                runCatching {
+                    startActivity(Intent(Settings.ACTION_NOTIFICATION_POLICY_ACCESS_SETTINGS))
+                }
+            }
+        }
+
+        @JavascriptInterface
+        fun setStudyFocus(active: Boolean, untilMillis: Double) {
+            runOnUiThread {
+                if (webView.url?.startsWith(${kotlinString(webOrigin + "/")}) != true) return@runOnUiThread
+                val until = untilMillis.toLong()
+                // At most a 12-hour period, never in the past.
+                if (active && until > System.currentTimeMillis() &&
+                    until < System.currentTimeMillis() + 12 * 60 * 60 * 1000L
+                ) {
+                    EnturmaFocus.start(applicationContext, until)
+                } else {
+                    EnturmaFocus.stop(applicationContext)
+                }
+            }
+        }
+
+        @JavascriptInterface
         fun setChatComposerFocused(focused: Boolean) {
             runOnUiThread {
                 chatComposerFocused = focused
@@ -1295,6 +1449,7 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         EnturmaAppState.foreground = true
+        EnturmaFocus.expire(this)
         refreshNativePushToken()
         EnturmaUpdateScheduler.checkNow(this)
         val pending = pendingUpdateUrl
@@ -2186,6 +2341,20 @@ if (!manifest.includes("EnturmaDownloadCompleteReceiver")) {
       </intent-filter>
     </receiver>
   </application>`,
+  );
+}
+if (!manifest.includes("EnturmaFocusEndReceiver")) {
+  manifest = manifest.replace(
+    "</application>",
+    `    <receiver android:name=".EnturmaFocusEndReceiver" android:exported="false" />
+  </application>`,
+  );
+}
+if (!manifest.includes("android.permission.ACCESS_NOTIFICATION_POLICY")) {
+  manifest = manifest.replace(
+    "<application",
+    `<uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
+    <application`,
   );
 }
 if (!manifest.includes("EnturmaMessagingService")) {
