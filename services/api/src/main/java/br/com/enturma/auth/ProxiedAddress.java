@@ -28,22 +28,41 @@ public final class ProxiedAddress {
   private ProxiedAddress() {}
 
   public static String resolve(String remote, Function<String, String> header) {
-    if (remote == null || !internal(remote)) return remote;
-    String cloudflare = literal(header.apply("CF-Connecting-IP"));
-    if (cloudflare != null) return cloudflare;
-    String forwarded = header.apply("X-Forwarded-For");
-    if (forwarded != null) {
-      String[] hops = forwarded.split(",");
-      String last = literal(hops[hops.length - 1]);
-      if (last != null) return last;
+    String source = "socket";
+    String result = remote;
+    if (remote != null && internal(remote)) {
+      String cloudflare = literal(header.apply("CF-Connecting-IP"));
+      String forwarded = header.apply("X-Forwarded-For");
+      String last = null;
+      if (forwarded != null) {
+        String[] hops = forwarded.split(",");
+        last = literal(hops[hops.length - 1]);
+      }
+      if (cloudflare != null) {
+        result = cloudflare;
+        source = "CF-Connecting-IP";
+      } else if (last != null) {
+        result = last;
+        source = "X-Forwarded-For";
+      }
     }
     if (diagnostics.getAndIncrement() < 3) {
+      // Names and address kinds only: never the addresses themselves.
       List<String> present = new ArrayList<>();
       for (String name : List.of("CF-Connecting-IP", "X-Forwarded-For", "X-Real-IP", "Forwarded"))
         if (header.apply(name) != null) present.add(name);
-      log.warn("client-identity: internal proxy without a usable client address; headers={}", present);
+      log.info(
+          "client-identity: peer={} source={} headers={}",
+          remote == null ? "none" : internal(remote) ? "private" : isLoopback(remote) ? "loopback" : "public",
+          source,
+          present);
     }
-    return remote;
+    return result;
+  }
+
+  private static boolean isLoopback(String value) {
+    InetAddress address = parse(value);
+    return address != null && address.isLoopbackAddress();
   }
 
   static boolean internal(String value) {
