@@ -2278,10 +2278,26 @@ class MainActivity : Activity() {
         if (requestCode == FILE_CHOOSER_REQUEST) {
             val callback = fileChooserCallback
             fileChooserCallback = null
-            callback?.onReceiveValue(
-                WebChromeClient.FileChooserParams.parseResult(resultCode, data),
-            )
+            callback?.onReceiveValue(pickedUris(resultCode, data))
         }
+    }
+
+    /**
+     * Everything the person picked. The Android photo picker (Google Photos
+     * included) returns several items in ClipData; parseResult only reads a
+     * single getData(), so videos and photos chosen together were dropped.
+     */
+    private fun pickedUris(resultCode: Int, data: Intent?): Array<Uri>? {
+        if (resultCode != Activity.RESULT_OK) return null
+        val uris = mutableListOf<Uri>()
+        val clip = data?.clipData
+        if (clip != null) {
+            for (i in 0 until clip.itemCount) clip.getItemAt(i)?.uri?.let { uris.add(it) }
+        }
+        data?.data?.let { if (it !in uris) uris.add(it) }
+        if (uris.isEmpty())
+            return WebChromeClient.FileChooserParams.parseResult(resultCode, data)
+        return uris.take(10).toTypedArray()
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
