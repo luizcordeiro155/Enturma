@@ -371,3 +371,16 @@
     animation: none;
   }
 }
+
+/* On wide screens the study guide follows the page instead of leaving an empty column below it. */
+@media (min-width: 1201px) {
+  .dashboard-grid > .study-journey {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100dvh - 48px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+}
