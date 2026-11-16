@@ -53,6 +53,8 @@ public class PlannerService {
 
   public record PersonalHoliday(LocalDate date, String name, String scope) {}
 
+  public record Vacation(LocalDate startsOn, LocalDate endsOn, String name) {}
+
   public record PlannerTask(
       String kind, String title, UUID subjectId, OffsetDateTime dueAt, Integer minutes) {}
 
@@ -382,6 +384,235 @@ public class PlannerService {
       throw ApiException.missing();
   }
 
+  // ---------------------------------------------------------------- school breaks
+
+  /** Longest break a student can save; a whole year of "vacation" is a typo, not a break. */
+  static final int MAX_VACATION_DAYS = 120;
+
+  @Transactional
+  public UUID addVacation(Actor a, Vacation v) {
+    String name = validVacation(v);
+    UUID id = UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO calendar_vacation(id,user_id,starts_on,ends_on,name) VALUES (?,?,?,?,?)",
+        id,
+        a.id(),
+        v.startsOn(),
+        v.endsOn(),
+        name);
+    changed(a.id());
+    return id;
+  }
+
+  @Transactional
+  public void updateVacation(Actor a, UUID id, Vacation v) {
+    String name = validVacation(v);
+    if (db.jdbc.update(
+            "UPDATE calendar_vacation SET starts_on=?,ends_on=?,name=? WHERE id=? AND user_id=?",
+            v.startsOn(),
+            v.endsOn(),
+            name,
+            id,
+            a.id())
+        == 0) throw ApiException.missing();
+    changed(a.id());
+  }
+
+  @Transactional
+  public void deleteVacation(Actor a, UUID id) {
+    if (db.jdbc.update("DELETE FROM calendar_vacation WHERE id=? AND user_id=?", id, a.id()) == 0)
+      throw ApiException.missing();
+    changed(a.id());
+  }
+
+  private static String validVacation(Vacation v) {
+    if (v == null || v.startsOn() == null || v.endsOn() == null)
+      throw ApiException.invalid("Informe o início e o fim das férias.");
+    if (v.endsOn().isBefore(v.startsOn()))
+      throw ApiException.invalid("O fim das férias precisa ser depois do início.");
+    if (ChronoUnit.DAYS.between(v.startsOn(), v.endsOn()) > MAX_VACATION_DAYS)
+      throw ApiException.invalid("Um período de férias pode ter no máximo 120 dias.");
+    String name = v.name() == null ? "" : v.name().strip();
+    if (name.isEmpty() || name.length() > 80) throw ApiException.invalid("Dê um nome de até 80 caracteres.");
+    return name;
+  }
+
+  /**
+   * Brazilian colleges stop in July and from just before Christmas to the end of January. Those
+   * breaks are written once per year so the student can move or delete them like their own.
+   */
+  private void ensureDefaultBreaks(UUID user, int fromYear, int toYear) {
+    for (int year = fromYear; year <= toYear; year++) {
+      if (db.jdbc.update(
+              "INSERT INTO calendar_vacation_year(user_id,year) VALUES (?,?) ON CONFLICT DO NOTHING",
+              user,
+              year)
+          == 0) continue;
+      db.jdbc.update(
+          "INSERT INTO calendar_vacation(id,user_id,starts_on,ends_on,name) VALUES"
+              + " (?,?,?,?,'Férias de julho'),(?,?,?,?,'Férias de fim de ano')",
+          UUID.randomUUID(),
+          user,
+          LocalDate.of(year, 7, 1),
+          LocalDate.of(year, 7, 31),
+          UUID.randomUUID(),
+          user,
+          LocalDate.of(year, 12, 20),
+          LocalDate.of(year + 1, 1, 31));
+    }
+  }
+
+  private List<Map<String, Object>> vacations(UUID user, LocalDate from, LocalDate to) {
+    ensureDefaultBreaks(user, from.getYear() - 1, to.getYear());
+    return db.list(
+        "SELECT id,starts_on,ends_on,name FROM calendar_vacation WHERE user_id=? AND starts_on<=? AND"
+            + " ends_on>=? ORDER BY starts_on,id",
+        user,
+        to,
+        from);
+  }
+
+  private static boolean onVacation(List<Map<String, Object>> vacations, LocalDate day) {
+    String iso = day.toString();
+    for (var v : vacations)
+      if (iso.compareTo((String) v.get("startsOn")) >= 0 && iso.compareTo((String) v.get("endsOn")) <= 0)
+        return true;
+    return false;
+  }
+
+  // ---------------------------------------------------------------- attendance
+
+  /** Recent classes without an answer are asked about for this long. */
+  static final int ASK_DAYS = 3;
+
+  /** Marks a class that already started as attended or missed. */
+  @Transactional
+  public void setAttendance(Actor a, String key, String status) {
+    if (!"PRESENT".equals(status) && !"ABSENT".equals(status))
+      throw ApiException.invalid("Responda se você foi ou faltou à aula.");
+    var occurrence = startedOccurrence(a.id(), key);
+    db.jdbc.update(
+        "INSERT INTO class_attendance(user_id,occurrence_key,schedule_id,occurs_on,status) VALUES"
+            + " (?,?,?,?,?) ON CONFLICT(user_id,occurrence_key) DO UPDATE SET"
+            + " status=EXCLUDED.status,answered_at=now()",
+        a.id(),
+        key,
+        occurrence.get("scheduleId"),
+        LocalDate.parse((String) occurrence.get("occursOn")),
+        status);
+  }
+
+  @Transactional
+  public void clearAttendance(Actor a, String key) {
+    db.jdbc.update("DELETE FROM class_attendance WHERE user_id=? AND occurrence_key=?", a.id(), key);
+  }
+
+  private Map<String, Object> startedOccurrence(UUID user, String key) {
+    LocalDate day;
+    try {
+      if (key != null && key.startsWith("extra:")) {
+        var row =
+            db.one(
+                "SELECT occurs_on FROM academic_class_exception WHERE id=? AND user_id=? AND kind='EXTRA'",
+                UUID.fromString(key.substring(6)),
+                user);
+        if (row == null) throw ApiException.missing();
+        day = LocalDate.parse((String) row.get("occursOn"));
+      } else {
+        int split = key == null ? -1 : key.lastIndexOf(':');
+        if (split < 0) throw ApiException.missing();
+        UUID.fromString(key.substring(0, split));
+        day = LocalDate.parse(key.substring(split + 1));
+      }
+    } catch (IllegalArgumentException | DateTimeParseException e) {
+      throw ApiException.missing();
+    }
+    var occurrence =
+        occurrences(user, day, day).stream()
+            .filter(o -> key.equals(o.get("attendanceKey")))
+            .findFirst()
+            .orElseThrow(ApiException::missing);
+    if ("CANCELLED".equals(occurrence.get("status")))
+      throw ApiException.invalid("Esta aula foi cancelada.");
+    if (Instant.parse((String) occurrence.get("startsAt")).isAfter(Instant.now()))
+      throw ApiException.invalid("Você poderá responder quando a aula começar.");
+    return occurrence;
+  }
+
+  /**
+   * Presences and absences in the student's semester. A class that already happened counts as
+   * attended until the student says they missed it; regular classes on holidays do not count.
+   */
+  @Transactional
+  public Map<String, Object> attendance(Actor a) {
+    var routine = routine(a.id());
+    var zone = zone((String) routine.get("timezone"));
+    var today = LocalDate.now(zone);
+    LocalDate start = parse(routine.get("semesterStart")), end = parse(routine.get("semesterEnd"));
+    boolean estimated = start == null || end == null;
+    if (estimated) {
+      start = today.getMonthValue() <= 6 ? today.withDayOfYear(1) : LocalDate.of(today.getYear(), 7, 1);
+      end = today.getMonthValue() <= 6 ? LocalDate.of(today.getYear(), 6, 30) : LocalDate.of(today.getYear(), 12, 31);
+    }
+    var now = Instant.now();
+    var last = min(today, end);
+    var subjects = new LinkedHashMap<Object, Map<String, Object>>();
+    int present = 0, absent = 0;
+    if (!last.isBefore(start)) {
+      var holidayDates = new HashSet<String>();
+      holidays(a.id(), start, last, (String) routine.get("state"))
+          .forEach(h -> holidayDates.add((String) h.get("date")));
+      for (var o : occurrences(a.id(), start, last, zone)) {
+        if (!counts(o, holidayDates, now)) continue;
+        var subject =
+            subjects.computeIfAbsent(
+                o.get("subjectId"),
+                id -> {
+                  var row = new LinkedHashMap<String, Object>();
+                  row.put("subjectId", id);
+                  row.put("subjectName", o.get("subjectName"));
+                  row.put("present", 0);
+                  row.put("absent", 0);
+                  return row;
+                });
+        String field = "ABSENT".equals(o.get("attendance")) ? "absent" : "present";
+        subject.put(field, ((Integer) subject.get(field)) + 1);
+        if ("absent".equals(field)) absent++;
+        else present++;
+      }
+    }
+    var pending = new ArrayList<Map<String, Object>>();
+    var askFrom = today.minusDays(ASK_DAYS);
+    var askHolidays = new HashSet<String>();
+    holidays(a.id(), askFrom, today, (String) routine.get("state"))
+        .forEach(h -> askHolidays.add((String) h.get("date")));
+    for (var o : occurrences(a.id(), askFrom, today, zone))
+      if (o.get("attendance") == null && counts(o, askHolidays, now)) pending.add(o);
+    pending.sort(Comparator.comparing((Map<String, Object> o) -> (String) o.get("startsAt")).reversed());
+    var result = new LinkedHashMap<String, Object>();
+    result.put("semesterStart", start.toString());
+    result.put("semesterEnd", end.toString());
+    result.put("estimated", estimated);
+    result.put("present", present);
+    result.put("absent", absent);
+    result.put("subjects", new ArrayList<>(subjects.values()));
+    result.put("pending", pending);
+    return result;
+  }
+
+  private static boolean counts(Map<String, Object> o, Set<String> holidays, Instant now) {
+    String status = (String) o.get("status");
+    if ("CANCELLED".equals(status)) return false;
+    if ("SCHEDULED".equals(status)
+        && o.get("attendance") == null
+        && holidays.contains((String) o.get("occursOn"))) return false;
+    return !Instant.parse((String) o.get("startsAt")).isAfter(now);
+  }
+
+  private static LocalDate parse(Object iso) {
+    return iso == null ? null : LocalDate.parse(iso.toString());
+  }
+
   @Transactional
   public UUID addTask(Actor a, PlannerTask t) {
     validateTask(a.id(), t);
@@ -502,6 +733,7 @@ public class PlannerService {
     var result = new LinkedHashMap<String, Object>();
     result.put("timezone", zone.getId());
     result.put("holidays", holidays);
+    result.put("vacations", vacations(a.id(), from, to));
     result.put("events", events);
     return result;
   }
@@ -534,6 +766,15 @@ public class PlannerService {
       if ("EXTRA".equals(e.get("kind"))) extras.add(e);
       else exceptions.put(e.get("scheduleId") + ":" + e.get("occursOn"), e);
     }
+    var breaks = vacations(user, from, to);
+    var answers = new HashMap<String, String>();
+    for (var r :
+        db.list(
+            "SELECT occurrence_key,status FROM class_attendance WHERE user_id=? AND occurs_on BETWEEN ?"
+                + " AND ?",
+            user,
+            from,
+            to)) answers.put((String) r.get("occurrenceKey"), (String) r.get("status"));
     var bySeries = new HashMap<Object, Map<String, Object>>();
     var result = new ArrayList<Map<String, Object>>();
     for (var s : series) {
@@ -546,8 +787,11 @@ public class PlannerService {
       for (var day = first.with(java.time.temporal.TemporalAdjusters.nextOrSame(weekday));
           !day.isAfter(last);
           day = day.plusWeeks(1)) {
-        var event = classEvent(s, day);
         var exception = exceptions.get(s.get("id") + ":" + day);
+        // A regular class in a school break does not happen; a class moved by hand still does.
+        if (onVacation(breaks, day)
+            && (exception == null || "CANCELLED".equals(exception.get("kind")))) continue;
+        var event = classEvent(s, day);
         Instant starts = day.atTime(start).atZone(zone).toInstant();
         Instant ends = day.atTime(end).atZone(zone).toInstant();
         String status = "SCHEDULED";
@@ -568,6 +812,8 @@ public class PlannerService {
         event.put("startsAt", starts.toString());
         event.put("endsAt", ends.toString());
         event.put("status", status);
+        event.put("attendanceKey", event.get("id"));
+        event.put("attendance", answers.get((String) event.get("id")));
         result.add(event);
       }
     }
@@ -594,6 +840,10 @@ public class PlannerService {
       event.put("startsAt", starts.toString());
       event.put("endsAt", starts.plus(minutes, ChronoUnit.MINUTES).toString());
       event.put("status", "EXTRA");
+      String key = "extra:" + extra.get("id");
+      event.put("id", key);
+      event.put("attendanceKey", key);
+      event.put("attendance", answers.get(key));
       result.add(event);
     }
     result.sort(Comparator.comparing(e -> (String) e.get("startsAt")));

@@ -85,6 +85,36 @@ public class PlannerController {
     planner.deleteHoliday(a, id);
   }
 
+  @PostMapping("/vacations")
+  public Object addVacation(@AuthenticationPrincipal Actor a, @RequestBody Vacation v) {
+    return Map.of("id", planner.addVacation(a, v));
+  }
+
+  @PutMapping("/vacations/{id}")
+  public void updateVacation(
+      @AuthenticationPrincipal Actor a, @PathVariable UUID id, @RequestBody Vacation v) {
+    planner.updateVacation(a, id, v);
+  }
+
+  @DeleteMapping("/vacations/{id}")
+  public void deleteVacation(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    planner.deleteVacation(a, id);
+  }
+
+  @GetMapping("/attendance")
+  public Object attendance(@AuthenticationPrincipal Actor a) {
+    return planner.attendance(a);
+  }
+
+  /** {@code status} PRESENT or ABSENT; null removes the answer. */
+  public record Attendance(String key, String status) {}
+
+  @PutMapping("/attendance")
+  public void setAttendance(@AuthenticationPrincipal Actor a, @RequestBody Attendance body) {
+    if (body.status() == null) planner.clearAttendance(a, body.key());
+    else planner.setAttendance(a, body.key(), body.status());
+  }
+
   @PostMapping("/tasks")
   public Object addTask(@AuthenticationPrincipal Actor a, @RequestBody PlannerTask t) {
     return Map.of("id", planner.addTask(a, t));
