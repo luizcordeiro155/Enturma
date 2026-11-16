@@ -378,7 +378,11 @@ class PlannerIntegrationTest {
   @Test
   void concurrentDeliverySendsOnce() throws Exception {
     UUID series = upcomingClass(a);
-    db.jdbc.update("UPDATE academic_reminder_job SET status='CANCELLED' WHERE user_id=?", a.id());
+    // deliverDue() is global: reminders left due by other tests would be counted as well.
+    db.jdbc.update(
+        "UPDATE academic_reminder_job SET status='CANCELLED' WHERE user_id=? OR (status='PENDING'"
+            + " AND fire_at<=now()+interval '1 day')",
+        a.id());
     UUID job = UUID.randomUUID();
     db.jdbc.update(
         "INSERT INTO academic_reminder_job(id,user_id,kind,source_id,occurrence_at,fire_at) VALUES"

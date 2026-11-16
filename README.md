@@ -16,6 +16,153 @@ O objetivo é oferecer um ambiente onde o estudante consiga acompanhar sua vida 
 
 A direção do produto é simples: **menos troca de aplicativos, mais contexto e conexão entre estudantes**.
 
+## Conheça o Enturma por dentro
+
+Capturas reais de [produção](https://enturma-flax.vercel.app), feitas em 16/11/2026 no aplicativo desktop e no layout para celular. Tudo o que aparece abaixo está publicado e funcionando hoje.
+
+### Boas-vindas
+
+<table>
+<tr>
+<td width="72%"><img src="docs/readme/start-desktop.webp" alt="Página inicial pública do Enturma no desktop" /></td>
+<td width="28%"><img src="docs/readme/start-mobile.webp" alt="Página inicial pública do Enturma no celular" /></td>
+</tr>
+</table>
+
+**Sua faculdade. Muito mais em companhia.** A porta de entrada apresenta a proposta em uma frase, leva direto ao cadastro e deixa explorar o Enturma como visitante antes de criar conta. Web, Windows e Android saem do mesmo lugar.
+
+### Entrar e criar conta
+
+<table>
+<tr>
+<td width="72%"><img src="docs/readme/login-desktop.webp" alt="Tela de login no desktop" /></td>
+<td width="28%"><img src="docs/readme/login-mobile.webp" alt="Tela de login no celular" /></td>
+</tr>
+<tr>
+<td width="72%"><img src="docs/readme/register-desktop.webp" alt="Tela de cadastro no desktop" /></td>
+<td width="28%"><img src="docs/readme/register-mobile.webp" alt="Tela de cadastro no celular" /></td>
+</tr>
+</table>
+
+O login escolhe entre manter a sessão neste aparelho ou apenas nesta janela. O cadastro pede o essencial, aceita senhas de 8 a 64 caracteres, recusa senhas comuns e registra o aceite dos Termos, da Política de Privacidade e da declaração de 18 anos, com a versão do documento, como manda a LGPD. Depois vem a confirmação do vínculo acadêmico, que libera a comunidade.
+
+### Início: o dia do estudante em uma tela
+
+<table>
+<tr>
+<td width="72%"><img src="docs/readme/home-desktop.webp" alt="Início no desktop" /></td>
+<td width="28%"><img src="docs/readme/home-mobile.webp" alt="Início no celular" /></td>
+</tr>
+</table>
+
+O Início recebe o estudante pelo nome, mostra a jornada concluída, o nível e o XP, e coloca o próximo passo em um botão: **Estudar agora**. A navegação lateral vira uma barra inferior no celular, com o restante do app em **Mais**.
+
+### Enturma Study: calendário, aulas e presença
+
+<table>
+<tr>
+<td width="72%"><img src="docs/readme/study-desktop.webp" alt="Calendário acadêmico, próximas aulas e presença no desktop" /></td>
+<td width="28%"><img src="docs/readme/study-mobile.webp" alt="Calendário acadêmico no celular" /></td>
+</tr>
+</table>
+
+Aulas, estudos, provas, feriados e faltas no mesmo calendário, com as próximas aulas ao lado e aviso duas horas antes de cada uma. A presença é contada por semestre (53 presenças e 100% de frequência no exemplo), e as **Sessões de estudo** agendam um tutor de IA para o horário escolhido.
+
+### Salas de estudo
+
+<table>
+<tr>
+<td width="72%"><img src="docs/readme/rooms-desktop.webp" alt="Salas de estudo no desktop" /></td>
+<td width="28%"><img src="docs/readme/rooms-mobile.webp" alt="Salas de estudo no celular" /></td>
+</tr>
+</table>
+
+**Encontre uma sala para estudar agora.** O Enturma recomenda primeiro as salas abertas ligadas às suas matérias e ao seu curso. Dá para criar a própria sala ou entrar por código ou QR Code, mesmo com as entradas fechadas; dentro dela há chat, voz, vídeo e compartilhamento de tela.
+
+### Fórum da comunidade
+
+<table>
+<tr>
+<td width="72%"><img src="docs/readme/forum-desktop.webp" alt="Fórum no desktop" /></td>
+<td width="28%"><img src="docs/readme/forum-mobile.webp" alt="Fórum no celular" /></td>
+</tr>
+</table>
+
+**Pergunte. Compartilhe. Aprenda junto.** Publicações por assunto, busca, ordenação, votos que formam a reputação de quem contribui e denúncia para moderação.
+
+### Enturma Social
+
+<table>
+<tr>
+<td width="72%"><img src="docs/readme/social-desktop.webp" alt="Feed do Enturma Social no desktop" /></td>
+<td width="28%"><img src="docs/readme/social-mobile.webp" alt="Feed do Enturma Social no celular" /></td>
+</tr>
+<tr>
+<td width="72%"><img src="docs/readme/clips-desktop.webp" alt="Clips no desktop" /></td>
+<td width="28%"><img src="docs/readme/clips-mobile.webp" alt="Clips no celular" /></td>
+</tr>
+</table>
+
+Uma rede social feita para a faculdade: feed **Para você**, **Seguindo** e **Minha faculdade**, stories, clips em tela cheia, curtidas, comentários, republicações e itens salvos. A coluna da direita sugere colegas da sua turma.
+
+<table>
+<tr>
+<td width="50%"><img src="docs/readme/explore-desktop.webp" alt="Explorar com hashtags em alta" /></td>
+<td width="50%"><img src="docs/readme/profile-desktop.webp" alt="Perfil social" /></td>
+</tr>
+</table>
+
+O **Explorar** reúne as hashtags em alta e uma grade de descobertas. O **perfil social** mostra capa, bio, interesses, links e contadores, com abas de posts, clips, republicações, marcados e salvos.
+
+### Amigos e conversas
+
+<img src="docs/readme/friends-desktop.webp" alt="Amigos e conversas" />
+
+Lista de amigos com stories, convites enviados e as conversas mais recentes. Cada conversa abre ao lado, com chamadas de voz e vídeo e GIFs.
+
+### Cadernos IA
+
+<img src="docs/readme/notebooks-desktop.webp" alt="Cadernos IA" />
+
+Cadernos por matéria que juntam suas fontes e as conversas com a Enturma AI, para estudar com respostas baseadas no seu próprio material.
+
+### Praticar programação e Desafios acadêmicos
+
+<table>
+<tr>
+<td width="50%"><img src="docs/readme/practice-desktop.webp" alt="Praticar programação" /></td>
+<td width="50%"><img src="docs/readme/challenges-desktop.webp" alt="Desafios acadêmicos" /></td>
+</tr>
+</table>
+
+**Um pouco de prática. Todos os dias.** Quatro jogos de programação (Termo Dev, Rota do Algoritmo, Laboratório Binário e Detetive de código) com cinco missões diárias e dificuldade crescente. Os **Desafios acadêmicos** trazem atividades ligadas às suas matérias, como rastreamento lógico, acessibilidade, fluxos de interface e planejamento de projetos.
+
+### Caronas universitárias
+
+<table>
+<tr>
+<td width="72%"><img src="docs/readme/rides-desktop.webp" alt="Caronas no desktop" /></td>
+<td width="28%"><img src="docs/readme/rides-mobile.webp" alt="Caronas no celular" /></td>
+</tr>
+</table>
+
+Motoristas e passageiros da mesma faculdade se encontram no mapa: quem vai para o campus ou volta dele escolhe vagas, ponto de partida e o carro; quem precisa de carona vê o trajeto, acompanha a viagem e avalia no final. Localização só durante a corrida.
+
+### Portfólio, menu e configurações
+
+<table>
+<tr>
+<td width="50%"><img src="docs/readme/portfolio-desktop.webp" alt="Portfólio acadêmico" /></td>
+<td width="50%"><img src="docs/readme/settings-desktop.webp" alt="Configurações" /></td>
+</tr>
+</table>
+
+<img src="docs/readme/menu-mobile.webp" alt="Menu Seu Enturma no celular" width="260" align="right" />
+
+O **Portfólio acadêmico** transforma XP, tempo de estudo, sequência, título, apresentação e competências em uma página profissional que você decide quando tornar pública. Em **Configurações** ficam o perfil acadêmico, as matérias do semestre, a ajuda por IA, as notificações e a seção de privacidade com exportação de dados, histórico de aceites e exclusão de conta. No celular, tudo isso fica a um toque no menu **Seu Enturma**.
+
+<br clear="right" />
+
 ## Estado atual do projeto
 
 [Enturma Social 2.0](docs/SOCIAL_2_IMPLEMENTATION.md): Feed, Clips, Stories e seguidores independentes do Fórum, editor e processamento de mídia limitado. Flags desligadas por padrão; documentação separa implementação, testes, capacidade pendente e ativação.
