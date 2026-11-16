@@ -258,6 +258,18 @@ public class PlannerService {
     validateSeries(start, end, s.validFrom(), s.validUntil());
     var ids = new ArrayList<UUID>();
     for (int day : new TreeSet<>(s.weekdays())) {
+      // The same class twice would show twice and ask twice whether the student went.
+      if (db.exists(
+          "SELECT EXISTS(SELECT 1 FROM academic_class_schedule WHERE user_id=? AND subject_id=? AND"
+              + " weekday=? AND starts_at=? AND ends_at=? AND valid_from<=coalesce(?::date,'infinity')"
+              + " AND coalesce(valid_until,'infinity')>=?)",
+          a.id(),
+          s.subjectId(),
+          weekday(day),
+          start,
+          end,
+          s.validUntil(),
+          s.validFrom())) continue;
       UUID id = UUID.randomUUID();
       db.jdbc.update(
           "INSERT INTO academic_class_schedule(id,user_id,subject_id,weekday,starts_at,ends_at,"
@@ -273,6 +285,7 @@ public class PlannerService {
           room(s.room()));
       ids.add(id);
     }
+    if (ids.isEmpty()) throw ApiException.invalid("Essa aula já está na sua grade.");
     changed(a.id());
     return ids;
   }
@@ -750,7 +763,7 @@ public class PlannerService {
                 + " starts_at,to_char(c.ends_at,'HH24:MI') ends_at,c.valid_from,c.valid_until,c.room,"
                 + "c.version FROM academic_class_schedule c JOIN academic_entry s ON s.id=c.subject_id"
                 + " WHERE c.user_id=? AND c.valid_from<=? AND (c.valid_until IS NULL OR"
-                + " c.valid_until>=?)",
+                + " c.valid_until>=?) ORDER BY c.created_at,c.id",
             user,
             to,
             from);
@@ -777,6 +790,8 @@ public class PlannerService {
             to)) answers.put((String) r.get("occurrenceKey"), (String) r.get("status"));
     var bySeries = new HashMap<Object, Map<String, Object>>();
     var result = new ArrayList<Map<String, Object>>();
+    // Identical series (same subject, day and time) are one class: keep the copy the student acted on.
+    var slots = new LinkedHashMap<String, Map<String, Object>>();
     for (var s : series) {
       bySeries.put(s.get("id"), s);
       var start = LocalTime.parse((String) s.get("startsAt"));
@@ -814,9 +829,13 @@ public class PlannerService {
         event.put("status", status);
         event.put("attendanceKey", event.get("id"));
         event.put("attendance", answers.get((String) event.get("id")));
-        result.add(event);
+        slots.merge(
+            s.get("subjectId") + "|" + day + "|" + s.get("startsAt") + "|" + s.get("endsAt"),
+            event,
+            (kept, copy) -> weight(copy) > weight(kept) ? copy : kept);
       }
     }
+    result.addAll(slots.values());
     for (var extra : extras) {
       var s =
           bySeries.computeIfAbsent(
@@ -848,6 +867,11 @@ public class PlannerService {
     }
     result.sort(Comparator.comparing(e -> (String) e.get("startsAt")));
     return result;
+  }
+
+  /** Which of two identical classes to show: one the student changed, then one they answered. */
+  private static int weight(Map<String, Object> event) {
+    return (event.get("exceptionId") != null ? 2 : 0) + (event.get("attendance") != null ? 1 : 0);
   }
 
   private static Map<String, Object> classEvent(Map<String, Object> s, LocalDate day) {
