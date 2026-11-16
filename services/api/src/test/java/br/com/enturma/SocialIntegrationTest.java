@@ -177,7 +177,10 @@ class SocialIntegrationTest {
     assertThat(found.getFirst()).containsEntry("tag", tag).containsEntry("posts", 2L);
     assertThat(found).extracting(h -> h.get("tag")).doesNotContain("z" + tag);
     var trending = posts.hashtags(a, "");
-    assertThat(trending).isNotEmpty().hasSizeLessThanOrEqualTo(12);
+    // "Em alta" shows only the few most used tags, never every tag used once.
+    assertThat(trending).isNotEmpty().hasSizeLessThanOrEqualTo(SocialPosts.TRENDING);
+    assertThat(trending).extracting(h -> h.get("tag")).doesNotContain("z" + tag);
+    assertThat(trending).allSatisfy(h -> assertThat(((Number) h.get("posts")).longValue()).isGreaterThan(1));
     assertThat(trending)
         .extracting(h -> ((Number) h.get("posts")).longValue())
         .isSortedAccordingTo(Comparator.reverseOrder());

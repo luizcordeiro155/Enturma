@@ -2449,7 +2449,11 @@ html[data-theme] .social-publish-toast .social-publish-toast-close{display:grid;
 .social-hashtag-list h3{display:flex;align-items:center;gap:6px;margin:0;font-size:.95rem;color:var(--ink)}
 .social-hashtag-list ul{display:flex;gap:8px;margin:0;padding:2px 2px 6px;list-style:none;overflow-x:auto;scroll-snap-type:x proximity;overscroll-behavior-x:contain}
 .social-explore-people .social-hashtag-list ul{display:grid;overflow:visible}
-.social-hashtag-list li{scroll-snap-align:start;animation:social-draft-in .3s cubic-bezier(.2,.8,.2,1) both}
+.social-hashtag-list li{flex:0 0 auto;min-width:0;scroll-snap-align:start;animation:social-draft-in .3s cubic-bezier(.2,.8,.2,1) both}
+/* Chips in a row keep their own width; squeezing them made each one slide under the next. */
+.social-hashtag-list ul{scrollbar-width:none}
+.social-hashtag-list ul::-webkit-scrollbar{display:none}
+.social-hashtag-list strong{display:block;max-width:180px;overflow:hidden;text-overflow:ellipsis}
 html[data-theme] .social-hashtag-list li button{display:flex;align-items:center;gap:10px;width:100%;min-height:0;padding:8px 14px 8px 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface)!important;color:var(--ink)!important;text-align:left;white-space:nowrap;box-shadow:none;transition:transform .18s ease,border-color .18s ease}
 .social-explore-people .social-hashtag-list li button{border-radius:14px}
 @media (hover:hover){html[data-theme] .social-hashtag-list li button:hover{border-color:var(--ink);transform:translateY(-1px)}}
@@ -2645,3 +2649,5 @@ html[data-theme] .social-page .social-clip-sound .social-volume-slider input[typ
 @media (prefers-reduced-motion: reduce) {
   .social-page .social-clip-sound .social-volume-slider { transition: none; }
 }
+/* "Em alta" lines up with the Explorar search above it. */
+.social-explore-search + .social-hashtag-list{width:min(694px,calc(100% - 32px));margin:0 auto 16px}
