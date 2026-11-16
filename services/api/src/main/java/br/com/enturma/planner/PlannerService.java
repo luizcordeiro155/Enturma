@@ -178,8 +178,52 @@ public class PlannerService {
         r.city() == null ? null : r.city().strip(),
         r.focusMode(),
         a.id());
+    if (r.semesterStart() != null && r.semesterEnd() != null)
+      syncCurrentTerm(a.id(), r.semesterStart(), r.semesterEnd());
     changed(a.id());
     return routine(a.id());
+  }
+
+  /**
+   * The routine's semester is the student's current term: editing its dates edits that term, and the
+   * first dates ever saved create it with the subjects the student has now.
+   */
+  private void syncCurrentTerm(UUID user, LocalDate start, LocalDate end) {
+    if (ChronoUnit.DAYS.between(start, end) > AcademicTerms.MAX_DAYS)
+      throw ApiException.invalid("Um semestre pode ter no máximo 400 dias.");
+    var current =
+        db.list(
+            "SELECT id FROM academic_term WHERE user_id=? ORDER BY starts_on DESC LIMIT 1", user);
+    if (db.exists(
+        "SELECT EXISTS(SELECT 1 FROM academic_term WHERE user_id=? AND starts_on=? AND id<>?)",
+        user,
+        start,
+        current.isEmpty() ? new UUID(0, 0) : current.getFirst().get("id")))
+      throw ApiException.invalid("Já existe um semestre começando nesse dia.");
+    if (!current.isEmpty()) {
+      db.jdbc.update(
+          "UPDATE academic_term SET starts_on=?,ends_on=?,name=CASE WHEN starts_on=? THEN name ELSE"
+              + " ? END WHERE id=?",
+          start,
+          end,
+          start,
+          AcademicTerms.name(start),
+          current.getFirst().get("id"));
+      return;
+    }
+    db.jdbc.update(
+        "INSERT INTO academic_term(id,user_id,name,starts_on,ends_on,period_id,subjects,"
+            + "subjects_confirmed) VALUES (?,?,?,?,?,(SELECT period_id FROM academic_enrollment WHERE"
+            + " user_id=?),coalesce((SELECT jsonb_agg(subject_id) FROM user_subject WHERE user_id=?),"
+            + "'[]'),EXISTS(SELECT 1 FROM user_subject WHERE user_id=?))",
+        UUID.randomUUID(),
+        user,
+        AcademicTerms.name(start),
+        start,
+        end,
+        user,
+        user,
+        user);
   }
 
   // ---------------------------------------------------------------- focus mode
@@ -256,6 +300,20 @@ public class PlannerService {
     var start = time(s.startsAt());
     var end = time(s.endsAt());
     validateSeries(start, end, s.validFrom(), s.validUntil());
+    // A class belongs to its semester: without an end it stops when the semester does.
+    var semesterEnd = routine(a.id()).get("semesterEnd");
+    if (s.validUntil() == null
+        && semesterEnd != null
+        && !s.validFrom().isAfter(LocalDate.parse(semesterEnd.toString())))
+      s =
+          new ClassSeries(
+              s.subjectId(),
+              s.weekdays(),
+              s.startsAt(),
+              s.endsAt(),
+              s.validFrom(),
+              LocalDate.parse(semesterEnd.toString()),
+              s.room());
     var ids = new ArrayList<UUID>();
     for (int day : new TreeSet<>(s.weekdays())) {
       // The same class twice would show twice and ask twice whether the student went.
@@ -558,10 +616,31 @@ public class PlannerService {
    */
   @Transactional
   public Map<String, Object> attendance(Actor a) {
+    return attendance(a, null);
+  }
+
+  /** Presences and absences of one of the student's semesters; null is the current one. */
+  @Transactional
+  public Map<String, Object> attendance(Actor a, UUID termId) {
     var routine = routine(a.id());
     var zone = zone((String) routine.get("timezone"));
     var today = LocalDate.now(zone);
     LocalDate start = parse(routine.get("semesterStart")), end = parse(routine.get("semesterEnd"));
+    Map<String, Object> term = null;
+    if (termId != null) {
+      term = db.one("SELECT id,name,starts_on,ends_on FROM academic_term WHERE id=? AND user_id=?", termId, a.id());
+      start = parse(term.get("startsOn"));
+      end = parse(term.get("endsOn"));
+    } else if (start != null) {
+      term =
+          db.list(
+                  "SELECT id,name,starts_on,ends_on FROM academic_term WHERE user_id=? AND starts_on=?",
+                  a.id(),
+                  start)
+              .stream()
+              .findFirst()
+              .orElse(null);
+    }
     boolean estimated = start == null || end == null;
     if (estimated) {
       start = today.getMonthValue() <= 6 ? today.withDayOfYear(1) : LocalDate.of(today.getYear(), 7, 1);
@@ -596,13 +675,17 @@ public class PlannerService {
     }
     var pending = new ArrayList<Map<String, Object>>();
     var askFrom = today.minusDays(ASK_DAYS);
+    if (termId == null) {
     var askHolidays = new HashSet<String>();
     holidays(a.id(), askFrom, today, (String) routine.get("state"))
         .forEach(h -> askHolidays.add((String) h.get("date")));
     for (var o : occurrences(a.id(), askFrom, today, zone))
       if (o.get("attendance") == null && counts(o, askHolidays, now)) pending.add(o);
     pending.sort(Comparator.comparing((Map<String, Object> o) -> (String) o.get("startsAt")).reversed());
+    }
     var result = new LinkedHashMap<String, Object>();
+    result.put("termId", term == null ? null : term.get("id"));
+    result.put("termName", term == null ? null : term.get("name"));
     result.put("semesterStart", start.toString());
     result.put("semesterEnd", end.toString());
     result.put("estimated", estimated);

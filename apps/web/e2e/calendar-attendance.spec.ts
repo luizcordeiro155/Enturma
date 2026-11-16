@@ -59,7 +59,7 @@ async function student(request: APIRequestContext) {
     (
       await request.post(`${backend}/api/v1/planner/classes`, {
         headers,
-        data: { subjectId: subject.id, weekdays: [1, 2, 3, 4, 5, 6, 7], startsAt: "08:00", endsAt: "09:00", validFrom: shift(-10), room: "" },
+        data: { subjectId: subject.id, weekdays: [1, 2, 3, 4, 5, 6, 7], startsAt: "08:00", endsAt: "09:00", validFrom: shift(-10), validUntil: "2027-12-31", room: "" },
       })
     ).ok(),
   ).toBe(true);

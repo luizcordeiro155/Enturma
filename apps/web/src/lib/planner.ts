@@ -65,6 +65,8 @@ export type Calendar = {
 };
 
 export type AttendanceSummary = {
+  termId?: string | null;
+  termName?: string | null;
   semesterStart: string;
   semesterEnd: string;
   /** True when the routine has no semester and the current half-year is used. */
@@ -74,6 +76,27 @@ export type AttendanceSummary = {
   subjects: { subjectId: string; subjectName: string; present: number; absent: number }[];
   /** Recent classes that already started and have no answer yet, newest first. */
   pending: CalendarEvent[];
+};
+
+export type AcademicTerm = {
+  id: string;
+  name: string;
+  startsOn: string;
+  endsOn: string;
+  periodId: string | null;
+  periodName: string | null;
+  subjects: { id: string; name: string }[];
+  subjectsConfirmed: boolean;
+};
+
+/** What the student still has to do about their semester. */
+export type TermNeeds = "NONE" | "SET_DATES" | "NEW_TERM" | "SUBJECTS";
+
+export type TermOverview = {
+  current: AcademicTerm | null;
+  needs: TermNeeds;
+  suggestion: { name: string; startsOn: string; endsOn: string };
+  terms: AcademicTerm[];
 };
 
 export type ClassState = "upcoming" | "ongoing" | "attended" | "absent";
@@ -215,7 +238,12 @@ export const planner = {
   updateVacation: (id: string, body: { startsOn: string; endsOn: string; name: string }) =>
     api(`/planner/vacations/${id}`, json(body, "PUT")),
   deleteVacation: (id: string) => api(`/planner/vacations/${id}`, { method: "DELETE" }),
-  attendance: () => api<AttendanceSummary>("/planner/attendance", { cache: "no-store" }),
+  attendance: (termId?: string | null) =>
+    api<AttendanceSummary>(`/planner/attendance${termId ? `?term=${termId}` : ""}`, { cache: "no-store" }),
+  terms: () => api<TermOverview>("/planner/terms", { cache: "no-store" }),
+  /** Starts the next semester: the old grade stops and the new subjects are chosen next. */
+  startTerm: (body: { name?: string; startsOn: string; endsOn: string }) =>
+    api<TermOverview>("/planner/terms", json(body, "POST")),
   /** Says whether the student went to a class that already started; null removes the answer. */
   setAttendance: (key: string, status: AttendanceStatus | null) =>
     api("/planner/attendance", json({ key, status }, "PUT")),

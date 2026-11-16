@@ -12,9 +12,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/planner")
 public class PlannerController {
   private final PlannerService planner;
+  private final AcademicTerms terms;
 
-  public PlannerController(PlannerService planner) {
+  public PlannerController(PlannerService planner, AcademicTerms terms) {
     this.planner = planner;
+    this.terms = terms;
   }
 
   @GetMapping("/routine")
@@ -102,8 +104,19 @@ public class PlannerController {
   }
 
   @GetMapping("/attendance")
-  public Object attendance(@AuthenticationPrincipal Actor a) {
-    return planner.attendance(a);
+  public Object attendance(@AuthenticationPrincipal Actor a, @RequestParam(required = false) UUID term) {
+    return planner.attendance(a, term);
+  }
+
+  @GetMapping("/terms")
+  public Object terms(@AuthenticationPrincipal Actor a) {
+    return terms.overview(a);
+  }
+
+  /** Starts the next semester; the student then chooses its subjects. */
+  @PostMapping("/terms")
+  public Object startTerm(@AuthenticationPrincipal Actor a, @RequestBody AcademicTerms.NewTerm t) {
+    return terms.start(a, t);
   }
 
   /** {@code status} PRESENT or ABSENT; null removes the answer. */

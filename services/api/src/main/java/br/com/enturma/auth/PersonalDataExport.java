@@ -43,6 +43,7 @@ public class PersonalDataExport {
     SECTIONS.put("study-holidays", "SELECT id,date,name,scope,created_at FROM calendar_holiday WHERE user_id=? ORDER BY date,id");
     SECTIONS.put("study-vacations", "SELECT id,starts_on,ends_on,name,created_at FROM calendar_vacation WHERE user_id=? ORDER BY starts_on,id");
     SECTIONS.put("study-attendance", "SELECT occurrence_key,schedule_id,occurs_on,status,answered_at FROM class_attendance WHERE user_id=? ORDER BY occurs_on,occurrence_key");
+    SECTIONS.put("study-terms", "SELECT id,name,starts_on,ends_on,period_id,subjects,subjects_confirmed,created_at FROM academic_term WHERE user_id=? ORDER BY starts_on,id");
     SECTIONS.put("study-reminders", "SELECT id,kind,source_id,occurrence_at,fire_at,status,sent_at FROM academic_reminder_job WHERE user_id=? ORDER BY fire_at,id");
     SECTIONS.put("study-tasks", "SELECT id,subject_id,kind,title,notes,due_at,estimated_minutes,priority,completed_at,created_at FROM campus_task WHERE user_id=? ORDER BY due_at,id");
     SECTIONS.put("study-focus", "SELECT id,subject_id,label,planned_minutes,started_at,finished_at,actual_seconds FROM focus_session WHERE user_id=? ORDER BY started_at,id");
