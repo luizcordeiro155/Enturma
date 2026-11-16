@@ -11,18 +11,25 @@ import {
   Flag,
   PartyPopper,
   Pencil,
+  TreePalm,
   Undo2,
+  UserCheck,
+  UserX,
   X,
 } from "lucide-react";
 import type { AcademicEntry } from "@enturma/contracts";
 import {
+  classState,
   isoDate,
   isoWeekday,
   planner,
   timeIn,
   WEEKDAYS,
+  type AttendanceStatus,
   type CalendarEvent,
   type CalendarHoliday,
+  type CalendarVacation,
+  type ClassState,
   type Routine,
 } from "@/lib/planner";
 import { study } from "@/lib/study";
@@ -43,7 +50,25 @@ const STATUS_LABEL: Partial<Record<CalendarEvent["status"], string>> = {
   ACTIVE: "Em andamento",
 };
 
-export type DayForm = "class" | "task" | "holiday" | "study" | null;
+const CLASS_STATE_LABEL: Record<ClassState, string> = {
+  upcoming: "",
+  ongoing: "Em andamento",
+  attended: "Concluída",
+  absent: "Falta",
+};
+
+export type DayForm = "class" | "task" | "holiday" | "study" | "vacation" | null;
+
+/** "1 a 31 de julho" for the period of a school break. */
+export function periodLabel(startsOn: string, endsOn: string) {
+  if (startsOn === endsOn) return dayLabel(startsOn);
+  const [start, end] = [dayLabel(startsOn), dayLabel(endsOn)];
+  const sameMonth = startsOn.slice(0, 7) === endsOn.slice(0, 7);
+  const years = startsOn.slice(0, 4) !== endsOn.slice(0, 4);
+  return sameMonth
+    ? `${start.split(" de ")[0]} a ${end}`
+    : `${start}${years ? ` de ${startsOn.slice(0, 4)}` : ""} a ${end}${years ? ` de ${endsOn.slice(0, 4)}` : ""}`;
+}
 
 /** Everything about one day: what happens, and the actions to change it. */
 export function StudyDayPanel({
@@ -51,6 +76,7 @@ export function StudyDayPanel({
   routine,
   subjects,
   holidays,
+  vacations = [],
   events,
   changed,
   close,
@@ -60,6 +86,8 @@ export function StudyDayPanel({
   routine: Routine;
   subjects: AcademicEntry[];
   holidays: CalendarHoliday[];
+  /** School breaks that include this day. */
+  vacations?: CalendarVacation[];
   events: CalendarEvent[];
   changed: () => Promise<void>;
   close: () => void;
@@ -71,6 +99,7 @@ export function StudyDayPanel({
   const [moving, setMoving] = useState<string | null>(null);
   const [editing, setEditing] = useState<string | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<string | null>(null);
+  const [now] = useState(() => Date.now());
   const weekday = WEEKDAYS.find((item) => item.value === isoWeekday(day))!.long;
   const past = day < isoDate(new Date());
   const title = `${weekday}, ${dayLabel(day)}`;
@@ -120,22 +149,95 @@ export function StudyDayPanel({
           )}
         </p>
       ))}
+      {vacations.map((vacation) => (
+        <div key={vacation.id} className="study-vacation-line">
+          <p>
+            <TreePalm size={16} aria-hidden />
+            <span>
+              <strong>{vacation.name}</strong> · {periodLabel(vacation.startsOn, vacation.endsOn)}
+            </span>
+          </p>
+          <p className="study-vacation-hint">Sem aulas regulares neste período. Se você tiver aula, ajuste ou remova.</p>
+          <div className="study-event-actions">
+            <button
+              type="button"
+              aria-expanded={editing === vacation.id}
+              disabled={busy}
+              onClick={() => setEditing(editing === vacation.id ? null : vacation.id)}
+            >
+              <Pencil size={14} aria-hidden /> Editar período
+            </button>
+            {confirmDelete === vacation.id ? (
+              <button
+                type="button"
+                className="danger"
+                disabled={busy}
+                onClick={() => run(() => planner.deleteVacation(vacation.id))}
+              >
+                Remover estas férias
+              </button>
+            ) : (
+              <button type="button" disabled={busy} onClick={() => setConfirmDelete(vacation.id)}>
+                Remover
+              </button>
+            )}
+          </div>
+          {editing === vacation.id && (
+            <VacationForm
+              busy={busy}
+              vacation={vacation}
+              submit={(body) => run(() => planner.updateVacation(vacation.id, body))}
+            />
+          )}
+        </div>
+      ))}
       {events.length ? (
         <ul className="study-day-events">
-          {events.map((event) => (
-            <li key={event.id} data-kind={event.kind} data-status={event.status}>
+          {events.map((event) => {
+            const state = event.kind === "CLASS" && event.status !== "CANCELLED" ? classState(event, now) : null;
+            const answer = (status: AttendanceStatus | null) =>
+              run(() => planner.setAttendance(event.attendanceKey!, status));
+            return (
+            <li key={event.id} data-kind={event.kind} data-status={event.status} data-attendance={state ?? undefined}>
               <span className="study-event-time">
                 {timeIn(event.startsAt, zone)} – {timeIn(event.endsAt, zone)}
               </span>
               <div className="study-event-body">
                 <span className="study-event-kind">
                   {KIND_LABEL[event.kind]}
-                  {STATUS_LABEL[event.status] ? ` · ${STATUS_LABEL[event.status]}` : ""}
+                  {state && state !== "upcoming"
+                    ? ` · ${CLASS_STATE_LABEL[state]}${event.status === "EXTRA" || event.status === "MOVED" ? ` (${STATUS_LABEL[event.status]!.toLowerCase()})` : ""}`
+                    : STATUS_LABEL[event.status]
+                      ? ` · ${STATUS_LABEL[event.status]}`
+                      : ""}
                 </span>
                 <strong>{event.title}</strong>
                 {event.room ? <small>{event.room}</small> : null}
-                {event.kind === "CLASS" && event.holiday && event.status === "SCHEDULED" && (
+                {state === "upcoming" && event.holiday && event.status === "SCHEDULED" && (
                   <small className="study-holiday-warning">Feriado — confirme se haverá aula.</small>
+                )}
+                {state && state !== "upcoming" && event.attendanceKey && (
+                  <div className="study-attendance" role="group" aria-label={`Presença em ${event.title}`}>
+                    <span>{event.attendance ? "Sua resposta:" : "Você foi a esta aula?"}</span>
+                    <button
+                      type="button"
+                      aria-pressed={event.attendance === "PRESENT"}
+                      data-answer="present"
+                      disabled={busy}
+                      onClick={() => answer(event.attendance === "PRESENT" ? null : "PRESENT")}
+                    >
+                      <UserCheck size={15} aria-hidden /> Fui
+                    </button>
+                    <button
+                      type="button"
+                      aria-pressed={event.attendance === "ABSENT"}
+                      data-answer="absent"
+                      disabled={busy}
+                      onClick={() => answer(event.attendance === "ABSENT" ? null : "ABSENT")}
+                    >
+                      <UserX size={15} aria-hidden /> Faltei
+                    </button>
+                  </div>
                 )}
                 {event.kind === "CLASS" && event.scheduleId && (
                   <div className="study-event-actions">
@@ -261,10 +363,11 @@ export function StudyDayPanel({
                 )}
               </div>
             </li>
-          ))}
+            );
+          })}
         </ul>
       ) : (
-        <p className="study-muted">Nada marcado para este dia.</p>
+        <p className="study-muted">{vacations.length ? "Sem aulas: dia de férias." : "Nada marcado para este dia."}</p>
       )}
       <div className="study-day-add" role="group" aria-label="Adicionar ao dia">
         <button
@@ -284,6 +387,9 @@ export function StudyDayPanel({
         </button>
         <button type="button" aria-pressed={form === "holiday"} onClick={() => setForm(form === "holiday" ? null : "holiday")}>
           <PartyPopper size={16} aria-hidden /> Feriado da cidade
+        </button>
+        <button type="button" aria-pressed={form === "vacation"} onClick={() => setForm(form === "vacation" ? null : "vacation")}>
+          <TreePalm size={16} aria-hidden /> Férias
         </button>
       </div>
       {past && (
@@ -335,12 +441,76 @@ export function StudyDayPanel({
           <button type="submit" disabled={busy}>Marcar feriado</button>
         </form>
       )}
+      {form === "vacation" && (
+        <VacationForm
+          busy={busy}
+          vacation={{ startsOn: day, endsOn: day, name: "Férias" }}
+          submit={(body) => run(() => planner.addVacation(body))}
+        />
+      )}
       {error && (
         <p role="alert" className="error">
           {error}
         </p>
       )}
     </section>
+  );
+}
+
+type VacationBody = Parameters<typeof planner.addVacation>[0];
+
+/** Creates or moves a school break; classes inside it stop showing. */
+function VacationForm({
+  busy,
+  vacation,
+  submit,
+}: {
+  busy: boolean;
+  vacation: VacationBody & { id?: string };
+  submit: (body: VacationBody) => void;
+}) {
+  const [error, setError] = useState("");
+  return (
+    <form
+      className="study-inline-form"
+      aria-label={vacation.id ? "Editar férias" : "Novas férias"}
+      noValidate
+      onSubmit={(event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        const body = {
+          name: String(data.get("name")).trim(),
+          startsOn: String(data.get("startsOn")),
+          endsOn: String(data.get("endsOn")),
+        };
+        if (!body.name) return setError("Dê um nome às férias.");
+        if (!body.startsOn || !body.endsOn) return setError("Informe o início e o fim.");
+        if (body.endsOn < body.startsOn) return setError("O fim precisa ser depois do início.");
+        setError("");
+        submit(body);
+      }}
+    >
+      <label>
+        Nome
+        <input name="name" required maxLength={80} defaultValue={vacation.name} />
+      </label>
+      <label>
+        Começa em
+        <input name="startsOn" type="date" required defaultValue={vacation.startsOn} />
+      </label>
+      <label>
+        Termina em
+        <input name="endsOn" type="date" required defaultValue={vacation.endsOn} />
+      </label>
+      {error && (
+        <p role="alert" className="error">
+          {error}
+        </p>
+      )}
+      <button type="submit" disabled={busy}>
+        <Check size={16} aria-hidden /> {vacation.id ? "Salvar período" : "Marcar férias"}
+      </button>
+    </form>
   );
 }
 

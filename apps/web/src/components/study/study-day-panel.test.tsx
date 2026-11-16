@@ -107,3 +107,91 @@ it("an exam, assignment or reminder can be edited again, keeping what it was", a
   });
   expect(screen.queryByRole("form", { name: "Editar marcação" })).not.toBeInTheDocument();
 });
+
+const lesson = (overrides: Record<string, unknown> = {}) =>
+  ({
+    id: "s1:2026-11-10",
+    kind: "CLASS",
+    title: "Cálculo I",
+    subjectId: "calc",
+    scheduleId: "s1",
+    occursOn: "2026-11-10",
+    startsAt: "2026-11-10T22:00:00Z",
+    endsAt: "2026-11-11T01:30:00Z",
+    status: "SCHEDULED",
+    holiday: false,
+    attendanceKey: "s1:2026-11-10",
+    attendance: null,
+    ...overrides,
+  }) as never;
+
+it("a class that already happened shows as done and can be marked as missed", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-15T12:00:00-03:00"));
+  panel("2026-11-10", [lesson()]);
+  expect(screen.getByText("Aula · Concluída")).toBeInTheDocument();
+  expect(screen.getByText("Você foi a esta aula?")).toBeInTheDocument();
+  await act(async () => fireEvent.click(screen.getByRole("button", { name: "Faltei" })));
+  const call = api.mock.calls.find(([path]) => path === "/planner/attendance");
+  expect(call?.[1]?.method).toBe("PUT");
+  expect(JSON.parse(String(call?.[1]?.body))).toEqual({ key: "s1:2026-11-10", status: "ABSENT" });
+});
+
+it("a missed class shows the absence and tapping it again removes the answer", async () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-15T12:00:00-03:00"));
+  panel("2026-11-10", [lesson({ attendance: "ABSENT" })]);
+  expect(screen.getByText("Aula · Falta")).toBeInTheDocument();
+  const missed = screen.getByRole("button", { name: "Faltei" });
+  expect(missed).toHaveAttribute("aria-pressed", "true");
+  await act(async () => fireEvent.click(missed));
+  const call = api.mock.calls.find(([path]) => path === "/planner/attendance");
+  expect(JSON.parse(String(call?.[1]?.body))).toEqual({ key: "s1:2026-11-10", status: null });
+});
+
+it("a future class does not ask about attendance", () => {
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(new Date("2026-11-01T12:00:00-03:00"));
+  panel("2026-11-10", [lesson()]);
+  expect(screen.getByText("Aula")).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Faltei" })).not.toBeInTheDocument();
+});
+
+it("a school break can be moved or removed by the student", async () => {
+  render(
+    <StudyDayPanel
+      day="2026-07-10"
+      routine={routine}
+      subjects={subjects}
+      holidays={[]}
+      vacations={[{ id: "v1", startsOn: "2026-07-01", endsOn: "2026-07-31", name: "Férias de julho" }]}
+      events={[]}
+      changed={async () => {}}
+      close={() => {}}
+    />,
+  );
+  expect(screen.getByText("Férias de julho")).toBeInTheDocument();
+  expect(screen.getByText(/1 a 31 de julho/)).toBeInTheDocument();
+  fireEvent.click(screen.getByRole("button", { name: "Editar período" }));
+  fireEvent.change(screen.getByLabelText("Começa em"), { target: { value: "2026-07-15" } });
+  await act(async () => fireEvent.submit(screen.getByRole("form", { name: "Editar férias" })));
+  const call = api.mock.calls.find(([path]) => path === "/planner/vacations/v1");
+  expect(call?.[1]?.method).toBe("PUT");
+  expect(JSON.parse(String(call?.[1]?.body))).toEqual({
+    name: "Férias de julho",
+    startsOn: "2026-07-15",
+    endsOn: "2026-07-31",
+  });
+  fireEvent.click(screen.getByRole("button", { name: "Remover" }));
+  await act(async () => fireEvent.click(screen.getByRole("button", { name: "Remover estas férias" })));
+  expect(api).toHaveBeenCalledWith("/planner/vacations/v1", { method: "DELETE" });
+});
+
+it("a new break needs its end after its start", async () => {
+  panel("2026-07-10", [lesson({ occursOn: "2026-07-10" })]);
+  fireEvent.click(screen.getByRole("button", { name: /^Férias$/ }));
+  fireEvent.change(screen.getByLabelText("Termina em"), { target: { value: "2026-07-01" } });
+  await act(async () => fireEvent.submit(screen.getByRole("form", { name: "Novas férias" })));
+  expect(screen.getByRole("alert")).toHaveTextContent(/fim precisa ser depois/i);
+  expect(api).not.toHaveBeenCalledWith("/planner/vacations", expect.anything());
+});
