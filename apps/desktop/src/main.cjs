@@ -1240,10 +1240,10 @@ ipcMain.handle("desktop:get-info", (event) => {
     platform: process.platform,
     webUrl: WEB_URL,
     releaseNotes: [
-      "Tema Enturma também no cabeçalho e em Caronas, com a marca oficial transparente.",
-      "Nova animação de entrada no login, sincronizada com suas cores.",
-      "Conversas mais compactas, um seletor de mídias e botão de áudio quando a mensagem está vazia.",
-      "Confirmações reais de entrega e leitura, incluindo histórico privado ao ser aberto novamente.",
+      "Enturma Study: calendário acadêmico, presença por semestre e sessões de estudo com tutor de IA.",
+      "Enturma Social: Feed, Clips e Stories com vídeos de até 3 minutos e hashtags em alta.",
+      "Conta e privacidade: aceite versionado, exportação completa e Configurações reorganizadas.",
+      "Desempenho: respostas mais rápidas e menos consultas em segundo plano.",
     ],
   };
 });
