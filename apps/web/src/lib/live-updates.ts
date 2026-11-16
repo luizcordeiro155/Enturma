@@ -217,6 +217,9 @@ export function useLiveRefresh(
         ? Math.max(interval, 3000)
         : Math.max(interval, 60000);
     const timer = window.setInterval(() => {
+      // Calls arrive through the socket; while it is up, a slower safety net is enough.
+      if (type === "private_call_changed" && liveConnected && Date.now() - lastRunAt < 20000)
+        return;
       if (
         type === "private_call_changed" ||
         (!liveConnected &&
