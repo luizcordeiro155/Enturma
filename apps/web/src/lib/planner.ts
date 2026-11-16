@@ -42,13 +42,52 @@ export type CalendarEvent = {
   endsAt: string;
   status: "SCHEDULED" | "CANCELLED" | "MOVED" | "EXTRA" | "DONE" | "ACTIVE";
   holiday: boolean;
+  /** Classes only: what identifies this one class when the student says if they went. */
+  attendanceKey?: string;
+  attendance?: AttendanceStatus | null;
+};
+
+export type AttendanceStatus = "PRESENT" | "ABSENT";
+
+/** A school break: regular classes in it do not happen. */
+export type CalendarVacation = {
+  id: string;
+  startsOn: string;
+  endsOn: string;
+  name: string;
 };
 
 export type Calendar = {
   timezone: string;
   holidays: CalendarHoliday[];
+  vacations?: CalendarVacation[];
   events: CalendarEvent[];
 };
+
+export type AttendanceSummary = {
+  semesterStart: string;
+  semesterEnd: string;
+  /** True when the routine has no semester and the current half-year is used. */
+  estimated: boolean;
+  present: number;
+  absent: number;
+  subjects: { subjectId: string; subjectName: string; present: number; absent: number }[];
+  /** Recent classes that already started and have no answer yet, newest first. */
+  pending: CalendarEvent[];
+};
+
+export type ClassState = "upcoming" | "ongoing" | "attended" | "absent";
+
+/** Where a class stands now: not started, happening, or past (attended unless marked absent). */
+export function classState(event: CalendarEvent, now = Date.now()): ClassState {
+  if (Date.parse(event.startsAt) > now) return "upcoming";
+  if (event.attendance === "ABSENT") return "absent";
+  if (Date.parse(event.endsAt) > now) return "ongoing";
+  return "attended";
+}
+
+export const vacationOn = (vacations: CalendarVacation[] | undefined, day: string) =>
+  (vacations ?? []).filter((vacation) => vacation.startsOn <= day && day <= vacation.endsOn);
 
 const pad = (value: number) => String(value).padStart(2, "0");
 
@@ -171,6 +210,15 @@ export const planner = {
   addHoliday: (body: { date: string; name: string; scope: "CITY" | "OPTIONAL" }) =>
     api<{ id: string }>("/planner/holidays", json(body, "POST")),
   deleteHoliday: (id: string) => api(`/planner/holidays/${id}`, { method: "DELETE" }),
+  addVacation: (body: { startsOn: string; endsOn: string; name: string }) =>
+    api<{ id: string }>("/planner/vacations", json(body, "POST")),
+  updateVacation: (id: string, body: { startsOn: string; endsOn: string; name: string }) =>
+    api(`/planner/vacations/${id}`, json(body, "PUT")),
+  deleteVacation: (id: string) => api(`/planner/vacations/${id}`, { method: "DELETE" }),
+  attendance: () => api<AttendanceSummary>("/planner/attendance", { cache: "no-store" }),
+  /** Says whether the student went to a class that already started; null removes the answer. */
+  setAttendance: (key: string, status: AttendanceStatus | null) =>
+    api("/planner/attendance", json({ key, status }, "PUT")),
   addTask: (body: {
     kind: "EXAM" | "ASSIGNMENT" | "EVENT";
     title: string;

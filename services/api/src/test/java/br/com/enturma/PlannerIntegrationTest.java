@@ -47,8 +47,17 @@ class PlannerIntegrationTest {
 
   @BeforeEach
   void setup() {
-    a = user();
-    b = user();
+    a = noVacations(user());
+    b = noVacations(user());
+  }
+
+  /** Clock-relative tests must not depend on whether today falls in the default school breaks. */
+  Actor noVacations(Actor student) {
+    db.jdbc.update(
+        "INSERT INTO calendar_vacation_year(user_id,year) SELECT ?,y FROM generate_series(2020,2040) y"
+            + " ON CONFLICT DO NOTHING",
+        student.id());
+    return student;
   }
 
   @SuppressWarnings("unchecked")
@@ -92,6 +101,17 @@ class PlannerIntegrationTest {
         "INSERT INTO focus_session(id,user_id,planned_minutes) VALUES (?,?,30)",
         UUID.randomUUID(),
         a.id());
+    db.jdbc.update(
+        "INSERT INTO calendar_vacation(id,user_id,starts_on,ends_on,name) VALUES"
+            + " (?,?,current_date,current_date+10,'Férias')",
+        UUID.randomUUID(),
+        a.id());
+    db.jdbc.update(
+        "INSERT INTO class_attendance(user_id,occurrence_key,schedule_id,occurs_on,status) VALUES"
+            + " (?,?,?,current_date,'ABSENT')",
+        a.id(),
+        schedule + ":" + LocalDate.now(),
+        schedule);
     for (String section :
         List.of(
             "study-routine",
@@ -100,7 +120,9 @@ class PlannerIntegrationTest {
             "study-holidays",
             "study-reminders",
             "study-tasks",
-            "study-focus")) {
+            "study-focus",
+            "study-vacations",
+            "study-attendance")) {
       assertThat(personalExport.sections()).contains(section);
       assertThat(exported(a, section)).as(section).hasSize(1);
       assertThat(exported(b, section)).as(section).isEmpty();
@@ -114,7 +136,10 @@ class PlannerIntegrationTest {
             "calendar_holiday",
             "academic_reminder_job",
             "campus_task",
-            "focus_session")) {
+            "focus_session",
+            "calendar_vacation",
+            "calendar_vacation_year",
+            "class_attendance")) {
       assertThat(
               db.jdbc.queryForObject(
                   "SELECT count(*) FROM " + table + " WHERE user_id=?", Integer.class, a.id()))
@@ -301,11 +326,16 @@ class PlannerIntegrationTest {
   }
 
   List<Map<String, Object>> jobs(Actor student, String status) {
+    return jobs(student, status, "CLASS");
+  }
+
+  List<Map<String, Object>> jobs(Actor student, String status, String kind) {
     return db.list(
         "SELECT source_id,occurrence_at,fire_at,status FROM academic_reminder_job WHERE user_id=? AND"
-            + " status=? ORDER BY occurrence_at",
+            + " status=? AND kind=? ORDER BY occurrence_at",
         student.id(),
-        status);
+        status,
+        kind);
   }
 
   @Test
@@ -422,6 +452,208 @@ class PlannerIntegrationTest {
                 "SELECT count(*) FROM notification WHERE user_id=? AND kind='STUDY_REMINDER'",
                 Integer.class,
                 a.id()))
+        .isZero();
+  }
+
+  // ---------------------------------------------------------------- school breaks
+
+  @SuppressWarnings("unchecked")
+  static List<Map<String, Object>> vacations(Map<String, Object> calendar) {
+    return (List<Map<String, Object>>) calendar.get("vacations");
+  }
+
+  static List<String> classDays(Map<String, Object> calendar) {
+    return events(calendar).stream()
+        .filter(e -> "CLASS".equals(e.get("kind")))
+        .map(e -> (String) e.get("occursOn"))
+        .toList();
+  }
+
+  @Test
+  void defaultBreaksHideRegularClassesButKeepExtraOnes() {
+    Actor c = user();
+    UUID series = planner.addClasses(c, mondays(subject(c), "2026-06-01", null)).getFirst();
+    var july = planner.calendar(c, d("2026-07-01"), d("2026-07-31"));
+    assertThat(vacations(july))
+        .anySatisfy(
+            v ->
+                assertThat(v)
+                    .containsEntry("name", "Férias de julho")
+                    .containsEntry("startsOn", "2026-07-01")
+                    .containsEntry("endsOn", "2026-07-31"));
+    assertThat(classDays(july)).isEmpty();
+    assertThat(classDays(planner.calendar(c, d("2026-06-01"), d("2026-06-30")))).contains("2026-06-29");
+    var january = planner.calendar(c, d("2027-01-01"), d("2027-01-31"));
+    assertThat(vacations(january))
+        .anySatisfy(
+            v ->
+                assertThat(v)
+                    .containsEntry("name", "Férias de fim de ano")
+                    .containsEntry("startsOn", "2026-12-20")
+                    .containsEntry("endsOn", "2027-01-31"));
+    assertThat(classDays(january)).isEmpty();
+    planner.addException(
+        c,
+        series,
+        new ClassException(d("2026-07-15"), "EXTRA", OffsetDateTime.parse("2026-07-15T19:00:00-03:00"), 120, "Reposição"));
+    assertThat(events(planner.calendar(c, d("2026-07-01"), d("2026-07-31"))))
+        .singleElement()
+        .satisfies(e -> assertThat(e).containsEntry("status", "EXTRA"));
+  }
+
+  @Test
+  void studentCanMoveAndRemoveBreaksWithoutThemComingBack() {
+    Actor c = user();
+    planner.addClasses(c, mondays(subject(c), "2026-06-01", null));
+    var july = vacations(planner.calendar(c, d("2026-07-01"), d("2026-07-31")));
+    UUID id =
+        (UUID)
+            july.stream().filter(v -> "Férias de julho".equals(v.get("name"))).findFirst().orElseThrow().get("id");
+    planner.updateVacation(c, id, new Vacation(d("2026-07-15"), d("2026-07-31"), "Recesso"));
+    assertThat(classDays(planner.calendar(c, d("2026-07-01"), d("2026-07-31"))))
+        .containsExactly("2026-07-06", "2026-07-13");
+    assertThatThrownBy(() -> planner.deleteVacation(b, id)).isInstanceOf(ApiException.class);
+    planner.deleteVacation(c, id);
+    assertThat(classDays(planner.calendar(c, d("2026-07-01"), d("2026-07-31")))).hasSize(4);
+    assertThat(vacations(planner.calendar(c, d("2026-07-01"), d("2026-07-31"))))
+        .noneMatch(v -> String.valueOf(v.get("startsOn")).startsWith("2026-07"));
+    UUID own = planner.addVacation(c, new Vacation(d("2026-07-20"), d("2026-07-24"), "Semana de provas"));
+    assertThat(own).isNotNull();
+    assertThat(classDays(planner.calendar(c, d("2026-07-01"), d("2026-07-31"))))
+        .containsExactly("2026-07-06", "2026-07-13", "2026-07-27");
+    assertThatThrownBy(() -> planner.addVacation(c, new Vacation(d("2026-07-24"), d("2026-07-20"), "x")))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> planner.addVacation(c, new Vacation(d("2026-07-20"), d("2026-07-24"), "  ")))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> planner.addVacation(c, new Vacation(d("2026-01-01"), d("2026-12-31"), "Ano")))
+        .isInstanceOf(ApiException.class);
+  }
+
+  // ---------------------------------------------------------------- attendance
+
+  /** A daily one-hour class that began two weeks ago, inside a semester around today. */
+  Actor dailyStudent() {
+    Actor c = noVacations(user());
+    var today = LocalDate.now(SP);
+    planner.saveRoutine(
+        c,
+        new Routine("America/Sao_Paulo", "08:00", "12:00", List.of(1, 2, 3, 4, 5), today.minusDays(14), today.plusDays(30), 120, null, null, "BALANCED", null, null, null));
+    planner.addClasses(
+        c, new ClassSeries(subject(c), List.of(1, 2, 3, 4, 5, 6, 7), "08:00", "09:00", today.minusDays(14), null, ""));
+    return c;
+  }
+
+  @SuppressWarnings("unchecked")
+  static List<Map<String, Object>> list(Map<String, Object> map, String key) {
+    return (List<Map<String, Object>>) map.get(key);
+  }
+
+  static int count(Map<String, Object> map, String key) {
+    return ((Number) map.get(key)).intValue();
+  }
+
+  Map<String, Object> pastClass(Actor c) {
+    var today = LocalDate.now(SP);
+    return events(planner.calendar(c, today.minusDays(7), today.minusDays(1))).stream()
+        .filter(e -> "CLASS".equals(e.get("kind")) && !Boolean.TRUE.equals(e.get("holiday")))
+        .reduce((first, second) -> second)
+        .orElseThrow();
+  }
+
+  @Test
+  void pastClassesCountAsAttendedUntilTheStudentMarksAnAbsence() {
+    Actor c = dailyStudent();
+    var before = planner.attendance(c);
+    int present = count(before, "present");
+    assertThat(present).isGreaterThanOrEqualTo(8);
+    assertThat(count(before, "absent")).isZero();
+    assertThat(before).containsEntry("estimated", false);
+    var past = pastClass(c);
+    assertThat(past).containsEntry("attendance", null);
+    String key = (String) past.get("attendanceKey");
+    planner.setAttendance(c, key, "ABSENT");
+    var after = planner.attendance(c);
+    assertThat(count(after, "present")).isEqualTo(present - 1);
+    assertThat(count(after, "absent")).isEqualTo(1);
+    assertThat(list(after, "subjects"))
+        .singleElement()
+        .satisfies(s -> assertThat(count(s, "absent")).isEqualTo(1));
+    assertThat(pastClass(c)).containsEntry("attendance", "ABSENT");
+    planner.setAttendance(c, key, "PRESENT");
+    assertThat(count(planner.attendance(c), "absent")).isZero();
+    assertThat(count(planner.attendance(c), "present")).isEqualTo(present);
+    planner.clearAttendance(c, key);
+    assertThat(pastClass(c)).containsEntry("attendance", null);
+  }
+
+  @Test
+  void onlyStartedClassesOfTheStudentCanBeMarked() {
+    Actor c = dailyStudent();
+    var today = LocalDate.now(SP);
+    String future =
+        (String)
+            events(planner.calendar(c, today.plusDays(2), today.plusDays(4))).getFirst().get("attendanceKey");
+    assertThatThrownBy(() -> planner.setAttendance(c, future, "ABSENT")).isInstanceOf(ApiException.class);
+    String key = (String) pastClass(c).get("attendanceKey");
+    assertThatThrownBy(() -> planner.setAttendance(b, key, "ABSENT")).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> planner.setAttendance(c, key, "MAYBE")).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> planner.setAttendance(c, "nonsense", "ABSENT")).isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void recentUnansweredClassesAreAskedAbout() {
+    Actor c = dailyStudent();
+    // A daily class always leaves at least one non-holiday class in the last three days.
+    var pending = list(planner.attendance(c), "pending");
+    assertThat(pending).isNotEmpty().allSatisfy(e -> assertThat(e).containsEntry("attendance", null));
+    String key = (String) pending.getFirst().get("attendanceKey");
+    planner.setAttendance(c, key, "PRESENT");
+    assertThat(list(planner.attendance(c), "pending")).noneMatch(e -> key.equals(e.get("attendanceKey")));
+  }
+
+  @Test
+  void withoutASemesterTheCurrentHalfYearIsEstimated() {
+    var summary = planner.attendance(a);
+    var today = LocalDate.now(SP);
+    assertThat(summary)
+        .containsEntry("estimated", true)
+        .containsEntry("semesterStart", (today.getMonthValue() <= 6 ? today.withDayOfYear(1) : today.withMonth(7).withDayOfMonth(1)).toString());
+  }
+
+  @Test
+  void classStartAsksWhetherTheStudentIsThere() {
+    var now = java.time.ZonedDateTime.now(SP);
+    Assumptions.assumeTrue(now.toLocalTime().isAfter(LocalTime.of(0, 30)));
+    var start = now.toLocalTime().minusMinutes(10).withSecond(0).withNano(0);
+    UUID series =
+        planner
+            .addClasses(
+                a,
+                new ClassSeries(subject(a), List.of(now.getDayOfWeek().getValue()), start.toString(), "23:59", now.toLocalDate(), null, ""))
+            .getFirst();
+    var startsAt = now.toLocalDate().atTime(start).atZone(SP).toInstant().toString();
+    assertThat(jobs(a, "PENDING", "ATTEND"))
+        .anySatisfy(j -> assertThat(j).containsEntry("sourceId", series).containsEntry("occurrenceAt", startsAt).containsEntry("fireAt", startsAt));
+    reminders.deliverDue();
+    var message =
+        db.one("SELECT message,href FROM notification WHERE user_id=? AND kind='STUDY_REMINDER'", a.id());
+    assertThat((String) message.get("message")).contains("Você está na aula");
+    assertThat((String) message.get("href")).contains("attendance=").endsWith("#enturma-study");
+  }
+
+  @Test
+  void answeredClassIsNotAskedAgain() {
+    var now = java.time.ZonedDateTime.now(SP);
+    Assumptions.assumeTrue(now.toLocalTime().isAfter(LocalTime.of(0, 30)));
+    var start = now.toLocalTime().minusMinutes(10).withSecond(0).withNano(0);
+    planner.addClasses(
+        a, new ClassSeries(subject(a), List.of(now.getDayOfWeek().getValue()), start.toString(), "23:59", now.toLocalDate(), null, ""));
+    String key = (String) events(planner.calendar(a, now.toLocalDate(), now.toLocalDate())).getFirst().get("attendanceKey");
+    planner.setAttendance(a, key, "PRESENT");
+    reminders.deliverDue();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM notification WHERE user_id=? AND kind='STUDY_REMINDER'", Integer.class, a.id()))
         .isZero();
   }
 }

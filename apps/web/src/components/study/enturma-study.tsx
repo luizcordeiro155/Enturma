@@ -11,10 +11,13 @@ import {
   planner,
   reminderLabel,
   timeIn,
+  vacationOn,
   weekOf,
+  type AttendanceSummary,
   type Calendar,
   type Routine,
 } from "@/lib/planner";
+import { StudyAttendance } from "./study-attendance";
 import { StudyCalendar, dayLabel, type CalendarView } from "./study-calendar";
 import { StudyDayPanel, type DayForm } from "./study-day-panel";
 import { StudyRoutinePanel } from "./study-routine-panel";
@@ -25,6 +28,15 @@ function requestedDay() {
   return day && /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
 }
 
+/** The class a "você está na aula?" notification asked about. */
+function requestedAttendance() {
+  if (typeof window === "undefined") return null;
+  return new URLSearchParams(window.location.search).get("attendance");
+}
+
+/** Attendance is extra: the calendar still works if it cannot load. */
+const attendanceOrNothing = () => planner.attendance().catch(() => undefined);
+
 /** Enturma Study on the home page: calendar, upcoming classes and today's agenda. */
 export function EnturmaStudy({ profile }: { profile: Profile }) {
   const [today] = useState(() => isoDate(new Date()));
@@ -34,6 +46,8 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
   const [view, setView] = useState<CalendarView>("month");
   const [routine, setRoutine] = useState<Routine>();
   const [calendar, setCalendar] = useState<Calendar>();
+  const [attendance, setAttendance] = useState<AttendanceSummary>();
+  const [focusKey] = useState(() => requestedAttendance());
   const [editingRoutine, setEditingRoutine] = useState(false);
   const [dayForm, setDayForm] = useState<DayForm>(null);
   const [error, setError] = useState("");
@@ -49,12 +63,14 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
 
   const load = useCallback(async () => {
     try {
-      const [nextRoutine, nextCalendar] = await Promise.all([
+      const [nextRoutine, nextCalendar, nextAttendance] = await Promise.all([
         planner.routine(),
         planner.calendar(range.from, range.to),
+        attendanceOrNothing(),
       ]);
       setRoutine(nextRoutine);
       setCalendar(nextCalendar);
+      setAttendance(nextAttendance);
       setError("");
     } catch (cause) {
       setError((cause as Error).message);
@@ -63,11 +79,12 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
 
   useEffect(() => {
     let alive = true;
-    void Promise.all([planner.routine(), planner.calendar(range.from, range.to)])
-      .then(([nextRoutine, nextCalendar]) => {
+    void Promise.all([planner.routine(), planner.calendar(range.from, range.to), attendanceOrNothing()])
+      .then(([nextRoutine, nextCalendar, nextAttendance]) => {
         if (!alive) return;
         setRoutine(nextRoutine);
         setCalendar(nextCalendar);
+        setAttendance(nextAttendance);
         setError("");
       })
       .catch((cause: Error) => {
@@ -80,6 +97,7 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
 
   const events = calendar?.events ?? [];
   const holidays = calendar?.holidays ?? [];
+  const vacations = calendar?.vacations ?? [];
   const zone = calendar?.timezone ?? "America/Sao_Paulo";
   const upcoming = events
     .filter((event) => event.kind === "CLASS" && event.status !== "CANCELLED" && Date.parse(event.endsAt) > now)
@@ -140,6 +158,7 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
             today={today}
             selected={selected}
             holidays={holidays}
+            vacations={vacations}
             events={events}
             select={(day) => {
               setDayForm(null);
@@ -172,6 +191,7 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
               routine={routine}
               subjects={profile.subjects}
               holidays={holidays.filter((holiday) => holiday.date === selected)}
+              vacations={vacationOn(vacations, selected)}
               events={events.filter((event) => event.occursOn === selected)}
               changed={load}
               close={() => setSelected(null)}
@@ -179,6 +199,16 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
           )}
         </article>
         <div className="enturma-study-side">
+          {attendance && (
+            <StudyAttendance
+              summary={attendance}
+              zone={zone}
+              today={today}
+              focusKey={focusKey}
+              changed={load}
+              editSemester={() => setEditingRoutine(true)}
+            />
+          )}
           <section className="study-card" aria-label="Próximas aulas">
             <div className="study-card-title">
               <GraduationCap aria-hidden />

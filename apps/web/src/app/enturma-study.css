@@ -5,6 +5,8 @@
   --study-exam: #b45309;
   --study-holiday: #b4233a;
   --study-done: var(--success);
+  --study-vacation: #0f766e;
+  --study-absent: #be123c;
 }
 html[data-theme="dark"],
 html[data-palette="enturma"] {
@@ -12,6 +14,8 @@ html[data-palette="enturma"] {
   --study-study: #c9adff;
   --study-exam: #ffb36b;
   --study-holiday: #ff8f9a;
+  --study-vacation: #5eead4;
+  --study-absent: #fda4af;
 }
 
 .enturma-study {
@@ -594,4 +598,187 @@ html[data-theme] .enturma-study .study-weekdays button[aria-pressed="true"] {
   .enturma-study {
     order: 2;
   }
+}
+
+/* School breaks and attendance. State is always spelled out next to the color. */
+html[data-theme] .enturma-study button.study-day.is-vacation {
+  background: color-mix(in srgb, var(--study-vacation) 13%, var(--surface)) !important;
+  border-color: color-mix(in srgb, var(--study-vacation) 34%, transparent);
+}
+html[data-theme] .enturma-study button.study-day.is-vacation.is-today {
+  background: var(--accent) !important;
+}
+.study-day-dots i[data-kind="absent"] {
+  background: var(--study-absent);
+}
+.study-day-items span[data-kind="VACATION"] {
+  --kind: var(--study-vacation);
+}
+.study-day-items span[data-attendance="ABSENT"] {
+  --kind: var(--study-absent);
+  text-decoration: line-through;
+}
+.study-legend li[data-kind="vacation"]::before {
+  background: var(--study-vacation);
+}
+.study-legend li[data-kind="absent"]::before {
+  background: var(--study-absent);
+}
+.study-vacation-line {
+  display: grid;
+  gap: 6px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--study-vacation) 35%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--study-vacation) 8%, var(--surface));
+}
+.study-vacation-line > p {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+.study-vacation-line > p:first-child svg {
+  flex: none;
+  color: var(--study-vacation);
+}
+.study-vacation-hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.study-day-events > li[data-attendance="attended"] {
+  --kind: var(--study-done);
+}
+.study-day-events > li[data-attendance="absent"] {
+  --kind: var(--study-absent);
+}
+.study-day-events > li[data-attendance="absent"] .study-event-kind {
+  color: var(--study-absent);
+}
+.study-attendance {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.study-attendance > span {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+html[data-theme] .enturma-study .study-attendance button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface) !important;
+  color: var(--ink) !important;
+  box-shadow: none;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+html[data-theme] .enturma-study .study-attendance button[data-answer="present"][aria-pressed="true"] {
+  border-color: var(--study-done);
+  background: color-mix(in srgb, var(--study-done) 22%, var(--surface)) !important;
+  color: var(--study-done) !important;
+}
+html[data-theme] .enturma-study .study-attendance button[data-answer="absent"][aria-pressed="true"] {
+  border-color: var(--study-absent);
+  background: color-mix(in srgb, var(--study-absent) 22%, var(--surface)) !important;
+  color: var(--study-absent) !important;
+}
+.study-attendance-question {
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+  border: 1px solid color-mix(in srgb, var(--study-class) 40%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--study-class) 9%, var(--surface));
+}
+.study-attendance-question p {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+}
+.study-attendance-question p span {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.study-attendance-totals {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.study-attendance-totals > div {
+  display: grid;
+  gap: 2px;
+  padding: 10px;
+  border-radius: 12px;
+  background: var(--soft);
+}
+.study-attendance-totals dt {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--muted);
+}
+.study-attendance-totals dd {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.study-attendance-totals > div[data-kind="present"] dd {
+  color: var(--study-done);
+}
+.study-attendance-totals > div[data-kind="absent"] dd {
+  color: var(--study-absent);
+}
+.study-attendance-subjects {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.study-attendance-subjects li {
+  display: grid;
+  gap: 6px;
+}
+.study-attendance-subjects li > span {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 10px;
+  font-size: 0.85rem;
+}
+.study-attendance-subjects small {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.study-attendance-subjects meter {
+  width: 100%;
+  height: 8px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--study-absent) 22%, var(--soft));
+}
+.study-attendance-subjects meter::-webkit-meter-bar {
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--study-absent) 22%, var(--soft));
+}
+.study-attendance-subjects meter::-webkit-meter-optimum-value,
+.study-attendance-subjects meter::-webkit-meter-suboptimum-value,
+.study-attendance-subjects meter::-webkit-meter-even-less-good-value {
+  border-radius: 999px;
+  background: var(--study-done);
+}
+.study-attendance-subjects meter::-moz-meter-bar {
+  border-radius: 999px;
+  background: var(--study-done);
 }

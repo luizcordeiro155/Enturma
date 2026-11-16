@@ -19,6 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class PlannerReminders {
   static final int WINDOW_DAYS = 14;
   static final int STUDY_LEAD_MINUTES = 10;
+
+  /** How long after a class starts the "are you there?" question is still worth sending. */
+  static final Duration ASK_GRACE = Duration.ofHours(3);
   private static final DateTimeFormatter HOUR = DateTimeFormatter.ofPattern("HH:mm");
   private final Db db;
   private final PlannerService planner;
@@ -42,10 +45,29 @@ public class PlannerReminders {
     var zone = PlannerService.zone((String) routine.get("timezone"));
     int minutes = ((Number) routine.get("classReminderMinutes")).intValue();
     var keep = new ArrayList<String>();
+    var asks = new ArrayList<String>();
+    var now = Instant.now();
+    var today = LocalDate.now(zone);
+    var upcoming = planner.occurrences(user, today, today.plusDays(WINDOW_DAYS));
+    for (var occurrence : upcoming) {
+      if ("CANCELLED".equals(occurrence.get("status")) || occurrence.get("attendance") != null) continue;
+      var starts = Instant.parse((String) occurrence.get("startsAt"));
+      if (starts.plus(ASK_GRACE).isBefore(now)) continue;
+      UUID source = (UUID) occurrence.get("scheduleId");
+      db.jdbc.update(
+          "INSERT INTO academic_reminder_job(id,user_id,kind,source_id,occurrence_at,fire_at)"
+              + " VALUES (?,?,'ATTEND',?,?,?) ON CONFLICT(user_id,kind,source_id,occurrence_at) DO"
+              + " UPDATE SET fire_at=EXCLUDED.fire_at,status='PENDING',lease_until=NULL WHERE"
+              + " academic_reminder_job.status<>'SENT'",
+          UUID.randomUUID(),
+          user,
+          source,
+          OffsetDateTime.ofInstant(starts, ZoneOffset.UTC),
+          OffsetDateTime.ofInstant(starts, ZoneOffset.UTC));
+      asks.add(source + "@" + starts.getEpochSecond());
+    }
     if (minutes > 0) {
-      var now = Instant.now();
-      var today = LocalDate.now(zone);
-      for (var occurrence : planner.occurrences(user, today, today.plusDays(WINDOW_DAYS))) {
+      for (var occurrence : upcoming) {
         if ("CANCELLED".equals(occurrence.get("status"))) continue;
         var starts = Instant.parse((String) occurrence.get("startsAt"));
         if (!starts.isAfter(now)) continue;
@@ -102,7 +124,12 @@ public class PlannerReminders {
             + " status='PENDING' AND NOT (source_id::text||'@'||extract(epoch FROM"
             + " occurrence_at)::bigint = ANY(?::text[]))",
         user,
-        "{" + String.join(",", keep) + "}");
+        "{" + String.join(",", keep) + "}");    db.jdbc.update(
+        "UPDATE academic_reminder_job SET status='CANCELLED' WHERE user_id=? AND kind='ATTEND' AND"
+            + " status='PENDING' AND NOT (source_id::text||'@'||extract(epoch FROM"
+            + " occurrence_at)::bigint = ANY(?::text[]))",
+        user,
+        "{" + String.join(",", asks) + "}");
   }
 
   /** A class reminder that would land in quiet hours is sent just before they begin. */
@@ -133,7 +160,8 @@ public class PlannerReminders {
             "SELECT j.id,j.user_id,j.kind,j.source_id,j.occurrence_at,coalesce(s.name,st.name)"
                 + " subject_name,ss.status study_status,coalesce(r.timezone,'America/Sao_Paulo')"
                 + " timezone FROM academic_reminder_job j LEFT JOIN academic_class_schedule c ON"
-                + " j.kind='CLASS' AND c.id=j.source_id LEFT JOIN academic_entry s ON s.id=c.subject_id"
+                + " j.kind IN ('CLASS','ATTEND') AND c.id=j.source_id LEFT JOIN academic_entry s ON"
+                + " s.id=c.subject_id"
                 + " LEFT JOIN study_session ss ON j.kind='STUDY' AND ss.id=j.source_id LEFT JOIN"
                 + " academic_entry st ON st.id=ss.subject_id LEFT JOIN academic_routine r ON"
                 + " r.user_id=j.user_id WHERE"
@@ -142,6 +170,10 @@ public class PlannerReminders {
     int sent = 0;
     for (var job : due) {
       var starts = Instant.parse((String) job.get("occurrenceAt"));
+      if ("ATTEND".equals(job.get("kind"))) {
+        if (askAttendance(job, starts)) sent++;
+        continue;
+      }
       if (!starts.isAfter(Instant.now()) || job.get("subjectName") == null) {
         db.jdbc.update("UPDATE academic_reminder_job SET status='CANCELLED' WHERE id=?", job.get("id"));
         continue;
@@ -183,6 +215,42 @@ public class PlannerReminders {
       sent++;
     }
     return sent;
+  }
+
+  /** Asks at the start of a class whether the student is there, unless they already answered. */
+  private boolean askAttendance(Map<String, Object> job, Instant starts) {
+    UUID user = (UUID) job.get("userId");
+    Map<String, Object> occurrence = null;
+    if (job.get("subjectName") != null && !starts.plus(ASK_GRACE).isBefore(Instant.now())) {
+      var day = starts.atZone(PlannerService.zone((String) job.get("timezone"))).toLocalDate();
+      for (var o : planner.occurrences(user, day.minusDays(1), day.plusDays(1)))
+        if (job.get("sourceId").equals(o.get("scheduleId")) && starts.toString().equals(o.get("startsAt")))
+          occurrence = o;
+    }
+    if (occurrence == null
+        || "CANCELLED".equals(occurrence.get("status"))
+        || occurrence.get("attendance") != null) {
+      db.jdbc.update("UPDATE academic_reminder_job SET status='CANCELLED' WHERE id=?", job.get("id"));
+      return false;
+    }
+    var local = starts.atZone(PlannerService.zone((String) job.get("timezone")));
+    notifications.send(
+        null,
+        user,
+        "STUDY_REMINDER",
+        "study:attendance",
+        (UUID) job.get("id"),
+        "/home?day="
+            + local.toLocalDate()
+            + "&attendance="
+            + java.net.URLEncoder.encode((String) occurrence.get("attendanceKey"), java.nio.charset.StandardCharsets.UTF_8)
+            + "#enturma-study",
+        "Sua aula de " + job.get("subjectName") + " começou às " + HOUR.format(local)
+            + ". Você está na aula? Toque para marcar presença ou falta.");
+    db.jdbc.update(
+        "UPDATE academic_reminder_job SET status='SENT',sent_at=now(),attempts=attempts+1 WHERE id=?",
+        job.get("id"));
+    return true;
   }
 
   /** Keeps the two-week window filled for everyone with classes. */

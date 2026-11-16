@@ -6,8 +6,10 @@ import {
   buildMonthGrid,
   parseDate,
   weekOf,
+  vacationOn,
   type CalendarEvent,
   type CalendarHoliday,
+  type CalendarVacation,
 } from "@/lib/planner";
 
 export const MONTHS = [
@@ -23,13 +25,14 @@ export function dayLabel(iso: string) {
   return `${date.getDate()} de ${MONTHS[date.getMonth()]}`;
 }
 
-/** Monthly or weekly calendar: holidays in red, classes, studies and exams marked by kind. */
+/** Monthly or weekly calendar: holidays in red, breaks, classes, studies and exams marked by kind. */
 export function StudyCalendar({
   cursor,
   view,
   today,
   selected,
   holidays,
+  vacations = [],
   events,
   select,
   move,
@@ -41,6 +44,7 @@ export function StudyCalendar({
   today: string;
   selected: string | null;
   holidays: CalendarHoliday[];
+  vacations?: CalendarVacation[];
   events: CalendarEvent[];
   select: (day: string) => void;
   move: (direction: -1 | 1) => void;
@@ -78,7 +82,7 @@ export function StudyCalendar({
           <CalendarDays aria-hidden />
           <div>
             <h3>Calendário acadêmico</h3>
-            <p>Suas aulas, estudos, provas e feriados.</p>
+            <p>Suas aulas, estudos, provas, feriados e férias.</p>
           </div>
         </div>
         <div className="study-calendar-controls">
@@ -119,10 +123,24 @@ export function StudyCalendar({
         {cells.map(({ date, inMonth }) => {
           const dayEvents = (byDay.get(date) ?? []).filter((event) => event.status !== "CANCELLED");
           const dayHolidays = holidayByDay.get(date) ?? [];
-          const kinds = new Set(dayEvents.map((event) => (event.kind === "CLASS" ? "class" : event.kind === "STUDY" ? "study" : "exam")));
+          const dayVacations = vacationOn(vacations, date);
+          const kinds = new Set(
+            dayEvents.map((event) =>
+              event.kind === "CLASS"
+                ? event.attendance === "ABSENT"
+                  ? "absent"
+                  : "class"
+                : event.kind === "STUDY"
+                  ? "study"
+                  : "exam",
+            ),
+          );
+          const absences = dayEvents.filter((event) => event.attendance === "ABSENT").length;
           const label = [
             dayLabel(date),
             ...dayHolidays.map((holiday) => `feriado: ${holiday.name}`),
+            ...dayVacations.map((vacation) => `férias: ${vacation.name}`),
+            absences ? `${absences} ${absences === 1 ? "falta" : "faltas"}` : "",
             dayEvents.length
               ? `${dayEvents.length} ${dayEvents.length === 1 ? "compromisso" : "compromissos"}`
               : "",
@@ -140,6 +158,7 @@ export function StudyCalendar({
                 "study-day",
                 inMonth ? "" : "is-outside",
                 dayHolidays.length ? "is-holiday" : "",
+                dayVacations.length && !dayHolidays.length ? "is-vacation" : "",
                 today === date ? "is-today" : "",
               ]
                 .filter(Boolean)
@@ -149,8 +168,11 @@ export function StudyCalendar({
               <span className="study-day-number">{parseDate(date).getDate()}</span>
               {view === "week" && (
                 <span className="study-day-items">
+                  {dayVacations.length > 0 && !dayEvents.length && (
+                    <span data-kind="VACATION">{dayVacations[0].name}</span>
+                  )}
                   {dayEvents.slice(0, 3).map((event) => (
-                    <span key={event.id} data-kind={event.kind}>
+                    <span key={event.id} data-kind={event.kind} data-attendance={event.attendance ?? undefined}>
                       {event.title}
                     </span>
                   ))}
@@ -170,6 +192,8 @@ export function StudyCalendar({
         <li data-kind="study">Estudo</li>
         <li data-kind="exam">Prova ou trabalho</li>
         <li data-kind="holiday">Feriado</li>
+        <li data-kind="vacation">Férias</li>
+        <li data-kind="absent">Falta</li>
       </ul>
     </div>
   );
