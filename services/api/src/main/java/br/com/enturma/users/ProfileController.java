@@ -66,6 +66,11 @@ public class ProfileController {
     profiles.removeBanner(a);
   }
 
+  @GetMapping("/enrollment/context")
+  public Object enrollmentContext(@AuthenticationPrincipal Actor a) {
+    return profiles.enrollmentContext(a);
+  }
+
   @PutMapping("/enrollment")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void enroll(@AuthenticationPrincipal Actor a, @Valid @RequestBody Enrollment r) {

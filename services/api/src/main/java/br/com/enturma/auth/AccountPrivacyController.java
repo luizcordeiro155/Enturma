@@ -223,6 +223,7 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM calendar_vacation WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM calendar_vacation_year WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM class_attendance WHERE user_id=?", userId);
+    db.jdbc.update("DELETE FROM academic_term WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM academic_routine WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM focus_session WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM campus_task WHERE user_id=?", userId);

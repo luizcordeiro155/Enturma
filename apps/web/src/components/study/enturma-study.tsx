@@ -1,5 +1,5 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Bell, Brain, CalendarClock, GraduationCap, Settings2, Sparkles } from "lucide-react";
 import type { Profile } from "@enturma/contracts";
@@ -16,8 +16,10 @@ import {
   type AttendanceSummary,
   type Calendar,
   type Routine,
+  type TermOverview,
 } from "@/lib/planner";
 import { StudyAttendance } from "./study-attendance";
+import { StudyTermNotice } from "./study-term";
 import { StudyCalendar, dayLabel, type CalendarView } from "./study-calendar";
 import { StudyDayPanel, type DayForm } from "./study-day-panel";
 import { StudyRoutinePanel } from "./study-routine-panel";
@@ -34,8 +36,22 @@ function requestedAttendance() {
   return new URLSearchParams(window.location.search).get("attendance");
 }
 
-/** Attendance is extra: the calendar still works if it cannot load. */
-const attendanceOrNothing = () => planner.attendance().catch(() => undefined);
+/** Attendance and semesters are extra: the calendar still works if they cannot load. */
+const attendanceOrNothing = (termId?: string | null) => planner.attendance(termId).catch(() => undefined);
+const termsOrNothing = () => planner.terms().catch(() => undefined);
+
+const prefersStill = () =>
+  document.documentElement.dataset.reducedMotion === "true" ||
+  window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+
+/** Brings a form into view gently, only when the student cannot already see it. */
+function reveal(element: Element | null) {
+  if (!element) return;
+  const box = element.getBoundingClientRect();
+  // Leave room for the bottom navigation on phones.
+  if (box.top >= 0 && box.bottom <= window.innerHeight - 80) return;
+  element.scrollIntoView?.({ behavior: prefersStill() ? "auto" : "smooth", block: "center" });
+}
 
 /** Enturma Study on the home page: calendar, upcoming classes and today's agenda. */
 export function EnturmaStudy({ profile }: { profile: Profile }) {
@@ -47,7 +63,12 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
   const [routine, setRoutine] = useState<Routine>();
   const [calendar, setCalendar] = useState<Calendar>();
   const [attendance, setAttendance] = useState<AttendanceSummary>();
+  const [terms, setTerms] = useState<TermOverview>();
+  const [termId, setTermId] = useState<string | null>(null);
+  const [startingTerm, setStartingTerm] = useState(false);
   const [focusKey] = useState(() => requestedAttendance());
+  const [revealStudyForm, setRevealStudyForm] = useState(0);
+  const studyPanel = useRef<HTMLDivElement>(null);
   const [editingRoutine, setEditingRoutine] = useState(false);
   const [dayForm, setDayForm] = useState<DayForm>(null);
   const [error, setError] = useState("");
@@ -63,28 +84,36 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
 
   const load = useCallback(async () => {
     try {
-      const [nextRoutine, nextCalendar, nextAttendance] = await Promise.all([
+      const [nextRoutine, nextCalendar, nextAttendance, nextTerms] = await Promise.all([
         planner.routine(),
         planner.calendar(range.from, range.to),
-        attendanceOrNothing(),
+        attendanceOrNothing(termId),
+        termsOrNothing(),
       ]);
       setRoutine(nextRoutine);
       setCalendar(nextCalendar);
       setAttendance(nextAttendance);
+      setTerms(nextTerms);
       setError("");
     } catch (cause) {
       setError((cause as Error).message);
     }
-  }, [range.from, range.to]);
+  }, [range.from, range.to, termId]);
 
   useEffect(() => {
     let alive = true;
-    void Promise.all([planner.routine(), planner.calendar(range.from, range.to), attendanceOrNothing()])
-      .then(([nextRoutine, nextCalendar, nextAttendance]) => {
+    void Promise.all([
+      planner.routine(),
+      planner.calendar(range.from, range.to),
+      attendanceOrNothing(termId),
+      termsOrNothing(),
+    ])
+      .then(([nextRoutine, nextCalendar, nextAttendance, nextTerms]) => {
         if (!alive) return;
         setRoutine(nextRoutine);
         setCalendar(nextCalendar);
         setAttendance(nextAttendance);
+        setTerms(nextTerms);
         setError("");
       })
       .catch((cause: Error) => {
@@ -93,7 +122,26 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
     return () => {
       alive = false;
     };
-  }, [range.from, range.to]);
+  }, [range.from, range.to, termId]);
+
+  // "Agendar estudo" opens the form inside the calendar card, far above the button on a phone.
+  useEffect(() => {
+    if (!revealStudyForm) return;
+    const frame = requestAnimationFrame(() =>
+      reveal(
+        studyPanel.current?.querySelector(".study-session-form") ??
+          studyPanel.current?.querySelector(".study-day-panel") ??
+          null,
+      ),
+    );
+    return () => cancelAnimationFrame(frame);
+  }, [revealStudyForm]);
+
+  useEffect(() => {
+    if (!startingTerm) return;
+    const frame = requestAnimationFrame(() => reveal(document.querySelector(".study-term-notice")));
+    return () => cancelAnimationFrame(frame);
+  }, [startingTerm]);
 
   const events = calendar?.events ?? [];
   const holidays = calendar?.holidays ?? [];
@@ -139,6 +187,9 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
           {error}
         </p>
       )}
+      {terms && (
+        <StudyTermNotice overview={terms} starting={startingTerm} close={() => setStartingTerm(false)} />
+      )}
       {editingRoutine && routine && (
         <StudyRoutinePanel
           routine={routine}
@@ -183,6 +234,7 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
               </ul>
             </div>
           )}
+          <div ref={studyPanel} className="study-day-anchor">
           {selected && routine && (
             <StudyDayPanel
               key={`${selected}:${dayForm ?? ""}`}
@@ -197,6 +249,7 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
               close={() => setSelected(null)}
             />
           )}
+          </div>
         </article>
         <div className="enturma-study-side">
           {attendance && (
@@ -207,6 +260,10 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
               focusKey={focusKey}
               changed={load}
               editSemester={() => setEditingRoutine(true)}
+              terms={terms?.terms}
+              termId={termId}
+              selectTerm={setTermId}
+              startTerm={terms?.needs === "NONE" ? () => setStartingTerm(true) : undefined}
             />
           )}
           <section className="study-card" aria-label="Próximas aulas">
@@ -283,6 +340,7 @@ export function EnturmaStudy({ profile }: { profile: Profile }) {
               type="button"
               className="study-schedule-button"
               onClick={() => {
+                setRevealStudyForm((count) => count + 1);
                 setDayForm("study");
                 setSelected(selected ?? today);
               }}

@@ -34,12 +34,23 @@ export function Onboarding() {
   const router = useRouter();
   const parent = selected[step - 1];
   const [contextReady, setContextReady] = useState(false);
+  /** Choosing the period and subjects of a new semester: the rest of the profile stays. */
+  const [newTerm, setNewTerm] = useState(false);
   useEffect(() => {
     let active = true;
-    api<AcademicContext>("/auth/academic/status", { cache: "no-store" })
-      .then((identity) => {
+    const term = new URLSearchParams(window.location.search).get("semestre") === "novo";
+    const enrolled = term
+      ? api<AcademicEntry[]>("/users/me/enrollment/context", { cache: "no-store" }).catch(() => [])
+      : Promise.resolve([] as AcademicEntry[]);
+    Promise.all([
+      enrolled,
+      api<AcademicContext>("/auth/academic/status", { cache: "no-store" }).catch(() => null),
+    ])
+      .then(([chain, identity]) => {
         if (!active) return;
-        const context = academicOnboardingContext(identity);
+        setNewTerm(term);
+        const context =
+          chain.length === 4 ? chain : identity ? academicOnboardingContext(identity) : [];
         if (context.length) {
           setSelected(context.map((item) => item.id));
           setSelection(context);
@@ -115,7 +126,7 @@ export function Onboarding() {
         }),
       });
       window.dispatchEvent(new Event("enturma-profile-updated"));
-      router.push("/home");
+      router.push(newTerm ? "/home#enturma-study" : "/home");
     } catch (e) {
       setError((e as Error).message);
     } finally {
@@ -126,16 +137,32 @@ export function Onboarding() {
     <Shell>
       <div className="narrow">
         <p className="step-label">
-          Seu perfil acadêmico · Etapa {step + 1} de 6
+          {newTerm ? "Novo semestre" : "Seu perfil acadêmico"} · Etapa {step + 1} de 6
         </p>
-        <h1>
-          Vamos encontrar
-          <br />a sua turma.
-        </h1>
-        <p className="lead">
-          Selecione os dados da sua jornada. Cada opção vem do catálogo da
-          plataforma.
-        </p>
+        {newTerm ? (
+          <>
+            <h1>
+              Novo semestre,
+              <br />
+              nova grade.
+            </h1>
+            <p className="lead">
+              Escolha o período que você vai cursar agora e as matérias deste
+              semestre. Depois, adicione as aulas no calendário.
+            </p>
+          </>
+        ) : (
+          <>
+            <h1>
+              Vamos encontrar
+              <br />a sua turma.
+            </h1>
+            <p className="lead">
+              Selecione os dados da sua jornada. Cada opção vem do catálogo da
+              plataforma.
+            </p>
+          </>
+        )}
         <div className="progress" aria-label={`Etapa ${step + 1} de 6`}>
           <span style={{ width: `${((step + 1) / 6) * 100}%` }} />
         </div>
@@ -304,7 +331,7 @@ export function Onboarding() {
               />
             </label>
             <button className="button" disabled={busy || subjects.length === 0}>
-              Concluir perfil
+              {newTerm ? "Salvar matérias do semestre" : "Concluir perfil"}
             </button>
           </form>
         ) : null}

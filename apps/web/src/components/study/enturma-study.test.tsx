@@ -7,6 +7,7 @@ import { EnturmaStudy } from "./enturma-study";
 const api = vi.hoisted(() => vi.fn());
 vi.mock("@/lib/api", () => ({ api }));
 vi.mock("@/lib/motion", () => ({ playMotion: vi.fn() }));
+vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
 
 const profile = {
   id: "me",
@@ -105,4 +106,37 @@ it("um dia de aula em feriado pede confirmação, sem cancelar", async () => {
   fireEvent.click(await screen.findByRole("button", { name: /^21 de abril/ }));
   const panel = screen.getByRole("region", { name: /terça-feira, 21 de abril/ });
   expect(within(panel).getByText(/Feriado — confirme se haverá aula/)).toBeVisible();
+});
+
+it("Agendar estudo leva suavemente até o formulário quando ele está fora da tela", async () => {
+  serve([]);
+  const scroll = vi.fn();
+  const box = vi
+    .spyOn(Element.prototype, "getBoundingClientRect")
+    .mockReturnValue({ top: 1800, bottom: 2300, left: 0, right: 300, width: 300, height: 500, x: 0, y: 1800, toJSON() {} });
+  Element.prototype.scrollIntoView = scroll;
+  vi.spyOn(window, "requestAnimationFrame").mockImplementation((step) => {
+    step(0);
+    return 1;
+  });
+  render(<EnturmaStudy profile={profile} />);
+  const sessions = await screen.findByRole("region", { name: "Sessões de estudo" });
+  fireEvent.click(within(sessions).getByRole("button", { name: "Agendar estudo" }));
+  expect(await screen.findByLabelText("Horário")).toBeInTheDocument();
+  expect(scroll).toHaveBeenCalledWith({ behavior: "smooth", block: "center" });
+  expect(scroll.mock.contexts[0]).toHaveClass("study-session-form");
+  box.mockRestore();
+  vi.mocked(window.requestAnimationFrame).mockRestore();
+});
+
+it("com o formulário já visível, a página não se mexe", async () => {
+  serve([]);
+  const scroll = vi.fn();
+  Element.prototype.scrollIntoView = scroll;
+  render(<EnturmaStudy profile={profile} />);
+  const sessions = await screen.findByRole("region", { name: "Sessões de estudo" });
+  fireEvent.click(within(sessions).getByRole("button", { name: "Agendar estudo" }));
+  expect(await screen.findByLabelText("Horário")).toBeInTheDocument();
+  await new Promise((done) => setTimeout(done, 50));
+  expect(scroll).not.toHaveBeenCalled();
 });

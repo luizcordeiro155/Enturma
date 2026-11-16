@@ -168,6 +168,33 @@ public class ProfileService {
         preferences);
     db.jdbc.update("DELETE FROM user_subject WHERE user_id=?", a.id());
     for (UUID id : subjects) db.jdbc.update("INSERT INTO user_subject VALUES (?,?)", a.id(), id);
+    // These are the subjects of the current semester.
+    db.jdbc.update(
+        "UPDATE academic_term SET period_id=?,subjects=(SELECT jsonb_agg(subject_id) FROM user_subject"
+            + " WHERE user_id=?),subjects_confirmed=true WHERE id=(SELECT id FROM academic_term WHERE"
+            + " user_id=? ORDER BY starts_on DESC LIMIT 1)",
+        period,
+        a.id(),
+        a.id());
     events.publishEvent(new AppChanged("profile_changed", Set.of()));
+  }
+
+  /**
+   * University, campus, course and curriculum of the student's enrollment, so choosing the subjects
+   * of a new semester starts at the period step.
+   */
+  public List<Map<String, Object>> enrollmentContext(Actor a) {
+    var enrollment = db.list("SELECT period_id FROM academic_enrollment WHERE user_id=?", a.id());
+    if (enrollment.isEmpty()) return List.of();
+    var chain = new ArrayList<Map<String, Object>>();
+    Object parent =
+        db.one("SELECT parent_id FROM academic_entry WHERE id=?", enrollment.getFirst().get("periodId"))
+            .get("parentId");
+    while (parent != null && chain.size() < 4) {
+      var entry = db.one("SELECT * FROM academic_entry WHERE id=? AND status='VERIFIED'", parent);
+      chain.addFirst(entry);
+      parent = entry.get("parentId");
+    }
+    return chain.size() == 4 && "INSTITUTION".equals(chain.getFirst().get("kind")) ? chain : List.of();
   }
 }

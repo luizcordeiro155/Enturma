@@ -1,7 +1,13 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { CalendarCheck, UserCheck, UserX } from "lucide-react";
-import { planner, timeIn, type AttendanceStatus, type AttendanceSummary } from "@/lib/planner";
+import {
+  planner,
+  timeIn,
+  type AcademicTerm,
+  type AttendanceStatus,
+  type AttendanceSummary,
+} from "@/lib/planner";
 import { dayLabel } from "./study-calendar";
 import { periodLabel } from "./study-day-panel";
 
@@ -16,6 +22,10 @@ export function StudyAttendance({
   focusKey,
   changed,
   editSemester,
+  terms = [],
+  termId = null,
+  selectTerm,
+  startTerm,
 }: {
   summary: AttendanceSummary;
   zone: string;
@@ -24,6 +34,12 @@ export function StudyAttendance({
   focusKey?: string | null;
   changed: () => Promise<void>;
   editSemester: () => void;
+  /** Every semester of the student, newest first. */
+  terms?: AcademicTerm[];
+  /** The semester shown; null is the current one. */
+  termId?: string | null;
+  selectTerm?: (id: string | null) => void;
+  startTerm?: () => void;
 }) {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState("");
@@ -70,6 +86,19 @@ export function StudyAttendance({
           </p>
         </div>
       </div>
+      {terms.length > 1 && selectTerm && (
+        <label className="study-term-select">
+          Semestre
+          <select value={termId ?? ""} onChange={(event) => selectTerm(event.target.value || null)}>
+            {terms.map((term, index) => (
+              <option key={term.id} value={index === 0 ? "" : term.id}>
+                {term.name}
+                {index === 0 ? " (atual)" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+      )}
       {question && (
         <div className="study-attendance-question" role="group" aria-label={`Você foi à aula de ${question.title}?`}>
           <p>
@@ -147,10 +176,17 @@ export function StudyAttendance({
       <p className="study-notice">
         Aula sem resposta conta como presença. Faltou? Marque “Faltei” no dia.
       </p>
-      {summary.estimated && (
+      {summary.estimated ? (
         <button type="button" className="study-schedule-button" onClick={editSemester}>
           Definir início e fim do semestre
         </button>
+      ) : (
+        startTerm &&
+        !termId && (
+          <button type="button" className="text-button study-term-start" onClick={startTerm}>
+            Começar novo semestre
+          </button>
+        )
       )}
       {error && (
         <p role="alert" className="error">
