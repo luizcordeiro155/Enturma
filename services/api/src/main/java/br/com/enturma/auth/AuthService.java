@@ -161,6 +161,33 @@ public class AuthService {
         .findFirst();
   }
 
+  /** Session, academic access and a global moderation restriction, in one database round trip. */
+  public record Access(Actor actor, boolean student, boolean restricted) {}
+
+  public Optional<Access> access(String token) {
+    return db
+        .list(
+            "SELECT s.id,s.user_id,u.role,"
+                + " EXISTS(SELECT 1 FROM academic_identity ai WHERE ai.user_id=u.id AND (ai.status IN"
+                + " ('LEGACY_APPROVED','STUDENT_VERIFIED') OR ai.personal_access)) AS student,"
+                + " EXISTS(SELECT 1 FROM moderation_case c JOIN moderation_action a ON a.case_id=c.id"
+                + " WHERE c.user_id=u.id AND c.room_id IS NULL AND a.kind IN"
+                + " ('BAN','SUSPENSION','RESTRICTION') AND a.revoked_at IS NULL AND (a.ends_at IS NULL"
+                + " OR a.ends_at>now())) AS restricted"
+                + " FROM user_session s JOIN app_user u ON u.id=s.user_id"
+                + " WHERE access_hash=? AND access_expires_at>now() AND expires_at>now() AND"
+                + " revoked_at IS NULL AND u.status='ACTIVE'",
+            Tokens.hash(token))
+        .stream()
+        .map(
+            r ->
+                new Access(
+                    new Actor((UUID) r.get("userId"), (UUID) r.get("id"), (String) r.get("role")),
+                    Boolean.TRUE.equals(r.get("student")),
+                    Boolean.TRUE.equals(r.get("restricted"))))
+        .findFirst();
+  }
+
   public boolean studentAccess(Actor actor) {
     return db.exists(
         "SELECT EXISTS(SELECT 1 FROM academic_identity WHERE user_id=?"

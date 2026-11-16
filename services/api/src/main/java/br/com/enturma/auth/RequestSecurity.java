@@ -35,18 +35,18 @@ public class RequestSecurity extends OncePerRequestFilter {
     req.setAttribute("requestId", requestId);
     res.setHeader("X-Request-ID", requestId);
     String authorization = req.getHeader("Authorization");
+    AuthService.Access access = null;
     if (authorization != null
         && authorization.startsWith("Bearer ")
         && authorization.length() < 200)
-      auth.authenticate(authorization.substring(7))
-          .ifPresent(
-              actor ->
-                  SecurityContextHolder.getContext()
-                      .setAuthentication(
-                          new UsernamePasswordAuthenticationToken(
-                              actor,
-                              null,
-                              List.of(new SimpleGrantedAuthority("ROLE_" + actor.role())))));
+      access = auth.access(authorization.substring(7)).orElse(null);
+    if (access != null)
+      SecurityContextHolder.getContext()
+          .setAuthentication(
+              new UsernamePasswordAuthenticationToken(
+                  access.actor(),
+                  null,
+                  List.of(new SimpleGrantedAuthority("ROLE_" + access.actor().role()))));
     var current = SecurityContextHolder.getContext().getAuthentication();
     // Match the decoded path used by Spring MVC, including percent-encoded letters.
     String route =
@@ -63,7 +63,11 @@ public class RequestSecurity extends OncePerRequestFilter {
                     || route.matches("/api/v1/users/[^/]+/(avatar|banner)")))
             || route.equals("/actuator/health")
             || route.equals("/ws");
-    if (current != null && !pendingAllowed && !auth.studentAccess((Actor) current.getPrincipal())) {
+    boolean studentAccess =
+        access != null
+            ? access.student()
+            : current != null && auth.studentAccess((Actor) current.getPrincipal());
+    if (current != null && !pendingAllowed && !studentAccess) {
       res.setStatus(403);
       res.setContentType("application/json");
       json.writeValue(
@@ -82,12 +86,16 @@ public class RequestSecurity extends OncePerRequestFilter {
         && !route.equals("/api/v1/users/me")
         && !route.startsWith("/api/v1/notifications")) {
       Actor actor = (Actor) current.getPrincipal();
-      if (db.exists(
-          "SELECT EXISTS(SELECT 1 FROM moderation_case c JOIN moderation_action a ON a.case_id=c.id"
-              + " WHERE c.user_id=? AND c.room_id IS NULL AND a.kind IN"
-              + " ('BAN','SUSPENSION','RESTRICTION') AND a.revoked_at IS NULL AND (a.ends_at IS"
-              + " NULL OR a.ends_at>now()))",
-          actor.id())) {
+      boolean restricted =
+          access != null
+              ? access.restricted()
+              : db.exists(
+                  "SELECT EXISTS(SELECT 1 FROM moderation_case c JOIN moderation_action a ON"
+                      + " a.case_id=c.id WHERE c.user_id=? AND c.room_id IS NULL AND a.kind IN"
+                      + " ('BAN','SUSPENSION','RESTRICTION') AND a.revoked_at IS NULL AND"
+                      + " (a.ends_at IS NULL OR a.ends_at>now()))",
+                  actor.id());
+      if (restricted) {
         res.setStatus(403);
         res.setContentType("application/json");
         json.writeValue(
