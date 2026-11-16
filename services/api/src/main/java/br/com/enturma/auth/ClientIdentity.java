@@ -20,7 +20,7 @@ public class ClientIdentity {
   }
 
   public String subject(HttpServletRequest request) {
-    String fallback = request.getRemoteAddr();
+    String fallback = ProxiedAddress.resolve(request.getRemoteAddr(), request::getHeader);
     String header = request.getHeader("X-Enturma-Client");
     if (secret.length() < 32 || header == null || header.length() > 150) return fallback;
     try {

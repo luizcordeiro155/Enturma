@@ -221,6 +221,7 @@ test("cadastro real, SMTP e confirmação em outro dispositivo liberam a tela se
     .fill(`${username}@example.test`);
   await page.getByLabel("Senha", { exact: true }).fill(password);
   await page.getByLabel("Confirmar senha", { exact: true }).fill(password);
+  await page.getByRole("checkbox", { name: /Li e aceito/ }).check();
   await page.getByRole("button", { name: "Criar conta", exact: true }).click();
   await expect(page).toHaveURL(/academic-verification/);
   await selectInstitution(page);

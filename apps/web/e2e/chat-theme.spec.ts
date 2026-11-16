@@ -120,7 +120,7 @@ test("two accounts acknowledge private and room messages, with compact themed co
           name: username,
           username,
           email: `${username}@example.test`,
-          password: "abc123",
+          password: "E2E-password-abc123",
           device: "E2E",
         },
       });

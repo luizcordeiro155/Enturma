@@ -11,6 +11,7 @@ import { api, post } from "@/lib/api";
 import { ApiError } from "@enturma/contracts";
 import { useRouter } from "next/navigation";
 import { useVisitor } from "@/lib/visitor-context";
+import { PrivacyRights } from "./privacy-rights";
 
 type Deletion = {
   status?: string;
@@ -184,6 +185,7 @@ export function AccountPrivacyCard() {
   }
   return (
     <section
+      id="privacidade"
       className="privacy-zone"
       onClickCapture={(event) => {
         if (visitor.active && (event.target as HTMLElement).closest("button")) {
@@ -203,6 +205,7 @@ export function AccountPrivacyCard() {
           </p>
         </div>
       </div>
+      {!visitor.active && <PrivacyRights />}
       {pending ? (
         <div className="deletion-pending">
           <AlertTriangle />
@@ -228,8 +231,9 @@ export function AccountPrivacyCard() {
           <div>
             <strong>Uma cópia para você</strong>
             <p>
-              Baixe seu cadastro, portfólio, fontes e conversas dos cadernos em
-              JSON. Arquivos e imagens são listados, sem incluir os binários.
+              Baixe em JSON tudo o que o Enturma guarda sobre você: conta,
+              vida acadêmica, estudos, comunidade, caronas, notificações e
+              aceites. Arquivos e imagens são listados, sem os binários.
             </p>
           </div>
           <button

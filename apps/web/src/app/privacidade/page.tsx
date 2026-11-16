@@ -1,252 +1,337 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalDocument } from "@/components/legal-document";
+import {
+  CONTROLLER_NAME,
+  LEGAL_VERSION,
+  LEGAL_VERSION_LABEL,
+  MINIMUM_AGE,
+  PRIVACY_EMAIL,
+} from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Política de Privacidade | Enturma",
   description:
-    "Como o Enturma trata dados pessoais, acadêmicos e de mobilidade.",
+    "Como o Enturma trata dados pessoais, com quem compartilha, por quanto tempo guarda e como você exerce seus direitos pela LGPD.",
   robots: { index: false, follow: false },
 };
+
+const mail = `mailto:${PRIVACY_EMAIL}?subject=${encodeURIComponent("LGPD - solicitação do titular")}`;
 
 export default function PrivacyPage() {
   return (
     <LegalDocument
       title="Política de Privacidade"
-      summary="Esta política explica quais dados o Enturma utiliza, por que eles são necessários e quais controles você possui sobre sua conta, seus conteúdos e sua localização."
-      updatedAt="2 de novembro de 2026"
+      summary="Esta política explica quais dados pessoais o Enturma trata, para quê, com qual base legal, com quem compartilha, por quanto tempo guarda e como você exerce os seus direitos previstos na Lei Geral de Proteção de Dados (Lei 13.709/2018)."
+      updatedAt={`${LEGAL_VERSION_LABEL} (versão ${LEGAL_VERSION})`}
     >
       <section>
-        <h2>1. Sobre esta política</h2>
+        <h2>1. Quem trata os seus dados</h2>
         <p>
-          O Enturma é uma plataforma acadêmica em desenvolvimento ativo. Esta
-          política se aplica ao site, ao aplicativo Desktop e ao aplicativo
-          Android oficial quando eles utilizam os serviços do Enturma.
+          O controlador dos dados pessoais tratados no Enturma é{" "}
+          <strong>{CONTROLLER_NAME}</strong>, responsável pelo projeto. Esta
+          política vale para o site, o aplicativo Desktop e o aplicativo
+          Android oficiais.
         </p>
         <p>
-          O objetivo é tratar somente os dados necessários para entregar os
-          recursos escolhidos pelo usuário e manter a plataforma segura.
+          O encarregado pelo tratamento de dados pessoais (DPO) é{" "}
+          {CONTROLLER_NAME}, pelo e-mail{" "}
+          <a href={mail}>{PRIVACY_EMAIL}</a>. Use esse canal para qualquer
+          dúvida, solicitação ou reclamação sobre os seus dados.
         </p>
       </section>
 
       <section>
-        <h2>2. Dados que podem ser tratados</h2>
+        <h2>2. Dados que tratamos</h2>
         <ul>
           <li>
-            <strong>Conta e autenticação:</strong> nome, nome de usuário,
-            e-mail, credenciais protegidas, sessões e informações necessárias
-            para recuperação e segurança da conta.
+            <strong>Conta:</strong> nome, nome de usuário, e-mail, senha
+            protegida por hash, sessões e dispositivos conectados.
           </li>
           <li>
-            <strong>Perfil e vida acadêmica:</strong> instituição, campus,
-            curso, período, matérias selecionadas, preferências, conquistas,
-            portfólio e demais informações que você decidir adicionar.
+            <strong>Vida acadêmica:</strong> instituição, campus, curso, período,
+            semestres, matérias, grade de aulas, presenças e faltas que você
+            registra, tarefas, provas, metas e sessões de estudo.
           </li>
           <li>
-            <strong>Comunidade e estudo:</strong> mensagens, publicações,
-            reações, arquivos, cadernos, atividades e outros conteúdos enviados
-            por você nos recursos em que existe persistência.
+            <strong>Verificação acadêmica:</strong> e-mail institucional e,
+            quando você escolhe esse caminho, o comprovante de vínculo enviado.
           </li>
           <li>
-            <strong>Dados técnicos:</strong> informações de dispositivo, versão
-            do aplicativo, sessão, registros de erro, segurança, notificações e
-            eventos necessários para operar o serviço.
+            <strong>Comunidade:</strong> publicações, comentários, reações,
+            mensagens em salas, fórum, conversas privadas, chamadas, arquivos,
+            cadernos, portfólio, conquistas e o que mais você decidir publicar.
           </li>
           <li>
-            <strong>Caronas e mobilidade:</strong> campus, direção da viagem,
-            pontos escolhidos, dados de veículo quando cadastrados e localização
-            quando você conceder permissão para recursos que realmente dependem
-            dela.
+            <strong>Caronas:</strong> pontos de partida e destino, rota,
+            veículo, avaliações e, apenas durante uma viagem com a sua
+            permissão, a localização ao vivo.
+          </li>
+          <li>
+            <strong>Dados técnicos:</strong> tipo de dispositivo e de
+            aplicativo, registros de segurança e de erro, preferências de
+            aparência, acessibilidade e notificações.
           </li>
         </ul>
+        <p>
+          Não pedimos dados pessoais sensíveis (como saúde, religião ou origem
+          racial). Não os inclua em publicações ou comprovantes.
+        </p>
       </section>
 
       <section>
-        <h2>3. Como usamos esses dados</h2>
+        <h2>3. Para que usamos e com qual base legal</h2>
+        <div className="legal-table-wrap">
+          <table className="legal-table">
+            <thead>
+              <tr>
+                <th scope="col">Finalidade</th>
+                <th scope="col">Base legal (LGPD)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Criar e manter a conta, sincronizar Web, Desktop e Android, entregar os recursos que você usa</td>
+                <td>Execução do contrato (art. 7º, V)</td>
+              </tr>
+              <tr>
+                <td>Verificar o vínculo acadêmico e manter a comunidade restrita a estudantes</td>
+                <td>Execução do contrato (art. 7º, V) e legítimo interesse (art. 7º, IX)</td>
+              </tr>
+              <tr>
+                <td>Localização ao vivo nas caronas, microfone, câmera e notificações no aparelho</td>
+                <td>Consentimento (art. 7º, I), dado pela permissão do sistema e revogável a qualquer momento</td>
+              </tr>
+              <tr>
+                <td>Recursos de inteligência artificial que você aciona</td>
+                <td>Execução do contrato (art. 7º, V)</td>
+              </tr>
+              <tr>
+                <td>Segurança, prevenção de fraude e abuso, moderação e limites de uso</td>
+                <td>Legítimo interesse (art. 7º, IX) e garantia da prevenção à fraude e da segurança do titular (art. 11, II, g, quando aplicável)</td>
+              </tr>
+              <tr>
+                <td>Guardar registros de acesso quando a lei exigir</td>
+                <td>Cumprimento de obrigação legal ou regulatória (art. 7º, II)</td>
+              </tr>
+              <tr>
+                <td>Defender direitos em processos e responder autoridades</td>
+                <td>Exercício regular de direitos (art. 7º, VI)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
         <p>
-          Publicações e comentários da comunidade podem ser lidos por visitantes
-          do site, junto ao nome e nome de usuário de quem publicou. A
-          descoberta de salas abertas mostra título, matéria, imagens da sala e
-          quantidade de participantes. Ela não publica a lista de participantes,
-          códigos de convite, mensagens, materiais, perfis completos ou
-          localização de caronas. Entrar em salas e interagir na comunidade
-          exige uma conta autorizada.
+          O Enturma não vende dados pessoais, não exibe publicidade
+          comportamental e não usa os seus dados para criar perfis de anúncios.
+        </p>
+      </section>
+
+      <section>
+        <h2>4. O que fica visível para outras pessoas</h2>
+        <p>
+          Publicações e comentários públicos da comunidade podem ser lidos por
+          visitantes do site, com o nome e o nome de usuário de quem publicou.
+          A descoberta de salas mostra título, matéria, imagens da sala e
+          quantidade de participantes; não mostra participantes, convites,
+          mensagens, materiais ou perfis completos. Contas privadas e
+          configurações de perfil controlam o restante.
+        </p>
+      </section>
+
+      <section>
+        <h2>5. Conversas privadas</h2>
+        <p>
+          As conversas privadas são cifradas no seu dispositivo. Para que você
+          possa abri-las em outros aparelhos, inclusive depois de recuperar a
+          senha, o serviço guarda uma cópia cifrada da identidade das conversas
+          protegida por uma chave da API. Por isso esse modelo{" "}
+          <strong>não é criptografia ponta a ponta inacessível ao servidor</strong>.
+          Mensagens de salas e chamadas são protegidas no transporte (HTTPS/WSS),
+          sem cifragem ponta a ponta. A IA não recebe conversas privadas entre
+          amigos.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. Localização e caronas</h2>
+        <p>
+          A localização só é usada com a sua permissão. A posição ao vivo é
+          compartilhada apenas com os participantes da viagem, nos estados
+          autorizados, e é apagada automaticamente em até 15 minutos sem
+          atualização. A localização exata nunca aparece na descoberta pública
+          de caronas.
         </p>
         <p>
-          Mensagens de voz usam o microfone somente depois de sua autorização e
-          podem ser ouvidas ou descartadas antes do envio. Nas conversas
-          privadas, o áudio utiliza a mesma proteção criptográfica dos anexos.
-          Os indicadores de entrega e leitura registram quando um cliente
-          autorizado recebeu a mensagem e quando ela ficou visível ao
-          destinatário com a conversa em foco.
+          Para buscar endereços e calcular rotas, o endereço digitado ou as
+          coordenadas do trajeto são enviados a serviços de mapas: OpenStreetMap
+          (mapas e Nominatim), OSRM (rotas) e Esri ArcGIS (busca de endereços).
         </p>
-        <p>Os dados podem ser usados para:</p>
+      </section>
+
+      <section>
+        <h2>7. Inteligência artificial</h2>
+        <p>
+          Quando você usa um recurso de IA (tutor, cadernos, revisão de
+          estudos), o conteúdo necessário para responder é enviado ao provedor
+          configurado, hoje a OpenAI. Os materiais respeitam as permissões do
+          recurso que originou o pedido. Não envie à IA senhas, documentos
+          sigilosos ou dados pessoais de outras pessoas.
+        </p>
+      </section>
+
+      <section>
+        <h2>8. Verificação acadêmica</h2>
+        <p>
+          Novas contas confirmam um e-mail acadêmico autorizado ou enviam um
+          comprovante para análise. A confirmação do e-mail prova o controle do
+          endereço, não uma matrícula ativa. Comprovantes ficam em
+          armazenamento privado, acessível apenas à equipe responsável, e são
+          apagados após a decisão ou em até 14 dias. A decisão, o método, a
+          instituição e o registro de auditoria são mantidos para controle de
+          acesso.
+        </p>
+      </section>
+
+      <section>
+        <h2>9. Com quem compartilhamos e transferência internacional</h2>
+        <p>
+          Os dados são tratados por operadores contratados apenas para operar
+          o serviço, cada um recebendo o mínimo necessário:
+        </p>
         <ul>
-          <li>criar e proteger sua conta;</li>
-          <li>sincronizar sua experiência entre Web, Desktop e Android;</li>
-          <li>conectar estudantes a matérias, turmas, salas e comunidades;</li>
-          <li>entregar chat, chamadas, materiais, notificações e portfólio;</li>
-          <li>processar recursos de IA solicitados por você;</li>
-          <li>operar matching, rota e segurança do Enturma Caronas;</li>
-          <li>
-            prevenir abuso, fraude, acesso indevido e falhas de segurança;
-          </li>
-          <li>diagnosticar erros e melhorar estabilidade e desempenho.</li>
+          <li><strong>Vercel</strong> — hospedagem do site e do app web;</li>
+          <li><strong>Square Cloud</strong> — hospedagem da API;</li>
+          <li><strong>Railway</strong> — banco de dados e downloads dos aplicativos;</li>
+          <li><strong>Cloudflare R2</strong> — armazenamento de fotos e vídeos do Social;</li>
+          <li><strong>LiveKit</strong> — chamadas de voz e vídeo;</li>
+          <li><strong>OpenAI</strong> — recursos de inteligência artificial;</li>
+          <li><strong>Google Firebase</strong> — notificações no Android;</li>
+          <li><strong>KLIPY</strong> — busca de GIFs e figurinhas;</li>
+          <li><strong>OpenStreetMap, OSRM e Esri ArcGIS</strong> — mapas, endereços e rotas;</li>
+          <li><strong>Provedor de e-mail (SMTP)</strong> — mensagens de confirmação e recuperação de conta.</li>
         </ul>
-      </section>
-
-      <section>
-        <h2>4. Localização e Enturma Caronas</h2>
         <p>
-          O acesso à localização depende da sua permissão. A localização exata
-          não deve ser exibida publicamente na descoberta de caronas.
-        </p>
-        <p>
-          Quando uma corrida utiliza acompanhamento ao vivo, a posição é
-          compartilhada apenas nos estados autorizados da viagem e entre os
-          participantes que possuem acesso ao match. O Enturma busca manter
-          somente o necessário para o funcionamento desse acompanhamento e
-          encerrar o compartilhamento quando a viagem, o match ou a permissão
-          correspondente deixam de estar ativos.
+          Vários desses fornecedores mantêm servidores fora do Brasil,
+          principalmente nos Estados Unidos e na Europa. Essas transferências
+          internacionais são feitas para executar o serviço que você contratou
+          (art. 33, IX) e com fornecedores que adotam cláusulas contratuais e
+          medidas de segurança próprias. Também podemos compartilhar dados
+          quando a lei ou uma autoridade competente exigir.
         </p>
       </section>
 
       <section>
-        <h2>5. Inteligência artificial</h2>
+        <h2>10. Cookies e armazenamento no aparelho</h2>
         <p>
-          A biblioteca pessoal de figurinhas e GIFs armazena cópias que você
-          escolher salvar. Ela é privada à sua conta e pode ser removida item a
-          item. Salvar uma imagem de conversa privada cria uma cópia nesta
-          biblioteca, fora do envelope cifrado da mensagem.
-        </p>
-        <p>
-          As conversas privadas são cifradas no dispositivo. Para abri-las após
-          login em outros aparelhos, inclusive após recuperação de senha, o
-          serviço mantém uma cópia cifrada da identidade das conversas e protege
-          sua chave com uma chave própria da API. O serviço pode recuperar essa
-          proteção para a conta autenticada; esse modelo não oferece
-          criptografia ponta a ponta inacessível ao servidor. A IA não recebe as
-          conversas privadas entre amigos.
-        </p>
-        <p>
-          Em Perfil, Privacidade, você pode exportar seu cadastro, portfólio,
-          fontes e conversas dos cadernos em JSON. Os arquivos de imagem e
-          documentos são listados na exportação e podem ser baixados nos
-          respectivos recursos. Para solicitar outros dados ou exercer seus
-          direitos, utilize o canal de contato desta política.
-        </p>
-        <p>
-          Quando você usa um recurso de IA, o conteúdo necessário para atender à
-          solicitação pode ser enviado ao provedor de IA configurado pelo
-          Enturma. Materiais e contexto devem respeitar as permissões do recurso
-          que originou a solicitação.
-        </p>
-        <p>
-          Não envie para a IA senhas, documentos sigilosos ou informações
-          pessoais que não sejam necessárias para sua atividade.
+          Usamos apenas cookies e armazenamento local necessários ao
+          funcionamento: cookies de sessão protegidos (HttpOnly, Secure e
+          SameSite), preferências de tema, acessibilidade, idioma,
+          notificações e estados de tela. Não usamos cookies de publicidade,
+          de rastreamento entre sites ou ferramentas de analytics de
+          terceiros.
         </p>
       </section>
 
       <section>
-        <h2>6. Fornecedores e integrações</h2>
+        <h2>11. Por quanto tempo guardamos</h2>
+        <div className="legal-table-wrap">
+          <table className="legal-table">
+            <thead>
+              <tr>
+                <th scope="col">Dado</th>
+                <th scope="col">Prazo</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Conta e conteúdos</td><td>Enquanto a conta existir; depois da exclusão, são apagados ou anonimizados</td></tr>
+              <tr><td>Sessões encerradas ou expiradas</td><td>30 dias</td></tr>
+              <tr><td>E-mails de confirmação e recuperação</td><td>30 dias após o envio</td></tr>
+              <tr><td>Notificações</td><td>180 dias após lidas; 1 ano no máximo</td></tr>
+              <tr><td>Localização ao vivo da carona</td><td>Até 15 minutos sem atualização</td></tr>
+              <tr><td>Comprovante de verificação acadêmica</td><td>Até a decisão ou 14 dias</td></tr>
+              <tr><td>Contadores antiabuso</td><td>1 dia após expirarem</td></tr>
+              <tr><td>Registros técnicos de acesso e de erro nos provedores de hospedagem</td><td>Conforme a retenção de cada provedor, sem conteúdo de mensagens, senhas ou tokens</td></tr>
+              <tr><td>Registro de aceite destes termos</td><td>Mantido após a exclusão, sem identificação, para comprovar o consentimento</td></tr>
+            </tbody>
+          </table>
+        </div>
         <p>
-          Para operar seus recursos, o Enturma pode utilizar provedores de
-          hospedagem, banco de dados, armazenamento, chamadas em tempo real,
-          inteligência artificial e notificações. Atualmente o projeto possui
-          integrações que podem envolver serviços como LiveKit, armazenamento
-          compatível com S3, OpenAI e Firebase Cloud Messaging.
-        </p>
-        <p>
-          Cada integração deve receber somente os dados necessários para a
-          finalidade técnica correspondente e também está sujeita aos termos e
-          políticas do respectivo fornecedor.
-        </p>
-      </section>
-
-      <section>
-        <h2>7. Cookies, sessão e preferências</h2>
-        <p>
-          O Enturma utiliza cookies e armazenamento local para autenticação,
-          manutenção de sessão, preferências de aparência, acessibilidade e
-          estados necessários ao funcionamento do aplicativo.
-        </p>
-        <p>
-          Esses mecanismos são utilizados para operar a plataforma e não são
-          apresentados como uma rede de publicidade comportamental.
-        </p>
-      </section>
-
-      <section>
-        <h2>8. Retenção e exclusão</h2>
-        <p>
-          O Enturma possui controles de exclusão de conta. Quando disponíveis no
-          aplicativo, você pode solicitar exclusão imediata ou agendada com
-          janela para cancelamento.
-        </p>
-        <p>
-          Alguns registros podem precisar ser anonimizados ou preservados pelo
-          período estritamente necessário para integridade, segurança, prevenção
-          de abuso, cumprimento de obrigações aplicáveis ou defesa de direitos.
+          Cópias de segurança seguem o próprio ciclo de retenção do provedor e
+          não são usadas para recuperar dados que você excluiu.
         </p>
       </section>
 
       <section>
-        <h2>9. Seus controles e direitos</h2>
+        <h2>12. Seus direitos</h2>
+        <p>Pela LGPD (art. 18), você pode, a qualquer momento:</p>
+        <ul>
+          <li>confirmar se tratamos seus dados e acessá-los;</li>
+          <li>corrigir dados incompletos, inexatos ou desatualizados;</li>
+          <li>pedir anonimização, bloqueio ou eliminação de dados desnecessários ou tratados em desconformidade;</li>
+          <li>receber uma cópia dos seus dados (portabilidade);</li>
+          <li>eliminar os dados tratados com consentimento;</li>
+          <li>saber com quem compartilhamos seus dados;</li>
+          <li>saber que pode não consentir e quais as consequências;</li>
+          <li>revogar o consentimento;</li>
+          <li>se opor a um tratamento feito sem consentimento, quando houver descumprimento da lei;</li>
+          <li>pedir revisão de decisões automatizadas (art. 20).</li>
+        </ul>
         <p>
-          Você pode atualizar informações do seu perfil e utilizar os controles
-          disponíveis para preferências, notificações, sessão e exclusão.
-          Solicitações relacionadas a acesso, correção, eliminação ou demais
-          direitos previstos pela legislação de proteção de dados podem ser
-          encaminhadas pelo canal oficial do projeto.
-        </p>
-        <p>
-          O repositório oficial do Enturma está disponível em{" "}
-          <Link href="https://github.com/luizcordeiro155/Enturma">
-            github.com/luizcordeiro155/Enturma
-          </Link>
-          .
-        </p>
-      </section>
-
-      <section>
-        <h2>Verificação acadêmica</h2>
-        <p>
-          Novas contas precisam confirmar um endereço acadêmico autorizado ou
-          passar pela análise de um comprovante. A confirmação do e-mail
-          comprova o controle do endereço; não atesta, por si só, uma matrícula
-          ativa. Contas anteriores à implantação mantêm seu acesso por
-          compatibilidade.
-        </p>
-        <p>
-          Comprovantes são armazenados de forma privada, acessíveis apenas à
-          equipe administrativa responsável. O arquivo é excluído após a decisão
-          ou ao completar 14 dias. Registros da decisão, método, instituição e
-          auditoria são preservados para acompanhamento e controle de acesso.
-          Cópias de segurança seguem seu ciclo de retenção e não disponibilizam
-          documentos ao público.
-        </p>
-        <p>
-          Envie somente os dados necessários para demonstrar seu vínculo.
-          Dúvidas e correções podem ser encaminhadas pela página de ajuda da
-          verificação, inclusive enquanto a conta estiver pendente.
-        </p>
-      </section>
-      <section>
-        <h2>10. Segurança</h2>
-        <p>
-          O Enturma adota controles técnicos e de autorização para reduzir
-          acesso indevido a contas e dados. Nenhum sistema é completamente imune
-          a falhas, por isso vulnerabilidades devem ser reportadas de forma
-          responsável e sem exposição pública de dados de terceiros.
+          <strong>Como exercer:</strong> em <Link href="/settings#privacidade">Configurações › Privacidade</Link>{" "}
+          você exporta todos os seus dados em JSON, corrige o perfil, revoga
+          sessões e exclui a conta (na hora ou em 5 dias). Permissões de
+          localização, microfone, câmera e notificações são revogadas nas
+          configurações do aparelho ou do navegador. Para qualquer outro
+          pedido, escreva para <a href={mail}>{PRIVACY_EMAIL}</a>: respondemos
+          em até 15 dias. Você também pode reclamar à Autoridade Nacional de
+          Proteção de Dados (ANPD) em{" "}
+          <Link href="https://www.gov.br/anpd">gov.br/anpd</Link>.
         </p>
       </section>
 
       <section>
-        <h2>11. Alterações desta política</h2>
+        <h2>13. Decisões automatizadas</h2>
         <p>
-          Esta política pode ser atualizada conforme o Enturma evolui. Mudanças
-          relevantes devem ser refletidas nesta página com uma nova data de
-          atualização.
+          Filtros automáticos ajudam a identificar spam e conteúdo que viola as
+          regras, e a IA pode sugerir revisões. Penalidades em contas passam por
+          revisão humana e podem ser contestadas pelo recurso disponível no
+          aviso ou pelo e-mail do encarregado.
+        </p>
+      </section>
+
+      <section>
+        <h2>14. Idade mínima</h2>
+        <p>
+          O Enturma é voltado a estudantes do ensino superior e exige{" "}
+          {MINIMUM_AGE} anos ou mais. Ao criar a conta você declara ter essa
+          idade. Se soubermos que uma conta pertence a uma pessoa menor de{" "}
+          {MINIMUM_AGE} anos, ela será encerrada e os dados excluídos. Responsáveis
+          podem nos avisar pelo e-mail do encarregado.
+        </p>
+      </section>
+
+      <section>
+        <h2>15. Segurança e incidentes</h2>
+        <p>
+          Usamos senhas com hash, tokens de sessão com hash e rotação, cookies
+          protegidos, HTTPS em todo o tráfego, autorização por recurso,
+          limites de uso, registros de auditoria e varredura de segredos no
+          código. Nenhum sistema é imune a falhas. Se ocorrer um incidente de
+          segurança que possa causar risco ou dano relevante, comunicaremos a
+          ANPD e as pessoas afetadas nos prazos da regulamentação. Para relatar
+          uma vulnerabilidade, escreva para <a href={mail}>{PRIVACY_EMAIL}</a>{" "}
+          sem expor dados de terceiros publicamente.
+        </p>
+      </section>
+
+      <section>
+        <h2>16. Alterações desta política</h2>
+        <p>
+          Quando esta política ou os <Link href="/termos">Termos de Uso</Link>{" "}
+          mudarem, a data e a versão acima serão atualizadas e você será
+          avisado no aplicativo. O aceite de cada versão fica registrado e pode
+          ser consultado em Configurações › Privacidade.
         </p>
       </section>
     </LegalDocument>

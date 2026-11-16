@@ -25,8 +25,10 @@ public class AuthController {
       @NotBlank @Size(max = 100) String name,
       @NotBlank @Size(max = 80) String username,
       @Email @NotBlank @Size(max = 254) String email,
-      @NotNull @Size(min = 6, max = 30) String password,
-      @NotBlank @Size(max = 150) String device) {}
+      @NotNull @Size(min = 8, max = 64) String password,
+      @NotBlank @Size(max = 150) String device,
+      /** True when the person accepted the Terms and Privacy Policy and declared being 18+. */
+      Boolean acceptedTerms) {}
 
   public record Login(
       @Email @NotBlank @Size(max = 254) String email,
@@ -39,12 +41,18 @@ public class AuthController {
 
   public record Reset(
       @NotBlank @Size(max = 100) String token,
-      @NotNull @Size(min = 6, max = 30) String password) {}
+      @NotNull @Size(min = 8, max = 64) String password) {}
 
   @PostMapping("/register")
   @ResponseStatus(org.springframework.http.HttpStatus.CREATED)
   public Object register(@Valid @RequestBody Register r) {
-    return auth.register(r.name(), r.username(), r.email(), r.password(), r.device());
+    return auth.register(
+        r.name(),
+        r.username(),
+        r.email(),
+        r.password(),
+        r.device(),
+        Boolean.TRUE.equals(r.acceptedTerms()));
   }
 
   @PostMapping("/login")

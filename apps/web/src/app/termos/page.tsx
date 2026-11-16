@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalDocument } from "@/components/legal-document";
+import { LEGAL_VERSION, LEGAL_VERSION_LABEL, MINIMUM_AGE, PRIVACY_EMAIL } from "@/lib/legal";
 
 export const metadata: Metadata = {
   title: "Termos de Uso | Enturma",
@@ -13,7 +14,7 @@ export default function TermsPage() {
     <LegalDocument
       title="Termos de Uso"
       summary="Estes termos definem as regras básicas para utilizar o Enturma, incluindo conta, comunidade, recursos acadêmicos, inteligência artificial e caronas universitárias."
-      updatedAt="06 de outubro de 2026"
+      updatedAt={`${LEGAL_VERSION_LABEL} (versão ${LEGAL_VERSION})`}
     >
       <section>
         <h2>1. Aceitação</h2>
@@ -39,6 +40,20 @@ export default function TermsPage() {
         <p>
           Recursos podem mudar, ser aprimorados, ficar temporariamente
           indisponíveis ou exigir atualização do aplicativo.
+        </p>
+      </section>
+
+      <section>
+        <h2>Idade mínima</h2>
+        <p>
+          O Enturma é destinado a estudantes do ensino superior com{" "}
+          {MINIMUM_AGE} anos ou mais. Ao criar a conta, você declara ter essa
+          idade. Contas de pessoas menores de {MINIMUM_AGE} anos serão encerradas
+          e seus dados excluídos.
+        </p>
+        <p>
+          Dúvidas sobre estes termos ou sobre seus dados:{" "}
+          <a href={`mailto:${PRIVACY_EMAIL}`}>{PRIVACY_EMAIL}</a>.
         </p>
       </section>
 

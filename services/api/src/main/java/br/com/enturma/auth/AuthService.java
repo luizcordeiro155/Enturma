@@ -16,15 +16,18 @@ public class AuthService {
   private final Db db;
   private final String appUrl;
   private final String dummyHash;
+  private final br.com.enturma.privacy.LegalConsents consents;
 
   public AuthService(
       AccountRepository accounts,
       PasswordEncoder encoder,
       Db db,
+      br.com.enturma.privacy.LegalConsents consents,
       @Value("${enturma.app-url}") String appUrl) {
     this.accounts = accounts;
     this.encoder = encoder;
     this.db = db;
+    this.consents = consents;
     this.appUrl = appUrl;
     dummyHash = encoder.encode(Tokens.create());
   }
@@ -38,6 +41,18 @@ public class AuthService {
   @Transactional
   public Credentials register(
       String name, String username, String email, String password, String device) {
+    return register(name, username, email, password, device, false);
+  }
+
+  /** {@code acceptedTerms}: the person accepted the Terms, the Privacy Policy and declared 18+. */
+  @Transactional
+  public Credentials register(
+      String name,
+      String username,
+      String email,
+      String password,
+      String device,
+      boolean acceptedTerms) {
     validatePassword(password);
     String normalizedEmail = email.strip().toLowerCase(Locale.ROOT);
     String normalizedUsername = normalizeUsername(username);
@@ -63,6 +78,7 @@ public class AuthService {
       throw ex;
     }
     issueAccountToken(user, "VERIFY");
+    if (acceptedTerms) consents.recordSignUp(user.id);
     return session(user.id, device);
   }
 
@@ -248,9 +264,19 @@ public class AuthService {
         actor.id());
   }
 
+  /** Passwords seen first in leaked-password lists; refused even when long enough. */
+  private static final Set<String> COMMON_PASSWORDS =
+      Set.of(
+          "12345678", "123456789", "1234567890", "12341234", "11111111", "00000000", "87654321",
+          "password", "password1", "password123", "senha123", "senha1234", "senhasenha", "qwerty123",
+          "qwertyui", "abcd1234", "abc12345", "iloveyou", "11223344", "123123123", "brasil123",
+          "admin123", "mudar123", "enturma1", "enturma123");
+
   private void validatePassword(String password) {
-    if (password == null || password.length() < 6 || password.length() > 30)
-      throw ApiException.invalid("A senha deve ter de 6 a 30 caracteres.");
+    if (password == null || password.length() < 8 || password.length() > 64)
+      throw ApiException.invalid("A senha deve ter de 8 a 64 caracteres.");
+    if (COMMON_PASSWORDS.contains(password.toLowerCase(Locale.ROOT)))
+      throw ApiException.invalid("Essa senha é muito comum. Escolha outra mais difícil de adivinhar.");
     if (password.getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72)
       throw ApiException.invalid("A senha pode ter até 72 bytes em UTF-8.");
   }
