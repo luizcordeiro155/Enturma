@@ -603,12 +603,10 @@ class PlannerIntegrationTest {
   @Test
   void recentUnansweredClassesAreAskedAbout() {
     Actor c = dailyStudent();
-    var yesterday = LocalDate.now(SP).minusDays(1);
-    String key = list(planner.attendance(c), "pending").stream()
-        .filter(e -> yesterday.toString().equals(e.get("occursOn")))
-        .findFirst()
-        .map(e -> (String) e.get("attendanceKey"))
-        .orElseThrow();
+    // A daily class always leaves at least one non-holiday class in the last three days.
+    var pending = list(planner.attendance(c), "pending");
+    assertThat(pending).isNotEmpty().allSatisfy(e -> assertThat(e).containsEntry("attendance", null));
+    String key = (String) pending.getFirst().get("attendanceKey");
     planner.setAttendance(c, key, "PRESENT");
     assertThat(list(planner.attendance(c), "pending")).noneMatch(e -> key.equals(e.get("attendanceKey")));
   }
