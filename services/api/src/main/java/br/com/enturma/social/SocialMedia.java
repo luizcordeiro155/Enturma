@@ -25,6 +25,8 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/social/media")
 public class SocialMedia {
   public static final int PART_BYTES = 2 * 1024 * 1024;
+  /** Largest original a person can upload (a 3-minute phone video fits). */
+  public static final long MAX_SOURCE_BYTES = 512L * 1024 * 1024;
   private final Db db;
   private final SocialAccess access;
   private final ObjectStorageService storage;
@@ -75,7 +77,7 @@ public class SocialMedia {
   public record Upload(
       @NotNull UUID id,
       @Pattern(regexp = "IMAGE|VIDEO") @NotNull String kind,
-      @Min(1) @Max(134217728) long size) {}
+      @Min(1) @Max(MAX_SOURCE_BYTES) long size) {}
 
   @PostMapping
   public Object create(@AuthenticationPrincipal Actor a, @Valid @RequestBody Upload upload) {
@@ -96,19 +98,10 @@ public class SocialMedia {
               throw ApiException.forbidden();
             return status(a, upload.id());
           }
-          // A fixed beta quota bounds processing and storage before a broader rollout.
-          long bytes =
-              db.jdbc.queryForObject(
-                  "SELECT coalesce(sum(expected_bytes),0) FROM social_media WHERE owner_id=? AND"
-                      + " state<>'DELETING'",
-                  Long.class,
-                  a.id());
-          if (bytes + upload.size() > 512L * 1024 * 1024)
+          // A social network has no per-account media quota; each file is bounded.
+          if (upload.size() < 1 || upload.size() > MAX_SOURCE_BYTES)
             throw new ApiException(
-                413,
-                "SOCIAL_QUOTA",
-                "Limite de 512 MB de mídia por conta atingido. Remova mídias antigas antes de"
-                    + " enviar.");
+                413, "SOCIAL_MEDIA_TOO_LARGE", "Envie fotos ou vídeos de até 512 MB.");
           db.jdbc.update(
               "INSERT INTO social_media(id,owner_id,kind,expected_bytes) VALUES (?,?,?,?)",
               upload.id(),
@@ -505,11 +498,18 @@ public class SocialMedia {
   void cleanupFiles() {
     for (var row :
         db.list(
-            "SELECT id FROM social_media WHERE state='DELETING' AND (lease_until IS NULL OR"
-                + " lease_until<now()) LIMIT 10")) {
+            "SELECT id,part_count FROM social_media WHERE state='DELETING' AND (lease_until IS"
+                + " NULL OR lease_until<now()) LIMIT 10")) {
       UUID id = (UUID) row.get("id");
       try {
-        for (int i = 0; i < 64; i++) storage.delete(key(id) + "part-" + i);
+        // Originals now have up to 256 parts of 2 MiB; remove all of them.
+        int parts =
+            Math.max(
+                64,
+                Math.min(
+                    (int) (MAX_SOURCE_BYTES / PART_BYTES),
+                    ((Number) row.get("partCount")).intValue()));
+        for (int i = 0; i < parts; i++) storage.delete(key(id) + "part-" + i);
         for (String file : List.of("image.jpg", "video.mp4", "cover.jpg"))
           storage.delete(key(id) + file);
         db.jdbc.update("DELETE FROM social_media WHERE id=? AND state='DELETING'", id);

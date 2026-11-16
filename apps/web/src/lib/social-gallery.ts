@@ -1,3 +1,4 @@
+import { MAX_SOURCE_BYTES, MAX_SOURCE_MB } from "./social-limits";
 /** Gallery providers may omit the MIME type. This is only a UI hint:
  * the API and FFmpeg still inspect the actual bytes before publication. */
 const extensions: Record<string, string> = {
@@ -8,8 +9,12 @@ const extensions: Record<string, string> = {
   "3gp": "video/3gpp", "3g2": "video/3gpp2",
 };
 export function normalizeSocialGalleryFile(file: File): File {
-  if (!file.size || file.size > 128 * 1024 * 1024)
-    throw new Error("Escolha uma foto ou vídeo de até 128 MB, que não esteja vazio.");
+  if (!file.size) throw new Error("Este arquivo está vazio. Escolha outra foto ou vídeo.");
+  if (file.size > MAX_SOURCE_BYTES)
+    throw new Error(
+      `Este arquivo tem ${Math.round(file.size / (1024 * 1024))} MB e o limite é ${MAX_SOURCE_MB} MB. ` +
+        "Corte o vídeo no celular ou grave em uma qualidade menor e tente de novo.",
+    );
   let type = file.type.toLowerCase().split(";")[0].trim();
   if (type === "image/jpg" || type === "image/pjpeg") type = "image/jpeg";
   if (type === "image/x-png") type = "image/png";

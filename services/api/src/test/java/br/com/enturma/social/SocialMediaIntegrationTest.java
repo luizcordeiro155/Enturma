@@ -195,6 +195,27 @@ class SocialMediaIntegrationTest {
   }
 
   @Test
+  void phoneVideosUpTo512MbAreAcceptedWithoutAPerAccountQuota() {
+    long big = 300L * 1024 * 1024;
+    // A 3-minute phone video is usually a few hundred MB; several of them fit.
+    for (int i = 0; i < 3; i++)
+      assertThat(
+              ((Map<?, ?>)
+                      media.create(
+                          owner, new SocialMedia.Upload(UUID.randomUUID(), "VIDEO", big)))
+                  .get("expectedBytes"))
+          .isEqualTo(big);
+    assertThat(SocialMedia.MAX_SOURCE_BYTES).isEqualTo(512L * 1024 * 1024);
+    assertThatThrownBy(
+            () ->
+                media.create(
+                    owner,
+                    new SocialMedia.Upload(
+                        UUID.randomUUID(), "VIDEO", SocialMedia.MAX_SOURCE_BYTES + 1)))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
   void reclaimedExportCannotWriteOrFailTheNewWorkersJob() throws Exception {
     var bytes = new ByteArrayOutputStream();
     javax.imageio.ImageIO.write(

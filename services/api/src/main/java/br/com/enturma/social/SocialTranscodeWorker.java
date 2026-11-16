@@ -22,7 +22,9 @@ import java.util.zip.ZipOutputStream;
  * Requests are authenticated and processed in one bounded directory at a time.
  */
 public final class SocialTranscodeWorker {
-  private static final long MAX_SOURCE_BYTES = 134217728L;
+  private static final long MAX_SOURCE_BYTES = SocialMedia.MAX_SOURCE_BYTES;
+  // The exported result stays small: bitrate is capped (see SocialTranscoder).
+  private static final long MAX_OUTPUT_BYTES = 134217728L;
   private static final ObjectMapper JSON = new ObjectMapper();
   private static final AtomicBoolean BUSY = new AtomicBoolean(false);
 
@@ -131,7 +133,7 @@ public final class SocialTranscodeWorker {
             exchange.getRequestHeaders().getFirst("Content-Length"));
       } catch (NumberFormatException | NullPointerException ignored) {}
       if (declared > MAX_SOURCE_BYTES) {
-        respond(exchange, 413, "Media file exceeds 128 MB");
+        respond(exchange, 413, "Media file exceeds 512 MB");
         return;
       }
       dir = Files.createTempDirectory("enturma-ffmpeg-worker-");
@@ -143,7 +145,7 @@ public final class SocialTranscodeWorker {
         while ((n = input.read(buffer)) != -1) {
           count += n;
           if (count > MAX_SOURCE_BYTES) {
-            respond(exchange, 413, "Media file exceeds 128 MB");
+            respond(exchange, 413, "Media file exceeds 512 MB");
             return;
           }
           output.write(buffer, 0, n);
@@ -154,7 +156,7 @@ public final class SocialTranscodeWorker {
         }
       }
       SocialTranscoder.Result result = transcoder.render(dir, kind, recipe);
-      if (Files.size(result.file()) > MAX_SOURCE_BYTES) {
+      if (Files.size(result.file()) > MAX_OUTPUT_BYTES) {
         respond(exchange, 422, "Rendered file exceeds size limit");
         return;
       }
