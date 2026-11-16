@@ -842,3 +842,55 @@ html[data-theme] .enturma-study .study-attendance button[data-answer="absent"][a
     animation: none;
   }
 }
+
+/*
+ * Wide layout. The tall side column left a big empty area beside and below the calendar, so the
+ * cards are placed on one grid instead: upcoming classes beside the calendar (they are about the
+ * same height), then the semester attendance next to the study sessions and today's agenda.
+ * Narrow containers keep the single stacked column.
+ */
+.enturma-study {
+  container: enturma-study / inline-size;
+}
+@container enturma-study (min-width: 720px) {
+  .enturma-study-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    /* Extra height from the attendance card goes to the last row: the agenda grows, not a gap. */
+    grid-template-rows: auto auto 1fr;
+    align-items: stretch;
+  }
+  /* Cards that share a row share its height; their content stays at the top. */
+  .enturma-study-grid .study-card {
+    align-content: start;
+  }
+  .enturma-study-side {
+    display: contents;
+  }
+  .enturma-study-grid > .study-calendar-card {
+    grid-column: 1 / 5;
+    grid-row: 1;
+  }
+  .enturma-study-side > [aria-label="Próximas aulas"] {
+    grid-column: 5 / 7;
+    grid-row: 1;
+  }
+  .enturma-study-side > .study-attendance-card {
+    grid-column: 1 / 4;
+    grid-row: 2 / 4;
+  }
+  .enturma-study-side > .study-sessions-card {
+    grid-column: 4 / 7;
+    grid-row: 2;
+  }
+  .enturma-study-side > [aria-label="Agenda de hoje"] {
+    grid-column: 4 / 7;
+    grid-row: 3;
+  }
+  .enturma-study-side:has(> .study-attendance-card) > .study-sessions-card {
+    align-self: start;
+  }
+  /* Without the attendance card, sessions and agenda share the second row in halves. */
+  .enturma-study-side:not(:has(> .study-attendance-card)) > .study-sessions-card {
+    grid-column: 1 / 4;
+  }
+}
