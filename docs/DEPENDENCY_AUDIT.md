@@ -1,5 +1,7 @@
 # Dependências — revisão de 02/11/2026
 
+> **Atualização 16/11/2026:** `npm audit --omit=dev` registrou 17 entradas, todas no toolchain Expo/React Native de `apps/mobile`; o runtime Web não tem alertas. `node-forge` foi fixado em **1.4.3** por override. `decode-uri-component` 0.5.x é somente ESM e não pode substituir a versão CommonJS exigida pelo toolchain. Java (`node scripts/audit-java-dependencies.mjs`): permanecem os dois advisories do Spring MVC 6.2.19 descritos abaixo, sem versão corrigida publicada e sem caminho alcançável. O texto abaixo preserva a revisão anterior.
+
 > **Limite temporal:** as 45 entradas npm descritas abaixo pertencem ao inventário de CI da PR #133. Não foi executado novo `npm audit` em 03/11. A CI verde da PR #135 não significa que os advisories foram corrigidos; reexecutar a auditoria antes de anunciar contagens atuais.
 
 Na [execução 41413561941 da CI](https://github.com/luizcordeiro155/Enturma/actions/runs/41413561941), commit `21ac899` da PR #133, `npm audit --json` registrou **45 entradas: 6 altas, 38 moderadas, 1 baixa e nenhuma crítica**. São seis advisories em cinco pacotes de origem; a contagem inclui dependentes afetados transitivamente, não 45 vulnerabilidades independentes. O inventário contém 1.249 dependências. O relatório é `dist/security/npm-audit.json`, no artefato `interface-evidence`.

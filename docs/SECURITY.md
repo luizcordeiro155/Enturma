@@ -6,7 +6,7 @@ Implementado: validação de DTOs, rejeição de campos extras, hashes BCrypt, t
 
 API usa Bearer; não deve ser colocada atrás de um proxy que transforme credenciais em parâmetros de URL. Não registrar bodies, headers Authorization, cookies, tokens ou documentos. E-mails não enviados contêm links de uso único na outbox; proteger backups e limitar acesso ao banco.
 
-O rate limit padrão usa usuário autenticado ou IP de conexão, sem confiar em X-Forwarded-For fornecido pelo cliente. Atrás do BFF, logins podem compartilhar IP; configurar limitação de borda e identificação de origem por proxy confiável antes da escala. A tabela de rate limit necessita expurgo. O WebSocket limita 2.000 conexões por instância, 64 pendentes por endereço, 24 por usuário e 24 quadros a cada 10 segundos. O BFF pode enviar identidade de origem assinada com BFF_PROXY_SECRET; sem configuração válida, usa-se o endereço da conexão.
+O rate limit padrão usa usuário autenticado ou IP de conexão, sem confiar em X-Forwarded-For fornecido pelo cliente. Atrás do BFF, logins podem compartilhar IP; configurar limitação de borda e identificação de origem por proxy confiável antes da escala. A tabela de rate limit é expurgada diariamente desde 16/11/2026. O WebSocket limita 2.000 conexões por instância, 64 pendentes por endereço, 24 por usuário e 24 quadros a cada 10 segundos. O BFF pode enviar identidade de origem assinada com BFF_PROXY_SECRET; sem configuração válida, usa-se o endereço da conexão.
 
 Este repositório não representa certificação de segurança ou conformidade LGPD. Antes de operação pública: consentimento/termos revisados, exportação/exclusão de conta, política de retenção, controle de acessos operacionais, alertas, testes de carga, antivírus, análise de dependências, teste de restauração e revisão dos provedores externos.
 
@@ -26,7 +26,7 @@ A UI administrativa permite revisar evidências, registrar sanção com requestI
 
 Electron mantém contextIsolation/sandbox, sem nodeIntegration. IPC exige main frame da janela/origem autorizada. Manifesto/ZIP exigem HTTPS, origem idêntica, tamanho limitado e SHA-256; sem redirects. Instalador valida caminhos, entrada ZIP e junções, preserva arquivos não substituídos e mantém backup para rollback. ENTURMA_PORTABLE=1 evita registrar protocolo em execução portátil/testes. Nenhuma chave privada é embutida no app.
 
-Auditoria atual: node-forge atualizado para 1.4.2; permanecem alertas transitivos do toolchain Expo. Veja versões, condições e limites em [DEPENDENCY_AUDIT](DEPENDENCY_AUDIT.md). Não usar audit --force nem declarar auditoria limpa.
+Auditoria atual: node-forge atualizado para 1.4.3 (16/11/2026); permanecem alertas transitivos do toolchain Expo. Veja versões, condições e limites em [DEPENDENCY_AUDIT](DEPENDENCY_AUDIT.md). Não usar audit --force nem declarar auditoria limpa.
 
 ---
 
@@ -41,3 +41,13 @@ A exportação/exclusão de dados e medidas técnicas não são certificação L
 ## Revisão de 28/10/2026
 
 IA adaptativa agora compartilha a cota diária transacional, limita concorrência e não mantém transação durante o provedor. O [relatório](PRODUCTION_READINESS.md) separa revisão estática, testes e riscos operacionais. A role do pacote disponível é superusuária: RLS habilitado não comprova isolamento do runtime. Veja [preparação operacional](OPERATIONS_READINESS.md).
+
+## Revisão de 16/11/2026
+
+- **Segredos:** varredura do histórico Git e dos bundles de produção sem chaves privadas expostas; source maps de produção retornam 403. Chaves públicas por desenho: Firebase Web e KLIPY (app key do navegador). gitleaks continua na CI sobre todo o histórico.
+- **Cabeçalhos:** HSTS, `X-Frame-Options: DENY`, `nosniff` e CSP parcial (sem `script-src`) confirmados em produção.
+- **Endereço do cliente:** na Square Cloud todas as conexões diretas chegavam à API pelo IP do proxy da plataforma, então limites anônimos (cadastro 5/15 min, login 8/min, Explorar público) e o limite de 64 WebSockets pendentes por endereço eram globais. `ProxiedAddress` passou a usar `CF-Connecting-IP`/último `X-Forwarded-For` somente quando o par TCP é de rede privada (o proxy); clientes da internet e processos locais (loopback) não conseguem falsificar o endereço. Requisições do BFF continuam identificadas pela assinatura `BFF_PROXY_SECRET`.
+- **Senhas:** 8 a 64 caracteres e recusa de senhas comuns.
+- **Retenção:** expurgo diário de limites, sessões, tokens, e-mails e notificações (ver [LGPD](LGPD.md)).
+- **Dependências:** `npm audit` sem alertas no runtime Web; os alertas restantes são do toolchain Expo (`apps/mobile`). `node-forge` 1.4.3 por override. Java: dois advisories do Spring MVC 6.2.19 sem caminho alcançável (ver [DEPENDENCY_AUDIT](DEPENDENCY_AUDIT.md)).
+- **Pendente:** papel do banco em produção é superusuário (RLS ignorado); CSP com `script-src` exige revisão dos scripts inline do Next.js.

@@ -56,3 +56,21 @@ A árvore atual contém **67 arquivos SQL de migration: V1–V66 e V68**, sem V6
 Não modificar migrations históricas. Antes de qualquer atualização, fazer backup, simular restauração, validar foreign keys e testes com banco isolado. Publicar o backend compatível antes dos clientes que usem novas colunas.
 
 A consulta **histórica** de 28/10 confirmou Flyway V65 naquela data. O código atual inclui V66 e V68; a aplicação real em produção exige consulta a `flyway_schema_history`. A credencial examinada ignorava RLS; a role efetiva da API em execução ainda deve ser comprovada. [Separação de permissões e restore](OPERATIONS_READINESS.md).
+
+---
+
+## Inventário das migrations — atualização de 16/11/2026
+
+A árvore contém **V1–V66 e V68–V81** (V67 continua inexistente). Produção aplicou V81 em 16/11/2026 (log do Flyway: "now at version v81").
+
+| Versões | Principais mudanças |
+|---|---|
+| V69–V74 | Enturma Social: feed, clips, stories, overlays, estúdio, coleções privadas e visualizações |
+| V75–V76 | Agenda de estudos e sessões de estudo |
+| V77 | Acesso por e-mail pessoal e modo foco |
+| V78 | Fontes de mídia maiores no Social |
+| V79 | Pausas do calendário e presença em aulas |
+| V80 | Períodos letivos (semestres) com matérias e presença por período |
+| V81 | `consent_record` (aceite de Termos, Política e 18+, por versão) e aviso da nova política a todos os usuários ativos |
+
+Retenção automática: `br.com.enturma.privacy.DataRetention` expurga diariamente `rate_limit`, `user_session`, `account_token`, `email_outbox` e notificações antigas; prazos em [LGPD](LGPD.md). A antiga pendência "a tabela de rate limit necessita expurgo" está resolvida.

@@ -10,7 +10,7 @@ Se você encontrar uma vulnerabilidade, trate o problema de forma responsável.
 
 Quando a opção estiver disponível no GitHub, prefira **Security → Report a vulnerability** para enviar o relatório de forma privada.
 
-Se o repositório não disponibilizar esse formulário, entre em contato com o responsável pelo projeto pelo GitHub para solicitar um canal privado, sem incluir exploit, token, dado pessoal ou passo a passo sensível na mensagem pública.
+Se o repositório não disponibilizar esse formulário, escreva para **enturmaflax@gmail.com** (canal de privacidade e do encarregado de dados), sem anexar dados de terceiros. Incidentes que envolvam dados pessoais seguem o plano descrito em [LGPD](docs/LGPD.md).
 
 Inclua no relatório privado, quando possível:
 
@@ -55,7 +55,7 @@ A documentação de segurança precisa distinguir proteções existentes de risc
 - **Atualizações e instaladores:** proteger origem, checksum/hash, downloads, IPC e permissões. A ausência de assinatura Authenticode reconhecida no Windows é uma limitação operacional, não algo a ocultar.
 - **Caronas:** endereço e localização não devem ser exibidos publicamente; a posição ao vivo e o PIN exigem controles de autorização, expiração e limpeza.
 - **Cadernos e IA:** dados e arquivos devem seguir as permissões do proprietário; URLs de importação e uploads precisam de validação contra SSRF e conteúdo malicioso. Entradas de usuário não podem alterar privilégios do modelo.
-- **LGPD:** funcionalidades de exportação e exclusão e medidas técnicas de proteção não constituem certificação legal de conformidade. São necessárias revisão de bases legais, retenção, backups, fornecedores, incidentes e direitos dos titulares.
+- **LGPD:** o app registra o aceite de Termos/Política/18+ por versão, exporta todos os dados ligados à conta, exclui/anonimiza a conta e expurga dados com prazo vencido; bases legais, operadores, retenção e plano de incidentes estão em [LGPD](docs/LGPD.md). Isso não é certificação: Termos, Política, idade mínima e contratos com operadores ainda precisam de revisão jurídica.
 
 Consulte [Segurança do release](docs/RELEASE_CHAT_SECURITY.md),
 [Privacidade do chat](docs/CHAT_PRIVACY.md),

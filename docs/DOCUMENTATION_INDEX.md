@@ -6,6 +6,8 @@ Referência: [`main` `9270a5f`](https://github.com/luizcordeiro155/Enturma/commi
 
 Complemento de 10/11/2026: [Enturma Social 2.0](SOCIAL_2_IMPLEMENTATION.md) descreve o novo módulo independente do Fórum, contratos, migrations, mídia privada no R2, evidências e condições de ativação. As flags permanecem desligadas por padrão; essa documentação não anuncia publicação em produção.
 
+Complemento de 16/11/2026: [LGPD](LGPD.md) (registro de tratamento, retenção, direitos e incidentes) e [Capacidade](CAPACITY.md) (testes de carga em produção e réplica, limites e upgrades) são novos. README, `SECURITY.md`, `docs/SECURITY.md`, `docs/STATUS.md`, `docs/DATABASE.md` e `docs/DEPENDENCY_AUDIT.md` foram atualizados; documentos de releases anteriores seguem preservados como histórico.
+
 ## Inventário Markdown
 
 | Arquivo | Tratamento |

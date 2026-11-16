@@ -6,7 +6,7 @@ O **Enturma** é um ecossistema acadêmico multiplataforma construído para apro
 
 O projeto é um monorepo com **Java 21 / Spring Boot**, **Next.js / React**, **React Native / Expo** e **Electron**, com aplicações para **Web, Android e Desktop**.
 
-> **Estado atual — 11/11/2026:** [Enturma Social 2.0 — PR #144](https://github.com/luizcordeiro155/Enturma/pull/144) reúne Feed, Clips, Stories e editor, preservando o Fórum. A integração na `main` está autorizada e condicionada aos checks; flags de produção permanecem desligadas por padrão. Os manifests nativos consultados ainda informam **0.4.424**. Consulte [Status](docs/STATUS.md) e [evidências/limitações do Social](docs/SOCIAL_2_IMPLEMENTATION.md).
+> **Estado atual — 16/11/2026:** a [PR #172](https://github.com/luizcordeiro155/Enturma/pull/172) alinhou o app à LGPD (aceite versionado de Termos/Política/18+, política de privacidade reescrita, exportação completa, retenção automática) e corrigiu os limites por cliente atrás do proxy da Square Cloud; a [PR #173](https://github.com/luizcordeiro155/Enturma/pull/173) reduziu as idas ao banco por requisição. Capacidade medida: **~1.300 usuários simultâneos online** no plano atual. Consulte [Status](docs/STATUS.md), [LGPD](docs/LGPD.md) e [Capacidade](docs/CAPACITY.md).
 
 ## A proposta
 
@@ -36,7 +36,7 @@ A apresentação pública fica em [`/start`](https://enturma-flax.vercel.app/sta
 | Comunidade | Fórum, amigos, perfil, personalização, conquistas e notificações |
 | Aprendizagem | Matérias, desafios, missões, notebooks, XP e assistência de IA |
 | Caronas | Fluxo universitário em evolução avançada, atualmente recebendo o maior ciclo de refinamento |
-| Produção | Web e distribuidores nativos publicados; recuperação de dados, dispositivos físicos e escala ainda não homologados |
+| Produção | Web e distribuidores nativos publicados; escala medida em 16/11 (~600 req/s, ~1.300 usuários simultâneos — [Capacidade](docs/CAPACITY.md)); recuperação de dados e dispositivos físicos ainda não homologados |
 
 As versões declaradas são Web **0.3.0**, Android **0.3.30** e Desktop **0.3.15**, com ciclos independentes. Os builders de download podem calcular números de release a partir do histórico de commits: confira os manifests de distribuição antes de anunciar uma versão. Existe estrutura iOS no repositório, mas não há publicação ou homologação oficial confirmada.
 
@@ -147,7 +147,7 @@ Integrações utilizadas pelo projeto incluem:
 - Vercel para a interface Web;
 - infraestrutura de backend/deploy configurada pelo projeto.
 
-Segredos devem permanecer somente no backend ou nos ambientes apropriados. Nunca adicione tokens, chaves ou credenciais reais ao repositório. Chaves de aplicativo usadas diretamente no navegador por exigência de provedores, como KLIPY, não devem ser confundidas com tokens privilegiados de backend. Permissões de banco, RLS e autorização por recurso exigem revisão independente. O projeto não declara conformidade integral certificada com a LGPD. Consulte [Segurança](SECURITY.md) e [Proteção do release](docs/RELEASE_CHAT_SECURITY.md).
+Segredos devem permanecer somente no backend ou nos ambientes apropriados. Nunca adicione tokens, chaves ou credenciais reais ao repositório. Chaves de aplicativo usadas diretamente no navegador por exigência de provedores, como KLIPY, não devem ser confundidas com tokens privilegiados de backend. Permissões de banco, RLS e autorização por recurso exigem revisão independente. Bases legais, operadores, retenção, direitos dos titulares e plano de incidentes estão em [LGPD](docs/LGPD.md); o projeto não declara conformidade certificada, e Termos/Política ainda precisam de revisão jurídica. Consulte [Segurança](SECURITY.md) e [Proteção do release](docs/RELEASE_CHAT_SECURITY.md).
 
 ## Executar localmente
 
@@ -226,6 +226,8 @@ Pontos de entrada:
 - [Aprendizagem](docs/LEARNING.md)
 - [Caronas](docs/CARPOOL.md)
 - [Segurança](docs/SECURITY.md)
+- [LGPD](docs/LGPD.md)
+- [Capacidade e testes de carga](docs/CAPACITY.md)
 - [Deploy](docs/DEPLOYMENT.md)
 - [Desktop](docs/DESKTOP.md)
 - [Mobile](docs/MOBILE.md)

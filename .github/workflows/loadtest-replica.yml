@@ -1,0 +1,79 @@
+name: Load test (replica)
+# Finds the breaking point of a copy of the production API, without touching production:
+# same JAR, JVM flags, memory, Hikari pool and CPU share, with network latency added between the
+# API and PostgreSQL. Runs only on loadtest-replica/** branches or manually.
+on:
+  push:
+    branches: ["loadtest-replica/**"]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  replica:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+          cache: maven
+      - uses: grafana/setup-k6-action@v1
+      - name: Build API
+        run: mvn -B -q -f services/api/pom.xml -DskipTests package && cp services/api/target/enturma-api-*.jar app.jar
+      - name: Start PostgreSQL with added network latency
+        run: |
+          set -a; . loadtest/replica.env; set +a
+          docker network create lt
+          docker run -d --name pg --network lt --cap-add NET_ADMIN \
+            -e POSTGRES_USER=enturma -e POSTGRES_PASSWORD=replica -e POSTGRES_DB=enturma postgres:17
+          for i in $(seq 1 30); do docker exec pg pg_isready -U enturma && break; sleep 1; done
+          docker exec pg bash -c "apt-get update -qq && apt-get install -y -qq iproute2 >/dev/null"
+          docker exec pg tc qdisc add dev eth0 root netem delay "${DB_ONE_WAY_MS}ms"
+          docker exec pg tc qdisc show dev eth0
+      - name: Start API replica
+        run: |
+          set -a; . loadtest/replica.env; set +a
+          docker run -d --name api --network lt -p 8080:80 --cpus="$API_CPUS" --memory="${API_MEMORY:-1g}" \
+            -v "$PWD/app.jar:/app/app.jar:ro" -w /app \
+            -e DATABASE_URL=jdbc:postgresql://pg:5432/enturma -e DATABASE_USERNAME=enturma \
+            -e DATABASE_PASSWORD=replica -e APP_URL=http://localhost:3000 \
+            -e AUTH_REGISTER_RATE_LIMIT=100000 -e MAIL_ENABLED=false \
+            -e DB_POOL_SIZE="$DB_POOL_SIZE" -e SOCIAL_ENABLED=true \
+            eclipse-temurin:21-jre \
+            java -XX:MaxRAMPercentage=65 -XX:+ExitOnOutOfMemoryError -jar app.jar --spring.profiles.active=squarecloud
+          for i in $(seq 1 90); do curl -fsS localhost:8080/actuator/health && break; sleep 2; done
+          curl -fsS localhost:8080/actuator/health
+      - name: Create verified test accounts
+        run: |
+          set -a; . loadtest/replica.env; set +a
+          seq 1 "$ACCOUNTS" | xargs -P 4 -I{} sh -c 'curl -fsS -X POST localhost:8080/api/v1/auth/register \
+            -H "Content-Type: application/json" \
+            -d "{\"name\":\"Carga {}\",\"username\":\"carga_{}\",\"email\":\"carga-{}@example.test\",\"password\":\"Replica-carga-{}-senha\",\"device\":\"k6\"}" \
+            | python3 -c "import json,sys;print(json.load(sys.stdin)[\"accessToken\"])"' > tokens.txt
+          python3 -c "import json;print(json.dumps(open('tokens.txt').read().split()))" > loadtest/tokens.json
+          docker exec pg psql -U enturma -d enturma -c "UPDATE academic_identity SET status='STUDENT_VERIFIED',method='TEST_FIXTURE',confidence='TEST_FIXTURE' WHERE status='PENDING'"
+          T=$(head -1 tokens.txt); curl -fsS -o /dev/null -w "calls/private %{http_code}\n" -H "Authorization: Bearer $T" localhost:8080/api/v1/calls/private
+          wc -l tokens.txt
+      - name: Sample container CPU and memory
+        run: |
+          (while true; do docker stats --no-stream --format '{{.Name}},{{.CPUPerc}},{{.MemUsage}}' api pg | sed "s/^/$(date +%s),/"; sleep 3; done) > stats.csv 2>/dev/null &
+      - name: Ramp until the replica breaks
+        run: |
+          set -a; . loadtest/replica.env; set +a
+          k6 run --quiet --summary-export=summary.json --out csv=results.csv.gz loadtest/replica.js || code=$?
+          echo "k6 exit ${code:-0}"
+          docker logs api 2>&1 | grep -E "WARN|ERROR|OutOfMemory|Hikari" | tail -40 > api-warnings.txt || true
+          docker exec pg psql -U enturma -d enturma -c "SELECT count(*) FROM pg_stat_activity" >> api-warnings.txt || true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: replica-results
+          path: |
+            summary.json
+            results.csv.gz
+            stats.csv
+            api-warnings.txt
+            loadtest/replica.env
+          retention-days: 7

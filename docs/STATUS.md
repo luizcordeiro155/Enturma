@@ -1,4 +1,15 @@
-# Estado atual — 11/11/2026
+# Estado atual — 16/11/2026
+
+## LGPD, segurança e capacidade — PRs #172 e #173
+
+- **LGPD** ([detalhes](LGPD.md)): aceite de Termos, Política e declaração de 18+ registrado por versão (V81), aceite de novas versões em Configurações → Privacidade, política de privacidade reescrita (controlador e encarregado, bases legais, operadores, transferência internacional, retenção, direitos), exportação de todas as tabelas ligadas à conta e expurgo diário de dados vencidos.
+- **Segurança**: senhas de 8 a 64 caracteres com bloqueio de senhas comuns; limites anônimos e de WebSocket passam a valer por cliente (antes eram globais atrás do proxy da Square Cloud); varredura de chaves no histórico e nos bundles sem vazamentos. Pendente: papel do banco é superusuário (RLS ignorado).
+- **Capacidade** ([detalhes](CAPACITY.md)): produção testada até 100 req/s com 0% de erros; réplica do plano atual estável até ~600 req/s (~1.300 usuários simultâneos), contra ~150 req/s antes das otimizações. O teto mensal do Vercel Hobby (1 milhão de invocações) é o primeiro limite real.
+- Produção confirmou Flyway **V81** em 16/11/2026.
+
+---
+
+# Estado anterior — 11/11/2026
 
 ## Enturma Social 2.0 — PR #144
 

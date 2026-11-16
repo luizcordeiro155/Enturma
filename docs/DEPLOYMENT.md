@@ -35,6 +35,7 @@ Preencha `.env` dentro do ZIP, ou use as variáveis do painel da SquareCloud (t�
 | `APP_URL`           | URL HTTPS web; modelo: `https://enturma-flax.vercel.app`                                                         |
 | `BFF_PROXY_SECRET`  | Chave aleatória de 32+ caracteres, igual à configurada na Vercel                                                 |
 | `FCM_SERVICE_ACCOUNT_BASE64` | Opcional; JSON da service account Firebase codificado em Base64 para push Android                               |
+| `DB_POOL_SIZE`      | Opcional; conexões do pool Hikari (padrão 15). A vazão é limitada por pool × latência até o banco; ver [Capacidade](CAPACITY.md) |
 
 Gere a chave localmente com `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`. Não a coloque no Git. Ela autentica a identidade anônima que o BFF encaminha para os limites de requisição; evita que todos os visitantes compartilhem o limite do proxy e não substitui a autenticação de usuário.
 
