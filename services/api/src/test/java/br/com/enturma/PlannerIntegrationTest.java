@@ -656,4 +656,66 @@ class PlannerIntegrationTest {
                 "SELECT count(*) FROM notification WHERE user_id=? AND kind='STUDY_REMINDER'", Integer.class, a.id()))
         .isZero();
   }
+
+  // ---------------------------------------------------------------- duplicates
+
+  @Test
+  void theSameClassSavedTwiceShowsOnceAndIsAskedAboutOnce() {
+    Actor c = dailyStudent();
+    var today = LocalDate.now(SP);
+    UUID subject = (UUID) pastClass(c).get("subjectId");
+    // Two identical series, as a double submit or an older app version could leave behind.
+    UUID twin = UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO academic_class_schedule(id,user_id,subject_id,weekday,starts_at,ends_at,valid_from)"
+            + " SELECT ?,user_id,subject_id,weekday,starts_at,ends_at,valid_from FROM"
+            + " academic_class_schedule WHERE user_id=? AND weekday=?",
+        twin,
+        c.id(),
+        today.minusDays(1).getDayOfWeek().getValue());
+    var yesterday = events(planner.calendar(c, today.minusDays(1), today.minusDays(1)));
+    assertThat(yesterday).filteredOn(e -> "CLASS".equals(e.get("kind"))).hasSize(1);
+    var summary = planner.attendance(c);
+    assertThat(list(summary, "pending"))
+        .extracting(e -> e.get("occursOn"))
+        .doesNotHaveDuplicates();
+    assertThat(list(summary, "subjects")).singleElement();
+    assertThat(subject).isNotNull();
+  }
+
+  @Test
+  void anActionOnOneOfTheCopiesIsTheOneThatShows() {
+    Actor c = dailyStudent();
+    var today = LocalDate.now(SP);
+    var day = today.plusDays(3);
+    UUID twin = UUID.randomUUID();
+    db.jdbc.update(
+        "INSERT INTO academic_class_schedule(id,user_id,subject_id,weekday,starts_at,ends_at,valid_from)"
+            + " SELECT ?,user_id,subject_id,weekday,starts_at,ends_at,valid_from FROM"
+            + " academic_class_schedule WHERE user_id=? AND weekday=?",
+        twin,
+        c.id(),
+        day.getDayOfWeek().getValue());
+    planner.addException(c, twin, new ClassException(day, "CANCELLED", null, null, ""));
+    assertThat(events(planner.calendar(c, day, day)))
+        .singleElement()
+        .satisfies(e -> assertThat(e).containsEntry("status", "CANCELLED"));
+  }
+
+  @Test
+  void savingAClassThatIsAlreadyInTheGradeIsRefused() {
+    UUID subject = subject(a);
+    planner.addClasses(a, mondays(subject, "2026-03-02", null));
+    assertThatThrownBy(() -> planner.addClasses(a, mondays(subject, "2026-03-09", null)))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("já está na sua grade");
+    // A different day in the same request is still saved.
+    var ids =
+        planner.addClasses(
+            a, new ClassSeries(subject, List.of(1, 3), "19:00", "22:30", d("2026-03-02"), null, "Sala 12"));
+    assertThat(ids).hasSize(1);
+    assertThat(classDays(planner.calendar(a, d("2026-03-01"), d("2026-03-31"))))
+        .doesNotHaveDuplicates()
+        .contains("2026-03-02", "2026-03-04");
+  }
 }
