@@ -182,6 +182,9 @@ public class SocialPosts {
    * Hashtags with how many posts the student can see use them: the most used of the last 30
    * days when {@code q} is blank, otherwise the tags starting with {@code q}.
    */
+  /** How many tags "Em alta" shows, and how many when no tag was used more than once yet. */
+  public static final int TRENDING = 8, TRENDING_FALLBACK = 5;
+
   public List<Map<String, Object>> hashtags(Actor a, String q) {
     access.require();
     String prefix = q == null ? "" : q.strip().replaceFirst("^#", "").toLowerCase(Locale.ROOT);
@@ -194,15 +197,22 @@ public class SocialPosts {
       args.add(prefix.length());
       args.add(prefix);
     }
-    return db.list(
+    var rows =
+        db.list(
         "SELECT t.tag,count(*) posts FROM social_post p CROSS JOIN LATERAL unnest(p.tags) t(tag)"
             + " WHERE "
             + SocialAccess.published("p")
             + " AND "
             + SocialAccess.visible("p")
             + where
-            + " GROUP BY t.tag ORDER BY (t.tag=?) DESC,count(*) DESC,t.tag LIMIT 12",
+            + " GROUP BY t.tag ORDER BY (t.tag=?) DESC,count(*) DESC,max(p.published_at) DESC,t.tag"
+            + " LIMIT 12",
         concat(args, prefix));
+    if (!prefix.isEmpty()) return rows;
+    // Trending is the few tags people actually repeat; a tag used once is not "em alta".
+    var repeated =
+        rows.stream().filter(r -> ((Number) r.get("posts")).longValue() > 1).limit(TRENDING).toList();
+    return repeated.isEmpty() ? rows.stream().limit(TRENDING_FALLBACK).toList() : repeated;
   }
 
   private static Object[] concat(List<Object> args, Object last) {
