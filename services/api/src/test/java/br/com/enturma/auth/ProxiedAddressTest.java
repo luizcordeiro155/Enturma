@@ -41,6 +41,13 @@ class ProxiedAddressTest {
   }
 
   @Test
+  void loopbackPeersAreLocalProcessesAndAreNeverTrusted() {
+    assertEquals(
+        "127.0.0.1",
+        resolve("127.0.0.1", Map.of("CF-Connecting-IP", "203.0.113.7", "X-Forwarded-For", "203.0.113.7")));
+  }
+
+  @Test
   void ipv6ClientsAndIpv4MappedProxiesAreSupported() {
     assertEquals(
         "2001:db8::1", resolve("::ffff:10.1.2.3", Map.of("CF-Connecting-IP", "2001:db8::1")));

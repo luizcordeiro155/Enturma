@@ -13,9 +13,9 @@ import org.slf4j.LoggerFactory;
  * Resolves the client address behind the hosting platform's reverse proxy.
  *
  * <p>On Square Cloud every request reaches the JVM from an internal proxy, so the socket address
- * is the same for all clients. Forwarded headers are trusted only when the peer itself is an
- * internal (private, loopback or link-local) address: a client connecting from the internet
- * cannot spoof them. {@code CF-Connecting-IP} is set by the Cloudflare edge; otherwise the last
+ * is the same for all clients. Forwarded headers are trusted only when the peer itself is on a
+ * private network (the platform proxy): a client connecting from the internet cannot spoof them,
+ * and loopback peers (local processes such as a development BFF) are never trusted. {@code CF-Connecting-IP} is set by the Cloudflare edge; otherwise the last
  * {@code X-Forwarded-For} entry, appended by the nearest proxy, is used.
  */
 public final class ProxiedAddress {
@@ -52,9 +52,7 @@ public final class ProxiedAddress {
     byte[] raw = address.getAddress();
     if (raw.length == 16 && (raw[0] & 0xfe) == 0xfc) return true; // fc00::/7
     if (raw.length == 4 && (raw[0] & 0xff) == 100 && (raw[1] & 0xc0) == 64) return true; // CGNAT
-    return address.isLoopbackAddress()
-        || address.isSiteLocalAddress()
-        || address.isLinkLocalAddress();
+    return address.isSiteLocalAddress() || address.isLinkLocalAddress();
   }
 
   private static String literal(String value) {
