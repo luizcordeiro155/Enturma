@@ -253,6 +253,13 @@ export function SocialEditor({
     [discard, setDiscard] = useState(false),
     [step, setStep] = useState<Step>("pick");
   const [reviewIndex, setReviewIndex] = useState(0);
+  // On a phone the end of the form sits behind the sticky actions, so a
+  // problem with the chosen file is shown and brought into view at the top.
+  const pickError = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (error && step === "pick")
+      pickError.current?.scrollIntoView?.({ block: "center", behavior: "smooth" });
+  }, [error, step]);
   const busyRef = useRef(false),
     alive = useRef(true),
     current = useRef(draft),
@@ -441,11 +448,8 @@ export function SocialEditor({
       const next: DraftFile[] = [];
       for (const original of files) {
         const file = normalizeSocialGalleryFile(original);
-        if (
-          !/^(image\/(jpeg|png|webp|gif)|video\/)/.test(file.type) ||
-          file.size > 128 * 1024 * 1024
-        )
-          throw new Error("Use imagem ou vídeo de até 128 MB.");
+        if (!/^(image\/(jpeg|png|webp|gif)|video\/)/.test(file.type))
+          throw new Error("Use uma foto (JPG, PNG, WEBP ou GIF) ou um vídeo.");
         const video = file.type.startsWith("video/")
           ? await videoInfo(file)
           : undefined;
@@ -903,13 +907,23 @@ export function SocialEditor({
             </strong>
             <span>
               {draft.kind === "STORY"
-                ? "Uma foto ou vídeo de até 3 min · 128 MB"
-                : "Até 10 fotos ou vídeos · vídeos de até 3 min · 128 MB cada"}
+                ? "Uma foto ou vídeo de até 3 min · 512 MB"
+                : "Até 10 fotos ou vídeos · vídeos de até 3 min · 512 MB cada"}
             </span>
             <span className="social-upload-auto">
               <Crop size={14} aria-hidden="true" />
               O melhor enquadramento é escolhido automaticamente.
             </span>
+            {busy && (
+              <p className="social-pick-busy" aria-live="polite">
+                Preparando sua mídia…
+              </p>
+            )}
+            {error && step === "pick" && (
+              <p role="alert" className="social-error social-pick-error" ref={pickError}>
+                {error}
+              </p>
+            )}
             <div className="social-row">
               <label className="social-file-button social-file-button-primary">
                 Escolher mídia
@@ -1247,7 +1261,7 @@ export function SocialEditor({
           A privacidade da conta prevalece. Publique apenas conteúdo que você
           tem autorização para compartilhar.
         </p>
-        {error && (
+        {error && step !== "pick" && (
           <p role="alert" className="social-error">
             {error}
           </p>

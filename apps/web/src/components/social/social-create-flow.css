@@ -358,3 +358,25 @@ html[data-theme] .social-page .social-editor .social-segments > button.social-fo
 .social-page .social-create-flow .social-create-step-actions > button.secondary:first-child {
   margin-left: 0;
 }
+
+/* A problem with the chosen file shows where the person is looking. */
+html[data-theme] .social-page .social-create-pick .social-upload > .social-pick-error {
+  width: 100%;
+  box-sizing: border-box;
+  margin: 2px 0;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--danger) 45%, transparent);
+  background: color-mix(in srgb, var(--danger) 12%, var(--surface));
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.45;
+  text-align: left;
+}
+.social-page .social-create-pick .social-upload > .social-pick-busy {
+  margin: 0;
+  color: var(--ink);
+  font-size: 13px;
+  font-weight: 700;
+}

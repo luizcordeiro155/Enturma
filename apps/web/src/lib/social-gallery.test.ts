@@ -31,7 +31,11 @@ describe("gallery file hints", () => {
   it("rejects empty and oversized files before allocating another File", () => {
     expect(() => normalizeSocialGalleryFile(new File([], "foto.png", { type: "image/png" }))).toThrow(/vazio/);
     const file = new File([data], "foto.png", { type: "image/png" });
-    Object.defineProperty(file, "size", { value: 128 * 1024 * 1024 + 1 });
-    expect(() => normalizeSocialGalleryFile(file)).toThrow(/128 MB/);
+    // A 3-minute phone video of a few hundred MB is accepted; past 512 MB is not.
+    Object.defineProperty(file, "size", { value: 300 * 1024 * 1024 });
+    expect(() => normalizeSocialGalleryFile(file)).not.toThrow();
+    const huge = new File([data], "video.mp4", { type: "video/mp4" });
+    Object.defineProperty(huge, "size", { value: 512 * 1024 * 1024 + 1 });
+    expect(() => normalizeSocialGalleryFile(huge)).toThrow(/512 MB/);
   });
 });

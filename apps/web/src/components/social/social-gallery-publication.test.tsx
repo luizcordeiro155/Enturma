@@ -100,3 +100,16 @@ it("keeps a selected photo and its caption when upload fails", async () => {
   expect(screen.getByRole("textbox", { name: /compartilhar/i })).toHaveValue("Meu projeto");
   expect(published).not.toHaveBeenCalled();
 });
+it("on the first step, a refused file is explained right at the upload area", async () => {
+  render(<SocialEditor user="me" mediaEnabled initialKind="POST" published={() => {}} />);
+  const input = await screen.findByLabelText("Escolher mídia");
+  const big = new File([png], "viagem.mp4", { type: "video/mp4" });
+  Object.defineProperty(big, "size", { value: 600 * 1024 * 1024 });
+  fireEvent.change(input, { target: { files: [big] } });
+  const alert = await screen.findByRole("alert");
+  // On a phone the bottom of the form sits behind the sticky actions: the
+  // message must be inside the upload area the person is looking at.
+  expect(alert.closest(".social-upload")).not.toBeNull();
+  expect(alert).toHaveTextContent("600 MB");
+  expect(alert).toHaveTextContent("512 MB");
+});

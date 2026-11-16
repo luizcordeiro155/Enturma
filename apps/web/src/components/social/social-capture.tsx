@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import { Camera, Circle, Square, SwitchCamera } from "lucide-react";
 import { SocialDialog } from "./social-dialog";
 import { MAX_VIDEO_SECONDS } from "@/lib/social";
+import { MAX_SOURCE_BYTES } from "@/lib/social-limits";
 const clock = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
 export function SocialCapture({
@@ -92,7 +93,7 @@ export function SocialCapture({
         elapsed = 0;
       rec.ondataavailable = (e) => {
         bytes += e.data.size;
-        if (bytes > 128 * 1024 * 1024) {
+        if (bytes > MAX_SOURCE_BYTES) {
           rec.onstop = null;
           rec.stop();
           setRecording(false);
