@@ -137,7 +137,7 @@ test("saved Enturma contrast and theme cycle survive navigation without reload",
       name: username,
       username,
       email: `${username}@example.test`,
-      password: "abc123",
+      password: "E2E-password-abc123",
       device: "E2E",
     },
   });
@@ -246,7 +246,7 @@ test("private invitation fits all themes, requires consent and keeps navigation 
           name: username,
           username,
           email: `${username}@example.test`,
-          password: "abc123",
+          password: "E2E-password-abc123",
           device: "E2E",
         },
       });

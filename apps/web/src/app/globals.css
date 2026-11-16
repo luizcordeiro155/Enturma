@@ -3447,6 +3447,37 @@ html[data-theme="dark"] .auth-story-footer span {
 .legal-document a {
   color: var(--ink);
 }
+.legal-table-wrap {
+  max-width: 100%;
+  margin: 16px 0;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+.legal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+.legal-table th,
+.legal-table td {
+  padding: 10px 14px;
+  text-align: left;
+  vertical-align: top;
+  line-height: 1.55;
+  color: color-mix(in srgb, var(--ink) 82%, var(--muted));
+}
+.legal-table th {
+  color: var(--ink);
+  background: color-mix(in srgb, var(--ink) 5%, transparent);
+  font-weight: 700;
+}
+.legal-table tr + tr td {
+  border-top: 1px solid var(--border);
+}
+.legal-table td:first-child {
+  width: 55%;
+}
 .legal-page-footer {
   display: flex;
   align-items: center;

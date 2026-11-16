@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { authDestination } from "@/lib/auth-navigation";
+import { MINIMUM_AGE } from "@/lib/legal";
 import { PublicThemeControl } from "./public-theme-control";
 import { Feedback } from "./feedback";
 const AuthFilm = dynamic(() => import("./motion/auth-player"), { ssr: false });
@@ -305,9 +306,9 @@ export function AuthForm({ mode }: { mode: Mode }) {
       if (!password) errors.password = "Informe sua senha.";
       else if (
         mode !== "login" &&
-        (password.length < 6 || password.length > 30)
+        (password.length < 8 || password.length > 64)
       )
-        errors.password = "A senha deve ter de 6 a 30 caracteres.";
+        errors.password = "A senha deve ter de 8 a 64 caracteres.";
     }
 
     if (["register", "reset-password"].includes(mode)) {
@@ -319,6 +320,10 @@ export function AuthForm({ mode }: { mode: Mode }) {
         errors.confirmPassword = "A confirmação não corresponde à senha.";
       }
     }
+
+    if (mode === "register" && data.acceptedTerms !== "on")
+      errors.acceptedTerms =
+        "Para criar a conta, aceite os Termos e a Política de Privacidade.";
 
     return errors;
   }
@@ -363,6 +368,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                     email: data.email,
                     password: data.password,
                     device: "Navegador web",
+                    acceptedTerms: true,
                   }
                 : {
                     email: data.email,
@@ -823,7 +829,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
               : mode === "forgot-password"
                 ? "Informe o e-mail da sua conta. Enviaremos um link seguro para você criar uma nova senha."
                 : mode === "reset-password"
-                  ? "Escolha uma senha de 6 a 30 caracteres para voltar ao seu espaço de estudo."
+                  ? "Escolha uma senha de 8 a 64 caracteres para voltar ao seu espaço de estudo."
                   : "Entre no seu espaço de estudo."}
           </p>
           <Feedback error={error} success={success} />
@@ -944,8 +950,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   mode === "login" ? "current-password" : "new-password"
                 }
                 required
-                minLength={mode === "login" ? 1 : 6}
-                maxLength={mode === "login" ? 72 : 30}
+                minLength={mode === "login" ? 1 : 8}
+                maxLength={mode === "login" ? 72 : 64}
                 onChange={() =>
                   setFieldErrors((current) => {
                     const next = { ...current };
@@ -963,7 +969,7 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   {fieldErrors.password}
                 </small>
               ) : mode !== "login" ? (
-                <small>Use de 6 a 30 caracteres.</small>
+                <small>Use de 8 a 64 caracteres. Evite senhas comuns.</small>
               ) : null}
             </label>
           ) : null}
@@ -985,8 +991,8 @@ export function AuthForm({ mode }: { mode: Mode }) {
                 type="password"
                 autoComplete="new-password"
                 required
-                minLength={6}
-                maxLength={30}
+                minLength={8}
+                maxLength={64}
                 onChange={() =>
                   setFieldErrors((current) => {
                     const next = { ...current };
@@ -1004,6 +1010,37 @@ export function AuthForm({ mode }: { mode: Mode }) {
                   {fieldErrors.confirmPassword}
                 </small>
               ) : null}
+            </label>
+          ) : null}
+          {mode === "register" ? (
+            <label className="auth-remember-toggle auth-consent">
+              <input
+                type="checkbox"
+                name="acceptedTerms"
+                aria-invalid={Boolean(fieldErrors.acceptedTerms)}
+                aria-describedby={
+                  fieldErrors.acceptedTerms ? "accepted-terms-error" : undefined
+                }
+                onChange={() =>
+                  setFieldErrors((current) => {
+                    const next = { ...current };
+                    delete next.acceptedTerms;
+                    return next;
+                  })
+                }
+              />
+              <span>
+                <strong>
+                  Li e aceito os <Link href="/termos" target="_blank">Termos de Uso</Link> e a{" "}
+                  <Link href="/privacidade" target="_blank">Política de Privacidade</Link> e declaro
+                  ter {MINIMUM_AGE} anos ou mais.
+                </strong>
+                {fieldErrors.acceptedTerms ? (
+                  <small id="accepted-terms-error" className="auth-field-error" role="alert">
+                    {fieldErrors.acceptedTerms}
+                  </small>
+                ) : null}
+              </span>
             </label>
           ) : null}
           {mode === "login" ? (

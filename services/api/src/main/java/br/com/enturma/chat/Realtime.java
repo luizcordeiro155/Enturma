@@ -65,7 +65,34 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
 
   @Override
   public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-    registry.addHandler(this, "/ws").setAllowedOrigins(origins);
+    registry
+        .addHandler(this, "/ws")
+        .addInterceptors(
+            new org.springframework.web.socket.server.HandshakeInterceptor() {
+              @Override
+              public boolean beforeHandshake(
+                  org.springframework.http.server.ServerHttpRequest request,
+                  org.springframework.http.server.ServerHttpResponse response,
+                  org.springframework.web.socket.WebSocketHandler handler,
+                  java.util.Map<String, Object> attributes) {
+                if (request instanceof org.springframework.http.server.ServletServerHttpRequest s) {
+                  var servlet = s.getServletRequest();
+                  String client =
+                      br.com.enturma.auth.ProxiedAddress.resolve(
+                          servlet.getRemoteAddr(), servlet::getHeader);
+                  if (client != null) attributes.put(CLIENT_ADDRESS, client);
+                }
+                return true;
+              }
+
+              @Override
+              public void afterHandshake(
+                  org.springframework.http.server.ServerHttpRequest request,
+                  org.springframework.http.server.ServerHttpResponse response,
+                  org.springframework.web.socket.WebSocketHandler handler,
+                  Exception exception) {}
+            })
+        .setAllowedOrigins(origins);
   }
 
   public boolean isTyping(UUID room) {
@@ -88,7 +115,10 @@ public class Realtime extends TextWebSocketHandler implements WebSocketConfigure
     }
   }
 
+  private static final String CLIENT_ADDRESS = "enturma.clientAddress";
+
   private static String address(WebSocketSession socket) {
+    if (socket.getAttributes().get(CLIENT_ADDRESS) instanceof String client) return client;
     var remote=socket.getRemoteAddress();
     return remote == null ? "unknown" : remote.getAddress() == null ? remote.getHostString() : remote.getAddress().getHostAddress();
   }

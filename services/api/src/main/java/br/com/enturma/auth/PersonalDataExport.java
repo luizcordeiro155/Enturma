@@ -52,15 +52,195 @@ public class PersonalDataExport {
     SECTIONS.put("study-mastery", "SELECT subject_id,level,evidence,updated_at FROM subject_mastery WHERE user_id=? ORDER BY subject_id");
     SECTIONS.put("social-reports", "SELECT id,post_id,reason,status,created_at FROM social_report WHERE reporter_id=? ORDER BY created_at,id");
   }
+
+  /**
+   * The rest of what a person did on Enturma (LGPD art. 18, access and portability): section, table and
+   * the columns that point at the person. Columns are read from the schema, minus secrets.
+   */
+  private static final String[][] TABLES = {
+    {"privacy-consents", "consent_record", "user_id"},
+    {"academic-enrollment", "academic_enrollment", "user_id"},
+    {"academic-enrollment-history", "academic_enrollment_history", "user_id"},
+    {"academic-subjects", "user_subject", "user_id"},
+    {"academic-identity", "academic_identity", "user_id"},
+    {"academic-verification-documents", "academic_verification_document", "user_id"},
+    {"academic-verification-support", "academic_verification_support", "user_id"},
+    {"academic-verification-history", "academic_verification_audit", "user_id"},
+    {"academic-catalog-requests", "academic_catalog_request", "user_id"},
+    {"account-deletion-requests", "account_deletion_request", "user_id"},
+    {"sessions", "user_session", "user_id"},
+    {"achievements", "user_achievement", "user_id"},
+    {"achievement-progress", "achievement_progress", "user_id"},
+    {"ai-messages", "ai_message", "user_id"},
+    {"games-algorithm", "algorithm_game_result", "user_id"},
+    {"games-academic", "academic_game_progress", "user_id"},
+    {"games-words", "word_game_result", "user_id"},
+    {"games-word-sessions", "word_game_session", "user_id"},
+    {"learning-profile", "campus_learning_profile", "user_id"},
+    {"learning-tutor", "campus_tutor_interaction", "user_id"},
+    {"learning-daily", "daily_learning_progress", "user_id"},
+    {"learning-daily-words", "daily_word_progress", "user_id"},
+    {"learning-missions", "learning_mission", "user_id"},
+    {"learning-mission-starts", "learning_mission_start", "user_id"},
+    {"learning-progress", "learning_progress", "user_id"},
+    {"learning-stats", "learning_stats", "user_id"},
+    {"learning-xp", "learning_xp_event", "user_id"},
+    {"practice-sessions", "practice_session", "user_id"},
+    {"practice-attempts", "practice_attempt", "user_id"},
+    {"forum-entries", "forum_entry", "author_id"},
+    {"forum-reactions", "forum_reaction", "user_id"},
+    {"forum-votes", "forum_vote", "user_id"},
+    {"friends", "friendship", "requester", "recipient"},
+    {"blocks", "user_block", "user_id"},
+    {"notifications", "notification", "user_id"},
+    {"notification-preferences", "notification_preference", "user_id"},
+    {"notification-devices", "notification_push_device", "user_id"},
+    {"experience-preferences", "user_experience_preference", "user_id"},
+    {"profile-privacy", "profile_privacy_setting", "user_id"},
+    {"profile-showcase", "profile_showcase", "user_id"},
+    {"profile-widgets", "profile_widget", "user_id"},
+    {"private-messages", "private_message", "sender_id"},
+    {"private-message-reactions", "private_message_reaction", "user_id"},
+    {"private-messages-hidden", "private_message_hidden", "user_id"},
+    {"private-message-receipts", "private_message_receipt", "user_id"},
+    {"private-calls", "private_call", "caller_id", "callee_id"},
+    {"reports", "report", "reporter_id"},
+    {"rides", "ride", "owner_id"},
+    {"ride-recurrences", "ride_recurrence", "owner_id"},
+    {"ride-matches", "ride_match", "user_id", "passenger_id", "driver_id"},
+    {"ride-messages", "ride_message", "sender_id"},
+    {"ride-reviews", "ride_review", "reviewer_id"},
+    {"ride-cancellations", "ride_cancellation", "actor_id"},
+    {"ride-safety-events", "ride_safety_event", "actor_id"},
+    {"ride-safety-shares", "ride_safety_share", "shared_by"},
+    {"ride-availability", "ride_driver_availability", "user_id"},
+    {"ride-preferences", "ride_user_mobility_pref", "user_id"},
+    {"ride-vehicles", "ride_vehicle_profile", "user_id"},
+    {"rooms-hosted", "study_room", "host_id"},
+    {"rooms-joined", "room_participant", "user_id"},
+    {"room-messages", "room_message", "user_id"},
+    {"room-messages-hidden", "room_message_hidden", "user_id"},
+    {"room-message-receipts", "room_message_receipt", "user_id"},
+    {"room-reactions", "room_reaction", "user_id"},
+    {"room-attachments", "room_attachment", "uploaded_by"},
+    {"room-notebook-shares", "room_notebook_share", "shared_by"},
+    {"room-artifacts", "room_session_artifact", "user_id"},
+    {"room-events", "room_system_event", "user_id"},
+    {"social-media", "social_media", "owner_id"},
+    {"social-mentions", "social_mention", "user_id"},
+    {"social-story-views", "social_story_view", "user_id"},
+    {"study-flashcards", "study_flashcard", "user_id"},
+    {"study-groups", "study_group", "owner_id"},
+    {"study-group-memberships", "study_group_member", "user_id"},
+    {"study-group-tasks", "study_group_task", "created_by", "assigned_to"},
+    {"study-journey", "study_journey", "user_id"},
+    {"study-match-profile", "study_match_profile", "user_id"},
+    {"study-materials", "study_material", "uploaded_by"},
+    {"teacher-profile", "teacher_profile", "user_id"},
+    {"teacher-classes", "teacher_class", "owner_id"},
+    {"teacher-class-memberships", "teacher_class_member", "user_id"},
+    {"teacher-submissions", "teacher_submission", "user_id"},
+  };
+
+  /**
+   * Tables that point at a person but are not exported, and why. Secrets protect the account; working
+   * queues and second-long presence are not information about the person.
+   */
+  public static final Map<String, String> EXEMPT =
+      Map.ofEntries(
+          Map.entry("academic_catalog_audit", "registro de ações de administradores no catálogo"),
+          Map.entry("academic_import_job", "importações feitas por administradores"),
+          Map.entry("academic_legacy_snapshot", "cópia técnica de migração do perfil antigo"),
+          Map.entry("academic_verification_token", "segredo de uso único"),
+          Map.entry("account_token", "segredo de uso único"),
+          Map.entry("password_reset_flow", "segredo de recuperação de senha"),
+          Map.entry("private_account_session_key", "chave criptográfica da conta"),
+          Map.entry("private_identity", "chave criptográfica da conta"),
+          Map.entry("achievement_sync_queue", "fila interna de processamento"),
+          Map.entry("audit_log", "trilha de segurança das ações administrativas"),
+          Map.entry("calendar_vacation_year", "controle interno de férias padrão"),
+          Map.entry("campus_pickup_zone", "pontos de encontro cadastrados por administradores"),
+          Map.entry("email_outbox", "fila de envio com links de uso único; apagada em 30 dias"),
+          Map.entry("moderation_action", "registro interno de moderação"),
+          Map.entry("moderation_blocked_host", "lista interna de domínios bloqueados"),
+          Map.entry("moderation_case", "registro interno de moderação"),
+          Map.entry("notification_desktop_push_event", "fila técnica de entrega"),
+          Map.entry("notification_push_delivery", "fila técnica de entrega"),
+          Map.entry("notification_web_push_subscription", "endereço técnico de push com chaves"),
+          Map.entry("private_typing_presence", "presença de segundos, apagada ao expirar"),
+          Map.entry("realtime_presence", "presença de segundos, apagada ao expirar"),
+          Map.entry("profile_activity", "presença recente, apagada em 7 dias"),
+          Map.entry("room_voice_presence", "presença em chamada, apagada ao sair"),
+          Map.entry("ride_dispatch_attempt", "tentativa técnica de despacho de carona"),
+          Map.entry("ride_live_location", "posição ao vivo, apagada em 15 minutos"),
+          Map.entry("rate_limit", "contador antiabuso, apagado em 1 dia"));
+
+  private static final Set<String> SECRET_PARTS =
+      Set.of(
+          "hash", "secret", "password", "token", "key", "keys", "cipher", "ciphertext", "nonce",
+          "salt", "iv", "wrapped", "signature", "endpoint", "auth", "p256dh", "encrypted", "vault");
+
+  private volatile Map<String, String> generated;
+
+  /** Builds the generated sections from the live schema the first time they are needed. */
+  private Map<String, String> generated() {
+    var current = generated;
+    if (current != null) return current;
+    var built = new LinkedHashMap<String, String>();
+    for (String[] t : TABLES) {
+      var columns =
+          db.jdbc.queryForList(
+              "SELECT column_name FROM information_schema.columns WHERE"
+                  + " table_schema=current_schema() AND table_name=? AND data_type<>'bytea' ORDER BY"
+                  + " ordinal_position",
+              String.class,
+              t[1]);
+      var safe =
+          columns.stream()
+              .filter(c -> Collections.disjoint(Arrays.asList(c.split("_")), SECRET_PARTS))
+              .toList();
+      if (safe.isEmpty()) continue;
+      var where = new StringJoiner(" OR ");
+      for (int i = 2; i < t.length; i++) where.add(t[i] + "=?");
+      built.put(
+          t[0],
+          "SELECT " + String.join(",", safe) + " FROM " + t[1] + " WHERE " + where + " ORDER BY 1");
+    }
+    generated = built;
+    return built;
+  }
+
+  /** Tables whose rows reach the person through some export section. */
+  public Set<String> exportedTables() {
+    var tables = new TreeSet<String>();
+    for (String[] t : TABLES) tables.add(t[1]);
+    for (String q : SECTIONS.values()) {
+      var m = java.util.regex.Pattern.compile("(?i)\\b(?:FROM|JOIN)\\s+([a-z_]+)").matcher(q);
+      while (m.find()) tables.add(m.group(1));
+    }
+    return tables;
+  }
+
+  private String query(String section) {
+    return SECTIONS.containsKey(section) ? SECTIONS.get(section) : generated().get(section);
+  }
+
   @GetMapping("/sections")
-  public Set<String> sections() { return Collections.unmodifiableSet(SECTIONS.keySet()); }
+  public Set<String> sections() {
+    var all = new LinkedHashSet<String>(SECTIONS.keySet());
+    all.addAll(generated().keySet());
+    return Collections.unmodifiableSet(all);
+  }
 
   @GetMapping
   public ResponseEntity<?> export(@AuthenticationPrincipal Actor actor,
       @RequestParam(defaultValue="account") String section,@RequestParam(defaultValue="0") int offset) {
-    String query=SECTIONS.get(section);
+    String query=query(section);
     if(query==null || offset<0 || offset>100000) throw ApiException.invalid("Página de exportação inválida.");
-    var rows=db.list(query+" LIMIT 101 OFFSET ?",actor.id(),offset);
+    int people=(int)query.chars().filter(c->c=='?').count();
+    var args=new ArrayList<Object>(Collections.nCopies(people,actor.id()));
+    args.add(offset);
+    var rows=db.list(query+" LIMIT 101 OFFSET ?",args.toArray());
     return ResponseEntity.ok().header("Cache-Control","private,no-store")
       .body(Map.of("section",section,"items",rows.subList(0,Math.min(100,rows.size())),"nextOffset",rows.size()>100?offset+100:-1));
   }

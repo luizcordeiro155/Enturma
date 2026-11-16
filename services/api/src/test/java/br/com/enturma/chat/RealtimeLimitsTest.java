@@ -61,4 +61,26 @@ class RealtimeLimitsTest {
     realtime.publish();
     verify(first).close(CloseStatus.POLICY_VIOLATION);
   }
+  @Test void pendingSocketLimitCountsClientsBehindTheSharedPlatformProxy() throws Exception {
+    var realtime=new Realtime(mock(AuthService.class),mock(Db.class),mock(ChatService.class),mock(StudyService.class),new ObjectMapper(),mock(RealtimePresence.class),"https://app.example");
+    var proxy=new java.net.InetSocketAddress("10.0.0.4",4000);
+    for(int i=0;i<100;i++){
+      var socket=mock(WebSocketSession.class);
+      when(socket.getId()).thenReturn("client-"+i);when(socket.isOpen()).thenReturn(true);
+      when(socket.getRemoteAddress()).thenReturn(proxy);
+      when(socket.getAttributes()).thenReturn(new HashMap<>(Map.of("enturma.clientAddress","203.0.113."+i)));
+      realtime.afterConnectionEstablished(socket);
+      verify(socket,never()).close(any(CloseStatus.class));
+    }
+    WebSocketSession last=null;
+    for(int i=0;i<65;i++){
+      var socket=mock(WebSocketSession.class);
+      when(socket.getId()).thenReturn("same-"+i);when(socket.isOpen()).thenReturn(true);
+      when(socket.getRemoteAddress()).thenReturn(proxy);
+      when(socket.getAttributes()).thenReturn(new HashMap<>(Map.of("enturma.clientAddress","198.51.100.1")));
+      realtime.afterConnectionEstablished(socket);
+      last=socket;
+    }
+    verify(last).close(CloseStatus.SERVICE_OVERLOAD);
+  }
 }

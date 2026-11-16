@@ -1,0 +1,38 @@
+name: Load test (production)
+on:
+  push:
+    branches: ["loadtest/**"]
+permissions:
+  contents: read
+jobs:
+  k6:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: grafana/setup-k6-action@v1
+      - name: Run k6 shard ${{ matrix.shard }}
+        env:
+          SHARDS: "5"
+        run: |
+          set -a; . loadtest/plan.env; set +a
+          k6 run --quiet --summary-export=summary-${{ matrix.shard }}.json \
+            --out csv=results-${{ matrix.shard }}.csv.gz loadtest/enturma.js || code=$?
+          echo "K6_EXIT=${code:-0}" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: loadtest-${{ matrix.shard }}
+          path: |
+            summary-${{ matrix.shard }}.json
+            results-${{ matrix.shard }}.csv.gz
+          retention-days: 7
+      - name: Fail when k6 could not run the plan
+        # 99 = a safety threshold aborted the run (expected when the limit is reached).
+        if: env.K6_EXIT != '0' && env.K6_EXIT != '99'
+        run: |
+          echo "k6 exited with $K6_EXIT (setup or script error)"
+          exit 1

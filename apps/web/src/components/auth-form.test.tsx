@@ -8,6 +8,7 @@ import {
   cleanup,
 } from "@testing-library/react";
 import { AuthForm } from "./auth-form";
+import { post } from "@/lib/api";
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: vi.fn(), replace: vi.fn() }),
 }));
@@ -62,19 +63,37 @@ describe("autenticação", () => {
     fireEvent.click(remember);
     expect(remember.checked).toBe(false);
   });
-  it("aceita de 6 a 30 caracteres para criação de conta", () => {
+  it("aceita de 8 a 64 caracteres para criação de conta", () => {
     render(<AuthForm mode="register" />);
     expect((screen.getByLabelText("Senha") as HTMLInputElement).minLength).toBe(
-      6,
+      8,
     );
     expect(
       (screen.getByLabelText("Confirmar senha") as HTMLInputElement).minLength,
-    ).toBe(6);
-    expect((screen.getByLabelText("Senha") as HTMLInputElement).maxLength).toBe(30);
+    ).toBe(8);
+    expect((screen.getByLabelText("Senha") as HTMLInputElement).maxLength).toBe(64);
     expect(screen.getByLabelText("Nome de usuário")).toBeTruthy();
   });
   it("preserva senhas anteriores maiores no login", () => {
     render(<AuthForm mode="login" />);
     expect((screen.getByLabelText("Senha") as HTMLInputElement).maxLength).toBe(72);
   });
+});
+
+it("sign-up asks to accept the terms and the privacy policy, and sends the acceptance", async () => {
+  vi.mocked(post).mockResolvedValue(undefined as never);
+  render(<AuthForm mode="register" />);
+  fireEvent.change(screen.getByLabelText("Seu nome"), { target: { value: "Ana" } });
+  fireEvent.change(screen.getByLabelText("Nome de usuário"), { target: { value: "ana_1" } });
+  fireEvent.change(screen.getByLabelText("E-mail", { exact: true }), { target: { value: "ana@example.test" } });
+  fireEvent.change(screen.getByLabelText("Senha", { exact: true }), { target: { value: "senha-forte-123" } });
+  fireEvent.change(screen.getByLabelText("Confirmar senha"), { target: { value: "senha-forte-123" } });
+  fireEvent.submit(screen.getByRole("button", { name: /Criar conta/ }).closest("form")!);
+  expect(await screen.findByText(/aceite os Termos e a Política de Privacidade/)).toBeTruthy();
+  expect(post).not.toHaveBeenCalled();
+  fireEvent.click(screen.getByRole("checkbox", { name: /Li e aceito/ }));
+  fireEvent.submit(screen.getByRole("button", { name: /Criar conta/ }).closest("form")!);
+  await waitFor(() =>
+    expect(post).toHaveBeenCalledWith("/auth/register", expect.objectContaining({ acceptedTerms: true })),
+  );
 });

@@ -17,7 +17,7 @@ test("mobile cards, navigation and transparent renewal preserve the document", a
       name: "Estudante mobile",
       username: `m_${randomUUID().slice(0, 8)}`,
       email,
-      password: "abc123",
+      password: "E2E-password-abc123",
       device: "E2E",
     },
   });
