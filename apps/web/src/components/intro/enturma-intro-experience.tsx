@@ -1,8 +1,5 @@
 "use client";
-import dynamic from "next/dynamic";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { Profile } from "@enturma/contracts";
-import type { PlayerRef } from "@remotion/player";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { gsap } from "gsap";
 import {
   ArrowRight,
@@ -12,53 +9,62 @@ import {
   Volume2,
   VolumeX,
 } from "lucide-react";
-import {
-  introDimensions,
-  introQuality,
-  INTRO_FEATURES,
-  INTRO_STORAGE_KEY,
-  INTRO_FRAMES,
-  INTRO_DURATION_LABEL,
-  introTime,
-  type IntroProps,
-} from "./intro-model";
+import { INTRO_STORAGE_KEY } from "./intro-model";
 
-const IntroPlayer = dynamic(() => import("./intro-player"), {
-  ssr: false,
-  loading: () => (
-    <div className="intro-fallback" role="status">
-      Preparando sua apresentação…
-    </div>
-  ),
-});
+/** Narrow screens (phones, the PWA and the mobile web) get the 9:16 cut; wider ones the 16:9 cut. */
+export const INTRO_PORTRAIT_QUERY = "(max-width: 760px)";
+export const INTRO_VIDEOS = {
+  portrait: {
+    src: "/intro/enturma-apresentacao-9x16.mp4",
+    poster: "/intro/enturma-apresentacao-9x16.jpg",
+  },
+  landscape: {
+    src: "/intro/enturma-apresentacao-16x9.mp4",
+    poster: "/intro/enturma-apresentacao-16x9.jpg",
+  },
+} as const;
+export type IntroLayout = keyof typeof INTRO_VIDEOS;
+export const INTRO_VIDEO_DURATION_LABEL = "1 min 30 s";
 
-export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
+export function introClock(seconds: number) {
+  const whole = Math.max(0, Math.floor(seconds || 0));
+  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
+}
+
+function currentLayout(): IntroLayout {
+  return typeof window !== "undefined" &&
+    window.matchMedia(INTRO_PORTRAIT_QUERY).matches
+    ? "portrait"
+    : "landscape";
+}
+
+export function EnturmaIntroExperience() {
   const [open, setOpen] = useState(false);
   const [run, setRun] = useState(0);
+  const [layout, setLayout] = useState<IntroLayout>("landscape");
   const [visible, setVisible] = useState(false);
   const [paused, setPaused] = useState(false);
-  const [frame, setFrame] = useState(0);
   const [muted, setMuted] = useState(false);
   const [audioBlocked, setAudioBlocked] = useState(false);
-  const [seekFrame, setSeekFrame] = useState<number>();
-  const [dimensions, setDimensions] = useState(introDimensions(900));
-  const [theme, setTheme] = useState<IntroProps["theme"]>("light");
-  const [quality, setQuality] = useState<IntroProps["quality"]>("optimized");
+  const [time, setTime] = useState(0);
+  const [duration, setDuration] = useState(90);
   const container = useRef<HTMLElement>(null);
-  const player = useRef<PlayerRef>(null);
+  const video = useRef<HTMLVideoElement>(null);
+  const resumeAt = useRef(0);
   const finishing = useRef(false);
   const exit = useRef<gsap.core.Tween | null>(null);
   const seen = useRef(false);
+
   const replay = useCallback(() => {
     finishing.current = false;
     exit.current?.kill();
     if (container.current)
       gsap.set(container.current, { clearProps: "opacity,transform" });
+    resumeAt.current = 0;
     setPaused(false);
-    setFrame(0);
+    setTime(0);
     setMuted(false);
     setAudioBlocked(false);
-    setSeekFrame(undefined);
     setRun((value) => value + 1);
     setOpen(true);
   }, []);
@@ -78,37 +84,26 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
     };
   }, [replay]);
 
+  // Pick the cut for this screen and follow rotations and window resizes.
+  useEffect(() => {
+    const media = window.matchMedia(INTRO_PORTRAIT_QUERY);
+    const update = () => {
+      const next = currentLayout();
+      setLayout((previous) => {
+        if (previous !== next && video.current)
+          resumeAt.current = video.current.currentTime;
+        return next;
+      });
+    };
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
   useEffect(() => {
     if (!open || !container.current) return;
     const el = container.current;
-    const media = matchMedia("(prefers-reduced-motion: reduce)");
-    const update = () => {
-      const width = el.clientWidth;
-      const memory = (navigator as Navigator & { deviceMemory?: number })
-        .deviceMemory;
-      setTheme(
-        document.documentElement.dataset.theme === "dark" ? "dark" : "light",
-      );
-      setQuality(
-        introQuality(
-          media.matches ||
-            document.documentElement.dataset.reducedMotion === "true",
-          memory,
-          navigator.hardwareConcurrency || 4,
-          width,
-        ),
-      );
-      setDimensions(introDimensions(width));
-    };
-    update();
-    const resize = new ResizeObserver(update);
-    resize.observe(el);
-    const themeObserver = new MutationObserver(update);
-    themeObserver.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["data-theme", "data-reduced-motion"],
-    });
-    media.addEventListener("change", update);
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     let inView = false;
     const visibility = () =>
       setVisible(inView && document.visibilityState === "visible");
@@ -125,13 +120,13 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
           }
         }
       },
-      { threshold: 0.15 },
+      { threshold: 0.35 },
     );
     intersection.observe(el);
     document.addEventListener("visibilitychange", visibility);
     const context = gsap.context(() => {
       if (
-        !media.matches &&
+        !reduced.matches &&
         document.documentElement.dataset.reducedMotion !== "true"
       )
         gsap.from(el, {
@@ -149,67 +144,74 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
     }
     return () => {
       context.revert();
-      resize.disconnect();
-      themeObserver.disconnect();
       intersection.disconnect();
-      media.removeEventListener("change", update);
       document.removeEventListener("visibilitychange", visibility);
     };
   }, [open, run]);
 
-  const finish = useCallback(
-    (restoreFocus = false) => {
-      if (finishing.current) return;
-      finishing.current = true;
-      setPaused(true);
-      const complete = () => {
-        if (container.current)
-          gsap.set(container.current, { clearProps: "opacity,transform" });
-        setOpen(false);
-        const content = document.getElementById(
-          matchMedia("(max-width: 760px)").matches
-            ? "enturma-study-guide"
-            : "minhas-materias",
-        );
-        if (restoreFocus) content?.focus({ preventScroll: true });
-      };
-      if (quality === "low" || !container.current) complete();
-      else
-        exit.current = gsap.to(container.current, {
-          opacity: 0,
-          scale: 0.99,
-          duration: 0.18,
-          onComplete: complete,
-        });
-    },
-    [quality],
-  );
-  const ended = useCallback(() => finish(false), [finish]);
-  const onNarrationBlocked = useCallback(() => {
-    player.current?.pause();
-    player.current?.seekTo(0);
-    setFrame(0);
+  // Play while on screen; browsers that refuse sound get a muted start and a button to hear it.
+  useEffect(() => {
+    const el = video.current;
+    if (!el || !open) return;
+    if (!visible || paused) {
+      el.pause();
+      return;
+    }
+    let alive = true;
+    el.muted = muted;
+    el.play().catch((error: DOMException) => {
+      if (!alive || error.name !== "NotAllowedError" || el.muted) return;
+      el.muted = true;
+      setMuted(true);
+      setAudioBlocked(true);
+      void el.play().catch(() => {
+        if (alive) setPaused(true);
+      });
+    });
+    return () => {
+      alive = false;
+    };
+  }, [open, visible, paused, muted, layout, run]);
+
+  const finish = useCallback((restoreFocus = false) => {
+    if (finishing.current) return;
+    finishing.current = true;
+    video.current?.pause();
     setPaused(true);
-    setAudioBlocked(true);
+    const complete = () => {
+      if (container.current)
+        gsap.set(container.current, { clearProps: "opacity,transform" });
+      setOpen(false);
+      const content = document.getElementById(
+        window.matchMedia(INTRO_PORTRAIT_QUERY).matches
+          ? "enturma-study-guide"
+          : "minhas-materias",
+      );
+      if (restoreFocus) content?.focus({ preventScroll: true });
+    };
+    const reduced =
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches ||
+      document.documentElement.dataset.reducedMotion === "true";
+    if (reduced || !container.current) complete();
+    else
+      exit.current = gsap.to(container.current, {
+        opacity: 0,
+        scale: 0.99,
+        duration: 0.18,
+        onComplete: complete,
+      });
   }, []);
 
-  const inputProps = useMemo<IntroProps>(
-    () => ({
-      user: {
-        name: profile.name,
-        avatarUrl: profile.hasAvatar
-          ? `/api/backend/users/${profile.id}/avatar`
-          : undefined,
-      },
-      students: [], // There is no public-student directory consent contract; use feature nodes.
-      subjects: profile.subjects.map((subject) => subject.name),
-      semester: profile.enrollment?.periodName,
-      features: INTRO_FEATURES,
-      theme,
-      quality,
-    }),
-    [profile, theme, quality],
-  );
+  const startWithSound = () => {
+    const el = video.current;
+    if (!el) return;
+    el.muted = false;
+    void el.play();
+    setMuted(false);
+    setAudioBlocked(false);
+    setPaused(false);
+  };
+
   if (!open)
     return (
       <section
@@ -234,19 +236,21 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
           <span>
             <strong>Conheça o Enturma</strong>
             <small>
-              Sua faculdade em companhia · {INTRO_DURATION_LABEL} · com narração
+              Sua faculdade em companhia · {INTRO_VIDEO_DURATION_LABEL} · com
+              narração
             </small>
           </span>
           <Play size={21} />
         </button>
       </section>
     );
+  const source = INTRO_VIDEOS[layout];
   return (
     <section
       ref={container}
       className="enturma-intro"
       aria-label="Apresentação do Enturma"
-      data-layout={dimensions.layout}
+      data-layout={layout}
     >
       <header>
         <span>Conheça o seu Enturma</span>
@@ -256,26 +260,12 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
             className="intro-control intro-sound"
             aria-label={muted ? "Ouvir narração" : "Silenciar narração"}
             aria-pressed={!muted}
-            onClickCapture={(event) => {
-              const instance = player.current;
-              if (!instance) return;
-              if (!muted) {
-                instance.mute();
+            onClick={() => {
+              if (muted) startWithSound();
+              else {
+                if (video.current) video.current.muted = true;
                 setMuted(true);
-                if (audioBlocked) {
-                  instance.play(event);
-                  setAudioBlocked(false);
-                  setPaused(false);
-                }
-                return;
               }
-              // Start the mounted audio inside the gesture, including Mobile Safari.
-              instance.pause();
-              instance.unmute();
-              instance.play(event);
-              setMuted(false);
-              setAudioBlocked(false);
-              setPaused(false);
             }}
           >
             {muted ? <VolumeX size={17} /> : <Volume2 size={17} />}
@@ -284,11 +274,8 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
           <button
             type="button"
             className="intro-control"
-            onClickCapture={(event) => {
-              if (paused) {
-                player.current?.play(event);
-                setAudioBlocked(false);
-              } else player.current?.pause();
+            onClick={() => {
+              if (paused) setAudioBlocked(false);
               setPaused((value) => !value);
             }}
             aria-label={
@@ -310,45 +297,50 @@ export function EnturmaIntroExperience({ profile }: { profile: Profile }) {
         <button
           type="button"
           className="intro-audio-start"
-          onClickCapture={(event) => {
-            player.current?.unmute();
-            player.current?.play(event);
-            setMuted(false);
-            setAudioBlocked(false);
-            setPaused(false);
-          }}
+          onClick={startWithSound}
         >
           <Volume2 size={20} /> Reproduzir com som
         </button>
       )}
-      <IntroPlayer
-        key={run}
-        inputProps={inputProps}
-        width={dimensions.width}
-        height={dimensions.height}
-        playing={visible && !paused}
-        onEnd={ended}
-        onFrame={setFrame}
-        seekFrame={seekFrame}
-        playerRef={player}
-        onMutedChange={setMuted}
-        onPlaybackBlocked={onNarrationBlocked}
-      />
+      <div className="intro-video-frame" data-layout={layout}>
+        <video
+          key={`${layout}-${run}`}
+          ref={video}
+          className="intro-video"
+          src={source.src}
+          poster={source.poster}
+          preload="metadata"
+          playsInline
+          aria-label="Vídeo de apresentação do Enturma com narração e legendas"
+          onLoadedMetadata={(event) => {
+            const el = event.currentTarget;
+            if (Number.isFinite(el.duration)) setDuration(el.duration);
+            if (resumeAt.current > 0) {
+              el.currentTime = Math.min(resumeAt.current, el.duration - 0.5);
+              resumeAt.current = 0;
+            }
+          }}
+          onTimeUpdate={(event) => setTime(event.currentTarget.currentTime)}
+          onEnded={() => finish(false)}
+          onError={() => setPaused(true)}
+        />
+      </div>
       <footer className="intro-timeline">
-        <span>{introTime(frame)}</span>
+        <span>{introClock(time)}</span>
         <input
           type="range"
           min="0"
-          max={INTRO_FRAMES - 1}
-          value={frame}
+          max={Math.floor(duration)}
+          step="0.1"
+          value={Math.min(time, duration)}
           aria-label="Posição da apresentação"
           onChange={(event) => {
             const next = Number(event.target.value);
-            setFrame(next);
-            setSeekFrame(next);
+            setTime(next);
+            if (video.current) video.current.currentTime = next;
           }}
         />
-        <span>{introTime(INTRO_FRAMES)}</span>
+        <span>{introClock(duration)}</span>
       </footer>
     </section>
   );

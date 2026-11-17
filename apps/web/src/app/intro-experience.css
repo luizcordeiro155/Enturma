@@ -53,6 +53,23 @@ html .enturma-intro .intro-sound[aria-pressed="true"] {
   color: #fff;
   border-color: #73dcc4;
 }
+.intro-video-frame {
+  display: grid;
+  place-items: center;
+  background: #0c1214;
+}
+.intro-video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
+  background: #0c1214;
+  object-fit: contain;
+}
+.intro-video-frame[data-layout="portrait"] .intro-video {
+  aspect-ratio: 9 / 16;
+  width: min(100%, calc(78dvh * 9 / 16));
+}
 .intro-fallback {
   display: grid;
   place-items: center;
