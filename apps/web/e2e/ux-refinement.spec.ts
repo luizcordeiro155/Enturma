@@ -1002,87 +1002,72 @@ test.describe("touch chat", () => {
 });
 
 test.describe("narration autoplay policy", () => {
-  for (const policy of ["rejected", "suspended"] as const) {
-    test(`${policy} audio waits for a gesture and begins unmuted`, async ({
-      request,
-    }) => {
-      const browser = await chromium.launch({
-        args: ["--autoplay-policy=document-user-activation-required"],
-      });
-      const page = await browser.newPage({
-        baseURL: process.env.E2E_WEB_URL ?? "http://localhost:3000",
-        viewport: { width: 1376, height: 1800 },
-      });
-      // Inject a policy denial: headless Chromium may grant audio permission
-      // despite autoplay flags. All playback after a real gesture stays native.
-      await page.addInitScript((policy) => {
-        let unlocked = false;
-        for (const event of ["pointerdown", "keydown"]) {
-          window.addEventListener(
-            event,
-            (e) => {
-              if (e.isTrusted) unlocked = true;
-            },
-            { capture: true },
-          );
-        }
-        const play = HTMLMediaElement.prototype.play;
-        HTMLMediaElement.prototype.play = function () {
-          if (
-            policy === "rejected" &&
-            this instanceof HTMLAudioElement &&
-            !this.muted &&
-            !unlocked
-          )
-            return Promise.reject(
-              new DOMException(
-                "Autoplay requires a gesture",
-                "NotAllowedError",
-              ),
-            );
-          return play.call(this);
-        };
-        if (policy === "suspended") {
-          const resume = AudioContext.prototype.resume;
-          AudioContext.prototype.resume = function () {
-            if (!unlocked) return new Promise<void>(() => {});
-            return resume.call(this);
-          };
-        }
-      }, policy);
-      try {
-        const credentials = await user(request, "Narração inicial");
-        await authenticate(page.context(), credentials);
-        await page.goto("/home");
-        const intro = page.getByRole("region", {
-          name: "Apresentação do Enturma",
-        });
-        const start = intro.getByRole("button", { name: "Reproduzir com som" });
-        await expect(intro.locator("audio")).toHaveCount(1);
-        await expect(start).toBeVisible();
-        await expect(
-          intro.getByRole("slider", { name: "Posição da apresentação" }),
-        ).toHaveValue("0");
-        await start.click();
-        await expect
-          .poll(() =>
-            intro
-              .locator("audio")
-              .evaluate(
-                (el: HTMLAudioElement) =>
-                  !el.muted && !el.paused && el.currentTime > 0,
-              ),
-          )
-          .toBe(true);
-        await intro.getByRole("button", { name: "Silenciar narração" }).click();
-        await expect
-          .poll(() =>
-            intro.locator("audio").evaluate((el: HTMLAudioElement) => el.muted),
-          )
-          .toBe(true);
-      } finally {
-        await browser.close();
-      }
+  test("rejected audio starts the video muted and a gesture turns the narration on", async ({
+    request,
+  }) => {
+    const browser = await chromium.launch({
+      args: ["--autoplay-policy=document-user-activation-required"],
     });
-  }
+    const page = await browser.newPage({
+      baseURL: process.env.E2E_WEB_URL ?? "http://localhost:3000",
+      viewport: { width: 1376, height: 1800 },
+    });
+    // Inject a policy denial: headless Chromium may grant audio permission
+    // despite autoplay flags. All playback after a real gesture stays native.
+    await page.addInitScript(() => {
+      let unlocked = false;
+      for (const event of ["pointerdown", "keydown"]) {
+        window.addEventListener(
+          event,
+          (e) => {
+            if (e.isTrusted) unlocked = true;
+          },
+          { capture: true },
+        );
+      }
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function () {
+        if (!this.muted && !unlocked)
+          return Promise.reject(
+            new DOMException("Autoplay requires a gesture", "NotAllowedError"),
+          );
+        return play.call(this);
+      };
+    });
+    try {
+      const credentials = await user(request, "Narração inicial");
+      await authenticate(page.context(), credentials);
+      await page.goto("/home");
+      const intro = page.getByRole("region", {
+        name: "Apresentação do Enturma",
+      });
+      const video = intro.locator("video.intro-video");
+      await expect(video).toHaveCount(1);
+      await video.scrollIntoViewIfNeeded();
+      const start = intro.getByRole("button", { name: "Reproduzir com som" });
+      await expect(start).toBeVisible();
+      await expect(
+        intro.getByRole("button", { name: "Ouvir narração" }),
+      ).toHaveAttribute("aria-pressed", "false");
+      await expect
+        .poll(() => video.evaluate((el: HTMLVideoElement) => el.muted))
+        .toBe(true);
+      await start.click();
+      await expect(start).toHaveCount(0);
+      await expect
+        .poll(() =>
+          video.evaluate(
+            (el: HTMLVideoElement) =>
+              !el.muted && !el.paused && el.currentTime > 0,
+          ),
+        )
+        .toBe(true);
+      await intro.getByRole("button", { name: "Silenciar narração" }).click();
+      await expect
+        .poll(() => video.evaluate((el: HTMLVideoElement) => el.muted))
+        .toBe(true);
+    } finally {
+      await browser.close();
+    }
+  });
 });
