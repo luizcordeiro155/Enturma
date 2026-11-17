@@ -516,7 +516,9 @@ public class NotebookService {
         + " cite [n] para elas, não invente fontes. Se houver pesquisa web habilitada, complemente"
         + " com resultados reais da ferramenta e identifique os links externos separadamente. Sem a"
         + " ferramenta, não afirme ter pesquisado. Diga quando os trechos forem insuficientes. Use"
-        + " Markdown com títulos e exemplos acessíveis. Objetivo do estudante: "
+        + " Markdown com títulos e exemplos acessíveis. Nunca use LaTeX nem barras invertidas:"
+        + " o Enturma não renderiza fórmulas, então escreva-as em texto com símbolos Unicode"
+        + " (ex.: lim x→2⁺ f(x) = 3, x², √x, ≤, ≠). Objetivo do estudante: "
         + question
         + "\nFormato: "
         + switch (mode) {
