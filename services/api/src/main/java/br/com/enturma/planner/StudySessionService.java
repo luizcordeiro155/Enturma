@@ -479,7 +479,14 @@ public class StudySessionService {
     int start = text.indexOf('{'), end = text.lastIndexOf('}');
     if (start < 0 || end <= start) return null;
     try {
-      Map<String, Object> root = json.readValue(text.substring(start, end + 1), new TypeReference<>() {});
+      String body = text.substring(start, end + 1);
+      Map<String, Object> root;
+      try {
+        root = json.readValue(body, new TypeReference<>() {});
+      } catch (Exception invalidEscape) {
+        // Math answers sometimes carry LaTeX (\lim, \infty) that is not a valid JSON escape.
+        root = json.readValue(escapeStrayBackslashes(body), new TypeReference<>() {});
+      }
       if (!(root.get("questions") instanceof List<?> list) || list.size() < 2 || list.size() > 10) return null;
       var questions = new ArrayList<Map<String, Object>>();
       for (var item : list) {
@@ -499,6 +506,24 @@ public class StudySessionService {
     } catch (Exception e) {
       return null;
     }
+  }
+
+  /** Keeps valid JSON escapes and doubles every other backslash, so "\lim" survives parsing. */
+  static String escapeStrayBackslashes(String text) {
+    var out = new StringBuilder(text.length() + 16);
+    for (int i = 0; i < text.length(); i++) {
+      char c = text.charAt(i);
+      if (c != '\\') {
+        out.append(c);
+        continue;
+      }
+      char next = i + 1 < text.length() ? text.charAt(i + 1) : ' ';
+      if ("\"\\/bfnrtu".indexOf(next) >= 0) {
+        out.append(c).append(next);
+        i++;
+      } else out.append("\\\\");
+    }
+    return out.toString();
   }
 
   private void validate(OffsetDateTime startsAt, Integer minutes) {
