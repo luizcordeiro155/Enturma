@@ -78,6 +78,18 @@ class FocusModeIntegrationTest {
   }
 
   @Test
+  void aSessionForTomorrowStartedEarlyAlsoPausesTheSocial() {
+    // At 23:59 a session "in one minute" belongs to tomorrow's calendar.
+    var zone = ZoneId.of("America/Sao_Paulo");
+    var tomorrow = ZonedDateTime.now(zone).toLocalDate().plusDays(1).atTime(0, 30).atZone(zone);
+    UUID session =
+        study.create(a, new StudySessionService.NewSession(subject, tomorrow.toOffsetDateTime(), 45, "Revisão"));
+    study.start(a, session);
+    assertThat(planner.focus(a)).containsEntry("blocked", true).containsEntry("studyId", session);
+    study.finish(a, session);
+  }
+
+  @Test
   void socialPushWaitsDuringFocusButStaysInTheApp() {
     String tag = UUID.randomUUID().toString().substring(0, 8);
     Actor friend = auth.authenticate(auth.register("Amigo", "amg_" + tag, "amg" + tag + "@example.test", "password-12345", "JUnit").accessToken())
