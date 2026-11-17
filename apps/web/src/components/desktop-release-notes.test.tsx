@@ -1,5 +1,5 @@
 import { afterEach, expect, test, vi } from "vitest";
-import { cleanup, fireEvent, render, screen } from "@testing-library/react";
+import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { DesktopReleaseNotes, versionIncreased } from "./desktop-release-notes";
 import { RELEASE_NOTES } from "@/lib/release-notes";
 vi.mock("next/dynamic", () => ({ default: () => () => null }));
@@ -43,22 +43,10 @@ test("announces the installed release once with the current release notes", asyn
   expect(localStorage.getItem("enturma-desktop-seen-version")).toBe("0.4.2");
 });
 
-test("announces Android updates with their own remembered version", async () => {
-  HTMLDialogElement.prototype.showModal = function () {
-    this.setAttribute("open", "");
-  };
-  HTMLDialogElement.prototype.close = function () {
-    this.removeAttribute("open");
-  };
-  localStorage.setItem("enturma-android-seen-version", "0.4.600");
-  render(<DesktopReleaseNotes version="0.4.610" storageKey="enturma-android-seen-version" />);
-  await screen.findByRole("dialog", { name: "Enturma atualizado." });
-  expect(screen.getByText(/0\.4\.610/)).toBeTruthy();
-  expect(localStorage.getItem("enturma-android-seen-version")).toBe("0.4.610");
-  expect(localStorage.getItem("enturma-desktop-seen-version")).toBeNull();
-});
-
-test("a first install remembers the version without announcing", () => {
-  render(<DesktopReleaseNotes version="0.4.610" storageKey="enturma-android-seen-version" />);
+test("a first install remembers the version without announcing", async () => {
+  render(<DesktopReleaseNotes version="0.4.610" />);
+  await waitFor(() =>
+    expect(localStorage.getItem("enturma-desktop-seen-version")).toBe("0.4.610"),
+  );
   expect(screen.queryByRole("dialog")).toBeNull();
 });

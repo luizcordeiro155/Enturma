@@ -22,10 +22,10 @@ O canal de privacidade recebe pedidos de titulares, dúvidas e comunicações de
 | Caronas | origem/destino, localização ao vivo durante a viagem, veículo, avaliações | execução de contrato (V); localização por consentimento (I) via permissão do aparelho |
 | Chamadas, microfone, câmera, notificações | mídia em tempo real (não gravada), tokens de push | consentimento (I) via permissão do sistema |
 | Enturma AI e Cadernos | perguntas, materiais enviados pelo usuário | execução de contrato (V) |
-| Segurança e moderação | registros de sessão, limites de uso, denúncias, auditoria administrativa | legítimo interesse (IX); prevenção à fraude (art. 11, II, g) |
+| Segurança e moderação | registros de sessão (plataforma — web, app desktop ou Android —, navegador e sistema, horário do login e do último acesso), limites de uso, denúncias, auditoria administrativa | legítimo interesse (IX); prevenção à fraude (art. 11, II, g) |
 | Prova de aceite | documento, versão, data e origem do aceite (`consent_record`) | cumprimento de obrigação legal (II) e exercício regular de direitos (VI) |
 
-Não há publicidade, venda de dados, analytics de terceiros nem cookies não essenciais. Cookies: somente sessão (`enturma_access`, `enturma_refresh`, `enturma_remember`), HttpOnly.
+Não há publicidade, venda de dados, analytics de terceiros nem cookies não essenciais. Cookies: somente sessão (`enturma_access`, `enturma_refresh`, `enturma_remember`), HttpOnly; dentro da Vitrine Virtual Mostra+ (iframe em mostraplus.com.br) os mesmos cookies são particionados (`SameSite=None; Partitioned`) e marcados por `enturma_embed`, sem compartilhamento com o site que incorpora.
 
 ## Operadores e transferência internacional
 

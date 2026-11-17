@@ -6,6 +6,7 @@ import {
   websocketUrl,
   upstreamHeaders,
 } from "@/lib/server-config";
+import { clearSessionCookies, sessionCookieOptions } from "@/lib/session-cookies";
 export async function POST(req: NextRequest) {
   if (!allowedOrigin(req)) return new NextResponse(null, { status: 403 });
   try {
@@ -42,12 +43,7 @@ export async function POST(req: NextRequest) {
     );
     if (result.ok) {
       const c: Credentials = await result.json();
-      const options = {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax" as const,
-        path: "/",
-      };
+      const options = sessionCookieOptions(req);
       res.cookies.set(
         "enturma_access",
         c.accessToken,
@@ -64,9 +60,7 @@ export async function POST(req: NextRequest) {
         rememberConnected ? { ...options, maxAge: 2592000 } : options,
       );
     } else if (result.status === 401) {
-      res.cookies.delete("enturma_access");
-      res.cookies.delete("enturma_refresh");
-      res.cookies.delete("enturma_remember");
+      clearSessionCookies(req, res);
     }
     return res;
   } catch {

@@ -308,11 +308,43 @@ public class AuthService {
       throw ApiException.invalid("A senha pode ter até 72 bytes em UTF-8.");
   }
 
+  /** Sessions active within this window are shown as online. */
+  static final String ONLINE_WINDOW = "5 minutes";
+
+  private static final long TOUCH_INTERVAL_MS = 60_000;
+  private final java.util.concurrent.ConcurrentHashMap<UUID, Long> touched =
+      new java.util.concurrent.ConcurrentHashMap<>();
+
+  /**
+   * Records where a session runs and that it was just used. Writes at most once a minute per
+   * session on this instance, so ordinary requests cost no extra database round trip.
+   */
+  public void touch(UUID session, String platform, String clientName) {
+    long now = System.currentTimeMillis();
+    Long previous = touched.get(session);
+    if (previous != null && now - previous < TOUCH_INTERVAL_MS) return;
+    if (touched.size() > 20_000) touched.clear();
+    touched.put(session, now);
+    db.jdbc.update(
+        "UPDATE user_session SET last_seen_at=now(),platform=COALESCE(?,platform),"
+            + "client_name=COALESCE(?,client_name) WHERE id=?",
+        SessionClient.platform(platform),
+        SessionClient.name(clientName),
+        session);
+  }
+
   public Object sessions(Actor actor) {
     return db.list(
-        "SELECT id,device,created_at,expires_at FROM user_session WHERE user_id=? AND revoked_at IS"
-            + " NULL AND expires_at>now() ORDER BY created_at DESC LIMIT 50",
-        actor.id());
+        "SELECT id,device,platform,client_name,created_at,expires_at,"
+            + "COALESCE(last_seen_at,created_at) AS last_seen_at,(id=?) AS current,"
+            + "(id=? OR COALESCE(last_seen_at,created_at)>now()-interval '"
+            + ONLINE_WINDOW
+            + "') AS online FROM user_session WHERE user_id=? AND revoked_at IS NULL AND"
+            + " expires_at>now() ORDER BY (id=?) DESC,COALESCE(last_seen_at,created_at) DESC LIMIT 50",
+        actor.sessionId(),
+        actor.sessionId(),
+        actor.id(),
+        actor.sessionId());
   }
 
   public void revoke(Actor actor, UUID id) {

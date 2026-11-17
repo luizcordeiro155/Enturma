@@ -26,7 +26,9 @@ export const RELEASE_NOTES: { area: string; items: string[] }[] = [
     items: [
       "Entrar com e-mail pessoal e aceite dos Termos e da Política de Privacidade por versão.",
       "Exportação completa dos seus dados, histórico de aceites e senhas mais seguras.",
-      "Configurações reorganizadas em seções, com menu que acompanha a página.",
+      "Configurações reorganizadas em seções, com menu que acompanha a página e a sua foto ou GIF de perfil.",
+      "Sessões mostram se o acesso é pelo navegador, app desktop ou app Android, quais estão ativas agora e o último acesso.",
+      "O Enturma funciona dentro da Vitrine Virtual Mostra+, com login e uso normal.",
     ],
   },
   {

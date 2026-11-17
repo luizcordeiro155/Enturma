@@ -45,7 +45,7 @@ IA adaptativa agora compartilha a cota diária transacional, limita concorrênci
 ## Revisão de 16/11/2026
 
 - **Segredos:** varredura do histórico Git e dos bundles de produção sem chaves privadas expostas; source maps de produção retornam 403. Chaves públicas por desenho: Firebase Web e KLIPY (app key do navegador). gitleaks continua na CI sobre todo o histórico.
-- **Cabeçalhos:** HSTS, `X-Frame-Options: DENY`, `nosniff` e CSP parcial (sem `script-src`) confirmados em produção.
+- **Cabeçalhos:** HSTS, `nosniff` e CSP parcial (sem `script-src`) confirmados em produção. Enquadramento só pelo próprio Enturma e pela Vitrine Virtual Mostra+: `frame-ancestors 'self' https://mostraplus.com.br https://*.mostraplus.com.br` (substitui o antigo `X-Frame-Options: DENY`). No iframe, os cookies de sessão ficam particionados (CHIPS) e as escritas continuam exigindo `Origin` do próprio Enturma.
 - **Endereço do cliente:** na Square Cloud todas as conexões diretas chegavam à API pelo IP do proxy da plataforma, então limites anônimos (cadastro 5/15 min, login 8/min, Explorar público) e o limite de 64 WebSockets pendentes por endereço eram globais. `ProxiedAddress` passou a usar `CF-Connecting-IP`/último `X-Forwarded-For` somente quando o par TCP é de rede privada (o proxy); clientes da internet e processos locais (loopback) não conseguem falsificar o endereço. Requisições do BFF continuam identificadas pela assinatura `BFF_PROXY_SECRET`.
 - **Senhas:** 8 a 64 caracteres e recusa de senhas comuns.
 - **Retenção:** expurgo diário de limites, sessões, tokens, e-mails e notificações (ver [LGPD](LGPD.md)).
