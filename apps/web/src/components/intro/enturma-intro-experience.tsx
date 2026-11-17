@@ -24,7 +24,7 @@ export const INTRO_VIDEOS = {
   },
 } as const;
 export type IntroLayout = keyof typeof INTRO_VIDEOS;
-export const INTRO_VIDEO_DURATION_LABEL = "1 min 30 s";
+export const INTRO_VIDEO_DURATION_LABEL = "1 min 54 s";
 
 export function introClock(seconds: number) {
   const whole = Math.max(0, Math.floor(seconds || 0));
