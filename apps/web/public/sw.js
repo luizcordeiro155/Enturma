@@ -54,6 +54,9 @@ self.addEventListener("fetch", (event) => {
   }
 
   if (request.mode === "navigate") {
+    // Inside the Mostra+ iframe the browser must load the page itself: a request
+    // re-issued here would lose the partitioned session cookies.
+    if (request.destination === "iframe") return;
     event.respondWith(
       fetch(request).catch(async () => {
         const cached = await caches.match("/offline");
