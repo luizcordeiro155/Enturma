@@ -149,7 +149,7 @@ export function Dashboard({ visitor = false }: { visitor?: boolean }) {
               </section>
             ) : null}
           </div>
-          {profile ? <EnturmaIntroExperience profile={profile} /> : null}
+          {profile ? <EnturmaIntroExperience /> : null}
           {profile ? <EnturmaStudy profile={profile} /> : null}
           {profile ? (
             <section

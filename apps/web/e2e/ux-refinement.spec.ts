@@ -6,13 +6,6 @@ import { mkdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import pg from "pg";
-import {
-  INTRO_FRAMES,
-  INTRO_FPS,
-  INTRO_SCENE_FRAMES,
-  INTRO_FEATURE_CUES,
-  INTRO_CUES,
-} from "../src/components/intro/intro-model";
 const backend = process.env.E2E_API_URL || "http://localhost:8080";
 const screenshots = join(tmpdir(), "enturma-ux-review");
 mkdirSync(screenshots, { recursive: true });
@@ -336,295 +329,83 @@ test("message menus, full emojis, private deletion and image gestures synchroniz
     await otherContext.close();
   }
 });
-test("Remotion intro adapts, pauses, skips, replays and does not remount after navigation", async ({
+test("Intro video picks the 9:16 cut on phones and 16:9 on wider screens, pauses, skips and replays", async ({
   page,
   request,
 }) => {
   const credentials = await user(request, "Marina Estudante");
   await authenticate(page.context(), credentials);
-  await page.addInitScript(() => {
-    localStorage.setItem(
-      "enturma-experience",
-      JSON.stringify({ theme: "DARK" }),
-    );
-  });
-  await request.put(`${backend}/api/v1/users/me/experience`, {
-    headers: { Authorization: `Bearer ${credentials.accessToken}` },
-    data: {
-      theme: "DARK",
-      reducedMotion: false,
-      fontScale: 1,
-      highContrast: false,
-      enhancedFocus: true,
-    },
-  });
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/home");
   const intro = page.getByRole("region", { name: "Apresentação do Enturma" });
   await expect(intro).toBeVisible();
-  const narration = intro.locator('audio[src*="enturma-book-cinema-90"]');
-  await expect(narration).toHaveCount(1);
-  // The dynamically loaded composition changes the card height. Scroll only
-  // after it mounts so the visibility observer can start playback.
-  await intro.locator("[data-intro-frame]").scrollIntoViewIfNeeded();
-  await expect(intro.locator("[data-intro-frame]")).toBeInViewport({
-    ratio: 0.5,
-  });
+  await expect(intro).toHaveAttribute("data-layout", "portrait");
+  const video = intro.locator("video.intro-video");
+  await expect(video).toHaveAttribute("src", /enturma-apresentacao-9x16\.mp4$/);
+  await video.scrollIntoViewIfNeeded();
   const startAudio = intro.getByRole("button", { name: "Reproduzir com som" });
-  async function startNarrationWhenReady() {
-    await expect(narration).toHaveCount(1);
-    await intro.locator("[data-intro-frame]").scrollIntoViewIfNeeded();
-    await expect
-      .poll(async () => ({
-        canStart:
-          (await startAudio.isVisible()) ||
-          Number(
-            await intro
-              .locator("[data-intro-frame]")
-              .getAttribute("data-intro-frame"),
-          ) > 20,
-        media: await narration.evaluate((audio: HTMLAudioElement) => ({
-          time: audio.currentTime,
-          paused: audio.paused,
-          ready: audio.readyState,
-          error: audio.error?.message,
-          muted: audio.muted,
-          network: audio.networkState,
-          visibility: document.visibilityState,
-          rect: audio
-            .closest(".enturma-intro")
-            ?.getBoundingClientRect()
-            .toJSON(),
-        })),
-      }))
-      .toMatchObject({ canStart: true });
-    if (await startAudio.isVisible()) await startAudio.click();
-  }
-  await startNarrationWhenReady();
   await expect
-    .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
-    .toBe(false);
+    .poll(async () =>
+      (await startAudio.isVisible()) ||
+      (await video.evaluate((v: HTMLVideoElement) => v.currentTime > 0.2)),
+    )
+    .toBe(true);
+  if (await startAudio.isVisible()) await startAudio.click();
+  await expect
+    .poll(() =>
+      video.evaluate((v: HTMLVideoElement) => ({
+        muted: v.muted,
+        paused: v.paused,
+        advancing: v.currentTime > 0,
+      })),
+    )
+    .toEqual({ muted: false, paused: false, advancing: true });
   await expect(
     intro.getByRole("button", { name: "Silenciar narração" }),
   ).toHaveAttribute("aria-pressed", "true");
-  await expect
-    .poll(() =>
-      narration.evaluate((audio: HTMLAudioElement) => ({
-        paused: audio.paused,
-        muted: audio.muted,
-        advancing: audio.currentTime > 0,
-        ready: audio.readyState,
-      })),
-    )
-    .toEqual({ paused: false, muted: false, advancing: true, ready: 4 });
-  // Synchronization is independent of asset-loading time and CI scheduling.
-  const playingFrame = Number(
-    await intro.locator("[data-intro-frame]").getAttribute("data-intro-frame"),
-  );
-  expect(
-    Math.abs(
-      (await narration.evaluate(
-        (audio: HTMLAudioElement) => audio.currentTime,
-      )) -
-        playingFrame / INTRO_FPS,
-    ),
-  ).toBeLessThan(0.3);
   await intro.getByRole("button", { name: "Pausar apresentação" }).click();
   await expect
-    .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.paused))
+    .poll(() => video.evaluate((v: HTMLVideoElement) => v.paused))
     .toBe(true);
-  const studyCue = INTRO_CUES.find((cue) => cue.scene === 5)!;
-  const studyFrame = studyCue.voiceStartFrame + INTRO_FPS;
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill(String(studyFrame));
+    .fill("40");
   await expect
     .poll(() =>
-      narration.evaluate(
-        (audio: HTMLAudioElement, target: number) =>
-          Math.abs(audio.currentTime - target),
-        studyFrame / INTRO_FPS,
-      ),
+      video.evaluate((v: HTMLVideoElement) => Math.abs(v.currentTime - 40)),
     )
-    .toBeLessThan(0.3);
-  await expect(intro.getByLabel("Legenda da narração")).toHaveAttribute(
-    "data-transcript",
-    studyCue.text,
-  );
-  await intro.getByRole("button", { name: "Silenciar narração" }).click();
+    .toBeLessThan(0.5);
+  await page.screenshot({ path: join(screenshots, "intro-mobile.png") });
+  // Wider screens switch to the YouTube cut and keep the position.
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await expect(intro).toHaveAttribute("data-layout", "landscape");
+  await expect(video).toHaveAttribute("src", /enturma-apresentacao-16x9\.mp4$/);
   await expect
-    .poll(() => narration.evaluate((audio: HTMLAudioElement) => audio.muted))
-    .toBe(true);
-  await expect(intro).toHaveAttribute("data-layout", "portrait");
-  await expect(
-    intro.locator("[data-brand-book]:visible").first(),
-  ).toBeVisible();
-  await page.screenshot({ path: join(screenshots, "intro-mobile-dark.png") });
+    .poll(() =>
+      video.evaluate((v: HTMLVideoElement) => Math.abs(v.currentTime - 40)),
+    )
+    .toBeLessThan(1);
+  await page.screenshot({ path: join(screenshots, "intro-desktop.png") });
   await intro.getByRole("button", { name: "Pular" }).click();
   await expect(intro).toHaveAttribute("data-minimized", "true");
-  await expect(intro.locator("canvas")).toHaveCount(0);
-  await expect(intro.locator("audio")).toHaveCount(0);
+  await expect(intro.locator("video")).toHaveCount(0);
+  await expect(page.locator("#minhas-materias")).toBeFocused();
   await page.reload();
-  await expect(
-    page.getByRole("heading", { name: "Minhas matérias" }),
-  ).toBeAttached();
   await expect(intro).toHaveAttribute("data-minimized", "true");
   await page.getByRole("button", { name: "Assistir apresentação" }).click();
-  await expect(intro).toBeVisible();
-  // Replay mounts a fresh audio context; browser autoplay policy applies again.
-  await startNarrationWhenReady();
+  const replay = intro.locator("video.intro-video");
+  await expect(replay).toHaveCount(1);
+  // Jump to the last second, whatever the cut's length, and let it finish.
   await expect
-    .poll(async () =>
-      Number(
-        await intro
-          .locator("[data-intro-frame]")
-          .getAttribute("data-intro-frame"),
-      ),
-    )
-    .toBeGreaterThan(20);
-  await intro.getByRole("button", { name: "Pausar apresentação" }).click();
-  await intro
-    .getByRole("slider", { name: "Posição da apresentação" })
-    .fill("0");
-  await expect(
-    intro.getByText("OUTRO UNIVERSO.", { exact: true }),
-  ).toBeVisible();
-  await expect(intro.locator("[data-presenter]")).toHaveCount(0);
-  await expect(intro.locator(".intro-caption")).toHaveCount(0);
-  const sceneStart = INTRO_FEATURE_CUES[0].fromFrame;
-  const seek = intro.getByRole("slider", { name: "Posição da apresentação" });
-  for (const offset of [12, 84, 12]) {
-    await seek.fill(String(sceneStart + offset));
-    await expect(intro.locator("[data-book-confetti]:visible")).toHaveCount(
-      offset === 84 ? 1 : 0,
-    );
-  }
-  await seek.fill(String(sceneStart + 6));
-  const bookTransform = () =>
-    intro
-      .locator("[data-brand-book]:visible")
-      .first()
-      .evaluate((node) =>
-        [...node.querySelectorAll("div")]
-          .map((n) => getComputedStyle(n).transform)
-          .join("|"),
-      );
-  const beforeTurn = await bookTransform();
-  await seek.fill(String(sceneStart + 7));
-  await expect.poll(bookTransform).not.toBe(beforeTurn);
-  for (const frame of [
-    ...INTRO_SCENE_FRAMES.slice(0, -1).map((start, i) =>
-      Math.floor((start + INTRO_SCENE_FRAMES[i + 1]) / 2),
-    ),
-    ...INTRO_FEATURE_CUES.map((cue) => cue.fromFrame + 48),
-  ]) {
-    await intro
-      .getByRole("slider", { name: "Posição da apresentação" })
-      .fill(String(frame));
-    await expect(intro.locator("[data-intro-frame]")).toHaveAttribute(
-      "data-intro-frame",
-      String(frame),
-    );
-    await expect(
-      intro.locator("[data-brand-book]:visible").first(),
-    ).toBeVisible();
-    await expect(intro.locator("[data-presenter]")).toHaveCount(0);
-    const safe = await intro
-      .locator("[data-intro-safe]")
-      .evaluateAll((elements) =>
-        elements.map((el) => {
-          const b = el.getBoundingClientRect();
-          return { top: b.top, bottom: b.bottom, left: b.left, right: b.right };
-        }),
-      );
-    const titleLocator = intro.locator("[data-intro-title]");
-    const artLocator = intro.locator("[data-intro-art]");
-    const title = (await titleLocator.count())
-      ? await titleLocator.boundingBox()
-      : null;
-    const art = (await artLocator.count())
-      ? await artLocator.boundingBox()
-      : null;
-    if (title && art) {
-      expect(
-        title.y + title.height,
-        `Text overlaps art at frame ${frame}`,
-      ).toBeLessThanOrEqual(art.y + 2);
-    }
-    for (const bounds of safe) {
-      expect(bounds.left).toBeGreaterThanOrEqual(0);
-      expect(bounds.right).toBeLessThanOrEqual(390);
-    }
-  }
-  for (const [index, cue] of INTRO_FEATURE_CUES.entries()) {
-    await intro
-      .getByRole("slider", { name: "Posição da apresentação" })
-      .fill(String(cue.fromFrame + 48));
-    await expect(intro.locator("[data-intro-scene]")).toHaveAttribute(
-      "data-intro-scene",
-      String(cue.scene),
-    );
-    await expect(intro.getByLabel("Legenda da narração")).toHaveAttribute(
-      "data-transcript",
-      cue.text,
-    );
-    await intro.screenshot({
-      path: join(screenshots, `intro-comic-mobile-${index}.png`),
-    });
-  }
-  await page.screenshot({
-    path: join(screenshots, "intro-mobile-refined.png"),
-  });
-  await page.setViewportSize({ width: 1920, height: 1080 });
-  await expect(intro).toHaveAttribute("data-layout", "desktop");
-  await intro
-    .getByRole("slider", { name: "Posição da apresentação" })
-    .fill(String(INTRO_FEATURE_CUES[0].fromFrame + 48));
-  await intro.screenshot({
-    path: join(screenshots, "intro-comic-desktop.png"),
-  });
-  await intro
-    .getByRole("slider", { name: "Posição da apresentação" })
-    .fill(String(INTRO_SCENE_FRAMES[15] + 84));
-  await intro.screenshot({
-    path: join(screenshots, "intro-closing-desktop.png"),
-  });
-  await page.screenshot({ path: join(screenshots, "intro-desktop-dark.png") });
-  await intro.getByRole("button", { name: "Pular" }).click();
-  await expect(page.locator("#minhas-materias")).toBeFocused();
-  await page
-    .getByRole("button", { name: "Ver apresentação novamente" })
-    .click();
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  await expect(intro.locator("canvas")).toHaveCount(0);
-  await startNarrationWhenReady();
-  await expect
-    .poll(() =>
-      narration.evaluate(
-        (audio: HTMLAudioElement) => !audio.muted && !audio.paused,
-      ),
-    )
-    .toBe(true);
-  for (const cue of INTRO_FEATURE_CUES) {
-    await intro
-      .getByRole("slider", { name: "Posição da apresentação" })
-      .fill(String(cue.fromFrame + 36));
-    await expect(intro.locator("[data-intro-scene]")).toHaveAttribute(
-      "data-intro-scene",
-      String(cue.scene),
-    );
-  }
-  await intro
-    .getByRole("slider", { name: "Posição da apresentação" })
-    .fill(String(INTRO_SCENE_FRAMES[15] + 84));
-  await expect(intro.locator('[data-intro-scene="15"]')).toBeVisible();
-  await expect(intro.getByLabel("Legenda da narração")).toHaveAttribute(
-    "data-transcript",
-    "Se enturme com o Enturma. Fique por dentro da sua faculdade conosco!",
+    .poll(() => replay.evaluate((v: HTMLVideoElement) => v.duration || 0))
+    .toBeGreaterThan(30);
+  const end = await replay.evaluate((v: HTMLVideoElement) =>
+    Math.floor(v.duration - 1),
   );
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill(String(INTRO_FRAMES - 10));
+    .fill(String(end));
+  if (await startAudio.isVisible()) await startAudio.click();
   await expect(intro).toHaveAttribute("data-minimized", "true", {
     timeout: 10000,
   });
@@ -1229,87 +1010,72 @@ test.describe("touch chat", () => {
 });
 
 test.describe("narration autoplay policy", () => {
-  for (const policy of ["rejected", "suspended"] as const) {
-    test(`${policy} audio waits for a gesture and begins unmuted`, async ({
-      request,
-    }) => {
-      const browser = await chromium.launch({
-        args: ["--autoplay-policy=document-user-activation-required"],
-      });
-      const page = await browser.newPage({
-        baseURL: process.env.E2E_WEB_URL ?? "http://localhost:3000",
-        viewport: { width: 1376, height: 1800 },
-      });
-      // Inject a policy denial: headless Chromium may grant audio permission
-      // despite autoplay flags. All playback after a real gesture stays native.
-      await page.addInitScript((policy) => {
-        let unlocked = false;
-        for (const event of ["pointerdown", "keydown"]) {
-          window.addEventListener(
-            event,
-            (e) => {
-              if (e.isTrusted) unlocked = true;
-            },
-            { capture: true },
-          );
-        }
-        const play = HTMLMediaElement.prototype.play;
-        HTMLMediaElement.prototype.play = function () {
-          if (
-            policy === "rejected" &&
-            this instanceof HTMLAudioElement &&
-            !this.muted &&
-            !unlocked
-          )
-            return Promise.reject(
-              new DOMException(
-                "Autoplay requires a gesture",
-                "NotAllowedError",
-              ),
-            );
-          return play.call(this);
-        };
-        if (policy === "suspended") {
-          const resume = AudioContext.prototype.resume;
-          AudioContext.prototype.resume = function () {
-            if (!unlocked) return new Promise<void>(() => {});
-            return resume.call(this);
-          };
-        }
-      }, policy);
-      try {
-        const credentials = await user(request, "Narração inicial");
-        await authenticate(page.context(), credentials);
-        await page.goto("/home");
-        const intro = page.getByRole("region", {
-          name: "Apresentação do Enturma",
-        });
-        const start = intro.getByRole("button", { name: "Reproduzir com som" });
-        await expect(intro.locator("audio")).toHaveCount(1);
-        await expect(start).toBeVisible();
-        await expect(
-          intro.getByRole("slider", { name: "Posição da apresentação" }),
-        ).toHaveValue("0");
-        await start.click();
-        await expect
-          .poll(() =>
-            intro
-              .locator("audio")
-              .evaluate(
-                (el: HTMLAudioElement) =>
-                  !el.muted && !el.paused && el.currentTime > 0,
-              ),
-          )
-          .toBe(true);
-        await intro.getByRole("button", { name: "Silenciar narração" }).click();
-        await expect
-          .poll(() =>
-            intro.locator("audio").evaluate((el: HTMLAudioElement) => el.muted),
-          )
-          .toBe(true);
-      } finally {
-        await browser.close();
-      }
+  test("rejected audio starts the video muted and a gesture turns the narration on", async ({
+    request,
+  }) => {
+    const browser = await chromium.launch({
+      args: ["--autoplay-policy=document-user-activation-required"],
     });
-  }
+    const page = await browser.newPage({
+      baseURL: process.env.E2E_WEB_URL ?? "http://localhost:3000",
+      viewport: { width: 1376, height: 1800 },
+    });
+    // Inject a policy denial: headless Chromium may grant audio permission
+    // despite autoplay flags. All playback after a real gesture stays native.
+    await page.addInitScript(() => {
+      let unlocked = false;
+      for (const event of ["pointerdown", "keydown"]) {
+        window.addEventListener(
+          event,
+          (e) => {
+            if (e.isTrusted) unlocked = true;
+          },
+          { capture: true },
+        );
+      }
+      const play = HTMLMediaElement.prototype.play;
+      HTMLMediaElement.prototype.play = function () {
+        if (!this.muted && !unlocked)
+          return Promise.reject(
+            new DOMException("Autoplay requires a gesture", "NotAllowedError"),
+          );
+        return play.call(this);
+      };
+    });
+    try {
+      const credentials = await user(request, "Narração inicial");
+      await authenticate(page.context(), credentials);
+      await page.goto("/home");
+      const intro = page.getByRole("region", {
+        name: "Apresentação do Enturma",
+      });
+      const video = intro.locator("video.intro-video");
+      await expect(video).toHaveCount(1);
+      await video.scrollIntoViewIfNeeded();
+      const start = intro.getByRole("button", { name: "Reproduzir com som" });
+      await expect(start).toBeVisible();
+      await expect(
+        intro.getByRole("button", { name: "Ouvir narração" }),
+      ).toHaveAttribute("aria-pressed", "false");
+      await expect
+        .poll(() => video.evaluate((el: HTMLVideoElement) => el.muted))
+        .toBe(true);
+      await start.click();
+      await expect(start).toHaveCount(0);
+      await expect
+        .poll(() =>
+          video.evaluate(
+            (el: HTMLVideoElement) =>
+              !el.muted && !el.paused && el.currentTime > 0,
+          ),
+        )
+        .toBe(true);
+      await intro.getByRole("button", { name: "Silenciar narração" }).click();
+      await expect
+        .poll(() => video.evaluate((el: HTMLVideoElement) => el.muted))
+        .toBe(true);
+    } finally {
+      await browser.close();
+    }
+  });
 });
