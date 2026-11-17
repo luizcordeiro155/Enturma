@@ -18,6 +18,7 @@ import {
 import { PwaInstallButton } from "@/components/pwa-install";
 import { EnturmaAppIcon } from "@/components/enturma-app-icon";
 import { DownloadIntegrity } from "@/components/download-integrity";
+import { DownloadTutorial } from "./download-tutorial";
 import styles from "./download.module.css";
 
 const WINDOWS_DOWNLOAD =
@@ -56,7 +57,10 @@ export default async function DownloadPage() {
               <Sparkles size={18} />
               Melhor experiência
             </span>
-            <h1>Baixe o Enturma como aplicativo.</h1>
+            <h1>
+              Baixe o Enturma{" "}
+              <span className={styles.heroAccent}>como aplicativo.</span>
+            </h1>
             <p className={styles.lead}>
               As versões para Windows e Android agora são a forma recomendada
               de usar o Enturma. Elas oferecem uma experiência mais completa,
@@ -133,7 +137,9 @@ export default async function DownloadPage() {
           </aside>
         </section>
 
-        <section className={styles.betaSection} aria-labelledby="apps-title">
+        <DownloadTutorial />
+
+        <section className={`${styles.betaSection} ${styles.reveal}`} aria-labelledby="apps-title">
           <div className={styles.betaHeading}>
             <div>
               <span className={styles.betaEyebrow}>
@@ -193,7 +199,7 @@ export default async function DownloadPage() {
           </small>
         </section>
 
-        <section className={styles.safetySection} aria-labelledby="safety-title">
+        <section className={`${styles.safetySection} ${styles.reveal}`} aria-labelledby="safety-title">
           <div className={styles.safetyIntro}>
             <div className={styles.safetyHeading}>
               <ShieldAlert size={28} aria-hidden="true" />
@@ -270,7 +276,7 @@ export default async function DownloadPage() {
           </div>
         </section>
 
-        <section className={styles.verifySection} aria-labelledby="verify-download-title">
+        <section className={`${styles.verifySection} ${styles.reveal}`} aria-labelledby="verify-download-title">
           <div className={styles.verifyHeader}>
             <Fingerprint size={25} aria-hidden="true" />
             <div>
@@ -292,7 +298,7 @@ export default async function DownloadPage() {
         </section>
 
         <section
-          className={styles.browserSection}
+          className={`${styles.browserSection} ${styles.reveal}`}
           aria-labelledby="browser-install-title"
         >
           <div className={styles.browserCopy}>
@@ -315,7 +321,7 @@ export default async function DownloadPage() {
           </div>
         </section>
 
-        <section className={styles.features} aria-label="Vantagens dos aplicativos">
+        <section className={`${styles.features} ${styles.reveal}`} aria-label="Vantagens dos aplicativos">
           <article>
             <Monitor size={28} />
             <div>
@@ -348,7 +354,7 @@ export default async function DownloadPage() {
           </article>
         </section>
 
-        <section className={styles.steps}>
+        <section className={`${styles.steps} ${styles.reveal}`}>
           <div>
             <span className={styles.eyebrow}>Instalação simples</span>
             <h2>Três passos e pronto</h2>

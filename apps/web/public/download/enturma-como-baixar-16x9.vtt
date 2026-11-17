@@ -1,0 +1,31 @@
+WEBVTT
+
+00:00:00.450 --> 00:00:04.277
+Veja como instalar o Enturma no seu computador, passo a passo e com segurança.
+
+00:00:07.950 --> 00:00:15.260
+Com o app, você recebe notificações do sistema, ativa o Modo foco para estudar sem distrações, e tudo fica mais rápido e fluido.
+
+00:00:18.262 --> 00:00:23.836
+Passo 1: acesse a página oficial de download do Enturma e clique no botão para baixar o instalador do Windows.
+
+00:00:25.762 --> 00:00:33.201
+Passo 2: confira o arquivo. Desça até “Confira o arquivo antes de instalar” e copie o código SHA-256 do Windows.
+
+00:00:35.138 --> 00:00:42.998
+Passo 3: abra o PowerShell na pasta Downloads e rode o comando da página. Se o código for igual ao da página, o arquivo é original.
+
+00:00:45.450 --> 00:00:53.691
+Passo 4: abra o instalador. O Windows pode mostrar este aviso, porque o Enturma ainda não tem assinatura digital, um certificado pago.
+
+00:00:54.825 --> 00:00:59.219
+Com o arquivo conferido, clique em “Mais informações” e depois em “Executar assim mesmo”.
+
+00:01:02.325 --> 00:01:05.668
+Pronto! O Enturma está instalado no seu computador.
+
+00:01:07.950 --> 00:01:15.083
+O app é oficial, publicado só nesta página e com código aberto. Nunca desative o SmartScreen nem o antivírus.
+
+00:01:17.325 --> 00:01:18.662
+Baixe agora e se enturme!
