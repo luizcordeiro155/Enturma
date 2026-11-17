@@ -46,7 +46,9 @@ export default function PrivacyPage() {
         <ul>
           <li>
             <strong>Conta:</strong> nome, nome de usuário, e-mail, senha
-            protegida por hash, sessões e dispositivos conectados.
+            protegida por hash, sessões e dispositivos conectados (se é o
+            navegador, o app desktop ou o app Android, o navegador e o sistema,
+            e quando foi o login e o último acesso).
           </li>
           <li>
             <strong>Vida acadêmica:</strong> instituição, campus, curso, período,

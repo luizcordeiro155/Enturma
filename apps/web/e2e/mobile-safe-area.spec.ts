@@ -1,4 +1,7 @@
+import { randomUUID } from "node:crypto";
 import { expect, test } from "@playwright/test";
+import { authenticate } from "./session";
+import { test as studentTest } from "./student-fixture";
 
 const nativeInsets = { top: 34, right: 6, bottom: 24, left: 6 };
 
@@ -81,4 +84,36 @@ test("Android protege login, cadastro e recuperação sob as barras do sistema",
       ),
     ).toBe(true);
   }
+});
+
+studentTest("Android mantém os atalhos das configurações abaixo da barra de status", async ({
+  page,
+  request,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const tag = randomUUID().slice(0, 8);
+  const registered = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Barra de status",
+        username: `statusbar_${tag}`,
+        email: `statusbar_${tag}@example.test`,
+        password: "Status-bar-password-123",
+        device: "E2E",
+      },
+    },
+  );
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
+  await page.goto("/settings");
+  await syncNativeInsets(page);
+  const nav = page.locator(".settings-nav");
+  await expect(nav).toBeVisible();
+  await page.mouse.wheel(0, 1400);
+  await expect
+    .poll(async () => (await nav.boundingBox())?.y ?? -1)
+    .toBeGreaterThanOrEqual(nativeInsets.top - 1);
+  const top = (await nav.boundingBox())!.y;
+  expect(top).toBeLessThan(nativeInsets.top + 4);
 });

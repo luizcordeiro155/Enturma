@@ -1,5 +1,6 @@
 import { createHash, createHmac } from "node:crypto";
 import { isIP } from "node:net";
+import { describeClient } from "./session-client";
 
 // Server-only configuration. Never import this module from a client component.
 export function backendUrl() {
@@ -55,6 +56,10 @@ export function allowedOrigin(req: Request) {
 
 export function upstreamHeaders(req: Request) {
   const headers = new Headers();
+  // Shown in Settings → Sessions: web, desktop app or Android app, and which browser.
+  const client = describeClient(req.headers.get("user-agent"));
+  headers.set("X-Enturma-Platform", client.platform);
+  headers.set("X-Enturma-Client-Name", client.name);
   const secret = process.env.BFF_PROXY_SECRET;
   // Vercel overwrites this header. Never trust it on a self-hosted server.
   const ip = req.headers.get("x-vercel-forwarded-for")?.split(",")[0]?.trim();

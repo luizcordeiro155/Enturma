@@ -7,13 +7,7 @@ import {
 } from "@/lib/server-config";
 import { MAX_WEB_REQUEST_BYTES } from "@/lib/upload-limits";
 export const maxDuration = 60;
-const secure = process.env.NODE_ENV === "production";
-const cookieOptions = {
-  httpOnly: true,
-  secure,
-  sameSite: "lax" as const,
-  path: "/",
-};
+import { clearSessionCookies, sessionCookieOptions } from "@/lib/session-cookies";
 async function proxy(
   req: NextRequest,
   context: { params: Promise<{ path: string[] }> },
@@ -89,6 +83,7 @@ async function proxy(
       },
     });
     if (credentials) {
+      const cookieOptions = sessionCookieOptions(req);
       res.cookies.set(
         "enturma_access",
         credentials.accessToken,
@@ -113,9 +108,7 @@ async function proxy(
       upstream.ok &&
       (route === "auth/logout" || route === "auth/reset-password")
     ) {
-      res.cookies.delete("enturma_access");
-      res.cookies.delete("enturma_refresh");
-      res.cookies.delete("enturma_remember");
+      clearSessionCookies(req, res);
     }
     return res;
   } catch {

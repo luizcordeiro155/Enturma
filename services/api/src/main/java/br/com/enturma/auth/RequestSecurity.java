@@ -41,6 +41,11 @@ public class RequestSecurity extends OncePerRequestFilter {
         && authorization.length() < 200)
       access = auth.access(authorization.substring(7)).orElse(null);
     if (access != null)
+      auth.touch(
+          access.actor().sessionId(),
+          req.getHeader("X-Enturma-Platform"),
+          req.getHeader("X-Enturma-Client-Name"));
+    if (access != null)
       SecurityContextHolder.getContext()
           .setAuthentication(
               new UsernamePasswordAuthenticationToken(

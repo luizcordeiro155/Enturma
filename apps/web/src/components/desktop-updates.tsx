@@ -374,12 +374,7 @@ export function DesktopUpdateProvider({
       {isDesktop() && state?.currentVersion && (
         <DesktopReleaseNotes version={state.currentVersion} />
       )}
-      {isMobileApp() && mobileVersion() !== "0.0.0" && (
-        <DesktopReleaseNotes
-          version={mobileVersion()}
-          storageKey="enturma-android-seen-version"
-        />
-      )}
+
       {open && state && !isMobileApp() && (
         <dialog
           ref={dialog}

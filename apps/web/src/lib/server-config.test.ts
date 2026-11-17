@@ -72,4 +72,13 @@ describe("configuração Vercel/SquareCloud", () => {
       createHmac("sha256", key).update(`${timestamp}:${subject}`).digest("hex"),
     );
   });
+  it("conta à API onde a sessão roda, sem repassar o User-Agent bruto", () => {
+    const req = new Request("https://web.test", {
+      headers: { "user-agent": "Mozilla/5.0 (Windows NT 10.0) Chrome/142.0 EnturmaDesktop/0.4.620" },
+    });
+    const headers = upstreamHeaders(req);
+    expect(headers.get("X-Enturma-Platform")).toBe("desktop");
+    expect(headers.get("X-Enturma-Client-Name")).toBe("Windows");
+    expect(headers.has("user-agent")).toBe(false);
+  });
 });

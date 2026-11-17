@@ -11,7 +11,6 @@ import {
   LockKeyhole,
   LogOut,
   MailCheck,
-  MonitorSmartphone,
   Settings2,
   ShieldCheck,
   Sparkles,
@@ -19,6 +18,8 @@ import {
   UserRound,
   X,
 } from "lucide-react";
+import { useAppShellState } from "./app-shell-state";
+import { SessionList, type AccountSession } from "./settings-session-list";
 import { SettingsNav, SettingsSection, type SettingsSectionItem } from "./settings-sections";
 import { Shell } from "./shell";
 import { ProfileDetailsEditor } from "./profile-details-editor";
@@ -51,14 +52,13 @@ export function ProfileView({
   settings?: boolean;
   visitor?: boolean;
 }) {
+  const { profileShortcut } = useAppShellState();
   const guest = useVisitor();
   const router = useRouter();
   const [p, setP] = useState<Profile | undefined>(() =>
     visitor ? undefined : peekApiSnapshot<Profile>("/users/me"),
   );
-  const [sessions, setSessions] = useState<
-    { id: string; device: string; createdAt: string }[]
-  >([]);
+  const [sessions, setSessions] = useState<AccountSession[]>([]);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [verificationBusy, setVerificationBusy] = useState(false);
@@ -293,7 +293,15 @@ export function ProfileView({
                 <div className="settings-account">
                   <div className="settings-account-identity">
                     <span className="settings-avatar" aria-hidden="true">
-                      {(p.name || p.username || "?").trim().charAt(0).toUpperCase()}
+                      {p.hasAvatar ? (
+                        // eslint-disable-next-line @next/next/no-img-element -- authenticated same-origin avatar (GIFs stay animated)
+                        <img
+                          src={`/api/backend/users/${p.id}/avatar?v=${profileShortcut?.version ?? 0}`}
+                          alt=""
+                        />
+                      ) : (
+                        (p.name || p.username || "?").trim().charAt(0).toUpperCase()
+                      )}
                     </span>
                     <div>
                       <strong>{p.name}</strong>
@@ -420,33 +428,11 @@ export function ProfileView({
                 id="seguranca"
                 icon={ShieldCheck}
                 title="Segurança"
-                description="Aparelhos conectados à sua conta e a sua senha."
+                description="Onde sua conta está conectada, o que está ativo agora e a sua senha."
                 index={5}
               >
                 {sessions.length ? (
-                  <ul className="settings-sessions">
-                    {sessions.map((s) => (
-                      <li key={s.id}>
-                        <span className="settings-session-icon" aria-hidden="true">
-                          <MonitorSmartphone size={18} />
-                        </span>
-                        <div>
-                          <strong>{s.device}</strong>
-                          <small>
-                            Desde {new Date(s.createdAt).toLocaleString("pt-BR")}
-                          </small>
-                        </div>
-                        <button
-                          type="button"
-                          className="secondary compact"
-                          onClick={() => revoke(s.id)}
-                          aria-label={`Revogar ${s.device}`}
-                        >
-                          Revogar
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                  <SessionList sessions={sessions} onRevoke={revoke} />
                 ) : (
                   <p className="settings-empty">Nenhum outro aparelho conectado.</p>
                 )}

@@ -16,6 +16,9 @@ vi.mock("next/link", () => ({
 }));
 vi.mock("@/lib/api", () => ({ api: vi.fn(), post: vi.fn(), peekApiSnapshot: () => undefined }));
 vi.mock("@/lib/visitor-context", () => ({ useVisitor: () => ({ requestLogin: vi.fn() }) }));
+vi.mock("./app-shell-state", () => ({
+  useAppShellState: () => ({ profileShortcut: { id: "me", hasAvatar: true, version: 7 } }),
+}));
 vi.mock("./shell", () => ({ Shell: ({ children }: { children: ReactNode }) => <main>{children}</main> }));
 vi.mock("./app-help", () => ({ AppHelp: () => <section>Ajuda por IA</section> }));
 vi.mock("./desktop-updates", () => ({ AppUpdateSettingsCard: () => <section>Atualização do aplicativo</section> }));
@@ -33,6 +36,7 @@ const profile = {
   username: "luiz",
   email: "luiz@example.test",
   emailVerified: true,
+  hasAvatar: true,
   role: "ADMIN",
   enrollment: { periodName: "Fundamental · semestres 1–2" },
   subjects: [
@@ -72,6 +76,10 @@ it("organizes every settings feature into navigable sections", async () => {
   expect(within(nav).getByRole("link", { name: /Privacidade/ })).toHaveAttribute("href", "#privacidade");
 
   expect(await screen.findByText("@luiz")).toBeInTheDocument();
+  expect(document.querySelector(".settings-avatar img")).toHaveAttribute(
+    "src",
+    "/api/backend/users/me/avatar?v=7",
+  );
   expect(screen.getByText("luiz@example.test")).toBeInTheDocument();
   expect(screen.getByText("Confirmado")).toBeInTheDocument();
   expect(screen.getByRole("link", { name: /Atualizar perfil acadêmico/ })).toHaveAttribute("href", "/onboarding");

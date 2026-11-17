@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { clearSessionCookies } from "@/lib/session-cookies";
 import { backendUrl, upstreamHeaders } from "@/lib/server-config";
 import { authDestination } from "@/lib/auth-navigation";
 
@@ -41,9 +42,7 @@ function toPage(req: NextRequest, page: string) {
 
 function signIn(req: NextRequest) {
   const response = toPage(req, "/login");
-  response.cookies.delete("enturma_access");
-  response.cookies.delete("enturma_refresh");
-  response.cookies.delete("enturma_remember");
+  clearSessionCookies(req, response);
   return response;
 }
 

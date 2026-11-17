@@ -68,8 +68,17 @@ class AcademicLegacyMigrationTest {
       assertThat(afterUsers).hasSize(beforeUsers.size());
       assertThat(afterUsers)
           .allSatisfy(user -> assertThat(user.get("credential_version")).isEqualTo(1));
-      assertThat(db.queryForList("SELECT * FROM user_session ORDER BY id"))
-          .isEqualTo(beforeSessions);
+      var afterSessions = db.queryForList("SELECT * FROM user_session ORDER BY id");
+      assertThat(afterSessions).hasSize(beforeSessions.size());
+      for (int i = 0; i < beforeSessions.size(); i++)
+        assertThat(afterSessions.get(i)).containsAllEntriesOf(beforeSessions.get(i));
+      // Sessions created before V82 keep empty activity until they are used again.
+      assertThat(afterSessions)
+          .allSatisfy(
+              s -> {
+                assertThat(s.get("platform")).isNull();
+                assertThat(s.get("last_seen_at")).isNull();
+              });
       assertThat(db.queryForList("SELECT status FROM academic_identity", String.class))
           .containsOnly("LEGACY_APPROVED")
           .hasSize(3);

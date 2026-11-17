@@ -163,6 +163,13 @@
   color: var(--on-accent);
   font-size: 1.3rem;
   font-weight: 800;
+  overflow: hidden;
+  flex: none;
+}
+.settings-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .settings-account-identity strong {
   display: block;
@@ -297,8 +304,49 @@
   display: block;
   overflow-wrap: anywhere;
 }
+.settings-sessions li[data-current="true"] {
+  border-color: color-mix(in srgb, var(--accent) 45%, var(--border));
+}
+.settings-session-icon {
+  position: relative;
+}
+.settings-session-online {
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 11px;
+  height: 11px;
+  border: 2px solid var(--surface-raised);
+  border-radius: 50%;
+  background: var(--success);
+}
+.settings-session-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 8px;
+}
+.settings-session-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--surface-strong);
+  color: var(--ink);
+  font-size: 0.74rem;
+  font-weight: 700;
+}
+.settings-session-client {
+  display: block;
+  color: var(--ink);
+  font-size: 0.88rem;
+}
 .settings-sessions small {
+  display: block;
+  margin-top: 2px;
   color: var(--muted);
+}
+.settings-session-live {
+  color: var(--success);
+  font-weight: 700;
 }
 .settings-empty {
   margin: 0;
@@ -356,13 +404,24 @@ html[data-reduced-motion="true"] .settings-section {
     margin-top: 18px;
   }
   .settings-nav {
-    top: 0;
+    /* Below the Android status bar / notch, never under it. */
+    top: var(--enturma-safe-top, 0px);
     z-index: 5;
     margin: 0 -16px;
     padding: 8px 16px;
     border-bottom: 1px solid var(--border);
     background: color-mix(in srgb, var(--bg) 90%, transparent);
     backdrop-filter: blur(10px);
+  }
+  .settings-nav::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: var(--enturma-safe-top, 0px);
+    background: var(--bg);
+    pointer-events: none;
   }
   .settings-nav ul {
     display: flex;
@@ -392,7 +451,7 @@ html[data-reduced-motion="true"] .settings-section {
     border-color: transparent;
   }
   .settings-section {
-    scroll-margin-top: 64px;
+    scroll-margin-top: calc(64px + var(--enturma-safe-top, 0px));
   }
   .settings-section:not(.settings-section-bare) {
     padding: 18px;
@@ -444,11 +503,37 @@ html[data-reduced-motion="true"] .settings-section {
   background: var(--accent);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--ink) 18%, transparent);
 }
-.release-dialog .release-notes-list {
-  max-height: min(40vh, 340px);
-  margin: 4px 0 8px;
-  padding-right: 6px;
+/* One scroll only: the notes list. Header, artwork and actions stay put at any window size. */
+.release-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  max-height: min(calc(100dvh - 28px), 860px);
+  overflow: hidden;
+}
+.release-dialog[open] > * {
+  flex: none;
+}
+.release-dialog[open] > h2,
+.release-dialog[open] > p {
+  margin-block: 6px;
+}
+.release-dialog[open] > .release-notes-list {
+  flex: 1 1 auto;
+  min-height: 96px;
+  margin: 10px 0 6px;
+  padding-right: 8px;
   overflow-y: auto;
+  overscroll-behavior: contain;
+}
+/* The film keeps its 2:1 ratio: limit its width so its height follows the window. */
+.release-dialog[open] > .transfer-film {
+  width: min(100%, calc(2 * min(24dvh, 260px)));
+  margin: 10px auto 4px;
+}
+@media (max-height: 620px) {
+  .release-dialog[open] > .transfer-film {
+    display: none;
+  }
 }
 .settings-release-notes {
   border: 1px solid var(--border);
