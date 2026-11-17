@@ -393,10 +393,18 @@ test("Intro video picks the 9:16 cut on phones and 16:9 on wider screens, pauses
   await page.reload();
   await expect(intro).toHaveAttribute("data-minimized", "true");
   await page.getByRole("button", { name: "Assistir apresentação" }).click();
-  await expect(intro.locator("video.intro-video")).toHaveCount(1);
+  const replay = intro.locator("video.intro-video");
+  await expect(replay).toHaveCount(1);
+  // Jump to the last second, whatever the cut's length, and let it finish.
+  await expect
+    .poll(() => replay.evaluate((v: HTMLVideoElement) => v.duration || 0))
+    .toBeGreaterThan(30);
+  const end = await replay.evaluate((v: HTMLVideoElement) =>
+    Math.floor(v.duration - 1),
+  );
   await intro
     .getByRole("slider", { name: "Posição da apresentação" })
-    .fill("89");
+    .fill(String(end));
   if (await startAudio.isVisible()) await startAudio.click();
   await expect(intro).toHaveAttribute("data-minimized", "true", {
     timeout: 10000,
