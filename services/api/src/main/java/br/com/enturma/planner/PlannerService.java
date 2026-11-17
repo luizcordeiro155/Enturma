@@ -254,7 +254,9 @@ public class PlannerService {
     var today = LocalDate.now(zone);
     var now = Instant.now();
     @SuppressWarnings("unchecked")
-    var events = (List<Map<String, Object>>) calendar(a, today.minusDays(1), today).get("events");
+    // Tomorrow too: near midnight a session scheduled for 00:xx may already be open early.
+    var events =
+        (List<Map<String, Object>>) calendar(a, today.minusDays(1), today.plusDays(1)).get("events");
     Map<String, Object> current = null;
     for (var event : events) {
       String kind = (String) event.get("kind");

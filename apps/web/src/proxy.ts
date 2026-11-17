@@ -92,7 +92,13 @@ export async function proxy(req: NextRequest) {
 
   const access = req.cookies.get("enturma_access")?.value;
   const refresh = req.cookies.get("enturma_refresh")?.value;
-  if (!access && !refresh) return signIn(req);
+  if (!access && !refresh) {
+    // Inside the Mostra+ frame browsers send the partitioned session cookies with
+    // fetches but not with page loads: let the client restore the session.
+    if (req.headers.get("sec-fetch-dest") === "iframe")
+      return toPage(req, "/session/restore");
+    return signIn(req);
+  }
   if (!access) return toPage(req, "/session/restore");
 
   try {

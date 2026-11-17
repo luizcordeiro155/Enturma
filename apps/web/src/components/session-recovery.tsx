@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { isEmbedded } from "@/components/embed-marker";
 import { LaunchSplash } from "@/components/app-launch";
 import { authDestination } from "@/lib/auth-navigation";
 import { APP_LAUNCH_MIN_MS } from "@/lib/launch-performance";
@@ -37,6 +39,7 @@ async function refreshSavedSession(signal: AbortSignal) {
  * API outage cannot replace the animation with a retry card or log the user out.
  */
 export function SessionRecovery() {
+  const router = useRouter();
   useEffect(() => {
     let disposed = false;
     let inFlight = false;
@@ -101,7 +104,11 @@ export function SessionRecovery() {
         }
         const remaining = Math.max(0, APP_LAUNCH_MIN_MS - (performance.now() - startedAt));
         timer = window.setTimeout(() => {
-          if (!disposed) window.location.replace(returnToApp());
+          if (disposed) return;
+          // Inside Mostra+ a page load would arrive without cookies; a client
+          // navigation fetches the page with them.
+          if (isEmbedded()) router.replace(returnToApp());
+          else window.location.replace(returnToApp());
         }, remaining);
       } catch (error) {
         if (!disposed && !(error instanceof DOMException && error.name === "AbortError"))
@@ -131,7 +138,7 @@ export function SessionRecovery() {
       window.removeEventListener("online", retryWhenOnline);
       document.removeEventListener("visibilitychange", retryWhenVisible);
     };
-  }, []);
+  }, [router]);
 
   return (
     <main className="auth-session-gate" aria-label="Abertura do Enturma">
