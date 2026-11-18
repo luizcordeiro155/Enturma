@@ -1,7 +1,7 @@
 "use client";
 import { useSocialLives } from "./social-live-context";
 /* eslint-disable @next/next/no-img-element -- authenticated highlight thumbnails */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { Bell, LockKeyhole, MessageCircle, Share2 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
@@ -18,7 +18,13 @@ import { SocialProfileGrid } from "./social-profile-grid";
 import { SocialPostViewer } from "./social-post-viewer";
 import { StoryViewer } from "./social-stories";
 import { SocialCollections } from "./social-collections";
-import { type PublicProfile, profileStyle } from "../user-identity";
+import {
+  ProfileCard,
+  type PublicProfile,
+  profileStyle,
+} from "../user-identity";
+import { ProfileBackdrop } from "../profile-motion";
+import type { Showcase } from "../profile-showcase";
 import { ForumLinks, ConfirmedLink } from "../forum-links";
 import { useLiveRefresh } from "@/lib/live-updates";
 
@@ -39,6 +45,23 @@ const TABS = [
   ["tagged", "Marcados"],
   ["saved", "Salvos"],
 ] as const;
+/** From this width up the profile uses the two-column surface of the main profile. */
+const DESKTOP_PROFILE_QUERY = "(min-width: 761px)";
+function watchDesktopProfile(changed: () => void) {
+  if (typeof window.matchMedia !== "function") return () => {};
+  const query = window.matchMedia(DESKTOP_PROFILE_QUERY);
+  query.addEventListener("change", changed);
+  return () => query.removeEventListener("change", changed);
+}
+function useDesktopProfile() {
+  return useSyncExternalStore(
+    watchDesktopProfile,
+    () =>
+      typeof window.matchMedia === "function" &&
+      window.matchMedia(DESKTOP_PROFILE_QUERY).matches,
+    () => false,
+  );
+}
 export function SocialProfile({
   id,
   me,
@@ -73,6 +96,26 @@ export function SocialProfile({
   );
   const writing = useRef(false);
   const [collections, setCollections] = useState(false);
+  const desktop = useDesktopProfile();
+  // The desktop surface borrows the look of the main profile (colours, mural, featured badges).
+  const [showcase, setShowcase] = useState<{
+    id: string;
+    value: Showcase | null;
+  }>();
+  useEffect(() => {
+    if (!desktop) return;
+    let alive = true;
+    void api<Showcase>(`/users/${id}/showcase`, { cache: "no-store" })
+      .then((value) => {
+        if (alive) setShowcase({ id, value });
+      })
+      .catch(() => {
+        if (alive) setShowcase({ id, value: null });
+      });
+    return () => {
+      alive = false;
+    };
+  }, [id, desktop]);
   useLiveRefresh(
     "profile_changed",
     async () => {
@@ -166,11 +209,295 @@ export function SocialProfile({
     }
   }
   const tabs = TABS.filter(([key]) => key !== "saved" || id === me);
+  const actions = profile && (
+    <>
+      {currentLive && (
+        <button
+          className="secondary"
+          onClick={() => lives.open(currentLive.id)}
+        >
+          Assistir ao vivo
+        </button>
+      )}
+      <FollowButton
+        id={id}
+        me={me}
+        changed={() => setRevision((value) => value + 1)}
+      />
+      {id !== me ? (
+        <NavigationLink
+          href="/friends"
+          className="secondary social-profile-message"
+        >
+          <MessageCircle size={18} />
+          Mensagem
+        </NavigationLink>
+      ) : (
+        <NavigationLink
+          href="/profile"
+          className="secondary social-profile-message"
+        >
+          Editar perfil
+        </NavigationLink>
+      )}
+      <button
+        type="button"
+        className="icon-control"
+        aria-label="Copiar link do perfil social"
+        onClick={() => {
+          void navigator.clipboard
+            .writeText(socialLink("person", id))
+            .then(() => setNotice("Link copiado."))
+            .catch(() => setError("N\u00e3o foi poss\u00edvel copiar."));
+        }}
+      >
+        <Share2 />
+      </button>
+    </>
+  );
+  const counts = profile && (
+    <div className="social-profile-counts">
+      <span>
+        <strong>{profile.posts}</strong> {"Publica\u00e7\u00f5es"}
+      </span>
+      <button onClick={() => list("followers")}>
+        <strong>{profile.followers}</strong> Seguidores
+      </button>
+      <button onClick={() => list("following")}>
+        <strong>{profile.following}</strong> Seguindo
+      </button>
+      <span>
+        <strong>{profile.likesReceived}</strong> Curtidas recebidas
+      </span>
+    </div>
+  );
+  const privateNotice = profile?.privateAccount && (
+    <p className="social-private-notice">
+      <LockKeyhole size={16} />
+      {
+        "Conta privada \u00b7 apenas seguidores aprovados veem as publica\u00e7\u00f5es."
+      }
+    </p>
+  );
+  const tools = profile && (
+    <div className="social-profile-tools">
+      {id !== me && profile.relationship.status === "ACCEPTED" && (
+        <button
+          className="secondary"
+          disabled={busy}
+          aria-pressed={profile.relationship.notify}
+          onClick={() =>
+            void perform(() =>
+              socialWrite(`/people/${id}/notifications`, {
+                active: !profile.relationship.notify,
+              }),
+            )
+          }
+        >
+          <Bell size={16} />
+          {profile.relationship.notify
+            ? "Avisos de novas publica\u00e7\u00f5es ativados"
+            : "Avisar sobre novas publica\u00e7\u00f5es"}
+        </button>
+      )}
+      {profile.relationship.muted && (
+        <button
+          className="text-button"
+          disabled={busy}
+          onClick={() =>
+            void perform(() =>
+              socialWrite(`/people/${id}/mute`, { active: false }),
+            )
+          }
+        >
+          Voltar a recomendar este criador
+        </button>
+      )}
+      {id === me && (
+        <button className="secondary" onClick={() => list("requests")}>
+          {"Solicita\u00e7\u00f5es para seguir"}
+        </button>
+      )}
+    </div>
+  );
+  const highlightStrip = highlights.length > 0 && (
+    <div
+      className="social-highlights"
+      aria-label="Destaques"
+      data-social-gesture="ignore"
+    >
+      {highlights.map((highlight, position) => (
+        <button
+          className="social-highlight"
+          key={highlight.id}
+          onClick={() => setStory(position)}
+        >
+          <span className="social-profile-highlight-art">
+            {highlight.media[0] ? (
+              <img
+                src={mediaUrl(highlight.media[0].id, true)}
+                alt=""
+                loading="lazy"
+              />
+            ) : (
+              <span aria-hidden="true">Aa</span>
+            )}
+          </span>
+          <small>
+            {highlight.highlightTitle ||
+              highlight.body.slice(0, 35) ||
+              "Destaque"}
+          </small>
+        </button>
+      ))}
+    </div>
+  );
+  const tabList = (
+    <div
+      className="social-tabs social-profile-tabs"
+      role="tablist"
+      aria-label={"Conte\u00fado do perfil"}
+    >
+      {tabs.map(([key, label]) => (
+        <button
+          key={key}
+          role="tab"
+          id={`profile-tab-${key}`}
+          aria-controls={`profile-panel-${key}`}
+          aria-selected={tab === key}
+          onClick={() => setTab(key)}
+        >
+          {label}
+        </button>
+      ))}
+    </div>
+  );
+  const panels = tabs.map(([key]) => (
+    <div
+      key={key}
+      id={`profile-panel-${key}`}
+      role="tabpanel"
+      aria-labelledby={`profile-tab-${key}`}
+      hidden={tab !== key}
+      className="social-profile-stream social-profile-grid-panel"
+    >
+      {key === "tagged" && id === me && mentions.length > 0 && (
+        <section
+          className="social-mention-review"
+          aria-label={"Marca\u00e7\u00f5es aguardando aprova\u00e7\u00e3o"}
+        >
+          <h3>Escolha o que aparece no seu perfil</h3>
+          {mentions.map((post) => (
+            <article key={post.id}>
+              <strong>
+                {post.name}
+                {" mencionou voc\u00ea"}
+              </strong>
+              <p>{post.body}</p>
+              <div className="social-row">
+                {[true, false].map((approve) => (
+                  <button
+                    className="secondary"
+                    disabled={busy}
+                    key={String(approve)}
+                    onClick={() =>
+                      void perform(
+                        () =>
+                          socialWrite(`/posts/${post.id}/mention`, {
+                            active: approve,
+                          }),
+                        () =>
+                          setMentions((previous) =>
+                            previous.filter((value) => value.id !== post.id),
+                          ),
+                      )
+                    }
+                  >
+                    {approve
+                      ? "Exibir no perfil"
+                      : "Recusar marca\u00e7\u00e3o"}
+                  </button>
+                ))}
+              </div>
+            </article>
+          ))}
+        </section>
+      )}
+      {key === "saved" && id === me && (
+        <button
+          className="secondary social-collections-open"
+          onClick={() => setCollections(true)}
+        >
+          Minhas coleções
+        </button>
+      )}
+      <SocialProfileGrid
+        query={`author=${id}&kind=${key === "clips" ? "CLIP" : key === "posts" ? "POST" : "ALL"}&collection=${key === "clips" ? "posts" : key}`}
+        pinnedQuery={
+          key === "posts"
+            ? `author=${id}&kind=ALL&collection=pinned`
+            : undefined
+        }
+        active={tab === key && !viewer && story === null}
+        shape={key === "clips" ? "portrait" : "square"}
+        refreshKey={revision}
+        open={(items, start) => setViewer({ items, start })}
+      />
+    </div>
+  ));
+  const surfaceProfile =
+    profile && desktop && showcase?.id === id
+      ? {
+          ...profile,
+          showcaseAppearance: showcase.value?.appearance,
+        }
+      : undefined;
   return (
     <SocialDialog title="Perfil social" close={close} wide variant="profile">
-      <div className="social-dialog-body social-profile-body">
-        {!profile && !error && <p role="status">{"Carregando perfil\u2026"}</p>}
-        {profile && (
+      <div
+        className={`social-dialog-body social-profile-body${desktop ? " social-profile-desktop" : ""}`}
+      >
+        {(!profile || (desktop && !surfaceProfile)) && !error && (
+          <p role="status">{"Carregando perfil\u2026"}</p>
+        )}
+        {surfaceProfile && (
+          <div
+            className={`profile-preview-combined profile-public-content profile-discord-public-layout profile-shared-surface social-profile-surface${showcase?.value?.appearance.muralMode === "PROFILE" ? " profile-mural-linked" : ""}`}
+            data-profile-preview="false"
+            style={profileStyle(surfaceProfile)}
+          >
+            <section className="profile-preview-identity profile-public-primary">
+              <ProfileCard
+                user={surfaceProfile}
+                showcase={showcase?.value ?? undefined}
+                actions={actions}
+              />
+            </section>
+            <section
+              className="profile-preview-mural profile-public-advanced profile-has-community"
+              aria-label="Enturma Social"
+            >
+              <ProfileBackdrop
+                appearance={surfaceProfile.showcaseAppearance}
+                mural
+              />
+              <div className="social-profile-main">
+                <div className="social-profile-main-top">
+                  <header className="social-profile-main-head">
+                    <h3 className="profile-mural-title">Enturma Social</h3>
+                    {counts}
+                  </header>
+                  {privateNotice}
+                  {tools}
+                  {highlightStrip}
+                  {tabList}
+                </div>
+                {panels}
+              </div>
+            </section>
+          </div>
+        )}
+        {profile && !desktop && (
           <>
             <div
               className="social-profile-banner"
@@ -187,72 +514,14 @@ export function SocialProfile({
             <div className="social-profile-intro">
               <div className="social-profile-heading">
                 <SocialAuthor user={profile} open={person} />
-                <div className="social-profile-buttons">
-                  {currentLive && (
-                    <button
-                      className="secondary"
-                      onClick={() => lives.open(currentLive.id)}
-                    >
-                      Assistir ao vivo
-                    </button>
-                  )}
-                  <FollowButton
-                    id={id}
-                    me={me}
-                    changed={() => setRevision((value) => value + 1)}
-                  />
-                  {id !== me ? (
-                    <NavigationLink
-                      href="/friends"
-                      className="secondary social-profile-message"
-                    >
-                      <MessageCircle size={18} />
-                      Mensagem
-                    </NavigationLink>
-                  ) : (
-                    <NavigationLink
-                      href="/profile"
-                      className="secondary social-profile-message"
-                    >
-                      Editar perfil
-                    </NavigationLink>
-                  )}
-                  <button
-                    type="button"
-                    className="icon-control"
-                    aria-label="Copiar link do perfil social"
-                    onClick={() => {
-                      void navigator.clipboard
-                        .writeText(socialLink("person", id))
-                        .then(() => setNotice("Link copiado."))
-                        .catch(() =>
-                          setError("N\u00e3o foi poss\u00edvel copiar."),
-                        );
-                    }}
-                  >
-                    <Share2 />
-                  </button>
-                </div>
+                <div className="social-profile-buttons">{actions}</div>
               </div>
               {profile.profileDetails?.statusText && (
                 <p className="social-profile-status">
                   {profile.profileDetails.statusText}
                 </p>
               )}
-              <div className="social-profile-counts">
-                <span>
-                  <strong>{profile.posts}</strong> {"Publica\u00e7\u00f5es"}
-                </span>
-                <button onClick={() => list("followers")}>
-                  <strong>{profile.followers}</strong> Seguidores
-                </button>
-                <button onClick={() => list("following")}>
-                  <strong>{profile.following}</strong> Seguindo
-                </button>
-                <span>
-                  <strong>{profile.likesReceived}</strong> Curtidas recebidas
-                </span>
-              </div>
+              {counts}
               {profile.bio && (
                 <p className="social-profile-bio">
                   <ForumLinks text={profile.bio} />
@@ -271,184 +540,12 @@ export function SocialProfile({
                   label="Site pessoal ↗"
                 />
               )}
-              {profile.privateAccount && (
-                <p className="social-private-notice">
-                  <LockKeyhole size={16} />
-                  {
-                    "Conta privada \u00b7 apenas seguidores aprovados veem as publica\u00e7\u00f5es."
-                  }
-                </p>
-              )}
-              <div className="social-profile-tools">
-                {id !== me && profile.relationship.status === "ACCEPTED" && (
-                  <button
-                    className="secondary"
-                    disabled={busy}
-                    aria-pressed={profile.relationship.notify}
-                    onClick={() =>
-                      void perform(() =>
-                        socialWrite(`/people/${id}/notifications`, {
-                          active: !profile.relationship.notify,
-                        }),
-                      )
-                    }
-                  >
-                    <Bell size={16} />
-                    {profile.relationship.notify
-                      ? "Avisos de novas publica\u00e7\u00f5es ativados"
-                      : "Avisar sobre novas publica\u00e7\u00f5es"}
-                  </button>
-                )}
-                {profile.relationship.muted && (
-                  <button
-                    className="text-button"
-                    disabled={busy}
-                    onClick={() =>
-                      void perform(() =>
-                        socialWrite(`/people/${id}/mute`, { active: false }),
-                      )
-                    }
-                  >
-                    Voltar a recomendar este criador
-                  </button>
-                )}
-                {id === me && (
-                  <button
-                    className="secondary"
-                    onClick={() => list("requests")}
-                  >
-                    {"Solicita\u00e7\u00f5es para seguir"}
-                  </button>
-                )}
-              </div>
-              {highlights.length > 0 && (
-                <div
-                  className="social-highlights"
-                  aria-label="Destaques"
-                  data-social-gesture="ignore"
-                >
-                  {highlights.map((highlight, position) => (
-                    <button
-                      className="social-highlight"
-                      key={highlight.id}
-                      onClick={() => setStory(position)}
-                    >
-                      <span className="social-profile-highlight-art">
-                        {highlight.media[0] ? (
-                          <img
-                            src={mediaUrl(highlight.media[0].id, true)}
-                            alt=""
-                            loading="lazy"
-                          />
-                        ) : (
-                          <span aria-hidden="true">Aa</span>
-                        )}
-                      </span>
-                      <small>
-                        {highlight.highlightTitle ||
-                          highlight.body.slice(0, 35) ||
-                          "Destaque"}
-                      </small>
-                    </button>
-                  ))}
-                </div>
-              )}
+              {privateNotice}
+              {tools}
+              {highlightStrip}
             </div>
-            <div
-              className="social-tabs social-profile-tabs"
-              role="tablist"
-              aria-label={"Conte\u00fado do perfil"}
-            >
-              {tabs.map(([key, label]) => (
-                <button
-                  key={key}
-                  role="tab"
-                  id={`profile-tab-${key}`}
-                  aria-controls={`profile-panel-${key}`}
-                  aria-selected={tab === key}
-                  onClick={() => setTab(key)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            {tabs.map(([key]) => (
-              <div
-                key={key}
-                id={`profile-panel-${key}`}
-                role="tabpanel"
-                aria-labelledby={`profile-tab-${key}`}
-                hidden={tab !== key}
-                className="social-profile-stream social-profile-grid-panel"
-              >
-                {key === "tagged" && id === me && mentions.length > 0 && (
-                  <section
-                    className="social-mention-review"
-                    aria-label={
-                      "Marca\u00e7\u00f5es aguardando aprova\u00e7\u00e3o"
-                    }
-                  >
-                    <h3>Escolha o que aparece no seu perfil</h3>
-                    {mentions.map((post) => (
-                      <article key={post.id}>
-                        <strong>
-                          {post.name}
-                          {" mencionou voc\u00ea"}
-                        </strong>
-                        <p>{post.body}</p>
-                        <div className="social-row">
-                          {[true, false].map((approve) => (
-                            <button
-                              className="secondary"
-                              disabled={busy}
-                              key={String(approve)}
-                              onClick={() =>
-                                void perform(
-                                  () =>
-                                    socialWrite(`/posts/${post.id}/mention`, {
-                                      active: approve,
-                                    }),
-                                  () =>
-                                    setMentions((previous) =>
-                                      previous.filter(
-                                        (value) => value.id !== post.id,
-                                      ),
-                                    ),
-                                )
-                              }
-                            >
-                              {approve
-                                ? "Exibir no perfil"
-                                : "Recusar marca\u00e7\u00e3o"}
-                            </button>
-                          ))}
-                        </div>
-                      </article>
-                    ))}
-                  </section>
-                )}
-                {key === "saved" && id === me && (
-                  <button
-                    className="secondary social-collections-open"
-                    onClick={() => setCollections(true)}
-                  >
-                    Minhas coleções
-                  </button>
-                )}
-                <SocialProfileGrid
-                  query={`author=${id}&kind=${key === "clips" ? "CLIP" : key === "posts" ? "POST" : "ALL"}&collection=${key === "clips" ? "posts" : key}`}
-                  pinnedQuery={
-                    key === "posts"
-                      ? `author=${id}&kind=ALL&collection=pinned`
-                      : undefined
-                  }
-                  active={tab === key && !viewer && story === null}
-                  shape={key === "clips" ? "portrait" : "square"}
-                  refreshKey={revision}
-                  open={(items, start) => setViewer({ items, start })}
-                />
-              </div>
-            ))}
+            {tabList}
+            {panels}
           </>
         )}
         {notice && <p role="status">{notice}</p>}

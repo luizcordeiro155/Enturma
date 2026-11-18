@@ -54,3 +54,7 @@ No desktop, rail de 76 px e Feed com leitura de até 500 px, Stories de 64 px e 
 Vídeos preenchem a largura do post com recorte central, sem faixas laterais adicionadas pelo player. A revisão do Studio permite alternar entre o enquadramento do feed e o vídeo completo. A grade do perfil ocupa a largura do painel; o cabeçalho usa banner, avatar, bio e mensagem do perfil principal, preservando GIFs. No desktop, abrir uma publicação reúne mídia e conversa lado a lado; no mobile, empilha.
 
 Curtidas usam `--social-like`, definido em `social-studio.css`: vermelho escuro `#bf2542` no claro e `#ff526b` no escuro. O controle de volume usa branco sobre `#292d32e8`, independente do tema; expande por hover ou foco. Movimento respeita a preferência de redução. O foco da busca contorna o campo completo.
+
+## Perfil social no desktop — 18/11/2026
+
+A partir de 761 px, o Perfil social usa a mesma superfície do perfil padrão (`ProfileCard` e as cores de `profileStyle`): cartão de identidade à esquerda, com banner, avatar, nome, status, bio e as ações de seguir, mensagem e copiar link; à direita, a coluna “Enturma Social” com os contadores reais, avisos, destaques, abas e a grade de três colunas. Os controles da coluna social derivam de `currentColor` (`--mural-copy`), para manter contraste nos temas Claro, Escuro, Enturma e Sistema e em murais personalizados. Até 760 px o perfil continua empilhado, sem mudanças.

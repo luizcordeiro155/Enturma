@@ -168,19 +168,32 @@ test("Social: mentions, keyboard, swipes and compact profile/inbox", async ({
   await expect(profile).toBeVisible();
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    const author = profile.locator(".social-profile-heading .social-author");
-    const name = author.locator("strong");
+    // From 761 px up the profile uses the two-column surface of the main profile.
+    const desktop = width >= 761;
+    const author = profile.locator(
+      desktop
+        ? ".social-profile-surface .public-profile-body"
+        : ".social-profile-heading .social-author",
+    );
+    const name = author.locator(desktop ? "h2" : "strong");
     await expect(name).toBeVisible();
     const nameBox = (await name.boundingBox())!,
       buttons = (await profile
-        .locator(".social-profile-buttons")
+        .locator(
+          desktop
+            ? ".social-profile-surface .profile-dialog-actions"
+            : ".social-profile-buttons",
+        )
         .boundingBox())!;
     expect(nameBox.width).toBeGreaterThan(80);
     expect(
       nameBox.y + nameBox.height <= buttons.y + 1 ||
         nameBox.x + nameBox.width <= buttons.x + 1,
     ).toBe(true);
-    const avatar = (await author.locator(".identity-avatar").boundingBox())!;
+    const avatar = (await author
+      .locator(".identity-avatar")
+      .first()
+      .boundingBox())!;
     expect(avatar.width).toBeLessThanOrEqual(width >= 1200 ? 140 : 88);
     expect(Math.abs(avatar.width - avatar.height)).toBeLessThan(1);
     await page.screenshot({
