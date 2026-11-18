@@ -110,10 +110,22 @@ studentTest("Android mantém os atalhos das configurações abaixo da barra de s
   await syncNativeInsets(page);
   const nav = page.locator(".settings-nav");
   await expect(nav).toBeVisible();
+  const maskHeight = () =>
+    nav.evaluate((element) => {
+      const mask = getComputedStyle(element, "::before");
+      return mask.content === "none" ? 0 : parseFloat(mask.height) || 0;
+    });
+  // No topo, a máscara da barra de status não pode cobrir o subtítulo logo acima dos atalhos.
+  await expect(page.locator(".settings-lede")).toBeVisible();
+  expect(await maskHeight()).toBe(0);
   await page.mouse.wheel(0, 1400);
   await expect
     .poll(async () => (await nav.boundingBox())?.y ?? -1)
     .toBeGreaterThanOrEqual(nativeInsets.top - 1);
   const top = (await nav.boundingBox())!.y;
   expect(top).toBeLessThan(nativeInsets.top + 4);
+  // Presos no topo, a máscara volta e nada rola por baixo da barra de status.
+  await expect.poll(maskHeight).toBeGreaterThanOrEqual(nativeInsets.top - 1);
+  await page.mouse.wheel(0, -4000);
+  await expect.poll(maskHeight).toBe(0);
 });

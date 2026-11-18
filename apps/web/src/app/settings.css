@@ -413,7 +413,8 @@ html[data-reduced-motion="true"] .settings-section {
     background: color-mix(in srgb, var(--bg) 90%, transparent);
     backdrop-filter: blur(10px);
   }
-  .settings-nav::before {
+  /* Status-bar mask: only while the chips are stuck. Unstuck, it would cover the text above them. */
+  .settings-nav[data-stuck="true"]::before {
     content: "";
     position: absolute;
     left: 0;

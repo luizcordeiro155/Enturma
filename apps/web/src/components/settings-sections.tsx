@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 
 export type SettingsSectionItem = { id: string; label: string; icon: LucideIcon };
@@ -16,6 +16,7 @@ function prefersReducedMotion() {
 /** Section menu: a side rail on wide screens, sticky chips on phones; follows the scroll. */
 export function SettingsNav({ items }: { items: SettingsSectionItem[] }) {
   const [active, setActive] = useState(items[0]?.id ?? "");
+  const navRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     if (typeof IntersectionObserver === "undefined") return;
@@ -38,6 +39,34 @@ export function SettingsNav({ items }: { items: SettingsSectionItem[] }) {
     return () => observer.disconnect();
   }, [items]);
 
+  // The status-bar mask above the chips (settings.css) must exist only while they are stuck:
+  // in the normal flow it sits over the last line of the page subtitle.
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const style = getComputedStyle(nav);
+      const stuck =
+        style.position === "sticky" &&
+        nav.getBoundingClientRect().top <= (parseFloat(style.top) || 0) + 1;
+      if (stuck) nav.dataset.stuck = "true";
+      else delete nav.dataset.stuck;
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(update);
+    };
+    update();
+    document.addEventListener("scroll", schedule, { capture: true, passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      cancelAnimationFrame(frame);
+      document.removeEventListener("scroll", schedule, { capture: true });
+      window.removeEventListener("resize", schedule);
+    };
+  }, []);
+
   useEffect(() => {
     const chip = document.querySelector<HTMLElement>(`.settings-nav a[href="#${active}"]`);
     const rail = chip?.parentElement?.parentElement;
@@ -49,7 +78,7 @@ export function SettingsNav({ items }: { items: SettingsSectionItem[] }) {
   }, [active]);
 
   return (
-    <nav className="settings-nav" aria-label="Seções das configurações">
+    <nav ref={navRef} className="settings-nav" aria-label="Seções das configurações">
       <ul>
         {items.map(({ id, label, icon: Icon }) => (
           <li key={id}>
