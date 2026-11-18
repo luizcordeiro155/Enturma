@@ -130,7 +130,9 @@ test("Studio visual: long video, drag trimming, cover and theme snapshots", asyn
     editor.locator(".studio-filmstrip-images img").first(),
   ).toBeVisible({ timeout: 20000 });
   // A long video starts with its first 3 minutes selected.
-  await expect(editor.getByLabel("Fim (s)", { exact: true })).toHaveValue("180");
+  await expect(editor.getByLabel("Fim (s)", { exact: true })).toHaveValue(
+    "180",
+  );
   const handle = editor.getByRole("slider", {
     name: "Fim do corte",
     exact: true,
@@ -155,7 +157,9 @@ test("Studio visual: long video, drag trimming, cover and theme snapshots", asyn
     )
     .toBeLessThan(130);
   // The Social editor has no separate texts-and-captions section.
-  await expect(editor.getByText("Textos e legendas", { exact: true })).toHaveCount(0);
+  await expect(
+    editor.getByText("Textos e legendas", { exact: true }),
+  ).toHaveCount(0);
   await editor
     .getByRole("button", { name: "Escolher capa", exact: true })
     .click();
@@ -279,7 +283,9 @@ test("Social profile avatar, plain actions, comment media and keyboard overlay",
   await page.getByRole("button", { name: "Meu perfil social" }).click();
   const profile = page.getByRole("dialog", { name: "Perfil social" });
   const avatar = profile
-    .locator(".social-profile-intro .identity-avatar")
+    .locator(
+      ":is(.social-profile-intro, .social-profile-surface .public-profile-body) .identity-avatar",
+    )
     .first();
   await expect(avatar).toBeVisible();
   for (const width of [390, 1440]) {

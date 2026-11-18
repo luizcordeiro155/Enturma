@@ -165,13 +165,22 @@ test("feed, volume, comment picker and profile detail remain usable across theme
   await expect(
     profile.getByText("Projetos, ideias e aprendizados com a turma."),
   ).toBeVisible();
-  await expect(profile.locator(".social-profile-banner img")).toBeVisible();
+  await expect(
+    profile.locator(".social-profile-surface .public-profile-banner img"),
+  ).toBeVisible();
   const grid = profile.locator(".social-profile-grid:visible");
   await profile.evaluate(el => Promise.all(el.getAnimations().map(animation => animation.finished)));
+  // On desktop the grid fills the Enturma Social column, beside the identity card.
   const gridBox = (await grid.boundingBox())!,
-    profileBox = (await profile.boundingBox())!;
-  expect(gridBox.x - profileBox.x).toBeLessThan(4);
-  expect(gridBox.width / profileBox.width).toBeGreaterThan(0.97);
+    columnBox = (await profile
+      .locator(".social-profile-surface .profile-preview-mural")
+      .boundingBox())!,
+    cardBox = (await profile
+      .locator(".social-profile-surface .profile-preview-identity")
+      .boundingBox())!;
+  expect(cardBox.x + cardBox.width).toBeLessThanOrEqual(columnBox.x + 1);
+  expect(gridBox.x - columnBox.x).toBeLessThan(32);
+  expect(gridBox.width / columnBox.width).toBeGreaterThan(0.85);
   const cell = grid.locator("button").first();
   await cell.hover();
   await expect(cell.locator(".social-grid-metrics")).toHaveCSS("opacity", "1");
