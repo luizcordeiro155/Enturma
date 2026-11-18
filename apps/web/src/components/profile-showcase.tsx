@@ -1,5 +1,6 @@
 "use client";
 import { PublicPortfolioLink } from "./portfolio-navigation";
+import { formatDays, formatStudyTime } from "./portfolio";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import {
@@ -582,7 +583,7 @@ export function ShowcaseView({
         <div className="profile-stat-row">
           <span>Nível {value.stats.level}</span>
           <span>{value.stats.totalXp} XP</span>
-          <span>{value.stats.currentStreak} dias de sequência</span>
+          <span>{formatDays(value.stats.currentStreak)} de sequência</span>
         </div>
       )}
       {value.joinedAt && (
@@ -675,9 +676,9 @@ export function ShowcaseView({
               ) : w.kind === "TECHNOLOGIES" ? (
                 <p>{value.appearance.technologies || "Em descoberta."}</p>
               ) : w.kind === "STREAK" ? (
-                <p>{value.stats?.currentStreak ?? 0} dias seguidos</p>
+                <p>{formatDays(value.stats?.currentStreak ?? 0)} em sequência</p>
               ) : w.kind === "HOURS" ? (
-                <p>{value.stats?.studyMinutes ?? 0} minutos em companhia</p>
+                <p>{formatStudyTime(value.stats?.studyMinutes ?? 0)} em companhia</p>
               ) : w.kind === "ACADEMIC" ? (
                 value.academic?.map((a, i) => (
                   <p key={i}>

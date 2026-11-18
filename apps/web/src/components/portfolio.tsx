@@ -47,6 +47,20 @@ type Portfolio = {
   studyMinutes: number;
 };
 
+/** "446.73" minutes reads as "7 h 27 min"; short sessions stay in minutes. */
+export function formatStudyTime(minutes: number) {
+  const total = Math.max(0, Math.round(Number(minutes) || 0));
+  const hours = Math.floor(total / 60);
+  const rest = total % 60;
+  if (!hours) return `${rest} min`;
+  return rest ? `${hours} h ${rest} min` : `${hours} h`;
+}
+
+export function formatDays(days: number) {
+  const value = Math.max(0, Math.round(Number(days) || 0));
+  return `${value} ${value === 1 ? "dia" : "dias"}`;
+}
+
 export function PortfolioEditor() {
   const [data, setData] = useState<Portfolio>();
   const [projects, setProjects] = useState<Project[]>([]);
@@ -158,11 +172,11 @@ export function PortfolioEditor() {
           </div>
           <div>
             <span>Tempo de estudo</span>
-            <strong>{data.studyMinutes} min</strong>
+            <strong>{formatStudyTime(data.studyMinutes)}</strong>
           </div>
           <div>
             <span>Sequência atual</span>
-            <strong>{data.stats.currentStreak} dias</strong>
+            <strong>{formatDays(data.stats.currentStreak)}</strong>
           </div>
         </section>
         <form onSubmit={save}>
@@ -439,8 +453,8 @@ export function PublicPortfolio({ username }: { username: string }) {
         </p>
         <div>
           <strong>{data.stats.totalXp} XP</strong>
-          <strong>{data.studyMinutes} min de estudo</strong>
-          <strong>{data.stats.currentStreak} dias de sequência</strong>
+          <strong>{formatStudyTime(data.studyMinutes)} de estudo</strong>
+          <strong>{formatDays(data.stats.currentStreak)} de sequência</strong>
         </div>
       </section>
       {data.skills?.length ? (
