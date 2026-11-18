@@ -1,0 +1,418 @@
+/* Daily missions: Termo Dev board with its own keyboard, tappable bits and
+   a mobile layout that keeps the board and the keys on one screen. Colours
+   come from the theme tokens so the four themes share one set of rules. */
+.mission-stage {
+  --word-hit: #237342;
+  --word-near: #f3c556;
+  --word-miss: #505e66;
+}
+.mission-stage.game-words .mission-hint,
+.mission-stage.game-words .mission-feedback,
+.mission-stage.game-words > .feedback {
+  max-width: 620px;
+  margin-inline: auto;
+}
+.mission-games small i {
+  font-style: normal;
+}
+
+/* Board */
+.word-game {
+  --word-gap: clamp(3px, 0.9vw, 6px);
+  --word-cell: clamp(40px, calc((100dvh - 520px) / 6), 58px);
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  max-width: 620px;
+  margin-inline: auto;
+  -webkit-user-select: none;
+  user-select: none;
+}
+.word-game .mission-word-board {
+  display: grid;
+  gap: var(--word-gap);
+  container-type: inline-size;
+  width: min(
+    100%,
+    calc(
+      var(--word-cols) * var(--word-cell) + (var(--word-cols) - 1) *
+        var(--word-gap)
+    )
+  );
+}
+.word-game .mission-word-row {
+  display: grid;
+  grid-template-columns: repeat(var(--word-cols), minmax(0, 1fr));
+  gap: var(--word-gap);
+}
+.word-game .mission-word-row > * {
+  aspect-ratio: 1;
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  margin: 0;
+  padding: 0 !important;
+  border: 2px solid var(--border) !important;
+  border-radius: clamp(4px, 14cqw / var(--word-cols), 9px);
+  background: color-mix(in srgb, var(--soft) 55%, transparent) !important;
+  color: var(--ink) !important;
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 1rem;
+  font-size: clamp(0.72rem, 48cqw / var(--word-cols), 1.9rem);
+  font-weight: 800;
+  line-height: 1;
+  text-transform: uppercase;
+}
+.word-game .mission-word-row.is-active > * {
+  background: var(--soft) !important;
+  border-color: color-mix(in srgb, var(--ink) 34%, var(--border)) !important;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.word-game .mission-word-row.is-active > :not(:empty) {
+  border-color: color-mix(in srgb, var(--ink) 70%, var(--border)) !important;
+}
+.word-game .mission-word-row.is-active > [aria-pressed="true"] {
+  border-color: var(--ink) !important;
+  box-shadow: inset 0 -4px 0 var(--ink);
+}
+.word-game .mission-word-row > .C {
+  background: var(--word-hit) !important;
+  border-color: var(--word-hit) !important;
+  color: #fff !important;
+}
+.word-game .mission-word-row > .P {
+  background: var(--word-near) !important;
+  border-color: var(--word-near) !important;
+  color: #332500 !important;
+}
+.word-game .mission-word-row > .A {
+  background: var(--word-miss) !important;
+  border-color: var(--word-miss) !important;
+  color: #fff !important;
+}
+.word-notice {
+  min-height: 1.35em;
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 650;
+  line-height: 1.35;
+  text-align: center;
+  color: var(--ink);
+}
+
+/* Keyboard */
+.word-keyboard {
+  --key-gap: 6px;
+  --key: calc((100cqw - 9 * var(--key-gap)) / 10);
+  display: grid;
+  gap: var(--key-gap);
+  width: 100%;
+  max-width: 560px;
+  container-type: inline-size;
+}
+.word-keys {
+  display: flex;
+  gap: var(--key-gap);
+}
+.word-keys:nth-child(3) > :first-child {
+  margin-left: calc((var(--key) + var(--key-gap)) / 2);
+}
+.word-keyboard .word-key {
+  flex: 1 1 0;
+  flex-basis: var(--key);
+  flex-grow: 0;
+  min-width: 0;
+  height: 54px;
+  padding: 0 !important;
+  gap: 6px;
+  border: 1px solid var(--border) !important;
+  border-radius: 8px;
+  background: var(--soft) !important;
+  color: var(--ink) !important;
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1;
+  touch-action: manipulation;
+  transition:
+    transform 0.08s ease-out,
+    background-color 0.15s;
+}
+.word-keyboard .word-key.is-wide,
+.word-keyboard .word-key.is-enter {
+  flex-grow: 1;
+  font-size: 0.8rem;
+}
+.word-keyboard .word-key.is-enter {
+  background: var(--ink) !important;
+  border-color: var(--ink) !important;
+  color: var(--surface) !important;
+}
+.word-keyboard .word-key:active:not(:disabled) {
+  transform: scale(0.93);
+}
+.word-keyboard .word-key:focus-visible,
+.word-game .word-cell:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.word-keyboard .word-key[data-mark="C"] {
+  background: var(--word-hit) !important;
+  border-color: var(--word-hit) !important;
+  color: #fff !important;
+}
+.word-keyboard .word-key[data-mark="P"] {
+  background: var(--word-near) !important;
+  border-color: var(--word-near) !important;
+  color: #332500 !important;
+}
+.word-keyboard .word-key[data-mark="A"] {
+  background: color-mix(in srgb, var(--soft) 35%, var(--bg)) !important;
+  border-color: transparent !important;
+  color: var(--muted) !important;
+}
+@media (hover: hover) {
+  .word-keyboard .word-key:hover:not(:disabled):not([data-mark]):not(.is-enter),
+  .word-game .mission-word-row.is-active > :hover {
+    border-color: var(--ink) !important;
+  }
+}
+.word-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px 16px;
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 0.78rem;
+  color: var(--muted);
+}
+.word-legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.word-legend i {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+}
+.word-legend .C {
+  background: var(--word-hit);
+}
+.word-legend .P {
+  background: var(--word-near);
+}
+.word-legend .A {
+  background: var(--word-miss);
+}
+
+/* Binary lab: every bit is a switch */
+.bit-display {
+  display: grid;
+  grid-template-columns: repeat(var(--bits, 8), minmax(0, 1fr));
+  gap: clamp(3px, 1vw, 8px);
+  margin: 20px 0;
+  container-type: inline-size;
+}
+.bit-display > button {
+  display: grid;
+  place-items: center;
+  gap: 4px;
+  min-width: 0;
+  padding: 12px 0 9px !important;
+  border: 1px solid var(--border) !important;
+  border-radius: 10px;
+  background: var(--soft) !important;
+  color: var(--ink) !important;
+  line-height: 1.1;
+  touch-action: manipulation;
+  transition:
+    background-color 0.2s,
+    transform 0.2s;
+}
+.bit-display > button.on {
+  background: #ddf280 !important;
+  border-color: #829951 !important;
+  color: #183f36 !important;
+  transform: translateY(-3px);
+}
+.bit-display > button:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+}
+.bit-display b {
+  font-family: ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 1.4rem;
+  font-size: clamp(1rem, 46cqw / var(--bits, 8), 1.8rem);
+  font-weight: 700;
+}
+.bit-display small {
+  font-size: 0.65rem;
+  font-size: clamp(0.56rem, 22cqw / var(--bits, 8), 0.72rem);
+  font-weight: 500;
+  opacity: 0.85;
+}
+.bit-display sup {
+  font-size: 0.8em;
+}
+.bit-help {
+  margin: -8px 0 16px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+/* On touch screens the switches are the answer field: no phone keyboard. */
+@media (pointer: coarse) {
+  .mission-binary > label {
+    display: none;
+  }
+}
+
+@media (max-width: 760px) {
+  .daily-lab .daily-heading {
+    margin-bottom: 16px;
+  }
+  .daily-lab .daily-heading h1 {
+    font-size: 1.6rem;
+    margin: 6px 0;
+  }
+  .daily-lab .daily-heading p {
+    margin: 0;
+    font-size: 0.92rem;
+  }
+  .daily-lab .mission-overview {
+    padding: 12px 14px;
+    margin-bottom: 12px;
+  }
+  .daily-lab .mission-games {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .daily-lab .mission-games button {
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 6px;
+    min-height: 88px;
+    padding: 10px 4px 8px;
+    text-align: center;
+    font-size: 0.7rem;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
+  }
+  .daily-lab .mission-games small {
+    margin-top: 3px;
+    font-size: 0.68rem;
+  }
+  .daily-lab .mission-games small i {
+    display: none;
+  }
+  .daily-lab .mission-steps {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 6px;
+    margin: 12px 0;
+  }
+  .daily-lab .mission-steps button {
+    gap: 5px;
+    min-height: 40px;
+    padding: 8px 0;
+    font-size: 0.85rem;
+  }
+  .daily-lab .mission-steps button > span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .daily-lab .mission-stage {
+    padding: 14px 12px 16px;
+    border-radius: 16px;
+  }
+  .daily-lab .mission-stage .game-heading {
+    flex-direction: row;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 4px 12px;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+  .daily-lab .mission-stage .game-heading h2 {
+    margin: 0;
+    font-size: 1.15rem;
+  }
+  .daily-lab .mission-hint {
+    margin: 0 0 14px;
+    padding: 12px 14px;
+  }
+  .daily-lab .mission-hint p {
+    font-size: 0.95rem;
+    line-height: 1.4;
+  }
+  /* Phones zoom and jump when a field is smaller than 16px. */
+  .daily-lab .mission-stage input,
+  .daily-lab .mission-stage textarea {
+    font-size: 16px !important;
+  }
+  .daily-lab .mission-code-layout textarea {
+    min-height: 180px;
+  }
+  .daily-lab .mission-command-buttons {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+  .daily-lab .mission-actions {
+    margin-top: 16px;
+  }
+  .daily-lab .mission-feedback {
+    margin: 14px 0 0;
+    padding: 12px 14px;
+    min-height: 0;
+    font-size: 0.92rem;
+  }
+  .bit-display {
+    grid-template-columns: repeat(
+      var(--bits-row, var(--bits, 8)),
+      minmax(0, 1fr)
+    );
+    gap: 6px;
+  }
+  .bit-display b {
+    font-size: clamp(1.1rem, 46cqw / var(--bits-row, 8), 1.8rem);
+  }
+  .bit-display small {
+    font-size: clamp(0.6rem, 22cqw / var(--bits-row, 8), 0.72rem);
+  }
+  /* Termo Dev: nearly edge to edge, board sized so the keys stay in view. */
+  .daily-lab .mission-stage.game-words {
+    margin-inline: -10px;
+    padding-inline: 8px;
+  }
+  .word-game {
+    --word-gap: 4px;
+    --word-cell: clamp(30px, calc((100dvh - 548px) / 6), 54px);
+    gap: 8px;
+  }
+  .word-keyboard {
+    --key-gap: 4px;
+  }
+  .word-keyboard .word-key {
+    height: clamp(44px, 5.8dvh, 54px);
+    border-radius: 6px;
+  }
+  .word-legend {
+    font-size: 0.74rem;
+    gap: 4px 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .word-keyboard .word-key {
+    transition: none;
+  }
+}
+html[data-reduced-motion="true"] .word-keyboard .word-key {
+  transition: none;
+}
