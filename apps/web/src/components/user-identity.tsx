@@ -24,7 +24,8 @@ import {
   type Showcase,
 } from "./profile-showcase";
 import { useVisitor } from "@/lib/visitor-context";
-import { ConfirmedLink, ForumLinks } from "./forum-links";
+import { ForumLinks } from "./forum-links";
+import { ProfileLinks } from "./profile-links";
 import { useLiveRefresh } from "@/lib/live-updates";
 export type ProfileDetails = {
   pronouns?: string;
@@ -34,6 +35,7 @@ export type ProfileDetails = {
   nameColor?: string;
   nameEffect?: string;
   website?: string;
+  links?: string[];
   interests?: string;
 };
 type FriendshipSummary = {
@@ -229,9 +231,7 @@ export function ProfileCard({
               {d.interests}
             </p>
           ) : null}
-          {d.website ? (
-            <ConfirmedLink href={d.website} label="Site pessoal ↗" />
-          ) : null}
+          <ProfileLinks details={d} />
         </div>
         {actions ? (
           <div className="profile-dialog-actions">{actions}</div>

@@ -97,7 +97,10 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await apply(page);
   const highlightedStatus = preview.locator(".profile-status");
   await expect(highlightedStatus).toHaveText("Programação");
-  await expect(highlightedStatus).toHaveCSS("background-color", "rgb(24, 38, 42)");
+  await expect(highlightedStatus).toHaveCSS(
+    "background-color",
+    "rgb(24, 38, 42)",
+  );
   await expect(highlightedStatus).toHaveCSS("color", "rgb(247, 251, 253)");
   await page.getByRole("link", { name: "Salas", exact: true }).first().click();
   await expect(page).toHaveURL(/rooms/);
@@ -163,7 +166,10 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await page.screenshot({ path: "../../.local/profile-visual-laptop.png" });
   await page.emulateMedia({ colorScheme: "dark" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
-  await expect(highlightedStatus).toHaveCSS("background-color", "rgb(24, 38, 42)");
+  await expect(highlightedStatus).toHaveCSS(
+    "background-color",
+    "rgb(24, 38, 42)",
+  );
   await expect(highlightedStatus).toHaveCSS("color", "rgb(247, 251, 253)");
   await page.setViewportSize({ width: 390, height: 844 });
   await expect(controls).toBeVisible();
@@ -185,15 +191,23 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
     node.appendChild(fixture);
   });
   const scroller = page.locator(".profile-editor-scroll");
-  await expect.poll(() => scroller.evaluate(
-    (element) => element.scrollHeight - element.clientHeight,
-  )).toBeGreaterThan(600);
-  await scroller.evaluate((element) => { element.scrollTop = element.scrollHeight; });
-  await expect.poll(() => scroller.evaluate(
-    (element) => element.scrollTop,
-  )).toBeGreaterThan(500);
+  await expect
+    .poll(() =>
+      scroller.evaluate(
+        (element) => element.scrollHeight - element.clientHeight,
+      ),
+    )
+    .toBeGreaterThan(600);
+  await scroller.evaluate((element) => {
+    element.scrollTop = element.scrollHeight;
+  });
+  await expect
+    .poll(() => scroller.evaluate((element) => element.scrollTop))
+    .toBeGreaterThan(500);
   await expect(preview.locator("#mural-scroll-fixture")).toBeInViewport();
-  await preview.locator("#mural-scroll-fixture").evaluate((node) => node.remove());
+  await preview
+    .locator("#mural-scroll-fixture")
+    .evaluate((node) => node.remove());
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,
@@ -252,6 +266,17 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
   const user = await registered.json();
   await authenticate(page.context(), user);
   await page.goto("/profile");
+  // The colour picked for the name must show on the card, not only be saved.
+  await panel(page, "Estilo do nome");
+  await page.getByLabel("Cor do nome", { exact: true }).fill("#ff3b30");
+  await apply(page);
+  const displayName = page.locator(".profile-copy-content h2").first();
+  await expect(displayName).toHaveCSS("color", "rgb(255, 59, 48)");
+  await panel(page, "Mais sobre você");
+  await page.getByLabel("Link 1", { exact: true }).fill("github.com/enturma");
+  await expect(
+    page.getByRole("dialog").locator(".profile-link-row small"),
+  ).toHaveText("GitHub");
   await panel(page, "Mural e movimento");
   await page
     .getByRole("textbox", { name: "Objetivo da semana", exact: true })
@@ -271,6 +296,13 @@ test("mural preserva widgets após recarregar e respeita privacidade", async ({
     page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
   ).toBeVisible();
   await page.reload();
+  await expect(page.locator(".profile-copy-content h2").first()).toHaveCSS(
+    "color",
+    "rgb(255, 59, 48)",
+  );
+  await expect(
+    page.getByRole("link", { name: "GitHub enturma", exact: true }).first(),
+  ).toBeVisible();
   await panel(page, "Mural e movimento");
   await expect(
     page.getByRole("textbox", { name: "Objetivo da semana", exact: true }),

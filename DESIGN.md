@@ -55,6 +55,14 @@ Vídeos preenchem a largura do post com recorte central, sem faixas laterais adi
 
 Curtidas usam `--social-like`, definido em `social-studio.css`: vermelho escuro `#bf2542` no claro e `#ff526b` no escuro. O controle de volume usa branco sobre `#292d32e8`, independente do tema; expande por hover ou foco. Movimento respeita a preferência de redução. O foco da busca contorna o campo completo.
 
+## Links e cor do nome no perfil — 18/11/2026
+
+- O perfil aceita até seis links (páginas web ou e-mail). Cada um aparece como uma etiqueta com o nome do serviço reconhecido pelo endereço real (GitHub, Instagram, LinkedIn, WhatsApp, e-mail, site…) e o identificador público; o número de WhatsApp nunca é exibido. O antigo campo único “Site ou GitHub” entra nessa lista.
+- As etiquetas usam a cor do texto do próprio cartão (`currentColor`), para continuarem legíveis em qualquer paleta escolhida pelo usuário.
+- A cor escolhida para o nome vale no cartão do perfil; o cartão redefine o texto para `inherit`, então a regra da cor do nome precisa ter especificidade maior que essa redefinição.
+
 ## Perfil social no desktop — 18/11/2026
 
 A partir de 761 px, o Perfil social usa a mesma superfície do perfil padrão (`ProfileCard` e as cores de `profileStyle`): cartão de identidade à esquerda, com banner, avatar, nome, status, bio e as ações de seguir, mensagem e copiar link; à direita, a coluna “Enturma Social” com os contadores reais, avisos, destaques, abas e a grade de três colunas. Os controles da coluna social derivam de `currentColor` (`--mural-copy`), para manter contraste nos temas Claro, Escuro, Enturma e Sistema e em murais personalizados. Até 760 px o perfil continua empilhado, sem mudanças.
+
+No celular (até 760 px) o Perfil social usa a mesma superfície, empilhada: o cartão de identidade com a personalização do perfil (banner, avatar e decoração, fonte, efeito e cor do nome, insígnias, cores e fundo) e, abaixo, o bloco “Enturma Social” com contadores, destaques, abas e grade. A escolha entre duas colunas e uma coluna é feita só por CSS; não há mais uma árvore separada para o celular.

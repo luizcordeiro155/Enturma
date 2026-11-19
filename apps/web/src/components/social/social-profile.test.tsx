@@ -131,23 +131,31 @@ it("no desktop o perfil abre mesmo sem a personalização do perfil padrão", as
   expect(screen.queryByRole("alert")).toBeNull();
 });
 
-it("no celular mantém o perfil empilhado e não busca a personalização", async () => {
+it("no celular mostra a mesma personalização do perfil padrão", async () => {
   viewport(false);
   backend(() => Promise.resolve(showcase));
   const { container } = open();
-  expect(await screen.findByText("Apple Style")).toBeInTheDocument();
-  const intro = container.querySelector(".social-profile-intro")!;
-  expect(intro.querySelector(".social-author")).toHaveTextContent(
-    "Lucca Rangel",
+  const card = await screen.findByTestId("card");
+  expect(card).toHaveAttribute("data-theme", "GRADIENT");
+  expect(card).toHaveTextContent("Lucca Rangel");
+  expect(card).toHaveTextContent("Mensagem");
+  expect(container.querySelector(".social-profile-surface")).toHaveClass(
+    "profile-shared-surface",
+    "profile-mural-linked",
   );
-  expect(intro.querySelector(".social-profile-buttons")).toHaveTextContent(
-    "Mensagem",
-  );
-  expect(intro.querySelector(".social-profile-counts")).toHaveTextContent(
+  const social = container.querySelector(".social-profile-main")!;
+  expect(social.querySelector(".social-profile-counts")).toHaveTextContent(
     "5 Publicações",
   );
-  expect(container.querySelector(".social-profile-banner")).not.toBeNull();
-  expect(container.querySelector(".social-profile-surface")).toBeNull();
-  expect(screen.queryByRole("heading", { name: "Enturma Social" })).toBeNull();
-  expect(api).not.toHaveBeenCalledWith("/users/u1/showcase", expect.anything());
+  expect(social.querySelectorAll('[role="tab"]')).toHaveLength(4);
+  expect(container.querySelector(".social-profile-intro")).toBeNull();
+});
+
+it("no celular o perfil abre mesmo sem a personalização do perfil padrão", async () => {
+  viewport(false);
+  backend(() => Promise.reject(new Error("indisponível")));
+  open();
+  const card = await screen.findByTestId("card");
+  expect(card).not.toHaveAttribute("data-theme");
+  expect(screen.queryByRole("alert")).toBeNull();
 });

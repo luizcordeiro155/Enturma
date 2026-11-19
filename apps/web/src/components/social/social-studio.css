@@ -2652,19 +2652,164 @@ html[data-theme] .social-page .social-clip-sound .social-volume-slider input[typ
 /* "Em alta" lines up with the Explorar search above it. */
 .social-explore-search + .social-hashtag-list{width:min(694px,calc(100% - 32px));margin:0 auto 16px}
 
-/* Desktop social profile: the two-column surface of the main profile (identity card on the left,
-   Enturma Social on the right). Phones keep the stacked layout above. Copy on the right follows
-   the profile's mural colours, so controls there derive from currentColor in every theme. */
+/* Social profile: the surface of the main profile (identity card + Enturma Social), so the
+   colours, mural and name style a person chose show here at every size. Two columns from
+   761 px, one stacked column on phones. Copy in the social part follows the profile's mural
+   colours, so its controls derive from currentColor in every theme. */
+.social-profile-body > :is(p[role="status"], [role="alert"]) {
+  flex: none;
+  margin: 0;
+  padding: 12px 24px;
+}
+.social-profile-surface .public-profile-body {
+  flex: 1 0 auto;
+  padding: 0 22px 22px;
+}
+.social-profile-surface .profile-copy-content p {
+  margin: 8px 0;
+  font-size: 14px;
+  line-height: 1.55;
+}
+html .social-profile-surface .profile-preview-identity .public-profile-body > .profile-dialog-actions {
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 10px;
+}
+.social-profile-surface .profile-dialog-actions > :not(.icon-control) {
+  grid-column: 1 / -1;
+}
+.social-profile-surface .profile-dialog-actions > .social-profile-message {
+  grid-column: 1;
+}
+.social-profile-surface .profile-dialog-actions > .social-follow {
+  display: grid;
+  gap: 6px;
+}
+html[data-theme] .social-profile-surface .profile-dialog-actions :is(a, button) {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  margin: 0;
+  padding: 8px 14px;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 650;
+  text-decoration: none;
+}
+html[data-theme] .social-dialog .social-profile-surface .profile-dialog-actions > .icon-control {
+  width: 44px;
+  padding: 0;
+  border-radius: 9px;
+  color: var(--ink) !important;
+  background: var(--surface) !important;
+  border: 1px solid var(--border) !important;
+}
+html .social-profile-body .profile-shared-surface .profile-preview-mural {
+  padding: 0 !important;
+}
+.social-profile-main {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  color: var(--mural-copy, var(--ink));
+}
+.social-profile-main-top {
+  flex: none;
+  background: var(--mural-copy-panel, transparent);
+}
+html .social-profile-surface .social-profile-main-head > .profile-mural-title {
+  margin: 0 0 16px;
+  font-size: 22px;
+  color: inherit;
+}
+html[data-theme] .social-profile-main .social-profile-counts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0;
+}
+html[data-theme] .social-dialog .social-profile-main .social-profile-counts > :is(span, button) {
+  display: grid;
+  justify-items: start;
+  align-content: start;
+  gap: 2px;
+  min-height: 0;
+  padding: 12px 14px;
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+  border-radius: 14px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+  font-size: 12px;
+  text-align: left;
+  box-shadow: none;
+}
+html[data-theme] .social-dialog .social-profile-main .social-profile-counts > button:hover {
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+.social-profile-main .social-profile-counts strong {
+  font-size: 22px;
+  line-height: 1.1;
+  color: inherit;
+}
+.social-profile-main-top > :is(.social-profile-tools, .social-private-notice) {
+  margin: 0;
+  padding: 0 24px 12px;
+}
+.social-profile-main-top > .social-profile-tools:empty {
+  display: none;
+}
+html[data-theme] .social-dialog .social-profile-main-top > .social-profile-tools > button {
+  border: 1px solid color-mix(in srgb, currentColor 22%, transparent) !important;
+  background: color-mix(in srgb, currentColor 8%, transparent) !important;
+  color: inherit !important;
+}
+html[data-theme] .social-dialog .social-profile-main-top > .social-profile-tools > button:hover {
+  background: color-mix(in srgb, currentColor 16%, transparent) !important;
+}
+.social-profile-main-top > .social-highlights {
+  padding: 4px 24px 12px;
+  gap: 14px;
+}
+html[data-theme] .social-profile-main-top > .social-highlights > button {
+  color: inherit;
+}
+.social-profile-main-top > .social-tabs {
+  flex: none;
+  justify-content: flex-start;
+  gap: 4px;
+  margin: 4px 24px 0;
+  padding: 0;
+  border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent);
+}
+html[data-theme] .social-dialog .social-profile-main-top > .social-tabs > button {
+  flex: 0 1 auto;
+  min-width: 0;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: inherit;
+  opacity: 0.72;
+  background: transparent;
+}
+html[data-theme] .social-dialog .social-profile-main-top > .social-tabs > button[aria-selected="true"] {
+  color: inherit;
+  opacity: 1;
+  border-bottom-color: currentColor;
+}
+.social-profile-main .social-profile-grid {
+  border-radius: 12px;
+  overflow: hidden;
+}
 @media (min-width: 761px) {
-  .social-profile-body.social-profile-desktop {
+  .social-dialog-body.social-profile-body {
     overflow: hidden;
   }
-  .social-profile-desktop > :is(p[role="status"], [role="alert"]) {
-    flex: none;
-    margin: 0;
-    padding: 12px 24px;
-  }
-  .social-profile-desktop > .social-profile-surface {
+  .social-profile-body > .social-profile-surface {
     flex: 1 1 auto;
     min-height: 0;
     height: auto;
@@ -2676,14 +2821,7 @@ html[data-theme] .social-page .social-clip-sound .social-volume-slider input[typ
     flex-direction: column;
     min-height: 100%;
   }
-  .social-profile-surface .public-profile-body {
-    flex: 1 0 auto;
-    padding: 0 22px 22px;
-  }
-  html[data-theme]
-    .social-profile-surface
-    .public-profile-body
-    > .identity-avatar {
+  html[data-theme] .social-profile-surface .public-profile-body > .identity-avatar {
     width: 96px;
     height: 96px;
     min-width: 96px;
@@ -2696,188 +2834,76 @@ html[data-theme] .social-page .social-clip-sound .social-volume-slider input[typ
     font-size: 25px;
     line-height: 1.15;
   }
-  .social-profile-surface .profile-copy-content p {
-    margin: 8px 0;
-    font-size: 14px;
-    line-height: 1.55;
-  }
-  html
-    .social-profile-surface
-    .profile-preview-identity
-    .public-profile-body
-    > .profile-dialog-actions {
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: 10px;
-  }
-  .social-profile-surface .profile-dialog-actions > :not(.icon-control) {
-    grid-column: 1 / -1;
-  }
-  .social-profile-surface .profile-dialog-actions > .social-profile-message {
-    grid-column: 1;
-  }
-  .social-profile-surface .profile-dialog-actions > .social-follow {
-    display: grid;
-    gap: 6px;
-  }
-  html[data-theme]
-    .social-profile-surface
-    .profile-dialog-actions
-    :is(a, button) {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    min-height: 44px;
-    margin: 0;
-    padding: 8px 14px;
-    border-radius: 9px;
-    font-size: 13px;
-    font-weight: 650;
-    text-decoration: none;
-  }
-  html[data-theme]
-    .social-dialog
-    .social-profile-surface
-    .profile-dialog-actions
-    > .icon-control {
-    width: 44px;
-    padding: 0;
-    border-radius: 9px;
-    color: var(--ink) !important;
-    background: var(--surface) !important;
-    border: 1px solid var(--border) !important;
-  }
-  html
-    .social-profile-desktop
-    .profile-shared-surface
-    .profile-preview-mural {
-    padding: 0 !important;
-  }
-  .social-profile-main {
-    position: relative;
-    z-index: 1;
-    display: flex;
-    flex-direction: column;
-    min-height: 100%;
-    color: var(--mural-copy, var(--ink));
-  }
-  .social-profile-main-top {
-    flex: none;
-    background: var(--mural-copy-panel, transparent);
-  }
   .social-profile-main-head {
     padding: 24px 24px 12px;
-  }
-  html .social-profile-surface .social-profile-main-head > .profile-mural-title {
-    margin: 0 0 16px;
-    font-size: 22px;
-    color: inherit;
-  }
-  html[data-theme] .social-profile-main .social-profile-counts {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: 10px;
-    margin: 0;
-  }
-  html[data-theme]
-    .social-dialog
-    .social-profile-main
-    .social-profile-counts
-    > :is(span, button) {
-    display: grid;
-    justify-items: start;
-    align-content: start;
-    gap: 2px;
-    min-height: 0;
-    padding: 12px 14px;
-    border: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-    border-radius: 14px;
-    background: color-mix(in srgb, currentColor 8%, transparent);
-    color: inherit;
-    font-size: 12px;
-    text-align: left;
-    box-shadow: none;
-  }
-  html[data-theme]
-    .social-dialog
-    .social-profile-main
-    .social-profile-counts
-    > button:hover {
-    background: color-mix(in srgb, currentColor 16%, transparent);
-  }
-  .social-profile-main .social-profile-counts strong {
-    font-size: 22px;
-    line-height: 1.1;
-    color: inherit;
-  }
-  .social-profile-main-top > :is(.social-profile-tools, .social-private-notice) {
-    margin: 0;
-    padding: 0 24px 12px;
-  }
-  .social-profile-main-top > .social-profile-tools:empty {
-    display: none;
-  }
-  html[data-theme]
-    .social-dialog
-    .social-profile-main-top
-    > .social-profile-tools
-    > button {
-    border: 1px solid color-mix(in srgb, currentColor 22%, transparent) !important;
-    background: color-mix(in srgb, currentColor 8%, transparent) !important;
-    color: inherit !important;
-  }
-  html[data-theme]
-    .social-dialog
-    .social-profile-main-top
-    > .social-profile-tools
-    > button:hover {
-    background: color-mix(in srgb, currentColor 16%, transparent) !important;
-  }
-  .social-profile-main-top > .social-highlights {
-    padding: 4px 24px 12px;
-    gap: 14px;
-  }
-  html[data-theme] .social-profile-main-top > .social-highlights > button {
-    color: inherit;
-  }
-  .social-profile-main-top > .social-tabs {
-    flex: none;
-    justify-content: flex-start;
-    gap: 4px;
-    margin: 4px 24px 0;
-    padding: 0;
-    border-bottom: 1px solid color-mix(in srgb, currentColor 22%, transparent);
-  }
-  html[data-theme]
-    .social-dialog
-    .social-profile-main-top
-    > .social-tabs
-    > button {
-    flex: 0 1 auto;
-    min-width: 0;
-    padding: 12px 16px;
-    font-size: 13px;
-    color: inherit;
-    opacity: 0.72;
-    background: transparent;
-  }
-  html[data-theme]
-    .social-dialog
-    .social-profile-main-top
-    > .social-tabs
-    > button[aria-selected="true"] {
-    color: inherit;
-    opacity: 1;
-    border-bottom-color: currentColor;
   }
   .social-profile-main > .social-profile-stream {
     padding: 16px 24px 24px;
   }
-  .social-profile-main .social-profile-grid {
+}
+@media (max-width: 760px) {
+  html .social-profile-body > .social-profile-surface {
+    flex: none;
+  }
+  .social-profile-surface .public-profile-body {
+    padding: 0 16px 18px;
+  }
+  html[data-theme] .social-profile-surface .public-profile-body > .identity-avatar {
+    width: 84px;
+    height: 84px;
+    min-width: 84px;
+    min-height: 84px;
+    flex: 0 0 84px;
+    margin: -42px 0 10px;
+  }
+  .social-profile-surface .public-profile-body h2 {
+    margin: 8px 0 2px;
+    font-size: 22px;
+    line-height: 1.15;
+  }
+  .social-profile-main-head {
+    padding: 18px 16px 10px;
+  }
+  html .social-profile-surface .social-profile-main-head > .profile-mural-title {
+    margin: 0 0 12px;
+    font-size: 18px;
+  }
+  html[data-theme] .social-profile-main .social-profile-counts {
+    gap: 6px;
+  }
+  html[data-theme] .social-dialog .social-profile-main .social-profile-counts > :is(span, button) {
+    justify-items: center;
+    padding: 10px 4px;
     border-radius: 12px;
-    overflow: hidden;
+    font-size: 10.5px;
+    line-height: 1.25;
+    text-align: center;
+    overflow-wrap: anywhere;
+  }
+  .social-profile-main .social-profile-counts strong {
+    font-size: 19px;
+  }
+  .social-profile-main-top > :is(.social-profile-tools, .social-private-notice) {
+    padding: 0 16px 10px;
+  }
+  .social-profile-main-top > .social-highlights {
+    padding: 4px 16px 10px;
+  }
+  .social-profile-main-top > .social-tabs {
+    gap: 0;
+    margin: 2px 0 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  html[data-theme] .social-dialog .social-profile-main-top > .social-tabs > button {
+    flex: 1 0 auto;
+    padding: 12px 10px;
+    font-size: 12px;
+  }
+  .social-profile-main > .social-profile-stream {
+    padding: 2px 0 0;
+  }
+  .social-profile-main .social-profile-grid {
+    border-radius: 0;
   }
 }
