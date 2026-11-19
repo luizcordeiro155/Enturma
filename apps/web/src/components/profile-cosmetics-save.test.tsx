@@ -119,3 +119,30 @@ it("on a phone, trying a pack on brings the preview into view", async () => {
   preview.remove();
   vi.unstubAllGlobals();
 });
+
+it("saves only the details the profile still has", async () => {
+  // A profile saved by an older version carries a field that no longer exists.
+  cleanup();
+  vi.mocked(api).mockClear();
+  saved.mockClear();
+  render(
+    <ProfileDetailsEditor
+      profile={{
+        id: "me",
+        name: "Estudante",
+        profileDetails: {
+          statusText: "Programação",
+          cosmeticFrame: "sakura",
+          cosmeticTheme: "sakura",
+        } as never,
+      }}
+      onSaved={saved}
+    />,
+  );
+  await save();
+  expect(sentDetails()).toMatchObject({
+    statusText: "Programação",
+    cosmeticFrame: "sakura",
+  });
+  expect(sentDetails()).not.toHaveProperty("cosmeticTheme");
+});

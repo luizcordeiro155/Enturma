@@ -36,6 +36,20 @@ import {
   type Showcase,
 } from "./profile-showcase";
 
+/** What a save sends. A stored profile may carry fields that no longer exist: they stay out. */
+const DETAIL_FIELDS = [
+  "pronouns",
+  "statusText",
+  "decoration",
+  "nameFont",
+  "nameColor",
+  "nameEffect",
+  "interests",
+  "cosmeticFrame",
+  "cosmeticAvatar",
+  "cosmeticEffect",
+] as const satisfies readonly (keyof ProfileDetails)[];
+
 export function ProfileDetailsEditor({
   profile,
   onSaved,
@@ -217,7 +231,15 @@ export function ProfileDetailsEditor({
       });
       await api("/users/me/profile-details", {
         method: "PUT",
-        body: JSON.stringify({ ...details, website: "", links: savedLinks }),
+        body: JSON.stringify({
+          ...Object.fromEntries(
+            DETAIL_FIELDS.flatMap((field) =>
+              details[field] === undefined ? [] : [[field, details[field]]],
+            ),
+          ),
+          website: "",
+          links: savedLinks,
+        }),
       });
       await api("/users/me/showcase", {
         method: "PUT",

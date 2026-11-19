@@ -193,6 +193,42 @@ test("Social: mentions, keyboard, swipes and compact profile/inbox", async ({
     await page.screenshot({
       path: info.outputPath(`social-profile-fixed-${width}.png`),
     });
+    if (width === 390) {
+      // On a phone the whole profile is one page: a finger on the card or on the
+      // posts carries it down, with no part holding the scroll to itself.
+      const body = profile.locator(".social-profile-body");
+      expect(
+        await body.evaluate((el) => el.scrollHeight - el.clientHeight),
+      ).toBeGreaterThan(100);
+      const touch = await page.context().newCDPSession(page);
+      await touch.send("Emulation.setTouchEmulationEnabled", { enabled: true });
+      for (const from of [520, 840]) {
+        await body.evaluate((el) => el.scrollTo(0, 0));
+        await touch.send("Input.dispatchTouchEvent", {
+          type: "touchStart",
+          touchPoints: [{ x: 195, y: from }],
+        });
+        for (let step = 1; step <= 10; step++) {
+          await touch.send("Input.dispatchTouchEvent", {
+            type: "touchMove",
+            touchPoints: [{ x: 195, y: from - step * 30 }],
+          });
+          await page.waitForTimeout(16);
+        }
+        await touch.send("Input.dispatchTouchEvent", {
+          type: "touchEnd",
+          touchPoints: [],
+        });
+        await expect
+          .poll(() => body.evaluate((el) => el.scrollTop))
+          .toBeGreaterThan(100);
+      }
+      await touch.send("Emulation.setTouchEmulationEnabled", {
+        enabled: false,
+      });
+      await touch.detach();
+      await body.evaluate((el) => el.scrollTo(0, 0));
+    }
   }
   await profile.getByRole("button", { name: "Fechar", exact: true }).click();
   await page.getByRole("button", { name: "Meu perfil social" }).click();

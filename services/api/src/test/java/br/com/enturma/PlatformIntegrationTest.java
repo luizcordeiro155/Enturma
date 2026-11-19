@@ -471,6 +471,50 @@ class PlatformIntegrationTest {
     assertThat(storedCosmetic("cosmeticEffect")).isEqualTo("abobora");
   }
 
+  @Test
+  void profileDetailsAcceptTheRetiredPackThemeFieldAndForgetIt() throws Exception {
+    // Profiles saved while a pack theme had a field of its own still carry it, and every app
+    // sends the saved details back when the student saves again.
+    db.jdbc.update(
+        "UPDATE app_user SET profile_details='{\"cosmeticTheme\":\"sakura\"}'::jsonb WHERE id=?",
+        host.id());
+    mvc.perform(
+            put("/api/v1/users/me/profile-details")
+                .header("Authorization", "Bearer " + hostCredentials.accessToken())
+                .contentType("application/json")
+                .content("{\"cosmeticTheme\":\"sakura\",\"cosmeticFrame\":\"sakura\"}"))
+        .andExpect(status().isOk());
+    assertThat(storedCosmetic("cosmeticFrame")).isEqualTo("sakura");
+    assertThat(storedCosmetic("cosmeticTheme")).isNull();
+    // A field the profile never had is still refused.
+    mvc.perform(
+            put("/api/v1/users/me/profile-details")
+                .header("Authorization", "Bearer " + hostCredentials.accessToken())
+                .contentType("application/json")
+                .content("{\"cosmeticSomething\":\"sakura\"}"))
+        .andExpect(status().isBadRequest());
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void theTeamWearsEveryPackWhateverTheLevel() throws Exception {
+    // Whoever runs the platform tries and shows the whole catalogue without earning the XP.
+    var shop = (Map<String, Object>) social.cosmetics(admin);
+    assertThat(shop.get("level")).isEqualTo(1);
+    assertThat((List<Map<String, Object>>) shop.get("items"))
+        .hasSize(29)
+        .allSatisfy(item -> assertThat(item.get("unlocked")).isEqualTo(true));
+    social.details(admin, cosmetics("pesadelo", "mecha", "tinta"));
+    assertThat(storedCosmetic("cosmeticFrame")).isEqualTo("pesadelo");
+    // A pack that does not exist is refused for everyone.
+    assertThatThrownBy(() -> social.details(admin, cosmetics("nao-existe", null, null)))
+        .isInstanceOf(ApiException.class);
+    // A student at the same level still waits.
+    assertThatThrownBy(() -> social.details(host, cosmetics(null, null, "pesadelo")))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("nível 22");
+  }
+
   private SocialController.Details cosmetics(String frame, String avatar, String effect) {
     return new SocialController.Details(
         null, null, null, null, null, null, null, null, null, frame, avatar, effect);

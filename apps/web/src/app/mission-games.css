@@ -91,6 +91,10 @@
   border-color: var(--word-miss) !important;
   color: #fff !important;
 }
+/* A played attempt turns over one letter at a time: each cell brings its own delay. */
+.word-game .mission-word-row > :is(.C, .P, .A) {
+  animation: letter-turn 0.4s ease-out both;
+}
 .word-notice {
   min-height: 1.35em;
   margin: 0;
@@ -412,7 +416,16 @@
   .word-keyboard .word-key {
     transition: none;
   }
+  .word-game .mission-word-row > :is(.C, .P, .A) {
+    animation: none;
+  }
 }
 html[data-reduced-motion="true"] .word-keyboard .word-key {
   transition: none;
+}
+html[data-reduced-motion="true"]
+  .word-game
+  .mission-word-row
+  > :is(.C, .P, .A) {
+  animation: none;
 }
