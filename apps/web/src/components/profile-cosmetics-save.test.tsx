@@ -104,3 +104,18 @@ it("never saves a pack that was only tried on", async () => {
   await save();
   expect(JSON.stringify(sentDetails())).not.toContain("dragao");
 });
+
+it("on a phone, trying a pack on brings the preview into view", async () => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: query.includes("max-width"),
+  }));
+  const preview = document.createElement("aside");
+  preview.className = "profile-edit-live-preview";
+  preview.scrollIntoView = vi.fn();
+  document.body.append(preview);
+  const dragon = await screen.findByRole("group", { name: "Dragão Imperial" });
+  fireEvent.click(within(dragon).getByRole("button", { name: "Experimentar" }));
+  await waitFor(() => expect(preview.scrollIntoView).toHaveBeenCalled());
+  preview.remove();
+  vi.unstubAllGlobals();
+});

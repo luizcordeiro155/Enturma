@@ -90,9 +90,35 @@ public class SocialController {
 
   private static Map<String, Integer> cosmeticLevels() {
     var levels = new LinkedHashMap<String, Integer>();
+    levels.put("primavera", 1);
+    levels.put("enturma", 1);
     levels.put("sakura", 1);
+    levels.put("gato", 2);
+    levels.put("cachorro", 2);
     levels.put("abobora", 3);
+    levels.put("coelhinho", 4);
+    levels.put("coelhinha", 4);
     levels.put("dragao", 5);
+    levels.put("verao", 6);
+    levels.put("programacao", 6);
+    levels.put("outono", 7);
+    levels.put("games", 7);
+    levels.put("inverno", 8);
+    levels.put("medicina", 8);
+    levels.put("rosas", 9);
+    levels.put("dino-fofinho", 9);
+    levels.put("pascoa", 10);
+    levels.put("carnaval", 10);
+    levels.put("natal", 11);
+    levels.put("ano-novo", 12);
+    levels.put("dino-selvagem", 13);
+    levels.put("samurai", 14);
+    levels.put("jdm", 15);
+    levels.put("mecha", 16);
+    levels.put("masmorra", 17);
+    levels.put("grimorio", 18);
+    levels.put("tinta", 20);
+    levels.put("pesadelo", 22);
     return Collections.unmodifiableMap(levels);
   }
 

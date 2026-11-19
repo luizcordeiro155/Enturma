@@ -125,3 +125,34 @@ html .cosmetic-shop .cosmetic-pack-colors {
   justify-content: center;
   gap: 8px;
 }
+
+/* The shelves: a row of themes to jump to, and the packs of each under its name. */
+.cosmetic-shelves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cosmetic-shelves button {
+  min-height: 40px;
+  padding: 0 14px;
+  border-radius: 999px;
+}
+.cosmetic-shelf {
+  display: grid;
+  gap: 12px;
+}
+.cosmetic-shelf > h3 {
+  margin: 8px 0 0;
+  font-size: 1rem;
+}
+
+/* Beside a long list the live preview stays in view while the list scrolls. */
+@media (min-width: 761px) {
+  .profile-edit-dialog-body > .profile-edit-live-preview {
+    position: sticky;
+    top: 0;
+    align-self: start;
+    overflow-y: auto;
+    max-height: calc(100dvh - 190px);
+  }
+}

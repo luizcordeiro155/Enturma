@@ -10,6 +10,7 @@ const shop = {
     { id: "sakura", level: 1, unlocked: true },
     { id: "abobora", level: 3, unlocked: true },
     { id: "dragao", level: 5, unlocked: false },
+    { id: "gato", level: 2, unlocked: true },
   ],
 };
 const open = (
@@ -101,4 +102,21 @@ it("shows what is being tried on and lets the student stop", () => {
   expect(stop).toHaveAttribute("aria-pressed", "true");
   fireEvent.click(stop);
   expect(tryOn).toHaveBeenCalledWith(undefined);
+});
+
+it("sorts the packs into shelves and shows one shelf when asked", () => {
+  open();
+  // Everything at first, under the name of its shelf.
+  expect(screen.getByRole("heading", { name: "Bichinhos" })).toBeVisible();
+  expect(pack("Gatinhos")).toBeVisible();
+  expect(pack("Sakura")).toBeVisible();
+  fireEvent.click(screen.getByRole("button", { name: "Bichinhos" }));
+  expect(screen.getByRole("button", { name: "Bichinhos" })).toHaveAttribute(
+    "aria-pressed",
+    "true",
+  );
+  expect(pack("Gatinhos")).toBeVisible();
+  expect(screen.queryByRole("group", { name: "Sakura" })).toBeNull();
+  fireEvent.click(screen.getByRole("button", { name: "Todos" }));
+  expect(pack("Sakura")).toBeVisible();
 });
