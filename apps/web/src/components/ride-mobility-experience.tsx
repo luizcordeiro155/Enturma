@@ -24,6 +24,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { AcademicEntry } from "@enturma/contracts";
 import { api, post, peekApiSnapshot } from "@/lib/api";
 import { useRideUpdates } from "@/lib/use-ride-updates";
+import { nextSnap, type SheetSnap } from "@/lib/ride-map-focus";
+import { useMapInset } from "@/lib/use-map-inset";
+import { RideChat, useRideConversation } from "./ride-chat";
 import { useVisitor } from "@/lib/visitor-context";
 import {
   RideMobilityMap,
@@ -472,17 +475,52 @@ function ArrivalCelebration() {
   );
 }
 
+/**
+ * The request sheet. On a phone it rests at three heights (a peek, half the
+ * screen, full height): pull the handle or tap it to move between them. From
+ * 761 px up it is a fixed side panel and the handle is hidden.
+ */
 function BottomSheet({
   children,
+  snap,
+  onSnap,
 }: {
   children: React.ReactNode;
-  expanded?: boolean;
+  snap: SheetSnap;
+  onSnap: (snap: SheetSnap) => void;
 }) {
+  const pull = useRef<{ y: number; moved: boolean } | null>(null);
   return (
-    <section className="ride-bottom-sheet sheet-expanded">
-      <div className="ride-sheet-handle" aria-hidden="true">
+    <section className="ride-bottom-sheet sheet-expanded" data-snap={snap}>
+      <button
+        type="button"
+        className="ride-sheet-handle"
+        aria-label={snap === "full" ? "Recolher painel" : "Expandir painel"}
+        aria-expanded={snap !== "peek"}
+        onPointerDown={(event) => {
+          pull.current = { y: event.clientY, moved: false };
+          event.currentTarget.setPointerCapture?.(event.pointerId);
+        }}
+        onPointerUp={(event) => {
+          const start = pull.current;
+          if (!start) return;
+          const distance = event.clientY - start.y;
+          if (Math.abs(distance) < 14) return;
+          start.moved = true;
+          onSnap(nextSnap(snap, distance < 0 ? "up" : "down"));
+        }}
+        onPointerCancel={() => {
+          pull.current = null;
+        }}
+        onClick={() => {
+          // A pull already moved the sheet; the click that follows it is not a tap.
+          const pulled = pull.current?.moved;
+          pull.current = null;
+          if (!pulled) onSnap(nextSnap(snap, "tap"));
+        }}
+      >
         <span />
-      </div>
+      </button>
       <div className="ride-sheet-content">{children}</div>
     </section>
   );
@@ -528,6 +566,9 @@ export function RideMobilityExperience({
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
   const [follow, setFollow] = useState(true);
+  const [sheetSnap, setSheetSnap] = useState<SheetSnap>("half");
+  const [sheetMatch, setSheetMatch] = useState<string>();
+  const [chatOpen, setChatOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [cancelReason, setCancelReason] = useState("CHANGE_OF_PLANS");
   const [cancelNote, setCancelNote] = useState("");
@@ -535,6 +576,12 @@ export function RideMobilityExperience({
   const [reviewRating, setReviewRating] = useState(0);
   const [reviewTags, setReviewTags] = useState<string[]>([]);
   const mobilityRoot = useRef<HTMLDivElement>(null);
+  // What the top bar, the sheet and the map picker take away from the map.
+  const mapInset = useMapInset(
+    mobilityRoot,
+    ":scope > .ride-map-top, :scope > .ride-bottom-sheet, :scope > .ride-map-picker-actions",
+    !!state,
+  );
   const modeSwitchRef = useRef<HTMLDivElement>(null);
   const locationWatch = useRef<number | undefined>(undefined);
   const lastSent = useRef<{ at: number; point: MapPoint } | null>(null);
@@ -674,6 +721,7 @@ export function RideMobilityExperience({
     return () => window.removeEventListener("enturma-ride-reviewed", reviewed);
   }, [load]);
   const activeMatch = state?.activeMatch ?? undefined;
+  const conversation = useRideConversation(activeMatch?.id, me, chatOpen);
   const activeRequest = state?.activeRequest ?? undefined;
   const availability = state?.driverAvailability ?? undefined;
   const recentCompleted = state?.recentCompleted ?? undefined;
@@ -1510,6 +1558,14 @@ export function RideMobilityExperience({
     return () => window.clearTimeout(timer);
   }, [activeMatch?.id]);
 
+  // A ride that has just been matched must not start folded away, and the
+  // temporary chat belongs to one ride: it never carries over to the next.
+  if (sheetMatch !== activeMatch?.id) {
+    setSheetMatch(activeMatch?.id);
+    if (sheetSnap === "peek") setSheetSnap("half");
+    if (chatOpen) setChatOpen(false);
+  }
+
   if (!state)
     return (
       <div className="ride-mobility-boot">
@@ -1518,7 +1574,15 @@ export function RideMobilityExperience({
     );
 
   return (
-    <div className="ride-mobility-app" ref={mobilityRoot}>
+    <div
+      className="ride-mobility-app"
+      ref={mobilityRoot}
+      style={
+        {
+          "--ride-covered-bottom": `${mapInset.bottom}px`,
+        } as React.CSSProperties
+      }
+    >
       {mapCenter ? (
         <RideMobilityMap
           center={mapCenter}
@@ -1527,6 +1591,7 @@ export function RideMobilityExperience({
           route={routeGeometry}
           selecting={selectOnMap}
           follow={follow}
+          inset={mapInset}
           onInteraction={() => setFollow(false)}
           onCenterChange={(value) => {
             if (selectOnMap) setLocation(value);
@@ -1616,15 +1681,7 @@ export function RideMobilityExperience({
           </button>
         </div>
       ) : (
-        <BottomSheet
-          expanded={
-            !pref?.campusId ||
-            !pref?.onboardingDone ||
-            !!route ||
-            !!driverRequests.length ||
-            !!activeMatch
-          }
-        >
+        <BottomSheet snap={sheetSnap} onSnap={setSheetSnap}>
           {error ? (
             <div className="feedback error" role="alert">
               {error}
@@ -1740,6 +1797,35 @@ export function RideMobilityExperience({
                 Agora não
               </button>
             </div>
+          ) : activeMatch && chatOpen ? (
+            <RideChat
+              me={me}
+              peer={
+                mode === "PASSENGER"
+                  ? {
+                      id: activeMatch.driverId,
+                      name: activeMatch.driverName,
+                      hasAvatar: activeMatch.driverHasAvatar,
+                      detail: activeMatch.vehicleModel
+                        ? `${activeMatch.vehicleBrand} ${activeMatch.vehicleModel} · ${activeMatch.vehicleColor}`
+                        : "Motorista",
+                    }
+                  : {
+                      id: activeMatch.passengerId,
+                      name: activeMatch.passengerName,
+                      hasAvatar: activeMatch.passengerHasAvatar,
+                      detail: "Passageiro",
+                    }
+              }
+              messages={conversation.messages}
+              closed={conversation.closed}
+              error={conversation.error}
+              send={conversation.send}
+              onClose={() => {
+                setChatOpen(false);
+                setSheetSnap("half");
+              }}
+            />
           ) : activeMatch ? (
             <div className="ride-active-sheet">
               <div className="ride-sheet-heading">
@@ -1840,12 +1926,28 @@ export function RideMobilityExperience({
               </div>
 
               <div className="ride-active-actions">
-                <Link
-                  href={`/caronas/matches?match=${activeMatch.id}`}
-                  className="button secondary"
+                <button
+                  type="button"
+                  className="secondary ride-chat-open"
+                  onClick={() => {
+                    setChatOpen(true);
+                    setSheetSnap("full");
+                  }}
                 >
                   <MessageCircle size={17} /> Mensagem
-                </Link>
+                  {conversation.unread ? (
+                    <span
+                      className="ride-chat-badge"
+                      aria-label={
+                        conversation.unread === 1
+                          ? "1 mensagem nova"
+                          : `${conversation.unread} mensagens novas`
+                      }
+                    >
+                      {conversation.unread}
+                    </span>
+                  ) : null}
+                </button>
                 <button
                   type="button"
                   className="secondary"
