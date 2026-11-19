@@ -11,6 +11,7 @@ import {
   circleLoop,
   Particles,
   glow,
+  Layer,
   sprite,
   stamp,
 } from "../kit";
@@ -834,24 +835,30 @@ export default function create(CARD, AVATAR) {
       kasumi(ctx, CARD.w + 26, -4, 108, a * 0.78, tt);
       kasumi(ctx, -34, CARD.h + 40, 124, a * 0.62, tt + 3);
       const g = this.front(T);
-      drawBranch(
-        ctx,
-        this.B,
-        g,
-        still ? 99 : t,
-        this.when,
-        this.spr,
-        this.sprDeep,
-      );
-      drawBranch(
-        ctx,
-        this.A,
-        g,
-        still ? 99 : t,
-        this.when,
-        this.spr,
-        this.sprDeep,
-      );
+      // Once in flower the branches only sway: painted a few times a second, stamped in between.
+      const branches = (c) => {
+        drawBranch(
+          c,
+          this.B,
+          g,
+          still ? 99 : t,
+          this.when,
+          this.spr,
+          this.sprDeep,
+        );
+        drawBranch(
+          c,
+          this.A,
+          g,
+          still ? 99 : t,
+          this.when,
+          this.spr,
+          this.sprDeep,
+        );
+      };
+      if (!still && t > this.t0 + this.dur + 1.6)
+        (this.rest || (this.rest = Layer())).draw(ctx, t, 10, branches);
+      else branches(ctx);
       // the mejiro lands on the top branch once it has flowered, then looks around
       {
         const p = this.A.pts[Math.round(this.A.n * 0.88)],

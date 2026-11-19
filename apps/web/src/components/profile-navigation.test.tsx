@@ -53,6 +53,7 @@ vi.mock("./profile-visual-surface", () => ({
     <div>
       <ConfirmedLink href="https://example.org/projeto" label="Site pessoal ↗" />
       {actions}
+      <section className="profile-preview-mural" data-testid="mural" />
     </div>
   ),
 }));
@@ -123,8 +124,12 @@ it("opens as the compact card and shows the full profile only when asked", async
   });
   const profile = screen.getByRole("dialog", { name: "Perfil de Estudante" });
   expect(profile).toHaveAttribute("data-profile-view", "compact");
+  const reveal = vi.fn();
+  screen.getByTestId("mural").scrollIntoView = reveal;
   fireEvent.click(more);
   expect(profile).toHaveAttribute("data-profile-view", "full");
+  // On a phone the rest of the profile opens below the card: bring it into view.
+  await waitFor(() => expect(reveal).toHaveBeenCalled());
   expect(
     screen.queryByRole("button", { name: "Ver perfil completo" }),
   ).toBeNull();

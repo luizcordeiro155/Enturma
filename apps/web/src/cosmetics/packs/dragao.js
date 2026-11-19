@@ -12,6 +12,8 @@ import {
   circleLoop,
   Particles,
   glow,
+  Layer,
+  sprite,
   tuft,
 } from "../kit";
 
@@ -771,6 +773,39 @@ function dragonLeg(ctx, hw, t, phase, fly) {
   ctx.restore();
 }
 
+// One scale per tone, painted once: its dark rim faces +x, where the tail is. Small scales skip the shine.
+let DRAGON_SCALES = null;
+function dragonScales() {
+  if (DRAGON_SCALES) return DRAGON_SCALES;
+  const one = (fill, rim, shine) =>
+    sprite(32, (x) => {
+      x.beginPath();
+      x.arc(0, 0, 12, 0, TAU);
+      x.fillStyle = fill;
+      x.fill();
+      x.beginPath();
+      x.arc(0, 0, 12, -1.45, 1.45);
+      x.strokeStyle = rim;
+      x.lineWidth = 1.9;
+      x.stroke();
+      if (shine) {
+        x.beginPath();
+        x.arc(0, 0, 7.2, -0.85, 0.85);
+        x.strokeStyle = shine;
+        x.lineWidth = 1.9;
+        x.stroke();
+      }
+    });
+  const tones = ["#F0512F", "#DC2F20", "#C4211C", "#A3161A"];
+  DRAGON_SCALES = [
+    ...tones.map((c) => one(c, "rgba(74,7,10,.78)", "rgba(255,150,110,.5)")),
+    one("#F2B03A", "rgba(120,60,6,.85)", "rgba(255,246,200,.85)"),
+    ...tones.map((c) => one(c, "rgba(74,7,10,.78)")),
+    one("#F2B03A", "rgba(120,60,6,.85)"),
+  ];
+  return DRAGON_SCALES;
+}
+
 function Dragon(o) {
   const self = { pts: [], vis: 0, hs: o.hs };
   const ds = o.ds || 4,
@@ -839,13 +874,27 @@ function Dragon(o) {
     self.head = { x: h.x, y: h.y, fx: h.fx, fy: h.fy, nx: h.nx, ny: h.ny };
     return self;
   };
+  const layer = Layer(),
+    skin = Layer();
+  // Once the dragon has settled its body only breathes, so it is painted a few times a second;
+  // the head, the glint and everything around it stay live.
   self.draw = (ctx, t, still) => {
     const pts = self.pts,
       n = pts.length - 1;
     if (n < 3) return;
+    if (!still && self.k >= 1)
+      layer.draw(ctx, t, 8, (c) => self.body(c, t, still));
+    else self.body(ctx, t, still);
+    self.face(ctx, t, still);
+  };
+  self.body = (ctx, t, still) => {
+    const pts = self.pts,
+      n = pts.length - 1;
     ctx.lineJoin = "round";
     ctx.lineCap = "round";
     const edge = (p, r) => [p.x + p.nx * p.hw * r, p.y + p.ny * p.hw * r];
+    const finStep = Math.max(2, Math.round((12 * sc + 3) / ds)),
+      first = Math.ceil((34 * o.hs + 6) / ds);
     // tail fan
     {
       const p = pts[n];
@@ -872,8 +921,6 @@ function Dragon(o) {
       ctx.restore();
     }
     // dorsal fins: a jade row behind, flames in front
-    const finStep = Math.max(2, Math.round((12 * sc + 3) / ds)),
-      first = Math.ceil((34 * o.hs + 6) / ds);
     const fin = (i, h, lean, fill, lw, half) => {
       const p = pts[i],
         a = pts[Math.max(0, i - half)],
@@ -936,55 +983,62 @@ function Dragon(o) {
         Math.round(finStep * 0.62),
       );
     }
-    // body
+    // body: the ink line first, then the skin. The scales are stamped on a scratch layer that
+    // only accepts paint where the body already is, which is far cheaper than a clip path.
     ribbon(ctx, pts, 0, 1, 1.8 * Math.max(0.55, sc));
     ctx.fillStyle = DR.ink;
     ctx.fill();
-    ribbon(ctx, pts, 0, 1);
-    ctx.fillStyle = "#b01a1a";
-    ctx.fill();
-    ctx.save();
-    ribbon(ctx, pts, 0, 1);
-    ctx.clip();
-    // scales, drawn tail to head so each row lies over the one behind it
-    const rowStep = Math.max(1, Math.round((7.4 * sc) / ds)),
-      tones = ["#F0512F", "#DC2F20", "#C4211C", "#A3161A"],
-      lw = Math.max(0.6, 0.95 * sc);
-    for (
-      let i = n - 1 - ((n - 1) % rowStep), row = Math.floor(i / rowStep);
-      i >= 0;
-      i -= rowStep, row--
-    ) {
-      const p = pts[i],
-        rs = Math.max(1.2, p.hw * 0.36),
-        back = Math.atan2(-p.fy, -p.fx),
-        odd = ((row % 2) + 2) % 2;
-      for (let c = 0; c < 4; c++) {
-        const r = 0.98 - c * 0.44 - odd * 0.22;
-        if (r < -0.5) continue;
-        const cx = p.x + p.nx * r * p.hw,
-          cy = p.y + p.ny * r * p.hw,
-          gold = (((row * 3 + c * 5) % 13) + 13) % 13 === 0;
-        ctx.beginPath();
-        ctx.arc(cx, cy, rs, 0, TAU);
-        ctx.fillStyle = gold ? "#F2B03A" : tones[Math.min(3, c + odd)];
-        ctx.fill();
-        ctx.beginPath();
-        ctx.arc(cx, cy, rs, back - 1.45, back + 1.45);
-        ctx.strokeStyle = gold ? "rgba(120,60,6,.85)" : "rgba(74,7,10,.78)";
-        ctx.lineWidth = lw;
-        ctx.stroke();
-        if (rs > 2.6) {
-          ctx.beginPath();
-          ctx.arc(cx, cy, rs * 0.6, back - 0.85, back + 0.85);
-          ctx.strokeStyle = gold
-            ? "rgba(255,246,200,.85)"
-            : "rgba(255,150,110,.5)";
-          ctx.lineWidth = lw;
-          ctx.stroke();
+    skin.draw(ctx, t, Infinity, (c) => {
+      ribbon(c, pts, 0, 1);
+      c.fillStyle = "#b01a1a";
+      c.fill();
+      c.globalCompositeOperation = "source-atop";
+      // scales, drawn tail to head so each row lies over the one behind it
+      const rowStep = Math.max(1, Math.round((7.4 * sc) / ds)),
+        set = dragonScales(),
+        base = c.getTransform();
+      for (
+        let i = n - 1 - ((n - 1) % rowStep), row = Math.floor(i / rowStep);
+        i >= 0;
+        i -= rowStep, row--
+      ) {
+        const p = pts[i],
+          rs = Math.max(1.2, p.hw * 0.36),
+          k = rs / 12,
+          co = -p.fx * k,
+          si = -p.fy * k,
+          odd = ((row % 2) + 2) % 2,
+          plain = rs > 2.6 ? 0 : 5;
+        const ma = base.a * co + base.c * si,
+          mb = base.b * co + base.d * si,
+          mc = base.c * co - base.a * si,
+          md = base.d * co - base.b * si;
+        for (let col = 0; col < 4; col++) {
+          const r = 0.98 - col * 0.44 - odd * 0.22;
+          if (r < -0.5) continue;
+          const cx = p.x + p.nx * r * p.hw,
+            cy = p.y + p.ny * r * p.hw,
+            gold = (((row * 3 + col * 5) % 13) + 13) % 13 === 0;
+          c.setTransform(
+            ma,
+            mb,
+            mc,
+            md,
+            base.a * cx + base.c * cy + base.e,
+            base.b * cx + base.d * cy + base.f,
+          );
+          c.drawImage(
+            set[plain + (gold ? 4 : Math.min(3, col + odd))],
+            -16,
+            -16,
+            32,
+            32,
+          );
         }
       }
-    }
+      c.setTransform(base);
+      c.globalCompositeOperation = "source-over";
+    });
     // volume: a soft light near the spine and a shadow towards the belly
     ribbon(ctx, pts, 0.7, 0.16);
     ctx.fillStyle = "rgba(255,176,130,.22)";
@@ -993,10 +1047,10 @@ function Dragon(o) {
     ctx.fillStyle = "rgba(60,4,8,.3)";
     ctx.fill();
     // belly plates with jade piping
-    ribbon(ctx, pts, -0.73, 0.3);
+    ribbon(ctx, pts, -0.715, 0.285);
     ctx.fillStyle = "#FBE7B4";
     ctx.fill();
-    ribbon(ctx, pts, -0.93, 0.09);
+    ribbon(ctx, pts, -0.925, 0.075);
     ctx.fillStyle = "rgba(214,150,40,.55)";
     ctx.fill();
     ribbon(ctx, pts, -0.56, 0.06);
@@ -1004,12 +1058,12 @@ function Dragon(o) {
     ctx.fill();
     ctx.strokeStyle = "rgba(150,92,20,.9)";
     ctx.lineWidth = Math.max(0.6, 0.95 * sc);
+    ctx.beginPath();
     for (let i = 1; i < n; i += Math.max(1, Math.round((6.5 * sc) / ds))) {
       const p = pts[i],
         a = edge(p, -0.46),
-        b = edge(p, -1),
+        b = edge(p, -0.99),
         m = edge(p, -0.74);
-      ctx.beginPath();
       ctx.moveTo(a[0], a[1]);
       ctx.quadraticCurveTo(
         m[0] - p.fx * 2.6 * sc,
@@ -1017,31 +1071,14 @@ function Dragon(o) {
         b[0],
         b[1],
       );
-      ctx.stroke();
     }
+    ctx.stroke();
     ribbon(ctx, pts, -0.43, 0.075);
     ctx.fillStyle = "#0b4f40";
     ctx.fill();
     ribbon(ctx, pts, -0.43, 0.04);
     ctx.fillStyle = "#35d6ac";
     ctx.fill();
-    ctx.restore();
-    // a moving glint along the back
-    if (sc > 0.6) {
-      ctx.save();
-      ctx.beginPath();
-      for (let i = Math.min(n, first); i <= n - 4; i++) {
-        const e = edge(pts[i], 0.72);
-        if (i === Math.min(n, first)) ctx.moveTo(e[0], e[1]);
-        else ctx.lineTo(e[0], e[1]);
-      }
-      ctx.setLineDash([14, 46]);
-      ctx.lineDashOffset = still ? 0 : t * 34;
-      ctx.strokeStyle = "rgba(255,236,200,.6)";
-      ctx.lineWidth = 1.7;
-      ctx.stroke();
-      ctx.restore();
-    }
     // legs grip the edge of the card
     (o.legs || []).forEach((frac, li) => {
       const u = frac * o.len;
@@ -1058,6 +1095,30 @@ function Dragon(o) {
       );
       ctx.restore();
     });
+  };
+  self.face = (ctx, t, still) => {
+    const pts = self.pts,
+      n = pts.length - 1;
+    ctx.lineJoin = "round";
+    ctx.lineCap = "round";
+    const edge = (p, r) => [p.x + p.nx * p.hw * r, p.y + p.ny * p.hw * r],
+      first = Math.ceil((34 * o.hs + 6) / ds);
+    // a moving glint along the back
+    if (sc > 0.6) {
+      ctx.save();
+      ctx.beginPath();
+      for (let i = Math.min(n, first); i <= n - 4; i++) {
+        const e = edge(pts[i], 0.72);
+        if (i === Math.min(n, first)) ctx.moveTo(e[0], e[1]);
+        else ctx.lineTo(e[0], e[1]);
+      }
+      ctx.setLineDash([14, 46]);
+      ctx.lineDashOffset = still ? 0 : t * 34;
+      ctx.strokeStyle = "rgba(255,236,200,.6)";
+      ctx.lineWidth = 1.7;
+      ctx.stroke();
+      ctx.restore();
+    }
     // head
     const h = pts[0],
       hs = o.hs;

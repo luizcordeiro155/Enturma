@@ -72,9 +72,15 @@ it("lets the frame spill around the card in a profile dialog on a wide screen", 
   expect(card.className).not.toContain("has-cosmetic-frame");
   expect(card.style.getPropertyValue("--cosmetic-side")).toBe("");
   expect(surface.className).toContain("has-cosmetic-spill");
+  // The room learns how far the art reaches, so it can keep it inside the screen.
+  for (const side of ["top", "bottom"])
+    expect(surface.style.getPropertyValue(`--cosmetic-spill-${side}`)).toMatch(
+      /^\d+px$/,
+    );
   stage.destroy();
   expect(dialog.querySelector("canvas")).toBeNull();
   expect(surface.className).toBe("profile-preview-combined");
+  expect(surface.getAttribute("style") ?? "").not.toContain("cosmetic");
   dialog.remove();
 });
 

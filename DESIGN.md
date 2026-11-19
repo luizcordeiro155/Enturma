@@ -98,3 +98,10 @@ No celular (até 760 px) o Perfil social usa a mesma superfície, empilhada: o c
 - Ao clicar numa pessoa abre o cartão compacto: só a identidade, com a moldura ao redor. "Ver perfil completo" mostra o mural, a atividade e o que há em comum ao lado do cartão.
 - No perfil completo o cartão fica afastado das bordas e arredondado; o conteúdo ao lado usa os componentes do Enturma sobre vidro escuro. Um mural com cores próprias tinge o seu lado da sala.
 - A prévia do editor é a mesma sala, para o estudante ver o perfil como os outros vão ver. A tela de editar continua como era.
+
+## Perfil completo único e cosméticos leves — 19/11/2026
+
+- **Um desenho só para o perfil completo.** O perfil aberto por um nome ou foto (salas, mensagens, fórum, amigos, caronas) abre como cartão compacto e, em "Ver perfil completo", ocupa a mesma caixa do perfil social (`min(1240px, 100vw - 64px)` por `min(900px, 100dvh - 32px)`), sobre a página escurecida: cartão à esquerda com a moldura ao redor, conteúdo à direita em vidro, abas sublinhadas sem faixa de fundo.
+- **Sem barra no topo.** O perfil social não tem mais a faixa com título e X: o título fica só para leitores de tela e o botão de fechar (42 px, vidro escuro) flutua dentro do painel, no mesmo lugar nos dois perfis e em qualquer largura.
+- **A sala abre espaço para a moldura.** No perfil completo a sala recebe `--cosmetic-spill-top/bottom` e aumenta o respiro acima e abaixo do cartão, para a tela não cortar molduras altas (a cabeça do dragão).
+- **Custo por quadro.** A entrada de um pacote roda na taxa da tela; em repouso, a 30 quadros por segundo. Se o aparelho não acompanha (média acima de 12 ms por quadro), o motor reduz a nitidez do canvas e depois a taxa (`cosmetics/pace.ts`). A arte que quase não se mexe é pintada numa camada própria algumas vezes por segundo (`Layer` no kit) e os brilhos são carimbos em vez de gradientes novos a cada chamada.

@@ -125,6 +125,13 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   expect(
     await floating.evaluate((node) => getComputedStyle(node).paddingLeft),
   ).toBe("0px");
+  // No bar across the top: the title is kept for screen readers and the close button
+  // floats inside the room.
+  const bar = page.locator(".social-dialog > header");
+  await expect(bar).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(bar).toHaveCSS("position", "absolute");
+  expect((await bar.locator("h2").boundingBox())!.width).toBeLessThanOrEqual(1);
+  await expect(page.getByRole("button", { name: "Fechar" })).toBeVisible();
   // The profile is its own dark room and the card wears the pack's two colours, deepened.
   const night = await page
     .locator(".social-dialog .profile-shared-surface")

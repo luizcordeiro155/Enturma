@@ -15,6 +15,7 @@ import {
 } from "@/lib/use-overlay-history";
 import { createPortal, flushSync } from "react-dom";
 import Link from "next/link";
+import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { ProfileCommunity } from "./profile-community";
 import { api, post } from "@/lib/api";
@@ -602,7 +603,7 @@ export function UserIdentity({
                 aria-label="Fechar perfil"
                 onClick={() => void close()}
               >
-                ×
+                <X size={20} aria-hidden="true" />
               </button>
               {profile && showcase ? (
                 <ProfileVisualSurface
@@ -634,7 +635,18 @@ export function UserIdentity({
                         <button
                           type="button"
                           className="secondary profile-open-full"
-                          onClick={() => setFull(true)}
+                          onClick={() => {
+                            // Keep the surrounding update synchronous so the rest of the
+                            // profile exists before it is brought into view on a phone.
+                            flushSync(() => setFull(true));
+                            if (matchMedia("(max-width: 760px)").matches)
+                              card.current
+                                ?.querySelector(".profile-preview-mural")
+                                ?.scrollIntoView({
+                                  behavior: "smooth",
+                                  block: "start",
+                                });
+                          }}
                         >
                           Ver perfil completo
                         </button>

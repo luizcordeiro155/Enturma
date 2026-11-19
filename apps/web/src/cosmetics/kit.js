@@ -150,15 +150,124 @@ export function pathFrom(ctx, pts, close = true) {
   pts.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
   if (close) ctx.closePath();
 }
-export function glow(ctx, x, y, r, inner, outer = "rgba(0,0,0,0)") {
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, inner);
-  g.addColorStop(1, outer);
-  ctx.fillStyle = g;
-  ctx.beginPath();
-  ctx.arc(x, y, r, 0, TAU);
-  ctx.fill();
+// A soft light. Painted once per colour and stamped after that: a gradient per call is what
+// makes canvas art slow.
+export const glowSprites = new Map();
+export function glow(ctx, x, y, r, inner, outer) {
+  if (r <= 0) return;
+  if (outer !== undefined) {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, inner);
+    g.addColorStop(1, outer);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, TAU);
+    ctx.fill();
+    return;
+  }
+  const m =
+      /^rgba\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*,\s*([\d.e+-]+)\s*\)$/.exec(
+        inner,
+      ),
+    key = m ? m[1] + "," + m[2] + "," + m[3] : inner,
+    alpha = m ? +m[4] : 1;
+  if (!(alpha > 0.004)) return;
+  let s = glowSprites.get(key);
+  if (!s) {
+    s = document.createElement("canvas");
+    s.width = s.height = 64;
+    const c = s.getContext("2d"),
+      g = c.createRadialGradient(32, 32, 0, 32, 32, 32);
+    g.addColorStop(0, m ? "rgb(" + key + ")" : inner);
+    g.addColorStop(1, m ? "rgba(" + key + ",0)" : "rgba(0,0,0,0)");
+    c.fillStyle = g;
+    c.fillRect(0, 0, 64, 64);
+    glowSprites.set(key, s);
+  }
+  const a = ctx.globalAlpha;
+  ctx.globalAlpha = a * Math.min(1, alpha);
+  ctx.drawImage(s, x - r, y - r, r * 2, r * 2);
+  ctx.globalAlpha = a;
 }
+// Art that hardly moves is painted into a layer of its own a few times a second and stamped in
+// between, so a frame at rest costs one picture instead of thousands of strokes.
+export function Layer() {
+  let canvas = null,
+    at = -1e9,
+    mark = "";
+  return {
+    draw(ctx, t, fps, paint) {
+      const m = ctx.getTransform(),
+        w = ctx.canvas.width,
+        h = ctx.canvas.height,
+        key =
+          w +
+          "x" +
+          h +
+          ":" +
+          m.a.toFixed(3) +
+          ":" +
+          m.e.toFixed(1) +
+          ":" +
+          m.f.toFixed(1);
+      if (!canvas) canvas = document.createElement("canvas");
+      if (key !== mark || t < at || t - at >= 1 / fps) {
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+        }
+        const c = canvas.getContext("2d");
+        c.setTransform(1, 0, 0, 1, 0, 0);
+        c.clearRect(0, 0, w, h);
+        c.setTransform(m);
+        paint(c);
+        mark = key;
+        at = t;
+      }
+      ctx.save();
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.drawImage(canvas, 0, 0);
+      ctx.restore();
+    },
+  };
+}
+// Art that repeats many times is painted once and stamped.
+export function sprite(size, draw) {
+  const c = document.createElement("canvas");
+  c.width = c.height = size * 2;
+  const x = c.getContext("2d");
+  x.scale(2, 2);
+  x.translate(size / 2, size / 2);
+  draw(x);
+  return c;
+}
+export function stamp(ctx, spr, x, y, s, rot, sy = 1) {
+  const w = spr.width / 2;
+  ctx.save();
+  ctx.translate(x, y);
+  ctx.rotate(rot);
+  ctx.scale(s, s * sy);
+  ctx.drawImage(spr, -w / 2, -w / 2, w, w);
+  ctx.restore();
+}
+// Ink outline over a fill, the look every pack shares.
+export const inked = (ctx, fill, lw = 1.6, ink = "#1c0d26") => {
+  ctx.fillStyle = fill;
+  ctx.fill();
+  ctx.lineWidth = lw;
+  ctx.strokeStyle = ink;
+  ctx.lineJoin = "round";
+  ctx.stroke();
+};
+export const bounceOut = (t) => {
+  t = clamp(t);
+  const n = 7.5625,
+    d = 2.75;
+  if (t < 1 / d) return n * t * t;
+  if (t < 2 / d) return n * (t -= 1.5 / d) * t + 0.75;
+  if (t < 2.5 / d) return n * (t -= 2.25 / d) * t + 0.9375;
+  return n * (t -= 2.625 / d) * t + 0.984375;
+};
 // A flame / tuft shape from (0,0) to (len,0), fat near the root.
 export function tuft(ctx, len, wide, bend = 0) {
   ctx.beginPath();
@@ -180,24 +289,4 @@ export function tuft(ctx, len, wide, bend = 0) {
     wide * 0.5,
   );
   ctx.closePath();
-}
-
-// Art that repeats many times is painted once and stamped.
-export function sprite(size, draw) {
-  const c = document.createElement("canvas");
-  c.width = c.height = size * 2;
-  const x = c.getContext("2d");
-  x.scale(2, 2);
-  x.translate(size / 2, size / 2);
-  draw(x);
-  return c;
-}
-export function stamp(ctx, spr, x, y, s, rot, sy = 1) {
-  const w = spr.width / 2;
-  ctx.save();
-  ctx.translate(x, y);
-  ctx.rotate(rot);
-  ctx.scale(s, s * sy);
-  ctx.drawImage(spr, -w / 2, -w / 2, w, w);
-  ctx.restore();
 }
