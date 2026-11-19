@@ -107,7 +107,9 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   // In the profile that opens over the page the frame goes around the card,
   // past its edges, instead of boxing the card in.
   await page.goto(`/social?person=${credentials.userId}`);
-  const spilled = page.locator(".social-dialog > canvas[data-layer='frame']");
+  const spilled = page.locator(
+    ".social-dialog .profile-preview-identity > canvas[data-layer='frame']",
+  );
   await expect(spilled).toBeVisible();
   await expect.poll(() => painted(spilled)).toBeGreaterThan(0.02);
   const floating = page.locator(".social-dialog .public-profile-card");
@@ -145,6 +147,62 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   await expect(
     page.locator(".social-dialog .profile-preview-combined"),
   ).toHaveCSS("--profile-realce", "#6d4bc4");
+
+  // In a short window the card does not fit. Card and frame then scroll as one piece
+  // inside a clear column the height of the room: the card is the box and the art adds
+  // no scrolling of its own.
+  const roomy = page.viewportSize()!;
+  await page.setViewportSize({ width: 1365, height: 460 });
+  const column = page.locator(".social-dialog .profile-preview-identity");
+  await expect
+    .poll(() =>
+      column.evaluate((node) => {
+        const style = getComputedStyle(node),
+          card = node.querySelector(".public-profile-card")!;
+        return Math.round(
+          node.scrollHeight -
+            card.getBoundingClientRect().height -
+            parseFloat(style.paddingTop) -
+            parseFloat(style.paddingBottom),
+        );
+      }),
+    )
+    .toBe(0);
+  expect(
+    await column.evaluate((node) => node.scrollHeight - node.clientHeight),
+  ).toBeGreaterThan(80);
+  const tops = async () => [
+    Math.round((await floating.boundingBox())!.y),
+    Math.round((await spilled.boundingBox())!.y),
+  ];
+  const rest = await tops();
+  expect(rest[0] - rest[1]).toBeGreaterThan(40);
+  await column.evaluate((node) => node.scrollTo(0, 80));
+  await expect.poll(tops).toEqual([rest[0] - 80, rest[1] - 80]);
+  await expect(column).toHaveCSS("border-top-width", "0px");
+  expect(
+    await floating.evaluate((node) => getComputedStyle(node).boxShadow),
+  ).not.toBe("none");
+  // The card's own window shows no bar at all: a bar there would float beside the
+  // frame. The content beside it has a thin one that only shows under the pointer.
+  expect(
+    await column.evaluate(
+      (node) => (node as HTMLElement).offsetWidth - node.clientWidth,
+    ),
+  ).toBe(0);
+  await expect(column).toHaveCSS("scrollbar-width", "none");
+  const beside = page.locator(".social-dialog .profile-preview-mural");
+  await page.mouse.move(4, 4);
+  await expect(beside).toHaveCSS("--profile-bar", "rgba(0, 0, 0, 0)");
+  await beside.hover();
+  await expect
+    .poll(() =>
+      beside.evaluate((node) =>
+        getComputedStyle(node).getPropertyValue("--profile-bar"),
+      ),
+    )
+    .toMatch(/^rgba\(255, 255, 255, 0\.\d+\)$/);
+  await page.setViewportSize(roomy);
 
   // With motion turned off the art is still there, as a still picture.
   await page.goto("/profile");

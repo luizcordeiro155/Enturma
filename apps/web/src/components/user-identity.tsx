@@ -395,11 +395,12 @@ export function UserIdentity({
     const panel = card.current;
     if (!anchor || !panel) return;
     function outside(e: PointerEvent) {
-      if (
-        !panel?.contains(e.target as Node) &&
-        !anchor?.contains(e.target as Node)
-      )
-        void close();
+      if (!panel || anchor?.contains(e.target as Node)) return;
+      // Compact, the popover is a clear column the card scrolls in: a press on the bare
+      // column is a press beside the card.
+      const beside =
+        e.target === panel && panel.dataset.profileView === "compact";
+      if (beside || !panel.contains(e.target as Node)) void close();
     }
     function key(e: KeyboardEvent) {
       if (e.key === "Escape") {

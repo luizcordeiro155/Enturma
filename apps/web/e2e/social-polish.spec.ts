@@ -176,7 +176,7 @@ test("feed, volume, comment picker and profile detail remain usable across theme
       .locator(".social-profile-surface .profile-preview-mural")
       .boundingBox())!,
     cardBox = (await profile
-      .locator(".social-profile-surface .profile-preview-identity")
+      .locator(".social-profile-surface .public-profile-card")
       .boundingBox())!;
   expect(cardBox.x + cardBox.width).toBeLessThanOrEqual(columnBox.x + 1);
   expect(gridBox.x - columnBox.x).toBeLessThan(32);
