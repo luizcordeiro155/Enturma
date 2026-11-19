@@ -2906,4 +2906,8 @@ html[data-theme] .social-dialog .social-profile-main-top > .social-tabs > button
   .social-profile-main .social-profile-grid {
     border-radius: 0;
   }
+  /* The posts are part of the profile page here: a finger on them scrolls the profile. */
+  .social-profile-main .social-profile-grid-scroll {
+    overscroll-behavior: auto;
+  }
 }

@@ -1473,9 +1473,12 @@ html .onboarding-banner {
     -webkit-overflow-scrolling: touch;
   }
 
+  /* One page on a phone: neither half keeps the scroll to itself. Other rules still make
+     them scroll boxes with nothing to scroll, and a contained one would swallow the finger. */
   .profile-public-primary,
   .profile-public-advanced {
     overflow: visible;
+    overscroll-behavior: auto;
   }
 
   .profile-public-primary {

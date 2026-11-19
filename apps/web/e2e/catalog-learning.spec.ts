@@ -104,6 +104,40 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
   await page.getByRole("button", { name: "Testar palavra" }).click();
   expect((await sent).ok()).toBe(true);
   await expect(page.locator(".mission-word-row").first()).toHaveText(word);
+  // The attempt turns over letter by letter, and every colour keeps its letter in
+  // sight inside the square.
+  const played = page.locator(".mission-word-row").first().locator("span");
+  expect(
+    await played.evaluateAll((cells) =>
+      cells.map((cell) => getComputedStyle(cell).animationName),
+    ),
+  ).toEqual(Array.from({ length }, () => "letter-turn"));
+  expect(
+    await played.evaluateAll((cells) =>
+      cells.map((cell) => parseFloat(getComputedStyle(cell).animationDelay)),
+    ),
+  ).toEqual(Array.from({ length }, (_, i) => expect.closeTo(i * 0.05, 3)));
+  expect(
+    await played.first().evaluate((cell) => {
+      const kept = cell.getAttribute("class") ?? "";
+      const seen = ["C", "P", "A"].map((mark) => {
+        cell.setAttribute("class", mark);
+        const box = cell.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(cell);
+        const letter = range.getBoundingClientRect();
+        return (
+          letter.width > 0 &&
+          letter.left >= box.left &&
+          letter.right <= box.right &&
+          letter.top >= box.top &&
+          letter.bottom <= box.bottom
+        );
+      });
+      cell.setAttribute("class", kept);
+      return seen;
+    }),
+  ).toEqual([true, true, true]);
   await page.reload();
   await expect(page.locator(".mission-word-row").first()).toHaveText(word);
   await page.getByRole("button", { name: /^Laboratório Binário/ }).click();

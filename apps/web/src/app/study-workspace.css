@@ -119,8 +119,6 @@
 .mission-stage textarea {
   width: 100%;
 }
-.mission-word-row .C,
-.mission-word-row .P,
 .mission-code-layout {
   display: grid;
   grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
@@ -632,6 +630,9 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .mission-robot,
+  .bit-display > button {
+    transition: none;
+  }
   .mission-word-row > *,
   .generation-loading svg {
     animation: none;

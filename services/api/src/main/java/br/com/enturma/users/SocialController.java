@@ -68,6 +68,11 @@ public class SocialController {
     return profile;
   }
 
+  /**
+   * A pack once set a theme field of its own. Profiles saved then still carry it and the apps
+   * send saved details back, so it is read and dropped rather than refused.
+   */
+  @com.fasterxml.jackson.annotation.JsonIgnoreProperties("cosmeticTheme")
   public record Details(
       @Size(max = 40) String pronouns,
       @Size(max = 80) String statusText,
@@ -84,7 +89,8 @@ public class SocialController {
 
   /**
    * Profile cosmetics and the level that opens each one. A pack brings a frame, an avatar
-   * decoration and a profile effect; the art itself lives in the web app.
+   * decoration and a profile effect; the art itself lives in the web app. The team that runs
+   * the platform wears any of them, to try and show the whole catalogue.
    */
   static final Map<String, Integer> COSMETICS = cosmeticLevels();
 
@@ -136,17 +142,20 @@ public class SocialController {
     int level = level(a.id());
     var items = new ArrayList<Map<String, Object>>();
     COSMETICS.forEach(
-        (id, needed) -> items.add(Map.of("id", id, "level", needed, "unlocked", level >= needed)));
+        (id, needed) ->
+            items.add(
+                Map.of("id", id, "level", needed, "unlocked", a.admin() || level >= needed)));
     return Map.of("level", level, "items", items);
   }
 
-  private void requireUnlocked(UUID user, String... chosen) {
+  private void requireUnlocked(Actor a, String... chosen) {
     int level = -1;
     for (String id : chosen) {
       if (id == null || id.isEmpty()) continue;
       Integer needed = COSMETICS.get(id);
       if (needed == null) throw ApiException.invalid("Esse item de perfil não existe.");
-      if (level < 0) level = level(user);
+      if (a.admin()) continue;
+      if (level < 0) level = level(a.id());
       if (level < needed)
         throw ApiException.invalid("Esse item de perfil libera no nível " + needed + ".");
     }
@@ -185,10 +194,10 @@ public class SocialController {
         && (value.links().size() > 6
             || !value.links().stream().allMatch(SocialController::profileLink)))
       throw ApiException.invalid("Use até 6 links, cada um com um endereço web ou um e-mail.");
-    requireUnlocked(a.id(), value.cosmeticFrame(), value.cosmeticAvatar(), value.cosmeticEffect());
+    requireUnlocked(a, value.cosmeticFrame(), value.cosmeticAvatar(), value.cosmeticEffect());
     db.jdbc.update(
-        "UPDATE app_user SET profile_details=coalesce(profile_details,'{}'::jsonb) ||"
-            + " jsonb_strip_nulls(?::jsonb) WHERE id=?",
+        "UPDATE app_user SET profile_details=(coalesce(profile_details,'{}'::jsonb) -"
+            + " 'cosmeticTheme') || jsonb_strip_nulls(?::jsonb) WHERE id=?",
         json.writeValueAsString(value),
         a.id());
     profileChanged(a.id());
