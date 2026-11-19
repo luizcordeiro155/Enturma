@@ -25,7 +25,8 @@ import {
 } from "../user-identity";
 import { ProfileBackdrop } from "../profile-motion";
 import type { Showcase } from "../profile-showcase";
-import { ForumLinks, ConfirmedLink } from "../forum-links";
+import { ForumLinks } from "../forum-links";
+import { ProfileLinks } from "../profile-links";
 import { useLiveRefresh } from "@/lib/live-updates";
 
 type Profile = SocialPerson &
@@ -534,12 +535,7 @@ export function SocialProfile({
                   {profile.profileDetails.interests}
                 </p>
               )}
-              {profile.profileDetails?.website && (
-                <ConfirmedLink
-                  href={profile.profileDetails.website}
-                  label="Site pessoal ↗"
-                />
-              )}
+              <ProfileLinks details={profile.profileDetails} />
               {privateNotice}
               {tools}
               {highlightStrip}

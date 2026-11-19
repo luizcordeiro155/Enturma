@@ -23,9 +23,14 @@ export function ForumLinks({ text }: { text: string }) {
 export function ConfirmedLink({
   href,
   label,
+  className = "message-link",
+  children,
 }: {
   href: string;
   label: string;
+  className?: string;
+  /** Richer content for the link; `label` stays as its text otherwise. */
+  children?: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
   const router = useRouter();
@@ -34,7 +39,8 @@ export function ConfirmedLink({
     <>
       <a
         href={href}
-        className="message-link"
+        className={className}
+        aria-label={children ? label : undefined}
         onClick={(e) => {
           const social = socialPath(href, location.origin);
           if (social) {
@@ -56,7 +62,10 @@ export function ConfirmedLink({
             // or preview installation. Keep it in this app window.
             if (
               new URL(href, location.origin).origin !== location.origin ||
-              e.metaKey || e.ctrlKey || e.shiftKey || e.altKey
+              e.metaKey ||
+              e.ctrlKey ||
+              e.shiftKey ||
+              e.altKey
             ) {
               e.preventDefault();
               location.assign(path);
@@ -80,7 +89,7 @@ export function ConfirmedLink({
           }
         }}
       >
-        {label}
+        {children ?? label}
       </a>
       {invitation && (
         <RoomJoinDialog code={invitation} onClose={() => setInvitation(null)} />
@@ -179,7 +188,11 @@ function ExternalConfirmation({
             if (!accepted) return;
             setOpeningError("");
             const url = new URL(href);
-            if (!["https:", "http:"].includes(url.protocol) || url.username || url.password) {
+            if (
+              !["https:", "http:"].includes(url.protocol) ||
+              url.username ||
+              url.password
+            ) {
               setOpeningError("Este endereço não é permitido.");
               return;
             }
