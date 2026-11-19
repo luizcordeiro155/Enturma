@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { expect, it } from "vitest";
 import {
+  COSMETIC_GROUPS,
   COSMETIC_PACKS,
   chosenCosmetics,
   framePadding,
@@ -60,4 +62,29 @@ it("has the art for every pack it lists", async () => {
     for (const part of ["init", "drawFrame", "drawAvatar", "drawEffect"])
       expect(typeof pack[part as "init"], `${id}.${part}`).toBe("function");
   }
+});
+
+it("keeps every pack in one of the shelves the editor shows, with no repeats", () => {
+  const ids = COSMETIC_PACKS.map((pack) => pack.id);
+  expect(new Set(ids).size).toBe(ids.length);
+  expect(ids).toHaveLength(29);
+  for (const pack of COSMETIC_PACKS)
+    expect(COSMETIC_GROUPS, pack.id).toContain(pack.group);
+  // Every shelf has something on it.
+  for (const group of COSMETIC_GROUPS)
+    expect(
+      COSMETIC_PACKS.some((pack) => pack.group === group),
+      group,
+    ).toBe(true);
+});
+
+it("lists exactly the packs the server gives a level to", () => {
+  const server = readFileSync(
+    "../../services/api/src/main/java/br/com/enturma/users/SocialController.java",
+    "utf8",
+  );
+  const levelled = [...server.matchAll(/levels\.put\("([a-z-]+)", \d+\)/g)]
+    .map((match) => match[1])
+    .sort();
+  expect(levelled).toEqual(COSMETIC_PACKS.map((pack) => pack.id).sort());
 });

@@ -438,7 +438,15 @@ class PlatformIntegrationTest {
     assertThatThrownBy(() -> social.details(host, cosmetics(null, "nao-existe", null)))
         .isInstanceOf(ApiException.class);
     assertThat(storedCosmetic("cosmeticFrame")).isEqualTo("sakura");
+    // The whole catalogue is on the shelf: a first-level pack goes on, a late one says when.
+    social.details(host, cosmetics(null, "primavera", null));
+    assertThat(storedCosmetic("cosmeticAvatar")).isEqualTo("primavera");
+    assertThatThrownBy(() -> social.details(host, cosmetics(null, null, "pesadelo")))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("nível 22");
+    social.details(host, cosmetics(null, "sakura", null));
     var shop = (Map<String, Object>) social.cosmetics(host);
+    assertThat((List<Map<String, Object>>) shop.get("items")).hasSize(29);
     assertThat(shop.get("level")).isEqualTo(1);
     assertThat((List<Map<String, Object>>) shop.get("items"))
         .anySatisfy(

@@ -223,7 +223,8 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
       frame = requestAnimationFrame(tick);
       return;
     }
-    const dt = Math.min(0.1, (now - last) / 1000 || 0.016);
+    // The frame's timestamp can be a hair before the moment the loop was woken.
+    const dt = Math.max(0, Math.min(0.1, (now - last) / 1000 || 0.016));
     last = now;
     if (!still) {
       time += dt;

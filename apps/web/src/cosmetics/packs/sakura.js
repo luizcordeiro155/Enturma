@@ -1,4 +1,5 @@
 // Generated from the cosmetics prototype by tools/export-app.mjs. Edit the prototype, then export again.
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   TAU,
   clamp,

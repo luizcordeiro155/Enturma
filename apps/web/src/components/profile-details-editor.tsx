@@ -765,7 +765,19 @@ export function ProfileDetailsEditor({
                   setTrying(undefined);
                   setDetails((current) => ({ ...current, ...change }));
                 }}
-                onTry={setTrying}
+                onTry={(id) => {
+                  setTrying(id);
+                  // On a phone the preview sits under the list: show what was just put on.
+                  if (id && matchMedia("(max-width: 760px)").matches)
+                    requestAnimationFrame(() =>
+                      document
+                        .querySelector(".profile-edit-live-preview")
+                        ?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        }),
+                    );
+                }}
               />
             </ProfileEditPanel>
 
