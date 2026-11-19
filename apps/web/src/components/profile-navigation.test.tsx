@@ -10,7 +10,7 @@ import {
   act,
 } from "@testing-library/react";
 import { afterEach, beforeEach, expect, it, vi } from "vitest";
-import { UserIdentity } from "./user-identity";
+import { UserIdentity, profileStyle } from "./user-identity";
 import { ConfirmedLink } from "./forum-links";
 import { api } from "@/lib/api";
 const push = vi.hoisted(() => vi.fn());
@@ -90,6 +90,51 @@ it("removes the profile overlay history entry before navigating to the editor", 
   fireEvent.click(screen.getByRole("link", { name: "Editar perfil" }));
   await waitFor(() => expect(push).toHaveBeenCalledWith("/profile"));
   expect(screen.queryByRole("dialog")).toBeNull();
+});
+
+it("gives the profile room two ends only when the theme is a gradient", () => {
+  const user = (theme: string) => ({
+    id: "u",
+    name: "Ana",
+    accentColor: "#aa0000",
+    showcaseAppearance: {
+      theme,
+      secondaryColor: "#0000aa",
+      effect: "NONE",
+      layout: "GRID",
+    },
+  });
+  const end = (theme: string) =>
+    (profileStyle(user(theme)) as Record<string, string>)["--profile-realce"];
+  expect(end("GRADIENT")).toBe("#0000aa");
+  // One colour chosen: the room and the card fade from it to itself, darkened.
+  expect(end("SOLID")).toBe("#aa0000");
+});
+
+it("opens as the compact card and shows the full profile only when asked", async () => {
+  render(<UserIdentity user={{ id: "me", name: "Estudante" }} />);
+  const open = () =>
+    fireEvent.click(
+      screen.getByRole("button", { name: "Ver perfil de Estudante" }),
+    );
+  open();
+  const more = await screen.findByRole("button", {
+    name: "Ver perfil completo",
+  });
+  const profile = screen.getByRole("dialog", { name: "Perfil de Estudante" });
+  expect(profile).toHaveAttribute("data-profile-view", "compact");
+  fireEvent.click(more);
+  expect(profile).toHaveAttribute("data-profile-view", "full");
+  expect(
+    screen.queryByRole("button", { name: "Ver perfil completo" }),
+  ).toBeNull();
+  // Closing puts it back: the next person opens compact again.
+  fireEvent.click(screen.getByRole("button", { name: "Fechar perfil" }));
+  await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
+  open();
+  expect(
+    await screen.findByRole("dialog", { name: "Perfil de Estudante" }),
+  ).toHaveAttribute("data-profile-view", "compact");
 });
 
 // Regression: the profile's global outside-pointer handler must not treat

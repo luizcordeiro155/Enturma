@@ -50,23 +50,11 @@ it("adds one decorative layer per chosen item and makes room for the frame", asy
   expect(card.style.getPropertyValue("--cosmetic-side")).toBe("");
 });
 
-it("dresses the card in the pack's colours and undresses it again", async () => {
-  const stage = mountCosmetics(card, { theme: "sakura" });
-  await vi.waitFor(() =>
-    expect(card.className).toContain("has-cosmetic-theme"),
-  );
-  expect(card.style.getPropertyValue("--cosmetic-bg")).toContain("gradient");
-  expect(layers()).toEqual([]);
-  stage.destroy();
-  expect(card.className).toBe("public-profile-card");
-  expect(card.style.getPropertyValue("--cosmetic-bg")).toBe("");
-});
-
 it("lets the frame spill around the card in a profile dialog on a wide screen", async () => {
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: query.includes("min-width"),
   }));
-  const dialog = document.createElement("div");
+  const dialog = document.createElement("dialog");
   dialog.className = "social-dialog";
   const surface = document.createElement("div");
   surface.className = "profile-preview-combined";
@@ -88,6 +76,25 @@ it("lets the frame spill around the card in a profile dialog on a wide screen", 
   expect(dialog.querySelector("canvas")).toBeNull();
   expect(surface.className).toBe("profile-preview-combined");
   dialog.remove();
+});
+
+it("hangs the frame of a profile popover on the page, where nothing can clip it", async () => {
+  vi.stubGlobal("matchMedia", (query: string) => ({
+    matches: query.includes("min-width"),
+  }));
+  const popover = document.createElement("div");
+  popover.className = "user-profile-popover";
+  document.body.append(popover);
+  popover.append(card);
+  const stage = mountCosmetics(card, { frame: "sakura" });
+  await vi.waitFor(() =>
+    expect(
+      document.body.querySelector(":scope > canvas[data-layer=frame]"),
+    ).not.toBeNull(),
+  );
+  stage.destroy();
+  expect(document.body.querySelector(":scope > canvas")).toBeNull();
+  popover.remove();
 });
 
 it("leaves the card untouched when nothing is chosen", () => {

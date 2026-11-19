@@ -11,17 +11,12 @@ export function ProfileCosmetics({
   card: RefObject<HTMLElement | null>;
   details?: CosmeticDetails;
 }) {
-  const { frame, avatar, effect, theme } = chosenCosmetics(details);
+  const { frame, avatar, effect } = chosenCosmetics(details);
   useEffect(() => {
     if (!card.current) return;
     // Mounting again is what replays the entrance each time a profile opens.
-    const stage = mountCosmetics(card.current, {
-      frame,
-      avatar,
-      effect,
-      theme,
-    });
+    const stage = mountCosmetics(card.current, { frame, avatar, effect });
     return () => stage.destroy();
-  }, [card, frame, avatar, effect, theme]);
+  }, [card, frame, avatar, effect]);
   return null;
 }

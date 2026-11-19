@@ -1,11 +1,10 @@
 /** Profile cosmetics: what exists, what a profile has on, and how much room the art needs. */
-export type CosmeticLayer = "frame" | "avatar" | "effect" | "theme";
+export type CosmeticLayer = "frame" | "avatar" | "effect";
 export type CosmeticChoice = Partial<Record<CosmeticLayer, string>>;
 export type CosmeticDetails = {
   cosmeticFrame?: string;
   cosmeticAvatar?: string;
   cosmeticEffect?: string;
-  cosmeticTheme?: string;
 };
 export type Reach = { top: number; side: number; bottom: number };
 type Drawing = CanvasRenderingContext2D;
@@ -15,8 +14,6 @@ export type CosmeticPack = {
   reach: Reach;
   /** The dark band the frame is drawn on, top to bottom. */
   mat: [string, string];
-  /** The pack's own colours for the card: background, banner, avatar and button. */
-  theme: Record<string, string>;
   ready?: boolean;
   init(): void;
   reset(): void;
@@ -29,22 +26,29 @@ export type CardShape = { w: number; h: number; r: number };
 type AvatarShape = { x: number; y: number; r: number };
 type PackFactory = (card: CardShape, avatar: AvatarShape) => CosmeticPack;
 
-/** Shown in this order in the editor; the level that opens each one comes from the server. */
+/**
+ * Shown in this order in the editor; the level that opens each one comes from the server.
+ * `colors` are the two profile colours (primary, accent) that go well with the pack: putting
+ * the pack on applies them, and the student stays free to change them.
+ */
 export const COSMETIC_PACKS = [
   {
     id: "sakura",
     name: "Sakura",
     blurb: "Cerejeira em flor, lua cheia e um passarinho que pousa no galho.",
+    colors: ["#e86a9a", "#6d4bc4"],
   },
   {
     id: "abobora",
     name: "Noite das Abóboras",
     blurb: "Morcegos, abóboras acesas, teia e um fantasminha curioso.",
+    colors: ["#7a35a8", "#f07a1c"],
   },
   {
     id: "dragao",
     name: "Dragão Imperial",
     blurb: "Um dragão chinês dá a volta no perfil, pousa e cospe fogo.",
+    colors: ["#c81d1d", "#3d1670"],
   },
 ] as const;
 
@@ -52,9 +56,8 @@ export const COSMETIC_FIELDS = {
   frame: "cosmeticFrame",
   avatar: "cosmeticAvatar",
   effect: "cosmeticEffect",
-  theme: "cosmeticTheme",
 } as const;
-export const COSMETIC_LAYERS = ["frame", "avatar", "effect", "theme"] as const;
+export const COSMETIC_LAYERS = ["frame", "avatar", "effect"] as const;
 
 // Each pack is its own chunk: a profile only downloads the art it shows.
 const loaders: Record<string, () => Promise<{ default: unknown }>> = {

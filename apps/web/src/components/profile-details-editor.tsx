@@ -18,6 +18,7 @@ import {
   Gem,
 } from "lucide-react";
 import { CosmeticsPicker, type CosmeticShop } from "./profile-cosmetics-picker";
+import { COSMETIC_PACKS } from "@/cosmetics/catalog";
 import { ProfileBackdrop } from "./profile-motion";
 import { ProfileEditPanel } from "./profile-edit-panel";
 import { ProfileImageEditor } from "./profile-image-editor";
@@ -268,9 +269,12 @@ export function ProfileDetailsEditor({
     }
   }
 
+  // A pack being tried on shows whole in the preview, colours included, and saves nothing.
+  const tried = COSMETIC_PACKS.find((pack) => pack.id === trying);
   const previewUser: PublicProfile = {
     ...profile,
     ...appearance,
+    ...(tried ? { accentColor: tried.colors[0] } : {}),
     mediaVersion: mediaVersion || profile.mediaVersion,
     hasAvatar: mediaState.avatar ?? profile.hasAvatar,
     hasBanner: mediaState.banner ?? profile.hasBanner,
@@ -278,16 +282,22 @@ export function ProfileDetailsEditor({
       ...details,
       website: "",
       links,
-      ...(trying
+      ...(tried
         ? {
-            cosmeticFrame: trying,
-            cosmeticAvatar: trying,
-            cosmeticEffect: trying,
-            cosmeticTheme: trying,
+            cosmeticFrame: tried.id,
+            cosmeticAvatar: tried.id,
+            cosmeticEffect: tried.id,
           }
         : {}),
     },
-    showcaseAppearance: showcase?.appearance,
+    showcaseAppearance:
+      tried && showcase
+        ? {
+            ...showcase.appearance,
+            secondaryColor: tried.colors[1],
+            theme: "GRADIENT",
+          }
+        : showcase?.appearance,
   };
 
   return (
@@ -725,6 +735,31 @@ export function ProfileDetailsEditor({
               <CosmeticsPicker
                 shop={shop}
                 details={details}
+                colors={[
+                  appearance.accentColor,
+                  showcase?.appearance.theme === "GRADIENT"
+                    ? showcase.appearance.secondaryColor
+                    : appearance.accentColor,
+                ]}
+                onColors={([primary, accent]) => {
+                  setTrying(undefined);
+                  setAppearance((current) => ({
+                    ...current,
+                    accentColor: primary,
+                  }));
+                  setShowcase((current) =>
+                    current
+                      ? {
+                          ...current,
+                          appearance: {
+                            ...current.appearance,
+                            secondaryColor: accent,
+                            theme: "GRADIENT",
+                          },
+                        }
+                      : current,
+                  );
+                }}
                 trying={trying}
                 onChange={(change) => {
                   setTrying(undefined);

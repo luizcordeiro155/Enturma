@@ -42,7 +42,6 @@ export type ProfileDetails = {
   cosmeticFrame?: string;
   cosmeticAvatar?: string;
   cosmeticEffect?: string;
-  cosmeticTheme?: string;
 };
 type FriendshipSummary = {
   id: string;
@@ -106,6 +105,15 @@ export function profileStyle(user: PublicProfile): React.CSSProperties {
   return {
     "--profile-accent": primary,
     "--profile-secondary": secondary,
+    // Where the profile's gradient ends: the accent colour, or the main one again when the
+    // student chose a single colour.
+    "--profile-realce": appearance?.theme === "GRADIENT" ? secondary : primary,
+    // In the dark profile room a custom mural tints its side under a veil; otherwise the
+    // room shows through.
+    "--mural-room":
+      appearance?.muralMode === "CUSTOM"
+        ? `linear-gradient(rgba(11,12,18,.6),rgba(11,12,18,.6)),linear-gradient(${angle}deg,${muralPrimary},${muralSecondary})`
+        : "none",
     "--mural-primary": muralPrimary,
     "--mural-secondary": muralSecondary,
     "--profile-banner": gradient,
@@ -341,6 +349,8 @@ export function UserIdentity({
   const [friendshipLoading, setFriendshipLoading] = useState(false);
   const loadingProfile = useRef(false);
   const [open, setOpen] = useState(false);
+  // A profile opens as the compact card; the full profile is one tap further.
+  const [full, setFull] = useState(false);
   const [message, setMessage] = useState("");
   const trigger = useRef<HTMLButtonElement>(null);
   const card = useRef<HTMLDivElement>(null);
@@ -359,7 +369,10 @@ export function UserIdentity({
     }
     // Commit closure before waiting: cleanup removes the overlay's history
     // entry. Starting navigation earlier lets that Back undo the new route.
-    flushSync(() => setOpen(false));
+    flushSync(() => {
+      setOpen(false);
+      setFull(false);
+    });
     await waitForOverlayHistory();
     closing.current = false;
     if (restoreFocus) trigger.current?.focus({ preventScroll: true });
@@ -448,6 +461,103 @@ export function UserIdentity({
       loadingProfile.current = false;
     }
   }
+  // What this visitor can do from the card: befriend, talk, or edit their own profile.
+  const profileActions = visitor.active ? (
+    <>
+      <button
+        type="button"
+        onClick={async () => {
+          await close(false);
+          visitor.requestLogin("/friends");
+        }}
+      >
+        Adicionar amizade
+      </button>
+      <button
+        type="button"
+        className="secondary"
+        onClick={async () => {
+          await close(false);
+          visitor.requestLogin("/friends");
+        }}
+      >
+        Iniciar conversa
+      </button>
+    </>
+  ) : !isOwnProfile ? (
+    <>
+      {friendshipLoading ? (
+        <button type="button" disabled>
+          Verificando amizade…
+        </button>
+      ) : friendship?.status === "ACCEPTED" ? (
+        <Link
+          className="button"
+          href={`/friends?chat=${friendship.id}`}
+          onNavigate={(event) => {
+            event.preventDefault();
+            void navigate(`/friends?chat=${friendship.id}`);
+          }}
+        >
+          Iniciar conversa
+        </Link>
+      ) : friendship?.status === "PENDING" ? (
+        <>
+          <button type="button" disabled>
+            Solicitação pendente
+          </button>
+          <Link
+            className="button secondary"
+            href="/friends"
+            onNavigate={(event) => {
+              event.preventDefault();
+              void navigate("/friends");
+            }}
+          >
+            Gerenciar convite
+          </Link>
+        </>
+      ) : (
+        <button
+          onClick={async () => {
+            try {
+              const created = await post<{
+                id: string;
+                status: "PENDING" | "ACCEPTED";
+              }>("/friends", {
+                username: profile?.username,
+              });
+              setFriendship({
+                id: created.id,
+                userId: profile?.id ?? user.id,
+                status: created.status,
+              });
+              setMessage(
+                created.status === "ACCEPTED"
+                  ? "Amizade confirmada."
+                  : "Solicitação enviada.",
+              );
+            } catch (e) {
+              setMessage((e as Error).message);
+            }
+          }}
+        >
+          Adicionar amizade
+        </button>
+      )}
+    </>
+  ) : (
+    <Link
+      className="button"
+      href="/profile"
+      onNavigate={(event) => {
+        event.preventDefault();
+        void navigate("/profile");
+      }}
+    >
+      Editar perfil
+    </Link>
+  );
   return (
     <>
       <button
@@ -483,6 +593,7 @@ export function UserIdentity({
               id={id}
               role="dialog"
               className="user-profile-dialog user-profile-popover"
+              data-profile-view={full ? "full" : "compact"}
               ref={card}
               aria-label={`Perfil de ${user.name}`}
             >
@@ -517,102 +628,18 @@ export function UserIdentity({
                     )
                   }
                   actions={
-                    visitor.active ? (
-                      <>
+                    <>
+                      {profileActions}
+                      {full ? null : (
                         <button
                           type="button"
-                          onClick={async () => {
-                            await close(false);
-                            visitor.requestLogin("/friends");
-                          }}
+                          className="secondary profile-open-full"
+                          onClick={() => setFull(true)}
                         >
-                          Adicionar amizade
+                          Ver perfil completo
                         </button>
-                        <button
-                          type="button"
-                          className="secondary"
-                          onClick={async () => {
-                            await close(false);
-                            visitor.requestLogin("/friends");
-                          }}
-                        >
-                          Iniciar conversa
-                        </button>
-                      </>
-                    ) : !isOwnProfile ? (
-                      <>
-                        {friendshipLoading ? (
-                          <button type="button" disabled>
-                            Verificando amizade…
-                          </button>
-                        ) : friendship?.status === "ACCEPTED" ? (
-                          <Link
-                            className="button"
-                            href={`/friends?chat=${friendship.id}`}
-                            onNavigate={(event) => {
-                              event.preventDefault();
-                              void navigate(`/friends?chat=${friendship.id}`);
-                            }}
-                          >
-                            Iniciar conversa
-                          </Link>
-                        ) : friendship?.status === "PENDING" ? (
-                          <>
-                            <button type="button" disabled>
-                              Solicitação pendente
-                            </button>
-                            <Link
-                              className="button secondary"
-                              href="/friends"
-                              onNavigate={(event) => {
-                                event.preventDefault();
-                                void navigate("/friends");
-                              }}
-                            >
-                              Gerenciar convite
-                            </Link>
-                          </>
-                        ) : (
-                          <button
-                            onClick={async () => {
-                              try {
-                                const created = await post<{
-                                  id: string;
-                                  status: "PENDING" | "ACCEPTED";
-                                }>("/friends", {
-                                  username: profile.username,
-                                });
-                                setFriendship({
-                                  id: created.id,
-                                  userId: profile.id,
-                                  status: created.status,
-                                });
-                                setMessage(
-                                  created.status === "ACCEPTED"
-                                    ? "Amizade confirmada."
-                                    : "Solicitação enviada.",
-                                );
-                              } catch (e) {
-                                setMessage((e as Error).message);
-                              }
-                            }}
-                          >
-                            Adicionar amizade
-                          </button>
-                        )}
-                      </>
-                    ) : (
-                      <Link
-                        className="button"
-                        href="/profile"
-                        onNavigate={(event) => {
-                          event.preventDefault();
-                          void navigate("/profile");
-                        }}
-                      >
-                        Editar perfil
-                      </Link>
-                    )
+                      )}
+                    </>
                   }
                 />
               ) : null}

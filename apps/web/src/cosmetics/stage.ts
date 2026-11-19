@@ -32,10 +32,9 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
     (layer) => chosen[layer],
   );
   let alive = true;
-  if (!wanted.length && !chosen.theme) return { destroy() {} };
+  if (!wanted.length) return { destroy() {} };
 
   const canvases = new Map<CosmeticLayer, HTMLCanvasElement>();
-  const themed: string[] = [];
   const packs = new Map<string, CosmeticPack>();
   let frame = 0,
     last = 0,
@@ -49,7 +48,8 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
   let floating: HTMLElement | null = null,
     surface: HTMLElement | null = null,
     shiftX = 0,
-    shiftY = 0;
+    shiftY = 0,
+    unboxed = false;
   const scale = () =>
     floating
       ? Math.round(
@@ -158,21 +158,24 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
         const ratio = fit(canvas, w, h);
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
         ctx.clearRect(0, 0, w, h);
-        // The band the frame sits on, with the card showing through the middle.
-        const mat = ctx.createLinearGradient(0, 0, 0, h);
-        mat.addColorStop(0, pack.mat[0]);
-        mat.addColorStop(1, pack.mat[1]);
-        ctx.beginPath();
-        ctx.rect(0, 0, w, h);
-        ctx.roundRect(
-          p.side,
-          p.top,
-          w - p.side * 2,
-          h - p.top - p.bottom,
-          INNER_RADIUS,
-        );
-        ctx.fillStyle = mat;
-        ctx.fill("evenodd");
+        // Outside a dark profile room the frame brings its own band to sit on, with the
+        // card showing through the middle.
+        if (!unboxed) {
+          const mat = ctx.createLinearGradient(0, 0, 0, h);
+          mat.addColorStop(0, pack.mat[0]);
+          mat.addColorStop(1, pack.mat[1]);
+          ctx.beginPath();
+          ctx.rect(0, 0, w, h);
+          ctx.roundRect(
+            p.side,
+            p.top,
+            w - p.side * 2,
+            h - p.top - p.bottom,
+            INNER_RADIUS,
+          );
+          ctx.fillStyle = mat;
+          ctx.fill("evenodd");
+        }
         ctx.save();
         ctx.translate(p.side, p.top);
         ctx.scale(s, s);
@@ -245,13 +248,7 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
   window.addEventListener("resize", place);
 
   void Promise.all(
-    [
-      ...new Set(
-        [...wanted, ...(chosen.theme ? (["theme"] as const) : [])].map(
-          (layer) => chosen[layer]!,
-        ),
-      ),
-    ].map(async (id) => ({
+    [...new Set(wanted.map((layer) => chosen[layer]!))].map(async (id) => ({
       id,
       create: await loadPack(id),
     })),
@@ -268,6 +265,9 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
     surface = floating
       ? card.closest<HTMLElement>(".profile-preview-combined")
       : null;
+    unboxed =
+      getComputedStyle(card).getPropertyValue("--cosmetic-mat").trim() ===
+      "none";
     for (const layer of wanted) {
       const canvas = document.createElement("canvas"),
         spills = layer === "frame" && floating;
@@ -281,22 +281,19 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
     // Frame last in the document so it sits over the other two.
     for (const layer of ["effect", "avatar", "frame"] as const) {
       const canvas = canvases.get(layer);
-      if (canvas)
-        (layer === "frame" && floating ? floating : card).append(canvas);
+      // A dialog in the top layer has to hold its own frame; anything else lets the page
+      // hold it, so no clipped or moved ancestor can cut the art.
+      const host =
+        layer === "frame" && floating
+          ? floating.matches("dialog")
+            ? floating
+            : document.body
+          : card;
+      if (canvas) host.append(canvas);
     }
-    for (const { id, create } of loaded) {
-      const pack = create(geometry, { x: 60, y: 112, r: 42 });
-      if (id === chosen.theme) {
-        // The pack's colours go on the card itself; the style sheet does the rest.
-        for (const [name, value] of Object.entries(pack.theme)) {
-          themed.push(name.replace("--card-", "--cosmetic-"));
-          card.style.setProperty(themed.at(-1)!, value);
-        }
-        card.classList.add("has-cosmetic-theme");
-      }
-      if (able && wanted.some((layer) => chosen[layer] === id))
-        packs.set(id, pack);
-    }
+    if (able)
+      for (const { id, create } of loaded)
+        packs.set(id, create(geometry, { x: 60, y: 112, r: 42 }));
     layout();
     resized?.observe(card);
     if (watched) watched.observe(card);
@@ -321,8 +318,6 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
       }
       for (const name of ["top", "side", "bottom"])
         card.style.removeProperty(`--cosmetic-${name}`);
-      for (const name of themed) card.style.removeProperty(name);
-      card.classList.remove("has-cosmetic-theme");
     },
   };
 }

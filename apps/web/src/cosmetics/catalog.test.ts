@@ -13,9 +13,8 @@ it("only knows the items that exist in the catalog", () => {
       cosmeticFrame: "sakura",
       cosmeticAvatar: "",
       cosmeticEffect: "nao-existe",
-      cosmeticTheme: "dragao",
     }),
-  ).toEqual({ frame: "sakura", theme: "dragao" });
+  ).toEqual({ frame: "sakura" });
   expect(chosenCosmetics(undefined)).toEqual({});
 });
 
@@ -42,6 +41,13 @@ it("on a phone the frame shows above and below the card and keeps the full width
   });
 });
 
+it("suggests two profile colours with every pack", () => {
+  for (const { id, colors } of COSMETIC_PACKS) {
+    expect(colors, id).toHaveLength(2);
+    for (const color of colors) expect(color, id).toMatch(/^#[0-9a-f]{6}$/);
+  }
+});
+
 it("has the art for every pack it lists", async () => {
   for (const { id } of COSMETIC_PACKS) {
     const pack = (await loadPack(id))(
@@ -50,7 +56,7 @@ it("has the art for every pack it lists", async () => {
     );
     expect(pack.reach.side, id).toBeGreaterThan(0);
     expect(pack.mat, id).toHaveLength(2);
-    expect(pack.theme["--card-bg"], id).toContain("gradient");
+    expect(pack.name, id).toBeTruthy();
     for (const part of ["init", "drawFrame", "drawAvatar", "drawEffect"])
       expect(typeof pack[part as "init"], `${id}.${part}`).toBe("function");
   }
