@@ -80,21 +80,29 @@ test("UNA Aimorés ADS: catálogo, jogos e acessibilidade", async ({
     page.getByText("Qual é o conceito?", { exact: true }),
   ).toBeVisible();
   await expect(page.getByText(/Consultar vocabulário/)).toHaveCount(0);
-  const input = page.getByLabel("Palavra tentativa", { exact: true });
-  const length = Number(await input.getAttribute("maxlength"));
+  // Termo Dev has no text field: the board takes the keyboard directly.
+  await expect(page.getByLabel("Palavra tentativa")).toHaveCount(0);
+  const cells = page.locator(".mission-word-row.is-active .word-cell");
+  const length = await cells.count();
   const word =
     ({ 4: "LOOP", 5: "ARRAY", 6: "STRING" } as Record<number, string>)[
       length
     ] ?? "A".repeat(length);
-  await input.fill(word.toLowerCase());
-  await expect(input).toHaveValue(word);
+  await page.keyboard.type(word.toLowerCase());
+  await expect(page.locator(".mission-word-row.is-active")).toHaveText(word);
+  // A tapped cell receives the next letter from the on-screen keyboard.
+  await cells.first().click();
+  await page.getByRole("button", { name: "Z", exact: true }).click();
+  await expect(cells.first()).toHaveText("Z");
+  await cells.first().click();
+  await page.getByRole("button", { name: word[0], exact: true }).click();
+  await expect(page.locator(".mission-word-row.is-active")).toHaveText(word);
   const sent = page.waitForResponse(
     (r) =>
       r.url().endsWith("/learning/missions") && r.request().method() === "POST",
   );
-  await input.press("Enter");
+  await page.getByRole("button", { name: "Testar palavra" }).click();
   expect((await sent).ok()).toBe(true);
-  await expect(input).toHaveValue("");
   await expect(page.locator(".mission-word-row").first()).toHaveText(word);
   await page.reload();
   await expect(page.locator(".mission-word-row").first()).toHaveText(word);

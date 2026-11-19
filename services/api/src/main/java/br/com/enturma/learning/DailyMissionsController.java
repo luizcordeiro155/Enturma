@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.*;
 import java.time.*;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,23 +90,25 @@ public class DailyMissionsController {
             + " NOTHING",
         a.id(),
         date);
-    String start =
-        (String)
-            db.one("SELECT started_on FROM learning_mission_start WHERE user_id=?", a.id())
-                .get("startedOn");
+    // The level follows play, not the calendar: one more for each earlier day with a finished
+    // mission. Days without playing leave it where it was.
     int difficulty =
-        (int) Math.min(10000, ChronoUnit.DAYS.between(LocalDate.parse(start), date) + 1);
-    for (String game : GAMES)
-      for (int slot = 1; slot <= 5; slot++)
-        db.jdbc.update(
-            "INSERT INTO learning_mission(user_id,mission_date,game,slot,difficulty,definition)"
-                + " VALUES (?,?,?,?,?,?::jsonb) ON CONFLICT DO NOTHING",
+        (int)
+            Math.min(
+                10000,
+                1
+                    + db.jdbc.queryForObject(
+                        "SELECT count(DISTINCT mission_date) FROM learning_mission WHERE user_id=?"
+                            + " AND mission_date<? AND completed",
+                        Integer.class,
+                        a.id(),
+                        date));
+    if (db.jdbc.queryForObject(
+            "SELECT count(*) FROM learning_mission WHERE user_id=? AND mission_date=?",
+            Integer.class,
             a.id(),
-            date,
-            game,
-            slot,
-            difficulty,
-            encode(definition(a.id(), date, game, slot, difficulty)));
+            date)
+        < GAMES.size() * 5) deal(a.id(), date);
     var rows =
         db.list(
             "SELECT game,slot,difficulty,definition,attempts,history,completed,won FROM"
@@ -120,6 +121,45 @@ public class DailyMissionsController {
           d.remove(List.of("answer", "word", "seed"));
         });
     return Map.of("date", date.toString(), "difficulty", difficulty, "missions", rows);
+  }
+
+  /**
+   * Deals the day's missions one by one. Each game/slot has its own level: 1 plus the earlier days
+   * on which that mission was finished. A mission left unfinished comes back as it was; only the
+   * finished ones give way to a new, harder challenge.
+   */
+  private void deal(UUID user, LocalDate date) {
+    var earlier = new HashMap<String, Map<String, Object>>();
+    for (var row :
+        db.list(
+            "SELECT DISTINCT ON (game,slot) game,slot,difficulty,definition,completed,count(*)"
+                + " FILTER (WHERE completed) OVER (PARTITION BY game,slot) done FROM"
+                + " learning_mission WHERE user_id=? AND mission_date<? ORDER BY"
+                + " game,slot,mission_date DESC",
+            user,
+            date)) earlier.put(row.get("game") + ":" + row.get("slot"), row);
+    for (String game : GAMES)
+      for (int slot = 1; slot <= 5; slot++) {
+        var last = earlier.get(game + ":" + slot);
+        int level =
+            last == null ? 1 : (int) Math.min(10000, ((Number) last.get("done")).longValue() + 1);
+        // Rows dealt under the old calendar rule carry another level and are dealt again.
+        boolean unfinished =
+            last != null
+                && !Boolean.TRUE.equals(last.get("completed"))
+                && ((Number) last.get("difficulty")).intValue() == level;
+        db.jdbc.update(
+            "INSERT INTO learning_mission(user_id,mission_date,game,slot,difficulty,definition)"
+                + " VALUES (?,?,?,?,?,?::jsonb) ON CONFLICT DO NOTHING",
+            user,
+            date,
+            game,
+            slot,
+            level,
+            unfinished
+                ? last.get("definition").toString()
+                : encode(definition(user, date, game, slot, level)));
+      }
   }
 
   private Map<String, Object> definition(

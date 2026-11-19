@@ -517,6 +517,74 @@ class PlatformIntegrationTest {
   }
 
   @Test
+  void missionsOnlyLevelUpWhenTheyArePlayed() {
+    db.jdbc.update(
+        "UPDATE academic_entry SET attributes=attributes||'{\"learningArea\":\"IT\"}'::jsonb WHERE"
+            + " id=?",
+        subject);
+    String date = (String) ((Map<?, ?>) missions.daily(host)).get("date");
+    for (int slot = 1; slot <= 2; slot++)
+      missions.attempt(
+          host,
+          new br.com.enturma.learning.DailyMissionsController.Attempt(
+              date, "words", slot, missionText("words", slot, "word")));
+    String keptWord = missionText("words", 3, "word");
+    String keptExpression = missionText("binary", 1, "expression");
+    // An account from before this rule: its level followed the calendar, not the play.
+    db.jdbc.update(
+        "UPDATE learning_mission SET difficulty=51 WHERE user_id=? AND game='trace'", host.id());
+    // Three days go by without a visit.
+    var played = java.time.LocalDate.parse(date).minusDays(3);
+    db.jdbc.update(
+        "UPDATE learning_mission SET mission_date=? WHERE user_id=?", played, host.id());
+    db.jdbc.update(
+        "UPDATE learning_mission_start SET started_on=? WHERE user_id=?", played, host.id());
+
+    var next = (Map<?, ?>) missions.daily(host);
+
+    assertThat(next.get("difficulty")).isEqualTo(2);
+    assertThat(missionLevel("words", 1)).isEqualTo(2);
+    assertThat(missionLevel("words", 2)).isEqualTo(2);
+    assertThat(missionLevel("words", 3)).isEqualTo(1);
+    assertThat(missionText("words", 3, "word")).isEqualTo(keptWord);
+    assertThat(missionLevel("binary", 1)).isEqualTo(1);
+    assertThat(missionText("binary", 1, "expression")).isEqualTo(keptExpression);
+    assertThat(missionLevel("trace", 1)).isEqualTo(1);
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM learning_mission WHERE user_id=? AND mission_date=?::date"
+                    + " AND (attempts>0 OR completed)",
+                Integer.class,
+                host.id(),
+                date))
+        .isZero();
+    // Looking again on the same day keeps what was dealt.
+    assertThat(((Map<?, ?>) missions.daily(host)).get("difficulty")).isEqualTo(2);
+    assertThat(missionText("words", 3, "word")).isEqualTo(keptWord);
+  }
+
+  private String missionText(String game, int slot, String field) {
+    return db.jdbc.queryForObject(
+        "SELECT definition->>(?::text) FROM learning_mission WHERE user_id=? AND game=? AND slot=?"
+            + " ORDER BY mission_date DESC LIMIT 1",
+        String.class,
+        field,
+        host.id(),
+        game,
+        slot);
+  }
+
+  private int missionLevel(String game, int slot) {
+    return db.jdbc.queryForObject(
+        "SELECT difficulty FROM learning_mission WHERE user_id=? AND game=? AND slot=? ORDER BY"
+            + " mission_date DESC LIMIT 1",
+        Integer.class,
+        host.id(),
+        game,
+        slot);
+  }
+
+  @Test
   void unicodeUsernamesAreAcceptedAndNormalized() {
     String suffix = UUID.randomUUID().toString().substring(0, 8);
     String username = "Cleita\u0303o_" + suffix;

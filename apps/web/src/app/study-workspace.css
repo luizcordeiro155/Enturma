@@ -119,62 +119,8 @@
 .mission-stage textarea {
   width: 100%;
 }
-.mission-word-layout {
-  max-width: 660px;
-  margin: auto;
-  display: grid;
-  gap: 16px;
-}
-.mission-word-board {
-  display: grid;
-  gap: 5px;
-  width: 100%;
-}
-.mission-word-row {
-  display: grid;
-  gap: 4px;
-}
-.mission-word-row span {
-  aspect-ratio: 1;
-  max-height: 48px;
-  display: grid;
-  place-items: center;
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  background: var(--soft);
-  font-family: ui-monospace, monospace;
-  font-size: clamp(0.7rem, 2vw, 1.2rem);
-  font-weight: 700;
-}
-.mission-word-row .C {
-  background: #237342;
-  color: white;
-  border-color: #237342;
-}
-.mission-word-row .P {
-  background: #f3c556;
-  color: #332500;
-  border-color: #f3c556;
-}
-.mission-word-row .A {
-  background: #505e66;
-  color: white;
-  border-color: #505e66;
-}
 .mission-word-row .C,
 .mission-word-row .P,
-.mission-word-row .A {
-  animation: letter-turn 0.4s ease-out both;
-}
-.mission-word-layout input {
-  font-family: ui-monospace, monospace;
-  letter-spacing: 0.2em;
-  font-weight: 700;
-  font-size: 1.2rem;
-}
-.mission-word-layout > small {
-  color: var(--muted);
-}
 .mission-code-layout {
   display: grid;
   grid-template-columns: minmax(260px, 0.8fr) minmax(0, 1.2fr);
@@ -252,36 +198,6 @@
 .mission-binary {
   max-width: 780px;
   margin: auto;
-}
-.bit-display {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(42px, 1fr));
-  gap: 6px;
-  margin: 20px 0;
-}
-.bit-display > span {
-  display: grid;
-  place-items: center;
-  padding: 12px 2px;
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  background: var(--soft);
-  transition:
-    background 0.2s,
-    transform 0.2s;
-}
-.bit-display > span.on {
-  background: #ddf280;
-  color: #183f36;
-  transform: translateY(-3px);
-}
-.bit-display b {
-  font:
-    700 1.8rem ui-monospace,
-    monospace;
-}
-.bit-display small {
-  font-size: 0.65rem;
 }
 .mission-feedback {
   display: flex;
@@ -703,13 +619,6 @@
   .study-modes button {
     padding: 12px;
   }
-  .mission-word-row {
-    gap: 2px;
-  }
-  .mission-word-row span {
-    border-radius: 3px;
-    font-size: 0.75rem;
-  }
   .daily-heading h1 {
     font-size: 2rem;
   }
@@ -723,19 +632,16 @@
 }
 @media (prefers-reduced-motion: reduce) {
   .mission-robot,
-  .bit-display > span {
-    transition: none;
-  }
-  .mission-word-row span,
+  .mission-word-row > *,
   .generation-loading svg {
     animation: none;
   }
 }
 html[data-reduced-motion="true"] .mission-robot,
-html[data-reduced-motion="true"] .bit-display > span {
+html[data-reduced-motion="true"] .bit-display > button {
   transition: none;
 }
-html[data-reduced-motion="true"] .mission-word-row span,
+html[data-reduced-motion="true"] .mission-word-row > *,
 html[data-reduced-motion="true"] .generation-loading svg {
   animation: none;
 }
