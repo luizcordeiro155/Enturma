@@ -11,25 +11,29 @@ export type CosmeticShop = {
   level: number;
   items: { id: string; level: number; unlocked: boolean }[];
 };
-const LAYER_NAMES = {
-  frame: "Moldura",
-  avatar: "Avatar",
-  effect: "Efeito",
-  theme: "Cores",
-};
+const LAYER_NAMES = { frame: "Moldura", avatar: "Avatar", effect: "Efeito" };
+const same = (a: readonly string[], b: readonly string[]) =>
+  a.length === b.length &&
+  a.every((color, index) => color.toLowerCase() === b[index].toLowerCase());
 
 /** The shelf of packs in the profile editor: put pieces on, mix them, try locked ones. */
 export function CosmeticsPicker({
   shop,
   details,
+  colors,
   trying,
   onChange,
+  onColors,
   onTry,
 }: {
   shop?: CosmeticShop;
   details: CosmeticDetails;
+  /** The profile's two colours right now: primary and accent. */
+  colors: readonly [string, string];
   trying?: string;
   onChange: (change: CosmeticDetails) => void;
+  /** Takes a pack's suggested colours as the profile's own. */
+  onColors: (colors: readonly [string, string]) => void;
   onTry: (id?: string) => void;
 }) {
   if (!shop)
@@ -42,16 +46,20 @@ export function CosmeticsPicker({
       <p className="cosmetic-shop-level">
         <strong>Você está no nível {shop.level}</strong>
         <span>
-          Cada pacote tem moldura, decoração de avatar, efeito e cores. Dá para
-          usar o pacote inteiro ou misturar as peças.
+          Cada pacote tem moldura, decoração de avatar, efeito e duas cores que
+          combinam. Dá para usar o pacote inteiro ou misturar as peças, e trocar
+          as cores depois em Tema e identidade.
         </span>
       </p>
       {COSMETIC_PACKS.map((pack) => {
         const item = shop.items.find((entry) => entry.id === pack.id);
         if (!item) return null;
-        const complete = COSMETIC_LAYERS.every(
-          (layer) => details[COSMETIC_FIELDS[layer]] === pack.id,
-        );
+        const painted = same(colors, pack.colors),
+          complete =
+            painted &&
+            COSMETIC_LAYERS.every(
+              (layer) => details[COSMETIC_FIELDS[layer]] === pack.id,
+            );
         return (
           <div
             key={pack.id}
@@ -91,20 +99,38 @@ export function CosmeticsPicker({
                 );
               })}
             </div>
+            <div className="cosmetic-pack-pieces">
+              <button
+                type="button"
+                className="secondary cosmetic-pack-colors"
+                data-action="colors"
+                aria-pressed={painted}
+                disabled={!item.unlocked}
+                onClick={() => onColors(pack.colors)}
+              >
+                <i
+                  aria-hidden
+                  style={{
+                    background: `linear-gradient(135deg, ${pack.colors[0]}, ${pack.colors[1]})`,
+                  }}
+                />
+                Cores do pacote
+              </button>
+            </div>
             <div className="cosmetic-pack-actions">
               {item.unlocked ? (
                 <button
                   type="button"
                   data-action="all"
                   aria-pressed={complete}
-                  onClick={() =>
+                  onClick={() => {
                     onChange({
                       cosmeticFrame: pack.id,
                       cosmeticAvatar: pack.id,
                       cosmeticEffect: pack.id,
-                      cosmeticTheme: pack.id,
-                    })
-                  }
+                    });
+                    onColors(pack.colors);
+                  }}
                 >
                   Usar o pacote completo
                 </button>
@@ -131,7 +157,6 @@ export function CosmeticsPicker({
               cosmeticFrame: "",
               cosmeticAvatar: "",
               cosmeticEffect: "",
-              cosmeticTheme: "",
             })
           }
         >

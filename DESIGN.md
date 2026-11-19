@@ -88,5 +88,13 @@ No celular (até 760 px) o Perfil social usa a mesma superfície, empilhada: o c
 - Cada pacote libera num nível (nível = XP total ÷ 250 + 1). O servidor confere o nível ao salvar; um pacote bloqueado pode ser experimentado na prévia, nunca salvo.
 - A arte é desenhada em canvas, um módulo por pacote, carregado só quando o perfil usa. A entrada toca toda vez que o perfil abre e depois a arte fica em repouso; com movimento reduzido vira uma imagem parada.
 - No perfil que abre sobre a página, em tela larga, a moldura fica ao redor do cartão e passa das bordas, sem caixa por trás. No celular o perfil ocupa a largura toda e a moldura aparece acima e abaixo dele. Na prévia do editor o cartão abre espaço para a moldura.
+- Cada pacote sugere duas cores (principal e realce). Usar o pacote aplica essas cores ao tema do próprio perfil; o estudante troca depois em "Tema e identidade".
 - As camadas são decoração: `aria-hidden`, sem capturar toques, e nunca cobrem o texto do perfil.
 - A arte nasce no protótipo e é exportada para `apps/web/src/cosmetics` por script; não se edita o arquivo gerado.
+
+## Perfil no modelo de cartão e sala escura — 19/11/2026
+
+- O perfil visto pelos outros é uma sala escura própria, igual nos dois temas do app: as duas cores do perfil (principal e realce) aparecem sob um véu escuro no fundo, no cartão e no botão principal, sempre com texto claro. Com uma cor só, o degradê vai dela para ela mesma.
+- Ao clicar numa pessoa abre o cartão compacto: só a identidade, com a moldura ao redor. "Ver perfil completo" mostra o mural, a atividade e o que há em comum ao lado do cartão.
+- No perfil completo o cartão fica afastado das bordas e arredondado; o conteúdo ao lado usa os componentes do Enturma sobre vidro escuro. Um mural com cores próprias tinge o seu lado da sala.
+- A prévia do editor é a mesma sala, para o estudante ver o perfil como os outros vão ver. A tela de editar continua como era.

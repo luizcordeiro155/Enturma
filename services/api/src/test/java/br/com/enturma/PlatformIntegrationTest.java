@@ -423,7 +423,7 @@ class PlatformIntegrationTest {
 
   private SocialController.Details profileLinks(List<String> links) {
     return new SocialController.Details(
-        null, null, null, null, null, null, null, null, links, null, null, null, null);
+        null, null, null, null, null, null, null, null, links, null, null, null);
   }
 
   @Test
@@ -457,21 +457,6 @@ class PlatformIntegrationTest {
     assertThat(storedCosmetic("cosmeticAvatar")).isEqualTo("sakura");
     assertThat(((Map<String, Object>) social.cosmetics(host)).get("level")).isEqualTo(5);
 
-    // The pack's colours follow the same rule as its other pieces.
-    assertThatThrownBy(
-            () ->
-                social.details(
-                    host,
-                    new SocialController.Details(
-                        null, null, null, null, null, null, null, null, null, null, null, null,
-                        "nao-existe")))
-        .isInstanceOf(ApiException.class);
-    social.details(
-        host,
-        new SocialController.Details(
-            null, null, null, null, null, null, null, null, null, null, null, null, "dragao"));
-    assertThat(storedCosmetic("cosmeticTheme")).isEqualTo("dragao");
-
     // An empty value takes the item off; what an older app does not send stays.
     social.details(host, cosmetics("", null, null));
     assertThat(storedCosmetic("cosmeticFrame")).isEmpty();
@@ -480,7 +465,7 @@ class PlatformIntegrationTest {
 
   private SocialController.Details cosmetics(String frame, String avatar, String effect) {
     return new SocialController.Details(
-        null, null, null, null, null, null, null, null, null, frame, avatar, effect, null);
+        null, null, null, null, null, null, null, null, null, frame, avatar, effect);
   }
 
   private String storedCosmetic(String field) {

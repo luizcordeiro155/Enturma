@@ -79,7 +79,22 @@ it("saves the pack the student put on", async () => {
     cosmeticFrame: "sakura",
     cosmeticAvatar: "sakura",
     cosmeticEffect: "sakura",
-    cosmeticTheme: "sakura",
+  });
+  // The pack's colours become the profile's own theme, free to change afterwards.
+  const sent = (path: string) =>
+    JSON.parse(
+      String(
+        vi
+          .mocked(api)
+          .mock.calls.find(
+            ([called, options]) => called === path && options?.body,
+          )![1]?.body,
+      ),
+    );
+  expect(sent("/users/me/appearance").accentColor).toBe("#e86a9a");
+  expect(sent("/users/me/showcase")).toMatchObject({
+    secondaryColor: "#6d4bc4",
+    theme: "GRADIENT",
   });
 });
 

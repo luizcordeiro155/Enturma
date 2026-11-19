@@ -12,24 +12,31 @@ const shop = {
     { id: "dragao", level: 5, unlocked: false },
   ],
 };
-const open = (details = {}, trying?: string) => {
+const open = (
+  details = {},
+  trying?: string,
+  colors: [string, string] = ["#111111", "#222222"],
+) => {
   const change = vi.fn(),
-    tryOn = vi.fn();
+    tryOn = vi.fn(),
+    paint = vi.fn();
   render(
     <CosmeticsPicker
       shop={shop}
       details={details}
+      colors={colors}
       trying={trying}
       onChange={change}
+      onColors={paint}
       onTry={tryOn}
     />,
   );
-  return { change, tryOn };
+  return { change, tryOn, paint };
 };
 const pack = (name: string) => screen.getByRole("group", { name });
 
-it("puts on the whole pack with one tap", () => {
-  const { change } = open();
+it("puts on the whole pack with one tap, colours included", () => {
+  const { change, paint } = open();
   fireEvent.click(
     pack("Sakura").querySelector('button[data-action="all"]') as HTMLElement,
   );
@@ -37,8 +44,23 @@ it("puts on the whole pack with one tap", () => {
     cosmeticFrame: "sakura",
     cosmeticAvatar: "sakura",
     cosmeticEffect: "sakura",
-    cosmeticTheme: "sakura",
   });
+  expect(paint).toHaveBeenCalledWith(["#e86a9a", "#6d4bc4"]);
+});
+
+it("offers the pack's colours on their own and shows when the profile wears them", () => {
+  const { paint, change } = open({}, undefined, ["#E86A9A", "#6d4bc4"]);
+  const colors = pack("Sakura").querySelector(
+    'button[data-action="colors"]',
+  ) as HTMLElement;
+  expect(colors).toHaveAttribute("aria-pressed", "true");
+  const other = pack("Noite das Abóboras").querySelector(
+    'button[data-action="colors"]',
+  ) as HTMLElement;
+  expect(other).toHaveAttribute("aria-pressed", "false");
+  fireEvent.click(other);
+  expect(paint).toHaveBeenCalledWith(["#7a35a8", "#f07a1c"]);
+  expect(change).not.toHaveBeenCalled();
 });
 
 it("mixes pieces of different packs and takes a piece off when tapped again", () => {

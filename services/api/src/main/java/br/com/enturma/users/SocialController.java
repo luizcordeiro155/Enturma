@@ -80,12 +80,11 @@ public class SocialController {
       @Size(max = 6) List<@Size(max = 200) String> links,
       @Pattern(regexp = "[a-z-]{0,32}") String cosmeticFrame,
       @Pattern(regexp = "[a-z-]{0,32}") String cosmeticAvatar,
-      @Pattern(regexp = "[a-z-]{0,32}") String cosmeticEffect,
-      @Pattern(regexp = "[a-z-]{0,32}") String cosmeticTheme) {}
+      @Pattern(regexp = "[a-z-]{0,32}") String cosmeticEffect) {}
 
   /**
    * Profile cosmetics and the level that opens each one. A pack brings a frame, an avatar
-   * decoration, a profile effect and its colours; the art itself lives in the web app.
+   * decoration and a profile effect; the art itself lives in the web app.
    */
   static final Map<String, Integer> COSMETICS = cosmeticLevels();
 
@@ -160,12 +159,7 @@ public class SocialController {
         && (value.links().size() > 6
             || !value.links().stream().allMatch(SocialController::profileLink)))
       throw ApiException.invalid("Use até 6 links, cada um com um endereço web ou um e-mail.");
-    requireUnlocked(
-        a.id(),
-        value.cosmeticFrame(),
-        value.cosmeticAvatar(),
-        value.cosmeticEffect(),
-        value.cosmeticTheme());
+    requireUnlocked(a.id(), value.cosmeticFrame(), value.cosmeticAvatar(), value.cosmeticEffect());
     db.jdbc.update(
         "UPDATE app_user SET profile_details=coalesce(profile_details,'{}'::jsonb) ||"
             + " jsonb_strip_nulls(?::jsonb) WHERE id=?",

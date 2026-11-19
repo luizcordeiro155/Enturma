@@ -441,9 +441,14 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
     path: "../../.local/profile-popover.png",
     animations: "disabled",
   });
+  // The profile is a dark room of its own, whatever the app theme.
   await expect(
     page.locator(".user-profile-popover .profile-shared-surface"),
-  ).toHaveCSS("background-color", "rgb(24, 63, 54)");
+  ).toHaveCSS("background-color", "rgb(11, 12, 18)");
+  // It opens as the compact card; the full profile is one tap further.
+  await expect(
+    page.getByRole("dialog", { name: `Perfil de ${b}` }),
+  ).toHaveAttribute("data-profile-view", "compact");
   await expect(
     page.locator(
       ".user-profile-popover .public-profile-body > .profile-dialog-actions",
@@ -463,12 +468,12 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   const profileAction = page.locator(
     ".user-profile-popover .public-profile-body > .profile-dialog-actions > .button:not(.secondary)",
   );
-  // The shared profile uses the configured Enturma accent, not the CSS fallback.
-  await expect(profileAction).toHaveCSS(
+  // On the card the main action wears the profile's own colour, deepened, with white text.
+  await expect(profileAction).not.toHaveCSS(
     "background-color",
     "rgb(216, 239, 121)",
   );
-  await expect(profileAction).toHaveCSS("color", "rgb(16, 42, 36)");
+  await expect(profileAction).toHaveCSS("color", "rgb(255, 255, 255)");
   await expect(profileAction).toHaveCSS("text-decoration-line", "none");
   await page.locator("html").evaluate((node, theme) => {
     if (theme === null) node.removeAttribute("data-theme");

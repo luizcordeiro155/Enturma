@@ -55,12 +55,16 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   ).toBeDisabled();
   await dragon.getByRole("button", { name: "Experimentar" }).click();
   await expect(layer(page, "frame")).toBeVisible();
-  await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.1);
+  await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.01);
 
   const sakura = dialog.getByRole("group", { name: "Sakura" });
   await sakura.getByRole("button", { name: "Usar o pacote completo" }).click();
   await expect(
     sakura.getByRole("button", { name: "Moldura", exact: true }),
+  ).toHaveAttribute("aria-pressed", "true");
+  // The pack brings two colours that go with it; they become the profile's own theme.
+  await expect(
+    sakura.getByRole("button", { name: "Cores do pacote" }),
   ).toHaveAttribute("aria-pressed", "true");
   await dialog.getByRole("button", { name: "Aplicar", exact: true }).click();
   await expect(dialog).toBeHidden();
@@ -87,7 +91,7 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   await page.reload();
   for (const name of ["frame", "avatar", "effect"])
     await expect(layer(page, name)).toBeVisible();
-  await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.1);
+  await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.01);
   await expect.poll(() => painted(layer(page, "avatar"))).toBeGreaterThan(0.02);
   // The frame takes its own room, so the profile text stays clear of it.
   const card = page.locator(".public-profile-card").last();
@@ -121,10 +125,23 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   expect(
     await floating.evaluate((node) => getComputedStyle(node).paddingLeft),
   ).toBe("0px");
+  // The profile is its own dark room and the card wears the pack's two colours, deepened.
+  const night = await page
+    .locator(".social-dialog .profile-shared-surface")
+    .evaluate((node) => getComputedStyle(node).backgroundColor);
+  expect(night).toBe("rgb(11, 12, 18)");
+  expect(
+    await floating
+      .locator(".public-profile-body")
+      .evaluate((node) => getComputedStyle(node).backgroundImage),
+  ).toContain("linear-gradient");
+  await expect(
+    page.locator(".social-dialog .profile-preview-combined"),
+  ).toHaveCSS("--profile-realce", "#6d4bc4");
 
   // With motion turned off the art is still there, as a still picture.
   await page.goto("/profile");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
-  await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.1);
+  await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.01);
 });

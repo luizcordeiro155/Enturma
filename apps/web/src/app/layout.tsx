@@ -50,6 +50,7 @@ import "./portfolio-projects.css";
 import "./settings.css";
 import "./mission-games.css";
 import "./profile-cosmetics.css";
+import "./profile-floating.css";
 import { DesktopUpdateProvider } from "@/components/desktop-updates";
 import { Motion } from "@/components/motion";
 import { ThemeSync } from "@/components/theme-sync";

@@ -21,8 +21,8 @@
   z-index: 2147483000;
 }
 /* The panel beside the card steps aside so the art does not sit on its text. */
-html body .has-cosmetic-spill > .profile-preview-mural {
-  border-left: var(--cosmetic-spill, 0) solid transparent !important;
+html body .profile-preview-combined.has-cosmetic-spill {
+  column-gap: calc(var(--cosmetic-spill, 0px) + 6px) !important;
 }
 /* Everywhere else the frame takes real room around the card, so it never covers the profile. */
 html body .public-profile-card.has-cosmetic-frame {
@@ -112,21 +112,16 @@ html .public-profile-card.has-cosmetic-frame > .public-profile-banner,
 html .public-profile-card.has-cosmetic-frame > .public-profile-body {
   flex-shrink: 0;
 }
-/* A pack's colours dress the card: night background, its banner, light text. */
-html body .public-profile-card.has-cosmetic-theme {
-  --profile-copy: #fff !important;
-  --profile-copy-panel: transparent !important;
-  background: var(--cosmetic-bg) !important;
+.cosmetic-pack-colors i {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border: 1px solid var(--border);
+  border-radius: 50%;
 }
-html body .public-profile-card.has-cosmetic-theme > .public-profile-banner {
-  background: var(--cosmetic-banner) !important;
-}
-html body .public-profile-card.has-cosmetic-theme > .public-profile-body {
-  border-top-width: 0 !important;
-  background: var(--cosmetic-bg) !important;
-}
-html body .public-profile-card.has-cosmetic-theme .identity-avatar {
-  border-color: var(--cosmetic-avatar-ring) !important;
-  background: var(--cosmetic-avatar) !important;
-  color: #fff !important;
+html .cosmetic-shop .cosmetic-pack-colors {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
