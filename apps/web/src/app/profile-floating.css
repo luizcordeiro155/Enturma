@@ -326,9 +326,9 @@ html
     flex-direction: column;
     box-sizing: border-box;
     overflow: hidden auto !important;
-    /* 372px of card, the room the frame reaches on each side, and the bar's two gutters. */
+    /* 372px of card and the room the frame reaches on each side. */
     width: min(
-      calc(384px + 2 * var(--pop-side)),
+      calc(372px + 2 * var(--pop-side)),
       calc(100vw - 16px)
     ) !important;
     height: 100dvh !important;
@@ -338,17 +338,6 @@ html
     border-radius: 0;
     background: transparent !important;
     box-shadow: none !important;
-    /* The card stays centred whether or not the bar is there. */
-    scrollbar-gutter: stable both-edges !important;
-  }
-  /* This bar lies over the page, not over the dark room: it takes the page's ink. */
-  html
-    body
-    .user-profile-popover[data-profile-view="compact"]:is(
-      :hover,
-      :focus-within
-    ) {
-    --profile-bar: color-mix(in srgb, var(--ink, #888) 42%, transparent);
   }
   html
     body
@@ -401,7 +390,28 @@ html
   }
 }
 
-/* A scroll bar here is a thin line that only shows under the pointer or the keyboard. */
+/* The card's own window shows no bar: one there would float beside the frame. The card
+   still scrolls with the wheel, the touchpad, a finger and the keyboard. */
+html
+  body
+  :is(dialog.social-dialog-profile, .user-profile-popover)
+  .profile-shared-surface
+  > .profile-preview-identity,
+html body .user-profile-popover[data-profile-view="compact"] {
+  scrollbar-width: none !important;
+}
+html
+  body
+  :is(dialog.social-dialog-profile, .user-profile-popover)
+  .profile-shared-surface
+  > .profile-preview-identity::-webkit-scrollbar,
+html
+  body
+  .user-profile-popover[data-profile-view="compact"]::-webkit-scrollbar {
+  display: none;
+}
+/* Beside the card, a scroll bar is a thin line that only shows under the pointer or the
+   keyboard. */
 @property --profile-bar {
   syntax: "<color>";
   inherits: true;
@@ -409,56 +419,34 @@ html
 }
 html
   body
-  :is(
-    .user-profile-popover,
-    :is(dialog.social-dialog-profile, .user-profile-popover)
-      :is(
-        .profile-preview-identity,
-        .profile-preview-mural,
-        .social-profile-grid-scroll
-      )
-  ) {
+  :is(dialog.social-dialog-profile, .user-profile-popover)
+  :is(.profile-preview-mural, .social-profile-grid-scroll) {
   --profile-bar: transparent;
   transition: --profile-bar 0.25s;
 }
 html
   body
-  :is(
-    .user-profile-popover,
-    :is(dialog.social-dialog-profile, .user-profile-popover)
-      :is(
-        .profile-preview-identity,
-        .profile-preview-mural,
-        .social-profile-grid-scroll
-      )
-  ):is(:hover, :focus-within) {
+  :is(dialog.social-dialog-profile, .user-profile-popover)
+  :is(.profile-preview-mural, .social-profile-grid-scroll):is(
+    :hover,
+    :focus-within
+  ) {
   --profile-bar: rgba(255, 255, 255, 0.34);
 }
 @supports selector(::-webkit-scrollbar) {
   html
     body
-    :is(
-      .user-profile-popover,
-      :is(dialog.social-dialog-profile, .user-profile-popover)
-        :is(
-          .profile-preview-identity,
-          .profile-preview-mural,
-          .social-profile-grid-scroll
-        )
-    ) {
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(.profile-preview-mural, .social-profile-grid-scroll) {
     scrollbar-width: auto;
     scrollbar-color: auto;
   }
   html
     body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
     :is(
-      .user-profile-popover,
-      :is(dialog.social-dialog-profile, .user-profile-popover)
-        :is(
-          .profile-preview-identity,
-          .profile-preview-mural,
-          .social-profile-grid-scroll
-        )
+      .profile-preview-mural,
+      .social-profile-grid-scroll
     )::-webkit-scrollbar {
     display: block;
     width: 6px;
@@ -467,54 +455,38 @@ html
   }
   html
     body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
     :is(
-      .user-profile-popover,
-      :is(dialog.social-dialog-profile, .user-profile-popover)
-        :is(
-          .profile-preview-identity,
-          .profile-preview-mural,
-          .social-profile-grid-scroll
-        )
+      .profile-preview-mural,
+      .social-profile-grid-scroll
     )::-webkit-scrollbar-track {
     background: transparent;
   }
   html
     body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
     :is(
-      .user-profile-popover,
-      :is(dialog.social-dialog-profile, .user-profile-popover)
-        :is(
-          .profile-preview-identity,
-          .profile-preview-mural,
-          .social-profile-grid-scroll
-        )
+      .profile-preview-mural,
+      .social-profile-grid-scroll
     )::-webkit-scrollbar-thumb {
     border-radius: 99px;
     background: var(--profile-bar);
   }
   html
     body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
     :is(
-      .user-profile-popover,
-      :is(dialog.social-dialog-profile, .user-profile-popover)
-        :is(
-          .profile-preview-identity,
-          .profile-preview-mural,
-          .social-profile-grid-scroll
-        )
+      .profile-preview-mural,
+      .social-profile-grid-scroll
     )::-webkit-scrollbar-thumb:hover {
     background: rgba(255, 255, 255, 0.55);
   }
   html
     body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
     :is(
-      .user-profile-popover,
-      :is(dialog.social-dialog-profile, .user-profile-popover)
-        :is(
-          .profile-preview-identity,
-          .profile-preview-mural,
-          .social-profile-grid-scroll
-        )
+      .profile-preview-mural,
+      .social-profile-grid-scroll
     )::-webkit-scrollbar-button {
     display: none;
   }
@@ -522,15 +494,8 @@ html
 @supports not selector(::-webkit-scrollbar) {
   html
     body
-    :is(
-      .user-profile-popover,
-      :is(dialog.social-dialog-profile, .user-profile-popover)
-        :is(
-          .profile-preview-identity,
-          .profile-preview-mural,
-          .social-profile-grid-scroll
-        )
-    ) {
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(.profile-preview-mural, .social-profile-grid-scroll) {
     scrollbar-width: thin;
     scrollbar-color: var(--profile-bar) transparent;
   }

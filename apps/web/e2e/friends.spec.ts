@@ -485,10 +485,10 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
     .boundingBox();
   expect(Math.round(cardAvatar!.width)).toBe(Math.round(cardAvatar!.height));
   // In a short window the compact card does not fit: the whole card scrolls in a clear
-  // column, and nothing inside it scrolls on its own (one bar, never two).
+  // column, and nothing inside it scrolls on its own.
   const roomy = page.viewportSize()!;
   if (roomy.width > 760) {
-    await page.setViewportSize({ width: roomy.width, height: 480 });
+    await page.setViewportSize({ width: roomy.width, height: 420 });
     const compact = page.getByRole("dialog", { name: `Perfil de ${b}` });
     await expect
       .poll(() =>
@@ -508,13 +508,15 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
         (await compact.locator(".profile-shared-surface").boundingBox())!.y,
       );
     const restTop = await cardTop();
-    await compact.evaluate((node) => node.scrollTo(0, 60));
-    await expect.poll(cardTop).toBe(restTop - 60);
+    await compact.evaluate((node) => node.scrollTo(0, 30));
+    await expect.poll(cardTop).toBe(restTop - 30);
+    // No bar floats beside the card: it scrolls with the wheel, the touchpad and keys.
+    await expect(compact).toHaveCSS("scrollbar-width", "none");
     // The close button rides on the card.
     const closeTop = (await compact
       .getByRole("button", { name: "Fechar perfil" })
       .boundingBox())!.y;
-    expect(Math.round(closeTop - (restTop - 60))).toBe(13);
+    expect(Math.round(closeTop - (restTop - 30))).toBe(13);
     await compact.evaluate((node) => node.scrollTo(0, 0));
     await page.setViewportSize(roomy);
   }

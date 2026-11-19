@@ -397,17 +397,9 @@ export function UserIdentity({
     function outside(e: PointerEvent) {
       if (!panel || anchor?.contains(e.target as Node)) return;
       // Compact, the popover is a clear column the card scrolls in: a press on the bare
-      // column is a press beside the card, unless it lands on the column's own scrollbar.
+      // column is a press beside the card.
       const beside =
-        e.target === panel &&
-        panel.dataset.profileView === "compact" &&
-        !(
-          panel.offsetWidth > panel.clientWidth &&
-          e.clientX >=
-            panel.getBoundingClientRect().left +
-              panel.clientLeft +
-              panel.clientWidth
-        );
+        e.target === panel && panel.dataset.profileView === "compact";
       if (beside || !panel.contains(e.target as Node)) void close();
     }
     function key(e: KeyboardEvent) {

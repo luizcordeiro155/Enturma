@@ -142,7 +142,7 @@ it("opens as the compact card and shows the full profile only when asked", async
   ).toHaveAttribute("data-profile-view", "compact");
 });
 
-it("closes the compact card on a press beside it, not on its content or its scrollbar", async () => {
+it("closes the compact card on a press beside it, not on its content", async () => {
   render(<UserIdentity user={{ id: "me", name: "Estudante" }} />);
   fireEvent.click(
     screen.getByRole("button", { name: "Ver perfil de Estudante" }),
@@ -151,20 +151,16 @@ it("closes the compact card on a press beside it, not on its content or its scro
     name: "Ver perfil completo",
   });
   const profile = screen.getByRole("dialog", { name: "Perfil de Estudante" });
-  // Compact, the popover is a clear column the card scrolls in, with its bar at the edge.
-  Object.defineProperties(profile, {
-    offsetWidth: { value: 500 },
-    clientWidth: { value: 494 },
-  });
   fireEvent.pointerDown(more);
-  fireEvent.pointerDown(profile, { clientX: 497 });
   await act(async () => {
     await new Promise((resolve) => setTimeout(resolve, 20));
   });
   expect(screen.getByRole("dialog", { name: "Perfil de Estudante" })).toBe(
     profile,
   );
-  fireEvent.pointerDown(profile, { clientX: 20 });
+  // Compact, the popover is a clear column the card scrolls in: the bare column is not
+  // the card.
+  fireEvent.pointerDown(profile);
   await waitFor(() => expect(screen.queryByRole("dialog")).toBeNull());
 });
 

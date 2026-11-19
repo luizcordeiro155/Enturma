@@ -149,8 +149,8 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   ).toHaveCSS("--profile-realce", "#6d4bc4");
 
   // In a short window the card does not fit. Card and frame then scroll as one piece
-  // inside a clear column the height of the room: the card is the box, the art adds no
-  // scrolling of its own, and the one thin bar only shows under the pointer.
+  // inside a clear column the height of the room: the card is the box and the art adds
+  // no scrolling of its own.
   const roomy = page.viewportSize()!;
   await page.setViewportSize({ width: 1365, height: 460 });
   const column = page.locator(".social-dialog .profile-preview-identity");
@@ -183,12 +183,21 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   expect(
     await floating.evaluate((node) => getComputedStyle(node).boxShadow),
   ).not.toBe("none");
+  // The card's own window shows no bar at all: a bar there would float beside the
+  // frame. The content beside it has a thin one that only shows under the pointer.
+  expect(
+    await column.evaluate(
+      (node) => (node as HTMLElement).offsetWidth - node.clientWidth,
+    ),
+  ).toBe(0);
+  await expect(column).toHaveCSS("scrollbar-width", "none");
+  const beside = page.locator(".social-dialog .profile-preview-mural");
   await page.mouse.move(4, 4);
-  await expect(column).toHaveCSS("--profile-bar", "rgba(0, 0, 0, 0)");
-  await floating.hover();
+  await expect(beside).toHaveCSS("--profile-bar", "rgba(0, 0, 0, 0)");
+  await beside.hover();
   await expect
     .poll(() =>
-      column.evaluate((node) =>
+      beside.evaluate((node) =>
         getComputedStyle(node).getPropertyValue("--profile-bar"),
       ),
     )
