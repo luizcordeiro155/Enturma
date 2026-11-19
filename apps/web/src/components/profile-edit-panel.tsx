@@ -14,6 +14,7 @@ export function ProfileEditPanel({
   children,
   onBegin,
   onCancel,
+  onClose,
 }: {
   title: string;
   description: string;
@@ -22,6 +23,8 @@ export function ProfileEditPanel({
   children: ReactNode;
   onBegin: () => void;
   onCancel: () => void;
+  /** Runs whenever the panel closes, applied or cancelled. */
+  onClose?: () => void;
 }) {
   const [open, setOpen] = useState(false);
   const dialog = useRef<HTMLDialogElement>(null);
@@ -32,6 +35,7 @@ export function ProfileEditPanel({
     if (closing.current) return;
     closing.current = true;
     if (cancel) onCancel();
+    onClose?.();
     try {
       await (dialog.current
         ? profileEntrance(dialog.current, true)?.finished

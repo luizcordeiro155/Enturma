@@ -15,7 +15,9 @@ import {
   Type,
   Trash2,
   X,
+  Gem,
 } from "lucide-react";
+import { CosmeticsPicker, type CosmeticShop } from "./profile-cosmetics-picker";
 import { ProfileBackdrop } from "./profile-motion";
 import { ProfileEditPanel } from "./profile-edit-panel";
 import { ProfileImageEditor } from "./profile-image-editor";
@@ -90,6 +92,20 @@ export function ProfileDetailsEditor({
     nameFont: "SYSTEM",
     ...profile.profileDetails,
   });
+  // What the student may wear, by level, and a pack being tried on without saving.
+  const [shop, setShop] = useState<CosmeticShop>();
+  const [trying, setTrying] = useState<string>();
+  useEffect(() => {
+    let active = true;
+    api<CosmeticShop>("/cosmetics")
+      .then((value) => {
+        if (active && Array.isArray(value?.items)) setShop(value);
+      })
+      .catch(() => {});
+    return () => {
+      active = false;
+    };
+  }, []);
   // The old single "site" joins the list; saving retires it.
   const [links, setLinks] = useState(() => {
     const saved = profileLinks(profile.profileDetails);
@@ -258,7 +274,19 @@ export function ProfileDetailsEditor({
     mediaVersion: mediaVersion || profile.mediaVersion,
     hasAvatar: mediaState.avatar ?? profile.hasAvatar,
     hasBanner: mediaState.banner ?? profile.hasBanner,
-    profileDetails: { ...details, website: "", links },
+    profileDetails: {
+      ...details,
+      website: "",
+      links,
+      ...(trying
+        ? {
+            cosmeticFrame: trying,
+            cosmeticAvatar: trying,
+            cosmeticEffect: trying,
+            cosmeticTheme: trying,
+          }
+        : {}),
+    },
     showcaseAppearance: showcase?.appearance,
   };
 
@@ -683,6 +711,27 @@ export function ProfileDetailsEditor({
                   <option value="GRADIENT">Anel degradê</option>
                 </select>
               </label>
+            </ProfileEditPanel>
+
+            <ProfileEditPanel
+              title="Molduras e efeitos"
+              description="Pacotes liberados por nível"
+              thumbnail={<Gem size={24} />}
+              preview={<ProfileCard user={previewUser} showcase={showcase} />}
+              onBegin={beginEdit}
+              onCancel={cancelEdit}
+              onClose={() => setTrying(undefined)}
+            >
+              <CosmeticsPicker
+                shop={shop}
+                details={details}
+                trying={trying}
+                onChange={(change) => {
+                  setTrying(undefined);
+                  setDetails((current) => ({ ...current, ...change }));
+                }}
+                onTry={setTrying}
+              />
             </ProfileEditPanel>
 
             <ProfileEditPanel
