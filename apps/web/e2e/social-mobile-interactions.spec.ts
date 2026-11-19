@@ -168,22 +168,16 @@ test("Social: mentions, keyboard, swipes and compact profile/inbox", async ({
   await expect(profile).toBeVisible();
   for (const width of [390, 1440]) {
     await page.setViewportSize({ width, height: 900 });
-    // From 761 px up the profile uses the two-column surface of the main profile.
-    const desktop = width >= 761;
+    // Every width uses the surface of the main profile: two columns from 761 px,
+    // one stacked column on phones.
     const author = profile.locator(
-      desktop
-        ? ".social-profile-surface .public-profile-body"
-        : ".social-profile-heading .social-author",
+      ".social-profile-surface .public-profile-body",
     );
-    const name = author.locator(desktop ? "h2" : "strong");
+    const name = author.locator("h2");
     await expect(name).toBeVisible();
     const nameBox = (await name.boundingBox())!,
       buttons = (await profile
-        .locator(
-          desktop
-            ? ".social-profile-surface .profile-dialog-actions"
-            : ".social-profile-buttons",
-        )
+        .locator(".social-profile-surface .profile-dialog-actions")
         .boundingBox())!;
     expect(nameBox.width).toBeGreaterThan(80);
     expect(

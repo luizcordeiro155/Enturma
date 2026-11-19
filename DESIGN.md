@@ -64,3 +64,5 @@ Curtidas usam `--social-like`, definido em `social-studio.css`: vermelho escuro 
 ## Perfil social no desktop — 18/11/2026
 
 A partir de 761 px, o Perfil social usa a mesma superfície do perfil padrão (`ProfileCard` e as cores de `profileStyle`): cartão de identidade à esquerda, com banner, avatar, nome, status, bio e as ações de seguir, mensagem e copiar link; à direita, a coluna “Enturma Social” com os contadores reais, avisos, destaques, abas e a grade de três colunas. Os controles da coluna social derivam de `currentColor` (`--mural-copy`), para manter contraste nos temas Claro, Escuro, Enturma e Sistema e em murais personalizados. Até 760 px o perfil continua empilhado, sem mudanças.
+
+No celular (até 760 px) o Perfil social usa a mesma superfície, empilhada: o cartão de identidade com a personalização do perfil (banner, avatar e decoração, fonte, efeito e cor do nome, insígnias, cores e fundo) e, abaixo, o bloco “Enturma Social” com contadores, destaques, abas e grade. A escolha entre duas colunas e uma coluna é feita só por CSS; não há mais uma árvore separada para o celular.

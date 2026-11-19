@@ -1,7 +1,7 @@
 "use client";
 import { useSocialLives } from "./social-live-context";
 /* eslint-disable @next/next/no-img-element -- authenticated highlight thumbnails */
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Bell, LockKeyhole, MessageCircle, Share2 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
@@ -25,8 +25,6 @@ import {
 } from "../user-identity";
 import { ProfileBackdrop } from "../profile-motion";
 import type { Showcase } from "../profile-showcase";
-import { ForumLinks } from "../forum-links";
-import { ProfileLinks } from "../profile-links";
 import { useLiveRefresh } from "@/lib/live-updates";
 
 type Profile = SocialPerson &
@@ -46,23 +44,6 @@ const TABS = [
   ["tagged", "Marcados"],
   ["saved", "Salvos"],
 ] as const;
-/** From this width up the profile uses the two-column surface of the main profile. */
-const DESKTOP_PROFILE_QUERY = "(min-width: 761px)";
-function watchDesktopProfile(changed: () => void) {
-  if (typeof window.matchMedia !== "function") return () => {};
-  const query = window.matchMedia(DESKTOP_PROFILE_QUERY);
-  query.addEventListener("change", changed);
-  return () => query.removeEventListener("change", changed);
-}
-function useDesktopProfile() {
-  return useSyncExternalStore(
-    watchDesktopProfile,
-    () =>
-      typeof window.matchMedia === "function" &&
-      window.matchMedia(DESKTOP_PROFILE_QUERY).matches,
-    () => false,
-  );
-}
 export function SocialProfile({
   id,
   me,
@@ -97,14 +78,13 @@ export function SocialProfile({
   );
   const writing = useRef(false);
   const [collections, setCollections] = useState(false);
-  const desktop = useDesktopProfile();
-  // The desktop surface borrows the look of the main profile (colours, mural, featured badges).
+  // Every size borrows the look of the main profile (colours, mural, name style, featured
+  // badges); CSS decides between two columns and a single stacked one.
   const [showcase, setShowcase] = useState<{
     id: string;
     value: Showcase | null;
   }>();
   useEffect(() => {
-    if (!desktop) return;
     let alive = true;
     void api<Showcase>(`/users/${id}/showcase`, { cache: "no-store" })
       .then((value) => {
@@ -116,7 +96,7 @@ export function SocialProfile({
     return () => {
       alive = false;
     };
-  }, [id, desktop]);
+  }, [id]);
   useLiveRefresh(
     "profile_changed",
     async () => {
@@ -447,7 +427,7 @@ export function SocialProfile({
     </div>
   ));
   const surfaceProfile =
-    profile && desktop && showcase?.id === id
+    profile && showcase?.id === id
       ? {
           ...profile,
           showcaseAppearance: showcase.value?.appearance,
@@ -455,10 +435,8 @@ export function SocialProfile({
       : undefined;
   return (
     <SocialDialog title="Perfil social" close={close} wide variant="profile">
-      <div
-        className={`social-dialog-body social-profile-body${desktop ? " social-profile-desktop" : ""}`}
-      >
-        {(!profile || (desktop && !surfaceProfile)) && !error && (
+      <div className="social-dialog-body social-profile-body">
+        {!surfaceProfile && !error && (
           <p role="status">{"Carregando perfil\u2026"}</p>
         )}
         {surfaceProfile && (
@@ -497,52 +475,6 @@ export function SocialProfile({
               </div>
             </section>
           </div>
-        )}
-        {profile && !desktop && (
-          <>
-            <div
-              className="social-profile-banner"
-              style={profileStyle(profile)}
-            >
-              {profile.hasBanner && (
-                <img
-                  key={`${id}-${profile.mediaVersion}`}
-                  src={`/api/backend/users/${id}/banner?v=${profile.mediaVersion ?? 0}`}
-                  alt={`Banner de ${profile.name}`}
-                />
-              )}
-            </div>
-            <div className="social-profile-intro">
-              <div className="social-profile-heading">
-                <SocialAuthor user={profile} open={person} />
-                <div className="social-profile-buttons">{actions}</div>
-              </div>
-              {profile.profileDetails?.statusText && (
-                <p className="social-profile-status">
-                  {profile.profileDetails.statusText}
-                </p>
-              )}
-              {counts}
-              {profile.bio && (
-                <p className="social-profile-bio">
-                  <ForumLinks text={profile.bio} />
-                </p>
-              )}
-              {profile.profileDetails?.interests && (
-                <p className="social-profile-bio">
-                  <strong>Interesses</strong>
-                  <br />
-                  {profile.profileDetails.interests}
-                </p>
-              )}
-              <ProfileLinks details={profile.profileDetails} />
-              {privateNotice}
-              {tools}
-              {highlightStrip}
-            </div>
-            {tabList}
-            {panels}
-          </>
         )}
         {notice && <p role="status">{notice}</p>}
         {error && (
