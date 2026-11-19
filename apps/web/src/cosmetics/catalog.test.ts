@@ -67,7 +67,7 @@ it("has the art for every pack it lists", async () => {
 it("keeps every pack in one of the shelves the editor shows, with no repeats", () => {
   const ids = COSMETIC_PACKS.map((pack) => pack.id);
   expect(new Set(ids).size).toBe(ids.length);
-  expect(ids).toHaveLength(29);
+  expect(ids).toHaveLength(31);
   for (const pack of COSMETIC_PACKS)
     expect(COSMETIC_GROUPS, pack.id).toContain(pack.group);
   // Every shelf has something on it.
@@ -87,4 +87,13 @@ it("lists exactly the packs the server gives a level to", () => {
     .map((match) => match[1])
     .sort();
   expect(levelled).toEqual(COSMETIC_PACKS.map((pack) => pack.id).sort());
+});
+
+it("keeps the dragons on a shelf of their own", () => {
+  const dragons = COSMETIC_PACKS.filter((pack) => pack.group === "Dragões");
+  expect(dragons.map((pack) => pack.name)).toEqual([
+    "Dragão Imperial",
+    "Dragão da Tempestade",
+    "Dragão da Lua",
+  ]);
 });

@@ -902,6 +902,74 @@ export function paintedEgg(ctx, r, kind, cols, ink = "#3b2a3a") {
 }
 
 // The prototype's card, tinted the way the app tints a profile with the pack's two colours.
+// A smooth line through `pts` ([x, y] pairs) as `n` steps, each with its direction and its normal: the
+// middle of a body, a neck or a tail. The normal points to the right of the way the line runs.
+export function spine(pts, n = 40) {
+  const out = [],
+    m = pts.length - 1,
+    P = (i) => pts[Math.max(0, Math.min(m, i))];
+  for (let k = 0; k <= n; k++) {
+    const f = (k / n) * m,
+      i = Math.min(m - 1, Math.floor(f)),
+      u = f - i,
+      a = P(i - 1),
+      b = P(i),
+      c = P(i + 1),
+      d = P(i + 2),
+      q = (j) =>
+        0.5 *
+        (2 * b[j] +
+          (c[j] - a[j]) * u +
+          (2 * a[j] - 5 * b[j] + 4 * c[j] - d[j]) * u * u +
+          (3 * b[j] - a[j] - 3 * c[j] + d[j]) * u * u * u);
+    out.push({ x: q(0), y: q(1), u: k / n });
+  }
+  for (let k = 0; k <= n; k++) {
+    const a = out[Math.max(0, k - 1)],
+      b = out[Math.min(n, k + 1)],
+      l = Math.hypot(b.x - a.x, b.y - a.y) || 1,
+      p = out[k];
+    p.tx = (b.x - a.x) / l;
+    p.ty = (b.y - a.y) / l;
+    p.nx = -p.ty;
+    p.ny = p.tx;
+  }
+  return out;
+}
+// The outline of a body along a spine, `half(u)` wide to each side (or from `from(u)` to `half(u)` of the
+// normal, for a belly or a stripe). Leaves the path ready to fill and stroke.
+export function bodyPath(ctx, sp, half, from) {
+  ctx.beginPath();
+  for (let k = 0; k < sp.length; k++) {
+    const p = sp[k],
+      w = half(p.u);
+    if (k) ctx.lineTo(p.x + p.nx * w, p.y + p.ny * w);
+    else ctx.moveTo(p.x + p.nx * w, p.y + p.ny * w);
+  }
+  for (let k = sp.length - 1; k >= 0; k--) {
+    const p = sp[k],
+      w = from ? from(p.u) : -half(p.u);
+    ctx.lineTo(p.x + p.nx * w, p.y + p.ny * w);
+  }
+  ctx.closePath();
+}
+// A bolt of lightning from one point to another: the same seed draws the same bolt.
+export function boltPath(ctx, x0, y0, x1, y1, seed, jag = 0.16, steps = 7) {
+  const R = rng(seed),
+    dx = x1 - x0,
+    dy = y1 - y0,
+    l = Math.hypot(dx, dy) || 1,
+    nx = -dy / l,
+    ny = dx / l;
+  ctx.beginPath();
+  ctx.moveTo(x0, y0);
+  for (let i = 1; i < steps; i++) {
+    const u = i / steps,
+      o = (R() - 0.5) * 2 * l * jag * Math.sin(u * Math.PI + 0.4);
+    ctx.lineTo(x0 + dx * u + nx * o, y0 + dy * u + ny * o);
+  }
+  ctx.lineTo(x1, y1);
+}
 export const cardTheme = (a, b) => ({
   "--card-bg": `linear-gradient(rgba(8,9,13,.52),rgba(8,9,13,.64)),linear-gradient(180deg,${a},${b})`,
   "--card-banner": `linear-gradient(120deg,${a},${b})`,

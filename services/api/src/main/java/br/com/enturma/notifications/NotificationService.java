@@ -26,6 +26,24 @@ public class NotificationService {
     this.planner = planner;
   }
 
+  /**
+   * Reactions pile up on the same thing: the inbox shows them as one entry with who reacted,
+   * and only the first one in a while rings the phone and the desktop.
+   */
+  private static final Set<String> GROUPED =
+      Set.of("SOCIAL_LIKE", "SOCIAL_REPOST", "FORUM_LIKE", "FORUM_REACTION");
+
+  private boolean rangLately(UUID user, String kind, UUID target) {
+    return GROUPED.contains(kind)
+        && target != null
+        && db.exists(
+            "SELECT EXISTS(SELECT 1 FROM notification_desktop_push_event WHERE user_id=? AND"
+                + " kind=? AND target_id=? AND created_at>now()-interval '1 hour')",
+            user,
+            kind,
+            target);
+  }
+
   /** In class or in an AI study session with focus mode on, Social waits in the app. */
   private boolean focusHolds(UUID user, String category) {
     if (!category.startsWith("SOCIAL_")) return false;
@@ -82,7 +100,9 @@ public class NotificationService {
     String dedupe = kind + ":" + target + ":" + actor;
     preferences.queue(user, category, dedupe, message);
 
-    if (preferences.pushEnabled(user, category) && !focusHolds(user, category)) {
+    if (preferences.pushEnabled(user, category)
+        && !focusHolds(user, category)
+        && !rangLately(user, kind, target)) {
       int pushInserted =
           db.jdbc.update(
               "INSERT INTO notification_push_delivery(id,user_id,dedupe_key) VALUES (?,?,?)"
@@ -169,14 +189,46 @@ public class NotificationService {
                 + "CASE WHEN n.kind='SOCIAL_FOLLOW' AND EXISTS(SELECT 1 FROM social_follow f WHERE f.follower_id=n.actor_id AND f.followed_id=n.user_id AND f.status='ACCEPTED') THEN coalesce((SELECT f.status FROM social_follow f WHERE f.follower_id=n.user_id AND f.followed_id=n.actor_id),'NONE') END social_follow_status FROM notification n LEFT JOIN app_user u ON"
                 + " u.id=n.actor_id WHERE "
                 + visible()
-                + " ORDER BY (n.read_at IS NULL) DESC,n.created_at DESC,n.id LIMIT 80",
+                + " ORDER BY n.created_at DESC,n.id LIMIT 400",
             a.id());
-    Long unread =
-        db.jdbc.queryForObject(
-            "SELECT count(*) FROM notification n WHERE " + visible() + " AND n.read_at IS NULL",
-            Long.class,
-            a.id());
-    return Map.of("items", rows, "unreadCount", unread);
+    // Newest first, so the first row of a group is its latest reaction and the last its oldest.
+    var groups = new LinkedHashMap<String, Map<String, Object>>();
+    for (var row : rows) {
+      boolean grouped = GROUPED.contains(row.get("kind")) && row.get("targetId") != null;
+      String key = grouped ? row.get("kind") + ":" + row.get("targetId") : row.get("id").toString();
+      var entry = groups.get(key);
+      if (entry == null) {
+        entry = new LinkedHashMap<>(row);
+        entry.put("actors", new ArrayList<Map<String, Object>>());
+        entry.put("actorCount", 0);
+        groups.put(key, entry);
+      } else {
+        // The entry answers by its oldest reaction, so it stays the same one as more arrive.
+        entry.put("id", row.get("id"));
+        if (row.get("readAt") == null) entry.put("readAt", null);
+      }
+      if (row.get("actorId") == null) continue;
+      entry.put("actorCount", (Integer) entry.get("actorCount") + 1);
+      @SuppressWarnings("unchecked")
+      var actors = (List<Map<String, Object>>) entry.get("actors");
+      if (actors.size() < 3) {
+        var actor = new LinkedHashMap<String, Object>();
+        actor.put("id", row.get("actorId"));
+        actor.put("name", row.get("actorName"));
+        actor.put("username", row.get("actorUsername"));
+        actor.put("hasAvatar", row.get("actorHasAvatar"));
+        actors.add(actor);
+      }
+    }
+    var unread = groups.values().stream().filter(entry -> entry.get("readAt") == null).toList();
+    var read = groups.values().stream().filter(entry -> entry.get("readAt") != null).toList();
+    var items = new ArrayList<>(unread);
+    items.addAll(read);
+    return Map.of(
+        "items",
+        items.subList(0, Math.min(80, items.size())),
+        "unreadCount",
+        (long) unread.size());
   }
 
   public Object desktopPush(Actor a, Long after) {
@@ -252,11 +304,16 @@ public class NotificationService {
           a.id(),
           context);
     else if (ids != null)
+      // An entry of reactions answers by one of them: reading it reads them all.
       for (UUID id : ids)
         db.jdbc.update(
-            "UPDATE notification SET read_at=now() WHERE id=? AND user_id=? AND read_at IS NULL",
+            "UPDATE notification n SET read_at=now() WHERE n.user_id=? AND n.read_at IS NULL AND"
+                + " (n.id=? OR EXISTS(SELECT 1 FROM notification g WHERE g.id=? AND"
+                + " g.user_id=n.user_id AND g.kind=n.kind AND g.target_id=n.target_id AND"
+                + " g.kind IN ('SOCIAL_LIKE','SOCIAL_REPOST','FORUM_LIKE','FORUM_REACTION')))",
+            a.id(),
             id,
-            a.id());
+            id);
     changed(a.id());
   }
 }

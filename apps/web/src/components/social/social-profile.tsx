@@ -2,16 +2,16 @@
 import { useSocialLives } from "./social-live-context";
 /* eslint-disable @next/next/no-img-element -- authenticated highlight thumbnails */
 import { useEffect, useRef, useState } from "react";
-import { Bell, LockKeyhole, MessageCircle, Share2 } from "lucide-react";
+import { Bell, LockKeyhole, MessageCircle } from "lucide-react";
 import { api } from "@/lib/api";
 import {
   mediaUrl,
   socialWrite,
-  socialLink,
   type SocialPerson,
   type SocialPost as Post,
 } from "@/lib/social";
 import { NavigationLink } from "../navigation-link";
+import { ProfileShareButton } from "../profile-share";
 import { SocialDialog } from "./social-dialog";
 import { FollowButton, SocialAuthor } from "./social-post";
 import { SocialProfileGrid } from "./social-profile-grid";
@@ -69,8 +69,7 @@ export function SocialProfile({
     [error, setError] = useState("");
   const [highlights, setHighlights] = useState<Post[]>([]),
     [story, setStory] = useState<number | null>(null);
-  const [notice, setNotice] = useState(""),
-    [mentions, setMentions] = useState<Post[]>([]);
+  const [mentions, setMentions] = useState<Post[]>([]);
   const [revision, setRevision] = useState(0),
     [busy, setBusy] = useState(false);
   const [viewer, setViewer] = useState<{ items: Post[]; start: number } | null>(
@@ -221,19 +220,16 @@ export function SocialProfile({
           Editar perfil
         </NavigationLink>
       )}
-      <button
-        type="button"
-        className="icon-control"
-        aria-label="Copiar link do perfil social"
-        onClick={() => {
-          void navigator.clipboard
-            .writeText(socialLink("person", id))
-            .then(() => setNotice("Link copiado."))
-            .catch(() => setError("N\u00e3o foi poss\u00edvel copiar."));
-        }}
-      >
-        <Share2 />
-      </button>
+      {profile && (
+        <ProfileShareButton
+          person={{
+            id,
+            name: profile.name,
+            username: profile.username,
+            hasAvatar: profile.hasAvatar,
+          }}
+        />
+      )}
     </>
   );
   const counts = profile && (
@@ -476,7 +472,6 @@ export function SocialProfile({
             </section>
           </div>
         )}
-        {notice && <p role="status">{notice}</p>}
         {error && (
           <div role="alert">
             <p>{error}</p>

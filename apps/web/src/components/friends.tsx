@@ -9,7 +9,11 @@ import { VoiceMessage, VoiceRecorder } from "./voice-message";
 import { MessageReceipt, type DeliveryReceipt } from "./message-receipt";
 import { useMessageReceipts } from "@/lib/use-message-receipts";
 import { SocialSharePreview } from "./social/social-share-preview";
-import { sharedSocialPostId } from "@/lib/social-stream-state";
+import { SharedProfilePreview } from "./profile-share-preview";
+import {
+  sharedSocialPostId,
+  sharedSocialProfileId,
+} from "@/lib/social-stream-state";
 import { RoomInvitationPreview } from "./room-invitation-preview";
 import { isChatAtLatest } from "@/lib/chat-scroll";
 import {
@@ -60,7 +64,7 @@ import {
 import { MessageMenu } from "./message-menu";
 import { EmojiText, AnimatedEmoji } from "./emoji-picker";
 import { FriendsInbox } from "./friends-inbox";
-import { latestPreview } from "@/lib/private-chat-preview";
+import { latestPreview, previewLabel } from "@/lib/private-chat-preview";
 import {
   canSyncNotificationKeys,
   clearConversationNotifications,
@@ -400,7 +404,7 @@ export function Friends() {
             id: newest.id,
             mine: newest.senderId !== friend.userId,
             text:
-              newest.text ||
+              previewLabel(newest.text) ||
               (newest.attachmentMime?.startsWith("audio/")
                 ? "Mensagem de voz"
                 : newest.attachmentUrl
@@ -919,7 +923,7 @@ export function Friends() {
         id: clientId,
         mine: true,
         text:
-          text ||
+          previewLabel(text) ||
           (selectedImage?.type.startsWith("audio/")
             ? "Mensagem de voz"
             : "Imagem"),
@@ -1427,6 +1431,8 @@ export function Friends() {
                                 </figure>
                               ) : sharedSocialPostId(m.text) ? (
                                 <SocialSharePreview text={m.text} />
+                              ) : sharedSocialProfileId(m.text) ? (
+                                <SharedProfilePreview text={m.text} />
                               ) : (
                                 <p>
                                   <EmojiText text={m.text} />

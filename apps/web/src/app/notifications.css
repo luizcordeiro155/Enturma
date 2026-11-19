@@ -82,6 +82,62 @@
   height: 100%;
   object-fit: cover;
 }
+/* Who did it: one face, or the latest two or three in a small pile. */
+.notification-faces {
+  position: relative;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+}
+.notification-faces > .identity-avatar {
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  width: 40px;
+  height: 40px;
+  min-width: 0;
+  border-radius: 50%;
+  font-size: 13px;
+}
+.notification-faces > .identity-avatar img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.notification-faces:not([data-faces="1"]) > .identity-avatar {
+  position: absolute;
+  width: 26px;
+  height: 26px;
+  box-shadow: 0 0 0 2px var(--surface-raised);
+  font-size: 10px;
+}
+.notification-faces[data-faces="2"] > .identity-avatar:nth-child(1) {
+  inset: 0 auto auto 0;
+  z-index: 1;
+}
+.notification-faces[data-faces="2"] > .identity-avatar:nth-child(2) {
+  inset: auto 0 0 auto;
+}
+.notification-faces[data-faces="3"] > .identity-avatar {
+  width: 24px;
+  height: 24px;
+}
+.notification-faces[data-faces="3"] > .identity-avatar:nth-child(1) {
+  inset: 0 auto auto 8px;
+  z-index: 2;
+}
+.notification-faces[data-faces="3"] > .identity-avatar:nth-child(2) {
+  inset: auto auto 0 0;
+  z-index: 1;
+}
+.notification-faces[data-faces="3"] > .identity-avatar:nth-child(3) {
+  inset: auto 0 0 auto;
+}
+/* A sentence about people reads in one line of text: the names in bold, then what they did. */
+.notification-item .notification-copy > span > strong {
+  display: inline;
+}
 .notification-toolbar {
   display: flex;
   flex-wrap: wrap;

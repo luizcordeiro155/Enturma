@@ -32,7 +32,6 @@ import { useLiveRefresh } from "@/lib/live-updates";
 export type ProfileDetails = {
   pronouns?: string;
   statusText?: string;
-  decoration?: string;
   nameFont?: string;
   nameColor?: string;
   nameEffect?: string;
@@ -173,12 +172,8 @@ export function LiveIdentity({ id, name }: { id: string; name: string }) {
 }
 export function Avatar({ user }: { user: PublicProfile }) {
   const visitor = useVisitor();
-  const d = user.profileDetails;
   return (
-    <span
-      className={`identity-avatar decoration-${d?.decoration ?? "NONE"}`}
-      style={profileStyle(user)}
-    >
+    <span className="identity-avatar" style={profileStyle(user)}>
       {user.hasAvatar ? (
         <img
           src={`/api/backend/${visitor.active ? "public/explore/" : ""}users/${user.id}/avatar?v=${user.mediaVersion ?? 0}`}

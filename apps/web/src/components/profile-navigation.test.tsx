@@ -230,3 +230,18 @@ it("shows the internal room invitation instead of an external warning or tab", (
   expect(screen.queryByRole("dialog", { name: "Você está saindo do Enturma" })).toBeNull();
   expect(open).not.toHaveBeenCalled();
 });
+
+it("draws no ring for a decoration saved before packs replaced it", () => {
+  const { container } = render(
+    <UserIdentity
+      user={{
+        id: "old",
+        name: "Antiga",
+        profileDetails: { decoration: "RING" } as never,
+      }}
+    />,
+  );
+  expect(container.querySelector(".identity-avatar")!.className).toBe(
+    "identity-avatar",
+  );
+});

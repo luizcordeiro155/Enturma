@@ -10,7 +10,8 @@ import { createPacer } from "./pace";
 
 const INNER_RADIUS = 16;
 /** Where a profile floats over the page: there the frame goes around the card, unboxed. */
-const FLOATING = ".user-profile-popover, .social-dialog";
+const FLOATING =
+  ".user-profile-popover, .social-dialog, .profile-preview-stage";
 /** The margin the art is drawn with around the card, at the size it was made. */
 const SPILL = 124;
 /** The avatar art is drawn on a 154px square around an 84px avatar. */

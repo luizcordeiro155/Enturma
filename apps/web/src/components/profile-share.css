@@ -1,0 +1,153 @@
+/* Sharing a profile uses the room invitation sheet; only what is its own lives here. */
+.profile-share-person {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 24px 20px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--soft);
+}
+.profile-share-person > .identity-avatar {
+  flex: 0 0 46px;
+  width: 46px;
+  height: 46px;
+}
+.profile-share-person > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+.profile-share-person strong {
+  font-size: 0.95rem;
+  overflow-wrap: anywhere;
+}
+.profile-share-person span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+/* No QR here: the link and the way out to other apps take the whole foot. */
+.profile-share-footer .room-invite-web-link,
+.profile-share-footer .room-invite-share-actions {
+  grid-column: 1 / -1;
+}
+/* Friends come in one after the other as the sheet opens. */
+.profile-share-dialog .room-invite-friend {
+  animation: profile-share-row 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(90ms + var(--row, 0) * 34ms);
+}
+@keyframes profile-share-row {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .profile-share-dialog .room-invite-friend {
+    animation: none;
+  }
+}
+html[data-reduced-motion="true"] .profile-share-dialog .room-invite-friend {
+  animation: none;
+}
+
+/* In a conversation a shared profile is a small card in that person's own colours. */
+.shared-profile-message {
+  max-width: 100%;
+}
+.shared-profile-message > p {
+  margin: 0 0 6px;
+}
+.shared-profile-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 12px;
+  overflow: hidden;
+  width: min(300px, 100%);
+  margin: 6px 0;
+  padding: 0 14px 14px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--ink);
+  text-decoration: none;
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+.shared-profile-card:hover,
+.shared-profile-card:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.16);
+}
+.shared-profile-banner {
+  grid-column: 1 / -1;
+  display: block;
+  overflow: hidden;
+  height: 64px;
+  margin: 0 -14px;
+  background: var(--profile-gradient, var(--accent));
+}
+.shared-profile-banner img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.shared-profile-card > .identity-avatar {
+  width: 56px;
+  height: 56px;
+  margin-top: -24px;
+  box-shadow: 0 0 0 4px var(--surface);
+}
+.shared-profile-copy {
+  display: grid;
+  gap: 1px;
+  min-width: 0;
+  padding-top: 8px;
+}
+.shared-profile-copy {
+  min-height: 76px;
+}
+.shared-profile-card.is-loading > .identity-avatar {
+  border-radius: 50%;
+  background: var(--soft);
+}
+.shared-profile-card.is-loading .shared-profile-open {
+  color: transparent;
+}
+.shared-profile-copy strong {
+  overflow: hidden;
+  font-size: 0.95rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.shared-profile-copy small {
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.shared-profile-copy span {
+  display: -webkit-box;
+  overflow: hidden;
+  margin-top: 4px;
+  font-size: 0.8rem;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+.shared-profile-open {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  background: var(--soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+}
+@media (prefers-reduced-motion: reduce) {
+  .shared-profile-card {
+    transition: none;
+  }
+}

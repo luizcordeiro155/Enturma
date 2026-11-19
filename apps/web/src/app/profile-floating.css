@@ -211,7 +211,11 @@ html
   /* The room keeps clear, around the card, what a frame reaches. */
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-shared-surface {
     --room-top: 40px;
     --room-bottom: 34px;
@@ -222,7 +226,11 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-shared-surface.has-cosmetic-spill {
     --room-top: max(40px, calc(var(--cosmetic-spill-top, 0px) + 6px));
     --room-bottom: max(34px, calc(var(--cosmetic-spill-bottom, 0px) + 6px));
@@ -232,7 +240,11 @@ html
      it does not fit, card and frame scroll in that window together, cut only by the room. */
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-shared-surface
     > .profile-preview-identity {
     z-index: 2;
@@ -253,7 +265,11 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-preview-identity
     > .public-profile-card {
     overflow: visible;
@@ -264,7 +280,11 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-preview-identity
     > .public-profile-card
     > .public-profile-banner {
@@ -272,13 +292,21 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-preview-identity
     > .public-profile-card
     > :is(.public-profile-body, canvas[data-layer="effect"]),
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-preview-identity
     > .public-profile-card
     > .public-profile-body
@@ -287,7 +315,11 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-preview-identity
     > .public-profile-card
     > canvas[data-layer="effect"] {
@@ -297,7 +329,11 @@ html
   /* Art that drifts off towards the content fades out instead of ending on a line. */
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     .profile-preview-identity
     > canvas.profile-cosmetic-spill {
     mask-image: linear-gradient(to left, transparent, #000 26px);
@@ -307,7 +343,11 @@ html
   @media (max-width: 980px) {
     html
       body
-      :is(dialog.social-dialog-profile, .user-profile-popover)
+      :is(
+        dialog.social-dialog-profile,
+        .user-profile-popover,
+        .profile-preview-stage
+      )
       .profile-shared-surface.has-cosmetic-spill {
       --room-left: 44px;
     }
@@ -394,7 +434,11 @@ html
    still scrolls with the wheel, the touchpad, a finger and the keyboard. */
 html
   body
-  :is(dialog.social-dialog-profile, .user-profile-popover)
+  :is(
+    dialog.social-dialog-profile,
+    .user-profile-popover,
+    .profile-preview-stage
+  )
   .profile-shared-surface
   > .profile-preview-identity,
 html body .user-profile-popover[data-profile-view="compact"] {
@@ -402,7 +446,11 @@ html body .user-profile-popover[data-profile-view="compact"] {
 }
 html
   body
-  :is(dialog.social-dialog-profile, .user-profile-popover)
+  :is(
+    dialog.social-dialog-profile,
+    .user-profile-popover,
+    .profile-preview-stage
+  )
   .profile-shared-surface
   > .profile-preview-identity::-webkit-scrollbar,
 html
@@ -419,14 +467,22 @@ html
 }
 html
   body
-  :is(dialog.social-dialog-profile, .user-profile-popover)
+  :is(
+    dialog.social-dialog-profile,
+    .user-profile-popover,
+    .profile-preview-stage
+  )
   :is(.profile-preview-mural, .social-profile-grid-scroll) {
   --profile-bar: transparent;
   transition: --profile-bar 0.25s;
 }
 html
   body
-  :is(dialog.social-dialog-profile, .user-profile-popover)
+  :is(
+    dialog.social-dialog-profile,
+    .user-profile-popover,
+    .profile-preview-stage
+  )
   :is(.profile-preview-mural, .social-profile-grid-scroll):is(
     :hover,
     :focus-within
@@ -436,14 +492,22 @@ html
 @supports selector(::-webkit-scrollbar) {
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     :is(.profile-preview-mural, .social-profile-grid-scroll) {
     scrollbar-width: auto;
     scrollbar-color: auto;
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     :is(
       .profile-preview-mural,
       .social-profile-grid-scroll
@@ -455,7 +519,11 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     :is(
       .profile-preview-mural,
       .social-profile-grid-scroll
@@ -464,7 +532,11 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     :is(
       .profile-preview-mural,
       .social-profile-grid-scroll
@@ -474,7 +546,11 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     :is(
       .profile-preview-mural,
       .social-profile-grid-scroll
@@ -483,7 +559,11 @@ html
   }
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     :is(
       .profile-preview-mural,
       .social-profile-grid-scroll
@@ -494,7 +574,11 @@ html
 @supports not selector(::-webkit-scrollbar) {
   html
     body
-    :is(dialog.social-dialog-profile, .user-profile-popover)
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover,
+      .profile-preview-stage
+    )
     :is(.profile-preview-mural, .social-profile-grid-scroll) {
     scrollbar-width: thin;
     scrollbar-color: var(--profile-bar) transparent;
@@ -682,16 +766,6 @@ html
   html body dialog.social-dialog-profile > header {
     padding: 10px 12px;
   }
-  /* On a phone the editor's preview has no room of its own: its heading sits on the page
-     and reads in the page's ink. */
-  html
-    body
-    .profile-studio
-    .profile-preview-stage
-    > .profile-preview-toolbar
-    strong {
-    color: var(--ink);
-  }
   /* The tabs stay on one line and slide sideways. */
   html body .user-profile-popover .profile-community > .profile-community-tabs {
     flex-wrap: nowrap;
@@ -726,6 +800,90 @@ html
 /* The editor's live preview is the same room, so what is edited is what people will see. */
 html body .profile-preview-stage .profile-shared-surface {
   border-radius: 18px !important;
+}
+/* Its heading sits on the page, not in the room: it reads in the page's ink. */
+html
+  body
+  .profile-studio
+  .profile-preview-stage
+  > .profile-preview-toolbar
+  strong {
+  color: var(--ink);
+}
+@media (min-width: 761px) {
+  /* On a computer the preview is the whole profile at its real size, frame and all, with
+     nothing cut and nothing to scroll inside it. The editor grows to hold it, the page
+     scrolls, and the long list of options scrolls beside it at the same height. */
+  html body .profile-studio .profile-discord-form {
+    height: auto;
+    min-height: 0;
+  }
+  html body .profile-studio .profile-editor-scroll {
+    overflow: visible;
+  }
+  html body .profile-studio .profile-editor-controls {
+    height: 0;
+    min-height: 100%;
+  }
+  html body .profile-studio .profile-preview-stage {
+    min-height: 600px;
+    background: transparent;
+  }
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    > .profile-preview-combined.profile-shared-surface {
+    flex: none;
+    grid-template-columns: clamp(300px, 46cqw, 380px) minmax(0, 1fr) !important;
+    align-items: start;
+    overflow: hidden !important;
+    height: auto !important;
+    max-height: none !important;
+    border-radius: 22px !important;
+    background: var(--floating-night);
+  }
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    .profile-shared-surface
+    > .profile-preview-mural {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  /* In a narrow preview the content goes under the card, as on a phone, and the card's
+     window runs the width of the room. */
+  @container profile-preview (max-width: 760px) {
+    html
+      body
+      .profile-studio
+      .profile-preview-stage
+      > .profile-preview-combined.profile-shared-surface {
+      grid-template-columns: minmax(0, 1fr) !important;
+      padding-right: var(--room-left);
+    }
+    html
+      body
+      .profile-studio
+      .profile-preview-stage
+      .profile-shared-surface
+      > .profile-preview-identity {
+      margin-right: calc(-1 * var(--room-left)) !important;
+      margin-bottom: 0 !important;
+      padding-right: var(--room-left) !important;
+    }
+    html
+      body
+      .profile-studio
+      .profile-preview-stage
+      .profile-preview-identity
+      > .public-profile-card {
+      width: min(400px, 100%);
+      margin-inline: auto;
+    }
+  }
 }
 html body .profile-edit-live-preview {
   --floating-night: #0b0c12;
