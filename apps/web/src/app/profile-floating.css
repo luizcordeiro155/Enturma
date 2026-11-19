@@ -453,6 +453,16 @@ html
   html body dialog.social-dialog-profile > header {
     padding: 10px 12px;
   }
+  /* On a phone the editor's preview has no room of its own: its heading sits on the page
+     and reads in the page's ink. */
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    > .profile-preview-toolbar
+    strong {
+    color: var(--ink);
+  }
   /* The tabs stay on one line and slide sideways. */
   html body .user-profile-popover .profile-community > .profile-community-tabs {
     flex-wrap: nowrap;

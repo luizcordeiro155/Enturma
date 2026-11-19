@@ -177,6 +177,23 @@ test("cores vivas, mural independente e rascunho preservado ao trocar de página
   await apply(page);
   await page.getByRole("button", { name: "Ver prévia", exact: true }).click();
   await expect(controls).toBeHidden();
+  // On a phone the preview heading sits on the page, so it reads in the page's ink
+  // in either theme.
+  expect(
+    await page
+      .locator(".profile-preview-toolbar strong")
+      .evaluate((heading) => {
+        const ink = document.createElement("span");
+        ink.style.color = "var(--ink)";
+        heading.closest(".profile-studio")!.append(ink);
+        const colors = [
+          getComputedStyle(heading).color,
+          getComputedStyle(ink).color,
+        ];
+        ink.remove();
+        return colors[0] === colors[1];
+      }),
+  ).toBe(true);
   await page.getByRole("button", { name: "Perfil", exact: true }).click();
   await expect(highlightedStatus).toBeVisible();
   await page.getByRole("button", { name: "Mural", exact: true }).click();
