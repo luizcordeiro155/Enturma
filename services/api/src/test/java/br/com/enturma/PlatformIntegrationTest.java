@@ -422,7 +422,70 @@ class PlatformIntegrationTest {
   }
 
   private SocialController.Details profileLinks(List<String> links) {
-    return new SocialController.Details(null, null, null, null, null, null, null, null, links);
+    return new SocialController.Details(
+        null, null, null, null, null, null, null, null, links, null, null, null, null);
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void profileCosmeticsOpenByLevelAndRefuseWhatIsLocked() throws Exception {
+    // Level 1 opens the first pack; the others wait for XP.
+    social.details(host, cosmetics("sakura", "sakura", "sakura"));
+    assertThat(storedCosmetic("cosmeticFrame")).isEqualTo("sakura");
+    assertThatThrownBy(() -> social.details(host, cosmetics("dragao", null, null)))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("nível 5");
+    assertThatThrownBy(() -> social.details(host, cosmetics(null, "nao-existe", null)))
+        .isInstanceOf(ApiException.class);
+    assertThat(storedCosmetic("cosmeticFrame")).isEqualTo("sakura");
+    var shop = (Map<String, Object>) social.cosmetics(host);
+    assertThat(shop.get("level")).isEqualTo(1);
+    assertThat((List<Map<String, Object>>) shop.get("items"))
+        .anySatisfy(
+            item -> {
+              assertThat(item.get("id")).isEqualTo("dragao");
+              assertThat(item.get("level")).isEqualTo(5);
+              assertThat(item.get("unlocked")).isEqualTo(false);
+            });
+
+    db.jdbc.update(
+        "INSERT INTO learning_stats(user_id,total_xp) VALUES (?,1000) ON CONFLICT (user_id) DO"
+            + " UPDATE SET total_xp=1000",
+        host.id());
+    social.details(host, cosmetics("dragao", null, "abobora"));
+    assertThat(storedCosmetic("cosmeticFrame")).isEqualTo("dragao");
+    assertThat(storedCosmetic("cosmeticAvatar")).isEqualTo("sakura");
+    assertThat(((Map<String, Object>) social.cosmetics(host)).get("level")).isEqualTo(5);
+
+    // The pack's colours follow the same rule as its other pieces.
+    assertThatThrownBy(
+            () ->
+                social.details(
+                    host,
+                    new SocialController.Details(
+                        null, null, null, null, null, null, null, null, null, null, null, null,
+                        "nao-existe")))
+        .isInstanceOf(ApiException.class);
+    social.details(
+        host,
+        new SocialController.Details(
+            null, null, null, null, null, null, null, null, null, null, null, null, "dragao"));
+    assertThat(storedCosmetic("cosmeticTheme")).isEqualTo("dragao");
+
+    // An empty value takes the item off; what an older app does not send stays.
+    social.details(host, cosmetics("", null, null));
+    assertThat(storedCosmetic("cosmeticFrame")).isEmpty();
+    assertThat(storedCosmetic("cosmeticEffect")).isEqualTo("abobora");
+  }
+
+  private SocialController.Details cosmetics(String frame, String avatar, String effect) {
+    return new SocialController.Details(
+        null, null, null, null, null, null, null, null, null, frame, avatar, effect, null);
+  }
+
+  private String storedCosmetic(String field) {
+    return db.jdbc.queryForObject(
+        "SELECT profile_details->>? FROM app_user WHERE id=?", String.class, field, host.id());
   }
 
   private int storedProfileLinks() {

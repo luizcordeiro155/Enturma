@@ -81,3 +81,12 @@ No celular (até 760 px) o Perfil social usa a mesma superfície, empilhada: o c
 - No Laboratório Binário cada bit é um interruptor; em telas de toque o campo de texto some. Campos dos jogos têm 16px no celular para o navegador não ampliar a página.
 - No celular, os quatro jogos ficam em uma linha e as missões viram cinco passos numerados.
 - Nível: cada missão (jogo + posição) tem o próprio nível, que sobe a cada dia em que ela foi concluída. Missão não concluída volta igual no dia seguinte. O nível diário conta os dias em que houve ao menos uma missão concluída.
+
+## Cosméticos de perfil — 19/11/2026
+
+- Um pacote tem quatro peças: moldura, decoração de avatar, efeito de perfil e cores. O estudante usa o pacote inteiro ou mistura peças de pacotes diferentes em "Molduras e efeitos", no editar perfil.
+- Cada pacote libera num nível (nível = XP total ÷ 250 + 1). O servidor confere o nível ao salvar; um pacote bloqueado pode ser experimentado na prévia, nunca salvo.
+- A arte é desenhada em canvas, um módulo por pacote, carregado só quando o perfil usa. A entrada toca toda vez que o perfil abre e depois a arte fica em repouso; com movimento reduzido vira uma imagem parada.
+- No perfil que abre sobre a página, em tela larga, a moldura fica ao redor do cartão e passa das bordas, sem caixa por trás. No celular o perfil ocupa a largura toda e a moldura aparece acima e abaixo dele. Na prévia do editor o cartão abre espaço para a moldura.
+- As camadas são decoração: `aria-hidden`, sem capturar toques, e nunca cobrem o texto do perfil.
+- A arte nasce no protótipo e é exportada para `apps/web/src/cosmetics` por script; não se edita o arquivo gerado.

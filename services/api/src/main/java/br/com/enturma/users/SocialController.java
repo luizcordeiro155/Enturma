@@ -77,7 +77,55 @@ public class SocialController {
       @Size(max = 120) String interests,
       @Pattern(regexp = "(?:#[0-9a-fA-F]{6})?") String nameColor,
       @Pattern(regexp = "SOLID|GRADIENT|NEON") String nameEffect,
-      @Size(max = 6) List<@Size(max = 200) String> links) {}
+      @Size(max = 6) List<@Size(max = 200) String> links,
+      @Pattern(regexp = "[a-z-]{0,32}") String cosmeticFrame,
+      @Pattern(regexp = "[a-z-]{0,32}") String cosmeticAvatar,
+      @Pattern(regexp = "[a-z-]{0,32}") String cosmeticEffect,
+      @Pattern(regexp = "[a-z-]{0,32}") String cosmeticTheme) {}
+
+  /**
+   * Profile cosmetics and the level that opens each one. A pack brings a frame, an avatar
+   * decoration, a profile effect and its colours; the art itself lives in the web app.
+   */
+  static final Map<String, Integer> COSMETICS = cosmeticLevels();
+
+  private static Map<String, Integer> cosmeticLevels() {
+    var levels = new LinkedHashMap<String, Integer>();
+    levels.put("sakura", 1);
+    levels.put("abobora", 3);
+    levels.put("dragao", 5);
+    return Collections.unmodifiableMap(levels);
+  }
+
+  private int level(UUID user) {
+    Integer xp =
+        db.jdbc.queryForObject(
+            "SELECT coalesce((SELECT total_xp FROM learning_stats WHERE user_id=?),0)",
+            Integer.class,
+            user);
+    return (xp == null ? 0 : xp) / 250 + 1;
+  }
+
+  @GetMapping("/cosmetics")
+  public Object cosmetics(@AuthenticationPrincipal Actor a) {
+    int level = level(a.id());
+    var items = new ArrayList<Map<String, Object>>();
+    COSMETICS.forEach(
+        (id, needed) -> items.add(Map.of("id", id, "level", needed, "unlocked", level >= needed)));
+    return Map.of("level", level, "items", items);
+  }
+
+  private void requireUnlocked(UUID user, String... chosen) {
+    int level = -1;
+    for (String id : chosen) {
+      if (id == null || id.isEmpty()) continue;
+      Integer needed = COSMETICS.get(id);
+      if (needed == null) throw ApiException.invalid("Esse item de perfil não existe.");
+      if (level < 0) level = level(user);
+      if (level < needed)
+        throw ApiException.invalid("Esse item de perfil libera no nível " + needed + ".");
+    }
+  }
 
   /** A profile link is a web page or an e-mail address; nothing else leaves the profile. */
   private static boolean profileLink(String value) {
@@ -112,6 +160,12 @@ public class SocialController {
         && (value.links().size() > 6
             || !value.links().stream().allMatch(SocialController::profileLink)))
       throw ApiException.invalid("Use até 6 links, cada um com um endereço web ou um e-mail.");
+    requireUnlocked(
+        a.id(),
+        value.cosmeticFrame(),
+        value.cosmeticAvatar(),
+        value.cosmeticEffect(),
+        value.cosmeticTheme());
     db.jdbc.update(
         "UPDATE app_user SET profile_details=coalesce(profile_details,'{}'::jsonb) ||"
             + " jsonb_strip_nulls(?::jsonb) WHERE id=?",

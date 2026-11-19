@@ -1,0 +1,132 @@
+/* Profile cosmetics: frame, avatar decoration and profile effect drawn over the card. */
+.profile-cosmetic-layer {
+  position: absolute;
+  display: block;
+  pointer-events: none;
+}
+.profile-cosmetic-layer[data-layer="effect"] {
+  z-index: 2;
+}
+.profile-cosmetic-layer[data-layer="avatar"] {
+  z-index: 4;
+}
+.profile-cosmetic-layer[data-layer="frame"] {
+  inset: 0;
+  z-index: 6;
+}
+/* In a floating profile the frame goes around the card and over what surrounds it. */
+.profile-cosmetic-layer.profile-cosmetic-spill {
+  position: fixed;
+  inset: 0 auto auto 0;
+  z-index: 2147483000;
+}
+/* The panel beside the card steps aside so the art does not sit on its text. */
+html body .has-cosmetic-spill > .profile-preview-mural {
+  border-left: var(--cosmetic-spill, 0) solid transparent !important;
+}
+/* Everywhere else the frame takes real room around the card, so it never covers the profile. */
+html body .public-profile-card.has-cosmetic-frame {
+  box-sizing: border-box;
+  height: auto !important;
+  padding: var(--cosmetic-top, 0) var(--cosmetic-side, 0)
+    var(--cosmetic-bottom, 0);
+}
+/* An avatar decoration alone needs a little air between the avatar and the edge. */
+html
+  .public-profile-card.has-cosmetic-avatar:not(.has-cosmetic-frame)
+  .identity-avatar {
+  margin-left: 20px;
+}
+
+/* The shelf of packs in the profile editor. */
+.cosmetic-shop {
+  display: grid;
+  gap: 12px;
+}
+.cosmetic-shop-level {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+}
+.cosmetic-shop-level span,
+.cosmetic-shop-note,
+.cosmetic-pack p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+  line-height: 1.45;
+}
+.cosmetic-pack {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.cosmetic-pack[data-locked="true"] {
+  background: var(--soft);
+}
+.cosmetic-pack-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.cosmetic-pack-level {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.cosmetic-pack-pieces,
+.cosmetic-pack-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cosmetic-pack-pieces button,
+.cosmetic-pack-actions button,
+.cosmetic-shop-clear {
+  min-height: 44px;
+}
+.cosmetic-pack-pieces button {
+  flex: 1 1 88px;
+}
+html .cosmetic-shop button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+}
+.cosmetic-shop-clear {
+  justify-self: start;
+}
+/* With a frame on, the card grows with its content instead of squeezing it under the frame. */
+html .public-profile-card.has-cosmetic-frame > .public-profile-banner,
+html .public-profile-card.has-cosmetic-frame > .public-profile-body {
+  flex-shrink: 0;
+}
+/* A pack's colours dress the card: night background, its banner, light text. */
+html body .public-profile-card.has-cosmetic-theme {
+  --profile-copy: #fff !important;
+  --profile-copy-panel: transparent !important;
+  background: var(--cosmetic-bg) !important;
+}
+html body .public-profile-card.has-cosmetic-theme > .public-profile-banner {
+  background: var(--cosmetic-banner) !important;
+}
+html body .public-profile-card.has-cosmetic-theme > .public-profile-body {
+  border-top-width: 0 !important;
+  background: var(--cosmetic-bg) !important;
+}
+html body .public-profile-card.has-cosmetic-theme .identity-avatar {
+  border-color: var(--cosmetic-avatar-ring) !important;
+  background: var(--cosmetic-avatar) !important;
+  color: #fff !important;
+}

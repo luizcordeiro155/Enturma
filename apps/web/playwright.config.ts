@@ -80,7 +80,7 @@ export default defineConfig({
     {
       name: "chromium-experience",
       testMatch:
-        /(?:theme-invites-calls|chat-theme|visitor-community|mobile-corrections|release-experience|isolated-load|public-start|notebook-profile-ui|mobile-study-polish|connected-experience|profile-v3|responsive-shell|study-journey|enturma-study|study-sessions|calendar-attendance|semester-rollover|focus-mode|mobile-safe-area|caronas-mobile)\.spec\.ts/,
+        /(?:theme-invites-calls|chat-theme|visitor-community|mobile-corrections|release-experience|isolated-load|public-start|notebook-profile-ui|mobile-study-polish|connected-experience|profile-v3|responsive-shell|study-journey|enturma-study|study-sessions|calendar-attendance|semester-rollover|focus-mode|mobile-safe-area|caronas-mobile|profile-cosmetics)\.spec\.ts/,
       use: {
         ...devices["Desktop Chrome"],
         viewport: { width: 1487, height: 1058 },

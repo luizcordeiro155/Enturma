@@ -26,6 +26,7 @@ import {
 import { useVisitor } from "@/lib/visitor-context";
 import { ForumLinks } from "./forum-links";
 import { ProfileLinks } from "./profile-links";
+import { ProfileCosmetics } from "./profile-cosmetics";
 import { useLiveRefresh } from "@/lib/live-updates";
 export type ProfileDetails = {
   pronouns?: string;
@@ -37,6 +38,11 @@ export type ProfileDetails = {
   website?: string;
   links?: string[];
   interests?: string;
+  /** Profile cosmetics: the id of the pack each piece comes from. */
+  cosmeticFrame?: string;
+  cosmeticAvatar?: string;
+  cosmeticEffect?: string;
+  cosmeticTheme?: string;
 };
 type FriendshipSummary = {
   id: string;
@@ -186,11 +192,14 @@ export function ProfileCard({
 }) {
   const visitor = useVisitor();
   const d = user.profileDetails ?? {};
+  const card = useRef<HTMLDivElement>(null);
   return (
     <div
+      ref={card}
       className={`public-profile-card profile-theme-${user.showcaseAppearance?.theme ?? "SOLID"} profile-effect-${user.showcaseAppearance?.effect ?? "NONE"}`}
       style={profileStyle(user)}
     >
+      <ProfileCosmetics card={card} details={d} />
       <div className="public-profile-banner">
         {user.hasBanner ? (
           <img
