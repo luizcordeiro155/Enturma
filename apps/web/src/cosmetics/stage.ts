@@ -6,6 +6,7 @@ import {
   type CosmeticLayer,
   type CosmeticPack,
 } from "./catalog";
+import { createPacer } from "./pace";
 
 const INNER_RADIUS = 16;
 /** Where a profile floats over the page: there the frame goes around the card, unboxed. */
@@ -34,6 +35,7 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
   let alive = true;
   if (!wanted.length) return { destroy() {} };
 
+  const pacer = createPacer();
   const canvases = new Map<CosmeticLayer, HTMLCanvasElement>();
   const packs = new Map<string, CosmeticPack>();
   let frame = 0,
@@ -82,7 +84,7 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
   }
 
   function fit(canvas: HTMLCanvasElement, w: number, h: number) {
-    const ratio = Math.min(2, window.devicePixelRatio || 1);
+    const ratio = pacer.ratio(Math.min(2, window.devicePixelRatio || 1));
     const pw = Math.max(1, Math.round(w * ratio)),
       ph = Math.max(1, Math.round(h * ratio));
     if (canvas.width !== pw) canvas.width = pw;
@@ -98,8 +100,15 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
       p = pad(),
       w = card.clientWidth,
       h = card.clientHeight;
-    if (chosen.frame && floating)
-      surface?.style.setProperty("--cosmetic-spill", `${reach().side}px`);
+    if (chosen.frame && floating) {
+      const around = reach();
+      surface?.style.setProperty("--cosmetic-spill", `${around.side}px`);
+      surface?.style.setProperty("--cosmetic-spill-top", `${around.top}px`);
+      surface?.style.setProperty(
+        "--cosmetic-spill-bottom",
+        `${around.bottom}px`,
+      );
+    }
     if (chosen.frame && !floating) {
       card.style.setProperty("--cosmetic-top", `${p.top}px`);
       card.style.setProperty("--cosmetic-side", `${p.side}px`);
@@ -209,13 +218,20 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
     frame = 0;
     if (!alive) return;
     const still = reducedMotion();
-    const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+    // Not every screen refresh is a frame: see the pacer.
+    if (!still && last && now - last < pacer.gap(time) - 3) {
+      frame = requestAnimationFrame(tick);
+      return;
+    }
+    const dt = Math.min(0.1, (now - last) / 1000 || 0.016);
     last = now;
     if (!still) {
       time += dt;
       for (const pack of packs.values()) pack.update(dt, time, false);
     }
+    const began = performance.now();
     draw(still);
+    if (!still) pacer.took(performance.now() - began);
     // With motion off the art is a still picture: drawn once, redrawn only on resize.
     if (!still && visible && !document.hidden)
       frame = requestAnimationFrame(tick);
@@ -311,7 +327,8 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
       window.removeEventListener("scroll", place, { capture: true });
       window.removeEventListener("resize", place);
       surface?.classList.remove("has-cosmetic-spill");
-      surface?.style.removeProperty("--cosmetic-spill");
+      for (const side of ["", "-top", "-bottom"])
+        surface?.style.removeProperty(`--cosmetic-spill${side}`);
       for (const [layer, canvas] of canvases) {
         canvas.remove();
         card.classList.remove(`has-cosmetic-${layer}`);

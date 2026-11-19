@@ -223,30 +223,6 @@ html
     border-radius: 18px;
     box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
   }
-  /* The title stays for screen readers; the close button floats over the room. */
-  html body dialog.social-dialog-profile > header {
-    position: absolute !important;
-    z-index: 5;
-    inset: 0 0 auto !important;
-    justify-content: flex-end;
-    border: 0 !important;
-    background: transparent !important;
-    pointer-events: none;
-  }
-  html body dialog.social-dialog-profile > header h2 {
-    position: absolute;
-    overflow: hidden;
-    width: 1px;
-    height: 1px;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-  html body dialog.social-dialog-profile > header button {
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(20, 22, 30, 0.72);
-    color: #fff;
-    pointer-events: auto;
-  }
   /* The profile popover opens as the card alone, with the full profile one tap further. */
   html body .user-profile-popover[data-profile-view="compact"] {
     overflow: visible;
@@ -284,16 +260,227 @@ html
   }
 }
 
+/* One way to close, on every size: a button that floats inside the room. The social profile
+   keeps its title for screen readers only. */
+html body dialog.social-dialog-profile > header {
+  position: absolute !important;
+  z-index: 5;
+  inset: 0 0 auto !important;
+  justify-content: flex-end;
+  min-height: 0;
+  border: 0 !important;
+  background: transparent !important;
+  pointer-events: none;
+}
+html body dialog.social-dialog-profile > header h2 {
+  position: absolute;
+  overflow: hidden;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+html body dialog.social-dialog-profile > header button,
+html body .user-profile-popover > .profile-close {
+  position: static;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  min-height: 0;
+  padding: 0;
+  place-items: center;
+  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  border-radius: 10px;
+  background: rgba(20, 22, 30, 0.72) !important;
+  color: #fff !important;
+  pointer-events: auto;
+}
+html body .user-profile-popover > .profile-close {
+  position: absolute;
+  z-index: 8;
+  inset: 13px 16px auto auto;
+}
+html body dialog.social-dialog-profile > header button:hover,
+html body .user-profile-popover > .profile-close:hover {
+  background: rgba(40, 43, 56, 0.9) !important;
+}
+
+/* The avatar is always a circle, whatever the card around it is doing. */
+html body .user-profile-popover .public-profile-body > .identity-avatar {
+  display: grid;
+  flex: 0 0 auto !important;
+  width: 88px !important;
+  height: 88px !important;
+  aspect-ratio: 1;
+  place-items: center;
+}
+
+/* The profile opened from a name or a picture anywhere in Enturma (rooms, messages, forum,
+   friends) is the same room as the social profile, with its own content beside the card. */
+html body .user-profile-popover .profile-community {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+  background: transparent !important;
+}
+html body .user-profile-popover .profile-community > .text-button {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  margin: 0 24px 4px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f5f6f8;
+  font-weight: 700;
+  text-decoration: none;
+}
+html body .user-profile-popover .profile-community > .text-button:hover {
+  background: rgba(255, 255, 255, 0.13);
+}
+html body .user-profile-popover .profile-community > .profile-community-tabs {
+  position: static;
+  gap: 4px 22px;
+  margin: 12px 24px 0;
+  padding: 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.16);
+  background: transparent !important;
+}
+html
+  body
+  .user-profile-popover
+  .profile-community
+  > .profile-community-tabs
+  button {
+  min-height: 44px;
+  padding: 0 2px;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  background: transparent !important;
+  color: #c3c7d1 !important;
+  font-weight: 700;
+}
+html
+  body
+  .user-profile-popover
+  .profile-community
+  > .profile-community-tabs
+  button[aria-selected="true"] {
+  border-bottom-color: #fff;
+  color: #fff !important;
+}
+html body .user-profile-popover .profile-community > .profile-community-panel {
+  padding: 16px 24px 24px;
+}
+/* Level, XP and streak read as the social profile's counters do. */
+html
+  body
+  .user-profile-popover
+  .profile-community-panel
+  .profile-stat-row
+  > span {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.07);
+  color: #f5f6f8;
+  font-weight: 700;
+}
+/* On your own social profile the one action on the card takes the profile's colour. */
+html
+  body
+  dialog.social-dialog-profile
+  .profile-shared-surface
+  .public-profile-body
+  > .profile-dialog-actions
+  > a.social-profile-message:first-child {
+  border: 1px solid rgba(255, 255, 255, 0.28) !important;
+  background-color: var(--profile-accent) !important;
+  background-image: linear-gradient(
+    rgba(8, 9, 13, 0.5),
+    rgba(8, 9, 13, 0.5)
+  ) !important;
+  color: #fff !important;
+}
+
+@media (min-width: 761px) {
+  /* A full profile nearly fills the screen, so the room gives a tall frame the space it
+     needs above and below the card instead of letting the screen cut it. */
+  html
+    body
+    :is(
+      dialog.social-dialog-profile,
+      .user-profile-popover[data-profile-view="full"]
+    )
+    .profile-preview-combined.profile-shared-surface.has-cosmetic-spill {
+    padding-top: max(40px, calc(var(--cosmetic-spill-top, 0px) - 6px));
+    padding-bottom: max(34px, calc(var(--cosmetic-spill-bottom, 0px) - 6px));
+  }
+  /* Opened in full, the profile takes the same box as the social profile, over a dimmed page. */
+  html
+    body
+    .user-profile-popover.user-profile-dialog[data-profile-view="full"] {
+    width: min(1240px, calc(100vw - 64px)) !important;
+    max-width: none !important;
+    height: min(900px, calc(100dvh - 32px)) !important;
+    max-height: none !important;
+    border-radius: 16px;
+    box-shadow: 0 0 0 100vmax rgba(4, 5, 9, 0.62);
+  }
+  html
+    body
+    .user-profile-popover[data-profile-view="full"]
+    .profile-preview-combined.profile-shared-surface {
+    grid-template-columns: clamp(300px, 34vw, 380px) minmax(0, 1fr) !important;
+    height: 100%;
+  }
+  html
+    body
+    .user-profile-popover[data-profile-view="full"]
+    .profile-community
+    > .text-button {
+    margin-top: 2px;
+  }
+}
+
 @media (max-width: 760px) {
   html body dialog.social-dialog-profile > header {
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    background: var(--floating-night) !important;
-    color: #f5f6f8 !important;
+    padding: 10px 12px;
   }
-  html body dialog.social-dialog-profile > header button {
-    border-color: rgba(255, 255, 255, 0.18);
-    background: rgba(255, 255, 255, 0.08);
-    color: #fff;
+  /* The tabs stay on one line and slide sideways. */
+  html body .user-profile-popover .profile-community > .profile-community-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    margin-inline: 16px;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  html
+    body
+    .user-profile-popover
+    .profile-community
+    > .profile-community-tabs
+    button {
+    flex: 0 0 auto;
+  }
+  html body .user-profile-popover .profile-community > .text-button {
+    margin: 18px 16px 4px;
+  }
+  html
+    body
+    .user-profile-popover
+    .profile-community
+    > .profile-community-panel {
+    padding-inline: 16px;
+  }
+  html body .user-profile-popover .profile-preview-mural {
+    scroll-margin-top: 8px;
   }
 }
 

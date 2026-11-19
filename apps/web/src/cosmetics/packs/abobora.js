@@ -11,6 +11,9 @@ import {
   rectLoop,
   Particles,
   glow,
+  Layer,
+  inked,
+  bounceOut,
 } from "../kit";
 
 // ---------- Noite das Abóboras ----------
@@ -24,23 +27,6 @@ const HW = {
   green: "#6aa83f",
   greenDark: "#27501f",
   bone: "#f6f1e7",
-};
-const inked = (ctx, fill, lw = 1.6, ink = HW.ink) => {
-  ctx.fillStyle = fill;
-  ctx.fill();
-  ctx.lineWidth = lw;
-  ctx.strokeStyle = ink;
-  ctx.lineJoin = "round";
-  ctx.stroke();
-};
-const bounceOut = (t) => {
-  t = clamp(t);
-  const n = 7.5625,
-    d = 2.75;
-  if (t < 1 / d) return n * t * t;
-  if (t < 2 / d) return n * (t -= 1.5 / d) * t + 0.75;
-  if (t < 2.5 / d) return n * (t -= 2.25 / d) * t + 0.9375;
-  return n * (t -= 2.625 / d) * t + 0.984375;
 };
 
 // A jack-o'-lantern around (0,0). `lit` goes from 0 (dark) to 1 (candle inside); `face` picks the carving.
@@ -104,10 +90,8 @@ function pumpkin(ctx, r, lit, t, face, wink = 0) {
   // carving
   const dark = "#3a1505";
   ctx.save();
-  if (lit > 0) {
-    ctx.shadowColor = `rgba(255,170,40,${lit})`;
-    ctx.shadowBlur = r * 0.35 * fl;
-  }
+  if (lit > 0)
+    glow(ctx, 0, r * 0.12, r * 0.95, `rgba(255,190,70,${0.5 * lit * fl})`);
   const g = ctx.createRadialGradient(0, r * 0.15, 0, 0, r * 0.15, r * 0.9);
   g.addColorStop(0, lit > 0.5 ? "#fffbd0" : dark);
   g.addColorStop(0.5, lit > 0.5 ? `rgba(255,214,92,${fl})` : dark);
@@ -115,7 +99,6 @@ function pumpkin(ctx, r, lit, t, face, wink = 0) {
   const carve = () => {
     ctx.fillStyle = g;
     ctx.fill();
-    ctx.shadowBlur = 0;
     ctx.strokeStyle = "#6e2a06";
     ctx.lineWidth = Math.max(1, r * 0.035);
     ctx.stroke();
@@ -892,32 +875,43 @@ export default function create(CARD, AVATAR) {
         ctx.restore();
       });
       // vines, then the pumpkins that sit on them
-      const g = this.front(T);
-      for (const v of this.vines) drawVine(ctx, v, g, T, this.when);
-      this.spots().forEach(([x, y, r], i) => {
-        const k = still ? 1 : easeOutBack(clamp((t - 0.3 - i * 0.35) / 0.55));
-        if (k <= 0) return;
-        const c = (tt + i * 2.7) % 7,
-          hop =
-            !still && t > 3 && c < 0.4
-              ? Math.sin((c / 0.4) * Math.PI) * (i === 2 ? 9 : 4)
-              : 0,
-          squash = 1 + (still ? 0 : Math.sin(tt * 2 + i) * 0.012) - hop * 0.004;
-        ctx.save();
-        ctx.translate(x, y - hop + r * 0.9);
-        ctx.rotate([-0.06, 0.16, -0.2][i]);
-        ctx.scale(k / squash, k * squash);
-        ctx.translate(0, -r * 0.9);
-        pumpkin(
-          ctx,
-          r,
-          lit,
-          tt + i,
-          i,
-          i === 0 && !still && tt % 6.2 > 5.9 ? 1 : 0,
-        );
-        ctx.restore();
-      });
+      const g = this.front(T),
+        vines = (c) => {
+          for (const v of this.vines) drawVine(c, v, g, T, this.when);
+        };
+      if (!still && t > this.t0 + this.dur + 1)
+        (this.rest || (this.rest = Layer())).draw(ctx, t, 8, vines);
+      else vines(ctx);
+      const pumpkins = (ctx) =>
+        this.spots().forEach(([x, y, r], i) => {
+          const k = still ? 1 : easeOutBack(clamp((t - 0.3 - i * 0.35) / 0.55));
+          if (k <= 0) return;
+          const c = (tt + i * 2.7) % 7,
+            hop =
+              !still && t > 3 && c < 0.4
+                ? Math.sin((c / 0.4) * Math.PI) * (i === 2 ? 9 : 4)
+                : 0,
+            squash =
+              1 + (still ? 0 : Math.sin(tt * 2 + i) * 0.012) - hop * 0.004;
+          ctx.save();
+          ctx.translate(x, y - hop + r * 0.9);
+          ctx.rotate([-0.06, 0.16, -0.2][i]);
+          ctx.scale(k / squash, k * squash);
+          ctx.translate(0, -r * 0.9);
+          pumpkin(
+            ctx,
+            r,
+            lit,
+            tt + i,
+            i,
+            i === 0 && !still && tt % 6.2 > 5.9 ? 1 : 0,
+          );
+          ctx.restore();
+        });
+      const busy =
+        still || t < 3.2 || [0, 1, 2].some((i) => (tt + i * 2.7) % 7 < 0.45);
+      if (busy) pumpkins(ctx);
+      else (this.sit || (this.sit = Layer())).draw(ctx, t, 12, pumpkins);
       // the moment the candles catch
       if (!still) {
         const k = (t - this.lite) / 0.8;

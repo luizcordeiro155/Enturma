@@ -479,6 +479,31 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
     if (theme === null) node.removeAttribute("data-theme");
     else node.setAttribute("data-theme", theme);
   }, oldTheme);
+  // The avatar stays a circle on the card.
+  const cardAvatar = await page
+    .locator(".user-profile-popover .public-profile-body > .identity-avatar")
+    .boundingBox();
+  expect(Math.round(cardAvatar!.width)).toBe(Math.round(cardAvatar!.height));
+  // Opened in full it is the same room as the social profile: same box, the close
+  // button floating inside, the content beside the card with no band behind the tabs.
+  await page.getByRole("button", { name: "Ver perfil completo" }).click();
+  const fullProfile = page.getByRole("dialog", { name: `Perfil de ${b}` });
+  await expect(fullProfile).toHaveAttribute("data-profile-view", "full");
+  const wide = page.viewportSize()!.width;
+  if (wide > 760)
+    await expect
+      .poll(async () => Math.round((await fullProfile.boundingBox())!.width))
+      .toBe(Math.min(1240, wide - 64));
+  const closeBox = await fullProfile
+    .getByRole("button", { name: "Fechar perfil" })
+    .boundingBox();
+  expect([Math.round(closeBox!.width), Math.round(closeBox!.height)]).toEqual([
+    42, 42,
+  ]);
+  await expect(fullProfile.locator(".profile-community-tabs")).toHaveCSS(
+    "background-color",
+    "rgba(0, 0, 0, 0)",
+  );
   await page.keyboard.press("Escape");
   await page.setViewportSize({ width: 390, height: 844 });
   await page
