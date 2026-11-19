@@ -49,9 +49,19 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
   // drawn; everywhere else the card makes room for it.
   let floating: HTMLElement | null = null,
     surface: HTMLElement | null = null,
-    shiftX = 0,
-    shiftY = 0,
     unboxed = false;
+  /** How much of the art's margin fits around the card inside the room, side by side. */
+  const margin = { top: 0, right: 0, bottom: 0, left: 0 };
+  /**
+   * What scrolls a floating card: compact, the popover is the card and scrolls whole; in
+   * full, the card has a column of its own.
+   */
+  const room = () =>
+    !floating
+      ? null
+      : floating.matches('[data-profile-view="compact"]')
+        ? floating
+        : (card.closest<HTMLElement>(".profile-preview-identity") ?? floating);
   const scale = () =>
     floating
       ? Math.round(
@@ -68,19 +78,32 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
   /** Canvas room around a floating card: the whole margin the art was drawn with. */
   const spill = () => Math.round(SPILL * scale());
 
-  /** Keeps the spilling frame on the card while the page scrolls or the dialog moves. */
+  /**
+   * Sets the spilling frame around the card inside the room that scrolls it, so card and
+   * frame go up and down as one piece and the room's edge is the only thing that cuts them.
+   */
   function place() {
-    const canvas = canvases.get("frame");
-    if (!floating || !canvas) return;
+    const canvas = canvases.get("frame"),
+      host = room();
+    if (!host || !canvas) return;
+    if (canvas.parentElement !== host) host.append(canvas);
     const m = spill(),
       at = card.getBoundingClientRect(),
-      now = canvas.getBoundingClientRect(),
-      dx = at.left - m - now.left,
-      dy = at.top - m - now.top;
-    if (Math.abs(dx) < 0.5 && Math.abs(dy) < 0.5) return;
-    shiftX += dx;
-    shiftY += dy;
-    canvas.style.transform = `translate(${shiftX}px, ${shiftY}px)`;
+      box = host.getBoundingClientRect(),
+      left = at.left - box.left - host.clientLeft + host.scrollLeft,
+      top = at.top - box.top - host.clientTop + host.scrollTop,
+      below = Math.max(
+        parseFloat(getComputedStyle(host).paddingBottom) || 0,
+        host.clientHeight - top - at.height,
+      ),
+      within = (free: number) => Math.round(Math.max(0, Math.min(m, free)));
+    // Never past what the room already scrolls: the art adds no scrolling of its own.
+    margin.left = within(left);
+    margin.top = within(top);
+    margin.right = within(host.clientWidth - left - at.width);
+    margin.bottom = within(below);
+    canvas.style.left = `${Math.round(left) - margin.left}px`;
+    canvas.style.top = `${Math.round(top) - margin.top}px`;
   }
 
   function fit(canvas: HTMLCanvasElement, w: number, h: number) {
@@ -102,12 +125,13 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
       h = card.clientHeight;
     if (chosen.frame && floating) {
       const around = reach();
-      surface?.style.setProperty("--cosmetic-spill", `${around.side}px`);
-      surface?.style.setProperty("--cosmetic-spill-top", `${around.top}px`);
-      surface?.style.setProperty(
+      floating.style.setProperty("--cosmetic-spill", `${around.side}px`);
+      floating.style.setProperty("--cosmetic-spill-top", `${around.top}px`);
+      floating.style.setProperty(
         "--cosmetic-spill-bottom",
         `${around.bottom}px`,
       );
+      place();
     }
     if (chosen.frame && !floating) {
       card.style.setProperty("--cosmetic-top", `${p.top}px`);
@@ -122,7 +146,6 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
       geometry.w = innerW / s;
       geometry.h = innerH / s;
       geometry.r = (chosen.frame ? INNER_RADIUS : 0) / s;
-      shiftX = shiftY = 0;
       for (const pack of packs.values()) pack.init();
     }
     const effect = canvases.get("effect");
@@ -151,18 +174,17 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
         pack = packs.get(chosen[layer]!);
       if (!ctx || !pack) continue;
       if (layer === "frame" && floating) {
-        const m = spill(),
-          fw = w + m * 2,
-          fh = h + m * 2,
+        place();
+        const fw = w + margin.left + margin.right,
+          fh = h + margin.top + margin.bottom,
           ratio = fit(canvas, fw, fh);
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
         ctx.clearRect(0, 0, fw, fh);
         ctx.save();
-        ctx.translate(m, m);
+        ctx.translate(margin.left, margin.top);
         ctx.scale(s, s);
         pack.drawFrame(ctx, time, still);
         ctx.restore();
-        place();
       } else if (layer === "frame") {
         const ratio = fit(canvas, w, h);
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
@@ -261,8 +283,18 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
       : undefined;
   const shown = () => wake();
   document.addEventListener("visibilitychange", shown);
-  window.addEventListener("scroll", place, { capture: true, passive: true });
-  window.addEventListener("resize", place);
+  // The room changes without the card changing size: the window is resized, or a compact
+  // popover opens in full and the card gets another room.
+  const moved = () => {
+    place();
+    if (packs.size) layout();
+    wake();
+  };
+  window.addEventListener("resize", moved);
+  const reopened =
+    typeof MutationObserver === "function"
+      ? new MutationObserver(moved)
+      : undefined;
 
   void Promise.all(
     [...new Set(wanted.map((layer) => chosen[layer]!))].map(async (id) => ({
@@ -298,16 +330,15 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
     // Frame last in the document so it sits over the other two.
     for (const layer of ["effect", "avatar", "frame"] as const) {
       const canvas = canvases.get(layer);
-      // A dialog in the top layer has to hold its own frame; anything else lets the page
-      // hold it, so no clipped or moved ancestor can cut the art.
-      const host =
-        layer === "frame" && floating
-          ? floating.matches("dialog")
-            ? floating
-            : document.body
-          : card;
+      // A spilling frame goes in the room that scrolls the card; the rest sits on the card.
+      const host = layer === "frame" && floating ? room()! : card;
       if (canvas) host.append(canvas);
     }
+    if (floating)
+      reopened?.observe(floating, {
+        attributes: true,
+        attributeFilter: ["data-profile-view"],
+      });
     if (able)
       for (const { id, create } of loaded)
         packs.set(id, create(geometry, { x: 60, y: 112, r: 42 }));
@@ -324,12 +355,12 @@ export function mountCosmetics(card: HTMLElement, chosen: CosmeticChoice) {
       cancelAnimationFrame(frame);
       resized?.disconnect();
       watched?.disconnect();
+      reopened?.disconnect();
       document.removeEventListener("visibilitychange", shown);
-      window.removeEventListener("scroll", place, { capture: true });
-      window.removeEventListener("resize", place);
+      window.removeEventListener("resize", moved);
       surface?.classList.remove("has-cosmetic-spill");
       for (const side of ["", "-top", "-bottom"])
-        surface?.style.removeProperty(`--cosmetic-spill${side}`);
+        floating?.style.removeProperty(`--cosmetic-spill${side}`);
       for (const [layer, canvas] of canvases) {
         canvas.remove();
         card.classList.remove(`has-cosmetic-${layer}`);

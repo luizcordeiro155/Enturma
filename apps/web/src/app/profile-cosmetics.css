@@ -14,11 +14,10 @@
   inset: 0;
   z-index: 6;
 }
-/* In a floating profile the frame goes around the card and over what surrounds it. */
+/* In a floating profile the frame goes around the card, inside the room that scrolls it:
+   the stage sets where, so card and frame move as one piece. */
 .profile-cosmetic-layer.profile-cosmetic-spill {
-  position: fixed;
-  inset: 0 auto auto 0;
-  z-index: 2147483000;
+  inset: auto;
 }
 /* The panel beside the card steps aside so the art does not sit on its text. */
 html body .profile-preview-combined.has-cosmetic-spill {

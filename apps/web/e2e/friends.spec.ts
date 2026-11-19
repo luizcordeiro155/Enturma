@@ -484,6 +484,40 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
     .locator(".user-profile-popover .public-profile-body > .identity-avatar")
     .boundingBox();
   expect(Math.round(cardAvatar!.width)).toBe(Math.round(cardAvatar!.height));
+  // In a short window the compact card does not fit: the whole card scrolls in a clear
+  // column, and nothing inside it scrolls on its own (one bar, never two).
+  const roomy = page.viewportSize()!;
+  if (roomy.width > 760) {
+    await page.setViewportSize({ width: roomy.width, height: 480 });
+    const compact = page.getByRole("dialog", { name: `Perfil de ${b}` });
+    await expect
+      .poll(() =>
+        compact.evaluate((node) =>
+          [node, ...node.querySelectorAll("*")]
+            .filter(
+              (el) =>
+                /auto|scroll/.test(getComputedStyle(el).overflowY) &&
+                el.scrollHeight > el.clientHeight + 1,
+            )
+            .map((el) => (el === node ? "popover" : el.className)),
+        ),
+      )
+      .toEqual(["popover"]);
+    const cardTop = async () =>
+      Math.round(
+        (await compact.locator(".profile-shared-surface").boundingBox())!.y,
+      );
+    const restTop = await cardTop();
+    await compact.evaluate((node) => node.scrollTo(0, 60));
+    await expect.poll(cardTop).toBe(restTop - 60);
+    // The close button rides on the card.
+    const closeTop = (await compact
+      .getByRole("button", { name: "Fechar perfil" })
+      .boundingBox())!.y;
+    expect(Math.round(closeTop - (restTop - 60))).toBe(13);
+    await compact.evaluate((node) => node.scrollTo(0, 0));
+    await page.setViewportSize(roomy);
+  }
   // Opened in full it is the same room as the social profile: same box, the close
   // button floating inside, the content beside the card with no band behind the tabs.
   await page.getByRole("button", { name: "Ver perfil completo" }).click();

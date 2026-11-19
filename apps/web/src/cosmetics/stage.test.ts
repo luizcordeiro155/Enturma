@@ -50,21 +50,33 @@ it("adds one decorative layer per chosen item and makes room for the frame", asy
   expect(card.style.getPropertyValue("--cosmetic-side")).toBe("");
 });
 
-it("lets the frame spill around the card in a profile dialog on a wide screen", async () => {
+/** The card as it stands in a floating profile: room > column that holds the card > card. */
+function floatingProfile(room: HTMLElement) {
+  const surface = document.createElement("div");
+  surface.className = "profile-preview-combined";
+  const column = document.createElement("section");
+  column.className = "profile-preview-identity";
+  document.body.append(room);
+  room.append(surface);
+  surface.append(column);
+  column.append(card);
+  return { surface, column };
+}
+const wide = () =>
   vi.stubGlobal("matchMedia", (query: string) => ({
     matches: query.includes("min-width"),
   }));
+
+it("lets the frame spill around the card in a profile dialog on a wide screen", async () => {
+  wide();
   const dialog = document.createElement("dialog");
   dialog.className = "social-dialog";
-  const surface = document.createElement("div");
-  surface.className = "profile-preview-combined";
-  document.body.append(dialog);
-  dialog.append(surface);
-  surface.append(card);
+  const { surface, column } = floatingProfile(dialog);
   const stage = mountCosmetics(card, { frame: "dragao", effect: "dragao" });
+  // The frame lives in the column that scrolls the card, so both move as one piece.
   await vi.waitFor(() =>
     expect(
-      dialog.querySelector(":scope > canvas[data-layer=frame]"),
+      column.querySelector(":scope > canvas[data-layer=frame]"),
     ).not.toBeNull(),
   );
   // Nothing is boxed in: the card keeps its size and the art goes around it.
@@ -72,34 +84,41 @@ it("lets the frame spill around the card in a profile dialog on a wide screen", 
   expect(card.className).not.toContain("has-cosmetic-frame");
   expect(card.style.getPropertyValue("--cosmetic-side")).toBe("");
   expect(surface.className).toContain("has-cosmetic-spill");
-  // The room learns how far the art reaches, so it can keep it inside the screen.
-  for (const side of ["top", "bottom"])
-    expect(surface.style.getPropertyValue(`--cosmetic-spill-${side}`)).toMatch(
+  // The whole room learns how far the art reaches, so it can leave that much clear.
+  for (const side of ["", "-top", "-bottom"])
+    expect(dialog.style.getPropertyValue(`--cosmetic-spill${side}`)).toMatch(
       /^\d+px$/,
     );
   stage.destroy();
   expect(dialog.querySelector("canvas")).toBeNull();
   expect(surface.className).toBe("profile-preview-combined");
-  expect(surface.getAttribute("style") ?? "").not.toContain("cosmetic");
+  expect(dialog.getAttribute("style") ?? "").not.toContain("cosmetic");
   dialog.remove();
 });
 
-it("hangs the frame of a profile popover on the page, where nothing can clip it", async () => {
-  vi.stubGlobal("matchMedia", (query: string) => ({
-    matches: query.includes("min-width"),
-  }));
+it("keeps the frame of a profile popover in whatever scrolls its card", async () => {
+  wide();
   const popover = document.createElement("div");
   popover.className = "user-profile-popover";
-  document.body.append(popover);
-  popover.append(card);
+  popover.dataset.profileView = "compact";
+  const { column } = floatingProfile(popover);
   const stage = mountCosmetics(card, { frame: "sakura" });
+  // Compact, the popover is the card and scrolls as a whole.
   await vi.waitFor(() =>
     expect(
-      document.body.querySelector(":scope > canvas[data-layer=frame]"),
+      popover.querySelector(":scope > canvas[data-layer=frame]"),
     ).not.toBeNull(),
   );
+  // Opened in full, the card has a column of its own.
+  popover.dataset.profileView = "full";
+  await vi.waitFor(() =>
+    expect(
+      column.querySelector(":scope > canvas[data-layer=frame]"),
+    ).not.toBeNull(),
+  );
+  expect(popover.querySelectorAll("canvas[data-layer=frame]")).toHaveLength(1);
   stage.destroy();
-  expect(document.body.querySelector(":scope > canvas")).toBeNull();
+  expect(popover.querySelector("canvas")).toBeNull();
   popover.remove();
 });
 

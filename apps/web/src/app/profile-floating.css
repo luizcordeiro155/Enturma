@@ -208,47 +208,182 @@ html
 }
 
 @media (min-width: 761px) {
+  /* The room keeps clear, around the card, what a frame reaches. */
   html
     body
     :is(dialog.social-dialog-profile, .user-profile-popover)
     .profile-shared-surface {
+    --room-top: 40px;
+    --room-bottom: 34px;
+    --room-left: 44px;
+    --room-side: var(--cosmetic-spill, 0px);
     gap: 30px;
-    padding: 40px 34px 34px 44px;
+    padding: var(--room-top) 34px var(--room-bottom) var(--room-left);
   }
   html
     body
     :is(dialog.social-dialog-profile, .user-profile-popover)
-    .profile-preview-identity {
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    border-radius: 18px;
-    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+    .profile-shared-surface.has-cosmetic-spill {
+    --room-top: max(40px, calc(var(--cosmetic-spill-top, 0px) + 6px));
+    --room-bottom: max(34px, calc(var(--cosmetic-spill-bottom, 0px) + 6px));
+    --room-left: max(44px, calc(var(--cosmetic-spill, 0px) + 6px));
   }
-  /* The profile popover opens as the card alone, with the full profile one tap further. */
-  html body .user-profile-popover[data-profile-view="compact"] {
-    overflow: visible;
-    width: min(372px, calc(100vw - 32px)) !important;
+  /* The card's column is a clear window as tall as the room. The card is the box, and when
+     it does not fit, card and frame scroll in that window together, cut only by the room. */
+  html
+    body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    .profile-shared-surface
+    > .profile-preview-identity {
+    z-index: 2;
+    overflow: hidden auto !important;
+    width: auto !important;
+    max-width: none !important;
     height: auto !important;
-    max-height: calc(100dvh - 150px);
+    max-height: none !important;
+    /* To the right it runs a little over the empty edge of the content beside it, so
+       drifting art fades out there instead of stopping short. */
+    margin: calc(-1 * var(--room-top)) calc(-20px - var(--room-side))
+      calc(-1 * var(--room-bottom)) calc(-1 * var(--room-left)) !important;
+    padding: var(--room-top) calc(var(--room-side) + 20px) var(--room-bottom)
+      var(--room-left) !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+  }
+  html
+    body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    .profile-preview-identity
+    > .public-profile-card {
+    overflow: visible;
     border-radius: 18px;
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.16),
+      0 12px 30px rgba(0, 0, 0, 0.42);
+  }
+  html
+    body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    .profile-preview-identity
+    > .public-profile-card
+    > .public-profile-banner {
+    border-radius: 18px 18px 0 0;
+  }
+  html
+    body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    .profile-preview-identity
+    > .public-profile-card
+    > :is(.public-profile-body, canvas[data-layer="effect"]),
+  html
+    body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    .profile-preview-identity
+    > .public-profile-card
+    > .public-profile-body
+    > .profile-color-layer {
+    border-radius: 0 0 18px 18px;
+  }
+  html
+    body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    .profile-preview-identity
+    > .public-profile-card
+    > canvas[data-layer="effect"] {
+    border-radius: 18px;
+  }
+
+  /* Art that drifts off towards the content fades out instead of ending on a line. */
+  html
+    body
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+    .profile-preview-identity
+    > canvas.profile-cosmetic-spill {
+    mask-image: linear-gradient(to left, transparent, #000 26px);
+  }
+  /* In a narrow window the content beside the card needs the width more than the frame's
+     left side does: that side runs off the room's edge. */
+  @media (max-width: 980px) {
+    html
+      body
+      :is(dialog.social-dialog-profile, .user-profile-popover)
+      .profile-shared-surface.has-cosmetic-spill {
+      --room-left: 44px;
+    }
+  }
+
+  /* The profile popover opens as the card alone, with the full profile one tap further. It
+     is a clear column as tall as the screen: a card that does not fit scrolls in it whole,
+     frame and all, so nothing inside the card scrolls on its own. */
+  html body .user-profile-popover[data-profile-view="compact"] {
+    --pop-top: max(14px, calc(var(--cosmetic-spill-top, 0px) + 8px));
+    --pop-bottom: max(14px, calc(var(--cosmetic-spill-bottom, 0px) + 8px));
+    --pop-side: calc(var(--cosmetic-spill, 0px) + 40px);
+    top: 0 !important;
+    translate: -50% 0;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    overflow: hidden auto !important;
+    /* 372px of card, the room the frame reaches on each side, and the bar's two gutters. */
+    width: min(
+      calc(384px + 2 * var(--pop-side)),
+      calc(100vw - 16px)
+    ) !important;
+    height: 100dvh !important;
+    max-height: none;
+    padding: var(--pop-top) var(--pop-side) var(--pop-bottom);
+    border: 0 !important;
+    border-radius: 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    /* The card stays centred whether or not the bar is there. */
+    scrollbar-gutter: stable both-edges !important;
+  }
+  /* This bar lies over the page, not over the dark room: it takes the page's ink. */
+  html
+    body
+    .user-profile-popover[data-profile-view="compact"]:is(
+      :hover,
+      :focus-within
+    ) {
+    --profile-bar: color-mix(in srgb, var(--ink, #888) 42%, transparent);
   }
   html
     body
     .user-profile-popover[data-profile-view="compact"]
     .profile-preview-combined.profile-shared-surface {
     display: grid !important;
+    flex: none;
     grid-template-columns: minmax(0, 1fr) !important;
-    overflow: hidden auto;
-    max-height: calc(100dvh - 150px);
+    overflow: visible !important;
+    width: 100%;
+    height: auto !important;
+    max-height: none;
+    margin-block: auto;
     padding: 0;
     border-radius: 18px !important;
+    /* A shadow that ends inside the column, so its edge never shows as a line. */
+    box-shadow:
+      0 0 0 1px rgba(255, 255, 255, 0.12),
+      0 10px 34px rgba(0, 0, 0, 0.42);
   }
   html
     body
     .user-profile-popover[data-profile-view="compact"]
-    .profile-preview-identity {
-    overflow: visible;
-    border: 0;
-    border-radius: 0;
+    .profile-shared-surface
+    > .profile-preview-identity {
+    z-index: auto;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  html
+    body
+    .user-profile-popover[data-profile-view="compact"]
+    .profile-preview-identity
+    > .public-profile-card {
     box-shadow: none;
   }
   html
@@ -257,6 +392,147 @@ html
     .profile-preview-combined.profile-shared-surface
     > .profile-preview-mural {
     display: none !important;
+  }
+  html
+    body
+    .user-profile-popover[data-profile-view="compact"]
+    > .profile-close {
+    inset: calc(var(--pop-top) + 13px) calc(var(--pop-side) + 16px) auto auto;
+  }
+}
+
+/* A scroll bar here is a thin line that only shows under the pointer or the keyboard. */
+@property --profile-bar {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: transparent;
+}
+html
+  body
+  :is(
+    .user-profile-popover,
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+      :is(
+        .profile-preview-identity,
+        .profile-preview-mural,
+        .social-profile-grid-scroll
+      )
+  ) {
+  --profile-bar: transparent;
+  transition: --profile-bar 0.25s;
+}
+html
+  body
+  :is(
+    .user-profile-popover,
+    :is(dialog.social-dialog-profile, .user-profile-popover)
+      :is(
+        .profile-preview-identity,
+        .profile-preview-mural,
+        .social-profile-grid-scroll
+      )
+  ):is(:hover, :focus-within) {
+  --profile-bar: rgba(255, 255, 255, 0.34);
+}
+@supports selector(::-webkit-scrollbar) {
+  html
+    body
+    :is(
+      .user-profile-popover,
+      :is(dialog.social-dialog-profile, .user-profile-popover)
+        :is(
+          .profile-preview-identity,
+          .profile-preview-mural,
+          .social-profile-grid-scroll
+        )
+    ) {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+  html
+    body
+    :is(
+      .user-profile-popover,
+      :is(dialog.social-dialog-profile, .user-profile-popover)
+        :is(
+          .profile-preview-identity,
+          .profile-preview-mural,
+          .social-profile-grid-scroll
+        )
+    )::-webkit-scrollbar {
+    display: block;
+    width: 6px;
+    height: 0;
+    background: transparent;
+  }
+  html
+    body
+    :is(
+      .user-profile-popover,
+      :is(dialog.social-dialog-profile, .user-profile-popover)
+        :is(
+          .profile-preview-identity,
+          .profile-preview-mural,
+          .social-profile-grid-scroll
+        )
+    )::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  html
+    body
+    :is(
+      .user-profile-popover,
+      :is(dialog.social-dialog-profile, .user-profile-popover)
+        :is(
+          .profile-preview-identity,
+          .profile-preview-mural,
+          .social-profile-grid-scroll
+        )
+    )::-webkit-scrollbar-thumb {
+    border-radius: 99px;
+    background: var(--profile-bar);
+  }
+  html
+    body
+    :is(
+      .user-profile-popover,
+      :is(dialog.social-dialog-profile, .user-profile-popover)
+        :is(
+          .profile-preview-identity,
+          .profile-preview-mural,
+          .social-profile-grid-scroll
+        )
+    )::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.55);
+  }
+  html
+    body
+    :is(
+      .user-profile-popover,
+      :is(dialog.social-dialog-profile, .user-profile-popover)
+        :is(
+          .profile-preview-identity,
+          .profile-preview-mural,
+          .social-profile-grid-scroll
+        )
+    )::-webkit-scrollbar-button {
+    display: none;
+  }
+}
+@supports not selector(::-webkit-scrollbar) {
+  html
+    body
+    :is(
+      .user-profile-popover,
+      :is(dialog.social-dialog-profile, .user-profile-popover)
+        :is(
+          .profile-preview-identity,
+          .profile-preview-mural,
+          .social-profile-grid-scroll
+        )
+    ) {
+    scrollbar-width: thin;
+    scrollbar-color: var(--profile-bar) transparent;
   }
 }
 
@@ -410,18 +686,6 @@ html
 }
 
 @media (min-width: 761px) {
-  /* A full profile nearly fills the screen, so the room gives a tall frame the space it
-     needs above and below the card instead of letting the screen cut it. */
-  html
-    body
-    :is(
-      dialog.social-dialog-profile,
-      .user-profile-popover[data-profile-view="full"]
-    )
-    .profile-preview-combined.profile-shared-surface.has-cosmetic-spill {
-    padding-top: max(40px, calc(var(--cosmetic-spill-top, 0px) - 6px));
-    padding-bottom: max(34px, calc(var(--cosmetic-spill-bottom, 0px) - 6px));
-  }
   /* Opened in full, the profile takes the same box as the social profile, over a dimmed page. */
   html
     body
