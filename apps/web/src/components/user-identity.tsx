@@ -639,7 +639,10 @@ export function UserIdentity({
                             // Keep the surrounding update synchronous so the rest of the
                             // profile exists before it is brought into view on a phone.
                             flushSync(() => setFull(true));
-                            if (matchMedia("(max-width: 760px)").matches)
+                            if (
+                              typeof matchMedia === "function" &&
+                              matchMedia("(max-width: 760px)").matches
+                            )
                               card.current
                                 ?.querySelector(".profile-preview-mural")
                                 ?.scrollIntoView({

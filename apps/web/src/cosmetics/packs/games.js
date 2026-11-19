@@ -396,7 +396,7 @@ export default function create(CARD, AVATAR) {
         if (k > 0) {
           const c = tt % 1.7,
             hop = still ? 0 : Math.abs(Math.sin((c / 1.7) * Math.PI)) * 12,
-            fr = Math.floor(tt * 3) % 2;
+            fr = ((Math.floor(tt * 3) % 2) + 2) % 2;
           ctx.save();
           ctx.translate(CARD.w * 0.74, -3 - hop);
           ctx.scale(k, k);

@@ -768,7 +768,11 @@ export function ProfileDetailsEditor({
                 onTry={(id) => {
                   setTrying(id);
                   // On a phone the preview sits under the list: show what was just put on.
-                  if (id && matchMedia("(max-width: 760px)").matches)
+                  if (
+                    id &&
+                    typeof matchMedia === "function" &&
+                    matchMedia("(max-width: 760px)").matches
+                  )
                     requestAnimationFrame(() =>
                       document
                         .querySelector(".profile-edit-live-preview")
