@@ -76,7 +76,24 @@ public class SocialController {
       @Size(max = 200) String website,
       @Size(max = 120) String interests,
       @Pattern(regexp = "(?:#[0-9a-fA-F]{6})?") String nameColor,
-      @Pattern(regexp = "SOLID|GRADIENT|NEON") String nameEffect) {}
+      @Pattern(regexp = "SOLID|GRADIENT|NEON") String nameEffect,
+      @Size(max = 6) List<@Size(max = 200) String> links) {}
+
+  /** A profile link is a web page or an e-mail address; nothing else leaves the profile. */
+  private static boolean profileLink(String value) {
+    if (value == null || value.isBlank() || value.length() > 200) return false;
+    try {
+      var uri = java.net.URI.create(value.strip());
+      if ("mailto".equalsIgnoreCase(uri.getScheme()))
+        return uri.getSchemeSpecificPart().matches("[^@/:\\s]+@[^@/:\\s]+\\.[^@/:\\s]+");
+      return uri.getScheme() != null
+          && Set.of("https", "http").contains(uri.getScheme().toLowerCase(Locale.ROOT))
+          && uri.getHost() != null
+          && uri.getUserInfo() == null;
+    } catch (IllegalArgumentException e) {
+      return false;
+    }
+  }
 
   @PutMapping("/users/me/profile-details")
   public void details(@AuthenticationPrincipal Actor a, @Valid @RequestBody Details value)
@@ -91,6 +108,10 @@ public class SocialController {
         throw ApiException.invalid("Informe um link HTTP ou HTTPS válido.");
       }
     }
+    if (value.links() != null
+        && (value.links().size() > 6
+            || !value.links().stream().allMatch(SocialController::profileLink)))
+      throw ApiException.invalid("Use até 6 links, cada um com um endereço web ou um e-mail.");
     db.jdbc.update(
         "UPDATE app_user SET profile_details=coalesce(profile_details,'{}'::jsonb) ||"
             + " jsonb_strip_nulls(?::jsonb) WHERE id=?",

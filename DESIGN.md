@@ -49,15 +49,30 @@ No Studio, manter Escolher → Editar → Detalhes e os rascunhos existentes. Ed
 Referência: https://www.figma.com/design/ayr0c9xHqgoOHSTqDI3M51?node-id=5-2.
 No desktop, rail de 76 px e Feed com leitura de até 500 px, Stories de 64 px e coluna lateral de 290 px a partir de 1200 px. A coluna usa conexões reais (Sua turma), com convite para descobrir pessoas quando vazia; não simula sugestões algorítmicas. No mobile, cinco destinos no dock e Explorar no cabeçalho. O perfil mantém grade de três colunas com fotos 3:4; Explorar pode usar quatro colunas em telas largas. Painéis móveis usam alça visual e cantos de 24 px, preservando teclado, safe areas e fechamento acessível. Clips, editor, mensagens, câmera e compartilhamento reutilizam os fluxos existentes desta PR. A aparência herda os temas escolhidos pelo usuário.
 
+## Caronas no celular e conversa da corrida — 18/11/2026
+
+- O centro do mapa é o meio da parte visível, e não do mapa inteiro: o mapa recebe quanto de cada borda está sob a barra superior e sob o painel de pedir carona e centraliza no que sobra. “Recentralizar” fica logo acima do painel, onde quer que ele esteja.
+- No celular o painel repousa em três alturas (espiada, meia tela, tela cheia). A alça é um botão: puxar para cima ou para baixo muda um degrau; tocar abre e, com o painel cheio, devolve o mapa. A partir de 761 px o painel é fixo ao lado do mapa e a alça some.
+- Com a corrida em andamento, o painel no celular mostra primeiro quem vem, o tempo e o próximo passo; mensagem, navegação e cancelar vêm depois.
+- A conversa com o motorista ou passageiro abre dentro do painel da corrida, com respostas rápidas e contador de não lidas. Ela é temporária: só existe durante a corrida, é encerrada quando a corrida termina ou é cancelada, e o histórico é apagado em até 24 horas. A animação de match não mudou.
+
 ## Mídia e perfil — revisão de 13/11/2026
 
 Vídeos preenchem a largura do post com recorte central, sem faixas laterais adicionadas pelo player. A revisão do Studio permite alternar entre o enquadramento do feed e o vídeo completo. A grade do perfil ocupa a largura do painel; o cabeçalho usa banner, avatar, bio e mensagem do perfil principal, preservando GIFs. No desktop, abrir uma publicação reúne mídia e conversa lado a lado; no mobile, empilha.
 
 Curtidas usam `--social-like`, definido em `social-studio.css`: vermelho escuro `#bf2542` no claro e `#ff526b` no escuro. O controle de volume usa branco sobre `#292d32e8`, independente do tema; expande por hover ou foco. Movimento respeita a preferência de redução. O foco da busca contorna o campo completo.
 
+## Links e cor do nome no perfil — 18/11/2026
+
+- O perfil aceita até seis links (páginas web ou e-mail). Cada um aparece como uma etiqueta com o nome do serviço reconhecido pelo endereço real (GitHub, Instagram, LinkedIn, WhatsApp, e-mail, site…) e o identificador público; o número de WhatsApp nunca é exibido. O antigo campo único “Site ou GitHub” entra nessa lista.
+- As etiquetas usam a cor do texto do próprio cartão (`currentColor`), para continuarem legíveis em qualquer paleta escolhida pelo usuário.
+- A cor escolhida para o nome vale no cartão do perfil; o cartão redefine o texto para `inherit`, então a regra da cor do nome precisa ter especificidade maior que essa redefinição.
+
 ## Perfil social no desktop — 18/11/2026
 
 A partir de 761 px, o Perfil social usa a mesma superfície do perfil padrão (`ProfileCard` e as cores de `profileStyle`): cartão de identidade à esquerda, com banner, avatar, nome, status, bio e as ações de seguir, mensagem e copiar link; à direita, a coluna “Enturma Social” com os contadores reais, avisos, destaques, abas e a grade de três colunas. Os controles da coluna social derivam de `currentColor` (`--mural-copy`), para manter contraste nos temas Claro, Escuro, Enturma e Sistema e em murais personalizados. Até 760 px o perfil continua empilhado, sem mudanças.
+
+No celular (até 760 px) o Perfil social usa a mesma superfície, empilhada: o cartão de identidade com a personalização do perfil (banner, avatar e decoração, fonte, efeito e cor do nome, insígnias, cores e fundo) e, abaixo, o bloco “Enturma Social” com contadores, destaques, abas e grade. A escolha entre duas colunas e uma coluna é feita só por CSS; não há mais uma árvore separada para o celular.
 
 ## Jogos de programação — 18/11/2026
 

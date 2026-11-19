@@ -1443,3 +1443,299 @@ html[data-enhanced-focus="true"] .ride-unified-search-box:focus-within {
 html .ride-mobility-app button.ride-circle-button {
   padding: 0 !important;
 }
+
+/* Phone: the request sheet rests at three heights (peek, half, full) and the
+   handle moves between them. "Recentralizar" sits just above wherever the
+   sheet currently is, using the height the map reports as covered. */
+@media (max-width: 760px) {
+  .ride-mobility-app {
+    --ride-sheet-gap: calc(76px + var(--ride-safe-bottom));
+  }
+  .ride-active-shell .ride-mobility-app {
+    --ride-sheet-gap: 8px;
+  }
+  html .ride-mobility-app .ride-bottom-sheet {
+    transition: top 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) !important;
+  }
+  html .ride-mobility-app .ride-bottom-sheet[data-snap="full"] {
+    top: calc(74px + var(--ride-safe-top)) !important;
+  }
+  html .ride-mobility-app .ride-bottom-sheet[data-snap="peek"] {
+    top: calc(100% - var(--ride-sheet-gap) - 132px) !important;
+  }
+  html
+    .ride-mobility-app
+    .ride-bottom-sheet[data-snap="peek"]
+    .ride-sheet-content {
+    overflow: hidden !important;
+  }
+  html .ride-mobility-app button.ride-sheet-handle {
+    height: 32px;
+    min-height: 32px;
+    cursor: grab;
+    touch-action: none;
+  }
+  html .ride-mobility-app button.ride-sheet-handle:focus-visible {
+    outline: 2px solid var(--ride-text);
+    outline-offset: -4px;
+  }
+  html .ride-mobility-app .ride-recenter {
+    bottom: calc(var(--ride-covered-bottom, 62dvh) + 12px) !important;
+    transition: bottom 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}
+/* From 761 px the sheet is a fixed panel beside the map: nothing to pull. */
+@media (min-width: 761px) {
+  html .ride-mobility-app .ride-sheet-handle {
+    display: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  html .ride-mobility-app .ride-bottom-sheet,
+  html .ride-mobility-app .ride-recenter {
+    transition: none !important;
+  }
+}
+html[data-reduced-motion="true"] .ride-mobility-app .ride-bottom-sheet,
+html[data-reduced-motion="true"] .ride-mobility-app .ride-recenter {
+  transition: none !important;
+}
+
+/* Temporary ride chat: takes the place of the ride sheet's content while open.
+   Bubbles follow the ride palette, so they read in the four themes. */
+.ride-chat {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 300px;
+}
+.ride-chat-head {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
+  flex: none;
+}
+.ride-chat-head .ride-person-avatar {
+  width: 40px;
+  height: 40px;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+.ride-chat-head strong,
+.ride-chat-head small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ride-chat-head small {
+  font-size: 0.78rem;
+}
+.ride-chat-messages {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin: 0;
+  padding: 4px 2px;
+  list-style: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+}
+.ride-chat-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  align-self: center;
+  max-width: 34ch;
+  margin-bottom: 6px;
+  padding: 9px 12px;
+  border: 1px dashed var(--ride-border);
+  border-radius: 12px;
+  color: var(--ride-muted);
+  font-size: 0.76rem;
+  line-height: 1.4;
+}
+.ride-chat-note svg {
+  flex: none;
+  margin-top: 1px;
+}
+.ride-chat-message {
+  display: grid;
+  gap: 2px;
+  align-self: flex-start;
+  max-width: 82%;
+  padding: 8px 12px 6px;
+  border-radius: 16px 16px 16px 5px;
+  background: var(--ride-surface-2);
+  border: 1px solid var(--ride-border);
+  color: var(--ride-text);
+}
+.ride-chat-message[data-mine="true"] {
+  align-self: flex-end;
+  border-radius: 16px 16px 5px 16px;
+  background: var(--ride-primary);
+  border-color: var(--ride-primary);
+  color: var(--ride-on-primary);
+}
+.ride-mobility-app .ride-chat-message p {
+  margin: 0;
+  color: inherit;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+.ride-chat-message time {
+  justify-self: end;
+  font-size: 0.68rem;
+  opacity: 0.75;
+}
+.ride-chat-quick {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  padding-bottom: 2px;
+}
+html .ride-mobility-app .ride-chat-quick > button {
+  flex: none;
+  min-height: 36px;
+  padding: 8px 12px !important;
+  border: 1px solid var(--ride-border) !important;
+  border-radius: 999px;
+  background: var(--ride-surface-2) !important;
+  color: var(--ride-text) !important;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+.ride-chat-composer {
+  flex: none;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+}
+.ride-mobility-app .ride-chat-composer input {
+  min-height: 46px;
+  border-radius: 999px;
+  padding-inline: 16px;
+  font-size: 16px;
+}
+html .ride-mobility-app .ride-chat-composer > button {
+  width: 46px;
+  min-height: 46px;
+  padding: 0 !important;
+  border-radius: 50%;
+  background: var(--ride-primary) !important;
+  border-color: var(--ride-primary) !important;
+  color: var(--ride-on-primary) !important;
+}
+.ride-mobility-app .ride-chat-closed,
+.ride-mobility-app .ride-chat-error {
+  flex: none;
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--ride-border);
+  border-radius: 12px;
+  background: var(--ride-surface-2);
+  color: var(--ride-text);
+  font-size: 0.88rem;
+  text-align: center;
+}
+.ride-mobility-app .ride-chat-error {
+  background: var(--ride-danger-bg);
+  color: var(--ride-danger-text);
+  border-color: var(--ride-danger-border);
+}
+.ride-chat-open {
+  position: relative;
+}
+.ride-chat-badge {
+  display: inline-grid;
+  place-items: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #d92d4a;
+  color: #fff;
+  font-size: 0.72rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* Phone, ride in progress: who is coming and the next step first, the
+   secondary actions after, so the half-height sheet shows what matters. */
+@media (max-width: 760px) {
+  .ride-active-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .ride-active-sheet > * {
+    order: 5;
+  }
+  .ride-active-sheet > .ride-sheet-heading {
+    order: 0;
+    margin-bottom: 0;
+  }
+  .ride-active-sheet > .ride-active-profile {
+    order: 1;
+  }
+  .ride-active-sheet > .ride-trip-facts {
+    order: 2;
+    margin-top: 0;
+  }
+  .ride-active-sheet > .ride-primary-action {
+    order: 3;
+    width: 100%;
+  }
+  .ride-active-sheet > .ride-active-actions {
+    order: 4;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: 0;
+  }
+  html[data-theme] .ride-mobility-app .ride-active-actions > .danger-action {
+    grid-column: 1 / -1;
+    min-height: 40px;
+    background: transparent !important;
+    border-color: transparent !important;
+    font-weight: 650;
+  }
+  .ride-active-sheet .ride-safety-strip {
+    margin-top: 0;
+  }
+  .ride-mobility-app .ride-active-sheet .ride-eta {
+    flex: none;
+    padding: 8px 12px;
+    border: 1px solid var(--ride-border);
+    border-radius: 999px;
+    background: var(--ride-selected);
+    font-size: 1.02rem;
+    line-height: 1;
+    white-space: nowrap;
+  }
+  .ride-active-profile-banner {
+    height: 0;
+  }
+  .ride-active-profile-banner:has(img) {
+    height: 52px;
+  }
+  .ride-active-profile .ride-person-summary {
+    padding: 12px 13px;
+  }
+  .ride-active-profile:has(.ride-active-profile-banner img) .ride-person-summary {
+    padding-top: 0;
+  }
+  .ride-active-profile:not(:has(.ride-active-profile-banner img))
+    .ride-person-avatar {
+    margin-top: 0;
+  }
+}

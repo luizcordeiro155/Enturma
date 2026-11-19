@@ -761,6 +761,94 @@ html .profile-edit-dialog input[type="color"] {
 .name-effect-NEON {
   text-shadow: 0 0 12px var(--profile-name-color, #ad7ef0);
 }
+/* The profile card resets its text to `color: inherit`; the colour the user
+   picked for the name has to win over that reset. */
+html .profile-copy-content :is(h2, strong)[class*="name-effect-"] {
+  color: var(--profile-name-color, inherit);
+}
+
+/* Profile links: a chip per link, named after the service it points to. They
+   borrow the card's own text colour so any profile palette stays readable. */
+.profile-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 10px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.profile-links li {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  min-width: 0;
+}
+html .profile-links .profile-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  min-height: 36px;
+  padding: 6px 12px 6px 10px;
+  border: 1px solid color-mix(in srgb, currentColor 24%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, currentColor 8%, transparent);
+  color: inherit;
+  font-size: 0.86rem;
+  line-height: 1.2;
+  text-decoration: none;
+}
+.profile-links .profile-link:hover {
+  background: color-mix(in srgb, currentColor 15%, transparent);
+}
+.profile-links .profile-link:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+.profile-links .profile-link svg {
+  flex: none;
+}
+.profile-links .profile-link span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.profile-links .profile-link small {
+  font-size: inherit;
+  opacity: 0.8;
+}
+.profile-link-note {
+  font-size: 0.78rem;
+  opacity: 0.85;
+}
+.profile-links-editor {
+  display: grid;
+  gap: 12px;
+}
+.profile-link-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 4px 8px;
+}
+.profile-link-row > small {
+  grid-column: 2 / -1;
+  font-size: 0.76rem;
+  color: var(--muted);
+}
+.profile-link-row > small[data-valid="true"] {
+  color: var(--ink);
+  font-weight: 650;
+}
+.profile-link-row input[aria-invalid="true"] {
+  border-color: #c0392b;
+}
+.profile-links-editor > .button {
+  justify-self: start;
+}
 .interactive-star-rating {
   display: flex;
   width: min(310px, 100%);

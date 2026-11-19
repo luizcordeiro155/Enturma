@@ -1,4 +1,6 @@
 "use client";
+import { ProfileLinksEditor } from "./profile-links";
+import { normalizeLink, profileLinks } from "@/lib/profile-links";
 
 import { useEffect, useRef, useState } from "react";
 import { PROFILE_PALETTES } from "@enturma/contracts";
@@ -87,6 +89,11 @@ export function ProfileDetailsEditor({
     decoration: "NONE",
     nameFont: "SYSTEM",
     ...profile.profileDetails,
+  });
+  // The old single "site" joins the list; saving retires it.
+  const [links, setLinks] = useState(() => {
+    const saved = profileLinks(profile.profileDetails);
+    return saved.length ? saved : [""];
   });
 
   useEffect(() => {
@@ -180,13 +187,20 @@ export function ProfileDetailsEditor({
     try {
       if (!showcase)
         throw Error("Aguarde o carregamento do perfil antes de salvar.");
+      const typed = links.map((link) => link.trim());
+      const unclear = typed.findIndex((link) => link && !normalizeLink(link));
+      if (unclear >= 0)
+        throw Error(
+          `Confira o link ${unclear + 1}: use um endereço web ou um e-mail.`,
+        );
+      const savedLinks = profileLinks({ links: typed });
       await api("/users/me/appearance", {
         method: "PUT",
         body: JSON.stringify(appearance),
       });
       await api("/users/me/profile-details", {
         method: "PUT",
-        body: JSON.stringify(details),
+        body: JSON.stringify({ ...details, website: "", links: savedLinks }),
       });
       await api("/users/me/showcase", {
         method: "PUT",
@@ -215,6 +229,7 @@ export function ProfileDetailsEditor({
     | {
         appearance: typeof appearance;
         details: ProfileDetails;
+        links: string[];
         showcase?: Showcase;
       }
     | undefined
@@ -223,6 +238,7 @@ export function ProfileDetailsEditor({
     editSnapshot.current = {
       appearance: { ...appearance },
       details: { ...details },
+      links: [...links],
       showcase: showcase ? structuredClone(showcase) : undefined,
     };
   }
@@ -231,6 +247,7 @@ export function ProfileDetailsEditor({
     if (saved) {
       setAppearance(saved.appearance);
       setDetails(saved.details);
+      setLinks(saved.links);
       setShowcase(saved.showcase);
     }
   }
@@ -241,7 +258,7 @@ export function ProfileDetailsEditor({
     mediaVersion: mediaVersion || profile.mediaVersion,
     hasAvatar: mediaState.avatar ?? profile.hasAvatar,
     hasBanner: mediaState.banner ?? profile.hasBanner,
-    profileDetails: details,
+    profileDetails: { ...details, website: "", links },
     showcaseAppearance: showcase?.appearance,
   };
 
@@ -758,16 +775,10 @@ export function ProfileDetailsEditor({
                   }
                 />
               </label>
-              <label className="profile-discord-field">
-                <span>Site ou GitHub</span>
-                <input
-                  type="url"
-                  value={details.website ?? ""}
-                  maxLength={200}
-                  placeholder="https://"
-                  onChange={(event) => setDetail("website", event.target.value)}
-                />
-              </label>
+              <div className="profile-discord-field">
+                <span>Links</span>
+                <ProfileLinksEditor value={links} onChange={setLinks} />
+              </div>
             </ProfileEditPanel>
 
             {showcase ? (

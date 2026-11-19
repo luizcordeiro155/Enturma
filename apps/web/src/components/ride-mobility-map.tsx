@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { NO_INSET, focusOf, type Inset } from "@/lib/ride-map-focus";
 
 export type MapPoint = { lat: number; lng: number };
 export type MapMarker = {
@@ -26,6 +27,8 @@ type Props = {
   route?: MapPoint[];
   selecting?: boolean;
   follow?: boolean;
+  /** Edges of the map that sit under panels; the camera centres on what is left. */
+  inset?: Inset;
   onCenterChange?: (point: MapPoint) => void;
   onInteraction?: () => void;
   className?: string;
@@ -79,22 +82,20 @@ function SmoothMarker({
   marker,
   center,
   zoom,
-  width,
-  height,
+  focus,
 }: {
   marker: MapMarker;
   center: MapPoint;
   zoom: number;
-  width: number;
-  height: number;
+  focus: { x: number; y: number };
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const previous = useRef<{ x: number; y: number } | null>(null);
   const targetWorld = world(marker.point, zoom);
   const centerWorld = world(center, zoom);
   const target = {
-    x: width / 2 + targetWorld.x - centerWorld.x,
-    y: height / 2 + targetWorld.y - centerWorld.y,
+    x: focus.x + targetWorld.x - centerWorld.x,
+    y: focus.y + targetWorld.y - centerWorld.y,
   };
 
   useEffect(() => {
@@ -146,6 +147,7 @@ export function RideMobilityMap({
   route = [],
   selecting = false,
   follow = true,
+  inset = NO_INSET,
   onCenterChange,
   onInteraction,
   className = "",
@@ -219,11 +221,14 @@ export function RideMobilityMap({
   }, []);
 
   const centerWorld = world(displayCenter, currentZoom);
+  // The centre of the camera is the middle of the visible part of the map,
+  // so a point "in the centre" is never behind the sheet or the side panel.
+  const focus = focusOf(size, inset);
   const tileRange = useMemo(() => {
-    const minX = Math.floor((centerWorld.x - size.width / 2) / TILE) - 1;
-    const maxX = Math.floor((centerWorld.x + size.width / 2) / TILE) + 1;
-    const minY = Math.floor((centerWorld.y - size.height / 2) / TILE) - 1;
-    const maxY = Math.floor((centerWorld.y + size.height / 2) / TILE) + 1;
+    const minX = Math.floor((centerWorld.x - focus.x) / TILE) - 1;
+    const maxX = Math.floor((centerWorld.x + size.width - focus.x) / TILE) + 1;
+    const minY = Math.floor((centerWorld.y - focus.y) / TILE) - 1;
+    const maxY = Math.floor((centerWorld.y + size.height - focus.y) / TILE) + 1;
     const limit = 2 ** currentZoom;
     const tiles: { x: number; y: number; key: string; left: number; top: number }[] = [];
     for (let y = minY; y <= maxY; y++) {
@@ -234,22 +239,30 @@ export function RideMobilityMap({
           x: wrapped,
           y,
           key: `${currentZoom}-${x}-${y}`,
-          left: x * TILE - centerWorld.x + size.width / 2,
-          top: y * TILE - centerWorld.y + size.height / 2,
+          left: x * TILE - centerWorld.x + focus.x,
+          top: y * TILE - centerWorld.y + focus.y,
         });
       }
     }
     return tiles;
-  }, [centerWorld.x, centerWorld.y, currentZoom, size.width, size.height]);
+  }, [
+    centerWorld.x,
+    centerWorld.y,
+    currentZoom,
+    size.width,
+    size.height,
+    focus.x,
+    focus.y,
+  ]);
 
   const routePoints = useMemo(() => {
     return route
       .map((point) => {
         const p = world(point, currentZoom);
-        return `${size.width / 2 + p.x - centerWorld.x},${size.height / 2 + p.y - centerWorld.y}`;
+        return `${focus.x + p.x - centerWorld.x},${focus.y + p.y - centerWorld.y}`;
       })
       .join(" ");
-  }, [route, currentZoom, size.width, size.height, centerWorld.x, centerWorld.y]);
+  }, [route, currentZoom, focus.x, focus.y, centerWorld.x, centerWorld.y]);
 
   useEffect(() => {
     const path = routePath.current;
@@ -388,13 +401,17 @@ export function RideMobilityMap({
           marker={marker}
           center={displayCenter}
           zoom={currentZoom}
-          width={size.width}
-          height={size.height}
+          focus={focus}
         />
       ))}
 
       {selecting ? (
-        <div ref={pin} className="ride-center-pin" aria-hidden="true">
+        <div
+          ref={pin}
+          className="ride-center-pin"
+          aria-hidden="true"
+          style={{ left: `${focus.x}px`, top: `${focus.y}px` }}
+        >
           <MapPin size={36} />
         </div>
       ) : null}

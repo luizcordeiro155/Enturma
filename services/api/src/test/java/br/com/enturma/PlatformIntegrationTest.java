@@ -396,6 +396,43 @@ class PlatformIntegrationTest {
   }
 
   @Test
+  void profileLinksAcceptWebAndEmailAndRefuseEverythingElse() throws Exception {
+    social.details(
+        host, profileLinks(List.of("https://github.com/ana", "mailto:ana@example.com")));
+    assertThat(storedProfileLinks()).isEqualTo(2);
+    for (String refused :
+        List.of(
+            "javascript:alert(1)",
+            "https://user:pass@example.com",
+            "ftp://example.com/file",
+            "mailto:not-an-email",
+            "https://"))
+      assertThatThrownBy(() -> social.details(host, profileLinks(List.of(refused))))
+          .as(refused)
+          .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                social.details(
+                    host, profileLinks(java.util.Collections.nCopies(7, "https://example.com"))))
+        .isInstanceOf(ApiException.class);
+    assertThat(storedProfileLinks()).isEqualTo(2);
+    // An older app that does not know the list leaves it untouched.
+    social.details(host, profileLinks(null));
+    assertThat(storedProfileLinks()).isEqualTo(2);
+  }
+
+  private SocialController.Details profileLinks(List<String> links) {
+    return new SocialController.Details(null, null, null, null, null, null, null, null, links);
+  }
+
+  private int storedProfileLinks() {
+    return db.jdbc.queryForObject(
+        "SELECT jsonb_array_length(profile_details->'links') FROM app_user WHERE id=?",
+        Integer.class,
+        host.id());
+  }
+
+  @Test
   void missionsHaveFivePerGameHideAnswersAndPersistAcrossDays() {
     db.jdbc.update(
         "UPDATE academic_entry SET attributes=attributes||'{\"learningArea\":\"IT\"}'::jsonb WHERE"

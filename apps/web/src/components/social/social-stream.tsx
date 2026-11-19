@@ -22,6 +22,12 @@ export function useSocialStream(
     [cursor, setCursor] = useState<string | null>(null);
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
+  // Publications that arrived below while the student was reading further up.
+  const [fresh, setFresh] = useState(0);
+  const known = useRef(new Set<string>());
+  useEffect(() => {
+    known.current = new Set(items.map((post) => post.id));
+  }, [items]);
   const running = useRef(false),
     refreshing = useRef(false),
     mounted = useRef(true),
@@ -55,6 +61,7 @@ export function useSocialStream(
             reset ? result.items : mergeSocialPage(old, result.items),
           );
           setCursor(result.nextCursor);
+          if (reset) setFresh(0);
         }
         return true;
       } catch (cause) {
@@ -70,11 +77,11 @@ export function useSocialStream(
   const refresh = useCallback(async () => {
     if (!latest.current.active || document.hidden || !navigator.onLine) {
       dirty.current = true;
-      return;
+      return 0;
     }
     if (running.current || refreshing.current) {
       dirty.current = true;
-      return;
+      return 0;
     }
     refreshing.current = true;
     const version = requestVersion.current;
@@ -84,22 +91,25 @@ export function useSocialStream(
         { cache: "no-store" },
       );
       if (mounted.current && version === requestVersion.current) {
-        setItems((old) =>
-          mergeFreshPosts(
-            old,
-            result.items,
-            latest.current.prependFresh?.() ?? false,
-          ),
-        );
+        const prepend = latest.current.prependFresh?.() ?? false;
+        const added = result.items.filter(
+          (post) => !known.current.has(post.id),
+        ).length;
+        setItems((old) => mergeFreshPosts(old, result.items, prepend));
+        if (added && !prepend && latest.current.prependFresh)
+          setFresh((count) => count + added);
         setError("");
         dirty.current = false;
+        return added;
       }
     } catch (cause) {
       if (mounted.current) setError((cause as Error).message);
     } finally {
       refreshing.current = false;
     }
+    return 0;
   }, []);
+  const seen = useCallback(() => setFresh(0), []);
   useLiveRefresh("social_changed", refresh, 20000);
   useEffect(() => {
     if (!active || cursor !== null || error) return;
@@ -135,8 +145,19 @@ export function useSocialStream(
       setItems((old) => old.map((item) => (item.id === post.id ? post : item))),
     [],
   );
-  return { items, cursor, busy, error, load, change, refresh };
+  return { items, cursor, busy, error, load, change, refresh, fresh, seen };
 }
+
+/** When Seguindo or Minha Faculdade run out, the Feed continues with Para Você. */
+function suggestionQuery(query: string) {
+  const params = new URLSearchParams(query);
+  const tab = params.get("tab");
+  if (params.get("q") || (tab !== "following" && tab !== "campus")) return "";
+  params.set("tab", "for-you");
+  return params.toString();
+}
+/** Shortest wait between two "anything new?" checks at the end of the Feed. */
+const END_CHECK_MS = 5000;
 
 export function SocialStream({
   query,
@@ -156,7 +177,8 @@ export function SocialStream({
   const panel = useRef<HTMLDivElement>(null);
   // Stories and tabs scroll with the Feed; other lists own their scroll area.
   const scroller = () =>
-    panel.current?.closest<HTMLElement>("[data-social-scroller]") ?? panel.current;
+    panel.current?.closest<HTMLElement>("[data-social-scroller]") ??
+    panel.current;
   const stream = useSocialStream(
       query,
       active,
@@ -165,23 +187,54 @@ export function SocialStream({
     sentinel = useRef<HTMLDivElement>(null),
     latest = useRef(stream.load),
     pull = useRef<{ x: number; y: number } | null>(null);
-  const [newContent, setNewContent] = useState(false);
+  const ended = stream.cursor === "" && !stream.error;
+  const suggestQuery = suggestionQuery(query);
+  const suggested = useSocialStream(
+    suggestQuery || query,
+    active && !!suggestQuery && ended && stream.items.length > 0,
+  );
+  const continues = !!suggestQuery && ended && stream.items.length > 0;
+  // The list being paged at the bottom: the tab itself, then its suggestions.
+  const tail = continues ? suggested : stream;
+  const shown = new Set(stream.items.map((post) => post.id));
+  const suggestions = continues
+    ? suggested.items.filter((post) => !shown.has(post.id))
+    : [];
+  const more = useRef(tail.load),
+    recheck = useRef({ stream, suggested, continues }),
+    lastCheck = useRef(0),
+    atEnd = useRef(false);
+  const [checking, setChecking] = useState(false);
   const [pulled, setPulled] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
   const refreshNow = useCallback(() => {
-    setNewContent(false);
     setRefreshing(true);
     void latest.current(true).finally(() => setRefreshing(false));
   }, []);
   useEffect(() => {
     latest.current = stream.load;
-  }, [stream.load]);
+    more.current = tail.load;
+    recheck.current = { stream, suggested, continues };
+  });
   useEffect(() => {
-    if (!active || stream.cursor === "" || stream.error || !sentinel.current)
-      return;
+    if (!active || tail.error || !sentinel.current) return;
+    const paging = tail.cursor !== "";
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries.some((e) => e.isIntersecting)) void latest.current();
+        atEnd.current = entries.some((e) => e.isIntersecting);
+        if (!atEnd.current) return;
+        if (paging) return void more.current();
+        // The end of everything: look for new publications right away, like a
+        // feed that never runs dry, instead of asking the student to refresh.
+        const now = recheck.current;
+        now.stream.seen();
+        if (Date.now() - lastCheck.current < END_CHECK_MS) return;
+        lastCheck.current = Date.now();
+        setChecking(true);
+        void Promise.all([
+          now.stream.refresh(),
+          now.continues ? now.suggested.refresh() : 0,
+        ]).finally(() => setChecking(false));
       },
       {
         root:
@@ -191,17 +244,16 @@ export function SocialStream({
       },
     );
     observer.observe(sentinel.current);
-    return () => observer.disconnect();
-  }, [active, stream.cursor, stream.error]);
-  useEffect(() => {
-    const changed = () => setNewContent(true);
-    window.addEventListener("enturma-social_changed", changed);
-    window.addEventListener("enturma-live-resync", changed);
     return () => {
-      window.removeEventListener("enturma-social_changed", changed);
-      window.removeEventListener("enturma-live-resync", changed);
+      atEnd.current = false;
+      observer.disconnect();
     };
-  }, []);
+  }, [active, tail.cursor, tail.error]);
+  const { fresh, seen } = stream;
+  useEffect(() => {
+    // What arrives while the student is at the end is already in front of them.
+    if (fresh && atEnd.current) seen();
+  }, [fresh, seen]);
   useEffect(() => {
     if (!refreshKey) return;
     // Tapping "Enturma": back to the top, then fresh posts with the spinner.
@@ -229,7 +281,9 @@ export function SocialStream({
         if (!start || !touch || refreshing) return;
         const dy = touch.clientY - start.y;
         // Resistance, like Instagram: the ring follows at half the finger's speed.
-        setPulled(dy > 0 && dy > Math.abs(touch.clientX - start.x) ? dy * 0.5 : 0);
+        setPulled(
+          dy > 0 && dy > Math.abs(touch.clientX - start.x) ? dy * 0.5 : 0,
+        );
       }}
       onTouchStart={(event) => {
         const touch = event.touches[0];
@@ -259,15 +313,15 @@ export function SocialStream({
     >
       <SocialPullRefresh distance={pulled} refreshing={refreshing} />
       <div className="social-stream-inner">
-        {newContent && (
+        {stream.fresh > 0 && (
           <button
             className="social-fresh secondary"
             onClick={() => {
-              scroller()?.scrollTo({ top: 0, behavior: "smooth" });
+              scroller()?.scrollTo?.({ top: 0, behavior: "smooth" });
               refreshNow();
             }}
           >
-            Novas publicações · atualizar
+            Novas publicações
           </button>
         )}
         {stream.items.map((item) => (
@@ -299,19 +353,39 @@ export function SocialStream({
           </div>
         )}
         {stream.error && <p role="alert">{stream.error}</p>}
+        {suggestions.length > 0 && (
+          <>
+            <div className="social-caught-up" role="separator">
+              <strong>Você está em dia</strong>
+              <span>Sugestões para você</span>
+            </div>
+            {suggestions.map((item) => (
+              <SocialPost
+                key={item.id}
+                item={item}
+                me={me}
+                person={person}
+                changed={suggested.change}
+                autoplay={active && autoplay}
+              />
+            ))}
+          </>
+        )}
+        {continues && suggested.error && <p role="alert">{suggested.error}</p>}
         <div ref={sentinel} className="social-load" aria-live="polite">
-          {stream.busy
+          {tail.busy
             ? "Buscando publicações…"
-            : stream.cursor !== "" && (
-                <button
-                  className="secondary"
-                  onClick={() => void stream.load()}
-                >
+            : tail.cursor !== "" && (
+                <button className="secondary" onClick={() => void tail.load()}>
                   Carregar mais
                 </button>
               )}
-          {stream.cursor === "" && !!stream.items.length && (
-            <small>Acompanhando novas publicações…</small>
+          {tail.cursor === "" && !tail.busy && !!stream.items.length && (
+            <small>
+              {checking
+                ? "Buscando novidades…"
+                : "Você está em dia. As novas publicações aparecem aqui."}
+            </small>
           )}
         </div>
       </div>
