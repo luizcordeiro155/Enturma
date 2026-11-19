@@ -123,7 +123,9 @@ public class SocialController {
     levels.put("mecha", 16);
     levels.put("masmorra", 17);
     levels.put("grimorio", 18);
+    levels.put("tempestade", 19);
     levels.put("tinta", 20);
+    levels.put("lua", 21);
     levels.put("pesadelo", 22);
     return Collections.unmodifiableMap(levels);
   }

@@ -40,7 +40,6 @@ import {
 const DETAIL_FIELDS = [
   "pronouns",
   "statusText",
-  "decoration",
   "nameFont",
   "nameColor",
   "nameEffect",
@@ -103,7 +102,6 @@ export function ProfileDetailsEditor({
     accentColor: profile.accentColor ?? "#183f36",
   });
   const [details, setDetails] = useState<ProfileDetails>({
-    decoration: "NONE",
     nameFont: "SYSTEM",
     ...profile.profileDetails,
   });
@@ -704,45 +702,6 @@ export function ProfileDetailsEditor({
                   </div>
                 </>
               ) : null}
-            </ProfileEditPanel>
-
-            <ProfileEditPanel
-              title="Decoração do avatar"
-              description="Anel, brilho e degradê"
-              thumbnail={<Sparkles size={24} />}
-              preview={<ProfileCard user={previewUser} showcase={showcase} />}
-              onBegin={beginEdit}
-              onCancel={cancelEdit}
-            >
-              <label className="profile-setting-row">
-                <span className="profile-setting-icon">
-                  <Sparkles size={21} />
-                </span>
-                <span>
-                  <strong>Decoração do avatar</strong>
-                  <small>
-                    {details.decoration === "NONE"
-                      ? "Nenhuma"
-                      : details.decoration === "RING"
-                        ? "Anel colorido"
-                        : details.decoration === "GLOW"
-                          ? "Brilho"
-                          : "Anel degradê"}
-                  </small>
-                </span>
-                <select
-                  value={details.decoration}
-                  aria-label="Decoração do avatar"
-                  onChange={(event) =>
-                    setDetail("decoration", event.target.value)
-                  }
-                >
-                  <option value="NONE">Sem decoração</option>
-                  <option value="RING">Anel colorido</option>
-                  <option value="GLOW">Brilho</option>
-                  <option value="GRADIENT">Anel degradê</option>
-                </select>
-              </label>
             </ProfileEditPanel>
 
             <ProfileEditPanel

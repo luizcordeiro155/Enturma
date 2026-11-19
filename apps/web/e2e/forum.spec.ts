@@ -157,7 +157,7 @@ test("fórum: publicar, buscar, responder, votar, reagir e editar em mobile", as
   });
   await page.getByRole("button", { name: /Notificações,.*não lidas/ }).click();
   const inbox = page.getByRole("dialog", { name: "Sua caixa de entrada" });
-  await expect(inbox).toContainText("Sua publicação recebeu uma curtida.");
+  await expect(inbox).toContainText("curtiu o que você escreveu no fórum.");
   await expect(inbox).toContainText(
     "Você foi mencionado em uma conversa do fórum.",
   );

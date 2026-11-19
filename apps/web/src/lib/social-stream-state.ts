@@ -11,7 +11,8 @@ export function mergeFreshPosts(
   return prepend ? [...added, ...retained] : [...retained, ...added];
 }
 /** Only a canonical first-party post link can trigger an authenticated preview request. */
-export function sharedSocialPostId(text: string): string | null {
+/** The post or person a message shares: only this installation's own Social link counts. */
+function sharedSocialId(text: string, kind: "post" | "person"): string | null {
   for (const match of text.matchAll(/https?:\/\/[^\s<>]+/g)) {
     try {
       const url = new URL(match[0]);
@@ -24,7 +25,7 @@ export function sharedSocialPostId(text: string): string | null {
         url.pathname !== "/social"
       )
         continue;
-      const id = url.searchParams.get("post");
+      const id = url.searchParams.get(kind);
       if (
         id &&
         /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/i.test(
@@ -38,3 +39,7 @@ export function sharedSocialPostId(text: string): string | null {
   }
   return null;
 }
+export const sharedSocialPostId = (text: string) =>
+  sharedSocialId(text, "post");
+export const sharedSocialProfileId = (text: string) =>
+  sharedSocialId(text, "person");

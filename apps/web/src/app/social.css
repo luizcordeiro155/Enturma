@@ -41,27 +41,6 @@
   object-fit: cover;
   border-radius: inherit;
 }
-.decoration-RING {
-  outline: 3px solid var(--profile-accent);
-  outline-offset: 2px;
-}
-.decoration-GLOW {
-  box-shadow:
-    0 0 0 2px var(--profile-accent),
-    0 0 14px var(--profile-accent);
-}
-.decoration-GRADIENT {
-  border: 3px solid transparent;
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    conic-gradient(
-        var(--profile-accent),
-        #cfb1f9,
-        #86d6d0,
-        var(--profile-accent)
-      )
-      border-box;
-}
 .name-MONO {
   font-family: ui-monospace, monospace;
 }

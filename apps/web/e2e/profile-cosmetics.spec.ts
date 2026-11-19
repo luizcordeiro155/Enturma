@@ -18,6 +18,11 @@ const painted = (canvas: Locator) =>
   });
 const layer = (page: Page, name: string) =>
   page.locator(`.public-profile-card canvas[data-layer="${name}"]`).last();
+/** In the editor's own preview the frame goes around the card, in the card's column. */
+const previewFrame = (page: Page) =>
+  page.locator(
+    ".profile-preview-stage .profile-preview-identity > canvas[data-layer='frame']",
+  );
 
 test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no perfil", async ({
   page,
@@ -56,6 +61,19 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   await dragon.getByRole("button", { name: "Experimentar" }).click();
   await expect(layer(page, "frame")).toBeVisible();
   await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.01);
+  // In this small preview the frame takes its own room inside the card, so the profile
+  // text stays clear of it.
+  const tried = await dialog
+    .locator(".public-profile-card")
+    .last()
+    .evaluate((node) => ({
+      side: parseFloat(getComputedStyle(node).paddingLeft),
+      left:
+        node.querySelector("h2")!.getBoundingClientRect().left -
+        node.getBoundingClientRect().left,
+    }));
+  expect(tried.side).toBeGreaterThan(20);
+  expect(tried.left).toBeGreaterThan(tried.side);
 
   const sakura = dialog.getByRole("group", { name: "Sakura" });
   await sakura.getByRole("button", { name: "Usar o pacote completo" }).click();
@@ -68,6 +86,38 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   ).toHaveAttribute("aria-pressed", "true");
   await dialog.getByRole("button", { name: "Aplicar", exact: true }).click();
   await expect(dialog).toBeHidden();
+
+  // Back in the editor, the preview is the whole profile as people will see it: the
+  // frame around the card, nothing cut by the preview and nothing to scroll inside it.
+  const previewRoom = page.locator(
+    ".profile-preview-stage .profile-shared-surface",
+  );
+  await expect(previewFrame(page)).toBeVisible();
+  await expect
+    .poll(() =>
+      previewRoom.evaluate((room) => {
+        const card = room
+            .querySelector(".public-profile-card")!
+            .getBoundingClientRect(),
+          art = room.querySelector("canvas[data-layer='frame']")!,
+          around = art.getBoundingClientRect(),
+          box = room.getBoundingClientRect(),
+          scrolls = [room, ...room.querySelectorAll("*")].filter(
+            (node) =>
+              /auto|scroll/.test(getComputedStyle(node).overflowY) &&
+              node.scrollHeight > node.clientHeight + 1,
+          ).length;
+        return {
+          scrolls,
+          cardInside: card.top >= box.top && card.bottom <= box.bottom,
+          frameAround: around.top < card.top - 20 && around.left < card.left,
+          boxed: room
+            .querySelector(".public-profile-card")!
+            .classList.contains("has-cosmetic-frame"),
+        };
+      }),
+    )
+    .toEqual({ scrolls: 0, cardInside: true, frameAround: true, boxed: false });
   await page
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();
@@ -89,20 +139,11 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
 
   // Opening the profile again brings the three pieces back, drawn.
   await page.reload();
-  for (const name of ["frame", "avatar", "effect"])
+  await expect(previewFrame(page)).toBeVisible();
+  for (const name of ["avatar", "effect"])
     await expect(layer(page, name)).toBeVisible();
-  await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.01);
+  await expect.poll(() => painted(previewFrame(page))).toBeGreaterThan(0.01);
   await expect.poll(() => painted(layer(page, "avatar"))).toBeGreaterThan(0.02);
-  // The frame takes its own room, so the profile text stays clear of it.
-  const card = page.locator(".public-profile-card").last();
-  const room = await card.evaluate((node) => ({
-    side: parseFloat(getComputedStyle(node).paddingLeft),
-    left:
-      node.querySelector("h2")!.getBoundingClientRect().left -
-      node.getBoundingClientRect().left,
-  }));
-  expect(room.side).toBeGreaterThan(20);
-  expect(room.left).toBeGreaterThan(room.side);
 
   // In the profile that opens over the page the frame goes around the card,
   // past its edges, instead of boxing the card in.
@@ -208,5 +249,5 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   await page.goto("/profile");
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.reload();
-  await expect.poll(() => painted(layer(page, "frame"))).toBeGreaterThan(0.01);
+  await expect.poll(() => painted(previewFrame(page))).toBeGreaterThan(0.01);
 });

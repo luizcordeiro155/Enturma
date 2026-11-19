@@ -96,6 +96,24 @@ it("lets the frame spill around the card in a profile dialog on a wide screen", 
   dialog.remove();
 });
 
+it("shows the editor's preview the way the profile opens for everyone else", async () => {
+  wide();
+  const preview = document.createElement("section");
+  preview.className = "profile-preview-stage";
+  const { surface, column } = floatingProfile(preview);
+  const stage = mountCosmetics(card, { frame: "sakura" });
+  // No box around the art: the frame spills around the card, as in the full profile.
+  await vi.waitFor(() =>
+    expect(
+      column.querySelector(":scope > canvas[data-layer=frame]"),
+    ).not.toBeNull(),
+  );
+  expect(card.className).not.toContain("has-cosmetic-frame");
+  expect(surface.className).toContain("has-cosmetic-spill");
+  stage.destroy();
+  preview.remove();
+});
+
 it("keeps the frame of a profile popover in whatever scrolls its card", async () => {
   wide();
   const popover = document.createElement("div");

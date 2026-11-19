@@ -36,14 +36,14 @@ const EN = {
   green: "#2f7a5c",
   paper: "#fbfdf3",
 };
-function enBook(ctx, w, h, c, spine) {
+function enBook(ctx, w, h, c, back) {
   ctx.lineJoin = "round";
   ctx.beginPath();
   ctx.roundRect(-w / 2, -h, w, h, 2.5);
   inked(ctx, c, 1.5, EN.ink);
   ctx.fillStyle = EN.paper;
   ctx.fillRect(w / 2 - 6, -h + 2, 4.4, h - 4);
-  ctx.fillStyle = spine;
+  ctx.fillStyle = back;
   ctx.fillRect(-w / 2 + 5, -h + 1, 3, h - 2);
   ctx.fillStyle = "rgba(255,255,255,.35)";
   ctx.fillRect(-w / 2 + 11, -h + 2.4, w * 0.4, 1.8);

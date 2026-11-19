@@ -8,13 +8,12 @@ import {
   unlockNotificationSound,
 } from "@/lib/notification-sound";
 import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { Avatar } from "./user-identity";
+import { NoticeSummary, type Notice } from "./notification-entry";
 import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   CheckCheck,
   MessageCircle,
-  ShieldAlert,
   X,
   AtSign,
   Trash2,
@@ -24,21 +23,6 @@ import { api, post, prepareSessionNavigation } from "@/lib/api";
 import { playMotion } from "@/lib/motion";
 import { useAppConnection, useLiveRefresh } from "@/lib/live-updates";
 
-type Notice = {
-  id: string;
-  message: string;
-  actorName: string | null;
-  actorId?: string;
-  actorUsername?: string;
-  actorHasAvatar?: boolean;
-  socialFollowStatus?: string;
-  kind: string;
-  contextKey: string | null;
-  targetId: string | null;
-  href: string | null;
-  readAt: string | null;
-  createdAt: string;
-};
 type Inbox = { items: Notice[]; unreadCount: number };
 type DesktopPushNotice = {
   sequence: number;
@@ -576,34 +560,7 @@ export function NotificationBell() {
                   className={`notification-item ${n.readAt ? "" : "unread"}`}
                   onClick={() => void visit(n)}
                 >
-                  {n.kind.startsWith("SOCIAL_") && n.actorId ? (
-                    <Avatar
-                      user={{
-                        id: n.actorId,
-                        name: n.actorName ?? "Estudante",
-                        username: n.actorUsername,
-                        hasAvatar: n.actorHasAvatar,
-                      }}
-                    />
-                  ) : n.kind === "MODERATION" ? (
-                    <ShieldAlert size={18} />
-                  ) : n.kind === "MENTION" ? (
-                    <AtSign size={18} />
-                  ) : (
-                    <MessageCircle size={18} />
-                  )}
-                  <span className="notification-copy">
-                    {n.actorName ? <strong>{n.actorName}</strong> : null}
-                    <span>{n.message}</span>
-                    <time dateTime={n.createdAt}>
-                      {new Date(n.createdAt).toLocaleString("pt-BR", {
-                        day: "2-digit",
-                        month: "2-digit",
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </time>
-                  </span>
+                  <NoticeSummary notice={n} />
                   {!n.readAt ? <i aria-label="Não lida" /> : null}
                 </button>
                 {n.socialFollowStatus && n.actorId && (

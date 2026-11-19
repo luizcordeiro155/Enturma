@@ -146,3 +146,12 @@ it("saves only the details the profile still has", async () => {
   });
   expect(sentDetails()).not.toHaveProperty("cosmeticTheme");
 });
+
+it("has no avatar decoration to choose and never saves one", async () => {
+  // Packs took its place: the old ring, glow and gradient are gone from the editor.
+  expect(
+    screen.queryByRole("button", { name: /^Decoração do avatar/ }),
+  ).toBeNull();
+  await save();
+  expect(sentDetails()).not.toHaveProperty("decoration");
+});

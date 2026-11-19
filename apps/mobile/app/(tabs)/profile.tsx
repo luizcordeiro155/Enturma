@@ -148,21 +148,6 @@ export default function ProfilePage() {
           }
         />
       ))}
-      <Text style={styles.title}>Decoração do avatar</Text>
-      <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
-        {[
-          ["NONE", "Sem decoração"],
-          ["RING", "Anel"],
-          ["GLOW", "Brilho"],
-          ["GRADIENT", "Degradê"],
-        ].map(([value, label]) => (
-          <Button
-            key={value}
-            title={`${(details.decoration ?? "NONE") === value ? "✓ " : ""}${label}`}
-            onPress={() => setDetails((old) => ({ ...old, decoration: value }))}
-          />
-        ))}
-      </View>
       <Text style={styles.title}>Estilo do nome</Text>
       <View style={{ flexDirection: "row", flexWrap: "wrap", gap: 8 }}>
         {[

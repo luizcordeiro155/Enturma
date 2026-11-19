@@ -446,7 +446,7 @@ class PlatformIntegrationTest {
         .hasMessageContaining("nível 22");
     social.details(host, cosmetics(null, "sakura", null));
     var shop = (Map<String, Object>) social.cosmetics(host);
-    assertThat((List<Map<String, Object>>) shop.get("items")).hasSize(29);
+    assertThat((List<Map<String, Object>>) shop.get("items")).hasSize(31);
     assertThat(shop.get("level")).isEqualTo(1);
     assertThat((List<Map<String, Object>>) shop.get("items"))
         .anySatisfy(
@@ -469,6 +469,80 @@ class PlatformIntegrationTest {
     social.details(host, cosmetics("", null, null));
     assertThat(storedCosmetic("cosmeticFrame")).isEmpty();
     assertThat(storedCosmetic("cosmeticEffect")).isEqualTo("abobora");
+  }
+
+  @Test
+  @SuppressWarnings("unchecked")
+  void likesOnOnePostArriveAsOneNotificationWithWhoLiked() {
+    UUID post = UUID.randomUUID(), other = UUID.randomUUID();
+    Actor third = create("fan_" + UUID.randomUUID().toString().substring(0, 8));
+    notices.clear(host);
+    db.jdbc.update("DELETE FROM notification_desktop_push_event WHERE user_id=?", host.id());
+    for (Actor fan : List.of(member, outsider, third))
+      notices.send(
+          fan.id(),
+          host.id(),
+          "SOCIAL_LIKE",
+          "social:interaction",
+          post,
+          "/social?post=" + post,
+          "Sua publicação recebeu uma curtida.");
+    notices.send(
+        member.id(),
+        host.id(),
+        "SOCIAL_LIKE",
+        "social:interaction",
+        other,
+        "/social?post=" + other,
+        "Sua publicação recebeu uma curtida.");
+    notices.send(
+        member.id(),
+        host.id(),
+        "SOCIAL_FOLLOW",
+        "social:relationship",
+        member.id(),
+        "/social?person=" + member.id(),
+        "Um estudante começou a seguir você.");
+
+    var inbox = (Map<String, Object>) notices.inbox(host);
+    var items = (List<Map<String, Object>>) inbox.get("items");
+    // Three likes on one post are one entry; the other post and the follow keep theirs.
+    assertThat(items).hasSize(3);
+    assertThat(((Number) inbox.get("unreadCount")).intValue()).isEqualTo(3);
+    var liked =
+        items.stream().filter(item -> post.equals(item.get("targetId"))).findFirst().orElseThrow();
+    assertThat(liked.get("actorCount")).isEqualTo(3);
+    // Who liked, the latest first, each with what an avatar needs.
+    var who = (List<Map<String, Object>>) liked.get("actors");
+    assertThat(who).extracting(actor -> actor.get("id"))
+        .containsExactly(third.id(), outsider.id(), member.id());
+    assertThat(who.getFirst()).containsKeys("name", "username", "hasAvatar");
+    assertThat(liked.get("actorId")).isEqualTo(third.id());
+    assertThat(liked.get("readAt")).isNull();
+    var single =
+        items.stream().filter(item -> other.equals(item.get("targetId"))).findFirst().orElseThrow();
+    assertThat(single.get("actorCount")).isEqualTo(1);
+
+    // Only the first like on a post rings the phone and the desktop; the rest wait in the inbox.
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM notification_desktop_push_event WHERE user_id=? AND"
+                    + " target_id=?",
+                Long.class,
+                host.id(),
+                post))
+        .isEqualTo(1L);
+
+    // Opening the entry reads every like in it, and the entry keeps its id as more arrive.
+    notices.read(host, List.of((UUID) liked.get("id")), null, false);
+    inbox = (Map<String, Object>) notices.inbox(host);
+    assertThat(((Number) inbox.get("unreadCount")).intValue()).isEqualTo(2);
+    var again =
+        ((List<Map<String, Object>>) inbox.get("items"))
+            .stream().filter(item -> post.equals(item.get("targetId"))).findFirst().orElseThrow();
+    assertThat(again.get("id")).isEqualTo(liked.get("id"));
+    assertThat(again.get("readAt")).isNotNull();
+    notices.clear(host);
   }
 
   @Test
@@ -502,7 +576,7 @@ class PlatformIntegrationTest {
     var shop = (Map<String, Object>) social.cosmetics(admin);
     assertThat(shop.get("level")).isEqualTo(1);
     assertThat((List<Map<String, Object>>) shop.get("items"))
-        .hasSize(29)
+        .hasSize(31)
         .allSatisfy(item -> assertThat(item.get("unlocked")).isEqualTo(true));
     social.details(admin, cosmetics("pesadelo", "mecha", "tinta"));
     assertThat(storedCosmetic("cosmeticFrame")).isEqualTo("pesadelo");

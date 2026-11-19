@@ -119,14 +119,6 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
     .getByRole("dialog")
     .getByRole("button", { name: "Aplicar", exact: true })
     .click();
-  await page.getByRole("button", { name: /^Decoração do avatar/ }).click();
-  await page
-    .getByRole("combobox", { name: "Decoração do avatar" })
-    .selectOption("RING");
-  await page
-    .getByRole("dialog")
-    .getByRole("button", { name: "Aplicar", exact: true })
-    .click();
   await page.getByRole("button", { name: "Salvar perfil" }).click();
   await expect(
     page.getByRole("status").filter({ hasText: "Perfil salvo com sucesso." }),
@@ -335,6 +327,32 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
       .locator(".private-messages")
       .getByText("Resposta protegida", { exact: true }),
   ).toBeVisible({ timeout: 10000 });
+  // A profile is shared like a room invitation: from its share button, straight into a
+  // friend's conversation, where it arrives as a card that opens the profile.
+  const sharedFriend = (
+    await (await page.request.get("/api/backend/friends")).json()
+  )[0];
+  const sharer = await other.context().newPage();
+  await sharer.goto(`/social?person=${sharedFriend.userId}`);
+  await sharer.getByRole("button", { name: "Compartilhar perfil" }).click();
+  const sheet = sharer.getByRole("dialog", { name: "Compartilhar perfil" });
+  await expect(sheet).toBeVisible();
+  await sheet.getByRole("button", { name: /^Enviar para / }).click();
+  await expect(
+    sheet.getByRole("button", { name: /^Perfil enviado para / }),
+  ).toBeDisabled();
+  await sharer.close();
+  const sharedCard = page
+    .locator(".private-messages")
+    .getByRole("link", { name: /^Abrir perfil de / });
+  await expect(sharedCard).toBeVisible({ timeout: 10000 });
+  await expect(sharedCard).toHaveAttribute(
+    "href",
+    `/social?person=${sharedFriend.userId}`,
+  );
+  await expect(
+    page.locator(".private-messages").getByText("enturma-flax.vercel.app"),
+  ).toHaveCount(0);
   await page.getByText("Código de segurança", { exact: true }).click();
   await other.getByText("Código de segurança", { exact: true }).click();
   expect(await page.locator(".safety-code").textContent()).toEqual(

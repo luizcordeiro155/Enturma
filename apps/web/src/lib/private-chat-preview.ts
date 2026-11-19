@@ -4,7 +4,10 @@
  * the same conversation key used when the chat is opened.
  */
 import { providerMessageUrl } from "./klipy";
-import { sharedSocialPostId } from "./social-stream-state";
+import {
+  sharedSocialPostId,
+  sharedSocialProfileId,
+} from "./social-stream-state";
 
 export type PreviewRow = {
   id: string;
@@ -33,15 +36,18 @@ export async function latestPreview<Row extends PreviewRow>(
   return {
     id: newest.id,
     mine: newest.senderId === me,
-    text: textLabel(text.trim()) || attachmentLabel(newest),
+    text: previewLabel(text.trim()) || attachmentLabel(newest),
   };
 }
 
-/** A message that is only a GIF or a shared post reads as such, like WhatsApp. */
-function textLabel(text: string) {
+/** A message that is only a GIF, a shared post or a shared profile reads as such. */
+export function previewLabel(text: string) {
   if (!text) return "";
   if (providerMessageUrl(text)) return "GIF";
-  if (/^\S+$/.test(text) && sharedSocialPostId(text)) return "Publicação do Social";
+  if (/^\S+$/.test(text) && sharedSocialPostId(text))
+    return "Publicação do Social";
+  if (/^\S+$/.test(text) && sharedSocialProfileId(text))
+    return "Perfil compartilhado";
   return text;
 }
 

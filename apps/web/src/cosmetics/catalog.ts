@@ -33,6 +33,7 @@ export const COSMETIC_GROUPS = [
   "Datas comemorativas",
   "Cursos e casa",
   "Culturas",
+  "Dragões",
   "Dinossauros",
   "Terror e fantasia",
 ] as const;
@@ -185,13 +186,6 @@ export const COSMETIC_PACKS = [
     group: "Culturas",
   },
   {
-    id: "dragao",
-    name: "Dragão Imperial",
-    blurb: "Um dragão chinês dá a volta no perfil, pousa e cospe fogo.",
-    colors: ["#c81d1d", "#3d1670"],
-    group: "Culturas",
-  },
-  {
     id: "samurai",
     name: "Samurai",
     blurb:
@@ -205,6 +199,29 @@ export const COSMETIC_PACKS = [
     blurb: "Cupê esportivo chega de lado, néon, cidade à noite e conta-giros.",
     colors: ["#d91a72", "#0f8fc4"],
     group: "Culturas",
+  },
+  {
+    id: "dragao",
+    name: "Dragão Imperial",
+    blurb: "Um dragão chinês dá a volta no perfil, pousa e cospe fogo.",
+    colors: ["#c81d1d", "#3d1670"],
+    group: "Dragões",
+  },
+  {
+    id: "tempestade",
+    name: "Dragão da Tempestade",
+    blurb:
+      "Um dragão sombrio pousa no topo do perfil entre nuvens, chuva e raios azuis.",
+    colors: ["#27408f", "#3a1f7a"],
+    group: "Dragões",
+  },
+  {
+    id: "lua",
+    name: "Dragão da Lua",
+    blurb:
+      "Uma dragãozinha branca descansa olhando a lua cheia, com névoa e estrelas.",
+    colors: ["#5d68b4", "#9a82cc"],
+    group: "Dragões",
   },
   {
     id: "dino-fofinho",
@@ -291,6 +308,8 @@ const loaders: Record<string, () => Promise<{ default: unknown }>> = {
   rosas: () => import("./packs/rosas"),
   sakura: () => import("./packs/sakura"),
   dragao: () => import("./packs/dragao"),
+  tempestade: () => import("./packs/tempestade"),
+  lua: () => import("./packs/lua"),
   samurai: () => import("./packs/samurai"),
   jdm: () => import("./packs/jdm"),
   "dino-fofinho": () => import("./packs/dino-fofinho"),
