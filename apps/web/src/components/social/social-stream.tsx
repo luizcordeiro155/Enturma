@@ -17,6 +17,8 @@ export function useSocialStream(
   active: boolean,
   prependFresh?: () => boolean,
   initialItems: Post[] = [],
+  // True while the student is already where new publications land.
+  caughtUp?: () => boolean,
 ) {
   const [items, setItems] = useState<Post[]>(initialItems),
     [cursor, setCursor] = useState<string | null>(null);
@@ -32,11 +34,11 @@ export function useSocialStream(
     refreshing = useRef(false),
     mounted = useRef(true),
     dirty = useRef(false);
-  const latest = useRef({ active, query, prependFresh }),
+  const latest = useRef({ active, query, prependFresh, caughtUp }),
     requestVersion = useRef(0);
   useEffect(() => {
-    latest.current = { active, query, prependFresh };
-  }, [active, query, prependFresh]);
+    latest.current = { active, query, prependFresh, caughtUp };
+  }, [active, query, prependFresh, caughtUp]);
   useEffect(() => {
     mounted.current = true;
     return () => {
@@ -96,7 +98,12 @@ export function useSocialStream(
           (post) => !known.current.has(post.id),
         ).length;
         setItems((old) => mergeFreshPosts(old, result.items, prepend));
-        if (added && !prepend && latest.current.prependFresh)
+        if (
+          added &&
+          !prepend &&
+          latest.current.prependFresh &&
+          !latest.current.caughtUp?.()
+        )
           setFresh((count) => count + added);
         setError("");
         dirty.current = false;
@@ -179,10 +186,14 @@ export function SocialStream({
   const scroller = () =>
     panel.current?.closest<HTMLElement>("[data-social-scroller]") ??
     panel.current;
+  const atEnd = useRef(false);
   const stream = useSocialStream(
       query,
       active,
       () => (scroller()?.scrollTop ?? 0) < 8,
+      [],
+      // At the end, what arrives is already in front of the student: no notice.
+      () => atEnd.current,
     ),
     sentinel = useRef<HTMLDivElement>(null),
     latest = useRef(stream.load),
@@ -202,8 +213,7 @@ export function SocialStream({
     : [];
   const more = useRef(tail.load),
     recheck = useRef({ stream, suggested, continues }),
-    lastCheck = useRef(0),
-    atEnd = useRef(false);
+    lastCheck = useRef(0);
   const [checking, setChecking] = useState(false);
   const [pulled, setPulled] = useState(0);
   const [refreshing, setRefreshing] = useState(false);
@@ -249,11 +259,6 @@ export function SocialStream({
       observer.disconnect();
     };
   }, [active, tail.cursor, tail.error]);
-  const { fresh, seen } = stream;
-  useEffect(() => {
-    // What arrives while the student is at the end is already in front of them.
-    if (fresh && atEnd.current) seen();
-  }, [fresh, seen]);
   useEffect(() => {
     if (!refreshKey) return;
     // Tapping "Enturma": back to the top, then fresh posts with the spinner.

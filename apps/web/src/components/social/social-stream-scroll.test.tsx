@@ -180,9 +180,18 @@ it("no fim do Feed busca novidades sozinho, sem pedir para atualizar", async () 
     nextCursor: "",
     snapshot: "s",
   });
+  // Reaching the end is reading what arrived: the notice must never appear,
+  // not even for the one frame before an effect could take it away.
+  let noticed = false;
+  const watcher = new MutationObserver(() => {
+    if (screen.queryByRole("button", { name: "Novas publicações" }))
+      noticed = true;
+  });
+  watcher.observe(document.body, { childList: true, subtree: true });
   intersect(sentinel(), 1);
   await waitFor(() => expect(shownPosts()).toEqual(["p1", "p2"]));
-  // Reaching the end is reading what arrived: no notice to tap.
+  watcher.disconnect();
+  expect(noticed).toBe(false);
   expect(
     screen.queryByRole("button", { name: "Novas publicações" }),
   ).toBeNull();
