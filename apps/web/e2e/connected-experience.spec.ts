@@ -106,6 +106,23 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
     .getByRole("dialog")
     .getByRole("button", { name: "Aplicar", exact: true })
     .click();
+  // The mentor's AI service is not part of this stack. Its two answers are stubbed, and the
+  // test looks at what leaves the browser and at what the student has to accept by hand.
+  let asked: Record<string, unknown> | undefined;
+  await page.route("**/api/backend/portfolio/mentor", (route) =>
+    route.fulfill({ json: { available: true } }),
+  );
+  await page.route("**/api/backend/portfolio/me/mentor", (route) => {
+    asked = route.request().postDataJSON();
+    return route.fulfill({
+      json: {
+        description: "Revisão da literatura sobre evasão no ensino superior.",
+        caseStudy:
+          "Problema: faltava um panorama da evasão.\nSolução: revisão de 30 artigos.",
+        questions: ["Quantos artigos entraram na revisão?"],
+      },
+    });
+  });
   await page.goto("/portfolio");
   await page.getByRole("button", { name: "Adicionar projeto", exact: true }).click();
   // A new project opens empty with its name field ready to type.
@@ -188,6 +205,48 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await page
     .getByLabel("Minha participação no projeto 1", { exact: true })
     .fill("Escrevi a revisão bibliográfica.");
+  // The mentor: asked with this project's words only, and nothing lands by itself.
+  const first = page.getByRole("article", { name: "Projeto 1", exact: true });
+  await expect(
+    first.getByRole("button", { name: "Pedir sugestões ao mentor" }),
+  ).toBeDisabled();
+  await page
+    .getByLabel("Descrição do projeto 1", { exact: true })
+    .fill("Revisão sobre evasão no ensino superior.");
+  await first.getByRole("button", { name: "Pedir sugestões ao mentor" }).click();
+  const advice = page.getByRole("region", {
+    name: "Sugestões do mentor para o projeto 1",
+  });
+  await expect(advice).toBeVisible();
+  expect(asked).toEqual({
+    name: "Pesquisa acadêmica",
+    description: "Revisão sobre evasão no ensino superior.",
+    technologies: [],
+    team: true,
+    role: "Escrevi a revisão bibliográfica.",
+    goal: "Estágio em back-end",
+  });
+  await expect(
+    advice.getByText("Quantos artigos entraram na revisão?"),
+  ).toBeVisible();
+  await expect(
+    page.getByLabel("Descrição do projeto 1", { exact: true }),
+  ).toHaveValue("Revisão sobre evasão no ensino superior.");
+  await expect(
+    page.getByLabel("Estudo de caso do projeto 1", { exact: true }),
+  ).toHaveValue("");
+  await advice
+    .getByRole("button", {
+      name: "Usar sugestão de estudo de caso no projeto 1",
+      exact: true,
+    })
+    .click();
+  await expect(
+    page.getByLabel("Estudo de caso do projeto 1", { exact: true }),
+  ).toHaveValue(/^Problema: faltava um panorama da evasão\./);
+  expect(
+    await advice.evaluate((node) => node.scrollWidth <= node.clientWidth),
+  ).toBe(true);
   await page
     .getByRole("button", { name: "Importar do GitHub", exact: true })
     .click();
@@ -256,6 +315,12 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await expect(
     open.getByText(/Minha participação: Escrevi a revisão bibliográfica\./),
   ).toBeVisible();
+  // the case study the student accepted and saved is on the project's card
+  await expect(
+    open
+      .locator("article.public-project", { hasText: "Pesquisa acadêmica" })
+      .locator(".public-project-case"),
+  ).toHaveText(/Estudo de caso\s*Problema: faltava um panorama da evasão\./);
   // each competency says what backs it; the archived repository backs nothing
   await expect(
     open.getByRole("list", { name: "Competências" }).getByRole("listitem"),

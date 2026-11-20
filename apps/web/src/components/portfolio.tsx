@@ -39,6 +39,8 @@ export function PortfolioEditor() {
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [shelf, setShelf] = useState<"active" | "archived">("active");
   const [importing, setImporting] = useState(false);
+  const [mentor, setMentor] = useState(false);
+  const form = useRef<HTMLFormElement>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [busy, setBusy] = useState(false);
@@ -80,6 +82,17 @@ export function PortfolioEditor() {
       })
       .catch((e) => setError(e.message));
   }, []);
+  useEffect(() => {
+    // Without the service the mentor is simply not offered.
+    void api<{ available?: boolean }>("/portfolio/mentor", {
+      cache: "no-store",
+    })
+      .then((v) => setMentor(Boolean(v?.available)))
+      .catch(() => setMentor(false));
+  }, []);
+  const goalNow = () =>
+    (form.current?.elements.namedItem("goal") as HTMLInputElement | null)
+      ?.value ?? "";
   useEffect(() => {
     if (!data || initialRevealDone.current) return;
     initialRevealDone.current = true;
@@ -242,7 +255,7 @@ export function PortfolioEditor() {
             <strong>{formatDays(data.stats.currentStreak)}</strong>
           </div>
         </section>
-        <form onSubmit={save} noValidate>
+        <form onSubmit={save} noValidate ref={form}>
           <section className="portfolio-settings" data-portfolio-reveal>
             <label className="portfolio-public-toggle">
               <input
@@ -396,6 +409,7 @@ export function PortfolioEditor() {
                 last={i === visible.length - 1}
                 assets={data.assets ?? []}
                 skills={skills}
+                mentor={mentor ? goalNow : undefined}
                 onToggle={() =>
                   setOpen((v) => {
                     const next = new Set(v);

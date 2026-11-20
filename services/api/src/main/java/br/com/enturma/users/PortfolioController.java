@@ -46,7 +46,9 @@ public class PortfolioController {
       Boolean archived,
       @Valid GithubSource github,
       /** Competencies from the portfolio's own list that this project is evidence of. */
-      @Size(max = 12) List<@Size(max = 60) String> skills) {}
+      @Size(max = 12) List<@Size(max = 60) String> skills,
+      /** A short case study in the student's words: problem, solution, challenges, result. */
+      @Size(max = 1500) String caseStudy) {}
 
   public record Portfolio(
       boolean publicProfile,
@@ -117,6 +119,7 @@ public class PortfolioController {
       if (project.github() != null) row.put("github", github(project.github(), repo));
       var shown = labels(project.skills(), 12);
       if (!shown.isEmpty()) row.put("skills", shown);
+      keep(row, "caseStudy", project.caseStudy());
       stored.add(row);
     }
     db.jdbc.update(

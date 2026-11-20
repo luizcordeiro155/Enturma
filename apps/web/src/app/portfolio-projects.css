@@ -399,6 +399,13 @@ html[data-theme="dark"]
 }
 
 @media print {
+  .public-project-case[data-clamped] > p {
+    display: block;
+    overflow: visible;
+  }
+  .public-project-case > button {
+    display: none;
+  }
   .public-portfolio .public-projects article.public-project {
     break-inside: avoid;
     box-shadow: none;
@@ -870,6 +877,48 @@ html[data-theme="dark"] .public-project-context > b {
 .public-project-outcome strong {
   margin-right: 6px;
   color: var(--ink);
+}
+.public-project-case {
+  display: grid;
+  gap: 6px;
+  padding-left: 14px;
+  border-left: 3px solid color-mix(in srgb, var(--accent) 55%, var(--border));
+  font-size: 0.92rem;
+}
+.public-project-case > strong {
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+.public-project-case > p {
+  margin: 0;
+  line-height: 1.6;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.public-project-case[data-clamped] > p {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 5;
+  line-clamp: 5;
+}
+.public-portfolio .public-projects .public-project-case > button,
+html[data-theme="dark"]
+  .public-portfolio
+  .public-projects
+  .public-project-case
+  > button {
+  justify-self: start;
+  min-height: 32px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
 }
 .public-project-tech {
   display: flex;
