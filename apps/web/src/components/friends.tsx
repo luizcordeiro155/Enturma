@@ -66,6 +66,7 @@ import { EmojiText, AnimatedEmoji } from "./emoji-picker";
 import { FriendsInbox } from "./friends-inbox";
 import { latestPreview, previewLabel } from "@/lib/private-chat-preview";
 import { presenceLine } from "@/lib/last-seen";
+import { RotatingLine, type RotatingEntry } from "./rotating-line";
 import {
   canSyncNotificationKeys,
   clearConversationNotifications,
@@ -124,7 +125,58 @@ export function Friends() {
   const [selected, setSelected] = useState<Friend>();
   // The open conversation keeps the friend as chosen; who is online comes from the list,
   // which is refreshed while the page is open.
-  const peer = friends.find((f) => f.id === selected?.id) ?? selected;
+  const listed = friends.find((f) => f.id === selected?.id) ?? selected;
+  // Coming and going sends no event: while a conversation is open, ask now and then.
+  const [seen, setSeen] = useState<{
+    id: string;
+    online: boolean;
+    lastSeenAt?: string | null;
+  }>();
+  const openId = selected?.id;
+  useEffect(() => {
+    if (!openId) return;
+    let alive = true;
+    const read = () => {
+      if (document.hidden) return;
+      void api<{ online: boolean; lastSeenAt?: string | null }>(
+        `/friends/${openId}/last-seen`,
+        { cache: "no-store" },
+      )
+        .then((now) => {
+          if (alive) setSeen({ id: openId, ...now });
+        })
+        .catch(() => {
+          // The line keeps what the list said.
+        });
+    };
+    read();
+    const timer = window.setInterval(read, 20000);
+    document.addEventListener("visibilitychange", read);
+    return () => {
+      alive = false;
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", read);
+    };
+  }, [openId]);
+  const peer =
+    listed && seen?.id === listed.id
+      ? { ...listed, online: seen.online, lastSeenAt: seen.lastSeenAt }
+      : listed;
+  // Under the friend's name: their own status, then online or last seen, taking turns.
+  const peerStatus = peer?.profileDetails?.statusText?.trim();
+  const peerPresence = peer ? presenceLine(peer) : "";
+  const peerLines: RotatingEntry[] = [
+    ...(peerStatus ? [{ id: "status", text: peerStatus }] : []),
+    ...(peerPresence
+      ? [
+          {
+            id: "presence",
+            text: peerPresence,
+            tone: peer?.online ? ("online" as const) : undefined,
+          },
+        ]
+      : []),
+  ];
   const callHistory = usePrivateCallHistory(selected?.id);
   const privateTyping = usePrivateTyping(selected?.id);
   useMobileWebChatViewport(Boolean(selected || requestedChat), "private");
@@ -1170,7 +1222,11 @@ export function Friends() {
                   >
                     <UserIdentity
                       user={{ ...selected, id: selected.userId }}
-                      subtitle={(peer && presenceLine(peer)) || undefined}
+                      subtitle={
+                        peerLines.length ? (
+                          <RotatingLine lines={peerLines} />
+                        ) : undefined
+                      }
                     />
                   </div>
                   <span className="privacy-pill">

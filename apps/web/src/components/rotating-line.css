@@ -1,0 +1,53 @@
+/* A line that hands over to the next: the old one rises out, the new one rises in. */
+.rotating-line {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  min-width: 0;
+}
+.rotating-line > [data-line] {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rotating-line > [data-line="in"][data-moved] {
+  animation: rotating-line-in 0.52s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+/* The line going out lies over the one coming in, so the row keeps its height. */
+.rotating-line > [data-line="out"] {
+  position: absolute;
+  inset: 0;
+  animation: rotating-line-out 0.36s cubic-bezier(0.55, 0, 0.8, 0.4) both;
+}
+@keyframes rotating-line-in {
+  from {
+    opacity: 0;
+    transform: translateY(85%);
+    filter: blur(3px);
+  }
+  55% {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+@keyframes rotating-line-out {
+  to {
+    opacity: 0;
+    transform: translateY(-85%);
+    filter: blur(3px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rotating-line > [data-line="in"][data-moved] {
+    animation: rotating-line-fade 0.2s ease both;
+  }
+  .rotating-line > [data-line="out"] {
+    animation: rotating-line-fade 0.2s ease reverse both;
+  }
+  @keyframes rotating-line-fade {
+    from {
+      opacity: 0;
+    }
+  }
+}

@@ -334,7 +334,8 @@ export function UserIdentity({
   user: PublicProfile;
   compact?: boolean;
   nameOnly?: boolean;
-  subtitle?: string;
+  /** The line under the name; without one, the person's own status is shown. */
+  subtitle?: React.ReactNode;
 }) {
   const router = useRouter();
   const visitor = useVisitor();

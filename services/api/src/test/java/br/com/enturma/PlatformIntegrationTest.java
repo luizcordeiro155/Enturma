@@ -1167,6 +1167,10 @@ class PlatformIntegrationTest {
     assertThat(friendOf(host).get("lastSeenAt")).isNull();
     social.accept(member, friendship);
     assertThat(friendOf(host).get("online")).isEqualTo(true);
+    // the open conversation asks about this one friend, and gets the same answer
+    assertThat(((Map<?, ?>) social.lastSeen(host, friendship)).get("online")).isEqualTo(true);
+    assertThatThrownBy(() -> social.lastSeen(outsider, friendship))
+        .isInstanceOf(ApiException.class);
     liveness.remove("seen-" + friendship);
     assertThat(friendOf(host).get("online")).isEqualTo(false);
     var seen = java.time.Instant.parse((String) friendOf(host).get("lastSeenAt"));
@@ -1184,6 +1188,8 @@ class PlatformIntegrationTest {
     liveness.touch("seen-" + friendship, member.id());
     assertThat(friendOf(host).get("online")).isEqualTo(false);
     assertThat(friendOf(host).get("lastSeenAt")).isNull();
+    assertThat(((Map<?, ?>) social.lastSeen(host, friendship)).get("online")).isEqualTo(false);
+    assertThat(((Map<?, ?>) social.lastSeen(host, friendship)).get("lastSeenAt")).isNull();
     // ...and stops seeing it of the friends who still share theirs
     liveness.touch("seen-host-" + friendship, host.id());
     assertThat(friendOf(member).get("online")).isEqualTo(false);

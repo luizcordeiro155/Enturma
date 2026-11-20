@@ -241,6 +241,28 @@ public class SocialController {
         a.id());
   }
 
+  /** The same presence as in the list, for the one conversation that is open. */
+  @GetMapping("/friends/{id}/last-seen")
+  public Object lastSeen(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
+    return db.one(
+        "SELECT (shared.presence AND EXISTS(SELECT 1 FROM realtime_presence rp WHERE"
+            + " rp.user_id=u.id AND rp.expires_at>now())) online,CASE WHEN shared.presence THEN"
+            + " u.last_seen_at END last_seen_at FROM friendship f JOIN app_user u ON u.id=CASE"
+            + " WHEN f.requester=? THEN f.recipient ELSE f.requester END CROSS JOIN LATERAL"
+            + " (SELECT f.status='ACCEPTED' AND NOT EXISTS(SELECT 1 FROM profile_privacy_setting"
+            + " hide WHERE hide.user_id IN (u.id,?::uuid) AND hide.field='LAST_SEEN' AND NOT"
+            + " hide.visible) presence) shared WHERE f.id=? AND (f.requester=? OR f.recipient=?)"
+            + " AND u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b WHERE"
+            + " (b.user_id=? AND b.blocked_id=u.id) OR (b.blocked_id=? AND b.user_id=u.id))",
+        a.id(),
+        a.id(),
+        id,
+        a.id(),
+        a.id(),
+        a.id(),
+        a.id());
+  }
+
   public record Invite(@NotBlank @Size(max = 40) String username) {}
 
   @PostMapping("/friends")
