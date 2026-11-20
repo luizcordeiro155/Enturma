@@ -14,6 +14,12 @@ public class RealtimePresence {
     this.db = db;
   }
 
+  /** One write a minute per person is enough for "last seen"; the lease itself is renewed each time. */
+  private static final long SEEN_INTERVAL_MS = 60_000;
+
+  private final java.util.concurrent.ConcurrentHashMap<UUID, Long> seen =
+      new java.util.concurrent.ConcurrentHashMap<>();
+
   public void touch(String connection, UUID user) {
     db.jdbc.update(
         "INSERT INTO realtime_presence(connection_id,user_id,expires_at) VALUES (?,?,now()+interval"
@@ -21,9 +27,20 @@ public class RealtimePresence {
             + " expires_at=EXCLUDED.expires_at",
         connection,
         user);
+    long now = System.currentTimeMillis();
+    Long previous = seen.get(user);
+    if (previous != null && now - previous < SEEN_INTERVAL_MS) return;
+    if (seen.size() > 20_000) seen.clear();
+    seen.put(user, now);
+    db.jdbc.update("UPDATE app_user SET last_seen_at=now() WHERE id=?", user);
   }
 
+  /** Leaving is the moment someone was last seen. */
   public void remove(String connection) {
+    db.jdbc.update(
+        "UPDATE app_user SET last_seen_at=now() WHERE id=(SELECT user_id FROM realtime_presence"
+            + " WHERE connection_id=?)",
+        connection);
     db.jdbc.update("DELETE FROM realtime_presence WHERE connection_id=?", connection);
   }
 

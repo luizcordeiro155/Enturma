@@ -1149,6 +1149,75 @@ class PlatformIntegrationTest {
 
   @Autowired br.com.enturma.notifications.PushNotificationService push;
 
+  @Autowired br.com.enturma.chat.RealtimePresence liveness;
+
+  private Map<?, ?> friendOf(Actor viewer) {
+    return (Map<?, ?>) ((List<?>) social.friends(viewer)).getFirst();
+  }
+
+  @Test
+  void friendsSeeWhenEachOtherWasLastOnlineUnlessOneOfThemHidesIt() {
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", member.id()).get("username");
+    UUID friendship =
+        (UUID) ((Map<?, ?>) social.invite(host, new SocialController.Invite(username))).get("id");
+    liveness.touch("seen-" + friendship, member.id());
+    // an invitation that was not accepted yet says nothing about when someone is around
+    assertThat(friendOf(host).get("online")).isEqualTo(false);
+    assertThat(friendOf(host).get("lastSeenAt")).isNull();
+    social.accept(member, friendship);
+    assertThat(friendOf(host).get("online")).isEqualTo(true);
+    liveness.remove("seen-" + friendship);
+    assertThat(friendOf(host).get("online")).isEqualTo(false);
+    var seen = java.time.Instant.parse((String) friendOf(host).get("lastSeenAt"));
+    assertThat(seen)
+        .isBetween(java.time.Instant.now().minusSeconds(60), java.time.Instant.now());
+    // each person's own switch is on until they turn it off
+    assertThat(
+            ((Map<?, ?>) ((Map<?, ?>) showcase.own(member)).get("privacy")).get("LAST_SEEN"))
+        .isEqualTo(true);
+
+    // who hides it is no longer shown online or last seen...
+    db.jdbc.update(
+        "INSERT INTO profile_privacy_setting(user_id,field,visible) VALUES (?,'LAST_SEEN',false)",
+        member.id());
+    liveness.touch("seen-" + friendship, member.id());
+    assertThat(friendOf(host).get("online")).isEqualTo(false);
+    assertThat(friendOf(host).get("lastSeenAt")).isNull();
+    // ...and stops seeing it of the friends who still share theirs
+    liveness.touch("seen-host-" + friendship, host.id());
+    assertThat(friendOf(member).get("online")).isEqualTo(false);
+    assertThat(friendOf(member).get("lastSeenAt")).isNull();
+    liveness.remove("seen-" + friendship);
+    liveness.remove("seen-host-" + friendship);
+    assertThat(
+            ((Map<?, ?>) ((Map<?, ?>) showcase.own(member)).get("privacy")).get("LAST_SEEN"))
+        .isEqualTo(false);
+  }
+
+  @Test
+  void savingTheMuralFromAnAppThatDoesNotKnowLastSeenLeavesThatChoiceAlone() {
+    db.jdbc.update(
+        "INSERT INTO profile_privacy_setting(user_id,field,visible) VALUES (?,'LAST_SEEN',false)"
+            + " ON CONFLICT(user_id,field) DO UPDATE SET visible=false",
+        host.id());
+    var known = new HashMap<String, Boolean>(Map.of("WIDGETS", true));
+    var save =
+        (java.util.function.Function<Map<String, Boolean>, Object>)
+            privacy -> {
+              showcase.save(
+                  host,
+                  new br.com.enturma.community.ProfileShowcaseController.Save(
+                      "#a020b9", "SOLID", "NONE", "IDENTITY_FIRST", "", "", "", privacy,
+                      List.of(), List.of(), null, null, null, null, null, null));
+              return ((Map<?, ?>) ((Map<?, ?>) showcase.own(host)).get("privacy"))
+                  .get("LAST_SEEN");
+            };
+    assertThat(save.apply(known)).isEqualTo(false);
+    known.put("LAST_SEEN", true);
+    assertThat(save.apply(known)).isEqualTo(true);
+  }
+
   @Test
   void privateMessagePushCarriesOnlyTheStillEncryptedMessageForTheRecipientsPhone()
       throws Exception {

@@ -65,6 +65,7 @@ import { MessageMenu } from "./message-menu";
 import { EmojiText, AnimatedEmoji } from "./emoji-picker";
 import { FriendsInbox } from "./friends-inbox";
 import { latestPreview, previewLabel } from "@/lib/private-chat-preview";
+import { presenceLine } from "@/lib/last-seen";
 import {
   canSyncNotificationKeys,
   clearConversationNotifications,
@@ -78,6 +79,8 @@ type Friend = Omit<PublicProfile, "id"> & {
   recipient: string;
   status: string;
   online?: boolean;
+  /** When the friend last had Enturma open; absent when one of you does not share it. */
+  lastSeenAt?: string | null;
   lastMessageId?: string;
   lastMessageAt?: string;
   unreadCount?: number;
@@ -119,6 +122,9 @@ export function Friends() {
     () => peekApiSnapshot<Friend[]>("/friends") ?? [],
   );
   const [selected, setSelected] = useState<Friend>();
+  // The open conversation keeps the friend as chosen; who is online comes from the list,
+  // which is refreshed while the page is open.
+  const peer = friends.find((f) => f.id === selected?.id) ?? selected;
   const callHistory = usePrivateCallHistory(selected?.id);
   const privateTyping = usePrivateTyping(selected?.id);
   useMobileWebChatViewport(Boolean(selected || requestedChat), "private");
@@ -1158,8 +1164,14 @@ export function Friends() {
                   >
                     <ArrowLeft size={24} />
                   </button>
-                  <div className="private-chat-peer">
-                    <UserIdentity user={{ ...selected, id: selected.userId }} />
+                  <div
+                    className="private-chat-peer"
+                    data-online={peer?.online ? "true" : undefined}
+                  >
+                    <UserIdentity
+                      user={{ ...selected, id: selected.userId }}
+                      subtitle={(peer && presenceLine(peer)) || undefined}
+                    />
                   </div>
                   <span className="privacy-pill">
                     Ponta a ponta · ECDH + AES-GCM

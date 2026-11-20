@@ -181,6 +181,12 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   await other.getByRole("button", { name: /^Conversar com / }).click();
   await expect(page.getByLabel("Mensagem privada")).toBeEnabled();
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
+  // Under the friend's name: online while they have Enturma open, otherwise when they
+  // were last seen. The friend is on the page right now, in the other browser.
+  await expect(page.locator(".private-chat-peer small")).toHaveText(
+    /^(online|visto por último hoje às \d{2}:\d{2})$/,
+    { timeout: 20000 },
+  );
   await page.getByLabel("Mensagem privada").fill("Rascunho durante o GIF");
   await page
     .getByRole("button", { name: "Adicionar emoji", exact: true })

@@ -205,13 +205,18 @@ public class SocialController {
     profileChanged(a.id());
   }
 
+  /**
+   * Online and "last seen" are shared only between accepted friends, and only while neither of
+   * them has turned the option off: whoever hides theirs does not see anyone else's.
+   */
   @GetMapping("/friends")
   public Object friends(@AuthenticationPrincipal Actor a) {
     return db.list(
         "SELECT f.id,f.requester,f.recipient,f.status,u.id"
             + " user_id,u.name,u.username,u.accent_color,u.profile_details,u.media_version,u.avatar_bytes"
-            + " IS NOT NULL has_avatar,EXISTS(SELECT 1 FROM realtime_presence rp WHERE"
-            + " rp.user_id=u.id AND rp.expires_at>now()) online,latest.id"
+            + " IS NOT NULL has_avatar,(shared.presence AND EXISTS(SELECT 1 FROM"
+            + " realtime_presence rp WHERE rp.user_id=u.id AND rp.expires_at>now())) online,"
+            + "CASE WHEN shared.presence THEN u.last_seen_at END last_seen_at,latest.id"
             + " last_message_id,latest.created_at last_message_at,(SELECT count(*) FROM"
             + " notification n WHERE n.user_id=? AND n.context_key='friend:'||f.id::text AND"
             + " n.read_at IS NULL AND n.kind IN ('PRIVATE_MESSAGE','MENTION')) unread_count FROM"
@@ -219,10 +224,14 @@ public class SocialController {
             + " f.requester END LEFT JOIN LATERAL (SELECT m.id,m.created_at FROM private_message m"
             + " WHERE m.friendship_id=f.id AND m.deleted_at IS NULL AND NOT EXISTS(SELECT 1 FROM"
             + " private_message_hidden h WHERE h.message_id=m.id AND h.user_id=?::uuid) ORDER BY"
-            + " m.created_at DESC,m.id DESC LIMIT 1) latest ON true WHERE (f.requester=? OR"
+            + " m.created_at DESC,m.id DESC LIMIT 1) latest ON true CROSS JOIN LATERAL (SELECT"
+            + " f.status='ACCEPTED' AND NOT EXISTS(SELECT 1 FROM profile_privacy_setting hide"
+            + " WHERE hide.user_id IN (u.id,?::uuid) AND hide.field='LAST_SEEN' AND NOT"
+            + " hide.visible) presence) shared WHERE (f.requester=? OR"
             + " f.recipient=?) AND u.status='ACTIVE' AND NOT EXISTS(SELECT 1 FROM user_block b"
             + " WHERE (b.user_id=? AND b.blocked_id=u.id) OR (b.blocked_id=? AND b.user_id=u.id))"
             + " ORDER BY COALESCE(latest.created_at,f.created_at) DESC",
+        a.id(),
         a.id(),
         a.id(),
         a.id(),
