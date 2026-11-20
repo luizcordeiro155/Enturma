@@ -118,6 +118,9 @@ public class AcademicGames {
   private final Db db;
   private final ObjectMapper json;
 
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private org.springframework.context.ApplicationEventPublisher events;
+
   public AcademicGames(Db db, ObjectMapper json) {
     this.db = db;
     this.json = json;
@@ -341,10 +344,14 @@ public class AcademicGames {
               amount)
           > 0) {
         xp = amount;
-        db.jdbc.update(
-            "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
-            xp,
-            a.id());
+        {
+          db.jdbc.update(
+              "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
+              xp,
+              a.id());
+          // the student's own open screens learn that the XP moved
+          br.com.enturma.notifications.AppChanged.xp(events, a.id());
+        }
       }
       var stats = db.one("SELECT * FROM learning_stats WHERE user_id=? FOR UPDATE", a.id());
       String last = (String) stats.get("lastActiveDate");

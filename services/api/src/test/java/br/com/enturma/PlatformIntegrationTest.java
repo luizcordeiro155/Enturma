@@ -26,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
   "enturma.catalog.worker-delay=3600000"
 })
 @AutoConfigureMockMvc
+@org.springframework.test.context.event.RecordApplicationEvents
 @org.springframework.test.annotation.DirtiesContext(
     classMode = org.springframework.test.annotation.DirtiesContext.ClassMode.AFTER_CLASS)
 class PlatformIntegrationTest {
@@ -2799,6 +2800,41 @@ class PlatformIntegrationTest {
   }
 
   @Autowired br.com.enturma.community.AchievementService levelStats;
+  @Autowired org.springframework.test.context.event.ApplicationEvents published;
+
+  @Test
+  void earningXpTellsTheStudentsOwnScreensAndTheLevelCanBeReadAlone() throws Exception {
+    db.jdbc.update(
+        "UPDATE academic_entry SET attributes=attributes||'{\"learningArea\":\"IT\"}'::jsonb WHERE"
+            + " id=?",
+        subject);
+    published.clear();
+    // a wrong answer earns nothing, so there is nothing to tell anyone
+    learning.attempt(
+        host, new br.com.enturma.learning.LearningController.Attempt("binary", 1, "111"));
+    assertThat(
+            published.stream(br.com.enturma.notifications.AppChanged.class)
+                .filter(event -> event.type().equals("xp_changed")))
+        .isEmpty();
+
+    learning.attempt(
+        host, new br.com.enturma.learning.LearningController.Attempt("binary", 1, "101"));
+    // the notice goes to the student who earned it and to nobody else
+    assertThat(
+            published.stream(br.com.enturma.notifications.AppChanged.class)
+                .filter(event -> event.type().equals("xp_changed")))
+        .isNotEmpty()
+        .allSatisfy(event -> assertThat(event.users()).containsExactly(host.id()));
+
+    var level = json.valueToTree(showcase.level(host));
+    int earned = level.get("xpToday").asInt();
+    assertThat(earned).isPositive();
+    assertThat(level.get("totalXp").asInt()).isEqualTo(earned);
+    assertThat(level.get("xpIntoLevel").asInt()).isEqualTo(earned % 250);
+    assertThat(level.get("level").asInt()).isEqualTo(earned / 250 + 1);
+    // somebody else's level is theirs to read: this route only ever answers for the caller
+    assertThat(json.valueToTree(showcase.level(member)).get("xpToday").asInt()).isZero();
+  }
 
   @Test
   void profileStatsSayHowFarTheLevelIsAndWhatWasEarnedToday() throws Exception {

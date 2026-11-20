@@ -142,10 +142,14 @@ public class AchievementService {
               "achievement:" + code,
               xp)
           > 0)
-        db.jdbc.update(
-            "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
-            xp,
-            user);
+        {
+          db.jdbc.update(
+              "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
+              xp,
+              user);
+          // the student's own open screens learn that the XP moved
+          br.com.enturma.notifications.AppChanged.xp(events, user);
+        }
       notices.send(
           null,
           user,

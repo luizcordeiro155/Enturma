@@ -144,6 +144,12 @@ public class ProfileShowcaseController {
     return get(a, a.id());
   }
 
+  /** The caller's own level numbers, light enough to fetch each time their XP moves. */
+  @GetMapping("/users/me/level")
+  public Object level(@AuthenticationPrincipal Actor a) {
+    return achievements.stats(a.id());
+  }
+
   @GetMapping("/users/{id}/showcase")
   public Object get(@AuthenticationPrincipal Actor a, @PathVariable UUID id) {
     if (db.exists(

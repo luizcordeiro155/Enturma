@@ -5,6 +5,7 @@ export type LevelStats = {
   xpIntoLevel?: number;
   xpForNextLevel?: number;
   xpToday?: number;
+  currentStreak?: number;
 };
 
 const SIZE = 250;

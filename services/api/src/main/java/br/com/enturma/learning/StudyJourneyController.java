@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 public class StudyJourneyController {
   private final Db db;
 
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private org.springframework.context.ApplicationEventPublisher events;
+
   public StudyJourneyController(Db db) {
     this.db = db;
   }
@@ -61,10 +64,14 @@ public class StudyJourneyController {
       steps.add(Map.of("key", keys[i], "completed", done, "xp", amounts[i]));
     }
     if (awarded > 0)
-      db.jdbc.update(
-          "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
-          awarded,
-          a.id());
+      {
+        db.jdbc.update(
+            "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
+            awarded,
+            a.id());
+        // the student's own open screens learn that the XP moved
+        br.com.enturma.notifications.AppChanged.xp(events, a.id());
+      }
     int xp =
         ((Number)
                 db.one("SELECT total_xp FROM learning_stats WHERE user_id=?", a.id())

@@ -2,7 +2,9 @@
 
 import { useEffect, useRef, useState } from "react";
 import { Flame } from "lucide-react";
+import { api } from "@/lib/api";
 import { levelProgress, type LevelStats } from "@/lib/level";
+import { useLiveRefresh } from "@/lib/live-updates";
 import { reducedMotion } from "@/lib/motion";
 import "./level-meter.css";
 
@@ -14,6 +16,30 @@ const still = () => {
     return true;
   }
 };
+
+/**
+ * The student's own level, kept current. The server tells this student's screens when their XP
+ * moves; the numbers are then read again, so an open profile shows the gain as it happens.
+ * Other people's profiles keep what they were opened with.
+ */
+function useLiveStats(stats: LevelStats, live: boolean) {
+  const [fresh, setFresh] = useState<LevelStats>();
+  useLiveRefresh(
+    "xp_changed",
+    async () => {
+      if (!live) return;
+      const now = await api<LevelStats>("/users/me/level", {
+        cache: "no-store",
+      });
+      if (now && typeof now.totalXp === "number") setFresh(now);
+    },
+    60000,
+  );
+  // what was fetched stands until the page itself brings newer numbers
+  return live && fresh && fresh.totalXp >= stats.totalXp
+    ? { ...stats, ...fresh }
+    : stats;
+}
 
 /** Counts a number up to its new value in step with the bar, once the bar is being watched. */
 function useCount(target: number, from: number, run: number, live: boolean) {
@@ -55,14 +81,20 @@ function useCount(target: number, from: number, run: number, live: boolean) {
  * rises when the profile opens, and again each time the XP goes up while it is open.
  */
 export function LevelMeter({
-  stats,
+  stats: given,
   streak,
+  live: own = false,
 }: {
   stats: LevelStats;
-  /** "3 dias de sequência", when the profile shows it. */
-  streak?: string;
+  /** "3 dias de sequência", when the profile shows it; a function follows the live count. */
+  streak?: string | ((days: number) => string);
+  /** The viewer's own profile: follow their XP as it is earned. */
+  live?: boolean;
 }) {
+  const stats = useLiveStats(given, own);
   const p = levelProgress(stats);
+  const streakText =
+    typeof streak === "function" ? streak(stats.currentStreak ?? 0) : streak;
   // What the bar showed last, to start the next rise from there.
   const [last, setLast] = useState({
     totalXp: stats.totalXp,
@@ -145,6 +177,12 @@ export function LevelMeter({
       <div className="level-body">
         <div className="level-head">
           <strong>Nível {p.level}</strong>
+          {/* what just came in: it shows beside the day's total for a moment, then folds away */}
+          {rise.gained > 0 ? (
+            <span className="level-pop" role="status" key={`p${rise.run}`}>
+              +{rise.gained} XP
+            </span>
+          ) : null}
           {p.leveledUp ? (
             <span className="level-chip level-chip-up">
               Subiu de nível hoje
@@ -166,11 +204,6 @@ export function LevelMeter({
           {/* a new key restarts the rise */}
           <span className="level-base" />
           {moving ? <span className="level-gain" key={`g${rise.run}`} /> : null}
-          {rise.gained > 0 ? (
-            <span className="level-pop" role="status" key={`p${rise.run}`}>
-              +{rise.gained} XP
-            </span>
-          ) : null}
         </div>
         <p className="level-foot">
           <span>
@@ -180,9 +213,9 @@ export function LevelMeter({
             Faltam {p.left} XP para o nível {p.level + 1}
           </span>
         </p>
-        {streak ? (
+        {streakText ? (
           <p className="level-streak">
-            <Flame size={14} aria-hidden="true" /> {streak}
+            <Flame size={14} aria-hidden="true" /> {streakText}
           </p>
         ) : null}
       </div>
@@ -191,8 +224,15 @@ export function LevelMeter({
 }
 
 /** The level as a small badge beside the @: the number inside a ring that shows the progress. */
-export function LevelBadge({ stats }: { stats: LevelStats }) {
-  const p = levelProgress(stats);
+export function LevelBadge({
+  stats,
+  live = false,
+}: {
+  stats: LevelStats;
+  /** The viewer's own profile: follow their XP as it is earned. */
+  live?: boolean;
+}) {
+  const p = levelProgress(useLiveStats(stats, live));
   return (
     <span
       className="level-badge"

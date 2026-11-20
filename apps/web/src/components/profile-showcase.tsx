@@ -584,7 +584,9 @@ export function ShowcaseView({
       {value.stats && (
         <LevelMeter
           stats={value.stats}
-          streak={`${formatDays(value.stats.currentStreak)} de sequência`}
+          streak={(days) => `${formatDays(days)} de sequência`}
+          // only the owner's showcase carries their privacy choices
+          live={Boolean(value.privacy)}
         />
       )}
       {value.joinedAt && (

@@ -230,7 +230,12 @@ export function ProfileCard({
             <p>
               @{user.username} {d.pronouns ? `· ${d.pronouns}` : ""}
             </p>
-            {showcase?.stats ? <LevelBadge stats={showcase.stats} /> : null}
+            {showcase?.stats ? (
+              <LevelBadge
+                stats={showcase.stats}
+                live={Boolean(showcase.privacy)}
+              />
+            ) : null}
             <FeaturedAchievementBadges showcase={showcase} />
           </div>
           {d.statusText ? (
