@@ -87,37 +87,56 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
   await dialog.getByRole("button", { name: "Aplicar", exact: true }).click();
   await expect(dialog).toBeHidden();
 
-  // Back in the editor, the preview is the whole profile as people will see it: the
-  // frame around the card, nothing cut by the preview and nothing to scroll inside it.
+  // Back in the editor, the preview is the same room as the open profile: it keeps the
+  // editor's height, the frame goes around the card, and what does not fit scrolls inside
+  // the room (the mural beside the card, or the whole column when the room is narrow).
   const previewRoom = page.locator(
     ".profile-preview-stage .profile-shared-surface",
   );
+  const measureRoom = () =>
+    previewRoom.evaluate((room) => {
+      const card = room
+          .querySelector(".public-profile-card")!
+          .getBoundingClientRect(),
+        art = room.querySelector("canvas[data-layer='frame']")!,
+        around = art.getBoundingClientRect(),
+        box = room.getBoundingClientRect(),
+        stage = room.closest(".profile-preview-stage")!.getBoundingClientRect(),
+        form = room.closest(".profile-discord-form")!.getBoundingClientRect(),
+        mural = room.querySelector(".profile-preview-mural")!,
+        stacked =
+          getComputedStyle(room).gridTemplateColumns.trim().split(/\s+/)
+            .length === 1,
+        scroller = stacked ? room : mural;
+      return {
+        stacked,
+        // the editor keeps its own height instead of growing with the profile
+        editorFits:
+          form.height <= Math.max(560, Math.min(900, innerHeight - 180)) + 1,
+        roomInside: box.bottom <= stage.bottom + 1 && box.top >= stage.top - 1,
+        scrolls: getComputedStyle(scroller).overflowY,
+        frameAround: around.top < card.top - 20 && around.left < card.left,
+        boxed: room
+          .querySelector(".public-profile-card")!
+          .classList.contains("has-cosmetic-frame"),
+      };
+    });
   await expect(previewFrame(page)).toBeVisible();
-  await expect
-    .poll(() =>
-      previewRoom.evaluate((room) => {
-        const card = room
-            .querySelector(".public-profile-card")!
-            .getBoundingClientRect(),
-          art = room.querySelector("canvas[data-layer='frame']")!,
-          around = art.getBoundingClientRect(),
-          box = room.getBoundingClientRect(),
-          scrolls = [room, ...room.querySelectorAll("*")].filter(
-            (node) =>
-              /auto|scroll/.test(getComputedStyle(node).overflowY) &&
-              node.scrollHeight > node.clientHeight + 1,
-          ).length;
-        return {
-          scrolls,
-          cardInside: card.top >= box.top && card.bottom <= box.bottom,
-          frameAround: around.top < card.top - 20 && around.left < card.left,
-          boxed: room
-            .querySelector(".public-profile-card")!
-            .classList.contains("has-cosmetic-frame"),
-        };
-      }),
-    )
-    .toEqual({ scrolls: 0, cardInside: true, frameAround: true, boxed: false });
+  // On a wide screen the card stays put and only the mural beside it scrolls.
+  const roomBeside = {
+    stacked: false,
+    editorFits: true,
+    roomInside: true,
+    scrolls: "auto",
+    frameAround: true,
+    boxed: false,
+  };
+  await expect.poll(measureRoom).toEqual(roomBeside);
+  // In a narrow editor the mural goes under the card and the room scrolls as one column.
+  const usual = page.viewportSize()!;
+  await page.setViewportSize({ width: 1000, height: 800 });
+  await expect.poll(measureRoom).toEqual({ ...roomBeside, stacked: true });
+  await page.setViewportSize(usual);
   await page
     .getByRole("button", { name: "Salvar perfil", exact: true })
     .click();

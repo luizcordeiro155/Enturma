@@ -389,8 +389,10 @@ html
     overflow: visible !important;
     width: 100%;
     height: auto !important;
+    /* As tall as what the card holds: a short profile is a short card, in the middle. */
+    min-height: 0 !important;
     max-height: none;
-    margin-block: auto;
+    margin-block: 0 auto;
     padding: 0;
     border-radius: 18px !important;
     /* A shadow that ends inside the column, so its edge never shows as a line. */
@@ -426,7 +428,13 @@ html
     body
     .user-profile-popover[data-profile-view="compact"]
     > .profile-close {
-    inset: calc(var(--pop-top) + 13px) calc(var(--pop-side) + 16px) auto auto;
+    /* In the flow, taking no room: it sits on the card's corner wherever the card rests,
+       and its auto margin shares the free space with the card's, which centres the pair. */
+    position: relative;
+    inset: 13px 16px auto auto;
+    flex: none;
+    align-self: flex-end;
+    margin: auto 0 -42px;
   }
 }
 
@@ -811,22 +819,10 @@ html
   color: var(--ink);
 }
 @media (min-width: 761px) {
-  /* On a computer the preview is the whole profile at its real size, frame and all, with
-     nothing cut and nothing to scroll inside it. The editor grows to hold it, the page
-     scrolls, and the long list of options scrolls beside it at the same height. */
-  html body .profile-studio .profile-discord-form {
-    height: auto;
-    min-height: 0;
-  }
-  html body .profile-studio .profile-editor-scroll {
-    overflow: visible;
-  }
-  html body .profile-studio .profile-editor-controls {
-    height: 0;
-    min-height: 100%;
-  }
+  /* On a computer the preview is the open profile itself: a room as tall as the editor, the
+     card and its frame in their own window, and the mural beside them scrolling inside the
+     room with the same thin bar. */
   html body .profile-studio .profile-preview-stage {
-    min-height: 600px;
     background: transparent;
   }
   html
@@ -834,27 +830,17 @@ html
     .profile-studio
     .profile-preview-stage
     > .profile-preview-combined.profile-shared-surface {
-    flex: none;
+    flex: 1;
     grid-template-columns: clamp(300px, 46cqw, 380px) minmax(0, 1fr) !important;
-    align-items: start;
     overflow: hidden !important;
+    min-height: 0 !important;
     height: auto !important;
     max-height: none !important;
     border-radius: 22px !important;
     background: var(--floating-night);
   }
-  html
-    body
-    .profile-studio
-    .profile-preview-stage
-    .profile-shared-surface
-    > .profile-preview-mural {
-    overflow: visible !important;
-    height: auto !important;
-    max-height: none !important;
-  }
-  /* In a narrow preview the content goes under the card, as on a phone, and the card's
-     window runs the width of the room. */
+  /* In a narrow preview the content goes under the card, as on a phone: the room scrolls
+     as one column, and the card's window runs the width of the room. */
   @container profile-preview (max-width: 760px) {
     html
       body
@@ -862,7 +848,18 @@ html
       .profile-preview-stage
       > .profile-preview-combined.profile-shared-surface {
       grid-template-columns: minmax(0, 1fr) !important;
+      grid-auto-rows: max-content;
+      align-content: start;
+      overflow: hidden auto !important;
       padding-right: var(--room-left);
+      scrollbar-width: none;
+    }
+    html
+      body
+      .profile-studio
+      .profile-preview-stage
+      > .profile-shared-surface::-webkit-scrollbar {
+      display: none;
     }
     html
       body
@@ -870,6 +867,7 @@ html
       .profile-preview-stage
       .profile-shared-surface
       > .profile-preview-identity {
+      overflow: visible !important;
       margin-right: calc(-1 * var(--room-left)) !important;
       margin-bottom: 0 !important;
       padding-right: var(--room-left) !important;
@@ -882,6 +880,16 @@ html
       > .public-profile-card {
       width: min(400px, 100%);
       margin-inline: auto;
+    }
+    html
+      body
+      .profile-studio
+      .profile-preview-stage
+      .profile-shared-surface
+      > .profile-preview-mural {
+      overflow: visible !important;
+      height: auto !important;
+      max-height: none !important;
     }
   }
 }
