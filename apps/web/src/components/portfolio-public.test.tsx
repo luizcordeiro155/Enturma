@@ -217,7 +217,9 @@ it("shows the case study in the student's words, opened on request when it is lo
     .closest("article")!;
   expect(within(short).getByText("Estudo de caso")).toBeTruthy();
   expect(within(short).getByText("Problema: fila no RU.")).toBeTruthy();
-  expect(within(short).queryByRole("button")).toBeNull();
+  expect(
+    within(short).queryByRole("button", { name: /estudo de caso/ }),
+  ).toBeNull();
   const tall = screen
     .getByRole("heading", { name: "Longo" })
     .closest("article")!;
@@ -271,4 +273,46 @@ it("shows the journey the student chose to show and leads from a record to its p
 it("has no journey section when the student shows no record", async () => {
   await show([{ id: "a", name: "Só projeto" }]);
   expect(screen.queryByRole("heading", { name: "Minha jornada" })).toBeNull();
+});
+
+it("names the people who made a team project with the student", async () => {
+  await show([
+    {
+      id: "a",
+      name: "Caronas",
+      team: true,
+      role: "Fiz a API.",
+      members: [
+        {
+          name: "Bruno Lima",
+          username: "bruno",
+          contribution: "Fiz o front-end.",
+          portfolio: true,
+        },
+      ],
+    },
+    { id: "b", name: "Sozinho" },
+  ]);
+  const card = screen
+    .getByRole("heading", { name: "Caronas" })
+    .closest("article")!;
+  const list = within(card).getByRole("list", { name: "Equipe" });
+  expect(within(list).getByRole("link", { name: "Bruno Lima" })).toBeTruthy();
+  const alone = screen
+    .getByRole("heading", { name: "Sozinho" })
+    .closest("article")!;
+  expect(within(alone).queryByRole("list", { name: "Equipe" })).toBeNull();
+});
+
+it("offers sharing for the portfolio and for each project", async () => {
+  await show([{ id: "a", name: "Caronas" }]);
+  expect(
+    screen.getByRole("button", { name: "Compartilhar portfólio" }),
+  ).toBeTruthy();
+  const card = screen
+    .getByRole("heading", { name: "Caronas" })
+    .closest("article")!;
+  expect(
+    within(card).getByRole("button", { name: "Compartilhar Caronas" }),
+  ).toBeTruthy();
 });

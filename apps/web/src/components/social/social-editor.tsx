@@ -44,10 +44,11 @@ import { SocialCapture } from "./social-capture";
 import { SocialDialog } from "./social-dialog";
 import { StoryDecorations, StoryDecorationEditor } from "./story-decorations";
 import { NavigationLink } from "../navigation-link";
+import { linkedProject } from "@/lib/social-project-link";
 type Portfolio = {
   username: string;
   publicProfile: boolean;
-  projects: { id: string; name: string }[];
+  projects: { id: string; name: string; archived?: boolean }[];
 };
 export type SocialEditorProgress = {
   state: "idle" | "working" | "done" | "error";
@@ -232,12 +233,15 @@ export function SocialEditor({
   user,
   mediaEnabled,
   initialKind,
+  linkProject,
   published,
   onProgress,
 }: {
   user: string;
   mediaEnabled: boolean;
   initialKind: "POST" | "STORY" | "CLIP";
+  /** A portfolio project the post was asked to present ("Publicar no Enturma Social"). */
+  linkProject?: string | null;
   published: (kind: "POST" | "STORY" | "CLIP") => void;
   onProgress?: (progress: SocialEditorProgress) => void;
 }) {
@@ -337,6 +341,28 @@ export function SocialEditor({
     // A view switch keeps the editor and its draft mounted.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
+  // Arriving from the portfolio: the project's link goes into the draft once, and the
+  // request leaves the address so a reload does not link it again.
+  const linkedOnce = useRef(false);
+  const draftReady = draft !== null;
+  useEffect(() => {
+    if (linkedOnce.current || !linkProject || !draftReady || !portfolio) return;
+    const project = linkedProject(linkProject, portfolio);
+    const timer = setTimeout(() => {
+      linkedOnce.current = true;
+      if (project) {
+        setDraft((value) => (value ? { ...value, projectUrl: project.url } : value));
+        setStatus(`O projeto ${project.name} vai junto na publicação. Escolha a mídia.`);
+      } else
+        setError(
+          "Não foi possível vincular o projeto. Deixe o portfólio público e o projeto ativo.",
+        );
+      const url = new URL(window.location.href);
+      url.searchParams.delete("projeto");
+      window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [linkProject, draftReady, portfolio]);
   useEffect(() => {
     const timer = setTimeout(
       () =>
@@ -1233,7 +1259,9 @@ export function SocialEditor({
                   }}
                 >
                   <option value="">Selecione um projeto</option>
-                  {portfolio.projects.map((project) => (
+                  {portfolio.projects
+                    .filter((project) => !project.archived)
+                    .map((project) => (
                     <option key={project.id} value={project.id}>
                       {project.name}
                     </option>

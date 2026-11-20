@@ -23,6 +23,8 @@ import {
 } from "./portfolio-format";
 import { PublicJourney } from "./portfolio-journey";
 import { PortfolioBack } from "./portfolio-navigation";
+import { PortfolioShareButton } from "./portfolio-share";
+import { PublicTeam } from "./portfolio-team";
 
 /** How many projects open at first; the rest are one press away. */
 const PAGE = 8;
@@ -32,6 +34,13 @@ export function PublicPortfolio({ username }: { username: string }) {
   const [error, setError] = useState("");
   const [kind, setKind] = useState<ProjectKind>();
   const [shown, setShown] = useState(PAGE);
+  // The owner looking at their own page gets one more way to share: posting in the Social.
+  const [viewer, setViewer] = useState<string>();
+  useEffect(() => {
+    void api<{ id: string }>("/users/me")
+      .then((me) => setViewer(me?.id))
+      .catch(() => {});
+  }, []);
   useEffect(() => {
     void api<Portfolio>("/public/portfolio/" + encodeURIComponent(username), {
       cache: "no-store",
@@ -98,9 +107,16 @@ export function PublicPortfolio({ username }: { username: string }) {
             ) : null}
           </div>
         </div>
-        <button onClick={() => window.print()}>
-          <Printer size={16} /> Salvar em PDF
-        </button>
+        <div className="public-portfolio-actions">
+          <PortfolioShareButton
+            owner={{ name: data.name, username: data.username }}
+            mine={viewer === data.id}
+            className=""
+          />
+          <button onClick={() => window.print()}>
+            <Printer size={16} /> Salvar em PDF
+          </button>
+        </div>
       </header>
       <section className="portfolio-intro">
         <p>
@@ -192,6 +208,8 @@ export function PublicPortfolio({ username }: { username: string }) {
                 project={p}
                 assets={data.assets ?? []}
                 later={i >= shown}
+                owner={{ name: data.name, username: data.username }}
+                mine={viewer === data.id}
               />
             ))}
           </div>
@@ -250,9 +268,13 @@ function PublicProject({
   project: p,
   assets,
   later,
+  owner,
+  mine,
 }: {
   project: Project;
   assets: PortfolioAsset[];
+  owner: { name: string; username: string };
+  mine: boolean;
   /** Past the first page: kept in the page for printing, shown on request. */
   later: boolean;
 }) {
@@ -320,6 +342,7 @@ function PublicProject({
             </span>
           </p>
         ) : null}
+        <PublicTeam members={p.members ?? []} />
         {p.outcome ? (
           <p className="public-project-outcome">
             <strong>Resultado</strong> {p.outcome}
@@ -336,7 +359,7 @@ function PublicProject({
         {rest.length ? (
           <PortfolioAttachments ids={rest} assets={assets} compact />
         ) : null}
-        {repo || link ? (
+        {repo || link || p.id ? (
           <div className="public-project-links">
             {repo ? (
               <a
@@ -370,6 +393,14 @@ function PublicProject({
                 {hostOf(link) ? <small>{hostOf(link)}</small> : null}
                 <ExternalLink size={14} aria-hidden="true" />
               </a>
+            ) : null}
+            {p.id ? (
+              <PortfolioShareButton
+                owner={owner}
+                project={{ id: p.id, name: p.name }}
+                mine={mine}
+                className="public-project-link"
+              />
             ) : null}
           </div>
         ) : null}

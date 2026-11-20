@@ -161,6 +161,7 @@ export function JourneyEditor() {
   const shownCount = (entries ?? []).filter((entry) => entry.visible).length;
   return (
     <section
+      id="jornada"
       className="portfolio-project-editor portfolio-journey"
       aria-labelledby={heading}
     >

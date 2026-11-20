@@ -2174,7 +2174,7 @@ class PlatformIntegrationTest {
       UUID id, String name, String description, String url, List<UUID> assets) {
     return new PortfolioController.Project(
         id, name, description, url, assets, null, null, null, null, null, null, null, null, null,
-        null, null, null, null);
+        null, null, null, null, null);
   }
 
   private static PortfolioController.Portfolio portfolioOf(
@@ -2208,11 +2208,11 @@ class PlatformIntegrationTest {
             new PortfolioController.GithubSource(
                 "ana-dev/caronas", 12, false, "2026-10-02T12:00:00Z"),
             Arrays.asList(" Trabalho em equipe ", "trabalho em equipe", "Modelagem de dados", ""),
-            "  Problema: colegas sem carona.  ");
+            "  Problema: colegas sem carona.  ", null);
     var shelved =
         new PortfolioController.Project(
             UUID.randomUUID(), "Rascunho antigo", "", "", List.of(draft), "PERSONAL", null, null,
-            null, null, null, null, null, true, true, null, null, null);
+            null, null, null, null, null, true, true, null, null, null, null);
     portfolio.save(
         host,
         new PortfolioController.Portfolio(
@@ -2263,19 +2263,19 @@ class PlatformIntegrationTest {
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), null, null, null, null, null, null, null,
             "https://evil.example.test/ana-dev/caronas", null, null,
-            new PortfolioController.GithubSource("ana-dev/caronas", 1, false, null), null, null);
+            new PortfolioController.GithubSource("ana-dev/caronas", 1, false, null), null, null, null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(fake))))
         .isInstanceOf(ApiException.class);
     var unsafe =
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), null, null, null, null, null, null, null,
-            "javascript:alert(1)", null, null, null, null, null);
+            "javascript:alert(1)", null, null, null, null, null, null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(unsafe))))
         .isInstanceOf(ApiException.class);
     var odd =
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), "CERTIFIED", null, null, null, null, null, null,
-            null, null, null, null, null, null);
+            null, null, null, null, null, null, null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(odd))))
         .isInstanceOf(ApiException.class);
     var stars = new ArrayList<PortfolioController.Project>();
@@ -2283,7 +2283,7 @@ class PlatformIntegrationTest {
       stars.add(
           new PortfolioController.Project(
               null, "Projeto " + i, "", "", List.of(), null, null, null, null, null, null, null,
-              null, true, null, null, null, null));
+              null, true, null, null, null, null, null));
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, stars)))
         .isInstanceOf(ApiException.class);
     portfolio.save(host, portfolioOf(false, stars.subList(0, 6)));
@@ -2484,10 +2484,10 @@ class PlatformIntegrationTest {
     publishPortfolio(
         new PortfolioController.Project(
             project, "Caronas", "App de caronas.", "", List.of(), "ACADEMIC", null, null, "2026.1",
-            true, null, null, null, null, null, null, null, null),
+            true, null, null, null, null, null, null, null, null, null),
         new PortfolioController.Project(
             archived, "Rascunho", "", "", List.of(), null, null, null, null, null, null, null, null,
-            null, true, null, null, null));
+            null, true, null, null, null, null));
     UUID done = UUID.randomUUID();
     UUID open = UUID.randomUUID();
     UUID routine = UUID.randomUUID();
@@ -2582,6 +2582,220 @@ class PlatformIntegrationTest {
         host, new br.com.enturma.users.PortfolioJourneyController.Dismissal("achievement:" + code));
     assertThat(json.valueToTree(timeline.mine(host)).get("suggestions").findValuesAsText("source"))
         .doesNotContain("achievement:" + code);
+  }
+
+  @Autowired br.com.enturma.users.PortfolioTeamController team;
+
+  private void befriend(Actor a, Actor b) {
+    db.jdbc.update(
+        "INSERT INTO friendship(id,requester,recipient,status) VALUES (?,?,?,'ACCEPTED')",
+        UUID.randomUUID(),
+        a.id(),
+        b.id());
+  }
+
+  private static PortfolioController.Project teamProject(UUID id, String name, Boolean archived) {
+    return new PortfolioController.Project(
+        id, name, "App de caronas.", "", List.of(), "ACADEMIC", List.of("Java"), "Engenharia",
+        "2026.1", true, "Fiz a API.", null, null, null, archived, null, null, null, null);
+  }
+
+  private String usernameOf(Actor a) {
+    return db.jdbc.queryForObject("SELECT username FROM app_user WHERE id=?", String.class, a.id());
+  }
+
+  private com.fasterxml.jackson.databind.JsonNode publicProject(Actor owner, String name) {
+    for (var project :
+        json.valueToTree(portfolio.publicPortfolio(usernameOf(owner))).path("projects"))
+      if (project.path("name").asText().equals(name)) return project;
+    throw new AssertionError("no public project " + name);
+  }
+
+  @Test
+  void teamMembersAppearOnlyAfterTheyAcceptAndSpeakForTheirOwnPart() throws Exception {
+    UUID project = UUID.randomUUID();
+    publishPortfolio(teamProject(project, "Caronas", null));
+    befriend(host, member);
+    var invite = new br.com.enturma.users.PortfolioTeamController.Invite(usernameOf(member));
+
+    // only a friend can be tagged, and only in a project that is saved and not archived
+    assertThatThrownBy(
+            () ->
+                team.invite(
+                    host,
+                    project,
+                    new br.com.enturma.users.PortfolioTeamController.Invite(usernameOf(outsider))))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> team.invite(host, UUID.randomUUID(), invite))
+        .isInstanceOf(ApiException.class);
+
+    team.invite(host, project, invite);
+    // being tagged is not consent: visitors see nobody yet
+    assertThat(publicProject(host, "Caronas").path("members")).isEmpty();
+    var pending = json.valueToTree(team.mine(member)).get("invitations");
+    assertThat(pending).hasSize(1);
+    assertThat(pending.get(0).get("projectName").asText()).isEqualTo("Caronas");
+    assertThat(pending.get(0).get("status").asText()).isEqualTo("PENDING");
+    assertThat(json.valueToTree(team.mine(host)).get("projects").get(project.toString()).get(0)
+            .get("status").asText())
+        .isEqualTo("PENDING");
+    assertThatThrownBy(() -> team.invite(host, project, invite)).isInstanceOf(ApiException.class);
+
+    // nobody answers for someone else
+    assertThatThrownBy(
+            () ->
+                team.answer(
+                    outsider,
+                    host.id(),
+                    project,
+                    new br.com.enturma.users.PortfolioTeamController.Answer("ACCEPTED", "Eu")))
+        .isInstanceOf(ApiException.class);
+
+    team.answer(
+        member,
+        host.id(),
+        project,
+        new br.com.enturma.users.PortfolioTeamController.Answer("ACCEPTED", "  Fiz o front-end.  "));
+    var shown = publicProject(host, "Caronas").path("members");
+    assertThat(shown).hasSize(1);
+    assertThat(shown.get(0).get("username").asText()).isEqualTo(usernameOf(member));
+    assertThat(shown.get(0).get("contribution").asText()).isEqualTo("Fiz o front-end.");
+    // the member has no public portfolio, so there is nowhere to link to
+    assertThat(shown.get(0).get("portfolio").asBoolean()).isFalse();
+    assertThat(shown.get(0).has("userId")).isFalse();
+
+    // the member takes the project into their own portfolio, with their own part
+    var copy =
+        json.valueToTree(team.include(member, host.id(), project));
+    assertThat(copy.get("name").asText()).isEqualTo("Caronas");
+    assertThat(copy.get("role").asText()).isEqualTo("Fiz o front-end.");
+    assertThat(copy.get("team").asBoolean()).isTrue();
+    assertThat(copy.get("sharedFrom").get("projectId").asText()).isEqualTo(project.toString());
+    assertThatThrownBy(() -> team.include(member, host.id(), project))
+        .isInstanceOf(ApiException.class);
+    db.jdbc.update("UPDATE portfolio_profile SET public=true WHERE user_id=?", member.id());
+    var theirs = publicProject(member, "Caronas");
+    // on the member's page the team is the author plus whoever else accepted
+    assertThat(theirs.path("members").findValuesAsText("username"))
+        .containsExactly(usernameOf(host));
+    assertThat(theirs.path("members").get(0).get("contribution").asText()).isEqualTo("Fiz a API.");
+    assertThat(theirs.path("members").get(0).get("portfolio").asBoolean()).isTrue();
+    assertThat(publicProject(host, "Caronas").path("members").get(0).get("portfolio").asBoolean())
+        .isTrue();
+
+    // leaving takes the name off the author's page
+    team.leave(member, host.id(), project);
+    assertThat(publicProject(host, "Caronas").path("members")).isEmpty();
+    assertThat(publicProject(member, "Caronas").path("members")).isEmpty();
+  }
+
+  @Test
+  void teamInvitationCanBeDeclinedAndIsNotSentAgain() throws Exception {
+    UUID project = UUID.randomUUID();
+    publishPortfolio(teamProject(project, "Caronas", null));
+    befriend(host, member);
+    var invite = new br.com.enturma.users.PortfolioTeamController.Invite(usernameOf(member));
+    team.invite(host, project, invite);
+    team.answer(
+        member,
+        host.id(),
+        project,
+        new br.com.enturma.users.PortfolioTeamController.Answer("DECLINED", ""));
+    assertThat(publicProject(host, "Caronas").path("members")).isEmpty();
+    assertThat(json.valueToTree(team.mine(member)).get("invitations")).isEmpty();
+    // the author sees the answer and cannot keep asking
+    assertThat(json.valueToTree(team.mine(host)).get("projects").get(project.toString()).get(0)
+            .get("status").asText())
+        .isEqualTo("DECLINED");
+    assertThatThrownBy(() -> team.invite(host, project, invite)).isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> team.include(member, host.id(), project))
+        .isInstanceOf(ApiException.class);
+
+    // a project that leaves the portfolio takes its team records with it
+    team.remove(host, project, member.id());
+    team.invite(host, project, invite);
+    publishPortfolio();
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM portfolio_project_member WHERE owner_id=?",
+                Integer.class,
+                host.id()))
+        .isZero();
+  }
+
+  @Test
+  void aSharedProjectCannotBeClaimedWithoutAnAcceptedPlaceInTheTeam() throws Exception {
+    UUID project = UUID.randomUUID();
+    publishPortfolio(teamProject(project, "Caronas", null));
+    // the outsider forges the link to the author's project in their own portfolio
+    UUID forged = UUID.randomUUID();
+    portfolio.save(
+        outsider,
+        new PortfolioController.Portfolio(
+            true,
+            "Dev",
+            "",
+            List.of(),
+            List.of(
+                new PortfolioController.Project(
+                    forged, "Caronas", "", "", List.of(), null, null, null, null, true, "Fiz tudo.",
+                    null, null, null, null, null, null, null,
+                    new PortfolioController.SharedFrom(host.id(), project))),
+            ""));
+    var theirs = publicProject(outsider, "Caronas");
+    assertThat(theirs.has("sharedFrom")).isFalse();
+    assertThat(theirs.path("members")).isEmpty();
+  }
+
+  @Autowired br.com.enturma.users.PortfolioResumeController resume;
+
+  private static br.com.enturma.users.PortfolioResumeController.Resume resumeDraft(
+      String template, String linkedin, List<UUID> projects) {
+    return new br.com.enturma.users.PortfolioResumeController.Resume(
+        template,
+        "PLAIN",
+        new br.com.enturma.users.PortfolioResumeController.Contact(
+            " ana@example.test ", "(11) 90000-0000", "São Paulo, SP", linkedin, null, null),
+        "  Estágio em back-end  ",
+        "Estudante de ADS.",
+        List.of(
+            new br.com.enturma.users.PortfolioResumeController.Education(
+                "Análise e Desenvolvimento de Sistemas", "FATEC", "2024 a 2026")),
+        projects,
+        List.of(),
+        Arrays.asList(" Java ", "java", "SQL", ""));
+  }
+
+  @Test
+  void resumeChoicesAreSavedForTheStudentAndNeverReachThePublicPortfolio() throws Exception {
+    UUID project = UUID.randomUUID();
+    publishPortfolio(teamProject(project, "Caronas", null));
+    // nothing saved yet: the page starts from the portfolio, so the answer is empty
+    assertThat(json.valueToTree(resume.mine(host)).isEmpty()).isTrue();
+
+    resume.save(
+        host, resumeDraft("TECH", "https://www.linkedin.com/in/ana", List.of(project, project)));
+    var saved = json.valueToTree(resume.mine(host));
+    assertThat(saved.get("template").asText()).isEqualTo("TECH");
+    assertThat(saved.get("objective").asText()).isEqualTo("Estágio em back-end");
+    assertThat(saved.get("contact").get("email").asText()).isEqualTo("ana@example.test");
+    assertThat(saved.get("contact").get("phone").asText()).isEqualTo("(11) 90000-0000");
+    assertThat(saved.get("education").get(0).get("institution").asText()).isEqualTo("FATEC");
+    assertThat(saved.get("projects")).hasSize(1);
+    assertThat(saved.get("skills").findValuesAsText("")).isEmpty();
+    assertThat(json.convertValue(saved.get("skills"), List.class)).containsExactly("Java", "SQL");
+
+    // the contact details are for the résumé the student prints, not for visitors
+    String visitors = json.writeValueAsString(portfolio.publicPortfolio(usernameOf(host)));
+    assertThat(visitors).doesNotContain("90000-0000").doesNotContain("ana@example.test");
+    // and each student only ever reads their own
+    assertThat(json.valueToTree(resume.mine(member)).isEmpty()).isTrue();
+
+    assertThatThrownBy(() -> resume.save(host, resumeDraft("DESIGNER", null, List.of())))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () -> resume.save(host, resumeDraft("TECH", "javascript:alert(1)", List.of())))
+        .isInstanceOf(ApiException.class);
   }
 
   @Autowired br.com.enturma.community.AchievementService levelStats;
@@ -4209,6 +4423,20 @@ class PlatformIntegrationTest {
     db.jdbc.update(
         "INSERT INTO portfolio_journey_dismissal(user_id,source) VALUES (?,'task:x')", userId);
     db.jdbc.update(
+        "INSERT INTO portfolio_resume(user_id,data) VALUES (?,'{\"template\":\"TECH\"}'::jsonb)",
+        userId);
+    // one team record where the account is the author and one where it is the member
+    db.jdbc.update(
+        "INSERT INTO portfolio_project_member(owner_id,project_id,member_id) VALUES (?,?,?)",
+        userId,
+        UUID.randomUUID(),
+        host.id());
+    db.jdbc.update(
+        "INSERT INTO portfolio_project_member(owner_id,project_id,member_id) VALUES (?,?,?)",
+        host.id(),
+        UUID.randomUUID(),
+        userId);
+    db.jdbc.update(
         "INSERT INTO practice_session(id,user_id,title) VALUES (?,?,?)",
         practiceSession,
         userId,
@@ -4260,6 +4488,7 @@ class PlatformIntegrationTest {
             "portfolio_profile",
             "portfolio_journey_entry",
             "portfolio_journey_dismissal",
+            "portfolio_resume",
             "practice_session",
             "campus_learning_profile",
             "campus_tutor_interaction",
@@ -4279,6 +4508,14 @@ class PlatformIntegrationTest {
           .as(table)
           .isZero();
     }
+    assertThat(
+            db.jdbc.queryForObject(
+                "SELECT count(*) FROM portfolio_project_member WHERE owner_id=? OR member_id=?",
+                Integer.class,
+                userId,
+                userId))
+        .as("portfolio_project_member")
+        .isZero();
     assertThat(
             db.jdbc.queryForObject(
                 "SELECT count(*) FROM campus_tutor_interaction WHERE user_id=?",
