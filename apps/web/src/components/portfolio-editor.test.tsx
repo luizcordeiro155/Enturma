@@ -456,3 +456,26 @@ it("lists the projects that tagged the student and takes an accepted one into th
     projectId: "p9",
   });
 });
+
+it("gives the long page a way around and sends the résumé to its own page", async () => {
+  await closed();
+  const nav = screen.getByRole("navigation", { name: "Seções do portfólio" });
+  expect(
+    within(nav)
+      .getAllByRole("link")
+      .map((link) => [link.textContent, link.getAttribute("href")]),
+  ).toEqual([
+    ["Apresentação", "#apresentacao"],
+    ["Competências", "#competencias"],
+    ["Projetos", "#projetos"],
+    ["Jornada", "#jornada"],
+    ["Currículo", "/portfolio/curriculo"],
+  ]);
+  for (const id of ["apresentacao", "competencias", "projetos", "jornada"])
+    expect(document.getElementById(id), id).toBeTruthy();
+  // the editor itself is not something to print: the résumé page makes the PDF
+  expect(screen.queryByRole("button", { name: /Gerar PDF/ })).toBeNull();
+  expect(
+    screen.getByRole("link", { name: "Montar currículo" }).getAttribute("href"),
+  ).toBe("/portfolio/curriculo");
+});

@@ -47,6 +47,7 @@ public class PersonalDataExport {
     SECTIONS.put("study-reminders", "SELECT id,kind,source_id,occurrence_at,fire_at,status,sent_at FROM academic_reminder_job WHERE user_id=? ORDER BY fire_at,id");
     SECTIONS.put("portfolio-journey", "SELECT id,kind,title,detail,happened_on,visible,source,created_at FROM portfolio_journey_entry WHERE user_id=? ORDER BY happened_on,id");
     SECTIONS.put("portfolio-journey-dismissed", "SELECT source,created_at FROM portfolio_journey_dismissal WHERE user_id=? ORDER BY created_at,source");
+    SECTIONS.put("portfolio-resume", "SELECT data,updated_at FROM portfolio_resume WHERE user_id=?");
     SECTIONS.put("portfolio-team", "SELECT owner_id,project_id,member_id,status,contribution,created_at,answered_at FROM portfolio_project_member WHERE owner_id=? OR member_id=? ORDER BY created_at,project_id");
     SECTIONS.put("study-tasks", "SELECT id,subject_id,kind,title,notes,due_at,estimated_minutes,priority,completed_at,created_at FROM campus_task WHERE user_id=? ORDER BY due_at,id");
     SECTIONS.put("study-focus", "SELECT id,subject_id,label,planned_minutes,started_at,finished_at,actual_seconds FROM focus_session WHERE user_id=? ORDER BY started_at,id");

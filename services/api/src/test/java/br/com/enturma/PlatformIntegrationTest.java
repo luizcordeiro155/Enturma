@@ -2747,6 +2747,57 @@ class PlatformIntegrationTest {
     assertThat(theirs.path("members")).isEmpty();
   }
 
+  @Autowired br.com.enturma.users.PortfolioResumeController resume;
+
+  private static br.com.enturma.users.PortfolioResumeController.Resume resumeDraft(
+      String template, String linkedin, List<UUID> projects) {
+    return new br.com.enturma.users.PortfolioResumeController.Resume(
+        template,
+        "PLAIN",
+        new br.com.enturma.users.PortfolioResumeController.Contact(
+            " ana@example.test ", "(11) 90000-0000", "São Paulo, SP", linkedin, null, null),
+        "  Estágio em back-end  ",
+        "Estudante de ADS.",
+        List.of(
+            new br.com.enturma.users.PortfolioResumeController.Education(
+                "Análise e Desenvolvimento de Sistemas", "FATEC", "2024 a 2026")),
+        projects,
+        List.of(),
+        Arrays.asList(" Java ", "java", "SQL", ""));
+  }
+
+  @Test
+  void resumeChoicesAreSavedForTheStudentAndNeverReachThePublicPortfolio() throws Exception {
+    UUID project = UUID.randomUUID();
+    publishPortfolio(teamProject(project, "Caronas", null));
+    // nothing saved yet: the page starts from the portfolio, so the answer is empty
+    assertThat(json.valueToTree(resume.mine(host)).isEmpty()).isTrue();
+
+    resume.save(
+        host, resumeDraft("TECH", "https://www.linkedin.com/in/ana", List.of(project, project)));
+    var saved = json.valueToTree(resume.mine(host));
+    assertThat(saved.get("template").asText()).isEqualTo("TECH");
+    assertThat(saved.get("objective").asText()).isEqualTo("Estágio em back-end");
+    assertThat(saved.get("contact").get("email").asText()).isEqualTo("ana@example.test");
+    assertThat(saved.get("contact").get("phone").asText()).isEqualTo("(11) 90000-0000");
+    assertThat(saved.get("education").get(0).get("institution").asText()).isEqualTo("FATEC");
+    assertThat(saved.get("projects")).hasSize(1);
+    assertThat(saved.get("skills").findValuesAsText("")).isEmpty();
+    assertThat(json.convertValue(saved.get("skills"), List.class)).containsExactly("Java", "SQL");
+
+    // the contact details are for the résumé the student prints, not for visitors
+    String visitors = json.writeValueAsString(portfolio.publicPortfolio(usernameOf(host)));
+    assertThat(visitors).doesNotContain("90000-0000").doesNotContain("ana@example.test");
+    // and each student only ever reads their own
+    assertThat(json.valueToTree(resume.mine(member)).isEmpty()).isTrue();
+
+    assertThatThrownBy(() -> resume.save(host, resumeDraft("DESIGNER", null, List.of())))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () -> resume.save(host, resumeDraft("TECH", "javascript:alert(1)", List.of())))
+        .isInstanceOf(ApiException.class);
+  }
+
   @Test
   void roomArtworkRequiresHostAndRejectsDisguisedHtml() throws Exception {
     UUID id = room(8);
@@ -4346,6 +4397,9 @@ class PlatformIntegrationTest {
         userId);
     db.jdbc.update(
         "INSERT INTO portfolio_journey_dismissal(user_id,source) VALUES (?,'task:x')", userId);
+    db.jdbc.update(
+        "INSERT INTO portfolio_resume(user_id,data) VALUES (?,'{\"template\":\"TECH\"}'::jsonb)",
+        userId);
     // one team record where the account is the author and one where it is the member
     db.jdbc.update(
         "INSERT INTO portfolio_project_member(owner_id,project_id,member_id) VALUES (?,?,?)",
@@ -4409,6 +4463,7 @@ class PlatformIntegrationTest {
             "portfolio_profile",
             "portfolio_journey_entry",
             "portfolio_journey_dismissal",
+            "portfolio_resume",
             "practice_session",
             "campus_learning_profile",
             "campus_tutor_interaction",

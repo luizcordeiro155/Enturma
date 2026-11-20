@@ -596,3 +596,104 @@ test("equipe: colega marcado só aparece depois de aceitar, e o projeto pode ser
   });
   await expect(page).not.toHaveURL(/projeto=/);
 });
+
+test("currículo: monta com o que foi marcado, guarda o contato e imprime só a folha", async ({
+  page,
+  request,
+}) => {
+  const tag = randomUUID().slice(0, 8),
+    username = `curriculo_${tag}`;
+  const api = process.env.E2E_API_URL ?? "http://localhost:8080";
+  const response = await request.post(`${api}/api/v1/auth/register`, {
+    data: {
+      name: "Ana do Currículo",
+      username,
+      email: `${username}@example.test`,
+      password: "Connected-test-12345",
+      device: "E2E",
+    },
+  });
+  expect(response.ok()).toBe(true);
+  const credentials = await response.json();
+  await authenticate(page.context(), credentials);
+  const saved = await request.put(`${api}/api/v1/portfolio/me`, {
+    headers: { authorization: `Bearer ${credentials.accessToken}` },
+    data: {
+      publicProfile: true,
+      headline: "Estudante de ADS",
+      summary: "Gosto de software simples.",
+      goal: "Estágio em back-end",
+      skills: ["Java", "Inglês"],
+      projects: [
+        {
+          id: randomUUID(),
+          name: "Caronas",
+          description: "App de caronas.",
+          url: "",
+          assets: [],
+          technologies: ["Java", "PostgreSQL"],
+        },
+        {
+          id: randomUUID(),
+          name: "Jogo da velha",
+          description: "Primeiro projeto.",
+          url: "",
+          assets: [],
+        },
+      ],
+    },
+  });
+  expect(saved.ok()).toBe(true);
+
+  // The editor points at the résumé from its section row.
+  await page.goto("/portfolio");
+  await page
+    .getByRole("navigation", { name: "Seções do portfólio" })
+    .getByRole("link", { name: "Currículo" })
+    .click();
+  await expect(page).toHaveURL(/\/portfolio\/curriculo$/);
+  const sheet = page.getByRole("region", { name: "Prévia do currículo" });
+  await expect(sheet.getByRole("heading", { level: 1 })).toHaveText(
+    "Ana do Currículo",
+  );
+  await expect(sheet.getByText("Estágio em back-end")).toBeVisible();
+  await expect(sheet.getByRole("heading", { name: "Caronas" })).toBeVisible();
+
+  // Only what stays ticked goes in; the model rearranges the same facts.
+  await page.getByLabel("Incluir o projeto Jogo da velha").uncheck();
+  await expect(sheet.getByRole("heading", { name: "Jogo da velha" })).toHaveCount(0);
+  await page.getByRole("radio", { name: /^Tecnologia/ }).check();
+  await expect(sheet.getByRole("heading", { level: 2 })).toHaveText([
+    "Objetivo",
+    "Resumo",
+    "Competências técnicas",
+    "Projetos",
+  ]);
+  await expect(sheet.getByText("Java, Inglês, PostgreSQL")).toBeVisible();
+  await page.getByLabel("E-mail", { exact: true }).fill("ana@example.test");
+  await page.getByLabel("Telefone", { exact: true }).fill("(11) 90000-0000");
+  await page.getByRole("button", { name: "Salvar currículo" }).click();
+  await expect(page.getByText("Currículo salvo.")).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+
+  // Printing leaves the sheet and nothing around it.
+  await page.emulateMedia({ media: "print" });
+  await expect(sheet).toBeVisible();
+  await expect(page.getByRole("button", { name: "Salvar currículo" })).toBeHidden();
+  await expect(page.getByRole("radio", { name: /^Tecnologia/ })).toBeHidden();
+  await page.emulateMedia({ media: "screen" });
+
+  // The choices come back, and the contact never reaches the public page.
+  await page.reload();
+  await expect(page.getByRole("radio", { name: /^Tecnologia/ })).toBeChecked();
+  await expect(sheet.getByText("(11) 90000-0000")).toBeVisible();
+  await expect(sheet.getByRole("heading", { name: "Jogo da velha" })).toHaveCount(0);
+  const visitors = await request.get(
+    `${api}/api/v1/public/portfolio/${username}`,
+  );
+  expect(await visitors.text()).not.toContain("90000-0000");
+});

@@ -4,10 +4,11 @@ import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   BriefcaseBusiness,
   ExternalLink,
+  FileText,
   FolderGit2,
   Plus,
-  Printer,
 } from "lucide-react";
+import Link from "next/link";
 import { api } from "@/lib/api";
 import {
   MAX_FEATURED,
@@ -283,8 +284,19 @@ export function PortfolioEditor() {
             <strong>{formatDays(data.stats.currentStreak)}</strong>
           </div>
         </section>
+        <nav className="portfolio-sections" aria-label="Seções do portfólio">
+          <a href="#apresentacao">Apresentação</a>
+          <a href="#competencias">Competências</a>
+          <a href="#projetos">Projetos</a>
+          <a href="#jornada">Jornada</a>
+          <Link href="/portfolio/curriculo">Currículo</Link>
+        </nav>
         <form onSubmit={save} noValidate ref={form}>
-          <section className="portfolio-settings" data-portfolio-reveal>
+          <section
+            id="apresentacao"
+            className="portfolio-settings"
+            data-portfolio-reveal
+          >
             <label className="portfolio-public-toggle">
               <input
                 type="checkbox"
@@ -323,7 +335,7 @@ export function PortfolioEditor() {
                 placeholder="Conte sua trajetória, objetivos e o tipo de problema que gosta de resolver."
               />
             </label>
-            <label>
+            <label id="competencias">
               Competências
               <input
                 name="skills"
@@ -369,6 +381,7 @@ export function PortfolioEditor() {
           />
 
           <section
+            id="projetos"
             className="portfolio-project-editor"
             data-portfolio-reveal
             aria-labelledby="portfolio-projects-title"
@@ -527,13 +540,9 @@ export function PortfolioEditor() {
                 <ExternalLink size={16} /> Ver público
               </PublicPortfolioLink>
             ) : null}
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => window.print()}
-            >
-              <Printer size={16} /> Gerar PDF pelo navegador
-            </button>
+            <Link className="button secondary" href="/portfolio/curriculo">
+              <FileText size={16} /> Montar currículo
+            </Link>
           </div>
         </form>
         <JourneyEditor />
