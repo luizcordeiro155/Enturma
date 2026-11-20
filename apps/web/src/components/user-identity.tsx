@@ -17,6 +17,7 @@ import { createPortal, flushSync } from "react-dom";
 import Link from "next/link";
 import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { LevelBadge } from "./level-meter";
 import { ProfileCommunity } from "./profile-community";
 import { api, post } from "@/lib/api";
 import {
@@ -229,6 +230,7 @@ export function ProfileCard({
             <p>
               @{user.username} {d.pronouns ? `· ${d.pronouns}` : ""}
             </p>
+            {showcase?.stats ? <LevelBadge stats={showcase.stats} /> : null}
             <FeaturedAchievementBadges showcase={showcase} />
           </div>
           {d.statusText ? (

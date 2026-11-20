@@ -16,6 +16,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { AchievementArt } from "./achievement-art";
+import { LevelMeter } from "./level-meter";
+import type { LevelStats } from "@/lib/level";
 import { api } from "@/lib/api";
 import type { ProfileVisualAppearance } from "@enturma/contracts";
 export type Achievement = {
@@ -52,9 +54,7 @@ export type Showcase = {
   widgets: Widget[];
   badges?: { code: string }[];
   achievements?: Achievement[];
-  stats?: {
-    totalXp: number;
-    level: number;
+  stats?: LevelStats & {
     currentStreak: number;
     studyMinutes: number;
   };
@@ -582,11 +582,10 @@ export function ShowcaseView({
         </div>
       ) : null}
       {value.stats && (
-        <div className="profile-stat-row">
-          <span>Nível {value.stats.level}</span>
-          <span>{value.stats.totalXp} XP</span>
-          <span>{formatDays(value.stats.currentStreak)} de sequência</span>
-        </div>
+        <LevelMeter
+          stats={value.stats}
+          streak={`${formatDays(value.stats.currentStreak)} de sequência`}
+        />
       )}
       {value.joinedAt && (
         <small>
