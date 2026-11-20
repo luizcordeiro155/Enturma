@@ -2409,6 +2409,181 @@ class PlatformIntegrationTest {
             org.mockito.ArgumentMatchers.anyBoolean());
   }
 
+  @Autowired br.com.enturma.users.PortfolioJourneyController timeline;
+
+  private static br.com.enturma.users.PortfolioJourneyController.Entry journeyEntry(
+      String kind, String title, String date, Boolean visible, String source) {
+    return new br.com.enturma.users.PortfolioJourneyController.Entry(
+        kind, title, "Detalhe de " + title, date, visible, source);
+  }
+
+  private void publishPortfolio(PortfolioController.Project... projects) throws Exception {
+    portfolio.save(
+        host,
+        new PortfolioController.Portfolio(
+            true, "Dev", "", List.of(), Arrays.asList(projects), "Estágio"));
+  }
+
+  private com.fasterxml.jackson.databind.JsonNode publicJourney() {
+    String username =
+        db.jdbc.queryForObject("SELECT username FROM app_user WHERE id=?", String.class, host.id());
+    return json.valueToTree(portfolio.publicPortfolio(username)).path("journey");
+  }
+
+  @Test
+  void journeyShowsVisitorsOnlyWhatTheStudentChoseToShow() throws Exception {
+    publishPortfolio();
+    var shown =
+        json.valueToTree(
+            timeline.add(host, journeyEntry("MILESTONE", "Entrei na faculdade", "2024-02-05", true, null)));
+    // saying nothing about visibility keeps the record with the student
+    var kept =
+        json.valueToTree(
+            timeline.add(host, journeyEntry("CERTIFICATE", "Curso de SQL", "2025-09-10", null, null)));
+    assertThat(shown.get("visible").asBoolean()).isTrue();
+    assertThat(kept.get("visible").asBoolean()).isFalse();
+
+    var mine = json.valueToTree(timeline.mine(host)).get("entries");
+    // newest first
+    assertThat(mine.findValuesAsText("title")).containsExactly("Curso de SQL", "Entrei na faculdade");
+    assertThat(publicJourney().findValuesAsText("title")).containsExactly("Entrei na faculdade");
+    assertThat(publicJourney().get(0).get("date").asText()).isEqualTo("2024-02-05");
+    assertThat(publicJourney().get(0).has("source")).isFalse();
+    assertThat(publicJourney().get(0).has("visible")).isFalse();
+
+    UUID keptId = UUID.fromString(kept.get("id").asText());
+    timeline.edit(host, keptId, journeyEntry("CERTIFICATE", "Curso de SQL avançado", "2025-09-12", true, null));
+    assertThat(publicJourney().findValuesAsText("title"))
+        .containsExactly("Curso de SQL avançado", "Entrei na faculdade");
+
+    // someone else can neither change nor remove it
+    assertThatThrownBy(
+            () -> timeline.edit(member, keptId, journeyEntry("GOAL", "Meu", "2025-01-01", true, null)))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(() -> timeline.remove(member, keptId)).isInstanceOf(ApiException.class);
+    assertThat(publicJourney()).hasSize(2);
+
+    timeline.remove(host, keptId);
+    assertThat(publicJourney().findValuesAsText("title")).containsExactly("Entrei na faculdade");
+
+    assertThatThrownBy(
+            () -> timeline.add(host, journeyEntry("PARTY", "Festa", "2025-01-01", true, null)))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () -> timeline.add(host, journeyEntry("GOAL", "Sem data", "ontem", true, null)))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () -> timeline.add(host, journeyEntry("GOAL", "Longe demais", "2199-01-01", true, null)))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void journeySuggestsTheStudentsOwnRecordsAndPublishesNoneOfThemByItself() throws Exception {
+    UUID project = UUID.randomUUID();
+    UUID archived = UUID.randomUUID();
+    publishPortfolio(
+        new PortfolioController.Project(
+            project, "Caronas", "App de caronas.", "", List.of(), "ACADEMIC", null, null, "2026.1",
+            true, null, null, null, null, null, null, null, null),
+        new PortfolioController.Project(
+            archived, "Rascunho", "", "", List.of(), null, null, null, null, null, null, null, null,
+            null, true, null, null, null));
+    UUID done = UUID.randomUUID();
+    UUID open = UUID.randomUUID();
+    UUID routine = UUID.randomUUID();
+    UUID theirs = UUID.randomUUID();
+    // The calendar has no "done" mark: an activity is on offer once its day has passed.
+    String task =
+        "INSERT INTO campus_task(id,user_id,kind,title,notes,due_at) VALUES"
+            + " (?,?,?,?,'ANOTACAO-PRIVADA',?::timestamptz)";
+    String past = "2026-05-21 15:00:00+00";
+    db.jdbc.update(task, done, host.id(), "EXAM", "Seminário de redes", past);
+    db.jdbc.update(
+        task,
+        open,
+        host.id(),
+        "ASSIGNMENT",
+        "Trabalho que ainda vai acontecer",
+        java.time.OffsetDateTime.now().plusDays(30).toString());
+    db.jdbc.update(task, routine, host.id(), "STUDY", "Revisar matéria", past);
+    db.jdbc.update(task, theirs, member.id(), "EXAM", "Prova do colega", past);
+    String code =
+        db.jdbc.queryForObject(
+            "SELECT code FROM achievement_definition ORDER BY code LIMIT 1", String.class);
+    db.jdbc.update(
+        "INSERT INTO user_achievement(user_id,code,definition_version,earned_at) VALUES"
+            + " (?,?,1,timestamptz '2026-03-02 10:00:00+00') ON CONFLICT DO NOTHING",
+        host.id(),
+        code);
+
+    var first = json.valueToTree(timeline.mine(host));
+    var sources = first.get("suggestions").findValuesAsText("source");
+    assertThat(sources)
+        .contains("task:" + done, "achievement:" + code, "project:" + project)
+        .doesNotContain(
+            "task:" + open, "task:" + routine, "task:" + theirs, "project:" + archived);
+    // a suggestion is only an offer: nothing was written, nothing is public
+    assertThat(first.get("entries")).isEmpty();
+    assertThat(publicJourney()).isEmpty();
+    assertThat(first.toString()).doesNotContain("ANOTACAO-PRIVADA");
+    for (var suggestion : first.get("suggestions")) {
+      if (suggestion.get("source").asText().equals("task:" + done)) {
+        assertThat(suggestion.get("title").asText()).isEqualTo("Seminário de redes");
+        assertThat(suggestion.get("date").asText()).isEqualTo("2026-05-21");
+        assertThat(suggestion.get("kind").asText()).isEqualTo("ACTIVITY");
+      }
+      if (suggestion.get("source").asText().equals("project:" + project)) {
+        assertThat(suggestion.get("kind").asText()).isEqualTo("TEAM");
+        assertThat(suggestion.get("date").asText()).isEqualTo("2026-03-01");
+      }
+    }
+
+    // accepted without a word about visibility, it stays private
+    var accepted =
+        json.valueToTree(
+            timeline.add(
+                host, journeyEntry("ACTIVITY", "Seminário de redes", "2026-05-21", null, "task:" + done)));
+    assertThat(accepted.get("visible").asBoolean()).isFalse();
+    assertThat(publicJourney()).isEmpty();
+    assertThat(json.valueToTree(timeline.mine(host)).get("suggestions").findValuesAsText("source"))
+        .doesNotContain("task:" + done);
+    // the same record does not enter twice, and nobody borrows another student's record
+    assertThatThrownBy(
+            () ->
+                timeline.add(
+                    host, journeyEntry("ACTIVITY", "De novo", "2026-05-21", true, "task:" + done)))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                timeline.add(
+                    host, journeyEntry("ACTIVITY", "Do colega", "2026-05-21", true, "task:" + theirs)))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                timeline.add(
+                    host, journeyEntry("ACTIVITY", "Rotina", "2026-05-21", true, "task:" + routine)))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                timeline.add(
+                    host, journeyEntry("ACTIVITY", "Ainda não aconteceu", "2026-05-21", true, "task:" + open)))
+        .isInstanceOf(ApiException.class);
+    assertThatThrownBy(
+            () ->
+                timeline.add(
+                    host, journeyEntry("PROJECT", "Arquivado", "2026-05-21", true, "project:" + archived)))
+        .isInstanceOf(ApiException.class);
+
+    // shown project records lead to the project, as long as visitors can see it
+    timeline.add(host, journeyEntry("TEAM", "Caronas", "2026-03-01", true, "project:" + project));
+    assertThat(publicJourney().get(0).get("projectId").asText()).isEqualTo(project.toString());
+
+    timeline.dismiss(
+        host, new br.com.enturma.users.PortfolioJourneyController.Dismissal("achievement:" + code));
+    assertThat(json.valueToTree(timeline.mine(host)).get("suggestions").findValuesAsText("source"))
+        .doesNotContain("achievement:" + code);
+  }
+
   @Test
   void roomArtworkRequiresHostAndRejectsDisguisedHtml() throws Exception {
     UUID id = room(8);
@@ -4002,6 +4177,13 @@ class PlatformIntegrationTest {
         "Resposta privada");
     db.jdbc.update("INSERT INTO portfolio_profile(user_id) VALUES (?)", userId);
     db.jdbc.update(
+        "INSERT INTO portfolio_journey_entry(id,user_id,kind,title,happened_on) VALUES"
+            + " (?,?,'GOAL','Privado',current_date)",
+        UUID.randomUUID(),
+        userId);
+    db.jdbc.update(
+        "INSERT INTO portfolio_journey_dismissal(user_id,source) VALUES (?,'task:x')", userId);
+    db.jdbc.update(
         "INSERT INTO practice_session(id,user_id,title) VALUES (?,?,?)",
         practiceSession,
         userId,
@@ -4051,6 +4233,8 @@ class PlatformIntegrationTest {
             "study_match_profile",
             "study_flashcard",
             "portfolio_profile",
+            "portfolio_journey_entry",
+            "portfolio_journey_dismissal",
             "practice_session",
             "campus_learning_profile",
             "campus_tutor_interaction",

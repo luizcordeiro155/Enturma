@@ -236,3 +236,39 @@ it("shows the case study in the student's words, opened on request when it is lo
     .closest("article")!;
   expect(within(none).queryByText("Estudo de caso")).toBeNull();
 });
+
+it("shows the journey the student chose to show and leads from a record to its project", async () => {
+  vi.mocked(api).mockResolvedValue({
+    ...base,
+    projects: Array.from({ length: 10 }, (_, i) => ({
+      id: "p" + i,
+      name: "Projeto " + i,
+    })),
+    journey: [
+      {
+        id: "j1",
+        kind: "PROJECT",
+        title: "Projeto 9",
+        detail: "",
+        date: "2026-03-01",
+        projectId: "p9",
+      },
+    ],
+  } as never);
+  Element.prototype.scrollIntoView = vi.fn();
+  render(<PublicPortfolio username="ana" />);
+  await screen.findByRole("heading", { name: "Minha jornada" });
+  const last = screen
+    .getByRole("heading", { name: "Projeto 9", level: 3, hidden: true })
+    .closest("article")!;
+  expect(last.hidden).toBe(true);
+  fireEvent.click(
+    screen.getByRole("link", { name: "Ver o projeto Projeto 9" }),
+  );
+  expect(last.hidden).toBe(false);
+});
+
+it("has no journey section when the student shows no record", async () => {
+  await show([{ id: "a", name: "Só projeto" }]);
+  expect(screen.queryByRole("heading", { name: "Minha jornada" })).toBeNull();
+});

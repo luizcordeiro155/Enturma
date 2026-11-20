@@ -335,3 +335,122 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
     ),
   ).toBe(true);
 });
+
+test("jornada: sugestão revisada entra privada, o estudante mostra e o visitante vê", async ({
+  page,
+  request,
+}) => {
+  const tag = randomUUID().slice(0, 8),
+    username = `jornada_${tag}`;
+  const api = process.env.E2E_API_URL ?? "http://localhost:8080";
+  const response = await request.post(`${api}/api/v1/auth/register`, {
+    data: {
+      name: "Estudante da jornada",
+      username,
+      email: `${username}@example.test`,
+      password: "Connected-test-12345",
+      device: "E2E",
+    },
+  });
+  expect(response.ok()).toBe(true);
+  const credentials = await response.json();
+  await authenticate(page.context(), credentials);
+  const headers = { authorization: `Bearer ${credentials.accessToken}` };
+  // A calendar activity that already happened, and a portfolio visitors can open.
+  const task = await request.post(`${api}/api/v1/planner/tasks`, {
+    headers,
+    data: {
+      kind: "EXAM",
+      title: "Prova de Banco de Dados",
+      dueAt: "2026-05-21T15:00:00Z",
+      minutes: 60,
+    },
+  });
+  expect(task.ok()).toBe(true);
+  const saved = await request.put(`${api}/api/v1/portfolio/me`, {
+    headers,
+    data: {
+      publicProfile: true,
+      headline: "Estudante",
+      summary: "",
+      goal: "",
+      skills: [],
+      projects: [],
+    },
+  });
+  expect(saved.ok()).toBe(true);
+
+  await page.goto("/portfolio");
+  const journey = page.locator("section.portfolio-journey");
+  await expect(
+    journey.getByRole("heading", { name: "Minha jornada" }),
+  ).toBeVisible();
+  // the platform offers; nothing is in the timeline yet
+  await expect(journey.getByRole("list", { name: "Registros da jornada" })).toHaveCount(0);
+  await journey
+    .getByRole("button", { name: "Revisar e adicionar Prova de Banco de Dados" })
+    .click();
+  const form = journey.getByRole("form", { name: "Novo registro da jornada" });
+  await expect(form.getByLabel("Data")).toHaveValue("2026-05-21");
+  await expect(form.getByLabel("Mostrar no portfólio público")).not.toBeChecked();
+  await form.getByRole("button", { name: "Salvar registro" }).click();
+  await expect(form).toBeHidden();
+  const record = journey
+    .getByRole("list", { name: "Registros da jornada" })
+    .locator("li", { hasText: "Prova de Banco de Dados" })
+    .last();
+  await expect(record.getByText("Só você vê")).toBeVisible();
+  await expect(
+    journey.getByRole("button", {
+      name: "Revisar e adicionar Prova de Banco de Dados",
+    }),
+  ).toHaveCount(0);
+
+  // a record the student writes
+  await journey.getByRole("button", { name: "Novo registro" }).click();
+  await form.getByLabel("Título").fill("Entrei na faculdade");
+  await form.getByLabel("Data").fill("2024-02-05");
+  await form.getByRole("button", { name: "Salvar registro" }).click();
+  await expect(form).toBeHidden();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+
+  // visitors see only what is shown
+  await page.goto(`/p/${username}`);
+  const open = page.locator("section.public-journey");
+  await expect(open.getByRole("heading", { level: 4 })).toHaveText([
+    "Entrei na faculdade",
+  ]);
+
+  await page.goto("/portfolio");
+  await journey
+    .getByRole("button", {
+      name: "Mostrar Prova de Banco de Dados no portfólio público",
+    })
+    .click();
+  await expect(
+    journey.getByRole("button", {
+      name: "Ocultar Prova de Banco de Dados do portfólio público",
+    }),
+  ).toBeVisible();
+  await page.goto(`/p/${username}`);
+  await expect(open.getByRole("heading", { level: 4 })).toHaveText([
+    "Prova de Banco de Dados",
+    "Entrei na faculdade",
+  ]);
+  await open
+    .getByRole("group", { name: "Filtrar jornada por semestre" })
+    .getByRole("button", { name: "2024.1" })
+    .click();
+  await expect(open.getByRole("heading", { level: 4 })).toHaveText([
+    "Entrei na faculdade",
+  ]);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});
