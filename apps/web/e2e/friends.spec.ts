@@ -467,6 +467,33 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   await expect(
     page.getByRole("dialog", { name: `Perfil de ${b}` }),
   ).toHaveAttribute("data-profile-view", "compact");
+  // On a tall screen the compact card is as tall as what it holds, not as tall as the screen.
+  const before = page.viewportSize()!;
+  await page.setViewportSize({ width: 1440, height: 1300 });
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const card = document
+          .querySelector(".user-profile-popover .public-profile-card")!
+          .getBoundingClientRect();
+        const actions = document
+          .querySelector(".user-profile-popover .profile-dialog-actions")!
+          .getBoundingClientRect();
+        const copy = document
+          .querySelector(".user-profile-popover .profile-copy-content")!
+          .getBoundingClientRect();
+        return {
+          // nothing but the card's own padding under the buttons or over them
+          foot: Math.round(card.bottom - actions.bottom) <= 32,
+          gap: Math.round(actions.top - copy.bottom) <= 32,
+          short: card.height < innerHeight - 200,
+          centred:
+            Math.abs(card.top + card.height / 2 - innerHeight / 2) < 40,
+        };
+      }),
+    )
+    .toEqual({ foot: true, gap: true, short: true, centred: true });
+  await page.setViewportSize(before);
   await expect(
     page.locator(
       ".user-profile-popover .public-profile-body > .profile-dialog-actions",
