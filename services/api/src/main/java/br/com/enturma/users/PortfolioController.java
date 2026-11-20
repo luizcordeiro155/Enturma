@@ -44,7 +44,9 @@ public class PortfolioController {
       @Size(max = 300) String repoUrl,
       Boolean featured,
       Boolean archived,
-      @Valid GithubSource github) {}
+      @Valid GithubSource github,
+      /** Competencies from the portfolio's own list that this project is evidence of. */
+      @Size(max = 12) List<@Size(max = 60) String> skills) {}
 
   public record Portfolio(
       boolean publicProfile,
@@ -113,6 +115,8 @@ public class PortfolioController {
       if (star) row.put("featured", true);
       if (archived) row.put("archived", true);
       if (project.github() != null) row.put("github", github(project.github(), repo));
+      var shown = labels(project.skills(), 12);
+      if (!shown.isEmpty()) row.put("skills", shown);
       stored.add(row);
     }
     db.jdbc.update(

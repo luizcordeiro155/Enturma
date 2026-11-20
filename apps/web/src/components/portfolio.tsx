@@ -13,8 +13,10 @@ import {
   MAX_FEATURED,
   MAX_PROJECTS,
   projectPayload,
+  splitLabels,
   type Project,
 } from "@/lib/portfolio-projects";
+import { competencies } from "@/lib/portfolio-skills";
 import { Feedback } from "./feedback";
 import {
   formatDays,
@@ -32,6 +34,8 @@ export { formatDays, formatStudyTime } from "./portfolio-format";
 export function PortfolioEditor() {
   const [data, setData] = useState<Portfolio>();
   const [projects, setProjects] = useState<Project[]>([]);
+  // Competencies are typed freely; which ones a project shows is worked out as they change.
+  const [skillsText, setSkillsText] = useState("");
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [shelf, setShelf] = useState<"active" | "archived">("active");
   const [importing, setImporting] = useState(false);
@@ -69,6 +73,7 @@ export function PortfolioEditor() {
           id: p.id ?? crypto.randomUUID(),
         }));
         setData(v);
+        setSkillsText((v.skills ?? []).join(", "));
         setProjects(list);
         // A short portfolio opens ready to edit; a long one opens as a list.
         if (list.length <= 3) setOpen(new Set(list.map((p) => p.id)));
@@ -175,11 +180,14 @@ export function PortfolioEditor() {
           headline: String(fd.get("headline") || ""),
           summary: String(fd.get("summary") || ""),
           goal: String(fd.get("goal") || ""),
-          skills: String(fd.get("skills") || "")
-            .split(",")
-            .map((v) => v.trim())
-            .filter(Boolean),
-          projects: projects.map(projectPayload),
+          skills,
+          // a link to a competency that left the list goes with it
+          projects: projects.map((p) =>
+            projectPayload({
+              ...p,
+              skills: (p.skills ?? []).filter((name) => skills.includes(name)),
+            }),
+          ),
         }),
       });
       setSuccess("Portfólio atualizado.");
@@ -200,6 +208,8 @@ export function PortfolioEditor() {
         )}
       </Shell>
     );
+  const skills = splitLabels(skillsText, 30);
+  const levels = competencies(skills, projects);
   const repositories = projects
     .map((p) => p.github?.fullName)
     .filter((name): name is string => Boolean(name));
@@ -276,10 +286,32 @@ export function PortfolioEditor() {
               Competências
               <input
                 name="skills"
-                defaultValue={(data.skills ?? []).join(", ")}
+                value={skillsText}
+                onChange={(e) => setSkillsText(e.target.value)}
                 placeholder="Java, SQL, Git, UI/UX"
               />
             </label>
+            {levels.length ? (
+              <div className="portfolio-skill-levels">
+                <ul aria-label="Competências e evidências">
+                  {levels.map((entry) => (
+                    <li key={entry.name} data-level={entry.level}>
+                      <strong>{entry.name}</strong>{" "}
+                      <span>
+                        {entry.level === "DEMONSTRATED"
+                          ? `Demonstrada em ${entry.evidence.length} ${entry.evidence.length === 1 ? "projeto" : "projetos"}`
+                          : "Declarada"}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p>
+                  Uma competência fica demonstrada quando um projeto ativo a usa
+                  como tecnologia ou quando você a liga ao projeto, no cartão
+                  dele. As outras aparecem como declaradas.
+                </p>
+              </div>
+            ) : null}
           </section>
 
           <section
@@ -363,6 +395,7 @@ export function PortfolioEditor() {
                 first={i === 0}
                 last={i === visible.length - 1}
                 assets={data.assets ?? []}
+                skills={skills}
                 onToggle={() =>
                   setOpen((v) => {
                     const next = new Set(v);

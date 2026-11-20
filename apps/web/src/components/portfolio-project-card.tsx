@@ -13,6 +13,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { readRepo, repoLanguages, repoTechnologies } from "@/lib/github-repos";
+import { byTechnology } from "@/lib/portfolio-skills";
 import {
   kindLabel,
   matchesGithub,
@@ -44,6 +45,7 @@ export function PortfolioProjectCard({
   first,
   last,
   assets,
+  skills,
   onToggle,
   onChange,
   onFeature,
@@ -59,6 +61,8 @@ export function PortfolioProjectCard({
   first: boolean;
   last: boolean;
   assets: PortfolioAsset[];
+  /** The portfolio's competencies, to say which ones this project shows. */
+  skills: string[];
   onToggle: () => void;
   onChange: (patch: Partial<Project>) => void;
   onFeature: () => void;
@@ -366,6 +370,50 @@ export function PortfolioProjectCard({
                 onChange={(e) => onChange({ outcome: e.target.value })}
               />
             </label>
+          </div>
+          <div className="portfolio-project-skills">
+            <span className="portfolio-field-title">
+              Competências que este projeto demonstra
+            </span>
+            {skills.length ? (
+              <div
+                role="group"
+                aria-label={`Competências do projeto ${number}`}
+              >
+                {skills.map((name) => {
+                  const used = byTechnology(name, p);
+                  const on = used || (p.skills ?? []).includes(name);
+                  return (
+                    <button
+                      type="button"
+                      key={name}
+                      aria-pressed={on}
+                      aria-label={`${name} no projeto ${number}`}
+                      title={
+                        used
+                          ? "Já aparece nas tecnologias do projeto"
+                          : undefined
+                      }
+                      disabled={used}
+                      onClick={() =>
+                        onChange({
+                          skills: on
+                            ? (p.skills ?? []).filter((label) => label !== name)
+                            : [...(p.skills ?? []), name],
+                        })
+                      }
+                    >
+                      {name}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              <p>
+                Escreva suas competências no topo do portfólio para ligá-las aos
+                projetos.
+              </p>
+            )}
           </div>
           {p.github ? (
             <div className="portfolio-github-source" data-linked={linked}>

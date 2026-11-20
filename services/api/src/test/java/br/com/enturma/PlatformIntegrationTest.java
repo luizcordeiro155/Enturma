@@ -2174,7 +2174,7 @@ class PlatformIntegrationTest {
       UUID id, String name, String description, String url, List<UUID> assets) {
     return new PortfolioController.Project(
         id, name, description, url, assets, null, null, null, null, null, null, null, null, null,
-        null, null);
+        null, null, null);
   }
 
   private static PortfolioController.Portfolio portfolioOf(
@@ -2206,11 +2206,12 @@ class PlatformIntegrationTest {
             true,
             false,
             new PortfolioController.GithubSource(
-                "ana-dev/caronas", 12, false, "2026-10-02T12:00:00Z"));
+                "ana-dev/caronas", 12, false, "2026-10-02T12:00:00Z"),
+            Arrays.asList(" Trabalho em equipe ", "trabalho em equipe", "Modelagem de dados", ""));
     var shelved =
         new PortfolioController.Project(
             UUID.randomUUID(), "Rascunho antigo", "", "", List.of(draft), "PERSONAL", null, null,
-            null, null, null, null, null, true, true, null);
+            null, null, null, null, null, true, true, null, null);
     portfolio.save(
         host,
         new PortfolioController.Portfolio(
@@ -2227,6 +2228,11 @@ class PlatformIntegrationTest {
     assertThat(saved.get("team").asBoolean()).isTrue();
     assertThat(saved.get("role").asText()).isEqualTo("Fiz a API e o banco.");
     assertThat(saved.get("github").get("fullName").asText()).isEqualTo("ana-dev/caronas");
+    // the competencies a project is evidence of are kept tidy, like its technologies
+    assertThat(saved.get("skills"))
+        .extracting(n -> n.asText())
+        .containsExactly("Trabalho em equipe", "Modelagem de dados");
+    assertThat(mine.get("projects").get(1).has("skills")).isFalse();
     // an archived project is never a highlight
     assertThat(mine.get("projects").get(1).has("featured")).isFalse();
     assertThat(mine.get("projects").get(1).get("archived").asBoolean()).isTrue();
@@ -2255,19 +2261,19 @@ class PlatformIntegrationTest {
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), null, null, null, null, null, null, null,
             "https://evil.example.test/ana-dev/caronas", null, null,
-            new PortfolioController.GithubSource("ana-dev/caronas", 1, false, null));
+            new PortfolioController.GithubSource("ana-dev/caronas", 1, false, null), null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(fake))))
         .isInstanceOf(ApiException.class);
     var unsafe =
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), null, null, null, null, null, null, null,
-            "javascript:alert(1)", null, null, null);
+            "javascript:alert(1)", null, null, null, null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(unsafe))))
         .isInstanceOf(ApiException.class);
     var odd =
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), "CERTIFIED", null, null, null, null, null, null,
-            null, null, null, null);
+            null, null, null, null, null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(odd))))
         .isInstanceOf(ApiException.class);
     var stars = new ArrayList<PortfolioController.Project>();
@@ -2275,7 +2281,7 @@ class PlatformIntegrationTest {
       stars.add(
           new PortfolioController.Project(
               null, "Projeto " + i, "", "", List.of(), null, null, null, null, null, null, null,
-              null, true, null, null));
+              null, true, null, null, null));
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, stars)))
         .isInstanceOf(ApiException.class);
     portfolio.save(host, portfolioOf(false, stars.subList(0, 6)));

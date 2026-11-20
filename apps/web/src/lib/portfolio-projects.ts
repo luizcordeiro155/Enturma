@@ -42,6 +42,8 @@ export type Project = {
   featured?: boolean;
   archived?: boolean;
   github?: GithubSource;
+  /** Competencies from the portfolio's list that this project is evidence of. */
+  skills?: string[];
 };
 
 /** "Java, SQL ,java" → ["Java", "SQL"]. */
@@ -109,5 +111,6 @@ export function projectPayload(project: Project) {
   else if (project.featured) payload.featured = true;
   if (project.github && matchesGithub(project.repoUrl, project.github.fullName))
     payload.github = project.github;
+  if (project.skills?.length) payload.skills = project.skills.slice(0, 12);
   return payload;
 }

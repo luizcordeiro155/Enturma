@@ -966,3 +966,174 @@ html[data-theme="dark"]
   background: var(--accent);
   color: var(--on-accent, #183f36);
 }
+
+/* ---------- Journey, fase 2: competências com evidências ---------- */
+.portfolio-skill-levels {
+  display: grid;
+  gap: 10px;
+  margin-top: 10px;
+}
+.portfolio-skill-levels ul,
+.portfolio-competencies {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.portfolio-skill-levels li {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  padding: 7px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 0.85rem;
+}
+.portfolio-skill-levels li > span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.portfolio-skill-levels li[data-level="DEMONSTRATED"] {
+  border-color: color-mix(in srgb, var(--success, #1f8a5b) 55%, var(--border));
+}
+.portfolio-skill-levels li[data-level="DEMONSTRATED"] > span {
+  color: var(--success, #1f8a5b);
+  font-weight: 700;
+}
+html[data-theme="dark"]
+  .portfolio-skill-levels
+  li[data-level="DEMONSTRATED"]
+  > span {
+  color: var(--accent);
+}
+.portfolio-skill-levels p {
+  max-width: 70ch;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.portfolio-project-skills {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+.portfolio-project-skills > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.portfolio-project-skills > p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+.portfolio-project-editor .portfolio-project-skills button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.portfolio-project-editor
+  .portfolio-project-skills
+  button[aria-pressed="true"] {
+  border-color: var(--success, #1f8a5b);
+  background: color-mix(in srgb, var(--success, #1f8a5b) 14%, var(--surface));
+}
+.portfolio-project-editor .portfolio-project-skills button:disabled {
+  cursor: default;
+  opacity: 0.75;
+}
+html[data-theme="dark"]
+  .app-shell
+  .portfolio-project-editor
+  .portfolio-project-skills
+  button {
+  border-color: var(--border);
+  background: var(--surface);
+  color: var(--ink);
+}
+html[data-theme="dark"]
+  .app-shell
+  .portfolio-project-editor
+  .portfolio-project-skills
+  button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 16%, var(--surface));
+}
+/* Public page: each competency says what backs it. */
+.public-portfolio .portfolio-competencies {
+  flex-direction: column;
+  gap: 0;
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+}
+.public-portfolio .portfolio-competencies li {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 4px 14px;
+  padding: 12px 16px;
+  background: var(--surface);
+  color: var(--ink);
+}
+@media (max-width: 620px) {
+  .public-portfolio .portfolio-competencies li {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.public-portfolio .portfolio-competencies li + li {
+  border-top: 1px solid var(--border);
+}
+.public-portfolio .portfolio-competencies li > span {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+.public-portfolio
+  .portfolio-competencies
+  li[data-level="DEMONSTRATED"]
+  > strong::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--success, #1f8a5b);
+  vertical-align: middle;
+}
+.public-portfolio
+  .portfolio-competencies
+  li[data-level="DECLARED"]
+  > strong::before {
+  content: "";
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  margin-right: 8px;
+  border: 1px solid var(--muted);
+  border-radius: 50%;
+  vertical-align: middle;
+}
+.public-portfolio .portfolio-competencies a {
+  color: var(--ink);
+  font-weight: 700;
+  text-underline-offset: 3px;
+}
+.public-portfolio .portfolio-skill-legend {
+  margin: 10px 0 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
