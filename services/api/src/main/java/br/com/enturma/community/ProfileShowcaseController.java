@@ -26,7 +26,10 @@ public class ProfileShowcaseController {
   }
 
   private static final Set<String> FIELDS =
-      Set.of("ACADEMIC", "STATS", "ACHIEVEMENTS", "JOINED", "WIDGETS", "ACTIVITY");
+      Set.of("ACADEMIC", "STATS", "ACHIEVEMENTS", "JOINED", "WIDGETS", "ACTIVITY", "LAST_SEEN");
+
+  /** Online and "last seen" start shared; the other fields start hidden. */
+  private static final String LAST_SEEN = "LAST_SEEN";
   private static final Set<String> WIDGETS =
       Set.of(
           "SUBJECTS",
@@ -53,7 +56,7 @@ public class ProfileShowcaseController {
       @NotNull @Size(max = 200) String goal,
       @NotNull @Size(max = 200) String technologies,
       @NotNull @Size(max = 1000) String projects,
-      @NotNull @Size(max = 6) Map<String, Boolean> privacy,
+      @NotNull @Size(max = 7) Map<String, Boolean> privacy,
       @NotNull @Size(max = 8) List<@NotNull @Valid Widget> widgets,
       @NotNull @Size(max = 4) List<@NotBlank String> badges,
       @Pattern(regexp = "PROFILE|DEFAULT|CUSTOM") String muralMode,
@@ -103,13 +106,16 @@ public class ProfileShowcaseController {
         s.gradientFlow(),
         s.entrance(),
         a.id());
-    for (String f : FIELDS)
+    for (String f : FIELDS) {
+      // An app that does not know this option yet does not send it: the choice stays as it was.
+      if (f.equals(LAST_SEEN) && !s.privacy().containsKey(f)) continue;
       db.jdbc.update(
           "INSERT INTO profile_privacy_setting(user_id,field,visible) VALUES (?,?,?) ON"
               + " CONFLICT(user_id,field) DO UPDATE SET visible=EXCLUDED.visible",
           a.id(),
           f,
           Boolean.TRUE.equals(s.privacy().get(f)));
+    }
     db.jdbc.update("DELETE FROM profile_widget WHERE user_id=?", a.id());
     for (int i = 0; i < s.widgets().size(); i++) {
       var w = s.widgets().get(i);
@@ -161,11 +167,17 @@ public class ProfileShowcaseController {
     for (String f : FIELDS)
       privacy.put(
           f,
-          db.exists(
-              "SELECT EXISTS(SELECT 1 FROM profile_privacy_setting WHERE user_id=? AND field=? AND"
-                  + " visible)",
-              id,
-              f));
+          f.equals(LAST_SEEN)
+              ? !db.exists(
+                  "SELECT EXISTS(SELECT 1 FROM profile_privacy_setting WHERE user_id=? AND"
+                      + " field=? AND NOT visible)",
+                  id,
+                  f)
+              : db.exists(
+                  "SELECT EXISTS(SELECT 1 FROM profile_privacy_setting WHERE user_id=? AND"
+                      + " field=? AND visible)",
+                  id,
+                  f));
     var result = new LinkedHashMap<String, Object>();
     var rows =
         db.list(

@@ -132,6 +132,13 @@ No celular (até 760 px) o Perfil social usa a mesma superfície, empilhada: o c
 - **Barra de rolagem.** A janela do cartão não mostra barra: ela ficaria solta ao lado da moldura. O cartão rola com a roda do mouse, o touchpad, o dedo e o teclado. O conteúdo ao lado (mural, publicações) tem uma linha de 6 px, sem setas, que só aparece com o ponteiro ou o foco em cima (`--profile-bar`).
 - **Espaço para a arte.** A sala reserva à esquerda o que a moldura alcança (antes cortava em 44 px); em janelas até 980 px de largura volta aos 44 px para o conteúdo ao lado não apertar. A arte que deriva para o lado do conteúdo some em degradê em vez de terminar numa linha.
 
+## Visto por último na conversa — 19/11/2026
+
+- **A linha embaixo do nome.** No cabeçalho da conversa privada, sob o nome do amigo: "online" enquanto ele está com o Enturma aberto, senão "visto por último hoje às 22:03", "ontem às 23:50", "em 12/11 às 15:30" ou, em outro ano, só a data. Vale no desktop, no celular e nos apps, que usam a mesma tela. A linha se atualiza junto com a lista de amigos.
+- **De onde vem.** A presença já existia (o soquete de atividade renova uma concessão curta). Agora ela também grava `app_user.last_seen_at`, no máximo uma vez por minuto por pessoa e na hora em que a conexão fecha.
+- **Quem vê.** Só amigos aceitos; um convite pendente não mostra online nem visto por último. Em "Privacidade do perfil" há a opção "Online e visto por último", ligada por padrão. Quem desliga deixa de aparecer e também deixa de ver o dos amigos, e o servidor nem envia o dado. Um app antigo que salva o mural sem conhecer a opção não mexe nela.
+- **O que a opção não esconde.** Os botões de ligação continuam ativos só quando o amigo está conectado, porque a chamada depende disso; o texto "Online/Offline" ao lado deles saiu, já que a linha sob o nome diz isso.
+
 ## Notificações agrupadas, prévia do editor, compartilhar perfil e dois dragões — 19/11/2026
 
 - **Curtidas viram uma linha só.** Curtidas e republicações do Social e curtidas e reações do fórum sobre a mesma coisa chegam como uma entrada: os rostos de até três pessoas (as mais recentes primeiro) e a frase "Ana, Bruno e mais 4 pessoas curtiram sua publicação.". Quem agrupa é o servidor (`NotificationService.inbox`), então web e celular recebem a mesma lista; o contador de não lidas conta entradas, não curtidas, e abrir uma entrada marca o grupo inteiro como lido. Seguir, comentar e pedir para seguir continuam uma por pessoa, com a foto de quem fez.

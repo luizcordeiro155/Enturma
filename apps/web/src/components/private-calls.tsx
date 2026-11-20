@@ -483,13 +483,8 @@ export function PrivateCallButtons({ friendshipId }: { friendshipId: string }) {
   }
   return (
     <div className="private-call-buttons">
-      <small>
-        {online === undefined
-          ? "Verificando presença…"
-          : online
-            ? "Online"
-            : "Offline"}
-      </small>
+      {/* Who is online is said under the friend's name; here only the wait is. */}
+      {online === undefined ? <small>Verificando presença…</small> : null}
       <button
         type="button"
         disabled={busy || online !== true}

@@ -13,7 +13,7 @@ public class PersonalDataExport {
   private final Db db;
   public PersonalDataExport(Db db) { this.db=db; }
   private static final Map<String,String> SECTIONS=new LinkedHashMap<>(Map.of(
-    "account", "SELECT id,name,username,email,bio,profile_details,created_at FROM app_user WHERE id=? ORDER BY id",
+    "account", "SELECT id,name,username,email,bio,profile_details,created_at,last_seen_at FROM app_user WHERE id=? ORDER BY id",
     "portfolio", "SELECT headline,summary,goal,skills,projects,public,updated_at FROM portfolio_profile WHERE user_id=? ORDER BY user_id",
     "notebooks", "SELECT id,title,created_at,updated_at FROM study_notebook WHERE user_id=? ORDER BY created_at,id",
     "sources", "SELECT s.id,s.notebook_id,s.title,s.kind,s.url,s.content,s.created_at FROM notebook_source s JOIN study_notebook n ON n.id=s.notebook_id WHERE n.user_id=? ORDER BY s.created_at,s.id",

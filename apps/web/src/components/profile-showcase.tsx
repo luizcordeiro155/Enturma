@@ -83,6 +83,8 @@ const PRIVACY_NAMES: Record<string, string> = {
   JOINED: "Data de entrada",
   WIDGETS: "Widgets e textos do mural",
   ACTIVITY: "Atividade de estudo e jogos (nunca ligações privadas)",
+  LAST_SEEN:
+    "Online e visto por último, para amigos (desligado, você também não vê o deles)",
 };
 
 function achievementTierClass(tier?: string) {
