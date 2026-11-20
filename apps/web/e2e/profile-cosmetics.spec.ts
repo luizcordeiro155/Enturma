@@ -115,6 +115,22 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
           form.height <= Math.max(560, Math.min(900, innerHeight - 180)) + 1,
         roomInside: box.bottom <= stage.bottom + 1 && box.top >= stage.top - 1,
         scrolls: getComputedStyle(scroller).overflowY,
+        // beside each other, neither column is taller than the room: what does not fit
+        // is reached by scrolling that column, never cut off by the room's edge
+        columnsFit:
+          stacked ||
+          [room.querySelector(".profile-preview-identity")!, mural].every(
+            (column) =>
+              column.getBoundingClientRect().bottom <= box.bottom + 1 &&
+              column.getBoundingClientRect().top >= box.top - 1,
+          ),
+        // the card is as tall as what it holds: nothing spills out under its foot
+        cardHoldsContent:
+          room.querySelector(".public-profile-body")!.getBoundingClientRect()
+            .bottom <=
+          card.bottom + 1,
+        // the frame is drawn for the whole card, so its foot is at the card's foot
+        frameReachesFoot: around.bottom >= card.bottom - 1,
         frameAround: around.top < card.top - 20 && around.left < card.left,
         boxed: room
           .querySelector(".public-profile-card")!
@@ -128,12 +144,65 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
     editorFits: true,
     roomInside: true,
     scrolls: "auto",
+    columnsFit: true,
+    cardHoldsContent: true,
+    frameReachesFoot: true,
     frameAround: true,
     boxed: false,
   };
   await expect.poll(measureRoom).toEqual(roomBeside);
-  // In a narrow editor the mural goes under the card and the room scrolls as one column.
+  // In a low window the card is taller than the room: it scrolls in its own column,
+  // frame and all, exactly as in the open profile.
   const usual = page.viewportSize()!;
+  await page.setViewportSize({ width: 1700, height: 640 });
+  // a long profile: more on the card and on the mural than the room can show
+  await previewRoom.evaluate((room) => {
+    for (const [where, height] of [
+      [".profile-copy-content", "600px"],
+      [".profile-preview-mural", "1200px"],
+    ]) {
+      const filler = document.createElement("div");
+      filler.dataset.testFiller = "true";
+      filler.style.height = height;
+      room.querySelector(where)!.append(filler);
+    }
+  });
+  await expect.poll(measureRoom).toEqual(roomBeside);
+  const muralWindow = previewRoom.locator(".profile-preview-mural");
+  await expect
+    .poll(() =>
+      muralWindow.evaluate((node) => node.scrollHeight - node.clientHeight),
+    )
+    .toBeGreaterThan(40);
+  const cardWindow = previewRoom.locator(".profile-preview-identity");
+  await expect
+    .poll(() =>
+      cardWindow.evaluate((node) => node.scrollHeight - node.clientHeight),
+    )
+    .toBeGreaterThan(40);
+  await cardWindow.evaluate((node) => node.scrollTo(0, node.scrollHeight));
+  await expect
+    .poll(() =>
+      previewRoom.evaluate((room) => {
+        const card = room
+            .querySelector(".public-profile-card")!
+            .getBoundingClientRect(),
+          art = room
+            .querySelector("canvas[data-layer='frame']")!
+            .getBoundingClientRect(),
+          box = room.getBoundingClientRect();
+        // the card's foot came into the room, and the frame's foot came with it
+        return card.bottom <= box.bottom && art.bottom >= card.bottom - 1;
+      }),
+    )
+    .toBe(true);
+  await cardWindow.evaluate((node) => node.scrollTo(0, 0));
+  await previewRoom.evaluate((room) =>
+    room
+      .querySelectorAll("[data-test-filler]")
+      .forEach((filler) => filler.remove()),
+  );
+  // In a narrow editor the mural goes under the card and the room scrolls as one column.
   await page.setViewportSize({ width: 1000, height: 800 });
   await expect.poll(measureRoom).toEqual({ ...roomBeside, stacked: true });
   await page.setViewportSize(usual);

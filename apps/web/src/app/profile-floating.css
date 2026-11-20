@@ -649,14 +649,22 @@ html body .user-profile-popover .public-profile-body > .identity-avatar {
 }
 
 /* The profile opened from a name or a picture anywhere in Enturma (rooms, messages, forum,
-   friends) is the same room as the social profile, with its own content beside the card. */
-html body .user-profile-popover .profile-community {
+   friends) is the same room as the social profile, with its own content beside the card.
+   The editor's preview on a computer shows that same column. */
+html
+  body
+  :is(.user-profile-popover, .profile-preview-stage)
+  .profile-community {
   display: flex;
   flex-direction: column;
   min-height: 100%;
   background: transparent !important;
 }
-html body .user-profile-popover .profile-community > .text-button {
+html
+  body
+  :is(.user-profile-popover, .profile-preview-stage)
+  .profile-community
+  > .text-button {
   display: inline-flex;
   align-self: flex-start;
   align-items: center;
@@ -671,10 +679,18 @@ html body .user-profile-popover .profile-community > .text-button {
   font-weight: 700;
   text-decoration: none;
 }
-html body .user-profile-popover .profile-community > .text-button:hover {
+html
+  body
+  :is(.user-profile-popover, .profile-preview-stage)
+  .profile-community
+  > .text-button:hover {
   background: rgba(255, 255, 255, 0.13);
 }
-html body .user-profile-popover .profile-community > .profile-community-tabs {
+html
+  body
+  :is(.user-profile-popover, .profile-preview-stage)
+  .profile-community
+  > .profile-community-tabs {
   position: static;
   gap: 4px 22px;
   margin: 12px 24px 0;
@@ -684,7 +700,7 @@ html body .user-profile-popover .profile-community > .profile-community-tabs {
 }
 html
   body
-  .user-profile-popover
+  :is(.user-profile-popover, .profile-preview-stage)
   .profile-community
   > .profile-community-tabs
   button {
@@ -698,20 +714,24 @@ html
 }
 html
   body
-  .user-profile-popover
+  :is(.user-profile-popover, .profile-preview-stage)
   .profile-community
   > .profile-community-tabs
   button[aria-selected="true"] {
   border-bottom-color: #fff;
   color: #fff !important;
 }
-html body .user-profile-popover .profile-community > .profile-community-panel {
+html
+  body
+  :is(.user-profile-popover, .profile-preview-stage)
+  .profile-community
+  > .profile-community-panel {
   padding: 16px 24px 24px;
 }
 /* Level, XP and streak read as the social profile's counters do. */
 html
   body
-  .user-profile-popover
+  :is(.user-profile-popover, .profile-preview-stage)
   .profile-community-panel
   .profile-stat-row
   > span {
@@ -838,6 +858,66 @@ html
     max-height: none !important;
     border-radius: 22px !important;
     background: var(--floating-night);
+  }
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    .profile-shared-surface
+    > .profile-preview-mural.profile-has-community {
+    padding: 0 !important;
+  }
+  /* The preview's column is narrower than the open profile's: its header stays on one
+     line and fades at the edge instead of breaking into several. */
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    .profile-community
+    > .text-button {
+    max-width: calc(100% - 48px);
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    .profile-community
+    > .text-button
+    svg {
+    flex: none;
+  }
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    .profile-community
+    > .profile-community-tabs {
+    flex-wrap: nowrap;
+    overflow: hidden;
+    white-space: nowrap;
+    mask-image: linear-gradient(to left, transparent, #000 28px);
+  }
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    .profile-community
+    > .profile-community-tabs
+    button {
+    flex: 0 0 auto;
+  }
+  /* The card is as tall as what it holds (and at least as tall as its window), as in the
+     open profile. An older editor rule pinned it to the window's height, so a long profile
+     spilled out under the card's foot and the frame was drawn round the wrong box. */
+  html
+    body
+    .profile-studio
+    .profile-preview-stage
+    .profile-preview-identity
+    > .public-profile-card {
+    height: auto;
   }
   /* In a narrow preview the content goes under the card, as on a phone: the room scrolls
      as one column, and the card's window runs the width of the room. */
