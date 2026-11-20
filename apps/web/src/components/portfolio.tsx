@@ -7,63 +7,34 @@ import {
   FolderGit2,
   Plus,
   Printer,
-  Trash2,
 } from "lucide-react";
 import { api } from "@/lib/api";
+import {
+  MAX_FEATURED,
+  MAX_PROJECTS,
+  projectPayload,
+  type Project,
+} from "@/lib/portfolio-projects";
 import { Feedback } from "./feedback";
 import {
-  PortfolioAttachments,
-  type PortfolioAsset,
-} from "./portfolio-attachments";
+  formatDays,
+  formatStudyTime,
+  type Portfolio,
+} from "./portfolio-format";
+import { GithubImportDialog } from "./portfolio-github";
+import { PublicPortfolioLink } from "./portfolio-navigation";
+import { PortfolioProjectCard } from "./portfolio-project-card";
 import { Shell } from "./shell";
-import { PortfolioBack, PublicPortfolioLink } from "./portfolio-navigation";
 
-const MAX_PROJECTS = 12;
-
-type Project = {
-  id?: string;
-  name: string;
-  description?: string;
-  url?: string;
-  assets?: string[];
-};
-type Portfolio = {
-  id: string;
-  name: string;
-  username: string;
-  bio?: string;
-  accentColor?: string;
-  hasAvatar?: boolean;
-  hasBanner?: boolean;
-  assets: PortfolioAsset[];
-  publicProfile: boolean;
-  headline: string;
-  summary: string;
-  skills: string[];
-  projects: Project[];
-  subjects: { name: string }[];
-  achievements: { name: string; description: string; tier: string }[];
-  stats: { totalXp: number; currentStreak: number };
-  studyMinutes: number;
-};
-
-/** "446.73" minutes reads as "7 h 27 min"; short sessions stay in minutes. */
-export function formatStudyTime(minutes: number) {
-  const total = Math.max(0, Math.round(Number(minutes) || 0));
-  const hours = Math.floor(total / 60);
-  const rest = total % 60;
-  if (!hours) return `${rest} min`;
-  return rest ? `${hours} h ${rest} min` : `${hours} h`;
-}
-
-export function formatDays(days: number) {
-  const value = Math.max(0, Math.round(Number(days) || 0));
-  return `${value} ${value === 1 ? "dia" : "dias"}`;
-}
+export { PublicPortfolio } from "./portfolio-public";
+export { formatDays, formatStudyTime } from "./portfolio-format";
 
 export function PortfolioEditor() {
   const [data, setData] = useState<Portfolio>();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [open, setOpen] = useState<Set<string>>(new Set());
+  const [shelf, setShelf] = useState<"active" | "archived">("active");
+  const [importing, setImporting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [busy, setBusy] = useState(false);
@@ -78,26 +49,29 @@ export function PortfolioEditor() {
     root.current
       ?.querySelector<HTMLInputElement>(`[data-project-name="${id}"]`)
       ?.focus();
-  }, [projects]);
+  }, [projects, open]);
   function addProject() {
+    if (projects.length >= MAX_PROJECTS) return;
     const id = crypto.randomUUID();
-    setProjects((v) =>
-      v.length >= MAX_PROJECTS
-        ? v
-        : [...v, { id, name: "", description: "", url: "", assets: [] }],
-    );
+    setProjects((v) => [
+      ...v,
+      { id, name: "", description: "", url: "", assets: [] },
+    ]);
+    setOpen((v) => new Set(v).add(id));
+    setShelf("active");
     focusProject.current = id;
   }
   useEffect(() => {
     void api<Portfolio>("/portfolio/me", { cache: "no-store" })
       .then((v) => {
+        const list = (v.projects ?? []).map((p) => ({
+          ...p,
+          id: p.id ?? crypto.randomUUID(),
+        }));
         setData(v);
-        setProjects(
-          (v.projects ?? []).map((p) => ({
-            ...p,
-            id: p.id ?? crypto.randomUUID(),
-          })),
-        );
+        setProjects(list);
+        // A short portfolio opens ready to edit; a long one opens as a list.
+        if (list.length <= 3) setOpen(new Set(list.map((p) => p.id)));
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -117,11 +91,81 @@ export function PortfolioEditor() {
       );
   }, [data]);
 
+  const patch = (id: string | undefined, change: Partial<Project>) =>
+    setProjects((v) => v.map((x) => (x.id === id ? { ...x, ...change } : x)));
+  const archivedCount = projects.filter((p) => p.archived).length;
+  const featuredCount = projects.filter(
+    (p) => p.featured && !p.archived,
+  ).length;
+  const view = archivedCount ? shelf : "active";
+  const visible = projects.filter(
+    (p) => Boolean(p.archived) === (view === "archived"),
+  );
+
+  function feature(project: Project) {
+    setError("");
+    if (!project.featured && featuredCount >= MAX_FEATURED) {
+      setError(`Você pode destacar até ${MAX_FEATURED} projetos.`);
+      return;
+    }
+    patch(project.id, { featured: !project.featured });
+  }
+  function archive(project: Project) {
+    patch(project.id, { archived: !project.archived, featured: false });
+    setOpen((v) => {
+      const next = new Set(v);
+      next.delete(project.id!);
+      return next;
+    });
+  }
+  /** Swaps a project with its neighbour in the list being shown. */
+  function move(project: Project, by: -1 | 1) {
+    const other = visible[visible.indexOf(project) + by];
+    if (!other) return;
+    setProjects((v) => {
+      const next = [...v];
+      const a = next.indexOf(project);
+      const b = next.indexOf(other);
+      [next[a], next[b]] = [next[b], next[a]];
+      return next;
+    });
+  }
+  function imported(drafts: Project[]) {
+    const room = MAX_PROJECTS - projects.length;
+    const added = drafts.slice(0, Math.max(0, room));
+    if (!added.length) return;
+    setProjects((v) => [...v, ...added]);
+    setShelf("active");
+    setError("");
+    setSuccess(
+      added.length === 1
+        ? "1 projeto do GitHub entrou como rascunho. Revise e salve o portfólio."
+        : `${added.length} projetos do GitHub entraram como rascunho. Revise e salve o portfólio.`,
+    );
+  }
+
   async function save(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    setBusy(true);
     setError("");
     setSuccess("");
+    const unnamed = projects.find((p) => !p.name.trim());
+    if (unnamed) {
+      const archived = Boolean(unnamed.archived);
+      const position =
+        projects
+          .filter((p) => Boolean(p.archived) === archived)
+          .indexOf(unnamed) + 1;
+      setShelf(archived ? "archived" : "active");
+      setOpen((v) => new Set(v).add(unnamed.id!));
+      focusProject.current = unnamed.id;
+      setError(
+        archived
+          ? `Dê um nome ao projeto arquivado ${position}.`
+          : `Dê um nome ao projeto ${position}.`,
+      );
+      return;
+    }
+    setBusy(true);
     const fd = new FormData(e.currentTarget);
     try {
       await api("/portfolio/me", {
@@ -130,11 +174,12 @@ export function PortfolioEditor() {
           publicProfile: fd.get("publicProfile") === "on",
           headline: String(fd.get("headline") || ""),
           summary: String(fd.get("summary") || ""),
+          goal: String(fd.get("goal") || ""),
           skills: String(fd.get("skills") || "")
             .split(",")
             .map((v) => v.trim())
             .filter(Boolean),
-          projects,
+          projects: projects.map(projectPayload),
         }),
       });
       setSuccess("Portfólio atualizado.");
@@ -148,9 +193,17 @@ export function PortfolioEditor() {
   if (!data)
     return (
       <Shell>
-        <p role="status">Montando seu portfólio…</p>
+        {error ? (
+          <Feedback error={error} />
+        ) : (
+          <p role="status">Montando seu portfólio…</p>
+        )}
       </Shell>
     );
+  const repositories = projects
+    .map((p) => p.github?.fullName)
+    .filter((name): name is string => Boolean(name));
+  const room = MAX_PROJECTS - projects.length;
   return (
     <Shell>
       <div className="portfolio-editor-page" ref={root}>
@@ -179,7 +232,7 @@ export function PortfolioEditor() {
             <strong>{formatDays(data.stats.currentStreak)}</strong>
           </div>
         </section>
-        <form onSubmit={save}>
+        <form onSubmit={save} noValidate>
           <section className="portfolio-settings" data-portfolio-reveal>
             <label className="portfolio-public-toggle">
               <input
@@ -199,6 +252,15 @@ export function PortfolioEditor() {
                 defaultValue={data.headline}
                 maxLength={140}
                 placeholder="Estudante de ADS · Java · UX"
+              />
+            </label>
+            <label>
+              Objetivo profissional
+              <input
+                name="goal"
+                defaultValue={data.goal ?? ""}
+                maxLength={200}
+                placeholder="Ex.: estágio em desenvolvimento back-end"
               />
             </label>
             <label>
@@ -229,142 +291,129 @@ export function PortfolioEditor() {
               <div>
                 <h2 id="portfolio-projects-title">Projetos</h2>
                 <p className="muted">
-                  {projects.length
-                    ? `${projects.length} de ${MAX_PROJECTS} projetos`
-                    : "Mostre o que você já construiu."}
+                  {projects.length ? (
+                    <>
+                      <span>
+                        {projects.length} de {MAX_PROJECTS} projetos
+                      </span>
+                      {featuredCount ? ` · ${featuredCount} em destaque` : null}
+                    </>
+                  ) : (
+                    "Mostre o que você já construiu."
+                  )}
                 </p>
               </div>
               {projects.length ? (
-                <button
-                  type="button"
-                  className="secondary"
-                  disabled={projects.length >= MAX_PROJECTS}
-                  onClick={addProject}
-                >
-                  <Plus size={16} /> Adicionar projeto
-                </button>
-              ) : null}
-            </div>
-            {projects.map((p, i) => (
-              <article
-                key={p.id ?? i}
-                className="portfolio-project-card"
-                aria-label={`Projeto ${i + 1}`}
-              >
-                <header>
-                  <span className="portfolio-project-number">
-                    Projeto {i + 1}
-                  </span>
+                <div className="portfolio-projects-actions">
                   <button
                     type="button"
-                    className="portfolio-project-remove"
-                    aria-label={`Remover projeto ${i + 1}`}
-                    onClick={() =>
-                      setProjects((v) => v.filter((_, n) => n !== i))
-                    }
+                    className="secondary"
+                    disabled={room < 1}
+                    onClick={() => setImporting(true)}
                   >
-                    <Trash2 size={15} aria-hidden="true" />
-                    <span>Remover</span>
+                    <FolderGit2 size={16} /> Importar do GitHub
                   </button>
-                </header>
-                <div className="portfolio-project-fields">
-                  <label className="portfolio-field">
-                    <span>Nome do projeto</span>
-                    <input
-                      aria-label={"Nome do projeto " + (i + 1)}
-                      data-project-name={p.id}
-                      value={p.name}
-                      maxLength={120}
-                      required
-                      placeholder="Ex.: App de caronas universitárias"
-                      onChange={(e) =>
-                        setProjects((v) =>
-                          v.map((x, n) =>
-                            n === i ? { ...x, name: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </label>
-                  <label className="portfolio-field">
-                    <span>
-                      Link <small>opcional</small>
-                    </span>
-                    <input
-                      type="url"
-                      aria-label={"Link do projeto " + (i + 1)}
-                      value={p.url ?? ""}
-                      maxLength={300}
-                      placeholder="https://github.com/voce/projeto"
-                      onChange={(e) =>
-                        setProjects((v) =>
-                          v.map((x, n) =>
-                            n === i ? { ...x, url: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </label>
-                  <label className="portfolio-field portfolio-field-wide">
-                    <span>
-                      Descrição
-                      <small aria-hidden="true">
-                        {(p.description ?? "").length}/500
-                      </small>
-                    </span>
-                    <textarea
-                      aria-label={"Descrição do projeto " + (i + 1)}
-                      value={p.description ?? ""}
-                      maxLength={500}
-                      rows={3}
-                      placeholder="O que você fez, com quem e qual foi o resultado."
-                      onChange={(e) =>
-                        setProjects((v) =>
-                          v.map((x, n) =>
-                            n === i ? { ...x, description: e.target.value } : x,
-                          ),
-                        )
-                      }
-                    />
-                  </label>
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={room < 1}
+                    onClick={addProject}
+                  >
+                    <Plus size={16} /> Adicionar projeto
+                  </button>
                 </div>
-                <div className="portfolio-project-files">
-                  <span className="portfolio-field-title">Imagens e PDFs</span>
-                  <PortfolioAttachments
-                    ids={p.assets}
-                    assets={data.assets ?? []}
-                    owner
-                    onUpload={(asset) =>
-                      setData((d) =>
-                        d ? { ...d, assets: [...(d.assets ?? []), asset] } : d,
-                      )
-                    }
-                    onChange={(ids) =>
-                      setProjects((v) =>
-                        v.map((x) =>
-                          x.id === p.id ? { ...x, assets: ids } : x,
-                        ),
-                      )
-                    }
-                  />
-                </div>
-              </article>
+              ) : null}
+            </div>
+            {archivedCount ? (
+              <div
+                className="portfolio-shelves"
+                role="tablist"
+                aria-label="Projetos ativos ou arquivados"
+              >
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={view === "active"}
+                  onClick={() => setShelf("active")}
+                >
+                  Ativos ({projects.length - archivedCount})
+                </button>
+                <button
+                  type="button"
+                  role="tab"
+                  aria-selected={view === "archived"}
+                  onClick={() => setShelf("archived")}
+                >
+                  Arquivados ({archivedCount})
+                </button>
+              </div>
+            ) : null}
+            {view === "archived" ? (
+              <p className="portfolio-shelf-note">
+                Projetos arquivados ficam guardados só para você: não aparecem
+                no portfólio público, nem os arquivos deles.
+              </p>
+            ) : null}
+            {visible.map((p, i) => (
+              <PortfolioProjectCard
+                key={p.id}
+                project={p}
+                number={i + 1}
+                open={open.has(p.id!)}
+                first={i === 0}
+                last={i === visible.length - 1}
+                assets={data.assets ?? []}
+                onToggle={() =>
+                  setOpen((v) => {
+                    const next = new Set(v);
+                    if (!next.delete(p.id!)) next.add(p.id!);
+                    return next;
+                  })
+                }
+                onChange={(change) => patch(p.id, change)}
+                onFeature={() => feature(p)}
+                onArchive={() => archive(p)}
+                onMove={(by) => move(p, by)}
+                onRemove={() =>
+                  setProjects((v) => v.filter((x) => x.id !== p.id))
+                }
+                onUpload={(asset) =>
+                  setData((d) =>
+                    d ? { ...d, assets: [...(d.assets ?? []), asset] } : d,
+                  )
+                }
+              />
             ))}
+            {projects.length && !visible.length ? (
+              <p className="portfolio-shelf-note">
+                Todos os projetos estão arquivados. Desarquive um ou adicione um
+                novo para ele aparecer no portfólio.
+              </p>
+            ) : null}
             {!projects.length ? (
               <div className="portfolio-projects-empty">
                 <FolderGit2 size={28} aria-hidden="true" />
                 <p>
                   Adicione projetos da faculdade, pessoais, open source ou
-                  trabalhos em equipe. Cada projeto pode ter link, imagens e
-                  PDFs.
+                  trabalhos em equipe. Cada projeto pode ter tecnologias, sua
+                  participação, links, imagens e PDFs.
                 </p>
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={addProject}
-                >
-                  <Plus size={16} /> Adicionar projeto
-                </button>
+                <div className="portfolio-projects-actions">
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={addProject}
+                  >
+                    <Plus size={16} /> Adicionar projeto
+                  </button>
+                  <button
+                    type="button"
+                    className="secondary"
+                    onClick={() => setImporting(true)}
+                  >
+                    <FolderGit2 size={16} /> Importar do GitHub
+                  </button>
+                </div>
               </div>
             ) : null}
           </section>
@@ -389,200 +438,16 @@ export function PortfolioEditor() {
             </button>
           </div>
         </form>
+        {importing ? (
+          <GithubImportDialog
+            taken={repositories}
+            room={room}
+            initialLogin={repositories[0]?.split("/")[0] ?? ""}
+            onImport={imported}
+            onClose={() => setImporting(false)}
+          />
+        ) : null}
       </div>
     </Shell>
   );
-}
-
-export function PublicPortfolio({ username }: { username: string }) {
-  const [data, setData] = useState<Portfolio>();
-  const [error, setError] = useState("");
-  useEffect(() => {
-    void api<Portfolio>("/public/portfolio/" + encodeURIComponent(username), {
-      cache: "no-store",
-    })
-      .then(setData)
-      .catch((e) => setError(e.message));
-  }, [username]);
-  if (error)
-    return (
-      <main className="public-portfolio">
-        <PortfolioBack />
-        <h1>Portfólio indisponível</h1>
-        <p>{error}</p>
-      </main>
-    );
-  if (!data)
-    return (
-      <main className="public-portfolio">
-        <PortfolioBack />
-        <p>Carregando portfólio…</p>
-      </main>
-    );
-  return (
-    <main
-      className="public-portfolio"
-      style={
-        {
-          "--portfolio-accent": data.accentColor ?? "#183f36",
-        } as React.CSSProperties
-      }
-    >
-      <PortfolioBack />
-      <header>
-        <div>
-          {data.hasAvatar ? (
-            <img src={"/api/backend/users/" + data.id + "/avatar"} alt="" />
-          ) : (
-            <span>{data.name.slice(0, 2).toUpperCase()}</span>
-          )}
-          <div>
-            <h1>{data.name}</h1>
-            <p>{data.headline || "Estudante no Enturma"}</p>
-          </div>
-        </div>
-        <button onClick={() => window.print()}>
-          <Printer size={16} /> Salvar em PDF
-        </button>
-      </header>
-      <section className="portfolio-intro">
-        <p>
-          {data.summary ||
-            data.bio ||
-            "Construindo minha trajetória acadêmica."}
-        </p>
-        <div>
-          <strong>{data.stats.totalXp} XP</strong>
-          <strong>{formatStudyTime(data.studyMinutes)} de estudo</strong>
-          <strong>{formatDays(data.stats.currentStreak)} de sequência</strong>
-        </div>
-      </section>
-      {data.skills?.length ? (
-        <section>
-          <h2>Competências</h2>
-          <div className="portfolio-tags">
-            {data.skills.map((s) => (
-              <span key={s}>{s}</span>
-            ))}
-          </div>
-        </section>
-      ) : null}
-      {data.projects?.length ? (
-        <section>
-          <h2>Projetos</h2>
-          <div className="public-projects">
-            {data.projects.map((p, i) => (
-              <PublicProject
-                key={p.id ?? i}
-                project={p}
-                assets={data.assets ?? []}
-              />
-            ))}
-          </div>
-        </section>
-      ) : null}
-      {data.subjects?.length ? (
-        <section>
-          <h2>Estudos atuais</h2>
-          <div className="portfolio-tags">
-            {data.subjects.map((s) => (
-              <span key={s.name}>{s.name}</span>
-            ))}
-          </div>
-        </section>
-      ) : null}
-      {data.achievements?.length ? (
-        <section>
-          <h2>Conquistas</h2>
-          <div className="public-achievements">
-            {data.achievements.map((a) => (
-              <article key={a.name}>
-                <strong>{a.name}</strong>
-                <span>{a.tier}</span>
-                <p>{a.description}</p>
-              </article>
-            ))}
-          </div>
-        </section>
-      ) : null}
-    </main>
-  );
-}
-
-function PublicProject({
-  project: p,
-  assets,
-}: {
-  project: Project;
-  assets: PortfolioAsset[];
-}) {
-  const files = (p.assets ?? []).filter((id) =>
-    assets.some((a) => a.id === id),
-  );
-  // The first image becomes the cover; the rest stay one tap away.
-  const cover = files.find((id) =>
-    assets.find((a) => a.id === id)?.mime.startsWith("image/"),
-  );
-  const coverAsset = assets.find((a) => a.id === cover);
-  const rest = files.filter((id) => id !== cover);
-  const link = p.url && /^https?:\/\//i.test(p.url) ? p.url : undefined;
-  let host = "";
-  try {
-    host = link ? new URL(link).host.replace(/^www\./, "") : "";
-  } catch {
-    host = "";
-  }
-  return (
-    <article
-      className="public-project"
-      id={p.id ? `projeto-${p.id}` : undefined}
-    >
-      {coverAsset ? (
-        <a
-          className="public-project-cover"
-          href={`/api/backend/public/portfolio/assets/${coverAsset.id}`}
-          target="_blank"
-          rel="noreferrer"
-        >
-          <img
-            src={`/api/backend/public/portfolio/assets/${coverAsset.id}`}
-            alt={coverAsset.name}
-            loading="lazy"
-          />
-        </a>
-      ) : (
-        <div className="public-project-cover-placeholder" aria-hidden="true">
-          <span>{initials(p.name)}</span>
-        </div>
-      )}
-      <div className="public-project-body">
-        <h3>{p.name}</h3>
-        {p.description ? <p>{p.description}</p> : null}
-        {rest.length ? (
-          <PortfolioAttachments ids={rest} assets={assets} compact />
-        ) : null}
-        {link ? (
-          <a
-            className="public-project-link"
-            href={link}
-            target="_blank"
-            rel="noreferrer"
-          >
-            Abrir projeto
-            {host ? <small>{host}</small> : null}
-            <ExternalLink size={14} aria-hidden="true" />
-          </a>
-        ) : null}
-      </div>
-    </article>
-  );
-}
-
-function initials(name: string) {
-  const words = name
-    .trim()
-    .split(/\s+/)
-    .filter((w) => w.length > 2);
-  const picked = (words.length ? words : name.trim().split(/\s+/)).slice(0, 2);
-  return picked.map((w) => w[0]?.toUpperCase() ?? "").join("") || "P";
 }

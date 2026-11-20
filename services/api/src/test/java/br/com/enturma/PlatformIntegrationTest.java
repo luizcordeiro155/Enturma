@@ -2064,7 +2064,7 @@ class PlatformIntegrationTest {
     assertThatThrownBy(() -> portfolioAssets.published(asset)).isInstanceOf(ApiException.class);
     var projects =
         List.of(
-            new PortfolioController.Project(
+            project(
                 UUID.randomUUID(),
                 "Pesquisa",
                 "Trabalho acadêmico",
@@ -2073,13 +2073,13 @@ class PlatformIntegrationTest {
     assertThatThrownBy(
             () ->
                 portfolio.save(
-                    member, new PortfolioController.Portfolio(true, "", "", List.of(), projects)))
+                    member, portfolioOf(true, projects)))
         .isInstanceOf(ApiException.class);
-    portfolio.save(host, new PortfolioController.Portfolio(false, "", "", List.of(), projects));
+    portfolio.save(host, portfolioOf(false, projects));
     assertThatThrownBy(() -> portfolioAssets.published(asset)).isInstanceOf(ApiException.class);
-    portfolio.save(host, new PortfolioController.Portfolio(true, "", "", List.of(), projects));
+    portfolio.save(host, portfolioOf(true, projects));
     assertThat(portfolioAssets.published(asset).getBody()).isEqualTo(file.getBytes());
-    portfolio.save(host, new PortfolioController.Portfolio(true, "", "", List.of(), List.of()));
+    portfolio.save(host, portfolioOf(true, List.of()));
     assertThatThrownBy(() -> portfolioAssets.published(asset)).isInstanceOf(ApiException.class);
     var html =
         new org.springframework.mock.web.MockMultipartFile(
@@ -2089,15 +2089,122 @@ class PlatformIntegrationTest {
             () ->
                 portfolio.save(
                     host,
-                    new PortfolioController.Portfolio(
+                    portfolioOf(
                         true,
-                        "",
-                        "",
-                        List.of(),
-                        List.of(
-                            new PortfolioController.Project(
-                                null, "Unsafe", "", "javascript:alert(1)", List.of())))))
+                        List.of(project(null, "Unsafe", "", "javascript:alert(1)", List.of())))))
         .isInstanceOf(ApiException.class);
+  }
+
+  private static PortfolioController.Project project(
+      UUID id, String name, String description, String url, List<UUID> assets) {
+    return new PortfolioController.Project(
+        id, name, description, url, assets, null, null, null, null, null, null, null, null, null,
+        null, null);
+  }
+
+  private static PortfolioController.Portfolio portfolioOf(
+      boolean open, List<PortfolioController.Project> projects) {
+    return new PortfolioController.Portfolio(open, "", "", List.of(), projects, null);
+  }
+
+  @Test
+  void portfolioProjectsCarryProfessionalDetailAndArchivedOnesStayPrivate() throws Exception {
+    var file =
+        new org.springframework.mock.web.MockMultipartFile(
+            "file", "rascunho.pdf", "application/pdf", "%PDF-1.7\nDraft".getBytes());
+    UUID draft = (UUID) ((Map<?, ?>) portfolioAssets.upload(host, file)).get("id");
+    var shown =
+        new PortfolioController.Project(
+            UUID.randomUUID(),
+            "Caronas universitárias",
+            "App de caronas entre colegas.",
+            "https://caronas.example.test",
+            List.of(),
+            "ACADEMIC",
+            Arrays.asList(" Java ", "java", "PostgreSQL", " ", null),
+            "Engenharia de Software",
+            "2026.1",
+            true,
+            "Fiz a API e o banco.",
+            "Usado por 40 colegas na feira.",
+            "https://github.com/ana-dev/caronas",
+            true,
+            false,
+            new PortfolioController.GithubSource(
+                "ana-dev/caronas", 12, false, "2026-10-02T12:00:00Z"));
+    var shelved =
+        new PortfolioController.Project(
+            UUID.randomUUID(), "Rascunho antigo", "", "", List.of(draft), "PERSONAL", null, null,
+            null, null, null, null, null, true, true, null);
+    portfolio.save(
+        host,
+        new PortfolioController.Portfolio(
+            true, "Dev", "", List.of(), List.of(shown, shelved), "Estágio em back-end"));
+
+    var mine = json.valueToTree(portfolio.mine(host));
+    assertThat(mine.get("goal").asText()).isEqualTo("Estágio em back-end");
+    assertThat(mine.get("projects")).hasSize(2);
+    var saved = mine.get("projects").get(0);
+    assertThat(saved.get("technologies"))
+        .extracting(n -> n.asText())
+        .containsExactly("Java", "PostgreSQL");
+    assertThat(saved.get("kind").asText()).isEqualTo("ACADEMIC");
+    assertThat(saved.get("team").asBoolean()).isTrue();
+    assertThat(saved.get("role").asText()).isEqualTo("Fiz a API e o banco.");
+    assertThat(saved.get("github").get("fullName").asText()).isEqualTo("ana-dev/caronas");
+    // an archived project is never a highlight
+    assertThat(mine.get("projects").get(1).has("featured")).isFalse();
+    assertThat(mine.get("projects").get(1).get("archived").asBoolean()).isTrue();
+
+    String username =
+        (String) db.one("SELECT username FROM app_user WHERE id=?", host.id()).get("username");
+    var open = json.valueToTree(portfolio.publicPortfolio(username));
+    assertThat(open.get("goal").asText()).isEqualTo("Estágio em back-end");
+    assertThat(open.get("projects")).hasSize(1);
+    assertThat(open.get("projects").get(0).get("name").asText())
+        .isEqualTo("Caronas universitárias");
+    assertThat(open.get("assets")).isEmpty();
+    assertThatThrownBy(() -> portfolioAssets.published(draft)).isInstanceOf(ApiException.class);
+    // the owner still reaches the file of an archived project
+    assertThat(portfolioAssets.own(host, draft).getBody()).isEqualTo(file.getBytes());
+
+    // a client that does not know the goal yet (the phone app) leaves it as it was
+    portfolio.save(host, portfolioOf(true, List.of(shown)));
+    assertThat(json.valueToTree(portfolio.mine(host)).get("goal").asText())
+        .isEqualTo("Estágio em back-end");
+  }
+
+  @Test
+  void portfolioRejectsAGithubLabelOnAnotherAddressAndTooManyHighlights() throws Exception {
+    var fake =
+        new PortfolioController.Project(
+            null, "Projeto", "", "", List.of(), null, null, null, null, null, null, null,
+            "https://evil.example.test/ana-dev/caronas", null, null,
+            new PortfolioController.GithubSource("ana-dev/caronas", 1, false, null));
+    assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(fake))))
+        .isInstanceOf(ApiException.class);
+    var unsafe =
+        new PortfolioController.Project(
+            null, "Projeto", "", "", List.of(), null, null, null, null, null, null, null,
+            "javascript:alert(1)", null, null, null);
+    assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(unsafe))))
+        .isInstanceOf(ApiException.class);
+    var odd =
+        new PortfolioController.Project(
+            null, "Projeto", "", "", List.of(), "CERTIFIED", null, null, null, null, null, null,
+            null, null, null, null);
+    assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(odd))))
+        .isInstanceOf(ApiException.class);
+    var stars = new ArrayList<PortfolioController.Project>();
+    for (int i = 0; i < 7; i++)
+      stars.add(
+          new PortfolioController.Project(
+              null, "Projeto " + i, "", "", List.of(), null, null, null, null, null, null, null,
+              null, true, null, null));
+    assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, stars)))
+        .isInstanceOf(ApiException.class);
+    portfolio.save(host, portfolioOf(false, stars.subList(0, 6)));
+    assertThat(json.valueToTree(portfolio.mine(host)).get("projects")).hasSize(6);
   }
 
   @Test
