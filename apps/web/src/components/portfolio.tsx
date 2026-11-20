@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import {
   BriefcaseBusiness,
   ExternalLink,
@@ -25,6 +25,8 @@ import {
 } from "./portfolio-format";
 import { GithubImportDialog } from "./portfolio-github";
 import { JourneyEditor } from "./portfolio-journey";
+import { TeamInvitations } from "./portfolio-team";
+import type { TeamState } from "@/lib/portfolio-team";
 import { PublicPortfolioLink } from "./portfolio-navigation";
 import { PortfolioProjectCard } from "./portfolio-project-card";
 import { Shell } from "./shell";
@@ -41,6 +43,24 @@ export function PortfolioEditor() {
   const [shelf, setShelf] = useState<"active" | "archived">("active");
   const [importing, setImporting] = useState(false);
   const [mentor, setMentor] = useState(false);
+  const [team, setTeam] = useState<TeamState>({
+    projects: {},
+    invitations: [],
+  });
+  // Teams live on the server, apart from the form: they are read again after each change.
+  const loadTeam = useCallback(() => {
+    void api<TeamState>("/portfolio/me/team", { cache: "no-store" })
+      .then((v) =>
+        setTeam({
+          projects: v?.projects ?? {},
+          invitations: v?.invitations ?? [],
+        }),
+      )
+      .catch(() => {});
+  }, []);
+  useEffect(loadTeam, [loadTeam]);
+  // What the server has: a project must be saved before anyone can be tagged in it.
+  const [savedIds, setSavedIds] = useState<Set<string>>(new Set());
   const form = useRef<HTMLFormElement>(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -76,6 +96,7 @@ export function PortfolioEditor() {
           id: p.id ?? crypto.randomUUID(),
         }));
         setData(v);
+        setSavedIds(new Set(list.map((p) => p.id!)));
         setSkillsText((v.skills ?? []).join(", "));
         // The page opens as a list: the student opens the project they came to see.
         setProjects(list);
@@ -206,7 +227,12 @@ export function PortfolioEditor() {
       setSuccess("Portfólio atualizado.");
       // Saved work folds back into the list.
       setOpen(new Set());
-      setData(await api<Portfolio>("/portfolio/me", { cache: "no-store" }));
+      const fresh = await api<Portfolio>("/portfolio/me", {
+        cache: "no-store",
+      });
+      setData(fresh);
+      setSavedIds(new Set((fresh.projects ?? []).map((p) => p.id!)));
+      loadTeam();
     } catch (err) {
       setError((err as Error).message);
     } finally {
@@ -329,6 +355,19 @@ export function PortfolioEditor() {
             ) : null}
           </section>
 
+          <TeamInvitations
+            invitations={team.invitations}
+            onChanged={loadTeam}
+            onIncluded={(project) => {
+              // The server already saved the copy; the list only catches up.
+              setProjects((v) => [...v, project]);
+              setSavedIds((v) => new Set(v).add(project.id!));
+              setShelf("active");
+              setError("");
+              setSuccess(`${project.name} entrou no seu portfólio.`);
+            }}
+          />
+
           <section
             className="portfolio-project-editor"
             data-portfolio-reveal
@@ -412,6 +451,16 @@ export function PortfolioEditor() {
                 assets={data.assets ?? []}
                 skills={skills}
                 mentor={mentor ? goalNow : undefined}
+                team={{
+                  members: team.projects[p.id!] ?? [],
+                  saved: savedIds.has(p.id!),
+                  author: team.invitations.find(
+                    (item) =>
+                      item.ownerId === p.sharedFrom?.userId &&
+                      item.projectId === p.sharedFrom?.projectId,
+                  )?.ownerName,
+                  onChanged: loadTeam,
+                }}
                 onToggle={() =>
                   setOpen((v) => {
                     const next = new Set(v);

@@ -2,6 +2,7 @@ import { test } from "./student-fixture";
 import { expect } from "@playwright/test";
 import { authenticate } from "./session";
 import { randomUUID } from "node:crypto";
+import pg from "pg";
 
 test("tema por hover e toque, edição cancelável e portfólio com arquivo real", async ({
   page,
@@ -460,4 +461,138 @@ test("jornada: sugestão revisada entra privada, o estudante mostra e o visitant
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+});
+
+test("equipe: colega marcado só aparece depois de aceitar, e o projeto pode ser compartilhado", async ({
+  page,
+  browser,
+  request,
+}) => {
+  test.setTimeout(120000);
+  const api = process.env.E2E_API_URL ?? "http://localhost:8080";
+  async function register(name: string) {
+    const username = `equipe_${randomUUID().slice(0, 8)}`;
+    const response = await request.post(`${api}/api/v1/auth/register`, {
+      data: {
+        name,
+        username,
+        email: `${username}@example.test`,
+        password: "Connected-test-12345",
+        device: "E2E",
+      },
+    });
+    expect(response.ok()).toBe(true);
+    const credentials = await response.json();
+    return {
+      username,
+      credentials,
+      headers: { authorization: `Bearer ${credentials.accessToken}` },
+    };
+  }
+  const ana = await register("Ana Autora");
+  const bruno = await register("Bruno Colega");
+  const db = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
+  await db.connect();
+  try {
+    await db.query(
+      "INSERT INTO friendship(id,requester,recipient,status) SELECT gen_random_uuid(),a.id,b.id,'ACCEPTED' FROM app_user a,app_user b WHERE a.username=$1 AND b.username=$2",
+      [ana.username, bruno.username],
+    );
+  } finally {
+    await db.end();
+  }
+  const project = randomUUID();
+  const saved = await request.put(`${api}/api/v1/portfolio/me`, {
+    headers: ana.headers,
+    data: {
+      publicProfile: true,
+      headline: "Back-end",
+      summary: "",
+      goal: "",
+      skills: [],
+      projects: [
+        {
+          id: project,
+          name: "Caronas",
+          description: "App de caronas entre colegas da faculdade.",
+          url: "",
+          assets: [],
+          team: true,
+          role: "Fiz a API.",
+        },
+      ],
+    },
+  });
+  expect(saved.ok()).toBe(true);
+
+  // The author tags a friend from the project's card.
+  await authenticate(page.context(), ana.credentials);
+  await page.goto("/portfolio");
+  const card = page.getByRole("article", { name: "Projeto 1", exact: true });
+  await card.locator("button.portfolio-project-toggle").click();
+  await card.getByRole("button", { name: "Marcar colega" }).click();
+  await card.getByRole("button", { name: "Marcar Bruno Colega" }).click();
+  const team = card.getByRole("list", { name: "Equipe do projeto 1" });
+  await expect(team.getByText("Aguardando resposta")).toBeVisible();
+
+  // Tagged is not accepted: visitors see no team yet.
+  await page.goto(`/p/${ana.username}`);
+  const shown = page.locator("article.public-project", { hasText: "Caronas" });
+  await expect(shown).toBeVisible();
+  await expect(shown.getByRole("list", { name: "Equipe" })).toHaveCount(0);
+
+  // The friend answers in their own words and takes the project home.
+  const other = await browser.newContext();
+  try {
+    await authenticate(other, bruno.credentials);
+    const theirs = await other.newPage();
+    await theirs.goto("/portfolio");
+    const invitations = theirs.locator("section.portfolio-team-invitations");
+    await expect(invitations.getByText("Ana Autora marcou você")).toBeVisible();
+    await invitations
+      .getByLabel("Minha participação em Caronas")
+      .fill("Fiz o aplicativo do celular.");
+    await invitations
+      .getByRole("button", { name: "Aceitar e entrar na equipe de Caronas" })
+      .click();
+    await invitations
+      .getByRole("button", { name: "Adicionar Caronas ao meu portfólio" })
+      .click();
+    await expect(theirs.getByText("1 de 60 projetos")).toBeVisible();
+    await expect(invitations.getByText("No seu portfólio")).toBeVisible();
+    expect(
+      await theirs.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth,
+      ),
+    ).toBe(true);
+  } finally {
+    await other.close();
+  }
+
+  await page.reload();
+  const people = shown.getByRole("list", { name: "Equipe" });
+  await expect(people.getByText("Bruno Colega")).toBeVisible();
+  await expect(people.getByText("Fiz o aplicativo do celular.")).toBeVisible();
+
+  // Sharing: the link of the project, LinkedIn, and for the author the way to a post.
+  await shown.getByRole("button", { name: "Compartilhar Caronas" }).click();
+  const sheet = page.getByRole("dialog", { name: "Compartilhar projeto" });
+  await expect(sheet.getByLabel("Link do projeto")).toHaveValue(
+    new RegExp(`/p/${ana.username}#projeto-${project}$`),
+  );
+  await expect(
+    sheet.getByRole("link", { name: "Compartilhar no LinkedIn" }),
+  ).toHaveAttribute("href", /^https:\/\/www\.linkedin\.com\/sharing\/share-offsite\/\?url=/);
+  await expect(
+    sheet.getByRole("link", { name: "Publicar no Enturma Social" }),
+  ).toHaveAttribute("href", `/social?projeto=${project}`);
+  await expect(sheet.getByRole("button", { name: "Enviar para Bruno Colega" })).toBeVisible();
+
+  // In the Social, the new post opens with the project already attached.
+  await sheet.getByRole("link", { name: "Publicar no Enturma Social" }).click();
+  await expect(page).toHaveURL(/\/social/);
+  await expect(page.getByText("O projeto Caronas vai junto na publicação.")).toBeVisible({
+    timeout: 30000,
+  });
+  await expect(page).not.toHaveURL(/projeto=/);
 });

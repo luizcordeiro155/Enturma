@@ -98,6 +98,8 @@ public class AccountPrivacyController {
     db.jdbc.update("DELETE FROM study_flashcard WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM portfolio_profile WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM portfolio_attachment WHERE user_id=?", userId);
+    db.jdbc.update(
+        "DELETE FROM portfolio_project_member WHERE owner_id=? OR member_id=?", userId, userId);
     db.jdbc.update("DELETE FROM portfolio_journey_entry WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM portfolio_journey_dismissal WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM profile_activity WHERE user_id=?", userId);

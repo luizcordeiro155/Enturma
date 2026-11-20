@@ -1,3 +1,4 @@
+import type { PublicMember } from "./portfolio-team";
 export const MAX_PROJECTS = 60;
 export const MAX_FEATURED = 6;
 export const MAX_TECHNOLOGIES = 12;
@@ -46,6 +47,10 @@ export type Project = {
   skills?: string[];
   /** Problem, solution, challenges and result, in the student's words. */
   caseStudy?: string;
+  /** Owner only: this is the student's copy of a team project someone else authored. */
+  sharedFrom?: { userId: string; projectId: string };
+  /** Visitors only: the teammates who accepted. */
+  members?: PublicMember[];
 };
 
 /** "Java, SQL ,java" → ["Java", "SQL"]. */
@@ -115,5 +120,7 @@ export function projectPayload(project: Project) {
     payload.github = project.github;
   if (project.skills?.length) payload.skills = project.skills.slice(0, 12);
   if (text(project.caseStudy)) payload.caseStudy = text(project.caseStudy);
+  // the server keeps this only while the student is still in that team
+  if (project.sharedFrom) payload.sharedFrom = project.sharedFrom;
   return payload;
 }
