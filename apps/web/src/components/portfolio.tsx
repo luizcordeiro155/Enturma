@@ -24,6 +24,7 @@ import {
   type Portfolio,
 } from "./portfolio-format";
 import { GithubImportDialog } from "./portfolio-github";
+import { JourneyEditor } from "./portfolio-journey";
 import { PublicPortfolioLink } from "./portfolio-navigation";
 import { PortfolioProjectCard } from "./portfolio-project-card";
 import { Shell } from "./shell";
@@ -485,6 +486,7 @@ export function PortfolioEditor() {
             </button>
           </div>
         </form>
+        <JourneyEditor />
         {importing ? (
           <GithubImportDialog
             taken={repositories}

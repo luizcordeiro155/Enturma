@@ -21,6 +21,7 @@ import {
   formatStudyTime,
   type Portfolio,
 } from "./portfolio-format";
+import { PublicJourney } from "./portfolio-journey";
 import { PortfolioBack } from "./portfolio-navigation";
 
 /** How many projects open at first; the rest are one press away. */
@@ -206,6 +207,7 @@ export function PublicPortfolio({ username }: { username: string }) {
           ) : null}
         </section>
       ) : null}
+      <PublicJourney entries={data.journey ?? []} onProject={reveal} />
       {data.subjects?.length ? (
         <section>
           <h2>Estudos atuais</h2>

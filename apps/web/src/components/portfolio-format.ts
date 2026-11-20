@@ -1,3 +1,4 @@
+import type { JourneyEntry } from "@/lib/portfolio-journey";
 import type { Project } from "@/lib/portfolio-projects";
 import type { PortfolioAsset } from "./portfolio-attachments";
 
@@ -16,6 +17,8 @@ export type Portfolio = {
   goal?: string;
   skills: string[];
   projects: Project[];
+  /** Visitors only: the timeline records the student chose to show. */
+  journey?: JourneyEntry[];
   subjects: { name: string }[];
   achievements: { name: string; description: string; tier: string }[];
   stats: { totalXp: number; currentStreak: number };

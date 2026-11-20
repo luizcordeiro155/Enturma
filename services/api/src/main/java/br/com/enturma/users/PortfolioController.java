@@ -238,6 +238,8 @@ public class PortfolioController {
                 + " project->'assets' @> jsonb_build_array(a.id::text))) ORDER BY a.created_at",
             user,
             owner));
+    // Visitors get the records the student chose to show, and nothing about where they came from.
+    if (!owner) base.put("journey", PortfolioJourneyController.shown(db, user, base.get("projects")));
     base.put(
         "subjects",
         db.list(

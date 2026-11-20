@@ -45,6 +45,8 @@ public class PersonalDataExport {
     SECTIONS.put("study-attendance", "SELECT occurrence_key,schedule_id,occurs_on,status,answered_at FROM class_attendance WHERE user_id=? ORDER BY occurs_on,occurrence_key");
     SECTIONS.put("study-terms", "SELECT id,name,starts_on,ends_on,period_id,subjects,subjects_confirmed,created_at FROM academic_term WHERE user_id=? ORDER BY starts_on,id");
     SECTIONS.put("study-reminders", "SELECT id,kind,source_id,occurrence_at,fire_at,status,sent_at FROM academic_reminder_job WHERE user_id=? ORDER BY fire_at,id");
+    SECTIONS.put("portfolio-journey", "SELECT id,kind,title,detail,happened_on,visible,source,created_at FROM portfolio_journey_entry WHERE user_id=? ORDER BY happened_on,id");
+    SECTIONS.put("portfolio-journey-dismissed", "SELECT source,created_at FROM portfolio_journey_dismissal WHERE user_id=? ORDER BY created_at,source");
     SECTIONS.put("study-tasks", "SELECT id,subject_id,kind,title,notes,due_at,estimated_minutes,priority,completed_at,created_at FROM campus_task WHERE user_id=? ORDER BY due_at,id");
     SECTIONS.put("study-focus", "SELECT id,subject_id,label,planned_minutes,started_at,finished_at,actual_seconds FROM focus_session WHERE user_id=? ORDER BY started_at,id");
     SECTIONS.put("study-sessions", "SELECT id,subject_id,notebook_id,starts_at,minutes,goal,status,personality,difficulty,started_at,finished_at,created_at FROM study_session WHERE user_id=? ORDER BY starts_at,id");

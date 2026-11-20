@@ -320,3 +320,17 @@ it("leaves the mentor out when the service is not there", async () => {
     screen.queryByRole("button", { name: "Pedir sugestões ao mentor" }),
   ).toBeNull();
 });
+
+it("keeps the journey on the page but out of the portfolio's own save", async () => {
+  await ready();
+  expect(
+    await screen.findByRole("heading", { name: "Minha jornada" }),
+  ).toBeTruthy();
+  expect(
+    vi
+      .mocked(api)
+      .mock.calls.some(([path]) => path === "/portfolio/me/journey"),
+  ).toBe(true);
+  const body = await save();
+  expect("journey" in body).toBe(false);
+});
