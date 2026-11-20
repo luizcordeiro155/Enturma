@@ -148,6 +148,13 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
     page.getByText("Portfólio atualizado.", { exact: true }),
   ).toBeVisible();
   await page.reload();
+  // Back on the page, the project is a closed row; the student opens it to look inside.
+  const saved = page
+    .getByRole("article", { name: "Projeto 1", exact: true })
+    .locator("button.portfolio-project-toggle");
+  await expect(saved).toHaveAttribute("aria-expanded", "false");
+  await expect(page.getByLabel("Nome do projeto 1", { exact: true })).toHaveCount(0);
+  await saved.click();
   await expect(page.getByRole("link", { name: /pesquisa.pdf/ })).toBeVisible();
   expect(
     await page.evaluate(

@@ -105,8 +105,22 @@ beforeEach(() => {
 });
 afterEach(cleanup);
 
-async function ready() {
+/** The editor as it opens: a list of closed projects. */
+async function closed() {
   render(<PortfolioEditor />);
+  await screen.findByRole("article", { name: "Projeto 1" });
+}
+const expanded = () =>
+  screen
+    .getAllByRole("article")
+    .filter((card) => card.hasAttribute("data-open"))
+    .map((card) => card.getAttribute("aria-label"));
+/** Most tests work inside the projects, so they open every one first. */
+async function ready() {
+  await closed();
+  for (const toggle of screen.getAllByRole("button", { expanded: false }))
+    if (toggle.classList.contains("portfolio-project-toggle"))
+      fireEvent.click(toggle);
   await screen.findByLabelText("Nome do projeto 1");
 }
 const save = async () => {
@@ -333,4 +347,37 @@ it("keeps the journey on the page but out of the portfolio's own save", async ()
   ).toBe(true);
   const body = await save();
   expect("journey" in body).toBe(false);
+});
+
+it("opens as a list of closed projects, however few they are", async () => {
+  await closed();
+  expect(screen.getAllByRole("article")).toHaveLength(2);
+  expect(expanded()).toEqual([]);
+  expect(screen.queryByLabelText("Nome do projeto 1")).toBeNull();
+  // the student opens the one they want to look at
+  fireEvent.click(
+    within(screen.getByRole("article", { name: "Projeto 2" })).getByRole(
+      "button",
+      { expanded: false },
+    ),
+  );
+  expect(expanded()).toEqual(["Projeto 2"]);
+});
+
+it("brings imported projects in closed and opens only a blank one to be filled", async () => {
+  await closed();
+  fireEvent.click(screen.getByRole("button", { name: "Importar do GitHub" }));
+  fireEvent.click(screen.getByRole("button", { name: "importar" }));
+  expect(screen.getAllByRole("article")).toHaveLength(3);
+  expect(expanded()).toEqual([]);
+  fireEvent.click(screen.getByRole("button", { name: "Adicionar projeto" }));
+  expect(expanded()).toEqual(["Projeto 4"]);
+});
+
+it("folds the projects back into the list once the portfolio is saved", async () => {
+  await ready();
+  expect(expanded()).toEqual(["Projeto 1", "Projeto 2"]);
+  await save();
+  await screen.findByText("Portfólio atualizado.");
+  await waitFor(() => expect(expanded()).toEqual([]));
 });

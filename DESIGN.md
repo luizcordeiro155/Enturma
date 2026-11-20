@@ -191,3 +191,9 @@ Primeira das cinco fases da proposta "Enturma Journey — Portfólio Vivo". As o
 - **Página pública.** Trilho vertical por semestre, mais recente primeiro; filtro por semestre quando há mais de um; oito registros abertos e o resto em "Mostrar a jornada inteira"; a impressão traz tudo. Registro que veio de um projeto visível leva ao cartão dele. Objetivo aparece como ponto vazado no trilho, por ainda não ter acontecido.
 - **Dados.** Tabelas `portfolio_journey_entry` e `portfolio_journey_dismissal` (migração V85), até 200 registros por estudante. Entram na exportação de dados pessoais e são apagadas na exclusão da conta.
 - **Fora desta fase.** Disciplinas cursadas não são sugeridas (o cadastro não tem data nem situação). O app do celular ainda não mostra nem edita a jornada. O mentor de IA não escreve registros.
+
+## Portfólio: projetos fechados por padrão — 20/11/2026
+
+- **A página abre como lista.** Todo projeto começa fechado, com nome, tipo, repositório e tecnologias na linha; o estudante abre o que quer conferir. Antes, portfólios com até três projetos abriam tudo de uma vez, o que escondia a lista atrás de formulários.
+- **Importar não abre nada.** Projetos vindos do GitHub entram como linhas fechadas. Só o projeto em branco criado em "Adicionar projeto" abre sozinho, porque precisa de um nome.
+- **Salvar recolhe.** Depois de "Salvar portfólio", os projetos voltam a ser lista. Se faltar nome em algum, só esse abre para ser corrigido.

@@ -77,9 +77,8 @@ export function PortfolioEditor() {
         }));
         setData(v);
         setSkillsText((v.skills ?? []).join(", "));
+        // The page opens as a list: the student opens the project they came to see.
         setProjects(list);
-        // A short portfolio opens ready to edit; a long one opens as a list.
-        if (list.length <= 3) setOpen(new Set(list.map((p) => p.id)));
       })
       .catch((e) => setError(e.message));
   }, []);
@@ -205,6 +204,8 @@ export function PortfolioEditor() {
         }),
       });
       setSuccess("Portfólio atualizado.");
+      // Saved work folds back into the list.
+      setOpen(new Set());
       setData(await api<Portfolio>("/portfolio/me", { cache: "no-store" }));
     } catch (err) {
       setError((err as Error).message);
