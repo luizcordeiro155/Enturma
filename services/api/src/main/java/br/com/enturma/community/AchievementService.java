@@ -171,13 +171,29 @@ public class AchievementService {
         user);
   }
 
+  /** Every level takes the same amount of XP. */
+  public static final int XP_PER_LEVEL = 250;
+
+  /**
+   * The numbers on a profile: level, how far into it, and what was earned today. "Today" is the
+   * student's own day, in the time zone of their study routine.
+   */
   public Object stats(UUID user) {
     return db.one(
-        "SELECT coalesce(s.total_xp,0) total_xp,coalesce(s.total_xp,0)/250+1"
-            + " level,coalesce(s.current_streak,0) current_streak,coalesce(s.longest_streak,0)"
-            + " longest_streak,(SELECT coalesce(sum(study_seconds),0)/60 FROM room_participant"
-            + " WHERE user_id=u.id) study_minutes FROM app_user u LEFT JOIN learning_stats s ON"
-            + " s.user_id=u.id WHERE u.id=?",
+        "SELECT coalesce(s.total_xp,0) total_xp,coalesce(s.total_xp,0)/"
+            + XP_PER_LEVEL
+            + "+1 level,coalesce(s.total_xp,0)%"
+            + XP_PER_LEVEL
+            + " xp_into_level,"
+            + XP_PER_LEVEL
+            + " xp_for_next_level,(SELECT coalesce(sum(e.amount),0)::int FROM learning_xp_event e"
+            + " WHERE e.user_id=u.id AND e.created_at>=date_trunc('day',now() AT TIME ZONE z.name)"
+            + " AT TIME ZONE z.name) xp_today,coalesce(s.current_streak,0) current_streak,"
+            + "coalesce(s.longest_streak,0) longest_streak,(SELECT coalesce(sum(study_seconds),0)/60"
+            + " FROM room_participant WHERE user_id=u.id) study_minutes FROM app_user u LEFT JOIN"
+            + " learning_stats s ON s.user_id=u.id CROSS JOIN LATERAL (SELECT coalesce((SELECT"
+            + " r.timezone FROM academic_routine r WHERE r.user_id=u.id),'America/Sao_Paulo') name)"
+            + " z WHERE u.id=?",
         user);
   }
 }

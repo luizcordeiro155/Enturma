@@ -1,0 +1,285 @@
+/* ---------- Level on a profile ---------- */
+.level-meter {
+  --level-accent: var(--profile-accent, var(--accent));
+  --level-second: var(--profile-secondary, var(--level-accent));
+  --level-bright: color-mix(in srgb, var(--level-accent) 52%, #fff);
+  position: relative;
+  display: grid;
+  /* the emblem sits beside the level's name; the bar runs the full width below, so the meter
+     reads the same in a narrow mural column and on a wide profile */
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 10px 12px;
+  margin: 10px 0;
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  border-radius: 16px;
+  background: var(--mural-copy-panel, var(--soft));
+  color: var(--mural-copy, var(--ink));
+}
+
+/* The emblem: a plate with the number, rimmed in the profile's own colours. */
+.level-emblem {
+  position: relative;
+  display: grid;
+  width: 46px;
+  height: 51px;
+  place-content: center;
+  justify-items: center;
+  gap: 1px;
+  background: linear-gradient(160deg, var(--level-bright), var(--level-second));
+  clip-path: polygon(50% 0, 100% 22%, 100% 72%, 50% 100%, 0 72%, 0 22%);
+  color: #fff;
+}
+.level-emblem::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  background: linear-gradient(180deg, #232a30, #12161a);
+  clip-path: inherit;
+}
+.level-emblem > * {
+  position: relative;
+}
+.level-emblem small {
+  color: var(--level-bright);
+  font-size: 0.54rem;
+  font-weight: 800;
+  line-height: 1;
+}
+.level-emblem strong {
+  font-size: 1.12rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+.level-meter[data-leveled-up] .level-emblem {
+  animation: level-up 900ms cubic-bezier(0.22, 1, 0.36, 1) 250ms both;
+}
+@keyframes level-up {
+  0% {
+    transform: scale(0.7) rotate(-8deg);
+    filter: brightness(2);
+  }
+  55% {
+    transform: scale(1.12) rotate(2deg);
+  }
+  100% {
+    transform: none;
+    filter: none;
+  }
+}
+
+.level-body {
+  display: contents;
+}
+.level-track,
+.level-foot,
+.level-streak {
+  grid-column: 1 / -1;
+}
+.level-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+}
+.level-head > strong {
+  margin-right: auto;
+  font-size: 1.05rem;
+}
+.level-chip {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--level-accent) 26%, transparent);
+  font-size: 0.76rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.level-chip-up {
+  background: color-mix(in srgb, var(--level-bright) 34%, transparent);
+}
+
+.level-track {
+  position: relative;
+  height: 12px;
+  border-radius: 999px;
+  background: color-mix(in srgb, currentColor 16%, transparent);
+}
+.level-base,
+.level-gain {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+}
+/* What was already there when the rise began. */
+.level-base {
+  width: var(--level-from);
+  background: var(--level-accent);
+}
+/* The rise itself: uncovered from left to right, never stretched. */
+.level-gain {
+  width: var(--level-to);
+  overflow: hidden;
+  background: var(--level-accent);
+  clip-path: inset(0 0 0 0 round 999px);
+  /* slow enough to be watched: the XP is seen going up, not found already there */
+  animation: level-rise 1500ms cubic-bezier(0.45, 0, 0.2, 1) 350ms backwards;
+}
+/* Until the meter is on screen the rise is held at its start. */
+.level-meter:not([data-live]) .level-gain {
+  clip-path: inset(0 calc(100% - var(--level-cover, 0%)) 0 0 round 999px);
+  animation: none;
+}
+.level-meter:not([data-live]) .level-gain::after,
+.level-meter:not([data-live]) .level-pop,
+.level-meter:not([data-live]) .level-emblem {
+  animation: none;
+}
+@keyframes level-rise {
+  from {
+    clip-path: inset(0 calc(100% - var(--level-cover, 0%)) 0 0 round 999px);
+  }
+}
+/* XP earned today reads as its own, brighter stretch at the tip of the bar. */
+.level-meter[data-today] .level-gain {
+  background: linear-gradient(
+    90deg,
+    var(--level-accent) 0,
+    var(--level-accent) var(--level-cover, 0%),
+    var(--level-bright) var(--level-cover, 0%)
+  );
+}
+.level-meter[data-today] .level-gain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    100deg,
+    transparent 35%,
+    rgb(255 255 255 / 55%) 50%,
+    transparent 65%
+  );
+  transform: translateX(-100%);
+  animation: level-sheen 1200ms ease-out 1900ms 2;
+}
+@keyframes level-sheen {
+  to {
+    transform: translateX(100%);
+  }
+}
+/* "+40 XP" lifts off the tip of the bar and goes. */
+.level-pop {
+  position: absolute;
+  bottom: calc(100% + 4px);
+  left: var(--level-to);
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--level-bright);
+  color: #12161a;
+  font-size: 0.74rem;
+  font-weight: 800;
+  white-space: nowrap;
+  transform: translateX(-50%);
+  opacity: 0;
+  pointer-events: none;
+  animation: level-pop 2400ms cubic-bezier(0.22, 1, 0.36, 1) 350ms;
+}
+@keyframes level-pop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px) scale(0.8);
+  }
+  18%,
+  70% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(1);
+  }
+}
+.level-foot {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 2px 12px;
+  margin: 0;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.86;
+}
+.level-foot b {
+  font-weight: 800;
+}
+.level-streak {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
+/* ---------- The level beside the @ ---------- */
+.level-badge {
+  --level-accent: var(--profile-accent, var(--accent));
+  --level-bright: color-mix(in srgb, var(--level-accent) 52%, #fff);
+  position: relative;
+  display: inline-grid;
+  flex: none;
+  width: 30px;
+  height: 30px;
+  place-content: center;
+  justify-items: center;
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--level-bright) var(--level-to),
+    rgb(255 255 255 / 22%) 0
+  );
+  color: #fff;
+  line-height: 1;
+}
+.level-badge::before {
+  content: "";
+  position: absolute;
+  inset: 3px;
+  border-radius: 50%;
+  background: #14181c;
+}
+.level-badge > * {
+  position: relative;
+}
+.level-badge small {
+  color: var(--level-bright);
+  font-size: 0.42rem;
+  font-weight: 800;
+}
+.level-badge strong {
+  font-size: 0.7rem;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-gain,
+  .level-gain::after,
+  .level-meter[data-leveled-up] .level-emblem {
+    animation: none !important;
+  }
+  .level-pop {
+    animation: none;
+    opacity: 1;
+    transform: translateX(-50%);
+  }
+}
+html[data-reduced-motion="true"] .level-gain,
+html[data-reduced-motion="true"] .level-gain::after,
+html[data-reduced-motion="true"] .level-meter[data-leveled-up] .level-emblem {
+  animation: none !important;
+}
+html[data-reduced-motion="true"] .level-pop {
+  animation: none;
+  opacity: 1;
+  transform: translateX(-50%);
+}

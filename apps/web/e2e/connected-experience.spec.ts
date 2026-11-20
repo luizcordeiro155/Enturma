@@ -461,3 +461,41 @@ test("jornada: sugestão revisada entra privada, o estudante mostra e o visitant
     ),
   ).toBe(true);
 });
+
+test("nível: o perfil mostra o nível, a barra de XP e o que falta para o próximo", async ({
+  page,
+  request,
+}) => {
+  const tag = randomUUID().slice(0, 8),
+    username = `nivel_${tag}`;
+  const response = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Estudante de nível",
+        username,
+        email: `${username}@example.test`,
+        password: "Connected-test-12345",
+        device: "E2E",
+      },
+    },
+  );
+  expect(response.ok()).toBe(true);
+  await authenticate(page.context(), await response.json());
+  await page.goto("/profile");
+  // A new account starts at level 1 with the whole level ahead of it.
+  const bar = page.locator(".level-meter [role=progressbar]").first();
+  await expect(bar).toHaveAttribute("aria-label", "Progresso do nível 1");
+  await expect(bar).toHaveAttribute("aria-valuetext", "0 de 250 XP");
+  await expect(
+    page.locator(".level-meter .level-foot").first(),
+  ).toContainText("Faltam 250 XP para o nível 2");
+  await expect(
+    page.locator(".profile-handle-row .level-badge").first(),
+  ).toHaveAttribute("aria-label", "Nível 1, 0 de 250 XP");
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+});

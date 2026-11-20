@@ -197,3 +197,12 @@ Primeira das cinco fases da proposta "Enturma Journey — Portfólio Vivo". As o
 - **A página abre como lista.** Todo projeto começa fechado, com nome, tipo, repositório e tecnologias na linha; o estudante abre o que quer conferir. Antes, portfólios com até três projetos abriam tudo de uma vez, o que escondia a lista atrás de formulários.
 - **Importar não abre nada.** Projetos vindos do GitHub entram como linhas fechadas. Só o projeto em branco criado em "Adicionar projeto" abre sozinho, porque precisa de um nome.
 - **Salvar recolhe.** Depois de "Salvar portfólio", os projetos voltam a ser lista. Se faltar nome em algum, só esse abre para ser corrigido.
+
+## Nível no perfil — 20/11/2026
+
+- **Dois tamanhos.** No cartão do perfil, ao lado do @, um selo redondo com o número do nível e um anel que mostra o progresso. No mural, no lugar das fichas "Nível" e "XP", o mostrador completo: emblema com o número, barra do XP dentro do nível, "201 de 250 XP" e "Faltam 49 XP para o nível 16", com a sequência de dias logo abaixo.
+- **O XP de hoje é um trecho à parte.** O que foi ganho no dia aparece mais claro na ponta da barra, com a ficha "+60 XP hoje". Ao abrir o perfil, a barra parte de onde o dia começou e sobe até onde está, com o número contando junto. Se o nível veio hoje, a barra sobe do zero e aparece "Subiu de nível hoje".
+- **Toda vez que o XP sobe.** Se o XP muda com o perfil aberto, a subida recomeça de onde a barra estava e um "+40 XP" sai da ponta. Fora isso, cada abertura do perfil no dia repete a subida do trecho de hoje.
+- **Só anima quando dá para ver.** A subida espera o mostrador entrar na tela e a abertura do aplicativo sair da frente; antes disso a barra fica parada no ponto de partida. Com movimento reduzido, o mostrador aparece pronto, sem animação.
+- **Cores do próprio perfil.** Barra e emblema usam a cor principal e a secundária do perfil; o número fica sobre fundo escuro para ser lido com qualquer cor escolhida.
+- **De onde vêm os números.** O servidor passou a enviar, junto do nível, o XP dentro do nível, o tamanho do nível (250) e o XP ganho hoje, somado dos registros de XP do dia no fuso da rotina do estudante. Quem escondeu as estatísticas na privacidade do perfil continua sem mostrador nem selo.

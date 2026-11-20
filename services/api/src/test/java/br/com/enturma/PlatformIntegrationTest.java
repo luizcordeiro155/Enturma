@@ -2584,6 +2584,31 @@ class PlatformIntegrationTest {
         .doesNotContain("achievement:" + code);
   }
 
+  @Autowired br.com.enturma.community.AchievementService levelStats;
+
+  @Test
+  void profileStatsSayHowFarTheLevelIsAndWhatWasEarnedToday() throws Exception {
+    db.jdbc.update(
+        "INSERT INTO learning_stats(user_id,total_xp) VALUES (?,3701) ON CONFLICT(user_id) DO"
+            + " UPDATE SET total_xp=3701",
+        host.id());
+    String event =
+        "INSERT INTO learning_xp_event(id,user_id,event_key,amount,reason,created_at) VALUES"
+            + " (?,?,?,?,'TEST',now() - (? || ' hours')::interval)";
+    db.jdbc.update(event, UUID.randomUUID(), host.id(), "nivel:agora", 40, "0");
+    db.jdbc.update(event, UUID.randomUUID(), host.id(), "nivel:agora-2", 20, "0");
+    db.jdbc.update(event, UUID.randomUUID(), host.id(), "nivel:antes", 90, "50");
+    db.jdbc.update(event, UUID.randomUUID(), member.id(), "nivel:outro", 30, "0");
+
+    var stats = json.valueToTree(levelStats.stats(host.id()));
+    assertThat(stats.get("level").asInt()).isEqualTo(15);
+    assertThat(stats.get("xpIntoLevel").asInt()).isEqualTo(201);
+    assertThat(stats.get("xpForNextLevel").asInt()).isEqualTo(250);
+    // today's gains only, and only this student's
+    assertThat(stats.get("xpToday").asInt()).isEqualTo(60);
+    assertThat(json.valueToTree(levelStats.stats(outsider.id())).get("xpToday").asInt()).isZero();
+  }
+
   @Test
   void roomArtworkRequiresHostAndRejectsDisguisedHtml() throws Exception {
     UUID id = room(8);
