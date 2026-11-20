@@ -183,10 +183,37 @@ test("amizade, perfil público e conversa cifrada sincronizada entre navegadores
   await expect(other.getByLabel("Mensagem privada")).toBeEnabled();
   // Under the friend's name: online while they have Enturma open, otherwise when they
   // were last seen. The friend is on the page right now, in the other browser.
-  await expect(page.locator(".private-chat-peer small")).toHaveText(
-    /^(online|visto por último hoje às \d{2}:\d{2})$/,
-    { timeout: 20000 },
+  const peerLine = page.locator(".private-chat-peer [data-line='in']");
+  const presence = /^(online|visto por último hoje às \d{2}:\d{2})$/;
+  await expect(peerLine).toHaveText(presence, { timeout: 20000 });
+  // With a status of their own, the line takes turns: the status, then online or last seen.
+  expect(
+    await other.evaluate(async () => {
+      const reply = await fetch("/api/backend/users/me/profile-details", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ statusText: "Apple Style" }),
+      });
+      return reply.status;
+    }),
+  ).toBeLessThan(300);
+  // the list is read again the way a change among friends makes it be
+  await page.evaluate(() =>
+    window.dispatchEvent(new Event("enturma-friends_changed")),
   );
+  await expect(peerLine).toHaveText("Apple Style", { timeout: 25000 });
+  await expect(peerLine).toHaveText(presence, { timeout: 12000 });
+  await expect(peerLine).toHaveText("Apple Style", { timeout: 12000 });
+  // the line that leaves is taken away, and the row never grows
+  await expect(page.locator(".private-chat-peer [data-line='out']")).toHaveCount(
+    0,
+    { timeout: 3000 },
+  );
+  expect(
+    await page
+      .locator(".private-chat-peer .rotating-line")
+      .evaluate((node) => node.getBoundingClientRect().height),
+  ).toBeLessThan(24);
   await page.getByLabel("Mensagem privada").fill("Rascunho durante o GIF");
   await page
     .getByRole("button", { name: "Adicionar emoji", exact: true })
