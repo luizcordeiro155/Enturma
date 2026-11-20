@@ -58,6 +58,9 @@ public class DailyMissionsController {
     {"TRANSACTION", "Conjunto de operações tratado como uma unidade consistente."}
   };
 
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private org.springframework.context.ApplicationEventPublisher events;
+
   public DailyMissionsController(Db db, LearningController learning, ObjectMapper json) {
     this.db = db;
     this.learning = learning;
@@ -364,10 +367,14 @@ public class DailyMissionsController {
               xp,
               "DAILY_MISSION");
       if (inserted == 1)
-        db.jdbc.update(
-            "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
-            xp,
-            a.id());
+        {
+          db.jdbc.update(
+              "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
+              xp,
+              a.id());
+          // the student's own open screens learn that the XP moved
+          br.com.enturma.notifications.AppChanged.xp(events, a.id());
+        }
     }
     return Map.of(
         "won",

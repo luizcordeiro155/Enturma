@@ -15,7 +15,8 @@ export type AppEventType =
   | "room_expiring"
   | "rooms_changed"
   | "friends_changed"
-  | "profile_changed";
+  | "profile_changed"
+  | "xp_changed";
 
 let liveConnected = false;
 let liveStarted = false;
@@ -90,6 +91,7 @@ export function useAppConnection(enabled = true) {
                 "rooms_changed",
                 "friends_changed",
                 "profile_changed",
+                "xp_changed",
               ].includes(type)
             ) {
               window.dispatchEvent(new Event(`enturma-${type}`));

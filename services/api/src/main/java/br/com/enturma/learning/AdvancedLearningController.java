@@ -40,6 +40,9 @@ public class AdvancedLearningController {
                   "IDEMPOTENT BACKPRESSURE CONSISTENCY MEMOIZATION POLYMORPHISM OBSERVABILITY ORCHESTRATOR SERIALIZABLE LINEARIZABLE COMMUTATIVITY ASSOCIATIVITY DISTRIBUTIVITY HOMOMORPHISM ISOMORPHISM CONTINUATION COROUTINE COINDUCTION BISECTION BISIMULATION INVARIANCE CONTRAVARIANT METAPROGRAMMING INTROSPECTION REFLECTION REIFICATION DEFUNCTOR FUNCTIONAL REFERENTIAL TRANSPARENCY DETERMINISM NONDETERMINISM SYNCHRONIZATION LAMPORT BYZANTINE CONVERGENCE COMMUTATIVE IDEMPOTENCE CRYPTOGRAPHY AUTHENTICATION AUTHORIZATION CAPABILITY SANDBOXING HYPERVISOR VIRTUALIZATION SPECULATION PREFETCHING VECTORIZATION PARALLELISM DISTRIBUTED TRANSACTIONAL"
                       .split(" ")));
 
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private org.springframework.context.ApplicationEventPublisher events;
+
   public AdvancedLearningController(Db db, LearningController access) {
     this.db = db;
     this.access = access;
@@ -619,10 +622,14 @@ public class AdvancedLearningController {
             amount,
             "ADVANCED_GAME");
     if (inserted == 1)
-      db.jdbc.update(
-          "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
-          amount,
-          user);
+      {
+        db.jdbc.update(
+            "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
+            amount,
+            user);
+        // the student's own open screens learn that the XP moved
+        br.com.enturma.notifications.AppChanged.xp(events, user);
+      }
     return inserted == 1 ? amount : 0;
   }
 

@@ -1,10 +1,14 @@
 import { afterEach, expect, it, vi } from "vitest";
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
+import { api } from "@/lib/api";
 import { LevelBadge, LevelMeter } from "./level-meter";
+
+vi.mock("@/lib/api", () => ({ api: vi.fn(), invalidateApiCache: vi.fn() }));
 
 afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
+  vi.mocked(api).mockReset();
 });
 
 const stats = {
@@ -130,4 +134,65 @@ it("holds the rise while the app's opening is still covering the page", async ()
   expect(meter.dataset.live).toBeUndefined();
   opening.remove();
   await waitFor(() => expect(meter.dataset.live).toBe("true"));
+});
+
+const earned = () => window.dispatchEvent(new Event("enturma-xp_changed"));
+
+it("fetches the new level the moment the student earns XP with their own profile open", async () => {
+  vi.mocked(api).mockResolvedValue({
+    ...stats,
+    totalXp: 3741,
+    xpIntoLevel: 241,
+    xpToday: 100,
+    currentStreak: 4,
+  } as never);
+  render(
+    <LevelMeter
+      stats={{ ...stats, currentStreak: 3 }}
+      streak={(days) => `${days} dias de sequência`}
+      live
+    />,
+  );
+  expect(screen.getByText("3 dias de sequência")).toBeTruthy();
+  expect(api).not.toHaveBeenCalled();
+  act(() => void earned());
+  // the bar goes on from where it was, and says what just came in
+  expect((await screen.findByRole("status")).textContent).toBe("+40 XP");
+  expect(vi.mocked(api).mock.calls[0][0]).toBe("/users/me/level");
+  const bar = screen.getByRole("progressbar");
+  expect(bar.getAttribute("aria-valuenow")).toBe("241");
+  const meter = bar.closest(".level-meter") as HTMLElement;
+  expect(meter.style.getPropertyValue("--level-from")).toBe("80.4%");
+  expect(meter.style.getPropertyValue("--level-to")).toBe("96.4%");
+  expect(screen.getByText("+100 XP hoje")).toBeTruthy();
+  expect(screen.getByText("4 dias de sequência")).toBeTruthy();
+});
+
+it("leaves someone else's level alone when the viewer earns XP", async () => {
+  vi.mocked(api).mockResolvedValue({ ...stats, totalXp: 9999 } as never);
+  render(
+    <>
+      <LevelMeter stats={stats} />
+      <LevelBadge stats={stats} />
+    </>,
+  );
+  act(() => void earned());
+  await new Promise((done) => setTimeout(done, 250));
+  expect(api).not.toHaveBeenCalled();
+  expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe(
+    "201",
+  );
+});
+
+it("keeps the small badge in step with the student's own XP too", async () => {
+  vi.mocked(api).mockResolvedValue({
+    ...stats,
+    totalXp: 3760,
+    level: 16,
+    xpIntoLevel: 10,
+    xpToday: 119,
+  } as never);
+  render(<LevelBadge stats={stats} live />);
+  act(() => void earned());
+  expect(await screen.findByLabelText("Nível 16, 10 de 250 XP")).toBeTruthy();
 });

@@ -729,6 +729,37 @@ test("nível: o perfil mostra o nível, a barra de XP e o que falta para o próx
   await expect(
     page.locator(".profile-handle-row .level-badge").first(),
   ).toHaveAttribute("aria-label", "Nível 1, 0 de 250 XP");
+
+  // XP earned while the profile is open reaches it without a reload: the first subject
+  // completes a step of the study journey, and the server tells this student's screens.
+  await expect(page.locator("html")).toHaveAttribute(
+    "data-realtime",
+    "connected",
+    { timeout: 30000 },
+  );
+  const db = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
+  await db.connect();
+  try {
+    await db.query(
+      "INSERT INTO user_subject(user_id,subject_id) SELECT u.id,(SELECT id FROM academic_curriculum_subject LIMIT 1) FROM app_user u WHERE u.username=$1 ON CONFLICT DO NOTHING",
+      [username],
+    );
+  } finally {
+    await db.end();
+  }
+  const synced = await page.request.post("/api/backend/study-journey/sync", {
+    headers: { Origin: new URL(page.url()).origin },
+  });
+  expect(synced.ok()).toBe(true);
+  await expect(bar).toHaveAttribute("aria-valuetext", "20 de 250 XP", {
+    timeout: 15000,
+  });
+  await expect(
+    page.locator(".level-meter .level-head").first(),
+  ).toContainText("+20 XP hoje");
+  await expect(
+    page.locator(".profile-handle-row .level-badge").first(),
+  ).toHaveAttribute("aria-label", "Nível 1, 20 de 250 XP");
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

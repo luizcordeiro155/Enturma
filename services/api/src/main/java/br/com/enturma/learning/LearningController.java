@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 public class LearningController {
   private final Db db;
 
+  @org.springframework.beans.factory.annotation.Autowired(required = false)
+  private org.springframework.context.ApplicationEventPublisher events;
+
   public LearningController(Db db) {
     this.db = db;
   }
@@ -208,10 +211,14 @@ public class LearningController {
             amount,
             reason);
     if (inserted == 1)
-      db.jdbc.update(
-          "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
-          amount,
-          user);
+      {
+        db.jdbc.update(
+            "UPDATE learning_stats SET total_xp=total_xp+?,updated_at=now() WHERE user_id=?",
+            amount,
+            user);
+        // the student's own open screens learn that the XP moved
+        br.com.enturma.notifications.AppChanged.xp(events, user);
+      }
     return inserted == 1 ? amount : 0;
   }
 
