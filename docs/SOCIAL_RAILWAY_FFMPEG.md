@@ -66,4 +66,10 @@ A configuração deve ser aplicada **somente à API Java** que usa o storage e o
 - Não apagar o bucket R2, nem as tabelas do Social, nem o banco Railway.
 - Alterações de código e de variáveis devem ser promovidas separadamente, com validação em preview sempre que disponível.
 
-**Limites:** este documento descreve integração e operação. Serviço Railway criado não significa que a SquareCloud tenha recebido as variáveis nem que upload de mídia já esteja habilitado em produção. O worker de instância única tem fila limitada; dimensionar antes de carga sustentada.
+## Ativação em produção — 11/11/2026
+
+Depois do merge da PR #146 (`ee24d39`), a SquareCloud publicou a API com o cliente do worker e `SOCIAL_MEDIA_ENABLED` foi alterada para `true` (`SOCIAL_ENABLED` já estava `true`). `capabilities` retornou `enabled:true, media:true`, o que exige `GET /ready` autenticado com sucesso no worker. Uma foto, um Clip MP4 de 6,5 s e um Story com imagem foram enviados, processados, gravados no R2 e exibidos em produção; cada exportação terminou em menos de 10 s. Foi uma conferência com uma conta e arquivos pequenos, não um teste de carga.
+
+Pendência: o serviço Railway ainda usa a branch `feat/railway-social-ffmpeg-worker` como fonte. Trocar para `main` no painel do Railway e só então remover a branch.
+
+**Limites:** o caminho API → worker → R2 não tem teste automatizado de ponta a ponta, porque o cliente só aceita URL `https://`; a evidência é a conferência acima. Falhas transitórias do worker (ocupado, 5xx, rede) marcam a mídia como `FAILED` sem nova tentativa automática: o rascunho fica preservado e a pessoa precisa exportar de novo. O worker de instância única processa uma mídia por vez; dimensionar antes de carga sustentada.
