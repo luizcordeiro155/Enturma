@@ -27,6 +27,7 @@ import {
   PortfolioAttachments,
   type PortfolioAsset,
 } from "./portfolio-attachments";
+import { PortfolioMentor } from "./portfolio-mentor";
 
 const month = new Intl.DateTimeFormat("pt-BR", {
   month: "short",
@@ -46,6 +47,7 @@ export function PortfolioProjectCard({
   last,
   assets,
   skills,
+  mentor,
   onToggle,
   onChange,
   onFeature,
@@ -63,6 +65,8 @@ export function PortfolioProjectCard({
   assets: PortfolioAsset[];
   /** The portfolio's competencies, to say which ones this project shows. */
   skills: string[];
+  /** Reads the goal typed above; absent when the mentor is not available. */
+  mentor?: () => string;
   onToggle: () => void;
   onChange: (patch: Partial<Project>) => void;
   onFeature: () => void;
@@ -370,7 +374,33 @@ export function PortfolioProjectCard({
                 onChange={(e) => onChange({ outcome: e.target.value })}
               />
             </label>
+            <label className="portfolio-field portfolio-field-wide">
+              <span>
+                Estudo de caso
+                <small aria-hidden="true">
+                  {(p.caseStudy ?? "").length}/1500
+                </small>
+              </span>
+              <textarea
+                aria-label={"Estudo de caso do projeto " + number}
+                value={p.caseStudy ?? ""}
+                maxLength={1500}
+                rows={5}
+                placeholder={
+                  "Problema: o que precisava ser resolvido.\nSolução: o que você construiu.\nDesafios: o que deu trabalho.\nResultado: o que mudou."
+                }
+                onChange={(e) => onChange({ caseStudy: e.target.value })}
+              />
+            </label>
           </div>
+          {mentor && !p.archived ? (
+            <PortfolioMentor
+              project={p}
+              number={number}
+              goal={mentor}
+              onUse={onChange}
+            />
+          ) : null}
           <div className="portfolio-project-skills">
             <span className="portfolio-field-title">
               Competências que este projeto demonstra

@@ -2174,7 +2174,7 @@ class PlatformIntegrationTest {
       UUID id, String name, String description, String url, List<UUID> assets) {
     return new PortfolioController.Project(
         id, name, description, url, assets, null, null, null, null, null, null, null, null, null,
-        null, null, null);
+        null, null, null, null);
   }
 
   private static PortfolioController.Portfolio portfolioOf(
@@ -2207,11 +2207,12 @@ class PlatformIntegrationTest {
             false,
             new PortfolioController.GithubSource(
                 "ana-dev/caronas", 12, false, "2026-10-02T12:00:00Z"),
-            Arrays.asList(" Trabalho em equipe ", "trabalho em equipe", "Modelagem de dados", ""));
+            Arrays.asList(" Trabalho em equipe ", "trabalho em equipe", "Modelagem de dados", ""),
+            "  Problema: colegas sem carona.  ");
     var shelved =
         new PortfolioController.Project(
             UUID.randomUUID(), "Rascunho antigo", "", "", List.of(draft), "PERSONAL", null, null,
-            null, null, null, null, null, true, true, null, null);
+            null, null, null, null, null, true, true, null, null, null);
     portfolio.save(
         host,
         new PortfolioController.Portfolio(
@@ -2233,6 +2234,7 @@ class PlatformIntegrationTest {
         .extracting(n -> n.asText())
         .containsExactly("Trabalho em equipe", "Modelagem de dados");
     assertThat(mine.get("projects").get(1).has("skills")).isFalse();
+    assertThat(saved.get("caseStudy").asText()).isEqualTo("Problema: colegas sem carona.");
     // an archived project is never a highlight
     assertThat(mine.get("projects").get(1).has("featured")).isFalse();
     assertThat(mine.get("projects").get(1).get("archived").asBoolean()).isTrue();
@@ -2261,19 +2263,19 @@ class PlatformIntegrationTest {
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), null, null, null, null, null, null, null,
             "https://evil.example.test/ana-dev/caronas", null, null,
-            new PortfolioController.GithubSource("ana-dev/caronas", 1, false, null), null);
+            new PortfolioController.GithubSource("ana-dev/caronas", 1, false, null), null, null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(fake))))
         .isInstanceOf(ApiException.class);
     var unsafe =
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), null, null, null, null, null, null, null,
-            "javascript:alert(1)", null, null, null, null);
+            "javascript:alert(1)", null, null, null, null, null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(unsafe))))
         .isInstanceOf(ApiException.class);
     var odd =
         new PortfolioController.Project(
             null, "Projeto", "", "", List.of(), "CERTIFIED", null, null, null, null, null, null,
-            null, null, null, null, null);
+            null, null, null, null, null, null);
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, List.of(odd))))
         .isInstanceOf(ApiException.class);
     var stars = new ArrayList<PortfolioController.Project>();
@@ -2281,11 +2283,130 @@ class PlatformIntegrationTest {
       stars.add(
           new PortfolioController.Project(
               null, "Projeto " + i, "", "", List.of(), null, null, null, null, null, null, null,
-              null, true, null, null, null));
+              null, true, null, null, null, null));
     assertThatThrownBy(() -> portfolio.save(host, portfolioOf(false, stars)))
         .isInstanceOf(ApiException.class);
     portfolio.save(host, portfolioOf(false, stars.subList(0, 6)));
     assertThat(json.valueToTree(portfolio.mine(host)).get("projects")).hasSize(6);
+  }
+
+  @Autowired br.com.enturma.users.PortfolioMentorController mentor;
+
+  private static br.com.enturma.users.PortfolioMentorController.Draft mentorDraft(String name) {
+    return new br.com.enturma.users.PortfolioMentorController.Draft(
+        name,
+        "App de caronas entre colegas da faculdade.",
+        List.of("Java", "PostgreSQL"),
+        "Engenharia de Software",
+        true,
+        "Fiz a API.",
+        "Usado por 40 colegas.",
+        "Estágio em back-end");
+  }
+
+  @Test
+  void portfolioMentorSuggestsFromWhatTheStudentWroteAndNothingElse() throws Exception {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    var asked = org.mockito.ArgumentCaptor.forClass(String.class);
+    var mode = org.mockito.ArgumentCaptor.forClass(String.class);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                asked.capture(),
+                mode.capture(),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenReturn(
+            new br.com.enturma.ai.AiProvider.Answer(
+                "```json\n{\"description\":\"Aplicativo de caronas entre colegas, com API em Java"
+                    + " e banco PostgreSQL.\",\"role\":\"Desenvolvi a API.\",\"outcome\":\""
+                    + "x".repeat(900)
+                    + "\",\"caseStudy\":\"Problema: colegas sem carona.\\nSolução: app.\","
+                    + "\"questions\":[\"Quantas pessoas fizeram o projeto?\",\"\",\"a\",\"b\","
+                    + "\"c\",\"d\",\"e\"],\"skills\":[\"Liderança\"]}\n```",
+                List.of()));
+    db.jdbc.update("UPDATE app_user SET bio='SEGREDO-DA-BIO' WHERE id=?", host.id());
+    var out = json.valueToTree(mentor.suggest(host, mentorDraft("Caronas")));
+
+    assertThat(mode.getValue()).isEqualTo("PORTFOLIO_MENTOR");
+    // only the draft goes to the model: nothing else of the account does
+    assertThat(asked.getValue())
+        .contains("Caronas", "Fiz a API.", "Java, PostgreSQL", "Estágio em back-end")
+        .doesNotContain("SEGREDO-DA-BIO");
+    assertThat(out.get("description").asText()).startsWith("Aplicativo de caronas");
+    assertThat(out.get("role").asText()).isEqualTo("Desenvolvi a API.");
+    // what comes back fits the fields it is offered for
+    assertThat(out.get("outcome").asText()).hasSize(300);
+    assertThat(out.get("caseStudy").asText()).contains("Problema: colegas sem carona.");
+    assertThat(out.get("questions")).hasSize(4);
+    // the mentor writes text and asks questions; it does not hand out competencies
+    assertThat(out.has("skills")).isFalse();
+  }
+
+  @Test
+  void portfolioMentorNeverOffersAPartOrAResultTheStudentDidNotWrite() throws Exception {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenReturn(
+            new br.com.enturma.ai.AiProvider.Answer(
+                "{\"description\":\"App de caronas.\",\"role\":\"Liderei a equipe.\","
+                    + "\"outcome\":\"Premiado na feira.\",\"questions\":[\"Qual foi a sua"
+                    + " parte?\"]}",
+                List.of()));
+    var out =
+        json.valueToTree(
+            mentor.suggest(
+                host,
+                new br.com.enturma.users.PortfolioMentorController.Draft(
+                    "Caronas",
+                    "App de caronas entre colegas da faculdade.",
+                    List.of("Java"),
+                    null,
+                    true,
+                    "  ",
+                    null,
+                    null)));
+    assertThat(out.get("description").asText()).isEqualTo("App de caronas.");
+    assertThat(out.has("role")).isFalse();
+    assertThat(out.has("outcome")).isFalse();
+    assertThat(out.get("questions")).hasSize(1);
+  }
+
+  @Test
+  void portfolioMentorSaysSoWhenItCannotHelpInsteadOfMakingSomethingUp() {
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(false);
+    assertThatThrownBy(() -> mentor.suggest(host, mentorDraft("Caronas")))
+        .isInstanceOf(ApiException.class)
+        .hasMessageContaining("indisponível");
+    org.mockito.Mockito.when(aiProvider.enabled()).thenReturn(true);
+    org.mockito.Mockito.when(
+            aiProvider.answer(
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.anyString(),
+                org.mockito.ArgumentMatchers.eq(false)))
+        .thenReturn(new br.com.enturma.ai.AiProvider.Answer("não sei responder", List.of()));
+    assertThatThrownBy(() -> mentor.suggest(host, mentorDraft("Caronas")))
+        .isInstanceOf(ApiException.class);
+    // a draft with nothing to work from is refused before anything is sent
+    org.mockito.Mockito.clearInvocations(aiProvider);
+    assertThatThrownBy(
+            () ->
+                mentor.suggest(
+                    host,
+                    new br.com.enturma.users.PortfolioMentorController.Draft(
+                        "Caronas", "  ", List.of(), null, null, null, null, null)))
+        .isInstanceOf(ApiException.class);
+    org.mockito.Mockito.verify(aiProvider, org.mockito.Mockito.never())
+        .answer(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyBoolean());
   }
 
   @Test

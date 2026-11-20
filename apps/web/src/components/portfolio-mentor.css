@@ -1,0 +1,144 @@
+.portfolio-mentor {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+.portfolio-mentor-ask {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px 12px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+.portfolio-mentor-ask > svg {
+  flex-shrink: 0;
+  color: var(--accent);
+}
+.portfolio-mentor-ask > p {
+  display: grid;
+  flex: 1 1 240px;
+  gap: 2px;
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.portfolio-mentor-ask > p > span {
+  color: var(--muted);
+}
+.portfolio-mentor-error {
+  margin: 0;
+  color: var(--danger, #b3261e);
+  font-size: 0.85rem;
+}
+html[data-theme="dark"] .portfolio-mentor-error {
+  color: #ff9aa8;
+}
+.portfolio-mentor-panel {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--border));
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--accent) 6%, var(--surface));
+  animation: portfolio-mentor-in 240ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes portfolio-mentor-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+.portfolio-mentor-note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+.portfolio-mentor-panel > article {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 6px 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+.portfolio-mentor-panel h4 {
+  grid-column: 1 / -1;
+  margin: 0;
+  font-size: 0.85rem;
+}
+.portfolio-mentor-panel > article > p {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+.portfolio-mentor-panel > article > small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.portfolio-mentor-panel > article[data-applied] {
+  border-color: var(--success, #1f8a5b);
+}
+.portfolio-mentor-questions {
+  display: grid;
+  gap: 6px;
+}
+.portfolio-mentor-questions ul {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding-left: 18px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+}
+.portfolio-mentor-questions small {
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.portfolio-project-editor .portfolio-mentor button.portfolio-mentor-close,
+html[data-theme="dark"]
+  .app-shell
+  .portfolio-project-editor
+  .portfolio-mentor
+  button.portfolio-mentor-close {
+  justify-self: start;
+  min-height: 36px;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 0.84rem;
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+.portfolio-project-editor .portfolio-mentor button.portfolio-mentor-close:hover,
+.portfolio-project-editor
+  .portfolio-mentor
+  button.portfolio-mentor-close:focus-visible {
+  color: var(--ink);
+}
+@media (max-width: 620px) {
+  .portfolio-mentor-panel > article {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .portfolio-mentor-ask > button,
+  .portfolio-mentor-panel > article > button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-mentor-panel {
+    animation: none;
+  }
+}

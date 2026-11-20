@@ -323,6 +323,7 @@ function PublicProject({
             <strong>Resultado</strong> {p.outcome}
           </p>
         ) : null}
+        {p.caseStudy?.trim() ? <CaseStudy text={p.caseStudy.trim()} /> : null}
         {p.technologies?.length ? (
           <ul className="public-project-tech" aria-label="Tecnologias">
             {p.technologies.map((label) => (
@@ -372,6 +373,33 @@ function PublicProject({
         ) : null}
       </div>
     </article>
+  );
+}
+
+/** A long case study opens on request; print always carries it whole. */
+function CaseStudy({ text }: { text: string }) {
+  const [open, setOpen] = useState(false);
+  const long = text.length > 320 || text.split("\n").length > 5;
+  return (
+    <div
+      className="public-project-case"
+      data-clamped={(long && !open) || undefined}
+    >
+      <strong>Estudo de caso</strong>
+      <p>{text}</p>
+      {long ? (
+        <button
+          type="button"
+          aria-expanded={open}
+          aria-label={
+            open ? "Recolher o estudo de caso" : "Ler o estudo de caso inteiro"
+          }
+          onClick={() => setOpen((v) => !v)}
+        >
+          {open ? "Recolher" : "Ler inteiro"}
+        </button>
+      ) : null}
+    </div>
   );
 }
 

@@ -203,3 +203,36 @@ it("brings a project into view when its name is followed from a competency", asy
   );
   expect(card().hidden).toBe(false);
 });
+
+it("shows the case study in the student's words, opened on request when it is long", async () => {
+  const long =
+    "Problema: colegas sem carona.\n" + "Solução: um app. ".repeat(40);
+  await show([
+    { id: "a", name: "Curto", caseStudy: "Problema: fila no RU." },
+    { id: "b", name: "Longo", caseStudy: long },
+    { id: "c", name: "Sem estudo" },
+  ]);
+  const short = screen
+    .getByRole("heading", { name: "Curto" })
+    .closest("article")!;
+  expect(within(short).getByText("Estudo de caso")).toBeTruthy();
+  expect(within(short).getByText("Problema: fila no RU.")).toBeTruthy();
+  expect(within(short).queryByRole("button")).toBeNull();
+  const tall = screen
+    .getByRole("heading", { name: "Longo" })
+    .closest("article")!;
+  const more = within(tall).getByRole("button", {
+    name: "Ler o estudo de caso inteiro",
+  });
+  expect(more.getAttribute("aria-expanded")).toBe("false");
+  fireEvent.click(more);
+  expect(
+    within(tall)
+      .getByRole("button", { name: "Recolher o estudo de caso" })
+      .getAttribute("aria-expanded"),
+  ).toBe("true");
+  const none = screen
+    .getByRole("heading", { name: "Sem estudo" })
+    .closest("article")!;
+  expect(within(none).queryByText("Estudo de caso")).toBeNull();
+});

@@ -87,8 +87,10 @@ const stored = {
 };
 
 let saved: Record<string, unknown> | undefined;
+let mentorOn = true;
 beforeEach(() => {
   saved = undefined;
+  mentorOn = true;
   Element.prototype.animate = vi.fn(() => ({})) as never;
   vi.mocked(api).mockImplementation(
     async (path: string, init?: RequestInit) => {
@@ -96,6 +98,7 @@ beforeEach(() => {
         saved = JSON.parse(String(init.body));
         return undefined as never;
       }
+      if (path === "/portfolio/mentor") return { available: mentorOn } as never;
       return structuredClone(stored) as never;
     },
   );
@@ -267,4 +270,53 @@ it("drops a project's link to a competency the student took off the list", async
   });
   const body = await save();
   expect(body.projects[1].skills).toBeUndefined();
+});
+
+it("keeps the case study the student wrote for a project", async () => {
+  await ready();
+  fireEvent.change(screen.getByLabelText("Estudo de caso do projeto 1"), {
+    target: { value: "  Problema: colegas sem carona.  " },
+  });
+  const body = await save();
+  expect(body.projects[0].caseStudy).toBe("Problema: colegas sem carona.");
+  expect("caseStudy" in body.projects[1]).toBe(false);
+});
+
+it("offers the mentor in each project, with the goal typed above", async () => {
+  await ready();
+  vi.mocked(api).mockClear();
+  fireEvent.change(screen.getByLabelText("Objetivo profissional"), {
+    target: { value: "Vaga júnior em dados" },
+  });
+  fireEvent.change(screen.getByLabelText("Descrição do projeto 1"), {
+    target: { value: "App de caronas entre colegas da faculdade." },
+  });
+  const card = screen.getByRole("article", { name: "Projeto 1" });
+  fireEvent.click(
+    within(card).getByRole("button", { name: "Pedir sugestões ao mentor" }),
+  );
+  await waitFor(() =>
+    expect(
+      vi
+        .mocked(api)
+        .mock.calls.some(([path]) => path === "/portfolio/me/mentor"),
+    ).toBe(true),
+  );
+  const call = vi
+    .mocked(api)
+    .mock.calls.find(([path]) => path === "/portfolio/me/mentor")!;
+  expect(JSON.parse(String(call[1]?.body)).goal).toBe("Vaga júnior em dados");
+});
+
+it("leaves the mentor out when the service is not there", async () => {
+  mentorOn = false;
+  await ready();
+  await waitFor(() =>
+    expect(
+      vi.mocked(api).mock.calls.some(([path]) => path === "/portfolio/mentor"),
+    ).toBe(true),
+  );
+  expect(
+    screen.queryByRole("button", { name: "Pedir sugestões ao mentor" }),
+  ).toBeNull();
 });

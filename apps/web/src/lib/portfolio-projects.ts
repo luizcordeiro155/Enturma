@@ -44,6 +44,8 @@ export type Project = {
   github?: GithubSource;
   /** Competencies from the portfolio's list that this project is evidence of. */
   skills?: string[];
+  /** Problem, solution, challenges and result, in the student's words. */
+  caseStudy?: string;
 };
 
 /** "Java, SQL ,java" → ["Java", "SQL"]. */
@@ -112,5 +114,6 @@ export function projectPayload(project: Project) {
   if (project.github && matchesGithub(project.repoUrl, project.github.fullName))
     payload.github = project.github;
   if (project.skills?.length) payload.skills = project.skills.slice(0, 12);
+  if (text(project.caseStudy)) payload.caseStudy = text(project.caseStudy);
   return payload;
 }
