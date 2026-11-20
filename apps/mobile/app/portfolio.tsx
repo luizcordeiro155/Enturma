@@ -4,9 +4,11 @@ import { api } from "../src/api";
 import { Screen, Button, ErrorMessage, FeedbackMessage, Field, useStyles } from "../src/ui";
 import { SuiteHero, SuiteSection, SuiteStats } from "../src/suite-ui";
 
+// A project keeps every field the web editor saved; this screen edits only these three.
 type Project={name:string;description?:string;url?:string};
+const MAX_PROJECTS=60;
 type Portfolio={
- id:string;username:string;publicProfile:boolean;headline:string;summary:string;skills:string[];
+ id:string;username:string;publicProfile:boolean;headline:string;summary:string;goal?:string;skills:string[];
  projects:Project[];studyMinutes:number;stats:{totalXp:number;currentStreak:number};
  subjects:{name:string}[];
 };
@@ -16,6 +18,7 @@ export default function Portfolio(){
  const [data,setData]=useState<Portfolio>();
  const [headline,setHeadline]=useState("");
  const [summary,setSummary]=useState("");
+ const [goal,setGoal]=useState("");
  const [skills,setSkills]=useState("");
  const [pub,setPub]=useState(false);
  const [projects,setProjects]=useState<Project[]>([]);
@@ -28,7 +31,7 @@ export default function Portfolio(){
    void api<Portfolio>("/portfolio/me")
      .then(v=>{
        if(!active)return;
-       setData(v);setHeadline(v.headline);setSummary(v.summary);
+       setData(v);setHeadline(v.headline);setSummary(v.summary);setGoal(v.goal??"");
        setSkills((v.skills??[]).join(", "));setPub(v.publicProfile);
        setProjects(v.projects??[]);
      })
@@ -43,6 +46,7 @@ export default function Portfolio(){
        publicProfile:pub,
        headline,
        summary,
+       goal,
        skills:skills.split(",").map(v=>v.trim()).filter(Boolean),
        projects
      })});
@@ -58,7 +62,7 @@ export default function Portfolio(){
  }
 
  function addProject(){
-   if(projects.length>=12)return;
+   if(projects.length>=MAX_PROJECTS)return;
    setProjects(v=>[...v,{name:"",description:"",url:""}]);
  }
 
@@ -97,6 +101,7 @@ export default function Portfolio(){
      description="Use uma descrição curta, clara e profissional."
    >
      <Field label="Título profissional" value={headline} onChangeText={setHeadline} placeholder="Estudante de ADS · Java · UI/UX"/>
+     <Field label="Objetivo profissional" value={goal} onChangeText={setGoal} placeholder="Ex.: estágio em desenvolvimento back-end"/>
      <Field label="Apresentação" value={summary} multiline onChangeText={setSummary} placeholder="Conte sua trajetória, objetivos e o tipo de problema que gosta de resolver."/>
      <Field label="Competências separadas por vírgula" value={skills} onChangeText={setSkills} placeholder="Java, SQL, Git, UI/UX"/>
    </SuiteSection>
@@ -113,7 +118,7 @@ export default function Portfolio(){
        <Button title="Remover projeto" onPress={()=>setProjects(v=>v.filter((_,i)=>i!==index))}/>
      </View>)}
      {!projects.length?<Text style={styles.muted}>Nenhum projeto adicionado ainda.</Text>:null}
-     {projects.length<12?<Button title="Adicionar projeto" onPress={addProject}/>:null}
+     {projects.length<MAX_PROJECTS?<Button title="Adicionar projeto" onPress={addProject}/>:null}
    </SuiteSection>
 
    {data?.subjects?.length?<SuiteSection

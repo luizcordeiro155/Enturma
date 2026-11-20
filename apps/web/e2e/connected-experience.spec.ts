@@ -137,4 +137,121 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
       () => document.documentElement.scrollWidth <= innerWidth,
     ),
   ).toBe(true);
+
+  // The professional detail, the GitHub import and what visitors end up seeing.
+  await page.route("https://api.github.com/**", (route) =>
+    route.fulfill({
+      headers: { "access-control-allow-origin": "*" },
+      json: route.request().url().includes("/languages")
+        ? { Java: 9000, TypeScript: 3000 }
+        : [
+            {
+              full_name: "ana-dev/caronas",
+              name: "caronas",
+              description: "App de caronas entre colegas.",
+              html_url: "https://github.com/ana-dev/caronas",
+              homepage: "",
+              language: "Java",
+              topics: ["spring-boot"],
+              stargazers_count: 12,
+              fork: false,
+              archived: false,
+              pushed_at: "2026-10-02T12:00:00Z",
+            },
+            {
+              full_name: "ana-dev/rascunho",
+              name: "rascunho",
+              description: "",
+              html_url: "https://github.com/ana-dev/rascunho",
+              homepage: "",
+              language: "Python",
+              topics: [],
+              stargazers_count: 0,
+              fork: false,
+              archived: false,
+              pushed_at: "2026-09-01T12:00:00Z",
+            },
+          ],
+    }),
+  );
+  await page
+    .getByLabel("Objetivo profissional", { exact: true })
+    .fill("Estágio em back-end");
+  await page.getByLabel("Projeto 1 feito em equipe").check();
+  await page
+    .getByLabel("Minha participação no projeto 1", { exact: true })
+    .fill("Escrevi a revisão bibliográfica.");
+  await page
+    .getByRole("button", { name: "Importar do GitHub", exact: true })
+    .click();
+  const sheet = page.getByRole("dialog", { name: "Importar do GitHub" });
+  await expect(sheet).toBeVisible();
+  expect(
+    await sheet.evaluate((node) => node.scrollWidth <= node.clientWidth),
+  ).toBe(true);
+  await sheet.getByLabel("Usuário do GitHub").fill("github.com/ana-dev");
+  await sheet
+    .getByRole("button", { name: "Buscar repositórios", exact: true })
+    .click();
+  // nothing comes ticked: the student chooses
+  await expect(sheet.getByRole("checkbox", { name: /caronas/ })).not.toBeChecked();
+  await sheet.getByRole("checkbox", { name: /caronas/ }).check();
+  await sheet.getByRole("checkbox", { name: /rascunho/ }).check();
+  await sheet
+    .getByRole("button", { name: "Adicionar 2 projetos", exact: true })
+    .click();
+  await expect(sheet).toBeHidden();
+  await expect(
+    page.getByText(/2 projetos do GitHub entraram como rascunho/),
+  ).toBeVisible();
+  await expect(page.getByText("3 de 60 projetos")).toBeVisible();
+  await page
+    .getByRole("button", { name: "Destacar projeto 2", exact: true })
+    .click();
+  await page
+    .getByRole("button", { name: "Arquivar projeto 3", exact: true })
+    .click();
+  await expect(
+    page.getByRole("tab", { name: "Arquivados (1)", exact: true }),
+  ).toBeVisible();
+  await page.getByLabel("Portfólio público").check();
+  await page
+    .getByRole("button", { name: "Salvar portfólio", exact: true })
+    .click();
+  await expect(
+    page.getByText("Portfólio atualizado.", { exact: true }),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
+
+  await page.goto(`/p/${username}`);
+  const open = page.locator("main.public-portfolio");
+  await expect(open.getByText("Estágio em back-end")).toBeVisible();
+  // the highlight comes first, the archived repository does not come at all
+  await expect(open.getByRole("heading", { level: 3 })).toHaveText([
+    "caronas",
+    "Pesquisa acadêmica",
+  ]);
+  const imported = open.locator("article.public-project", {
+    hasText: "caronas",
+  });
+  await expect(imported.getByText("Destaque")).toBeVisible();
+  await expect(imported.getByRole("link", { name: /Repositório/ })).toHaveAttribute(
+    "href",
+    "https://github.com/ana-dev/caronas",
+  );
+  await expect(
+    imported.getByRole("list", { name: "Tecnologias" }).getByRole("listitem"),
+  ).toHaveText(["Java", "TypeScript", "spring-boot"]);
+  await expect(
+    open.getByText(/Minha participação: Escrevi a revisão bibliográfica\./),
+  ).toBeVisible();
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= innerWidth,
+    ),
+  ).toBe(true);
 });

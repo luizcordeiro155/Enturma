@@ -245,6 +245,10 @@ test("APP Desktop permite rolar o portfólio público longo sem liberar scroll n
   await page.goto("/p/teste-scroll?returnTo=%2Fportfolio");
   const portfolio = page.locator("main.public-portfolio");
   await expect(page.locator("html")).toHaveAttribute("data-desktop-chrome", "true");
+  // The first eight open; the rest are in the page and come on request.
+  await expect(portfolio.getByRole("heading", { name: "Projeto acadêmico 8", exact: true })).toBeVisible();
+  await expect(portfolio.getByRole("heading", { name: "Projeto acadêmico 16" })).toBeHidden();
+  await portfolio.getByRole("button", { name: /Mostrar mais projetos/ }).click();
   await expect(portfolio.getByRole("heading", { name: "Projeto acadêmico 16" })).toBeVisible();
   const metrics = await page.evaluate(() => ({
     scrollHeight: document.scrollingElement?.scrollHeight ?? 0,

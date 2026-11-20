@@ -1,0 +1,202 @@
+/* Importing from GitHub uses the room invitation sheet; only what is its own lives here. */
+.portfolio-github-dialog .room-invite-dialog-header p {
+  max-width: 58ch;
+}
+.portfolio-github-search {
+  display: grid;
+  gap: 6px;
+  margin: 0 24px 14px;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+.portfolio-github-search > div {
+  display: flex;
+  gap: 8px;
+}
+.portfolio-github-search input {
+  flex: 1;
+  min-width: 0;
+  min-height: 44px;
+}
+.portfolio-github-search button {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+}
+.portfolio-github-error {
+  margin: 0 24px 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--danger) 10%, transparent);
+  color: var(--danger);
+  font-size: 0.86rem;
+  line-height: 1.45;
+}
+html[data-theme="dark"] .portfolio-github-error {
+  color: #ff9aa8;
+}
+.portfolio-github-list {
+  min-height: 180px;
+  max-height: min(46vh, 420px);
+  margin: 0 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--soft);
+}
+.portfolio-github-count {
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 0.8rem;
+}
+.portfolio-github-list ul {
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+}
+.portfolio-github-list li {
+  animation: portfolio-github-row 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--row, 0) * 28ms);
+}
+@keyframes portfolio-github-row {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+.portfolio-github-list label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+}
+.portfolio-github-list label:has(input:disabled) {
+  cursor: default;
+  opacity: 0.6;
+}
+.portfolio-github-list label:hover:not(:has(input:disabled)),
+.portfolio-github-list label[data-on] {
+  border-color: var(--border);
+  background: var(--surface);
+}
+.portfolio-github-list label[data-on] {
+  border-color: var(--accent);
+}
+.portfolio-github-list input[type="checkbox"] {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+  min-height: 20px;
+  margin: 2px 0 0;
+}
+.portfolio-github-repo {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+.portfolio-github-repo > strong {
+  font-size: 0.94rem;
+  overflow-wrap: anywhere;
+}
+.portfolio-github-repo > span {
+  display: -webkit-box;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+.portfolio-github-repo > small {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  color: var(--muted);
+  font-size: 0.76rem;
+}
+.portfolio-github-repo > small :is(b, i, em) {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-style: normal;
+}
+.portfolio-github-repo > small b {
+  color: var(--ink);
+}
+.portfolio-github-repo > small em {
+  padding: 1px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 600;
+}
+.portfolio-github-empty {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+  min-height: 180px;
+  padding: 20px;
+  color: var(--muted);
+  text-align: center;
+}
+.portfolio-github-empty p {
+  max-width: 38ch;
+  margin: 0;
+  line-height: 1.5;
+}
+.portfolio-github-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 24px 22px;
+}
+.portfolio-github-footer p {
+  flex: 1 1 240px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.portfolio-github-footer button {
+  min-height: 44px;
+}
+@media (max-width: 620px) {
+  .portfolio-github-search,
+  .portfolio-github-error,
+  .portfolio-github-list {
+    margin-inline: 16px;
+  }
+  .portfolio-github-search > div {
+    flex-direction: column;
+  }
+  .portfolio-github-search button,
+  .portfolio-github-footer button {
+    width: 100%;
+    justify-content: center;
+  }
+  .portfolio-github-footer {
+    padding: 14px 16px 18px;
+  }
+  .portfolio-github-list {
+    max-height: none;
+    flex: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-github-list li {
+    animation: none;
+  }
+}

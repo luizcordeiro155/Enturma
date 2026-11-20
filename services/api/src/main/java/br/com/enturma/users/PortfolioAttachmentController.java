@@ -75,7 +75,8 @@ public class PortfolioAttachmentController {
             "SELECT a.name,a.mime,a.data FROM portfolio_attachment a JOIN portfolio_profile p ON"
                 + " p.user_id=a.user_id JOIN app_user u ON u.id=a.user_id WHERE a.id=? AND p.public"
                 + " AND u.status='ACTIVE' AND EXISTS(SELECT 1 FROM jsonb_array_elements(p.projects)"
-                + " project WHERE project->'assets' @> ?::jsonb)",
+                + " project WHERE NOT coalesce((project->>'archived')::boolean,false)"
+                + " AND project->'assets' @> ?::jsonb)",
             id,
             "[\"" + id + "\"]"));
   }
