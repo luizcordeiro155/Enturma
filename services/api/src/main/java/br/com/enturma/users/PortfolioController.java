@@ -48,7 +48,12 @@ public class PortfolioController {
       /** Competencies from the portfolio's own list that this project is evidence of. */
       @Size(max = 12) List<@Size(max = 60) String> skills,
       /** A short case study in the student's words: problem, solution, challenges, result. */
-      @Size(max = 1500) String caseStudy) {}
+      @Size(max = 1500) String caseStudy,
+      /** Set when the project is a member's copy of someone else's team project. */
+      @Valid SharedFrom sharedFrom) {}
+
+  /** The author's project a member's copy came from. Kept only while the member is in the team. */
+  public record SharedFrom(UUID userId, UUID projectId) {}
 
   public record Portfolio(
       boolean publicProfile,
@@ -120,6 +125,18 @@ public class PortfolioController {
       var shown = labels(project.skills(), 12);
       if (!shown.isEmpty()) row.put("skills", shown);
       keep(row, "caseStudy", project.caseStudy());
+      // A copy keeps pointing at the author's project only while this student is in its team.
+      var from = project.sharedFrom();
+      if (from != null
+          && from.userId() != null
+          && from.projectId() != null
+          && db.exists(
+              "SELECT EXISTS(SELECT 1 FROM portfolio_project_member WHERE owner_id=? AND"
+                  + " project_id=? AND member_id=? AND status='ACCEPTED')",
+              from.userId(),
+              from.projectId(),
+              a.id()))
+        row.put("sharedFrom", Map.of("userId", from.userId(), "projectId", from.projectId()));
       stored.add(row);
     }
     db.jdbc.update(
@@ -138,6 +155,11 @@ public class PortfolioController {
         json.writeValueAsString(stored),
         r.goal() == null ? null : r.goal().strip(),
         r.goal() == null ? null : r.goal().strip());
+    // A project that left the portfolio has no team any more.
+    db.jdbc.update(
+        "DELETE FROM portfolio_project_member WHERE owner_id=? AND NOT (project_id = ANY(?))",
+        a.id(),
+        stored.stream().map(row -> (UUID) row.get("id")).toArray(UUID[]::new));
   }
 
   private static final int MAX_PROJECTS = 60;
@@ -238,6 +260,8 @@ public class PortfolioController {
                 + " project->'assets' @> jsonb_build_array(a.id::text))) ORDER BY a.created_at",
             user,
             owner));
+    // Who else made each project: only people who accepted, each in their own words.
+    if (!owner) PortfolioTeamController.attach(db, json, user, base.get("projects"));
     // Visitors get the records the student chose to show, and nothing about where they came from.
     if (!owner) base.put("journey", PortfolioJourneyController.shown(db, user, base.get("projects")));
     base.put(

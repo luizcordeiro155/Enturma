@@ -1,0 +1,74 @@
+.portfolio-share-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.portfolio-share-preview > span:first-child {
+  display: grid;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--accent) 22%, transparent);
+  color: var(--ink);
+}
+.profile-share-signed-out {
+  margin: 0;
+  padding: 18px 16px;
+  text-align: center;
+}
+
+/* On a project card, sharing is a quiet action beside the links. */
+.public-portfolio
+  .public-projects
+  .public-project-links
+  button.portfolio-share-button,
+html[data-theme="dark"]
+  .public-portfolio
+  .public-projects
+  .public-project-links
+  button.portfolio-share-button {
+  min-height: 38px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.86rem;
+  font-weight: 700;
+  box-shadow: none;
+}
+.public-portfolio
+  .public-projects
+  .public-project-links
+  button.portfolio-share-button:hover,
+.public-portfolio
+  .public-projects
+  .public-project-links
+  button.portfolio-share-button:focus-visible {
+  border-color: var(--ink);
+}
+.public-portfolio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+/* The sheet's extra ways out line up as equal columns instead of a ragged row. */
+.profile-share-footer .room-invite-share-actions:has(> a) {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+}
+.profile-share-footer .room-invite-share-actions > a.button {
+  justify-content: center;
+  text-align: center;
+}
+@media print {
+  .public-portfolio-actions,
+  .public-project-links button.portfolio-share-button {
+    display: none;
+  }
+}

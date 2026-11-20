@@ -28,6 +28,8 @@ import {
   type PortfolioAsset,
 } from "./portfolio-attachments";
 import { PortfolioMentor } from "./portfolio-mentor";
+import { ProjectTeam } from "./portfolio-team";
+import type { TeamMember } from "@/lib/portfolio-team";
 
 const month = new Intl.DateTimeFormat("pt-BR", {
   month: "short",
@@ -48,6 +50,7 @@ export function PortfolioProjectCard({
   assets,
   skills,
   mentor,
+  team,
   onToggle,
   onChange,
   onFeature,
@@ -67,6 +70,13 @@ export function PortfolioProjectCard({
   skills: string[];
   /** Reads the goal typed above; absent when the mentor is not available. */
   mentor?: () => string;
+  /** Who the author tagged, whether the server knows the project, and whose it is when shared. */
+  team: {
+    members: TeamMember[];
+    saved: boolean;
+    author?: string;
+    onChanged: () => void;
+  };
   onToggle: () => void;
   onChange: (patch: Partial<Project>) => void;
   onFeature: () => void;
@@ -342,6 +352,15 @@ export function PortfolioProjectCard({
                   </small>
                 </span>
               </label>
+              {p.sharedFrom ? (
+                <p className="portfolio-team-note">
+                  <strong>
+                    Projeto da equipe de {team.author ?? "um colega"}.
+                  </strong>{" "}
+                  Você entrou como integrante; a equipe é mostrada a partir do
+                  portfólio de quem criou.
+                </p>
+              ) : null}
               {p.team ? (
                 <label className="portfolio-field">
                   <span>
@@ -359,6 +378,15 @@ export function PortfolioProjectCard({
                     onChange={(e) => onChange({ role: e.target.value })}
                   />
                 </label>
+              ) : null}
+              {p.team && !p.sharedFrom ? (
+                <ProjectTeam
+                  projectId={p.id!}
+                  number={number}
+                  saved={team.saved}
+                  members={team.members}
+                  onChanged={team.onChanged}
+                />
               ) : null}
             </div>
             <label className="portfolio-field portfolio-field-wide">

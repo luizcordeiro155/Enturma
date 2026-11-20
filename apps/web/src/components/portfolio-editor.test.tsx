@@ -88,9 +88,11 @@ const stored = {
 
 let saved: Record<string, unknown> | undefined;
 let mentorOn = true;
+let team: { projects: Record<string, unknown[]>; invitations: unknown[] };
 beforeEach(() => {
   saved = undefined;
   mentorOn = true;
+  team = { projects: {}, invitations: [] };
   Element.prototype.animate = vi.fn(() => ({})) as never;
   vi.mocked(api).mockImplementation(
     async (path: string, init?: RequestInit) => {
@@ -99,6 +101,7 @@ beforeEach(() => {
         return undefined as never;
       }
       if (path === "/portfolio/mentor") return { available: mentorOn } as never;
+      if (path === "/portfolio/me/team") return structuredClone(team) as never;
       return structuredClone(stored) as never;
     },
   );
@@ -380,4 +383,99 @@ it("folds the projects back into the list once the portfolio is saved", async ()
   await save();
   await screen.findByText("Portfólio atualizado.");
   await waitFor(() => expect(expanded()).toEqual([]));
+});
+
+it("shows the team of a saved project inside its card once it is marked as team work", async () => {
+  team.projects.p1 = [
+    {
+      userId: "u-bruno",
+      name: "Bruno Lima",
+      username: "bruno",
+      status: "PENDING",
+      contribution: "",
+    },
+  ];
+  await ready();
+  const card = screen.getByRole("article", { name: "Projeto 1" });
+  expect(within(card).queryByText("Quem fez com você")).toBeNull();
+  fireEvent.click(screen.getByLabelText("Projeto 1 feito em equipe"));
+  const list = await within(card).findByRole("list", {
+    name: "Equipe do projeto 1",
+  });
+  expect(within(list).getByText("Bruno Lima")).toBeTruthy();
+  expect(within(list).getByText("Aguardando resposta")).toBeTruthy();
+});
+
+it("lists the projects that tagged the student and takes an accepted one into the list", async () => {
+  team.invitations = [
+    {
+      ownerId: "o1",
+      projectId: "p9",
+      ownerName: "Bia Reis",
+      ownerUsername: "bia",
+      status: "ACCEPTED",
+      contribution: "Fiz os testes.",
+      projectName: "Horta comunitária",
+      projectDescription: "Sensores na horta.",
+      included: false,
+    },
+  ];
+  await closed();
+  expect(
+    await screen.findByRole("heading", { name: "Projetos em equipe" }),
+  ).toBeTruthy();
+  const before = vi.mocked(api).getMockImplementation()!;
+  vi.mocked(api).mockImplementation(async (path, init) =>
+    String(path).endsWith("/copy")
+      ? ({
+          id: "copia",
+          name: "Horta comunitária",
+          description: "Sensores na horta.",
+          url: "",
+          assets: [],
+          team: true,
+          role: "Fiz os testes.",
+          sharedFrom: { userId: "o1", projectId: "p9" },
+        } as never)
+      : before(path, init),
+  );
+  fireEvent.click(
+    screen.getByRole("button", {
+      name: "Adicionar Horta comunitária ao meu portfólio",
+    }),
+  );
+  expect(await screen.findByText("3 de 60 projetos")).toBeTruthy();
+  // it is the team's project: the card says whose it is and saving keeps the link
+  const card = screen.getByRole("article", { name: "Projeto 3" });
+  fireEvent.click(within(card).getByRole("button", { expanded: false }));
+  expect(within(card).getByText(/Projeto da equipe de Bia Reis/)).toBeTruthy();
+  expect(within(card).queryByText("Quem fez com você")).toBeNull();
+  const body = await save();
+  expect(body.projects[2].sharedFrom).toEqual({
+    userId: "o1",
+    projectId: "p9",
+  });
+});
+
+it("gives the long page a way around and sends the résumé to its own page", async () => {
+  await closed();
+  const nav = screen.getByRole("navigation", { name: "Seções do portfólio" });
+  expect(
+    within(nav)
+      .getAllByRole("link")
+      .map((link) => [link.textContent, link.getAttribute("href")]),
+  ).toEqual([
+    ["Apresentação", "#apresentacao"],
+    ["Competências", "#competencias"],
+    ["Projetos", "#projetos"],
+    ["Jornada", "#jornada"],
+    ["Currículo", "/portfolio/curriculo"],
+  ]);
+  for (const id of ["apresentacao", "competencias", "projetos", "jornada"])
+    expect(document.getElementById(id), id).toBeTruthy();
+  // the editor itself is not something to print: the résumé page makes the PDF
+  expect(screen.queryByRole("button", { name: /Gerar PDF/ })).toBeNull();
+  expect(
+    screen.getByRole("link", { name: "Montar currículo" }).getAttribute("href"),
+  ).toBe("/portfolio/curriculo");
 });

@@ -1186,3 +1186,55 @@ html[data-theme="dark"]
   font-size: 0.82rem;
   line-height: 1.5;
 }
+
+/* The editor is a long page: a row of anchors stays within reach while it scrolls. */
+.portfolio-sections {
+  position: sticky;
+  top: 8px;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+  margin: 0 0 18px;
+  padding: 6px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 92%, transparent);
+  backdrop-filter: blur(10px);
+  scrollbar-width: none;
+}
+.portfolio-sections::-webkit-scrollbar {
+  display: none;
+}
+.portfolio-sections > a {
+  flex: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.portfolio-sections > a:hover,
+.portfolio-sections > a:focus-visible {
+  background: var(--soft);
+  color: var(--ink);
+}
+.portfolio-sections > a:last-child {
+  margin-left: auto;
+  color: var(--ink);
+}
+.portfolio-editor-page
+  :is(#apresentacao, #competencias, #projetos, #jornada, #equipe) {
+  scroll-margin-top: 76px;
+}
+@media print {
+  .portfolio-sections {
+    display: none;
+  }
+}
+/* The save row closes the form; the journey below is saved on its own. */
+.portfolio-editor-page form > .portfolio-actions {
+  margin-bottom: 26px;
+}

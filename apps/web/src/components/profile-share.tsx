@@ -19,15 +19,34 @@ type Friend = PublicProfile & {
   online?: boolean;
 };
 
+/** What is being shared, and the words the sheet uses for it. */
+export type ShareSubject = {
+  eyebrow: string;
+  title: string;
+  description: string;
+  link: string;
+  linkLabel: string;
+  /** "Perfil enviado para": completes with the friend's name. */
+  sentLabel: string;
+  outside: { title: string; text: string };
+  preview: React.ReactNode;
+  /** A friend who is the subject itself is not offered their own link. */
+  excludeUserId?: string;
+  /** The page can be open to people who are not signed in: they get the link, not friends. */
+  open?: boolean;
+  /** More ways out, after "Compartilhar em outro app". */
+  actions?: React.ReactNode;
+};
+
 /**
- * Sends a profile to friends the same way a room invitation goes: straight into the
+ * Sends something to friends the same way a room invitation goes: straight into the
  * private conversation, sealed like any message, with the link left for everywhere else.
  */
-function ProfileShareDialog({
-  person,
+export function ShareDialog({
+  subject,
   onClose,
 }: {
-  person: PublicProfile;
+  subject: ShareSubject;
   onClose: () => void;
 }) {
   const titleId = useId(),
@@ -41,13 +60,14 @@ function ProfileShareDialog({
   const [sending, setSending] = useState<string>();
   const [sent, setSent] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState("");
+  const [signedOut, setSignedOut] = useState(false);
   const busy = useRef(false);
   // A sealed message is kept across retries, so an uncertain answer never sends it twice.
   const pending = useRef(
     new Map<string, Awaited<ReturnType<typeof preparePrivateShare>>>(),
   );
   const alive = useRef(true);
-  const link = socialLink("person", person.id);
+  const link = subject.link;
   useOverlayHistory(onClose);
 
   useEffect(() => {
@@ -90,12 +110,17 @@ function ProfileShareDialog({
           setFriends(
             people.filter(
               (friend) =>
-                friend.status === "ACCEPTED" && friend.userId !== person.id,
+                friend.status === "ACCEPTED" &&
+                friend.userId !== subject.excludeUserId,
             ),
           );
       })
       .catch((cause) => {
-        if (active) setError((cause as Error).message);
+        if (!active) return;
+        // A visitor of a public page simply has no friends list to send to.
+        if (subject.open && (cause as { status?: number }).status === 401)
+          setSignedOut(true);
+        else setError((cause as Error).message);
       })
       .finally(() => {
         if (active) setLoading(false);
@@ -103,7 +128,7 @@ function ProfileShareDialog({
     return () => {
       active = false;
     };
-  }, [person.id]);
+  }, [subject.excludeUserId, subject.open]);
 
   async function send(friend: Friend) {
     if (busy.current || sent.has(friend.id)) return;
@@ -126,7 +151,7 @@ function ProfileShareDialog({
       pending.current.delete(friend.id);
       if (alive.current) {
         setSent((previous) => new Set([...previous, friend.id]));
-        setStatus(`Perfil enviado para ${friend.name}.`);
+        setStatus(`${subject.sentLabel} ${friend.name}.`);
       }
     } catch (cause) {
       if (alive.current)
@@ -160,8 +185,8 @@ function ProfileShareDialog({
     try {
       if (navigator.share)
         await navigator.share({
-          title: `${person.name} no Enturma`,
-          text: `Veja o perfil de ${person.name} no Enturma`,
+          title: subject.outside.title,
+          text: subject.outside.text,
           url: link,
         });
       else await copy();
@@ -195,9 +220,9 @@ function ProfileShareDialog({
       <div className="room-invite-dialog-content">
         <header className="room-invite-dialog-header">
           <div>
-            <small>PERFIL NO ENTURMA</small>
-            <h2 id={titleId}>Compartilhar perfil</h2>
-            <p>Envie este perfil direto na conversa com seus amigos.</p>
+            <small>{subject.eyebrow}</small>
+            <h2 id={titleId}>{subject.title}</h2>
+            <p>{subject.description}</p>
           </div>
           <button
             type="button"
@@ -208,95 +233,98 @@ function ProfileShareDialog({
             <X size={20} />
           </button>
         </header>
-        <div className="profile-share-person">
-          <Avatar user={person} />
-          <div>
-            <strong>{person.name}</strong>
-            {person.username ? <span>@{person.username}</span> : null}
-          </div>
-        </div>
-        <div className="room-invite-friends">
-          <label className="room-invite-search" htmlFor={searchId}>
-            <Search size={18} aria-hidden="true" />
-            <span className="sr-only">Buscar amigos</span>
-            <input
-              id={searchId}
-              type="search"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Buscar amigos"
-              autoComplete="off"
-            />
-          </label>
-          <div
-            className="room-invite-friends-list"
-            aria-label="Seus amigos"
-            aria-busy={loading}
-          >
-            {loading ? (
-              <p className="room-invite-empty" role="status">
-                Buscando seus amigos…
-              </p>
-            ) : visible.length ? (
-              visible.map((friend, index) => (
-                <div
-                  className="room-invite-friend"
-                  key={friend.id}
-                  style={{ "--row": Math.min(index, 8) } as React.CSSProperties}
-                >
-                  <Avatar user={{ ...friend, id: friend.userId }} />
-                  <div>
-                    <strong>{friend.name}</strong>
-                    <small>
-                      {friend.online ? (
-                        <>
-                          <i />
-                          Disponível agora
-                        </>
-                      ) : (
-                        `@${friend.username ?? "estudante"}`
-                      )}
-                    </small>
-                  </div>
-                  <button
-                    type="button"
-                    className={
-                      sent.has(friend.id)
-                        ? "secondary room-invite-sent"
-                        : "secondary"
-                    }
-                    disabled={Boolean(sending) || sent.has(friend.id)}
-                    onClick={() => void send(friend)}
-                    aria-label={`${sent.has(friend.id) ? "Perfil enviado para" : "Enviar para"} ${friend.name}`}
-                  >
-                    {sent.has(friend.id) ? (
-                      <>
-                        <Check size={16} />
-                        Enviado
-                      </>
-                    ) : sending === friend.id ? (
-                      "Enviando…"
-                    ) : (
-                      <>
-                        <Send size={15} />
-                        Enviar
-                      </>
-                    )}
-                  </button>
-                </div>
-              ))
-            ) : (
-              <div className="room-invite-empty">
-                <Users size={26} />
-                <p>
-                  {search
-                    ? "Nenhum amigo com esse nome."
-                    : "Seus amigos aparecerão aqui depois que a amizade for aceita."}
+        {subject.preview}
+        {signedOut ? (
+          <p className="room-invite-empty profile-share-signed-out">
+            Entre no Enturma para enviar direto na conversa com seus amigos. O
+            link abaixo funciona em qualquer lugar.
+          </p>
+        ) : (
+          <div className="room-invite-friends">
+            <label className="room-invite-search" htmlFor={searchId}>
+              <Search size={18} aria-hidden="true" />
+              <span className="sr-only">Buscar amigos</span>
+              <input
+                id={searchId}
+                type="search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Buscar amigos"
+                autoComplete="off"
+              />
+            </label>
+            <div
+              className="room-invite-friends-list"
+              aria-label="Seus amigos"
+              aria-busy={loading}
+            >
+              {loading ? (
+                <p className="room-invite-empty" role="status">
+                  Buscando seus amigos…
                 </p>
-              </div>
-            )}
+              ) : visible.length ? (
+                visible.map((friend, index) => (
+                  <div
+                    className="room-invite-friend"
+                    key={friend.id}
+                    style={
+                      { "--row": Math.min(index, 8) } as React.CSSProperties
+                    }
+                  >
+                    <Avatar user={{ ...friend, id: friend.userId }} />
+                    <div>
+                      <strong>{friend.name}</strong>
+                      <small>
+                        {friend.online ? (
+                          <>
+                            <i />
+                            Disponível agora
+                          </>
+                        ) : (
+                          `@${friend.username ?? "estudante"}`
+                        )}
+                      </small>
+                    </div>
+                    <button
+                      type="button"
+                      className={
+                        sent.has(friend.id)
+                          ? "secondary room-invite-sent"
+                          : "secondary"
+                      }
+                      disabled={Boolean(sending) || sent.has(friend.id)}
+                      onClick={() => void send(friend)}
+                      aria-label={`${sent.has(friend.id) ? subject.sentLabel : "Enviar para"} ${friend.name}`}
+                    >
+                      {sent.has(friend.id) ? (
+                        <>
+                          <Check size={16} />
+                          Enviado
+                        </>
+                      ) : sending === friend.id ? (
+                        "Enviando…"
+                      ) : (
+                        <>
+                          <Send size={15} />
+                          Enviar
+                        </>
+                      )}
+                    </button>
+                  </div>
+                ))
+              ) : (
+                <div className="room-invite-empty">
+                  <Users size={26} />
+                  <p>
+                    {search
+                      ? "Nenhum amigo com esse nome."
+                      : "Seus amigos aparecerão aqui depois que a amizade for aceita."}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        </div>
+        )}
         {error && (
           <p
             className="room-invite-feedback room-invitation-error"
@@ -311,7 +339,7 @@ function ProfileShareDialog({
         <footer className="room-invite-share-footer profile-share-footer">
           <div className="room-invite-web-link">
             <label className="sr-only" htmlFor={`${searchId}-url`}>
-              Link do perfil
+              {subject.linkLabel}
             </label>
             <input
               id={`${searchId}-url`}
@@ -336,10 +364,47 @@ function ProfileShareDialog({
             >
               <Share2 size={16} /> Compartilhar em outro app
             </button>
+            {subject.actions}
           </div>
         </footer>
       </div>
     </dialog>
+  );
+}
+
+function ProfileShareDialog({
+  person,
+  onClose,
+}: {
+  person: PublicProfile;
+  onClose: () => void;
+}) {
+  return (
+    <ShareDialog
+      onClose={onClose}
+      subject={{
+        eyebrow: "PERFIL NO ENTURMA",
+        title: "Compartilhar perfil",
+        description: "Envie este perfil direto na conversa com seus amigos.",
+        link: socialLink("person", person.id),
+        linkLabel: "Link do perfil",
+        sentLabel: "Perfil enviado para",
+        outside: {
+          title: `${person.name} no Enturma`,
+          text: `Veja o perfil de ${person.name} no Enturma`,
+        },
+        excludeUserId: person.id,
+        preview: (
+          <div className="profile-share-person">
+            <Avatar user={person} />
+            <div>
+              <strong>{person.name}</strong>
+              {person.username ? <span>@{person.username}</span> : null}
+            </div>
+          </div>
+        ),
+      }}
+    />
   );
 }
 
