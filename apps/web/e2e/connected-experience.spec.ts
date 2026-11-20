@@ -177,6 +177,13 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await page
     .getByLabel("Objetivo profissional", { exact: true })
     .fill("Estágio em back-end");
+  // Competencies: one will be shown by a technology, one linked by hand, one only declared.
+  await page
+    .getByLabel("Competências", { exact: true })
+    .fill("Java, Pesquisa, Inglês");
+  await page
+    .getByRole("button", { name: "Pesquisa no projeto 1", exact: true })
+    .click();
   await page.getByLabel("Projeto 1 feito em equipe").check();
   await page
     .getByLabel("Minha participação no projeto 1", { exact: true })
@@ -249,6 +256,14 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
   await expect(
     open.getByText(/Minha participação: Escrevi a revisão bibliográfica\./),
   ).toBeVisible();
+  // each competency says what backs it; the archived repository backs nothing
+  await expect(
+    open.getByRole("list", { name: "Competências" }).getByRole("listitem"),
+  ).toHaveText([
+    /^Java\s*Demonstrada em\s*caronas$/,
+    /^Pesquisa\s*Demonstrada em\s*Pesquisa acadêmica$/,
+    /^Inglês\s*Declarada$/,
+  ]);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= innerWidth,

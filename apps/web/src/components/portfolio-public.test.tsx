@@ -145,3 +145,61 @@ it("opens the first eight projects and brings the rest on request", async () => 
     screen.queryByRole("button", { name: /Mostrar mais projetos/ }),
   ).toBeNull();
 });
+
+it("says which competencies a project shows and which are only declared", async () => {
+  vi.mocked(api).mockResolvedValue({
+    ...base,
+    skills: ["Inglês", "Java", "Trabalho em equipe"],
+    projects: [
+      { id: "a", name: "Caronas", technologies: ["java"] },
+      { id: "b", name: "Feira", skills: ["Trabalho em equipe"] },
+      { id: "c", name: "Guardado", archived: true, technologies: ["Inglês"] },
+    ],
+  } as never);
+  render(<PublicPortfolio username="ana" />);
+  await screen.findByRole("heading", { name: "Ana Souza" });
+  const list = screen.getByRole("list", { name: "Competências" });
+  const rows = within(list)
+    .getAllByRole("listitem")
+    .map((li) => li.textContent!.replace(/\s+/g, " ").trim());
+  expect(rows).toEqual([
+    "Java Demonstrada em Caronas",
+    "Trabalho em equipe Demonstrada em Feira",
+    "Inglês Declarada",
+  ]);
+  expect(
+    within(list).getByRole("link", { name: "Caronas" }).getAttribute("href"),
+  ).toBe("#projeto-a");
+  // the reader is told what the two words mean, and no one is called "validated"
+  expect(screen.getByText(/Demonstrada: aparece em um projeto/)).toBeTruthy();
+  expect(document.body.textContent).not.toMatch(/validad/i);
+});
+
+it("brings a project into view when its name is followed from a competency", async () => {
+  vi.mocked(api).mockResolvedValue({
+    ...base,
+    skills: ["Java"],
+    projects: [
+      ...Array.from({ length: 9 }, (_, i) => ({
+        id: `p${i}`,
+        name: `P${i + 1}`,
+        kind: "PERSONAL",
+      })),
+      { id: "last", name: "Caronas", kind: "ACADEMIC", technologies: ["Java"] },
+    ],
+  } as never);
+  Element.prototype.scrollIntoView = vi.fn();
+  render(<PublicPortfolio username="ana" />);
+  await screen.findByRole("heading", { name: "Ana Souza" });
+  const card = () =>
+    screen.getByText("Caronas", { selector: "h3" }).closest("article")!;
+  expect(card().hidden).toBe(true);
+  fireEvent.click(screen.getByRole("button", { name: "Pessoal" }));
+  fireEvent.click(
+    within(screen.getByRole("list", { name: "Competências" })).getByRole(
+      "link",
+      { name: "Caronas" },
+    ),
+  );
+  expect(card().hidden).toBe(false);
+});

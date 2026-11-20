@@ -225,3 +225,46 @@ it("names the project that still has no name instead of sending it", async () =>
   expect(await screen.findByText("Dê um nome ao projeto 2.")).toBeTruthy();
   expect(saved).toBeUndefined();
 });
+
+it("shows which competencies are demonstrated as the student types and links them", async () => {
+  await ready();
+  const levels = () =>
+    within(screen.getByRole("list", { name: "Competências e evidências" }))
+      .getAllByRole("listitem")
+      .map((li) => li.textContent!.replace(/\s+/g, " ").trim());
+  // "Java" is a technology of the first project
+  expect(levels()).toEqual(["Java Demonstrada em 1 projeto"]);
+  fireEvent.change(screen.getByLabelText("Competências"), {
+    target: { value: "Java, Trabalho em equipe" },
+  });
+  expect(levels()).toEqual([
+    "Java Demonstrada em 1 projeto",
+    "Trabalho em equipe Declarada",
+  ]);
+  // linking a project to it is what makes it demonstrated
+  fireEvent.click(
+    screen.getByRole("button", { name: "Trabalho em equipe no projeto 2" }),
+  );
+  expect(levels()[1]).toBe("Trabalho em equipe Demonstrada em 1 projeto");
+  // what a technology already shows needs no link
+  expect(
+    screen.getByRole<HTMLButtonElement>("button", { name: "Java no projeto 1" })
+      .disabled,
+  ).toBe(true);
+  const body = await save();
+  expect(body.projects[1].skills).toEqual(["Trabalho em equipe"]);
+  expect(body.projects[0].skills).toBeUndefined();
+});
+
+it("drops a project's link to a competency the student took off the list", async () => {
+  await ready();
+  fireEvent.change(screen.getByLabelText("Competências"), {
+    target: { value: "Java, UX" },
+  });
+  fireEvent.click(screen.getByRole("button", { name: "UX no projeto 2" }));
+  fireEvent.change(screen.getByLabelText("Competências"), {
+    target: { value: "Java" },
+  });
+  const body = await save();
+  expect(body.projects[1].skills).toBeUndefined();
+});

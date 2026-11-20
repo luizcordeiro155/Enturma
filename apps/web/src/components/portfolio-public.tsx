@@ -11,6 +11,7 @@ import {
   type Project,
   type ProjectKind,
 } from "@/lib/portfolio-projects";
+import { competencies } from "@/lib/portfolio-skills";
 import {
   PortfolioAttachments,
   type PortfolioAsset,
@@ -56,6 +57,19 @@ export function PublicPortfolio({ username }: { username: string }) {
   const kinds = kindsIn(projects);
   const listed = kind ? projects.filter((p) => p.kind === kind) : projects;
   const later = Math.max(0, listed.length - shown);
+  const levels = competencies(data.skills ?? [], projects);
+  /** Opens the list as far as a project and takes the reader to it. */
+  function reveal(id: string | undefined, event: React.MouseEvent) {
+    if (!id) return;
+    event.preventDefault();
+    setKind(undefined);
+    setShown(projects.length);
+    requestAnimationFrame(() =>
+      document
+        .getElementById(`projeto-${id}`)
+        ?.scrollIntoView({ block: "center", behavior: "smooth" }),
+    );
+  }
   return (
     <main
       className="public-portfolio"
@@ -99,14 +113,39 @@ export function PublicPortfolio({ username }: { username: string }) {
           <strong>{formatDays(data.stats.currentStreak)} de sequência</strong>
         </div>
       </section>
-      {data.skills?.length ? (
+      {levels.length ? (
         <section>
           <h2>Competências</h2>
-          <div className="portfolio-tags">
-            {data.skills.map((s) => (
-              <span key={s}>{s}</span>
+          <ul className="portfolio-competencies" aria-label="Competências">
+            {levels.map((entry) => (
+              <li key={entry.name} data-level={entry.level}>
+                <strong>{entry.name}</strong>{" "}
+                {entry.level === "DEMONSTRATED" ? (
+                  <span>
+                    Demonstrada em{" "}
+                    {entry.evidence.map((project, index) => (
+                      <span key={project.id ?? index}>
+                        {index ? ", " : ""}
+                        <a
+                          href={`#projeto-${project.id}`}
+                          onClick={(event) => reveal(project.id, event)}
+                        >
+                          {project.name}
+                        </a>
+                      </span>
+                    ))}
+                  </span>
+                ) : (
+                  <span>Declarada</span>
+                )}
+              </li>
             ))}
-          </div>
+          </ul>
+          <p className="portfolio-skill-legend">
+            Demonstrada: aparece em um projeto deste portfólio. Declarada:
+            informada por {data.name.trim().split(/\s+/)[0]}, ainda sem um
+            projeto aqui que a mostre.
+          </p>
         </section>
       ) : null}
       {projects.length ? (
