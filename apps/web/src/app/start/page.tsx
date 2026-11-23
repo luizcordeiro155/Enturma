@@ -23,16 +23,16 @@ export const metadata: Metadata = {
     description: "Sua turma. Seus estudos. Seu Enturma.",
     images: [
       {
-        url: "https://enturma-flax.vercel.app/start/poster.png?v=2",
-        width: 1200,
-        height: 630,
+        url: "https://enturma-flax.vercel.app/start/poster.png?v=3",
+        width: 936,
+        height: 1664,
         alt: "Enturma — sua faculdade, em companhia",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    images: ["https://enturma-flax.vercel.app/start/poster.png?v=2"],
+    images: ["https://enturma-flax.vercel.app/start/poster.png?v=3"],
   },
 };
 

@@ -342,7 +342,7 @@ export function StartExperience({
         <nav aria-label="Informações">
           <Link href="/privacidade">Privacidade</Link>
           <Link href="/termos">Termos de uso</Link>
-          <a href="/start/poster.png?v=2" target="_blank" rel="noreferrer">
+          <a href="/start/poster.png?v=3" target="_blank" rel="noreferrer">
             Imagem de apresentação
           </a>
         </nav>

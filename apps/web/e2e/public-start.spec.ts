@@ -76,14 +76,14 @@ test("public presentation has a share image and enters login with an animated CT
   ).toBeVisible();
   await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
     "content",
-    /\/start\/poster\.png\?v=2$/,
+    /\/start\/poster\.png\?v=3$/,
   );
   const poster = await request.get("/start/poster.png");
   expect(poster.status()).toBe(200);
   expect(poster.headers()["content-type"]).toContain("image/png");
   const png = await poster.body();
-  expect(png.readUInt32BE(16)).toBe(1200);
-  expect(png.readUInt32BE(20)).toBe(630);
+  expect(png.readUInt32BE(16)).toBe(936);
+  expect(png.readUInt32BE(20)).toBe(1664);
   await expect(
     page.getByRole("img", { name: /Livro aberto com páginas/ }),
   ).toBeVisible();

@@ -1,6 +1,6 @@
 # Apresentação pública — refinamento visual
 
-Superfície: `/`, `/start` e `/start/poster.png?v=2`. Modo: apresentação e participação.
+Superfície: `/`, `/start` e `/start/poster.png?v=3`. Modo: apresentação e participação.
 
 A identidade verde-floresta, lima e papel claro permanece. A arte do livro aberto substitui a composição de cartões sobrepostos. A fonte Archivo Black, já utilizada pelo Enturma, é hospedada localmente e compartilhada com o pôster. Texto, logo e links continuam nativos, legíveis e acessíveis.
 
@@ -11,9 +11,10 @@ As abas Salas de estudo, Cadernos IA e Vida acadêmica apresentam recursos reais
 Gerada com a ferramenta integrada de geração de imagens, sem chave de API externa. Assets entregues:
 
 - `apps/web/public/start/book-world.webp`: 1000 × 1250, aproximadamente 75 KB, ilustração da página.
-- `apps/web/public/start/book-world-share.jpg`: 640 × 800, aproximadamente 47 KB, fonte local do pôster PNG 1200 × 630.
+- `apps/web/public/start/book-world-share.jpg`: 640 × 800, aproximadamente 47 KB, recurso do pôster horizontal anterior.
+- `apps/web/public/start/enturma-apresentacao-9x16.png`: 936 × 1664, nova arte vertical para a Mostra+ na ExpoUna, servida por `/start/poster.png`.
 
-O parâmetro `v=2` atualiza a URL de Open Graph/Twitter para diferenciar a imagem anterior nos caches de compartilhamento. Plataformas que já armazenaram uma prévia podem exigir nova coleta.
+O parâmetro `v=3` atualiza a URL de Open Graph/Twitter e o link de apresentação para diferenciar a nova imagem vertical nos caches de compartilhamento. Plataformas que já armazenaram uma prévia podem exigir nova coleta.
 
 Prompt usado:
 
