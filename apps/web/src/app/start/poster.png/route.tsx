@@ -1,8 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 
-export const runtime = "nodejs";
-
 /** Vertical 9:16 presentation image for Enturma and the Mostra+ showcase. */
 export async function GET() {
   const image = await readFile(
