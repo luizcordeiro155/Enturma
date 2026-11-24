@@ -510,6 +510,83 @@ em { font-style: normal; color: var(--lime); }
 .editing [contenteditable]:hover { outline-color: rgba(255, 129, 99, 0.8); }
 .editing [contenteditable]:focus { outline: 3px solid #ff8163; }
 
+/* ---------- capa: instituição, data e integrantes ---------- */
+.cover .mark { top: 100px; }
+.cover h1 { top: 214px; font-size: 106px; }
+.cover .lead { top: 556px; font-size: 35px; width: 900px; }
+.cover .meta { top: 684px; width: 960px; gap: 12px; flex-wrap: wrap; }
+.cover .meta .pill { font-size: 24px; padding: 13px 21px 14px; }
+.crew { position: absolute; left: 128px; top: 772px; width: 960px; --d: 1500ms; }
+.crew > p { font-size: 24px; font-weight: 600; color: var(--lime); margin-bottom: 12px; }
+.crew ul { list-style: none; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(3, auto); gap: 13px 36px; }
+.crew li { font-size: 24.5px; white-space: nowrap; font-weight: 600; line-height: 1.25; display: flex; align-items: center; gap: 14px; }
+.crew li::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--lime); flex: none; }
+
+/* ---------- sumário ---------- */
+.toc ol { position: absolute; left: 128px; right: 128px; top: 310px; list-style: none; counter-reset: toc; display: grid; grid-template-columns: 1fr 1fr; grid-auto-flow: column; grid-template-rows: repeat(6, auto); column-gap: 90px; --d: 500ms; }
+.toc li { counter-increment: toc; position: relative; display: flex; align-items: baseline; gap: 30px; padding: 28px 0 29px; font-size: 40px; font-weight: 600; line-height: 1.15; }
+.toc li::before { content: counter(toc, decimal-leading-zero); font-family: var(--display); font-size: 32px; letter-spacing: -0.02em; color: #1d6a4a; width: 62px; flex: none; }
+.toc li::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: rgba(11, 36, 28, 0.16); transform-origin: 0 50%; transform: scaleX(0); }
+.on.toc li::after { animation: growX 1.1s var(--expo) both; animation-delay: calc(var(--i) * 95ms + 650ms); }
+
+/* ---------- introdução ---------- */
+.ctx .nums { position: absolute; left: 128px; right: 128px; top: 420px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 56px; --d: 700ms; transition: filter 0.5s; }
+.ctx .n b { display: block; font-family: var(--display); font-weight: 400; font-size: 130px; line-height: 1; letter-spacing: -0.045em; color: var(--lime); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.ctx .n b i { font-style: normal; }
+.ctx .n p { margin-top: 18px; font-size: 34px; line-height: 1.3; }
+.ctx .src { position: absolute; left: 128px; top: 720px; font-size: 26px; color: var(--soft); --d: 1300ms; transition: filter 0.5s; }
+.ctx .title { transition: filter 0.5s; }
+.ctx.g1 .title, .ctx.g1 .src { filter: opacity(0); }
+.ctx.g1 .nums { filter: opacity(0.3); }
+.ctx .k1 { left: 128px; top: 810px; width: 1500px; }
+.ctx .k1 h3 { font-size: 50px; color: var(--lime); }
+.ctx .k1 p { font-size: 33px; color: var(--paper); max-width: 1400px; }
+
+/* ---------- objetivo do projeto ---------- */
+.goal h2 { font-size: 62px; width: 1664px; }
+.goal .sub { position: absolute; left: 128px; top: 392px; font-size: 30px; font-weight: 700; color: #1d6a4a; --d: 700ms; }
+.goal .cards { top: 450px; }
+.goal .card h3 { font-size: 44px; }
+.goal .card p { font-size: 32px; }
+.goal .scope { bottom: 64px; font-size: 31px; }
+
+/* ---------- público potencial ---------- */
+.who .lead { font-size: 34px; }
+.who .lead span { display: block; }
+.who .lead span + span { font-weight: 700; color: var(--ink); }
+
+/* ---------- fontes de pesquisa ---------- */
+.srcs { position: absolute; left: 128px; right: 128px; top: 320px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 26px; }
+.srcs .card { padding: 34px 30px 40px; gap: 16px; --rz: -4deg; }
+.srcs .pill { align-self: flex-start; font-size: 21px; padding: 10px 18px 11px; background: var(--ink); color: var(--lime); border-color: var(--ink); }
+.srcs h3 { font-size: 38px; line-height: 1.06; margin-top: 10px; }
+.srcs .work { font-size: 28px; line-height: 1.28; font-weight: 700; color: #1d6a4a; }
+.srcs .card p:not(.work) { font-size: 30px; line-height: 1.36; }
+.sources .foot { position: absolute; left: 128px; bottom: 84px; font-size: 32px; font-weight: 600; --d: 1500ms; }
+
+/* ---------- análise dos integrantes ---------- */
+.team .by { position: absolute; left: 128px; top: 254px; font-size: 28px; color: var(--soft); --d: 900ms; transition: filter 0.5s; }
+.team .title { transition: filter 0.5s; }
+.team.g1 .title, .team.g1 .by, .team.g1 .tag { filter: opacity(0); }
+.crewgrid { position: absolute; left: 128px; right: 128px; top: 326px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 28px 32px; --d: 600ms; }
+.m { position: relative; height: 316px; padding: 26px 28px; border-radius: 30px; background: rgba(255, 255, 255, 0.06); border: 2px solid rgba(216, 239, 121, 0.28); display: flex; flex-direction: column; gap: 12px; transition: filter 0.5s, border-color 0.5s, background 0.5s, box-shadow 0.5s; }
+.m .who2 { display: flex; align-items: center; gap: 18px; min-height: 76px; }
+.m .who2 b { flex: none; width: 76px; height: 76px; border-radius: 50%; display: grid; place-items: center; font-family: var(--display); font-weight: 400; font-size: 28px; letter-spacing: -0.02em; background: var(--lime); color: var(--ink); box-shadow: 0 0 0 0 rgba(216, 239, 121, 0.6); }
+.m h3 { font-size: 31px; line-height: 1.06; }
+.m .role { font-size: 25px; line-height: 1.24; font-weight: 700; color: var(--lime); }
+.m .resp { font-size: 21.5px; line-height: 1.34; color: var(--paper); opacity: 0.6; transition: opacity 0.4s; }
+.team[data-step="1"] .m:nth-child(1), .team[data-step="2"] .m:nth-child(2), .team[data-step="3"] .m:nth-child(3), .team[data-step="4"] .m:nth-child(4), .team[data-step="5"] .m:nth-child(5), .team[data-step="6"] .m:nth-child(6) { border-color: var(--lime); background: rgba(216, 239, 121, 0.1); box-shadow: 0 40px 90px rgba(0, 0, 0, 0.45), 0 0 70px rgba(216, 239, 121, 0.18); }
+.team[data-step="1"] .m:nth-child(1) .resp, .team[data-step="2"] .m:nth-child(2) .resp, .team[data-step="3"] .m:nth-child(3) .resp, .team[data-step="4"] .m:nth-child(4) .resp, .team[data-step="5"] .m:nth-child(5) .resp, .team[data-step="6"] .m:nth-child(6) .resp { opacity: 1; }
+.team[data-step="1"] .m:nth-child(1) .who2 b, .team[data-step="2"] .m:nth-child(2) .who2 b, .team[data-step="3"] .m:nth-child(3) .who2 b, .team[data-step="4"] .m:nth-child(4) .who2 b, .team[data-step="5"] .m:nth-child(5) .who2 b, .team[data-step="6"] .m:nth-child(6) .who2 b { animation: ringOut 1.8s ease-out 0.5s infinite; }
+@keyframes ringOut { from { box-shadow: 0 0 0 0 rgba(216, 239, 121, 0.6); } to { box-shadow: 0 0 0 26px rgba(216, 239, 121, 0); } }
+.team[data-step="1"] .m:not(:nth-child(1)), .team[data-step="2"] .m:not(:nth-child(2)), .team[data-step="3"] .m:not(:nth-child(3)), .team[data-step="4"] .m:not(:nth-child(4)), .team[data-step="5"] .m:not(:nth-child(5)), .team[data-step="6"] .m:not(:nth-child(6)) { filter: opacity(0.22); }
+
+/* ---------- referências ---------- */
+.refs ul { position: absolute; left: 128px; top: 300px; width: 1560px; list-style: none; display: flex; flex-direction: column; gap: 24px; --d: 500ms; }
+.refs li { position: relative; padding-left: 36px; font-size: 32px; line-height: 1.34; color: #26443a; }
+.refs li::before { content: ""; position: absolute; left: 0; top: 6px; bottom: 6px; width: 6px; border-radius: 6px; background: #1d6a4a; }
+.refs li b { color: var(--ink); }
+
 </style>
 </head>
 <body>
@@ -545,7 +622,8 @@ em { font-style: normal; color: var(--lime); }
       <div class="mark"><svg viewBox="0 0 24 24"><path pathLength="1" d="M12 7c-2-3-7-3-10-2v15c4-1 7-1 10 1 3-2 6-2 10-1V5c-3-1-8-1-10 2Zm0 0v14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round"/></svg><span class="letters">enturma.</span></div>
       <h1 class="kin"><span class="ln">Sua faculdade.</span><span class="ln">Muito mais</span><span class="ln"><em>em companhia.</em></span></h1>
       <p class="lead a">Plataforma de estudos com rede social para universitários, no navegador, no Android e no Windows.</p>
-      <div class="meta"><span class="pill fill a" style="--i:0">ExpoUna 2026</span><span class="pill a" style="--i:1">Luiz Cordeiro</span></div>
+      <div class="meta"><span class="pill fill a" style="--i:0">ExpoUna 2026</span><span class="pill a" style="--i:1">Centro Universitário UNA</span><span class="pill a" style="--i:2">30 de novembro de 2026</span></div>
+      <div class="crew"><p class="a" style="--i:3">Integrantes</p><ul><li class="a left" style="--i:4">Frederico Docas</li><li class="a left" style="--i:5">Gabriel Chaves Notini</li><li class="a left" style="--i:6">João Guilherme Machado Ferreira</li><li class="a left" style="--i:7">Lucas Almeida Fidelis Silva</li><li class="a left" style="--i:8">Lucas Gabriel Dias Costa</li><li class="a left" style="--i:9">Luiz Henrique Cordeiro dos Santos</li></ul></div>
       <div class="art px" style="--dz:1.6">
         <div class="frame"><img src="img/capa-arte.jpg" alt="Estudantes reunidos em volta de um notebook e de um livro aberto, com ícones de turma, conversa, IA, carona e calendário"><div class="shine"></div></div>
         <div class="tiles">
@@ -559,18 +637,49 @@ em { font-style: normal; color: var(--lime); }
     </div>
   </section>
 
-  <!-- 1 · objetivo -->
-  <section class="scene goal rv-diag on-paper" data-name="Objetivo" style="--tw:-2deg;--ex:0px;--ey:-160px">
+  <!-- sumário -->
+  <section class="scene toc rv-up on-paper" data-name="Sumário" style="--tw:2deg">
     <div class="bg bg-paper"></div><div class="dots" style="color:#0b241c"></div>
     <div class="cam">
-      <p class="tag"><i></i><span>Objetivo do trabalho</span></p>
-      <h2 class="title kin">Reunir em um só lugar o que o universitário precisa para <span class="hl">estudar em companhia</span>.</h2>
-      <div class="cards px" style="--dz:.8">
-        <div class="card a" style="--i:0"><div class="ic"><svg><use href="#i-cal"/></svg></div><h3>Organizar a rotina</h3><p>Aulas, presença, prazos e sessões de estudo no mesmo calendário.</p></div>
-        <div class="card a" style="--i:1"><div class="ic"><svg><use href="#i-users"/></svg></div><h3>Aproximar a turma</h3><p>Uma sala por matéria, com conversa, chamada e tela compartilhada.</p></div>
-        <div class="card a" style="--i:2"><div class="ic"><svg><use href="#i-spark"/></svg></div><h3>Apoiar o estudo</h3><p>IA que responde a partir dos materiais da própria sala e cita a fonte.</p></div>
+      <p class="tag"><i></i><span>Sumário</span></p>
+      <h2 class="title kin">O que vamos ver.</h2>
+      <ol>
+        <li class="a left" style="--i:0">Introdução</li><li class="a left" style="--i:1">Objetivo do projeto</li><li class="a left" style="--i:2">Problema e pesquisa</li><li class="a left" style="--i:3">Fontes de pesquisa</li><li class="a left" style="--i:4">Público-alvo e personas</li><li class="a left" style="--i:5">A solução funcionando</li>
+        <li class="a left" style="--i:6">Plano de trabalho</li><li class="a left" style="--i:7">Relatório técnico de IA</li><li class="a left" style="--i:8">Desenvolvimento do software</li><li class="a left" style="--i:9">Demonstração e resultados</li><li class="a left" style="--i:10">Conclusão e análise da equipe</li><li class="a left" style="--i:11">Referências</li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- introdução (2 passos) -->
+  <section class="scene ctx rv-circle" style="--cx:80%;--cy:30%;--ez:.25;--ex:0px" data-len="2" data-cam="960,540,1; 960,690,1.12" data-name="Introdução">
+    <div class="bg bg-dark"></div><div class="dots" style="color:#d8ef79"></div>
+    <div class="orb" style="right:-280px;top:-300px;width:1000px;height:1000px"></div>
+    <div class="cam">
+      <p class="tag"><i></i><span>Introdução</span></p>
+      <h2 class="title kin">A faculdade cresceu. A turma <em>se espalhou</em>.</h2>
+      <div class="nums">
+        <div class="n a" style="--i:0"><b><span data-count="10.2" data-dec="1" data-suffix=" mi">10,2 mi</span></b><p>de matrículas na graduação em 2024, o maior número já registrado.</p></div>
+        <div class="n a" style="--i:1"><b><span data-count="50.7" data-dec="1" data-suffix="%">50,7%</span></b><p>dessas matrículas já são a distância: pela primeira vez, a maioria.</p></div>
+        <div class="n a" style="--i:2"><b><i>+</i><span data-count="30.5" data-dec="1" data-suffix="%">30,5%</span></b><p>de crescimento das matrículas em dez anos, de 2014 a 2024.</p></div>
       </div>
-      <p class="scope a"><b>Recorte:</b> estudantes de graduação, começando pelos catálogos de UNA, UFMG, PUC Minas e Newton.</p>
+      <p class="src a">Inep, Censo da Educação Superior 2024.</p>
+      <div class="stepcap k1"><h3>Mais gente estudando, menos gente no mesmo lugar.</h3><p>A turma se organiza em grupos de mensagem, chamadas, pastas e planilhas que não se conversam. É nesse cenário que nasce o Enturma, um projeto de estudantes da UNA.</p></div>
+    </div>
+  </section>
+
+  <!-- objetivo do projeto -->
+  <section class="scene goal rv-diag on-paper" data-name="Objetivo do projeto" style="--tw:-2deg;--ex:0px;--ey:-160px">
+    <div class="bg bg-paper"></div><div class="dots" style="color:#0b241c"></div>
+    <div class="cam">
+      <p class="tag"><i></i><span>Objetivo do projeto</span></p>
+      <h2 class="title kin">Desenvolver e publicar, de setembro a novembro, uma plataforma contra o <span class="hl">isolamento e a desorganização</span> na graduação.</h2>
+      <p class="sub a">Resultados pretendidos</p>
+      <div class="cards px" style="--dz:.8">
+        <div class="card a" style="--i:0"><div class="ic"><svg><use href="#i-check"/></svg></div><h3>Produto no ar</h3><p>Aplicativo funcionando na web, no Android e no Windows, aberto para qualquer pessoa testar.</p></div>
+        <div class="card a" style="--i:1"><div class="ic"><svg><use href="#i-users"/></svg></div><h3>Problema comprovado</h3><p>Evasão, cenário e público descritos com dados públicos e três personas.</p></div>
+        <div class="card a" style="--i:2"><div class="ic"><svg><use href="#i-spark"/></svg></div><h3>Processo verificável</h3><p>Cada entrega registrada no GitHub e aprovada por testes automáticos.</p></div>
+      </div>
+      <p class="scope a"><b>Não confundir com o objetivo do aplicativo:</b> reunir em um só lugar o que o universitário precisa para estudar em companhia.</p>
     </div>
   </section>
 
@@ -586,6 +695,38 @@ em { font-style: normal; color: var(--lime); }
         <div class="stat a" style="--i:2"><div class="ringbox"><svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="10"/><circle class="ring" style="--off:16.5;--i:2" pathLength="100" cx="60" cy="60" r="52" fill="none" stroke-width="10" stroke-linecap="round"/></svg><div class="num"><span data-count="83.5" data-dec="1" data-suffix="%">83,5%</span></div></div><p>dos graduandos das federais relatam dificuldade emocional que atrapalha os estudos.</p><small>Andifes e Fonaprace, V Pesquisa de Perfil dos Graduandos (2018).</small></div>
       </div>
       <p class="bottomline a">A evasão tem muitas causas. Duas cabem num aplicativo: <em style="color:var(--coral)">isolamento e desorganização</em>.</p>
+    </div>
+  </section>
+
+  <!-- fontes de pesquisa -->
+  <section class="scene sources rv-diag on-paper" data-name="Fontes de pesquisa" style="--tw:-2deg">
+    <div class="bg bg-paper"></div><div class="dots" style="color:#0b241c"></div>
+    <div class="cam">
+      <p class="tag"><i></i><span>Fontes de pesquisa</span></p>
+      <h2 class="title kin">De onde vêm os dados.</h2>
+      <div class="srcs">
+        <div class="card a tilt" style="--i:0"><span class="pill">Dado oficial</span><h3>Inep e MEC</h3><p class="work">Censo da Educação Superior</p><p>Matrículas de 2024 e trajetória dos ingressantes de 2014 acompanhados até 2023.</p></div>
+        <div class="card a tilt" style="--i:1"><span class="pill">Estudo setorial</span><h3>Instituto Semesp</h3><p class="work">Mapa do Ensino Superior no Brasil 2026, 16ª edição</p><p>Evasão anual de 2024 no presencial e no EAD, calculada sobre o Censo.</p></div>
+        <div class="card a tilt" style="--i:2"><span class="pill">Pesquisa nacional</span><h3>Andifes e Fonaprace</h3><p class="work">V Pesquisa de Perfil dos Graduandos das IFES, 2018</p><p>Respostas de 424 mil estudantes das universidades federais.</p></div>
+        <div class="card a tilt" style="--i:3"><span class="pill">Equipe do projeto</span><h3>Pesquisa de campo e de referências</h3><p class="work">Levantamento próprio</p><p>Necessidades levantadas com estudantes e comparação com soluções existentes.</p></div>
+      </div>
+      <p class="foot a">Cada número desta apresentação aparece com a fonte escrita ao lado.</p>
+    </div>
+  </section>
+
+  <!-- 6 · público e personas -->
+  <section class="scene who rv-blinds on-paper" data-len="4" data-cam="960,540,1; 540,700,1.45; 960,700,1.45; 1380,700,1.45" data-name="Público" style="--ez:.25">
+    <div class="bg bg-paper"></div><div class="dots" style="color:#0b241c"></div>
+    <div class="cam">
+      <p class="tag"><i></i><span>Público-alvo e personas</span></p>
+      <h2 class="title kin">Para quem está na graduação.</h2>
+      <p class="lead a"><span>Universitários maiores de 18 anos, do presencial ao EAD.</span><span>Público potencial: 10,2 milhões de matrículas na graduação em 2024 (Inep).</span></p>
+      <div class="personas px" style="--dz:.6">
+        <div class="persona a tilt" style="--i:0"><div class="who-row"><div class="avatar">A</div><div><h3>Ana, 19</h3><p class="sub">Caloura de ADS, turno da noite</p></div></div><p class="pain"><b>O que trava</b>Não conhece ninguém da turma e se perde nos prazos.</p><p class="gain"><b>No Enturma</b>Entra na sala da matéria no primeiro dia e vê tudo no calendário.</p></div>
+        <div class="persona a tilt" style="--i:1"><div class="who-row"><div class="avatar">L</div><div><h3>Lucas, 24</h3><p class="sub">Trabalha de dia e mora longe</p></div></div><p class="pain"><b>O que trava</b>Chega cansado, perde aula e gasta muito com transporte.</p><p class="gain"><b>No Enturma</b>Combina carona com colegas e revisa com resumos da IA.</p></div>
+        <div class="persona a tilt" style="--i:2"><div class="who-row"><div class="avatar">B</div><div><h3>Bia, 22</h3><p class="sub">Veterana em busca de estágio</p></div></div><p class="pain"><b>O que trava</b>Fez muitos projetos, mas não tem como mostrar.</p><p class="gain"><b>No Enturma</b>Monta o portfólio e gera o currículo a partir do que já fez.</p></div>
+      </div>
+      <p class="note a">Personas de referência, criadas para representar perfis de estudantes.</p>
     </div>
   </section>
 
@@ -688,22 +829,6 @@ em { font-style: normal; color: var(--lime); }
       </div>
       <div class="rd-phone a right" style="--d:650ms"><img src="img/caronas-celular.jpg" alt="Caronas no celular, com os modos passageiro e motorista"></div>
       <div class="stepcap k1"><span class="pill fill">Modo motorista</span><h3>Ofereça uma vaga</h3><p>Escolha o sentido, as vagas e o ponto de partida.</p></div>
-    </div>
-  </section>
-
-  <!-- 6 · público e personas -->
-  <section class="scene who rv-blinds on-paper" data-len="4" data-cam="960,540,1; 540,700,1.45; 960,700,1.45; 1380,700,1.45" data-name="Público" style="--ez:.25">
-    <div class="bg bg-paper"></div><div class="dots" style="color:#0b241c"></div>
-    <div class="cam">
-      <p class="tag"><i></i><span>Público-alvo e personas</span></p>
-      <h2 class="title kin">Para quem está na graduação.</h2>
-      <p class="lead a">Universitários maiores de 18 anos, do presencial ao EAD.</p>
-      <div class="personas px" style="--dz:.6">
-        <div class="persona a tilt" style="--i:0"><div class="who-row"><div class="avatar">A</div><div><h3>Ana, 19</h3><p class="sub">Caloura de ADS, turno da noite</p></div></div><p class="pain"><b>O que trava</b>Não conhece ninguém da turma e se perde nos prazos.</p><p class="gain"><b>No Enturma</b>Entra na sala da matéria no primeiro dia e vê tudo no calendário.</p></div>
-        <div class="persona a tilt" style="--i:1"><div class="who-row"><div class="avatar">L</div><div><h3>Lucas, 24</h3><p class="sub">Trabalha de dia e mora longe</p></div></div><p class="pain"><b>O que trava</b>Chega cansado, perde aula e gasta muito com transporte.</p><p class="gain"><b>No Enturma</b>Combina carona com colegas e revisa com resumos da IA.</p></div>
-        <div class="persona a tilt" style="--i:2"><div class="who-row"><div class="avatar">B</div><div><h3>Bia, 22</h3><p class="sub">Veterana em busca de estágio</p></div></div><p class="pain"><b>O que trava</b>Fez muitos projetos, mas não tem como mostrar.</p><p class="gain"><b>No Enturma</b>Monta o portfólio e gera o currículo a partir do que já fez.</p></div>
-      </div>
-      <p class="note a">Personas de referência, criadas para representar perfis de estudantes.</p>
     </div>
   </section>
 
@@ -854,18 +979,54 @@ em { font-style: normal; color: var(--lime); }
     </div>
   </section>
 
+  <!-- análise dos integrantes (7 passos: visão geral e zoom em cada um) -->
+  <section class="scene team rv-circle" style="--cx:50%;--cy:60%;--ez:.3;--ex:0px" data-len="7" data-cam="960,540,1; 394,484,1.9; 959,484,1.9; 1524,484,1.9; 394,828,1.9; 959,828,1.9; 1524,828,1.9" data-name="Análise dos integrantes">
+    <div class="bg bg-dark"></div><div class="dots" style="color:#d8ef79"></div>
+    <div class="orb" style="left:-300px;bottom:-380px;width:1000px;height:1000px"></div>
+    <div class="cam">
+      <p class="tag"><i></i><span>Análise dos integrantes</span></p>
+      <h2 class="title kin">Seis integrantes, <em>um produto</em>.</h2>
+      <p class="by a">Distribuição registrada pela equipe</p>
+      <div class="crewgrid">
+        <div class="m a" style="--i:0"><div class="who2"><b>FD</b><h3>Frederico Docas</h3></div><p class="role">Pesquisa de campo, requisitos e modelagem de dados</p><p class="resp">Levantamento de necessidades, análise de requisitos e apoio à estrutura do banco e às regras de negócio.</p></div>
+        <div class="m a" style="--i:1"><div class="who2"><b>GN</b><h3>Gabriel Chaves Notini</h3></div><p class="role">Pesquisa de referências e IA</p><p class="resp">Comparação com soluções existentes, estudo de recursos acadêmicos e apoio à integração e avaliação das funções de IA.</p></div>
+        <div class="m a" style="--i:2"><div class="who2"><b>JF</b><h3>João Guilherme Machado Ferreira</h3></div><p class="role">Gestão, documentação e autenticação e perfil</p><p class="resp">Organização de entregas e documentação, revisão das funcionalidades de acesso e experiência de identidade do usuário.</p></div>
+        <div class="m a" style="--i:3"><div class="who2"><b>LF</b><h3>Lucas Almeida Fidelis Silva</h3></div><p class="role">UX, prototipação e frontend</p><p class="resp">Organização de navegação, responsividade, componentes visuais e experiência do usuário.</p></div>
+        <div class="m a" style="--i:4"><div class="who2"><b>LG</b><h3>Lucas Gabriel Dias Costa</h3></div><p class="role">Pesquisa de campo, requisitos e matching</p><p class="resp">Levantamento de necessidades e colaboração nas regras de combinação para mobilidade universitária.</p></div>
+        <div class="m a" style="--i:5"><div class="who2"><b>LH</b><h3>Luiz Henrique Cordeiro dos Santos</h3></div><p class="role">UX, prototipação, frontend e backend</p><p class="resp">Apps Web, Desktop e Mobile, atualizações e correções, experiência visual, navegação entre plataformas e integração das funcionalidades.</p></div>
+      </div>
+    </div>
+  </section>
+
   <!-- 13 · conclusão -->
   <section class="scene end rv-up" data-name="Conclusão">
     <div class="bg bg-dark"></div><div class="dots" style="color:#d8ef79"></div>
     <div class="cam">
       <p class="tag"><i></i><span>Conclusão</span></p>
-      <h2 class="title kin">O objetivo era reunir o estudo em companhia em um só lugar. <em>Está no ar.</em></h2>
+      <h2 class="title kin">O objetivo era desenvolver e publicar a plataforma em três meses. <em>Está no ar.</em></h2>
       <div class="checks">
-        <div class="check a" style="--i:0"><div class="ok"><svg viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>Organizar a rotina</h3><p>Enturma Study, com calendário, presença e sessões.</p></div></div>
-        <div class="check a" style="--i:1"><div class="ok"><svg viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>Aproximar a turma</h3><p>Salas por matéria, Social, amigos e caronas.</p></div></div>
-        <div class="check a" style="--i:2"><div class="ok"><svg viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>Apoiar o estudo</h3><p>Enturma AI e Cadernos IA com fontes.</p></div></div>
+        <div class="check a" style="--i:0"><div class="ok"><svg viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>Produto no ar</h3><p>Web, Android e Windows, em uso desde 29/09.</p></div></div>
+        <div class="check a" style="--i:1"><div class="ok"><svg viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>Problema comprovado</h3><p>Três fontes públicas e três personas.</p></div></div>
+        <div class="check a" style="--i:2"><div class="ok"><svg viewBox="0 0 24 24"><path pathLength="1" d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div><div><h3>Processo verificável</h3><p>Mais de 200 entregas aprovadas nos testes.</p></div></div>
       </div>
-      <p class="next a">Falta a parte mais importante: provar, com uma turma de verdade, que estudar em companhia ajuda a ficar.</p>
+      <p class="next a">O que ainda não foi alcançado: medir, com uma turma de verdade, se estudar em companhia ajuda a ficar.</p>
+    </div>
+  </section>
+
+  <!-- referências -->
+  <section class="scene refs rv-blinds on-paper" data-name="Referências" style="--tw:2deg">
+    <div class="bg bg-paper"></div><div class="dots" style="color:#0b241c"></div>
+    <div class="cam">
+      <p class="tag"><i></i><span>Referências bibliográficas</span></p>
+      <h2 class="title kin">Referências.</h2>
+      <ul>
+        <li class="a left" style="--i:0">ANDIFES; FONAPRACE. <b>V Pesquisa Nacional de Perfil Socioeconômico e Cultural dos(as) Graduandos(as) das IFES: 2018.</b> Uberlândia: Andifes, 2019. Disponível em: andifes.org.br.</li>
+        <li class="a left" style="--i:1">BRASIL. <b>Lei nº 13.709, de 14 de agosto de 2018.</b> Lei Geral de Proteção de Dados Pessoais (LGPD). Brasília, DF, 2018. Disponível em: planalto.gov.br.</li>
+        <li class="a left" style="--i:2">INEP. <b>Censo da Educação Superior 2023:</b> trajetória dos ingressantes de 2014 a 2023. Brasília, DF: Inep, 2024. Disponível em: gov.br/inep.</li>
+        <li class="a left" style="--i:3">INEP. <b>Censo da Educação Superior 2024:</b> divulgação dos resultados. Brasília, DF: Inep, 2025. Disponível em: gov.br/inep.</li>
+        <li class="a left" style="--i:4">INSTITUTO SEMESP. <b>Mapa do Ensino Superior no Brasil 2026.</b> 16. ed. São Paulo: Semesp, 2026. Disponível em: semesp.org.br.</li>
+        <li class="a left" style="--i:5">Documentação técnica oficial consultada: Next.js, React, Spring Boot, PostgreSQL, Electron, LiveKit e OpenAI API.</li>
+      </ul>
     </div>
   </section>
 
