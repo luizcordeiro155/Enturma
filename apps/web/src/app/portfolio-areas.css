@@ -1,0 +1,129 @@
+/* The portfolio's area: its own colour on a few edges, and the controls that came with areas. */
+.portfolio-editor-page[data-track],
+.public-portfolio[data-track] {
+  --track-ink: var(--track);
+}
+html[data-theme="dark"] .portfolio-editor-page[data-track],
+html[data-theme="dark"] .public-portfolio[data-track] {
+  /* the same hue, light enough to read on a dark page */
+  --track-ink: color-mix(in srgb, var(--track) 50%, #ffffff);
+}
+.portfolio-track-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px solid color-mix(in srgb, var(--track-ink, var(--ink)) 55%, transparent);
+  background: color-mix(in srgb, var(--track-ink, var(--ink)) 12%, var(--bg));
+  color: var(--ink);
+  font-size: 0.82rem;
+  font-weight: 700;
+  width: fit-content;
+}
+.portfolio-track-chip svg {
+  color: var(--track-ink, var(--ink));
+}
+.portfolio-hero .portfolio-track-chip {
+  align-self: center;
+}
+.portfolio-editor-page[data-track] .portfolio-hero {
+  border-left: 6px solid var(--track-ink);
+}
+.portfolio-editor-page[data-track] .portfolio-hero > div > svg {
+  color: var(--track-ink);
+}
+
+.portfolio-area {
+  display: grid;
+  gap: 6px;
+  margin: 12px 0 4px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--track-ink, var(--ink));
+  background: var(--bg);
+}
+.portfolio-area label {
+  font-weight: 700;
+}
+.portfolio-area select {
+  min-height: 44px;
+  max-width: 420px;
+}
+.portfolio-area p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.portfolio-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.portfolio-suggestions > span {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.portfolio-editor-page .portfolio-settings .portfolio-suggestions > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 34px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1.5px dashed color-mix(in srgb, var(--track-ink, var(--ink)) 60%, var(--border));
+  background: transparent;
+  color: var(--ink);
+  font-size: 0.84rem;
+  font-weight: 600;
+}
+.portfolio-editor-page .portfolio-settings .portfolio-suggestions > button:hover {
+  background: color-mix(in srgb, var(--track-ink, var(--ink)) 12%, var(--bg));
+  border-style: solid;
+}
+
+.portfolio-ideas {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.portfolio-ideas li {
+  padding: 3px 11px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--track-ink, var(--ink)) 12%, var(--bg));
+  color: var(--ink);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.portfolio-editor-page[data-track] .portfolio-projects-empty > svg {
+  color: var(--track-ink);
+}
+
+/* Public page: the area tints the labels of each work. */
+.public-portfolio[data-track] .public-project-tech li {
+  border-color: color-mix(in srgb, var(--track-ink) 45%, var(--border));
+  background: color-mix(in srgb, var(--track-ink) 9%, var(--bg));
+}
+.public-portfolio[data-track] .public-project-kinds > button[aria-pressed="true"] {
+  border-color: var(--track-ink);
+}
+.public-portfolio .portfolio-track-chip {
+  margin-top: 6px;
+}
+
+@media print {
+  .portfolio-track-chip {
+    border-color: #999;
+    background: none;
+  }
+}

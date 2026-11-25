@@ -1,13 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import {
-  BriefcaseBusiness,
-  ExternalLink,
-  FileText,
-  FolderGit2,
-  Plus,
-} from "lucide-react";
+import { ExternalLink, FileText, FolderGit2, Plus } from "lucide-react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import {
@@ -18,6 +12,8 @@ import {
   type Project,
 } from "@/lib/portfolio-projects";
 import { competencies } from "@/lib/portfolio-skills";
+import { TRACKS, trackOf } from "@/lib/portfolio-tracks";
+import { TrackIcon } from "./portfolio-track-icon";
 import { Feedback } from "./feedback";
 import {
   formatDays,
@@ -43,6 +39,8 @@ export function PortfolioEditor() {
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [shelf, setShelf] = useState<"active" | "archived">("active");
   const [importing, setImporting] = useState(false);
+  // "AUTO" follows the course; undefined when the server knows nothing about areas.
+  const [area, setArea] = useState<string>();
   const [mentor, setMentor] = useState(false);
   const [team, setTeam] = useState<TeamState>({
     projects: {},
@@ -97,6 +95,7 @@ export function PortfolioEditor() {
           id: p.id ?? crypto.randomUUID(),
         }));
         setData(v);
+        setArea(v.track ? (v.trackChoice ?? "AUTO") : undefined);
         setSavedIds(new Set(list.map((p) => p.id!)));
         setSkillsText((v.skills ?? []).join(", "));
         // The page opens as a list: the student opens the project they came to see.
@@ -215,6 +214,7 @@ export function PortfolioEditor() {
           headline: String(fd.get("headline") || ""),
           summary: String(fd.get("summary") || ""),
           goal: String(fd.get("goal") || ""),
+          ...(area ? { track: area } : {}),
           skills,
           // a link to a competency that left the list goes with it
           projects: projects.map((p) =>
@@ -252,17 +252,31 @@ export function PortfolioEditor() {
     );
   const skills = splitLabels(skillsText, 30);
   const levels = competencies(skills, projects);
+  // What the student picked shows at once; saving is what makes it stay.
+  const byCourse = trackOf(data.courseTrack ?? data.track);
+  const track = area && area !== "AUTO" ? trackOf(area) : area ? byCourse : trackOf(data.track);
+  const has = (name: string) =>
+    skills.some(
+      (skill) => skill.toLocaleLowerCase("pt-BR") === name.toLocaleLowerCase("pt-BR"),
+    );
+  const suggestions = track.suggested.filter((name) => !has(name));
   const repositories = projects
     .map((p) => p.github?.fullName)
     .filter((name): name is string => Boolean(name));
   const room = MAX_PROJECTS - projects.length;
   return (
     <Shell>
-      <div className="portfolio-editor-page" ref={root}>
+      <div
+        className="portfolio-editor-page"
+        ref={root}
+        data-track={area ? track.id : undefined}
+        style={{ "--track": track.accent } as React.CSSProperties}
+      >
         <header className="suite-heading suite-hero portfolio-hero">
           <div>
-            <BriefcaseBusiness size={32} />
+            <TrackIcon track={track.id} size={32} />
             <h1>Portfólio acadêmico</h1>
+            {area ? <span className="portfolio-track-chip">{track.label}</span> : null}
           </div>
           <p>
             Transforme sua trajetória no Enturma em uma apresentação
@@ -308,13 +322,37 @@ export function PortfolioEditor() {
                 <small>Disponível em /p/{data.username}</small>
               </span>
             </label>
+            {area ? (
+              <div className="portfolio-area">
+                <label htmlFor="portfolio-area">Área do portfólio</label>
+                <select
+                  id="portfolio-area"
+                  aria-label="Área do portfólio"
+                  value={area}
+                  onChange={(e) => setArea(e.target.value)}
+                >
+                  <option value="AUTO">Automática pelo curso: {byCourse.label}</option>
+                  {TRACKS.map((entry) => (
+                    <option key={entry.id} value={entry.id}>
+                      {entry.label}
+                    </option>
+                  ))}
+                </select>
+                <p>
+                  {data.course
+                    ? `Seu curso no Enturma é ${data.course}. `
+                    : "Você ainda não escolheu um curso no Enturma. "}
+                  A área define os tipos de trabalho, os campos e as sugestões desta página.
+                </p>
+              </div>
+            ) : null}
             <label>
               Título profissional
               <input
                 name="headline"
                 defaultValue={data.headline}
                 maxLength={140}
-                placeholder="Estudante de ADS · Java · UX"
+                placeholder={track.profile.headline}
               />
             </label>
             <label>
@@ -323,7 +361,7 @@ export function PortfolioEditor() {
                 name="goal"
                 defaultValue={data.goal ?? ""}
                 maxLength={200}
-                placeholder="Ex.: estágio em desenvolvimento back-end"
+                placeholder={track.profile.goal}
               />
             </label>
             <label>
@@ -341,9 +379,30 @@ export function PortfolioEditor() {
                 name="skills"
                 value={skillsText}
                 onChange={(e) => setSkillsText(e.target.value)}
-                placeholder="Java, SQL, Git, UI/UX"
+                placeholder={track.profile.skills}
               />
             </label>
+            {suggestions.length ? (
+              <div
+                className="portfolio-suggestions"
+                role="group"
+                aria-label="Sugestões de competências"
+              >
+                <span aria-hidden="true">Sugestões</span>
+                {suggestions.map((name) => (
+                  <button
+                    key={name}
+                    type="button"
+                    onClick={() =>
+                      setSkillsText((text) => [...splitLabels(text, 30), name].join(", "))
+                    }
+                  >
+                    <Plus size={13} aria-hidden="true" />
+                    {name}
+                  </button>
+                ))}
+              </div>
+            ) : null}
             {levels.length ? (
               <div className="portfolio-skill-levels">
                 <ul aria-label="Competências e evidências">
@@ -359,9 +418,10 @@ export function PortfolioEditor() {
                   ))}
                 </ul>
                 <p>
-                  Uma competência fica demonstrada quando um projeto ativo a usa
-                  como tecnologia ou quando você a liga ao projeto, no cartão
-                  dele. As outras aparecem como declaradas.
+                  {track.id === "TECH"
+                    ? "Uma competência fica demonstrada quando um projeto ativo a usa como tecnologia ou quando você a liga ao projeto, no cartão dele."
+                    : `Uma competência fica demonstrada quando um projeto ativo a lista em "${track.fields.tools.label}" ou quando você a liga ao projeto, no cartão dele.`}{" "}
+                  As outras aparecem como declaradas.
                 </p>
               </div>
             ) : null}
@@ -388,7 +448,7 @@ export function PortfolioEditor() {
           >
             <div className="section-heading portfolio-projects-heading">
               <div>
-                <h2 id="portfolio-projects-title">Projetos</h2>
+                <h2 id="portfolio-projects-title">{track.heading}</h2>
                 <p className="muted">
                   {projects.length ? (
                     <>
@@ -404,21 +464,23 @@ export function PortfolioEditor() {
               </div>
               {projects.length ? (
                 <div className="portfolio-projects-actions">
-                  <button
-                    type="button"
-                    className="secondary"
-                    disabled={room < 1}
-                    onClick={() => setImporting(true)}
-                  >
-                    <FolderGit2 size={16} /> Importar do GitHub
-                  </button>
+                  {track.github ? (
+                    <button
+                      type="button"
+                      className="secondary"
+                      disabled={room < 1}
+                      onClick={() => setImporting(true)}
+                    >
+                      <FolderGit2 size={16} /> Importar do GitHub
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className="secondary"
                     disabled={room < 1}
                     onClick={addProject}
                   >
-                    <Plus size={16} /> Adicionar projeto
+                    <Plus size={16} /> {track.add}
                   </button>
                 </div>
               ) : null}
@@ -457,6 +519,7 @@ export function PortfolioEditor() {
               <PortfolioProjectCard
                 key={p.id}
                 project={p}
+                track={track}
                 number={i + 1}
                 open={open.has(p.id!)}
                 first={i === 0}
@@ -503,27 +566,30 @@ export function PortfolioEditor() {
             ) : null}
             {!projects.length ? (
               <div className="portfolio-projects-empty">
-                <FolderGit2 size={28} aria-hidden="true" />
-                <p>
-                  Adicione projetos da faculdade, pessoais, open source ou
-                  trabalhos em equipe. Cada projeto pode ter tecnologias, sua
-                  participação, links, imagens e PDFs.
-                </p>
+                <TrackIcon track={track.id} size={28} />
+                <p>{track.empty}</p>
+                <ul className="portfolio-ideas" aria-label="Ideias do que mostrar">
+                  {track.ideas.map((idea) => (
+                    <li key={idea}>{idea}</li>
+                  ))}
+                </ul>
                 <div className="portfolio-projects-actions">
                   <button
                     type="button"
                     className="secondary"
                     onClick={addProject}
                   >
-                    <Plus size={16} /> Adicionar projeto
+                    <Plus size={16} /> {track.add}
                   </button>
-                  <button
-                    type="button"
-                    className="secondary"
-                    onClick={() => setImporting(true)}
-                  >
-                    <FolderGit2 size={16} /> Importar do GitHub
-                  </button>
+                  {track.github ? (
+                    <button
+                      type="button"
+                      className="secondary"
+                      onClick={() => setImporting(true)}
+                    >
+                      <FolderGit2 size={16} /> Importar do GitHub
+                    </button>
+                  ) : null}
                 </div>
               </div>
             ) : null}

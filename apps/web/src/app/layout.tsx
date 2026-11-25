@@ -47,6 +47,7 @@ import "./experience-stabilization.css";
 import "./room-invitations.css";
 import "./enturma-identity.css";
 import "./portfolio-projects.css";
+import "./portfolio-areas.css";
 import "./settings.css";
 import "./mission-games.css";
 import "./profile-cosmetics.css";

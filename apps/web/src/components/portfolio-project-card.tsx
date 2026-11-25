@@ -18,11 +18,11 @@ import {
   kindLabel,
   matchesGithub,
   MAX_TECHNOLOGIES,
-  PROJECT_KINDS,
   splitLabels,
   type Project,
   type ProjectKind,
 } from "@/lib/portfolio-projects";
+import { kindsFor, trackOf, type Track } from "@/lib/portfolio-tracks";
 import {
   PortfolioAttachments,
   type PortfolioAsset,
@@ -43,6 +43,7 @@ export function githubUpdated(iso?: string) {
 /** One project in the editor: a summary row that opens into its fields. */
 export function PortfolioProjectCard({
   project: p,
+  track = trackOf(),
   number,
   open,
   first,
@@ -60,6 +61,8 @@ export function PortfolioProjectCard({
   onUpload,
 }: {
   project: Project;
+  /** The portfolio's area: it names the fields and chooses the kinds of work offered. */
+  track?: Track;
   /** Position in the list being shown, from 1. */
   number: number;
   open: boolean;
@@ -227,7 +230,7 @@ export function PortfolioProjectCard({
                 data-project-name={p.id}
                 value={p.name}
                 maxLength={120}
-                placeholder="Ex.: App de caronas universitárias"
+                placeholder={track.fields.name}
                 onChange={(e) => onChange({ name: e.target.value })}
               />
             </label>
@@ -246,7 +249,7 @@ export function PortfolioProjectCard({
                 }
               >
                 <option value="">Sem tipo</option>
-                {PROJECT_KINDS.map((kind) => (
+                {kindsFor(track, p.kind).map((kind) => (
                   <option key={kind.id} value={kind.id}>
                     {kind.label}
                   </option>
@@ -265,19 +268,19 @@ export function PortfolioProjectCard({
                 value={p.description ?? ""}
                 maxLength={500}
                 rows={3}
-                placeholder="Que problema o projeto resolve e como ele funciona."
+                placeholder={track.fields.description}
                 onChange={(e) => onChange({ description: e.target.value })}
               />
             </label>
             <label className="portfolio-field portfolio-field-wide">
               <span>
-                Tecnologias <small>separadas por vírgula</small>
+                {track.fields.tools.label} <small>separe por vírgula</small>
               </span>
               <input
-                aria-label={"Tecnologias do projeto " + number}
+                aria-label={track.fields.tools.label + " do projeto " + number}
                 value={typed}
                 maxLength={400}
-                placeholder="Java, PostgreSQL, React"
+                placeholder={track.fields.tools.placeholder}
                 onChange={(e) => {
                   setTyped(e.target.value);
                   const labels = splitLabels(e.target.value, MAX_TECHNOLOGIES);
@@ -294,7 +297,7 @@ export function PortfolioProjectCard({
                 aria-label={"Disciplina do projeto " + number}
                 value={p.subject ?? ""}
                 maxLength={120}
-                placeholder="Ex.: Engenharia de Software"
+                placeholder={track.fields.subject}
                 onChange={(e) => onChange({ subject: e.target.value })}
               />
             </label>
@@ -312,27 +315,27 @@ export function PortfolioProjectCard({
             </label>
             <label className="portfolio-field">
               <span>
-                Repositório <small>opcional</small>
+                {track.fields.link.label} <small>opcional</small>
               </span>
               <input
                 type="url"
-                aria-label={"Repositório do projeto " + number}
+                aria-label={track.fields.link.label + " do projeto " + number}
                 value={p.repoUrl ?? ""}
                 maxLength={300}
-                placeholder="https://github.com/voce/projeto"
+                placeholder={track.fields.link.placeholder}
                 onChange={(e) => onChange({ repoUrl: e.target.value })}
               />
             </label>
             <label className="portfolio-field">
               <span>
-                Demonstração ou site <small>opcional</small>
+                {track.fields.demo.label} <small>opcional</small>
               </span>
               <input
                 type="url"
                 aria-label={"Link do projeto " + number}
                 value={p.url ?? ""}
                 maxLength={300}
-                placeholder="https://meu-projeto.com"
+                placeholder={track.fields.demo.placeholder}
                 onChange={(e) => onChange({ url: e.target.value })}
               />
             </label>
@@ -374,7 +377,7 @@ export function PortfolioProjectCard({
                     value={p.role ?? ""}
                     maxLength={300}
                     rows={2}
-                    placeholder="Ex.: modelei o banco e escrevi a API de reservas."
+                    placeholder={track.fields.role}
                     onChange={(e) => onChange({ role: e.target.value })}
                   />
                 </label>
@@ -398,7 +401,7 @@ export function PortfolioProjectCard({
                 value={p.outcome ?? ""}
                 maxLength={300}
                 rows={2}
-                placeholder="O que ficou pronto, quem usou, que nota ou retorno teve."
+                placeholder={track.fields.outcome}
                 onChange={(e) => onChange({ outcome: e.target.value })}
               />
             </label>

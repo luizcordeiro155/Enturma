@@ -61,7 +61,9 @@ public class PortfolioController {
       @Size(max = 1200) String summary,
       @Size(max = 30) List<@Size(max = 60) String> skills,
       @Size(max = 60) List<@Valid Project> projects,
-      @Size(max = 200) String goal) {}
+      @Size(max = 200) String goal,
+      /** The area chosen by the student, "AUTO" to follow the course again, absent to keep it. */
+      @Size(max = 20) String track) {}
 
   @GetMapping("/portfolio/me")
   public Object mine(@AuthenticationPrincipal Actor a) {
@@ -83,6 +85,9 @@ public class PortfolioController {
                 .limit(30)
                 .toList();
     List<Project> projects = r.projects() == null ? List.of() : r.projects();
+    boolean follow = "AUTO".equals(r.track());
+    if (r.track() != null && !follow && !PortfolioTracks.known(r.track()))
+      throw ApiException.invalid("Escolha uma área válida para o portfólio.");
     if (projects.size() > MAX_PROJECTS)
       throw ApiException.invalid("O portfólio guarda até " + MAX_PROJECTS + " projetos.");
     db.one("SELECT id FROM app_user WHERE id=? FOR UPDATE", a.id());
@@ -141,12 +146,15 @@ public class PortfolioController {
     }
     db.jdbc.update(
         "INSERT INTO portfolio_profile(user_id,public,headline,summary,skills,projects,goal,"
-            + "updated_at) VALUES (?,?,?,?,?::jsonb,?::jsonb,coalesce(?,''),now())"
+            + "track,updated_at) VALUES (?,?,?,?,?::jsonb,?::jsonb,coalesce(?,''),?,now())"
             + " ON CONFLICT(user_id) DO UPDATE SET"
             + " public=EXCLUDED.public,headline=EXCLUDED.headline,summary=EXCLUDED.summary,"
             + " skills=EXCLUDED.skills,projects=EXCLUDED.projects,"
             // a client that does not send the goal (an older app) leaves it as it was
-            + " goal=coalesce(?,portfolio_profile.goal),updated_at=now()",
+            + " goal=coalesce(?,portfolio_profile.goal),"
+            // the same for the area: absent keeps it, "AUTO" hands it back to the course
+            + " track=CASE WHEN ? THEN NULL ELSE coalesce(?,portfolio_profile.track) END,"
+            + " updated_at=now()",
         a.id(),
         r.publicProfile(),
         Objects.toString(r.headline(), "").strip(),
@@ -154,7 +162,10 @@ public class PortfolioController {
         json.writeValueAsString(skills),
         json.writeValueAsString(stored),
         r.goal() == null ? null : r.goal().strip(),
-        r.goal() == null ? null : r.goal().strip());
+        follow ? null : r.track(),
+        r.goal() == null ? null : r.goal().strip(),
+        follow,
+        follow ? null : r.track());
     // A project that left the portfolio has no team any more.
     db.jdbc.update(
         "DELETE FROM portfolio_project_member WHERE owner_id=? AND NOT (project_id = ANY(?))",
@@ -165,7 +176,17 @@ public class PortfolioController {
   private static final int MAX_PROJECTS = 60;
   private static final int MAX_FEATURED = 6;
   private static final Set<String> KINDS =
-      Set.of("ACADEMIC", "PERSONAL", "OPEN_SOURCE", "RESEARCH");
+      Set.of(
+          "ACADEMIC",
+          "PERSONAL",
+          "OPEN_SOURCE",
+          "RESEARCH",
+          "INTERNSHIP",
+          "VOLUNTEER",
+          "CASE_STUDY",
+          "PUBLICATION",
+          "CREATIVE",
+          "COMPETITION");
   private static final java.util.regex.Pattern REPOSITORY =
       java.util.regex.Pattern.compile("[A-Za-z0-9-]{1,39}/[A-Za-z0-9._-]{1,100}");
 
@@ -231,18 +252,42 @@ public class PortfolioController {
     return build(id, false);
   }
 
+  /** The course above the period the student is enrolled in, when there is one. */
+  private String course(UUID user) {
+    return db
+        .list(
+            "WITH RECURSIVE up AS (SELECT e.parent_id,e.kind,e.name,0 depth FROM academic_entry e"
+                + " JOIN academic_enrollment en ON en.period_id=e.id WHERE en.user_id=?"
+                + " UNION ALL SELECT p.parent_id,p.kind,p.name,up.depth+1 FROM academic_entry p"
+                + " JOIN up ON up.parent_id=p.id WHERE up.depth<6)"
+                + " SELECT name FROM up WHERE kind='COURSE' LIMIT 1",
+            user)
+        .stream()
+        .map(row -> (String) row.get("name"))
+        .findFirst()
+        .orElse(null);
+  }
+
   private Object build(UUID user, boolean owner) {
     var base =
         db.one(
             "SELECT u.id,u.name,u.username,u.bio,u.accent_color,"
                 + " u.avatar_bytes IS NOT NULL has_avatar,u.banner_bytes IS NOT NULL has_banner,"
                 + " coalesce(p.public,false) public_profile,coalesce(p.headline,'') headline,"
-                + " coalesce(p.summary,'') summary,coalesce(p.goal,'') goal,"
+                + " coalesce(p.summary,'') summary,coalesce(p.goal,'') goal,p.track track_choice,"
                 + " coalesce(p.skills,'[]'::jsonb) skills,"
                 + " coalesce(p.projects,'[]'::jsonb) projects"
                 + " FROM app_user u LEFT JOIN portfolio_profile p ON p.user_id=u.id WHERE u.id=?",
             user);
     if (!owner && !Boolean.TRUE.equals(base.get("publicProfile"))) throw ApiException.missing();
+    // The area follows the enrolled course until the student chooses one.
+    String course = course(user);
+    Object choice = base.get("trackChoice");
+    base.put("track", PortfolioTracks.known((String) choice) ? choice : PortfolioTracks.of(course));
+    if (owner) {
+      base.put("course", course);
+      base.put("courseTrack", PortfolioTracks.of(course));
+    } else base.remove("trackChoice");
     // Archived projects are the owner's alone: visitors get neither the project nor its files.
     if (!owner && base.get("projects") instanceof com.fasterxml.jackson.databind.node.ArrayNode all) {
       var open = json.createArrayNode();
