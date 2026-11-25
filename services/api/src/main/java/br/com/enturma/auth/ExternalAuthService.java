@@ -132,7 +132,13 @@ public class ExternalAuthService {
             // Nobody knows this password; the account gets one through "forgot my password".
             encoder.encode(Tokens.create()));
     created.emailVerified = true;
-    accounts.saveAndFlush(created);
+    try {
+      accounts.saveAndFlush(created);
+    } catch (org.springframework.dao.DataIntegrityViolationException e) {
+      // Two sign-ins for the same new person at once: the second one simply tries again.
+      throw new ApiException(
+          409, "SIGNUP_CONFLICT", "Não foi possível criar sua conta agora. Tente de novo.");
+    }
     db.jdbc.update("UPDATE app_user SET password_set=false WHERE id=?", created.id);
     consents.recordSignUp(created.id);
     attach(created.id, GOOGLE, profile);
