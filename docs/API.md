@@ -35,6 +35,11 @@ Detalhes e schemas em [ACADEMIC_IMPORTS](ACADEMIC_IMPORTS.md). `/academics` e `/
 | POST /auth/forgot-password                         | `{email}`; sempre 204 se entrada válida                                    |
 | POST /auth/reset-password                          | `{token,password}`                                                         |
 | POST /auth/verify-email                            | `{token}`                                                                  |
+| GET /public/auth/providers                         | Provedores ligados, ID público do cliente e endereço de retorno            |
+| POST /auth/google                                  | `{code,codeVerifier,device,acceptedTerms}`; tokens + `created`             |
+| POST /auth/google/link; POST /auth/github/connect  | `{code,codeVerifier}`; vincula à conta da sessão                           |
+| GET /auth/identities; DELETE /auth/identities/{p}  | Contas conectadas (`google`, `github`) e desvínculo                        |
+| PUT /portfolio/me/github                           | `{auto}`; liga/desliga a importação automática; `{login,auto,added,reached}` |
 | GET /academics                                     | kind, parentId, search, page; 30 itens                                     |
 | GET /users/me                                      | Perfil, matrícula e matérias                                               |
 | PUT /users/me/enrollment                           | periodId, subjectIds, shift, preferences                                   |

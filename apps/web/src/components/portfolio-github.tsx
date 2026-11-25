@@ -33,6 +33,7 @@ export function GithubImportDialog({
   taken,
   room,
   initialLogin = "",
+  autoSearch = false,
   onImport,
   onClose,
 }: {
@@ -41,6 +42,8 @@ export function GithubImportDialog({
   /** How many more projects the portfolio can hold. */
   room: number;
   initialLogin?: string;
+  /** Lists the repositories of {@link initialLogin} as the dialog opens. */
+  autoSearch?: boolean;
   onImport: (projects: Project[]) => void;
   onClose: () => void;
 }) {
@@ -88,11 +91,20 @@ export function GithubImportDialog({
     };
   }, []);
 
+  // The connected account needs no typing: its repositories are listed at once.
+  const searched = useRef(false);
+  useEffect(() => {
+    if (!autoSearch || !initialLogin || searched.current) return;
+    searched.current = true;
+    queueMicrotask(() => void search());
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the dialog opens
+  }, []);
+
   const have = new Set(taken.map((name) => name.toLowerCase()));
   const full = picked.length >= room;
 
-  async function search(event: FormEvent) {
-    event.preventDefault();
+  async function search(event?: FormEvent) {
+    event?.preventDefault();
     if (busy) return;
     const name = githubLogin(login);
     setError("");

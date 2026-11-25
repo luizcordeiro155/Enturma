@@ -76,6 +76,7 @@ public class AccountPrivacyController {
     // anonimizar.
     db.jdbc.update("DELETE FROM account_token WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM password_reset_flow WHERE user_id=?", userId);
+    db.jdbc.update("DELETE FROM user_identity WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM notification_push_device WHERE user_id=?", userId);
     db.jdbc.update("DELETE FROM notification_web_push_subscription WHERE user_id=?", userId);
     db.jdbc.update(

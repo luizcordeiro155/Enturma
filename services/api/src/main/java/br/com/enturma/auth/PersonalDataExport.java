@@ -14,7 +14,7 @@ public class PersonalDataExport {
   public PersonalDataExport(Db db) { this.db=db; }
   private static final Map<String,String> SECTIONS=new LinkedHashMap<>(Map.of(
     "account", "SELECT id,name,username,email,bio,profile_details,created_at,last_seen_at FROM app_user WHERE id=? ORDER BY id",
-    "portfolio", "SELECT headline,summary,goal,skills,projects,public,track,updated_at FROM portfolio_profile WHERE user_id=? ORDER BY user_id",
+    "portfolio", "SELECT headline,summary,goal,skills,projects,public,track,github_auto,updated_at FROM portfolio_profile WHERE user_id=? ORDER BY user_id",
     "notebooks", "SELECT id,title,created_at,updated_at FROM study_notebook WHERE user_id=? ORDER BY created_at,id",
     "sources", "SELECT s.id,s.notebook_id,s.title,s.kind,s.url,s.content,s.created_at FROM notebook_source s JOIN study_notebook n ON n.id=s.notebook_id WHERE n.user_id=? ORDER BY s.created_at,s.id",
     "conversations", "SELECT g.id,g.notebook_id,g.question,g.answer,g.citations,g.external_sources,g.created_at FROM notebook_generation g JOIN study_notebook n ON n.id=g.notebook_id WHERE n.user_id=? ORDER BY g.created_at,g.id",
@@ -25,6 +25,7 @@ public class PersonalDataExport {
     "social-preferences", "SELECT private_account,recommendations,autoplay,interests,navigation FROM social_profile WHERE user_id=? ORDER BY user_id"
   ));
   static {
+    SECTIONS.put("connected-accounts", "SELECT provider,login,created_at FROM user_identity WHERE user_id=? ORDER BY provider");
     SECTIONS.put("social-collections", "SELECT id,name,created_at FROM social_collection WHERE owner_id=? ORDER BY created_at,id");
     SECTIONS.put("social-collection-items", "SELECT i.collection_id,i.post_id,i.created_at FROM social_collection_item i JOIN social_collection c ON c.id=i.collection_id WHERE c.owner_id=? ORDER BY i.created_at,i.collection_id,i.post_id");
     SECTIONS.put("social-lives", "SELECT id,title,visibility,state,started_at,ended_at,peak_viewers FROM social_live WHERE author_id=? ORDER BY started_at,id");
