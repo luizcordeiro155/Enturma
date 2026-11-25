@@ -125,6 +125,16 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
     });
   });
   await page.goto("/portfolio");
+  // The fixture course says nothing about its area, so the portfolio opens as the general
+  // one, without GitHub. Choosing technology is what brings the import to the page.
+  await expect(page.getByLabel("Área do portfólio")).toHaveValue("AUTO");
+  await expect(
+    page.getByRole("button", { name: "Importar do GitHub", exact: true }),
+  ).toHaveCount(0);
+  await page.getByLabel("Área do portfólio").selectOption("TECH");
+  await expect(
+    page.getByRole("button", { name: "Importar do GitHub", exact: true }),
+  ).toBeVisible();
   await page.getByRole("button", { name: "Adicionar projeto", exact: true }).click();
   // A new project opens empty with its name field ready to type.
   await expect(

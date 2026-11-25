@@ -2180,7 +2180,72 @@ class PlatformIntegrationTest {
 
   private static PortfolioController.Portfolio portfolioOf(
       boolean open, List<PortfolioController.Project> projects) {
-    return new PortfolioController.Portfolio(open, "", "", List.of(), projects, null);
+    return new PortfolioController.Portfolio(open, "", "", List.of(), projects, null, null);
+  }
+
+  @Test
+  void portfolioFollowsTheCourseAreaUntilTheStudentChoosesAnother() throws Exception {
+    // the fixture course has no recognisable name: the general portfolio
+    var mine = json.valueToTree(portfolio.mine(host));
+    assertThat(mine.get("track").asText()).isEqualTo("GENERAL");
+    assertThat(mine.get("course").asText()).isEqualTo("TESTE SINTÉTICO — COURSE");
+    assertThat(mine.get("trackChoice").isNull()).isTrue();
+
+    // period → curriculum → course
+    db.jdbc.update(
+        "UPDATE academic_entry SET name='Enfermagem' WHERE id=(SELECT parent_id FROM"
+            + " academic_entry WHERE id=(SELECT parent_id FROM academic_entry WHERE id=?))",
+        period);
+    assertThat(json.valueToTree(portfolio.mine(host)).get("track").asText()).isEqualTo("HEALTH");
+
+    portfolio.save(host, portfolioIn("DESIGN", null));
+    mine = json.valueToTree(portfolio.mine(host));
+    assertThat(mine.get("track").asText()).isEqualTo("DESIGN");
+    assertThat(mine.get("trackChoice").asText()).isEqualTo("DESIGN");
+    // the editor still knows what "follow my course" would give
+    assertThat(mine.get("courseTrack").asText()).isEqualTo("HEALTH");
+    // an older client does not send the area: the choice stays
+    portfolio.save(host, portfolioIn(null, null));
+    assertThat(json.valueToTree(portfolio.mine(host)).get("track").asText()).isEqualTo("DESIGN");
+    // visitors see the same area, and not which course it came from
+    var visitor = json.valueToTree(portfolio.publicPortfolio(usernameOf(host)));
+    assertThat(visitor.get("track").asText()).isEqualTo("DESIGN");
+    assertThat(visitor.has("trackChoice")).isFalse();
+    assertThat(visitor.has("courseTrack")).isFalse();
+    assertThat(visitor.has("course")).isFalse();
+
+    portfolio.save(host, portfolioIn("AUTO", null));
+    mine = json.valueToTree(portfolio.mine(host));
+    assertThat(mine.get("track").asText()).isEqualTo("HEALTH");
+    assertThat(mine.get("trackChoice").isNull()).isTrue();
+
+    assertThatThrownBy(() -> portfolio.save(host, portfolioIn("MAGIC", null)))
+        .isInstanceOf(ApiException.class);
+  }
+
+  @Test
+  void portfolioAcceptsTheKindsOfWorkOfEveryArea() throws Exception {
+    for (String kind :
+        List.of(
+            "ACADEMIC", "PERSONAL", "OPEN_SOURCE", "RESEARCH", "INTERNSHIP", "VOLUNTEER",
+            "CASE_STUDY", "PUBLICATION", "CREATIVE", "COMPETITION")) {
+      portfolio.save(host, portfolioIn(null, kind));
+      assertThat(json.valueToTree(portfolio.mine(host)).get("projects").get(0).get("kind").asText())
+          .isEqualTo(kind);
+    }
+    assertThatThrownBy(() -> portfolio.save(host, portfolioIn(null, "HOMEWORK")))
+        .isInstanceOf(ApiException.class);
+  }
+
+  private static PortfolioController.Portfolio portfolioIn(String track, String kind) {
+    var projects =
+        kind == null
+            ? List.<PortfolioController.Project>of()
+            : List.of(
+                new PortfolioController.Project(
+                    UUID.randomUUID(), "Trabalho", "", "", List.of(), kind, null, null, null, null,
+                    null, null, null, null, null, null, null, null, null));
+    return new PortfolioController.Portfolio(true, "", "", List.of(), projects, null, track);
   }
 
   @Test
@@ -2217,7 +2282,7 @@ class PlatformIntegrationTest {
     portfolio.save(
         host,
         new PortfolioController.Portfolio(
-            true, "Dev", "", List.of(), List.of(shown, shelved), "Estágio em back-end"));
+            true, "Dev", "", List.of(), List.of(shown, shelved), "Estágio em back-end", null));
 
     var mine = json.valueToTree(portfolio.mine(host));
     assertThat(mine.get("goal").asText()).isEqualTo("Estágio em back-end");
@@ -2422,7 +2487,7 @@ class PlatformIntegrationTest {
     portfolio.save(
         host,
         new PortfolioController.Portfolio(
-            true, "Dev", "", List.of(), Arrays.asList(projects), "Estágio"));
+            true, "Dev", "", List.of(), Arrays.asList(projects), "Estágio", null));
   }
 
   private com.fasterxml.jackson.databind.JsonNode publicJourney() {
@@ -2742,7 +2807,8 @@ class PlatformIntegrationTest {
                     forged, "Caronas", "", "", List.of(), null, null, null, null, true, "Fiz tudo.",
                     null, null, null, null, null, null, null,
                     new PortfolioController.SharedFrom(host.id(), project))),
-            ""));
+            "",
+            null));
     var theirs = publicProject(outsider, "Caronas");
     assertThat(theirs.has("sharedFrom")).isFalse();
     assertThat(theirs.path("members")).isEmpty();

@@ -15,6 +15,12 @@ export type Portfolio = {
   headline: string;
   summary: string;
   goal?: string;
+  /** The area the portfolio is shaped for; absent when the server is older than areas. */
+  track?: string;
+  /** Owner only: the area the student chose, what the course alone would give, and the course. */
+  trackChoice?: string | null;
+  courseTrack?: string;
+  course?: string | null;
   skills: string[];
   projects: Project[];
   /** Visitors only: the timeline records the student chose to show. */

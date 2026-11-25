@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ExternalLink, FolderGit2, Printer, Star, Users } from "lucide-react";
+import {
+  ExternalLink,
+  FileText,
+  FolderGit2,
+  Printer,
+  Star,
+  Users,
+} from "lucide-react";
+import { trackOf, type Track } from "@/lib/portfolio-tracks";
+import { TrackIcon } from "./portfolio-track-icon";
 import { api } from "@/lib/api";
 import {
   kindLabel,
@@ -68,6 +77,7 @@ export function PublicPortfolio({ username }: { username: string }) {
   const listed = kind ? projects.filter((p) => p.kind === kind) : projects;
   const later = Math.max(0, listed.length - shown);
   const levels = competencies(data.skills ?? [], projects);
+  const track = trackOf(data.track);
   /** Opens the list as far as a project and takes the reader to it. */
   function reveal(id: string | undefined, event: React.MouseEvent) {
     if (!id) return;
@@ -83,9 +93,11 @@ export function PublicPortfolio({ username }: { username: string }) {
   return (
     <main
       className="public-portfolio"
+      data-track={data.track ? track.id : undefined}
       style={
         {
           "--portfolio-accent": data.accentColor ?? "#183f36",
+          "--track": track.accent,
         } as React.CSSProperties
       }
     >
@@ -100,6 +112,12 @@ export function PublicPortfolio({ username }: { username: string }) {
           <div>
             <h1>{data.name}</h1>
             <p>{data.headline || "Estudante no Enturma"}</p>
+            {data.track ? (
+              <p className="portfolio-track-chip">
+                <TrackIcon track={track.id} size={14} />
+                {track.label}
+              </p>
+            ) : null}
             {data.goal ? (
               <p className="portfolio-goal">
                 <strong>Objetivo</strong> {data.goal}
@@ -168,7 +186,7 @@ export function PublicPortfolio({ username }: { username: string }) {
       {projects.length ? (
         <section>
           <div className="public-projects-heading">
-            <h2>Projetos</h2>
+            <h2>{track.heading}</h2>
             {kinds.length > 1 ? (
               <div
                 className="public-project-kinds"
@@ -206,6 +224,7 @@ export function PublicPortfolio({ username }: { username: string }) {
               <PublicProject
                 key={p.id ?? i}
                 project={p}
+                track={track}
                 assets={data.assets ?? []}
                 later={i >= shown}
                 owner={{ name: data.name, username: data.username }}
@@ -266,12 +285,14 @@ function hostOf(link?: string) {
 
 function PublicProject({
   project: p,
+  track,
   assets,
   later,
   owner,
   mine,
 }: {
   project: Project;
+  track: Track;
   assets: PortfolioAsset[];
   owner: { name: string; username: string };
   mine: boolean;
@@ -350,7 +371,7 @@ function PublicProject({
         ) : null}
         {p.caseStudy?.trim() ? <CaseStudy text={p.caseStudy.trim()} /> : null}
         {p.technologies?.length ? (
-          <ul className="public-project-tech" aria-label="Tecnologias">
+          <ul className="public-project-tech" aria-label={track.fields.tools.label}>
             {p.technologies.map((label) => (
               <li key={label}>{label}</li>
             ))}
@@ -368,8 +389,12 @@ function PublicProject({
                 target="_blank"
                 rel="noreferrer"
               >
-                <FolderGit2 size={14} aria-hidden="true" />
-                Repositório
+                {track.github ? (
+                  <FolderGit2 size={14} aria-hidden="true" />
+                ) : (
+                  <FileText size={14} aria-hidden="true" />
+                )}
+                {track.fields.link.label}
                 <small>
                   {github
                     ? github.fullName + (github.fork ? " (fork)" : "")

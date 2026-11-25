@@ -3,14 +3,30 @@ export const MAX_PROJECTS = 60;
 export const MAX_FEATURED = 6;
 export const MAX_TECHNOLOGIES = 12;
 
-export type ProjectKind = "ACADEMIC" | "PERSONAL" | "OPEN_SOURCE" | "RESEARCH";
+export type ProjectKind =
+  | "ACADEMIC"
+  | "PERSONAL"
+  | "OPEN_SOURCE"
+  | "RESEARCH"
+  | "INTERNSHIP"
+  | "CASE_STUDY"
+  | "PUBLICATION"
+  | "CREATIVE"
+  | "COMPETITION"
+  | "VOLUNTEER";
 
-/** The order kinds are offered in, everywhere. */
+/** Every kind of work there is. Each area offers its own selection, in its own order. */
 export const PROJECT_KINDS: { id: ProjectKind; label: string }[] = [
   { id: "ACADEMIC", label: "Faculdade" },
   { id: "PERSONAL", label: "Pessoal" },
   { id: "OPEN_SOURCE", label: "Código aberto" },
   { id: "RESEARCH", label: "Pesquisa e extensão" },
+  { id: "INTERNSHIP", label: "Estágio e prática" },
+  { id: "CASE_STUDY", label: "Estudo de caso" },
+  { id: "PUBLICATION", label: "Artigo e publicação" },
+  { id: "CREATIVE", label: "Criação autoral" },
+  { id: "COMPETITION", label: "Competição e evento" },
+  { id: "VOLUNTEER", label: "Voluntariado e ligas" },
 ];
 
 export const kindLabel = (kind?: string) =>
