@@ -15,10 +15,12 @@ import org.springframework.web.bind.annotation.*;
 public class PortfolioController {
   private final Db db;
   private final ObjectMapper json;
+  private final PortfolioGithub github;
 
-  public PortfolioController(Db db, ObjectMapper json) {
+  public PortfolioController(Db db, ObjectMapper json, PortfolioGithub github) {
     this.db = db;
     this.json = json;
+    this.github = github;
   }
 
   /** Where an imported project came from. Only public repository data, chosen by the student. */
@@ -67,6 +69,12 @@ public class PortfolioController {
 
   @GetMapping("/portfolio/me")
   public Object mine(@AuthenticationPrincipal Actor a) {
+    // New public repositories enter here when the student left automatic import on.
+    try {
+      github.refresh(a.id());
+    } catch (RuntimeException e) {
+      // the portfolio opens with what it already has
+    }
     return build(a.id(), true);
   }
 
@@ -287,6 +295,7 @@ public class PortfolioController {
     if (owner) {
       base.put("course", course);
       base.put("courseTrack", PortfolioTracks.of(course));
+      base.put("github", github.status(user));
     } else base.remove("trackChoice");
     // Archived projects are the owner's alone: visitors get neither the project nor its files.
     if (!owner && base.get("projects") instanceof com.fasterxml.jackson.databind.node.ArrayNode all) {

@@ -19,6 +19,7 @@ import {
   X,
 } from "lucide-react";
 import { useAppShellState } from "./app-shell-state";
+import { ConnectedAccounts } from "./connected-accounts";
 import { SessionList, type AccountSession } from "./settings-session-list";
 import { SettingsNav, SettingsSection, type SettingsSectionItem } from "./settings-sections";
 import { Shell } from "./shell";
@@ -431,6 +432,9 @@ export function ProfileView({
                 description="Onde sua conta está conectada, o que está ativo agora e a sua senha."
                 index={5}
               >
+                <h3 className="settings-subheading">Contas conectadas</h3>
+                <ConnectedAccounts />
+                <h3 className="settings-subheading">Aparelhos</h3>
                 {sessions.length ? (
                   <SessionList sessions={sessions} onRevoke={revoke} />
                 ) : (

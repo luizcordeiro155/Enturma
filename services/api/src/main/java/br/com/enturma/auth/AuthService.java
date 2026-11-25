@@ -106,7 +106,8 @@ public class AuthService {
     return session(user.id, device);
   }
 
-  private Credentials session(UUID user, String device) {
+  /** Opens a session for someone whose identity was already established. */
+  Credentials session(UUID user, String device) {
     String access = Tokens.create(), refresh = Tokens.create();
     db.jdbc.update(
         "INSERT INTO"
@@ -273,7 +274,8 @@ public class AuthService {
       db.jdbc.update("UPDATE app_user SET email_verified=true WHERE id=?", user);
     else {
       db.jdbc.update(
-          "UPDATE app_user SET password_hash=?,credential_version=credential_version+1 WHERE id=?",
+          "UPDATE app_user SET password_hash=?,password_set=true,"
+              + "credential_version=credential_version+1 WHERE id=?",
           encoder.encode(password),
           user);
       db.jdbc.update("UPDATE user_session SET revoked_at=now() WHERE user_id=?", user);

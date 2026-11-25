@@ -20,3 +20,31 @@
 @media(max-width:700px){.privacy-rights article{grid-template-columns:auto minmax(0,1fr)}.privacy-rights article > button{grid-column:1/-1;width:100%}}
 /* The consent row adds height to registration; keep it inside short desktop windows. */
 @media(min-width:1000px) and (max-height:800px){.auth-entry[data-auth-mode="register"] .auth-main form{row-gap:clamp(8px,1.1vh,20px)}}
+
+/* Sign-in with Google, under the form's own button. */
+.auth-other-access {
+  display: grid;
+  gap: 10px;
+}
+.auth-other-access > span {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--muted);
+  font-size: 0.86rem;
+}
+.auth-other-access > span::before,
+.auth-other-access > span::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.auth-other-access > a.button {
+  justify-content: center;
+  text-decoration: none;
+}
+.auth-other-access > small {
+  color: var(--muted);
+  line-height: 1.4;
+}

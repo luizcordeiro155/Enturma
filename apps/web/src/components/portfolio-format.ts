@@ -21,6 +21,8 @@ export type Portfolio = {
   trackChoice?: string | null;
   courseTrack?: string;
   course?: string | null;
+  /** Owner only: the connected GitHub account, or null when there is none. */
+  github?: { login: string; auto: boolean } | null;
   skills: string[];
   projects: Project[];
   /** Visitors only: the timeline records the student chose to show. */

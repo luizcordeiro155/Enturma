@@ -30,3 +30,17 @@ export function clearSessionCookies(req: NextRequest, res: NextResponse) {
   const options = sessionCookieOptions(req);
   for (const name of SESSION_COOKIES) res.cookies.set(name, "", { ...options, maxAge: 0 });
 }
+
+/** Stores a new session the way the sign-in form does. */
+export function setSessionCookies(
+  req: NextRequest,
+  res: NextResponse,
+  credentials: { accessToken: string; refreshToken: string },
+  remember: boolean,
+) {
+  const options = sessionCookieOptions(req);
+  const kept = (maxAge: number) => (remember ? { ...options, maxAge } : options);
+  res.cookies.set("enturma_access", credentials.accessToken, kept(600));
+  res.cookies.set("enturma_refresh", credentials.refreshToken, kept(30 * 86400));
+  res.cookies.set("enturma_remember", remember ? "1" : "0", kept(30 * 86400));
+}

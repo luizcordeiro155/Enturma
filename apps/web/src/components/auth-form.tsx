@@ -18,6 +18,9 @@ import {
 } from "lucide-react";
 import { api, post } from "@/lib/api";
 import { authDestination } from "@/lib/auth-navigation";
+import { useProviders } from "@/lib/external-access";
+import { ProviderLink } from "./provider-link";
+import { oauthMessage } from "@/lib/oauth-messages";
 import { MINIMUM_AGE } from "@/lib/legal";
 import { PublicThemeControl } from "./public-theme-control";
 import { Feedback } from "./feedback";
@@ -68,6 +71,22 @@ export function AuthForm({ mode }: { mode: Mode }) {
   >(null);
   const [accountRedirectSeconds, setAccountRedirectSeconds] = useState(10);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const providers = useProviders();
+  const google = providers.google && (mode === "login" || mode === "register");
+
+  // Back from Google without a session: say why, once.
+  useEffect(() => {
+    if (mode !== "login" && mode !== "register") return;
+    const query = new URLSearchParams(window.location.search);
+    queueMicrotask(() => {
+      if (mode === "login" && query.has("oauth"))
+        setError(oauthMessage(query.get("oauth")));
+      if (mode === "register" && query.get("google") === "terms")
+        setSuccess(
+          "Ainda não há conta com esse Google. Aceite os termos abaixo e toque em “Criar conta com o Google”.",
+        );
+    });
+  }, [mode]);
   const [rememberConnected, setRememberConnected] = useState(() => {
     if (mode !== "login" || typeof window === "undefined") return true;
     try {
@@ -1072,6 +1091,51 @@ export function AuthForm({ mode }: { mode: Mode }) {
                     : "Continuar"}
             <ArrowRight size={18} />
           </button>
+          {google ? (
+            <div className="auth-other-access">
+              <span aria-hidden="true">ou</span>
+              <ProviderLink
+                className="button secondary wide"
+                href={
+                  mode === "login"
+                    ? `/api/oauth/google/start?intent=login&remember=${rememberConnected ? "1" : "0"}&next=${encodeURIComponent(
+                        authDestination(
+                          new URLSearchParams(window.location.search).get(
+                            "next",
+                          ),
+                        ),
+                      )}`
+                    : "/api/oauth/google/start?intent=signup&terms=1"
+                }
+                allow={(event) => {
+                  if (mode !== "register") return true;
+                  const terms = event.currentTarget
+                    .closest("form")
+                    ?.querySelector<HTMLInputElement>(
+                      'input[name="acceptedTerms"]',
+                    );
+                  if (terms?.checked) return true;
+                  // A new account needs the terms accepted here, before leaving for Google.
+                  setFieldErrors({
+                    acceptedTerms:
+                      "Para criar a conta, aceite os Termos e a Política de Privacidade.",
+                  });
+                  terms?.focus();
+                  return false;
+                }}
+              >
+                {mode === "login"
+                  ? "Continuar com o Google"
+                  : "Criar conta com o Google"}
+              </ProviderLink>
+              {mode === "register" ? (
+                <small>
+                  Com o Google você não cria senha: seu nome e e-mail vêm da
+                  conta Google.
+                </small>
+              ) : null}
+            </div>
+          ) : null}
           {mode === "login" ? (
             <>
               <Link className="auth-action-link" href="/forgot-password">

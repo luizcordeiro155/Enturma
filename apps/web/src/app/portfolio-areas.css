@@ -127,3 +127,82 @@ html[data-theme="dark"] .public-portfolio[data-track] {
     background: none;
   }
 }
+
+/* The connected GitHub account, above the projects of a Tecnologia e Jogos portfolio. */
+.portfolio-github-account {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 12px 16px;
+  margin: 4px 0 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  border-left: 5px solid var(--track-ink, var(--ink));
+  background: var(--bg);
+}
+.portfolio-github-account > svg {
+  flex: none;
+  margin-top: 2px;
+  color: var(--track-ink, var(--ink));
+}
+.portfolio-github-account > div:first-of-type {
+  flex: 1 1 280px;
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+.portfolio-github-account strong span {
+  margin-left: 6px;
+  font-weight: 600;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+.portfolio-github-account p,
+.portfolio-github-account small {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  max-width: 64ch;
+}
+.portfolio-github-account > a.button {
+  align-self: center;
+}
+.portfolio-github-auto {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.portfolio-github-auto input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 2px 0 0;
+  accent-color: var(--track-ink, var(--ink));
+}
+.portfolio-github-auto small {
+  display: block;
+  margin-top: 2px;
+  font-weight: 400;
+}
+.portfolio-github-account-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+@media (max-width: 640px) {
+  .portfolio-github-account > svg {
+    display: none;
+  }
+  .portfolio-github-account-actions,
+  .portfolio-github-account > a.button {
+    width: 100%;
+  }
+  .portfolio-github-account-actions > button:first-child {
+    flex: 1;
+  }
+}

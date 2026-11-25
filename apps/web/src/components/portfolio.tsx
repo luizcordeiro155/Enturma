@@ -21,6 +21,12 @@ import {
   type Portfolio,
 } from "./portfolio-format";
 import { GithubImportDialog } from "./portfolio-github";
+import {
+  PortfolioGithubAccount,
+  type GithubAccount,
+} from "./portfolio-github-account";
+import { useProviders } from "@/lib/external-access";
+import { oauthMessage } from "@/lib/oauth-messages";
 import { JourneyEditor } from "./portfolio-journey";
 import { TeamInvitations } from "./portfolio-team";
 import type { TeamState } from "@/lib/portfolio-team";
@@ -39,6 +45,9 @@ export function PortfolioEditor() {
   const [open, setOpen] = useState<Set<string>>(new Set());
   const [shelf, setShelf] = useState<"active" | "archived">("active");
   const [importing, setImporting] = useState(false);
+  const providers = useProviders();
+  const [github, setGithub] = useState<GithubAccount | null>();
+  const [githubBusy, setGithubBusy] = useState(false);
   // "AUTO" follows the course; undefined when the server knows nothing about areas.
   const [area, setArea] = useState<string>();
   const [mentor, setMentor] = useState(false);
@@ -95,6 +104,7 @@ export function PortfolioEditor() {
           id: p.id ?? crypto.randomUUID(),
         }));
         setData(v);
+        setGithub(v.github);
         setArea(v.track ? (v.trackChoice ?? "AUTO") : undefined);
         setSavedIds(new Set(list.map((p) => p.id!)));
         setSkillsText((v.skills ?? []).join(", "));
@@ -103,6 +113,80 @@ export function PortfolioEditor() {
       })
       .catch((e) => setError(e.message));
   }, []);
+  // Back from GitHub: say what happened, then leave a clean address behind.
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    const result = url.searchParams.get("github");
+    if (!result) return;
+    queueMicrotask(() => {
+      if (result === "ok")
+        setSuccess(
+          "GitHub conectado. Escolha repositórios ou ligue a importação automática.",
+        );
+      else setError(oauthMessage(result));
+    });
+    url.searchParams.delete("github");
+    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
+  }, []);
+  /** Turning it on, the server brings what is public now; those projects join what is on screen. */
+  async function automatic(auto: boolean) {
+    setGithubBusy(true);
+    setError("");
+    setSuccess("");
+    try {
+      const answer = await api<
+        GithubAccount & { added: number; reached?: boolean }
+      >(
+        "/portfolio/me/github",
+        { method: "PUT", body: JSON.stringify({ auto }) },
+      );
+      setGithub({ login: answer.login, auto: answer.auto });
+      if (answer.added > 0) {
+        const fresh = await api<Portfolio>("/portfolio/me", {
+          cache: "no-store",
+        });
+        const arrived = (fresh.projects ?? []).filter(
+          (p): p is Project & { id: string } => Boolean(p.id),
+        );
+        // What is being edited stays as it is; only what is new comes in.
+        setProjects((current) => {
+          const have = new Set(current.map((p) => p.id));
+          return [...current, ...arrived.filter((p) => !have.has(p.id))];
+        });
+        setSavedIds((ids) => new Set([...ids, ...arrived.map((p) => p.id)]));
+        setShelf("active");
+      }
+      setSuccess(
+        !auto
+          ? "Importação automática desligada. O que já entrou continua no portfólio."
+          : answer.reached === false
+            ? "Importação automática ligada. O GitHub não respondeu agora; a busca acontece na próxima vez que você abrir o portfólio."
+            : answer.added === 1
+            ? "1 repositório entrou no portfólio."
+            : answer.added > 1
+              ? `${answer.added} repositórios entraram no portfólio.`
+              : "Importação automática ligada. Repositórios públicos novos vão entrar sozinhos.",
+      );
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setGithubBusy(false);
+    }
+  }
+  async function disconnectGithub() {
+    setGithubBusy(true);
+    setError("");
+    setSuccess("");
+    try {
+      await api("/auth/identities/github", { method: "DELETE" });
+      setGithub(null);
+      setSuccess("GitHub desconectado. Os projetos que já estavam no portfólio continuam.");
+    } catch (e) {
+      setError((e as Error).message);
+    } finally {
+      setGithubBusy(false);
+    }
+  }
   useEffect(() => {
     // Without the service the mentor is simply not offered.
     void api<{ available?: boolean }>("/portfolio/mentor", {
@@ -464,7 +548,8 @@ export function PortfolioEditor() {
               </div>
               {projects.length ? (
                 <div className="portfolio-projects-actions">
-                  {track.github ? (
+                  {/* with an account connected, its own panel offers the choice */}
+                  {track.github && !github ? (
                     <button
                       type="button"
                       className="secondary"
@@ -485,6 +570,17 @@ export function PortfolioEditor() {
                 </div>
               ) : null}
             </div>
+            {track.github ? (
+              <PortfolioGithubAccount
+                account={github}
+                available={providers.github}
+                busy={githubBusy}
+                full={room < 1}
+                onAuto={(auto) => void automatic(auto)}
+                onChoose={() => setImporting(true)}
+                onDisconnect={() => void disconnectGithub()}
+              />
+            ) : null}
             {archivedCount ? (
               <div
                 className="portfolio-shelves"
@@ -581,7 +677,7 @@ export function PortfolioEditor() {
                   >
                     <Plus size={16} /> {track.add}
                   </button>
-                  {track.github ? (
+                  {track.github && !github ? (
                     <button
                       type="button"
                       className="secondary"
@@ -616,7 +712,8 @@ export function PortfolioEditor() {
           <GithubImportDialog
             taken={repositories}
             room={room}
-            initialLogin={repositories[0]?.split("/")[0] ?? ""}
+            initialLogin={github?.login ?? repositories[0]?.split("/")[0] ?? ""}
+            autoSearch={Boolean(github)}
             onImport={imported}
             onClose={() => setImporting(false)}
           />
