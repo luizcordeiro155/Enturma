@@ -99,6 +99,21 @@ public class PortfolioController {
     if (projects.size() > MAX_PROJECTS)
       throw ApiException.invalid("O portfólio guarda até " + MAX_PROJECTS + " projetos.");
     db.one("SELECT id FROM app_user WHERE id=? FOR UPDATE", a.id());
+    // A repository comes in only from the GitHub account this student connected. What is already
+    // in the portfolio stays, and so does a teammate's project the student was tagged in.
+    String githubLogin =
+        db.list("SELECT login FROM user_identity WHERE user_id=? AND provider='GITHUB'", a.id())
+            .stream()
+            .map(row -> (String) row.get("login"))
+            .findFirst()
+            .orElse(null);
+    var keptRepositories = new HashSet<String>();
+    for (var row :
+        db.list(
+            "SELECT lower(project->'github'->>'fullName') name FROM portfolio_profile p,"
+                + " jsonb_array_elements(p.projects) project WHERE p.user_id=? AND"
+                + " project->'github'->>'fullName' IS NOT NULL",
+            a.id())) keptRepositories.add((String) row.get("name"));
     var stored = new ArrayList<Map<String, Object>>();
     int featured = 0;
     for (var project : projects) {
@@ -134,21 +149,39 @@ public class PortfolioController {
       if (!repo.isEmpty()) row.put("repoUrl", repo);
       if (star) row.put("featured", true);
       if (archived) row.put("archived", true);
-      if (project.github() != null) row.put("github", github(project.github(), repo));
+      // A copy keeps pointing at the author's project only while this student is in its team.
+      var from = project.sharedFrom();
+      boolean shared =
+          from != null
+              && from.userId() != null
+              && from.projectId() != null
+              && db.exists(
+                  "SELECT EXISTS(SELECT 1 FROM portfolio_project_member WHERE owner_id=? AND"
+                      + " project_id=? AND member_id=? AND status='ACCEPTED')",
+                  from.userId(),
+                  from.projectId(),
+                  a.id());
+      if (project.github() != null) {
+        var source = github(project.github(), repo);
+        String name = ((String) source.get("fullName")).toLowerCase(Locale.ROOT);
+        if (!shared && !keptRepositories.contains(name)) {
+          if (githubLogin == null)
+            throw new ApiException(
+                409,
+                "GITHUB_NOT_CONNECTED",
+                "Conecte sua conta do GitHub para trazer repositórios ao portfólio.");
+          if (!name.startsWith(githubLogin.toLowerCase(Locale.ROOT) + "/"))
+            throw new ApiException(
+                400,
+                "GITHUB_NOT_YOURS",
+                "Só entram repositórios da conta do GitHub conectada ao seu perfil.");
+        }
+        row.put("github", source);
+      }
       var shown = labels(project.skills(), 12);
       if (!shown.isEmpty()) row.put("skills", shown);
       keep(row, "caseStudy", project.caseStudy());
-      // A copy keeps pointing at the author's project only while this student is in its team.
-      var from = project.sharedFrom();
-      if (from != null
-          && from.userId() != null
-          && from.projectId() != null
-          && db.exists(
-              "SELECT EXISTS(SELECT 1 FROM portfolio_project_member WHERE owner_id=? AND"
-                  + " project_id=? AND member_id=? AND status='ACCEPTED')",
-              from.userId(),
-              from.projectId(),
-              a.id()))
+      if (shared)
         row.put("sharedFrom", Map.of("userId", from.userId(), "projectId", from.projectId()));
       stored.add(row);
     }

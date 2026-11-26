@@ -22,6 +22,8 @@ Na API (`ExternalAuthService`), nenhum token do Google ou do GitHub é guardado:
 - **Vincular pelas Configurações** → conta com e-mail confirmado vincula qualquer Google; conta sem confirmação só o Google do próprio e-mail. Uma conta Google pertence a um único perfil (`IDENTITY_IN_USE`).
 - **Desvincular o Google** só com senha definida (`PASSWORD_NEEDED`); "Esqueci minha senha" cria a senha de uma conta que nasceu pelo Google.
 
+Repositórios só entram no portfólio pela conta conectada: não existe importação por nome de usuário. Ao salvar, a API recusa um projeto com selo do GitHub quando não há conta conectada (`GITHUB_NOT_CONNECTED`) ou quando o repositório é de outro dono (`GITHUB_NOT_YOURS`). Ficam de fora dessa regra o que já estava no portfólio e a cópia de um projeto de equipe em que a pessoa foi marcada.
+
 O GitHub não é forma de entrar: `POST /auth/github/connect` associa a conta ao perfil para o portfólio de Tecnologia e Jogos. O pedido não leva `scope`, então o Enturma só conhece o que é público. Com a importação automática ligada (`PUT /portfolio/me/github`), ao abrir o portfólio a API lista os repositórios públicos do usuário (no máximo uma vez por hora; dez minutos depois de uma falha) e inclui os novos, até 12 por vez, sem forks nem arquivados. Cada repositório é oferecido uma única vez (`github_seen`), então o que a pessoa remove não volta.
 
 O código de autorização dos dois provedores é protegido por PKCE (S256): sem o verificador, que fica no cookie HttpOnly de quem começou o pedido, o código não serve a ninguém.

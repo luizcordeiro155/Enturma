@@ -35,9 +35,10 @@ export function PortfolioGithubAccount({
         <div>
           <strong>Conecte sua conta do GitHub</strong>
           <p>
-            Seus repositórios públicos viram projetos: escolha um a um ou deixe
-            os novos entrarem sozinhos. O Enturma não pede acesso a repositórios
-            privados nem permissão para alterar nada.
+            Para trazer repositórios ao portfólio é preciso entrar com a sua
+            conta do GitHub. Depois você escolhe um a um ou deixa os novos
+            entrarem sozinhos. O Enturma não pede acesso a repositórios privados
+            nem permissão para alterar nada.
           </p>
           <small>
             Você sai desta página por um instante: salve o portfólio antes.
@@ -50,7 +51,18 @@ export function PortfolioGithubAccount({
           Conectar GitHub
         </ProviderLink>
       </aside>
-    ) : null;
+    ) : (
+      <aside className="portfolio-github-account" aria-label="Conta do GitHub">
+        <FolderGit2 size={22} aria-hidden="true" />
+        <div>
+          <strong>GitHub</strong>
+          <p>
+            A conexão com o GitHub não está disponível agora, então não dá para
+            trazer repositórios. Você ainda pode adicionar projetos à mão.
+          </p>
+        </div>
+      </aside>
+    );
   return (
     <aside
       className="portfolio-github-account"

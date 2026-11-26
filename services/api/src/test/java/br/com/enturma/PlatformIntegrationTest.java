@@ -2275,6 +2275,11 @@ class PlatformIntegrationTest {
                 "ana-dev/caronas", 12, false, "2026-10-02T12:00:00Z"),
             Arrays.asList(" Trabalho em equipe ", "trabalho em equipe", "Modelagem de dados", ""),
             "  Problema: colegas sem carona.  ", null);
+    // the repository belongs to the GitHub account this student connected
+    db.jdbc.update(
+        "INSERT INTO user_identity(provider,subject,user_id,login) VALUES ('GITHUB',?,?,'ana-dev')",
+        "gh-" + UUID.randomUUID(),
+        host.id());
     var shelved =
         new PortfolioController.Project(
             UUID.randomUUID(), "Rascunho antigo", "", "", List.of(draft), "PERSONAL", null, null,

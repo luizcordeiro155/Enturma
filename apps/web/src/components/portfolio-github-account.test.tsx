@@ -20,12 +20,9 @@ vi.mock("./portfolio-navigation", () => ({
   PublicPortfolioLink: () => null,
 }));
 vi.mock("./portfolio-github", () => ({
-  GithubImportDialog: (props: {
-    initialLogin?: string;
-    autoSearch?: boolean;
-  }) => (
+  GithubImportDialog: (props: { login: string }) => (
     <div role="dialog" aria-label="Importar do GitHub">
-      {props.initialLogin}:{String(props.autoSearch)}
+      {props.login}
     </div>
   ),
 }));
@@ -141,17 +138,21 @@ it("fora de Tecnologia e Jogos o GitHub não aparece", async () => {
   expect(screen.queryByText(/GitHub/)).not.toBeInTheDocument();
 });
 
-it("sem o GitHub configurado no servidor, resta a importação pelo nome de usuário", async () => {
+it("sem conta conectada não existe outro caminho para trazer repositórios", async () => {
+  render(<PortfolioEditor />);
+  await opened();
+  await screen.findByRole("link", { name: "Conectar GitHub" });
+  expect(screen.queryByRole("button", { name: /Importar do GitHub/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Escolher repositórios" })).not.toBeInTheDocument();
+});
+
+it("sem o GitHub configurado no servidor, avisa que a conexão não está disponível", async () => {
   providers = { google: { enabled: false }, github: { enabled: false } };
   render(<PortfolioEditor />);
   await opened();
-  await new Promise((resolve) => setTimeout(resolve, 20));
-  expect(
-    screen.queryByRole("link", { name: "Conectar GitHub" }),
-  ).not.toBeInTheDocument();
-  expect(
-    screen.getByRole("button", { name: /Importar do GitHub/ }),
-  ).toBeInTheDocument();
+  expect(await screen.findByText(/conexão com o GitHub não está disponível/)).toBeInTheDocument();
+  expect(screen.queryByRole("link", { name: "Conectar GitHub" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: /Importar do GitHub/ })).not.toBeInTheDocument();
 });
 
 it("com a conta conectada, escolher repositórios já abre na conta certa", async () => {
@@ -164,7 +165,7 @@ it("com a conta conectada, escolher repositórios já abre na conta certa", asyn
   );
   expect(
     screen.getByRole("dialog", { name: "Importar do GitHub" }),
-  ).toHaveTextContent("ana-dev:true");
+  ).toHaveTextContent("ana-dev");
 });
 
 it("ligar a importação automática traz os repositórios sem perder o que estava sendo editado", async () => {

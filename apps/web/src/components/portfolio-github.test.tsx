@@ -64,6 +64,7 @@ function open(props: Partial<Parameters<typeof GithubImportDialog>[0]> = {}) {
   const onClose = vi.fn();
   render(
     <GithubImportDialog
+      login="ana-dev"
       taken={[]}
       room={10}
       onImport={onImport}
@@ -74,27 +75,18 @@ function open(props: Partial<Parameters<typeof GithubImportDialog>[0]> = {}) {
   return { onImport, onClose };
 }
 
-async function search(name: string) {
-  fireEvent.change(screen.getByLabelText("Usuário do GitHub"), {
-    target: { value: name },
-  });
-  fireEvent.click(screen.getByRole("button", { name: "Buscar repositórios" }));
-}
-
-it("asks nothing of GitHub until the student searches, and says what it reads", () => {
+it("lists the connected account at once, with no field to type someone else's name", async () => {
   open();
-  expect(fetcher).not.toHaveBeenCalled();
+  expect(await screen.findByRole("checkbox", { name: /caronas/ })).toBeTruthy();
+  expect(fetcher.mock.calls[0][0]).toContain("/users/ana-dev/repos");
+  expect(screen.queryByLabelText("Usuário do GitHub")).toBeNull();
+  expect(screen.queryByRole("button", { name: "Buscar repositórios" })).toBeNull();
+  expect(screen.getByText(/@ana-dev/)).toBeTruthy();
   expect(screen.getByText(/só os repositórios públicos/i)).toBeTruthy();
-  expect(
-    screen.getByRole<HTMLButtonElement>("button", {
-      name: "Buscar repositórios",
-    }).disabled,
-  ).toBe(true);
 });
 
 it("imports only the repositories the student ticks", async () => {
   const { onImport, onClose } = open();
-  await search("github.com/ana-dev");
   const caronas = await screen.findByRole<HTMLInputElement>("checkbox", {
     name: /caronas/,
   });
@@ -121,7 +113,6 @@ it("imports only the repositories the student ticks", async () => {
 
 it("marks forks and what is already in the portfolio", async () => {
   open({ taken: ["ana-dev/TCC"] });
-  await search("ana-dev");
   expect(await screen.findByText("Fork")).toBeTruthy();
   const taken = screen.getByRole<HTMLInputElement>("checkbox", { name: /tcc/ });
   expect(taken.disabled).toBe(true);
@@ -130,7 +121,6 @@ it("marks forks and what is already in the portfolio", async () => {
 
 it("never lets a selection pass the room left in the portfolio", async () => {
   open({ room: 1 });
-  await search("ana-dev");
   fireEvent.click(await screen.findByRole("checkbox", { name: /caronas/ }));
   expect(
     screen.getByRole<HTMLInputElement>("checkbox", { name: /biblioteca/ })
@@ -139,17 +129,10 @@ it("never lets a selection pass the room left in the portfolio", async () => {
   expect(screen.getByText(/cabe mais 1 projeto/i)).toBeTruthy();
 });
 
-it("tells the student when the user does not exist", async () => {
+it("says so when GitHub does not answer and lets the student try again", async () => {
+  fetcher.mockImplementationOnce(async () => new Response("{}", { status: 500 }));
   open();
-  await search("ninguem");
-  expect(
-    await screen.findByText(/Não encontramos esse usuário no GitHub/),
-  ).toBeTruthy();
-});
-
-it("refuses a name that is not a GitHub user before asking GitHub", async () => {
-  open();
-  await search("https://evil.example.test/ana");
-  expect(await screen.findByText(/Escreva só o nome de usuário/)).toBeTruthy();
-  expect(fetcher).not.toHaveBeenCalled();
+  expect(await screen.findByRole("alert")).toBeTruthy();
+  fireEvent.click(screen.getByRole("button", { name: "Tentar de novo" }));
+  expect(await screen.findByRole("checkbox", { name: /caronas/ })).toBeTruthy();
 });

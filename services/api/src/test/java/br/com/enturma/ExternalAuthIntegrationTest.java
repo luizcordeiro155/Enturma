@@ -332,6 +332,40 @@ class ExternalAuthIntegrationTest {
     assertThat(projectNames(me)).containsExactly("voltou");
   }
 
+  private PortfolioController.Portfolio with(String name, String fullName) {
+    var project =
+        new PortfolioController.Project(
+            UUID.randomUUID(), name, "", "", List.of(), "PERSONAL", null, null, null, null, null,
+            null, "https://github.com/" + fullName, null, null,
+            new PortfolioController.GithubSource(fullName, 1, false, null), null, null, null);
+    return new PortfolioController.Portfolio(false, "", "", List.of(), List.of(project), null, null);
+  }
+
+  @Test
+  void aRepositoryOnlyEntersThePortfolioOfWhoeverConnectedThatGithubAccount() throws Exception {
+    Actor me = registered("dono", true);
+    // without a connected account nothing comes in as a GitHub project
+    assertThatThrownBy(() -> portfolio.save(me, with("site", "ana-dona/site")))
+        .isInstanceOfSatisfying(
+            ApiException.class, e -> assertThat(e.code).isEqualTo("GITHUB_NOT_CONNECTED"));
+
+    github("dono", "Ana-Dona");
+    external.connectGithub(me, "h-dono", null);
+    // someone else's repository is not this student's work to import
+    assertThatThrownBy(() -> portfolio.save(me, with("alheio", "outra-pessoa/alheio")))
+        .isInstanceOfSatisfying(
+            ApiException.class, e -> assertThat(e.code).isEqualTo("GITHUB_NOT_YOURS"));
+    portfolio.save(me, with("site", "ana-dona/site"));
+    assertThat(projectNames(me)).containsExactly("site");
+
+    // what was imported stays where it is after disconnecting; nothing new comes in
+    external.unlink(me, "GITHUB");
+    portfolio.save(me, with("site renomeado", "ana-dona/site"));
+    assertThat(projectNames(me)).containsExactly("site renomeado");
+    assertThatThrownBy(() -> portfolio.save(me, with("novo", "ana-dona/novo")))
+        .isInstanceOf(ApiException.class);
+  }
+
   @Test
   void automaticImportNeedsAConnectedAccount() {
     Actor me = registered("sem", true);

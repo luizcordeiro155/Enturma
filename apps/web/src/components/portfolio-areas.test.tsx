@@ -93,7 +93,7 @@ const save = async () => {
 it("speaks the language of a health course and leaves GitHub out", async () => {
   await editor();
   expect(screen.getByRole("heading", { name: "Práticas e trabalhos" })).toBeTruthy();
-  expect(screen.queryByRole("button", { name: /Importar do GitHub/ })).toBeNull();
+  expect(screen.queryByLabelText("Conta do GitHub")).toBeNull();
   expect(screen.getByRole("button", { name: /Adicionar trabalho/ })).toBeTruthy();
   expect(
     screen.getByLabelText<HTMLInputElement>("Procedimentos e métodos do projeto 1").value,
@@ -115,7 +115,7 @@ it("says where the area came from and lets the student choose another", async ()
 
   fireEvent.change(area, { target: { value: "TECH" } });
   // the page changes at once, before anything is saved
-  expect(screen.getByRole("button", { name: /Importar do GitHub/ })).toBeTruthy();
+  expect(screen.getByLabelText("Conta do GitHub")).toBeTruthy();
   expect(screen.getByLabelText("Tecnologias do projeto 1")).toBeTruthy();
   expect((await save()).track).toBe("TECH");
 });
@@ -148,7 +148,7 @@ it("does not send an area to a server that never told one", async () => {
   await editor();
   expect(screen.queryByLabelText("Área do portfólio")).toBeNull();
   // exactly as before areas existed
-  expect(screen.getByRole("button", { name: /Importar do GitHub/ })).toBeTruthy();
+  expect(screen.getByLabelText("Conta do GitHub")).toBeTruthy();
   expect("track" in (await save())).toBe(false);
 });
 
