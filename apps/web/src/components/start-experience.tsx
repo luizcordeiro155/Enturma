@@ -208,6 +208,15 @@ export function StartExperience({
               <Link href="/download" className={styles.download}>
                 Baixar o aplicativo
               </Link>
+              {/* A static page: the .html address opens without signing in. */}
+              <a
+                href="/apresentacao/index.html"
+                target="_blank"
+                rel="noopener noreferrer"
+                className={styles.download}
+              >
+                Ver os slides
+              </a>
             </div>
             <VisitorLink className="start-visitor-link" />
             <div className={styles.platforms}>
