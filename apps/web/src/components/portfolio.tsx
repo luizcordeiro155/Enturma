@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
-import { ExternalLink, FileText, FolderGit2, Plus } from "lucide-react";
+import { ExternalLink, FileText, Plus } from "lucide-react";
 import Link from "next/link";
 import { api } from "@/lib/api";
 import {
@@ -548,17 +548,6 @@ export function PortfolioEditor() {
               </div>
               {projects.length ? (
                 <div className="portfolio-projects-actions">
-                  {/* with an account connected, its own panel offers the choice */}
-                  {track.github && !github ? (
-                    <button
-                      type="button"
-                      className="secondary"
-                      disabled={room < 1}
-                      onClick={() => setImporting(true)}
-                    >
-                      <FolderGit2 size={16} /> Importar do GitHub
-                    </button>
-                  ) : null}
                   <button
                     type="button"
                     className="secondary"
@@ -677,15 +666,6 @@ export function PortfolioEditor() {
                   >
                     <Plus size={16} /> {track.add}
                   </button>
-                  {track.github && !github ? (
-                    <button
-                      type="button"
-                      className="secondary"
-                      onClick={() => setImporting(true)}
-                    >
-                      <FolderGit2 size={16} /> Importar do GitHub
-                    </button>
-                  ) : null}
                 </div>
               </div>
             ) : null}
@@ -708,12 +688,11 @@ export function PortfolioEditor() {
           </div>
         </form>
         <JourneyEditor />
-        {importing ? (
+        {importing && github ? (
           <GithubImportDialog
+            login={github.login}
             taken={repositories}
             room={room}
-            initialLogin={github?.login ?? repositories[0]?.split("/")[0] ?? ""}
-            autoSearch={Boolean(github)}
             onImport={imported}
             onClose={() => setImporting(false)}
           />

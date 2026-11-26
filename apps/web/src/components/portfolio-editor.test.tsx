@@ -20,17 +20,17 @@ vi.mock("./portfolio-github", () => ({
     onClose,
     taken,
     room,
-    initialLogin,
+    login,
   }: {
     onImport: (projects: unknown[]) => void;
     onClose: () => void;
     taken: string[];
     room: number;
-    initialLogin?: string;
+    login: string;
   }) => (
     <div role="dialog" aria-label="Importar do GitHub">
       <output data-testid="import-state">
-        {JSON.stringify({ taken, room, initialLogin })}
+        {JSON.stringify({ taken, room, login })}
       </output>
       <button
         onClick={() => {
@@ -65,6 +65,7 @@ const stored = {
   headline: "Dev",
   summary: "",
   goal: "Estágio em back-end",
+  github: { login: "ana-dev", auto: false },
   skills: ["Java"],
   projects: [
     {
@@ -214,12 +215,12 @@ it("moves a project up so the student decides the order", async () => {
 
 it("adds GitHub drafts without saving them, and knows what is already there", async () => {
   await ready();
-  fireEvent.click(screen.getByRole("button", { name: "Importar do GitHub" }));
+  fireEvent.click(screen.getByRole("button", { name: "Escolher repositórios" }));
   const state = JSON.parse(screen.getByTestId("import-state").textContent!);
   expect(state).toEqual({
     taken: ["ana-dev/caronas"],
     room: 58,
-    initialLogin: "ana-dev",
+    login: "ana-dev",
   });
   fireEvent.click(screen.getByRole("button", { name: "importar" }));
   expect(saved).toBeUndefined();
@@ -369,7 +370,7 @@ it("opens as a list of closed projects, however few they are", async () => {
 
 it("brings imported projects in closed and opens only a blank one to be filled", async () => {
   await closed();
-  fireEvent.click(screen.getByRole("button", { name: "Importar do GitHub" }));
+  fireEvent.click(screen.getByRole("button", { name: "Escolher repositórios" }));
   fireEvent.click(screen.getByRole("button", { name: "importar" }));
   expect(screen.getAllByRole("article")).toHaveLength(3);
   expect(expanded()).toEqual([]);

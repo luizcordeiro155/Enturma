@@ -1,8 +1,7 @@
 "use client";
-import { FormEvent, useEffect, useId, useRef, useState } from "react";
-import { FolderGit2, GitFork, Search, Star, X } from "lucide-react";
+import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { FolderGit2, GitFork, RotateCw, Star, X } from "lucide-react";
 import {
-  githubLogin,
   listRepos,
   projectFromRepo,
   repoLanguages,
@@ -26,35 +25,30 @@ const worked = (iso: string) => {
 };
 
 /**
- * Lists a GitHub user's public repositories so the student can pick which become
- * project drafts. Nothing is ticked for them and nothing is saved here.
+ * Lists the public repositories of the GitHub account the student connected, so they pick which
+ * become project drafts. Nothing is ticked for them and nothing is saved here.
  */
 export function GithubImportDialog({
+  login,
   taken,
   room,
-  initialLogin = "",
-  autoSearch = false,
   onImport,
   onClose,
 }: {
+  /** The connected GitHub account. There is no other way to choose whose repositories these are. */
+  login: string;
   /** Repositories already in the portfolio, as "owner/name". */
   taken: string[];
   /** How many more projects the portfolio can hold. */
   room: number;
-  initialLogin?: string;
-  /** Lists the repositories of {@link initialLogin} as the dialog opens. */
-  autoSearch?: boolean;
   onImport: (projects: Project[]) => void;
   onClose: () => void;
 }) {
-  const titleId = useId(),
-    loginId = useId();
+  const titleId = useId();
   const dialog = useRef<HTMLDialogElement>(null);
-  const [login, setLogin] = useState(initialLogin);
   const [repos, setRepos] = useState<GithubRepo[]>();
-  const [owner, setOwner] = useState("");
   const [picked, setPicked] = useState<string[]>([]);
-  const [busy, setBusy] = useState<"search" | "import">();
+  const [busy, setBusy] = useState<"search" | "import" | undefined>("search");
   const [error, setError] = useState("");
   const alive = useRef(true);
   useOverlayHistory(onClose);
@@ -91,36 +85,16 @@ export function GithubImportDialog({
     };
   }, []);
 
-  // The connected account needs no typing: its repositories are listed at once.
-  const searched = useRef(false);
-  useEffect(() => {
-    if (!autoSearch || !initialLogin || searched.current) return;
-    searched.current = true;
-    queueMicrotask(() => void search());
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- once, as the dialog opens
-  }, []);
-
   const have = new Set(taken.map((name) => name.toLowerCase()));
   const full = picked.length >= room;
 
-  async function search(event?: FormEvent) {
-    event?.preventDefault();
-    if (busy) return;
-    const name = githubLogin(login);
+  const load = useCallback(async () => {
     setError("");
-    if (!name) {
-      setError(
-        "Escreva só o nome de usuário do GitHub, como ana-dev ou github.com/ana-dev.",
-      );
-      return;
-    }
     setBusy("search");
     setPicked([]);
     try {
-      const found = await listRepos(name);
-      if (!alive.current) return;
-      setRepos(found);
-      setOwner(name);
+      const found = await listRepos(login);
+      if (alive.current) setRepos(found);
     } catch (cause) {
       if (alive.current) {
         setRepos(undefined);
@@ -129,7 +103,10 @@ export function GithubImportDialog({
     } finally {
       if (alive.current) setBusy(undefined);
     }
-  }
+  }, [login]);
+  useEffect(() => {
+    queueMicrotask(() => void load());
+  }, [load]);
 
   async function add() {
     if (busy || !repos || !picked.length) return;
@@ -163,9 +140,9 @@ export function GithubImportDialog({
           <div>
             <h2 id={titleId}>Importar do GitHub</h2>
             <p>
-              O Enturma lê só os repositórios públicos, direto do GitHub. Não
-              pede senha nem permissão na sua conta, e nada entra no portfólio
-              sem você escolher e salvar.
+              Repositórios de <strong>@{login}</strong>, a conta conectada ao
+              seu perfil. O Enturma lê só os repositórios públicos, e nada entra
+              no portfólio sem você escolher e salvar.
             </p>
           </div>
           <button
@@ -177,28 +154,17 @@ export function GithubImportDialog({
             <X size={20} />
           </button>
         </header>
-        <form className="portfolio-github-search" onSubmit={search}>
-          <label htmlFor={loginId}>Usuário do GitHub</label>
-          <div>
-            <input
-              id={loginId}
-              value={login}
-              onChange={(event) => setLogin(event.target.value)}
-              placeholder="ana-dev ou github.com/ana-dev"
-              autoComplete="off"
-              autoCapitalize="none"
-              spellCheck={false}
-              maxLength={120}
-            />
-            <button disabled={!login.trim() || Boolean(busy)}>
-              <Search size={16} aria-hidden="true" />
-              {busy === "search" ? "Buscando…" : "Buscar repositórios"}
-            </button>
-          </div>
-        </form>
         {error ? (
           <p className="portfolio-github-error" role="alert">
-            {error}
+            {error}{" "}
+            <button
+              type="button"
+              className="secondary compact"
+              onClick={() => void load()}
+            >
+              <RotateCw size={14} aria-hidden="true" />
+              Tentar de novo
+            </button>
           </p>
         ) : null}
         <div
@@ -210,8 +176,9 @@ export function GithubImportDialog({
             <div className="portfolio-github-empty">
               <FolderGit2 size={28} aria-hidden="true" />
               <p>
-                Busque um usuário para ver os repositórios e marcar os que viram
-                projeto.
+                {busy === "search"
+                  ? "Buscando seus repositórios…"
+                  : "Não foi possível listar os repositórios agora."}
               </p>
             </div>
           ) : repos.length ? (
@@ -220,7 +187,7 @@ export function GithubImportDialog({
                 {repos.length === 1
                   ? "1 repositório público"
                   : `${repos.length} repositórios públicos`}{" "}
-                de {owner}.{" "}
+                de {login}.{" "}
                 {room > 0
                   ? `Cabe mais ${room} ${room === 1 ? "projeto" : "projetos"} no portfólio.`
                   : "O portfólio já está cheio."}
@@ -287,7 +254,7 @@ export function GithubImportDialog({
           ) : (
             <div className="portfolio-github-empty">
               <FolderGit2 size={28} aria-hidden="true" />
-              <p>{owner} não tem repositórios públicos.</p>
+              <p>{login} não tem repositórios públicos.</p>
             </div>
           )}
         </div>

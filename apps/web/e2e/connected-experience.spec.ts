@@ -124,17 +124,29 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
       },
     });
   });
+  // Repositories only come from a connected GitHub account; the sign-in at GitHub itself is
+  // outside this test, so the connection is written as the API would have stored it.
+  const accounts = new pg.Client({ connectionString: process.env.E2E_DATABASE_URL });
+  await accounts.connect();
+  try {
+    await accounts.query(
+      "INSERT INTO user_identity(provider,subject,user_id,login) SELECT 'GITHUB',$1,id,'ana-dev' FROM app_user WHERE username=$2",
+      [`e2e-${tag}`, username],
+    );
+  } finally {
+    await accounts.end();
+  }
   await page.goto("/portfolio");
   // The fixture course says nothing about its area, so the portfolio opens as the general
-  // one, without GitHub. Choosing technology is what brings the import to the page.
+  // one, without GitHub. Choosing technology is what brings the account to the page.
   await expect(page.getByLabel("Área do portfólio")).toHaveValue("AUTO");
+  await expect(page.getByLabel("Conta do GitHub")).toHaveCount(0);
+  await page.getByLabel("Área do portfólio").selectOption("TECH");
+  await expect(page.getByLabel("Conta do GitHub")).toContainText("@ana-dev");
+  // there is no way to bring someone else's repositories by typing a name
   await expect(
     page.getByRole("button", { name: "Importar do GitHub", exact: true }),
   ).toHaveCount(0);
-  await page.getByLabel("Área do portfólio").selectOption("TECH");
-  await expect(
-    page.getByRole("button", { name: "Importar do GitHub", exact: true }),
-  ).toBeVisible();
   await page.getByRole("button", { name: "Adicionar projeto", exact: true }).click();
   // A new project opens empty with its name field ready to type.
   await expect(
@@ -266,17 +278,14 @@ test("tema por hover e toque, edição cancelável e portfólio com arquivo real
     await advice.evaluate((node) => node.scrollWidth <= node.clientWidth),
   ).toBe(true);
   await page
-    .getByRole("button", { name: "Importar do GitHub", exact: true })
+    .getByRole("button", { name: "Escolher repositórios", exact: true })
     .click();
   const sheet = page.getByRole("dialog", { name: "Importar do GitHub" });
   await expect(sheet).toBeVisible();
   expect(
     await sheet.evaluate((node) => node.scrollWidth <= node.clientWidth),
   ).toBe(true);
-  await sheet.getByLabel("Usuário do GitHub").fill("github.com/ana-dev");
-  await sheet
-    .getByRole("button", { name: "Buscar repositórios", exact: true })
-    .click();
+  await expect(sheet.getByLabel("Usuário do GitHub")).toHaveCount(0);
   // nothing comes ticked: the student chooses
   await expect(sheet.getByRole("checkbox", { name: /caronas/ })).not.toBeChecked();
   await sheet.getByRole("checkbox", { name: /caronas/ }).check();
