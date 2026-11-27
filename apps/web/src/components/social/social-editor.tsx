@@ -39,6 +39,7 @@ import { prepareCover } from "@/lib/social-cover";
 import { bestAspect } from "@/lib/social-editing";
 import { normalizeSocialGalleryFile } from "@/lib/social-gallery";
 import { importPhoto } from "@/lib/photo-import";
+import { SocialMediaStrip } from "./social-media-strip";
 import { usePhotoAccept } from "@/lib/photo-accept";
 import { ImageEditor } from "./image-editor";
 import { VideoEditor } from "./video-editor";
@@ -260,7 +261,10 @@ export function SocialEditor({
   const [capture, setCapture] = useState(false),
     [discard, setDiscard] = useState(false),
     [step, setStep] = useState<Step>("pick");
+  // Which media is open: one at a time, in the editor and in the review alike.
   const [reviewIndex, setReviewIndex] = useState(0);
+  const picker = useRef<HTMLInputElement>(null);
+  const swipe = useRef<{ x: number; y: number } | null>(null);
   // On a phone the end of the form sits behind the sticky actions, so a
   // problem with the chosen file is shown and brought into view at the top.
   const pickError = useRef<HTMLParagraphElement>(null);
@@ -500,6 +504,8 @@ export function SocialEditor({
         });
       }
       if (alive.current) {
+        // The first of what was just added is the one that opens.
+        setReviewIndex(draft.files.length);
         setDraft((value) =>
           value ? { ...value, files: [...value.files, ...next] } : value,
         );
@@ -802,6 +808,7 @@ export function SocialEditor({
     }
   }
   if (!draft) return <p role="status">Recuperando seu rascunho…</p>;
+  const openIndex = Math.max(0, Math.min(reviewIndex, draft.files.length - 1));
   const pending = draft.files.some((file) => file.media?.state !== "READY"),
     hasContent = !!draft.body.trim() || draft.files.length > 0;
   const canPublish =
@@ -960,6 +967,7 @@ export function SocialEditor({
               <label className="social-file-button social-file-button-primary">
                 Escolher mídia
                 <input
+                  ref={picker}
                   type="file"
                   accept={mediaAccept}
                   multiple={draft.kind === "POST"}
@@ -1010,11 +1018,14 @@ export function SocialEditor({
           />
         </div>
         <div hidden={step !== "edit"} className="social-create-edit">
-          {draft.files.map((item, index) => (
-            <div className="social-edit-media" key={item.id}>
+          {/* One media at a time, like the publication itself; the line below chooses which. */}
+          {draft.files.map((item, index) =>
+            index !== openIndex ? null : (
+            // The frame stays while its content changes, so the arrows keep the focus.
+            <div className="social-edit-media" key="open">
               <div className="social-row">
                 <strong>
-                  {`Mídia ${index + 1}`}
+                  {`Mídia ${index + 1}${draft.files.length > 1 ? ` de ${draft.files.length}` : ""}`}
                   {item.media
                     ? ` · ${item.media.state === "READY" ? "Pronta" : item.media.state === "FAILED" ? "Falha no processamento" : "Em preparação"}`
                     : ""}
@@ -1027,12 +1038,16 @@ export function SocialEditor({
                       : `Enquadramento ${item.recipe.aspect}`}
                   </span>
                 )}
+                {draft.files.length > 1 && (
+                  <span className="social-edit-order">Ordem</span>
+                )}
                 {draft.files.length > 1 &&
                   [-1, 1].map((delta) => (
                     <button
                       type="button"
                       key={delta}
                       className="icon-control"
+                      title={delta < 0 ? "Passar para antes" : "Passar para depois"}
                       aria-label={`${delta < 0 ? "Antecipar" : "Adiar"} mídia ${index + 1}`}
                       disabled={
                         busy ||
@@ -1046,6 +1061,8 @@ export function SocialEditor({
                           files[index],
                         ];
                         setDraft({ ...draft, files });
+                        // the open media goes along to its new place
+                        setReviewIndex(index + delta);
                       }}
                     >
                       {delta < 0 ? (
@@ -1065,8 +1082,22 @@ export function SocialEditor({
                   <Trash2 size={18} />
                 </button>
               </div>
+              {draft.kind === "POST" && (
+                <SocialMediaStrip
+                  items={draft.files}
+                  current={openIndex}
+                  onSelect={setReviewIndex}
+                  disabled={busy || !mediaEnabled}
+                  onAdd={
+                    draft.files.length < 10
+                      ? () => picker.current?.click()
+                      : undefined
+                  }
+                />
+              )}
               <div className="social-edit-stage">
                 <LocalFile
+                  key={item.id}
                   item={item}
                   coverChanged={(coverFile) =>
                     setDraft(
@@ -1113,7 +1144,8 @@ export function SocialEditor({
               </div>
               {item.media?.error && <p role="alert">{item.media.error}</p>}
             </div>
-          ))}
+            ),
+          )}
           {draft.kind === "STORY" && (
             <>
               {!draft.files.length && (
@@ -1134,20 +1166,49 @@ export function SocialEditor({
           )}
         </div>
         {step === "details" && draft.files.length > 0 && (
-          <div className="social-create-preview">
+          <div
+            className="social-create-preview"
+            // A sideways swipe on the still preview goes to the next media, as in the feed.
+            data-social-gesture={draft.files.length > 1 ? "ignore" : undefined}
+            onTouchStart={(event) => {
+              const touch = event.touches[0];
+              swipe.current = touch
+                ? { x: touch.clientX, y: touch.clientY }
+                : null;
+            }}
+            onTouchEnd={(event) => {
+              const from = swipe.current;
+              const touch = event.changedTouches[0];
+              swipe.current = null;
+              if (!from || !touch || draft.files.length < 2) return;
+              const across = touch.clientX - from.x;
+              const down = touch.clientY - from.y;
+              if (Math.abs(across) < 48 || Math.abs(across) < Math.abs(down) * 1.5)
+                return;
+              setReviewIndex(
+                Math.max(
+                  0,
+                  Math.min(
+                    draft.files.length - 1,
+                    openIndex + (across < 0 ? 1 : -1),
+                  ),
+                ),
+              );
+            }}
+          >
             <SocialDraftPreview
               showFeedPreview={
                 draft.kind !== "STORY" &&
                 (draft.files[
-                  Math.min(reviewIndex, draft.files.length - 1)
+                  openIndex
                 ].file?.type.startsWith("video/") === true ||
-                  draft.files[Math.min(reviewIndex, draft.files.length - 1)]
+                  draft.files[openIndex]
                     .media?.kind === "VIDEO")
               }
               key={
-                draft.files[Math.min(reviewIndex, draft.files.length - 1)].id
+                draft.files[openIndex].id
               }
-              item={draft.files[Math.min(reviewIndex, draft.files.length - 1)]}
+              item={draft.files[openIndex]}
               overlay={
                 draft.kind === "STORY" ? (
                   <StoryDecorations items={draft.storyOverlays ?? []} />
@@ -1155,24 +1216,11 @@ export function SocialEditor({
               }
             />
             {draft.files.length > 1 && (
-              <div
-                className="social-review-pages"
-                aria-label="Mídias da publicação"
-              >
-                {draft.files.map((file, index) => (
-                  <button
-                    key={file.id}
-                    type="button"
-                    aria-label={`Revisar mídia ${index + 1}`}
-                    aria-pressed={
-                      index === Math.min(reviewIndex, draft.files.length - 1)
-                    }
-                    onClick={() => setReviewIndex(index)}
-                  >
-                    {index + 1}
-                  </button>
-                ))}
-              </div>
+              <SocialMediaStrip
+                items={draft.files}
+                current={openIndex}
+                onSelect={setReviewIndex}
+              />
             )}
           </div>
         )}

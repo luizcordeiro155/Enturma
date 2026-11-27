@@ -208,9 +208,37 @@ html[data-theme] .social-media-sound {
   color: var(--ink);
   cursor: pointer;
 }
-html[data-theme] .social-carousel-arrow {
+/* Over any picture, light or dark: a dark disc with a white arrow. The extra class in the
+   selector outranks the theme's own colour for buttons. */
+html[data-theme] .social-carousel > .social-carousel-arrow {
   top: 50%;
   transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  background: rgb(0 0 0 / 58%);
+  color: #fff;
+}
+html[data-theme] .social-carousel > .social-carousel-arrow:hover {
+  background: rgb(0 0 0 / 78%);
+}
+html[data-theme] .social-carousel > .social-carousel-arrow:focus-visible {
+  outline: 3px solid #fff;
+  outline-offset: 2px;
+}
+.social-carousel-count {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 2;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgb(0 0 0 / 58%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.5;
+  pointer-events: none;
 }
 .social-carousel-previous {
   left: 8px;
@@ -241,7 +269,9 @@ html[data-theme] .social-carousel-dots > button {
   padding: 0;
   border: 0;
   border-radius: 50%;
-  background: color-mix(in srgb, var(--bg) 62%, transparent);
+  /* seen over light and dark pictures alike */
+  background: rgb(255 255 255 / 62%);
+  box-shadow: 0 0 0 1px rgb(0 0 0 / 28%);
   pointer-events: auto;
   cursor: pointer;
 }

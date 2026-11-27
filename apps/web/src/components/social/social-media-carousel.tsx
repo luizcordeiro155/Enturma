@@ -157,6 +157,10 @@ export function SocialMediaCarousel({
       </div>
       {many && (
         <>
+          {/* The dots below say the same to assistive technology. */}
+          <span className="social-carousel-count" aria-hidden="true">
+            {index + 1}/{media.length}
+          </span>
           <button
             type="button"
             className="social-carousel-arrow social-carousel-previous"

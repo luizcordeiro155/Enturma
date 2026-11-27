@@ -246,11 +246,204 @@ test("fotos HEIC do celular e RAW de câmera abrem no editor como fotos comuns",
       )
       .toBe(width);
     const seen = await halves(preview);
-    expect(seen.left[0], `${file} à esquerda`).toBeGreaterThan(seen.left[2] + 60);
-    expect(seen.right[2], `${file} à direita`).toBeGreaterThan(seen.right[0] + 60);
+    expect(seen.left[0], `${file} à esquerda`).toBeGreaterThan(
+      seen.left[2] + 60,
+    );
+    expect(seen.right[2], `${file} à direita`).toBeGreaterThan(
+      seen.right[0] + 60,
+    );
     // back to the first step for the next photo
     await page.goto("/social");
     await nav.getByRole("button", { name: "Criar", exact: true }).click();
     await page.getByRole("button", { name: "Post", exact: true }).click();
+  }
+});
+
+test("com várias mídias o editor abre uma por vez, com a fila de miniaturas", async ({
+  page,
+  request,
+}) => {
+  const id = randomUUID().slice(0, 8);
+  const registration = await request.post(`${backend}/api/v1/auth/register`, {
+    data: {
+      name: "Carrossel no editor",
+      username: `fila_${id}`,
+      email: `fila-${id}@example.test`,
+      password: "social-test-123",
+      device: "Gallery E2E",
+    },
+  });
+  expect(registration.ok()).toBe(true);
+  await page.route("**/api/backend/social/capabilities", async (route) => {
+    const response = await route.fetch();
+    await route.fulfill({
+      response,
+      json: { ...(await response.json()), media: true },
+    });
+  });
+  await authenticate(page.context(), await registration.json());
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto("/social");
+  const nav = page.getByRole("navigation", { name: "Ambientes do Social" });
+  await expect(
+    page.getByRole("dialog", { name: "Bem-vindo ao Enturma Social" }),
+  ).not.toBeVisible({ timeout: 10000 });
+  await nav.getByRole("button", { name: "Criar", exact: true }).click();
+  await page.getByRole("button", { name: "Post", exact: true }).click();
+  // Two photos at once: an ordinary one and a phone's HEIC (320 px wide once converted).
+  await page.getByLabel("Escolher mídia", { exact: true }).setInputFiles([
+    { name: "primeira.png", mimeType: "image/png", buffer: png },
+    {
+      name: "segunda.heic",
+      mimeType: "image/heic",
+      buffer: readFileSync(join(__dirname, "fixtures", "foto-celular.heic")),
+    },
+  ]);
+  const strip = page.getByRole("group", { name: "Mídias da publicação" });
+  await expect(strip).toBeVisible({ timeout: 30000 });
+  await expect(strip.getByRole("button", { name: /^Abrir mídia/ })).toHaveCount(
+    2,
+  );
+  await expect(
+    strip.getByRole("button", { name: "Adicionar mídia" }),
+  ).toBeVisible();
+  // one editor on screen, not one under the other
+  const editors = page.getByRole("region", {
+    name: "Editor de imagem",
+    exact: true,
+  });
+  await expect(editors).toHaveCount(1);
+  await expect(page.getByText(/^Mídia 1 de 2/)).toBeVisible();
+  const width = () =>
+    editors
+      .getByRole("img", { name: "Prévia da imagem escolhida", exact: true })
+      .evaluate(
+        (image: HTMLImageElement) => image.complete && image.naturalWidth,
+      );
+  await expect.poll(width).toBeGreaterThan(0);
+  const first = await width();
+  expect(first).not.toBe(320);
+
+  await strip.getByRole("button", { name: "Abrir mídia 2" }).click();
+  await expect(page.getByText(/^Mídia 2 de 2/)).toBeVisible();
+  await expect(editors).toHaveCount(1);
+  await expect.poll(width).toBe(320);
+  await expect(
+    strip.getByRole("button", { name: "Próxima mídia" }),
+  ).toBeDisabled();
+  await strip.getByRole("button", { name: "Mídia anterior" }).click();
+  await expect.poll(width).toBe(first);
+
+  // The line of thumbnails scrolls inside itself; the page never grows sideways.
+  for (const viewport of [390, 1440]) {
+    await page.setViewportSize({ width: viewport, height: 900 });
+    await expect(strip).toBeVisible();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
+    expect(
+      await strip.evaluate(
+        (node) => node.getBoundingClientRect().right <= innerWidth + 1,
+      ),
+    ).toBe(true);
+  }
+});
+
+test("a publicação com várias mídias é um carrossel no celular e no computador", async ({
+  page,
+  request,
+}) => {
+  const id = randomUUID().slice(0, 8);
+  const registration = await request.post(`${backend}/api/v1/auth/register`, {
+    data: {
+      name: "Carrossel no feed",
+      username: `feed_${id}`,
+      email: `feed-${id}@example.test`,
+      password: "social-test-123",
+      device: "Gallery E2E",
+    },
+  });
+  expect(registration.ok()).toBe(true);
+  const user = await registration.json();
+  const post = {
+    id: randomUUID(),
+    authorId: user.userId,
+    name: "Carrossel no feed",
+    username: `feed_${id}`,
+    kind: "POST",
+    body: "Três fotos de uma vez",
+    publishedAt: new Date().toISOString(),
+    pinned: false,
+    likes: 0,
+    comments: 0,
+    reposts: 0,
+    mine: [],
+    media: Array.from({ length: 3 }, () => ({
+      id: randomUUID(),
+      kind: "IMAGE",
+      width: 1080,
+      height: 1350,
+    })),
+  };
+  // A fixture for the player only: publication and storage are covered by the API's own tests.
+  await page.route("**/api/backend/social/feed?**", (route) =>
+    route.fulfill({
+      json: {
+        items: [post],
+        nextCursor: "",
+        snapshot: new Date().toISOString(),
+      },
+    }),
+  );
+  await page.route("**/api/backend/social/media/*/content*", (route) =>
+    route.fulfill({ contentType: "image/png", body: png }),
+  );
+  await authenticate(page.context(), user);
+  for (const [width, arrows] of [
+    [390, false],
+    [1366, true],
+  ] as const) {
+    await page.setViewportSize({ width, height: 844 });
+    await page.goto("/social");
+    const carousel = page
+      .locator(".social-feed-view .social-stream:visible .social-carousel")
+      .first();
+    await expect(carousel).toBeVisible({ timeout: 20000 });
+    const count = carousel.locator(".social-carousel-count");
+    await expect(count).toHaveText("1/3");
+    const track = carousel.locator(".social-carousel-track");
+    // every media is exactly one frame wide, whatever the screen
+    expect(
+      await track.evaluate((node) =>
+        [...node.children].every(
+          (figure) =>
+            Math.abs(figure.getBoundingClientRect().width - node.clientWidth) <=
+            1,
+        ),
+      ),
+    ).toBe(true);
+    // sliding the line sideways changes the media, the counter and the dots
+    await track.evaluate((node) =>
+      node.scrollTo({ left: node.clientWidth, behavior: "instant" }),
+    );
+    await expect(count).toHaveText("2/3");
+    await expect(carousel.getByRole("tab").nth(1)).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    const next = carousel.getByRole("button", { name: "Próxima mídia" });
+    if (arrows) {
+      // with a mouse there is nothing to drag, so the arrows are there
+      await next.click();
+      await expect(count).toHaveText("3/3");
+      await expect(next).toBeHidden();
+    } else await expect(next).toBeHidden();
+    expect(
+      await page.evaluate(
+        () => document.documentElement.scrollWidth <= innerWidth + 1,
+      ),
+    ).toBe(true);
   }
 });
