@@ -35,6 +35,8 @@ import {
   AchievementGrid,
   type Showcase,
 } from "./profile-showcase";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 
 /** What a save sends. A stored profile may carry fields that no longer exist: they stay out. */
 const DETAIL_FIELDS = [
@@ -56,6 +58,7 @@ export function ProfileDetailsEditor({
   profile: PublicProfile;
   onSaved: () => Promise<void>;
 }) {
+  const photoAccept = usePhotoAccept();
   const router = useRouter();
   const [status, setStatus] = useState("");
   const showcaseEdited = useRef(false);
@@ -145,14 +148,22 @@ export function ProfileDetailsEditor({
     setDetails((current) => ({ ...current, [field]: value }));
   }
 
-  function choose(kind: "avatar" | "banner", file?: File) {
-    if (!file) return;
+  async function choose(kind: "avatar" | "banner", chosen?: File) {
+    if (!chosen) return;
+    let file = chosen;
+    try {
+      // HEIC from the phone camera and RAW become a JPG before the crop.
+      file = await importPhoto(chosen);
+    } catch (cause) {
+      setStatus((cause as Error).message);
+      return;
+    }
     if (
       !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
         file.type,
       )
     ) {
-      setStatus("Use JPG, PNG, WEBP ou GIF.");
+      setStatus("Escolha uma foto ou imagem.");
       return;
     }
     if (file.size > 20 * 1024 * 1024) {
@@ -438,15 +449,15 @@ export function ProfileDetailsEditor({
                     </span>
                     <span>
                       <strong>Foto de perfil</strong>
-                      <small>JPG, PNG, WEBP ou GIF</small>
+                      <small>Qualquer foto, inclusive HEIC e RAW</small>
                     </span>
                     <ChevronRight size={20} />
                     <input
                       type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      accept={photoAccept}
                       disabled={busy}
                       onChange={(event) => {
-                        choose("avatar", event.target.files?.[0]);
+                        void choose("avatar", event.target.files?.[0]);
                         event.target.value = "";
                       }}
                     />
@@ -470,15 +481,15 @@ export function ProfileDetailsEditor({
                     </span>
                     <span>
                       <strong>Banner</strong>
-                      <small>JPG, PNG, WEBP ou GIF animado</small>
+                      <small>Qualquer foto ou GIF animado</small>
                     </span>
                     <ChevronRight size={20} />
                     <input
                       type="file"
-                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      accept={photoAccept}
                       disabled={busy}
                       onChange={(event) => {
-                        choose("banner", event.target.files?.[0]);
+                        void choose("banner", event.target.files?.[0]);
                         event.target.value = "";
                       }}
                     />

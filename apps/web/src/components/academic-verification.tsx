@@ -23,9 +23,12 @@ import {
   type AcademicInstitution,
 } from "@/lib/academic-identity";
 import { AcademicMotion } from "./academic-motion";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 
 type Campus = { id: string; name: string };
 export function AcademicVerification() {
+  const photoAccept = usePhotoAccept("application/pdf");
   const {
     identity,
     error: connectionError,
@@ -568,11 +571,21 @@ export function AcademicVerification() {
                         <strong>
                           {file?.name || "Selecionar comprovante"}
                         </strong>
-                        <small>PDF, PNG ou JPEG · até 2 MB</small>
+                        <small>PDF ou foto do documento · até 2 MB</small>
                         <input
                           type="file"
-                          accept="application/pdf,image/png,image/jpeg"
-                          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+                          accept={photoAccept}
+                          onChange={(e) => {
+                            const chosen = e.target.files?.[0] ?? null;
+                            if (!chosen) return setFile(null);
+                            // a photo of the document taken in HEIC or RAW goes as a JPG
+                            void importPhoto(chosen, { maxSide: 1600 })
+                              .then(setFile)
+                              .catch((cause: Error) => {
+                                setFile(null);
+                                setError(cause.message);
+                              });
+                          }}
                         />
                       </label>
                       <p className="academic-note">

@@ -21,7 +21,7 @@ export function normalizeSocialGalleryFile(file: File): File {
   if (!type || type === "application/octet-stream")
     type = extensions[file.name.split(".").pop()?.toLowerCase() ?? ""] ?? "";
   if (!/^(image\/(jpeg|png|webp|gif)$|video\/)/.test(type))
-    throw new Error("Escolha uma foto JPG, PNG, WebP ou GIF, ou um vídeo compatível. Para HEIC/HEIF, exporte a foto como JPG na galeria.");
+    throw new Error("Este arquivo não é uma foto ou um vídeo que o Enturma consiga abrir. Escolha outro.");
   return type === file.type ? file : new File([file], file.name, {
     type, lastModified: file.lastModified,
   });

@@ -36,6 +36,8 @@ import {
   type MediaAspect,
   type MediaFilter,
 } from "@/lib/social-editing";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 
 function GalleryCover({ file }: { file: File }) {
   const [url, setUrl] = useState("");
@@ -72,6 +74,7 @@ export function VideoEditor({
   coverFile?: File;
   onCoverFile?: (file: File | undefined) => void;
 }) {
+  const photoAccept = usePhotoAccept();
   const video = useRef<HTMLVideoElement>(null),
     undo = useRef<VideoRecipe[]>([]),
     redo = useRef<VideoRecipe[]>([]);
@@ -396,21 +399,25 @@ export function VideoEditor({
               Capa da galeria
               <input
                 type="file"
-                accept="image/jpeg,image/png,image/webp"
+                accept={photoAccept}
                 onChange={(event) => {
-                  const file = event.target.files?.[0];
-                  setCoverError("");
-                  if (
-                    file &&
-                    /image\/(jpeg|png|webp)$/.test(file.type) &&
-                    file.size <= 16 * 1024 * 1024
-                  )
-                    onCoverFile(file);
-                  else if (file)
-                    setCoverError(
-                      "Use uma imagem JPG, PNG ou WebP de at\u00e9 16 MB para a capa.",
-                    );
+                  const chosen = event.target.files?.[0];
                   event.target.value = "";
+                  setCoverError("");
+                  if (!chosen) return;
+                  void importPhoto(chosen)
+                    .then((file) => {
+                      if (
+                        /image\/(jpeg|png|webp)$/.test(file.type) &&
+                        file.size <= 16 * 1024 * 1024
+                      )
+                        onCoverFile(file);
+                      else
+                        setCoverError(
+                          "Use uma foto de at\u00e9 16 MB para a capa.",
+                        );
+                    })
+                    .catch((cause: Error) => setCoverError(cause.message));
                 }}
               />
             </label>

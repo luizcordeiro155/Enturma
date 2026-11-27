@@ -23,10 +23,10 @@ describe("gallery file hints", () => {
     expect(normalized.lastModified).toBe(1234);
   });
   it("does not reinterpret a declared document as an image by extension", () => {
-    expect(() => normalizeSocialGalleryFile(new File([data], "foto.png", { type: "text/html" }))).toThrow(/JPG/);
+    expect(() => normalizeSocialGalleryFile(new File([data], "foto.png", { type: "text/html" }))).toThrow(/foto ou um vídeo/);
   });
-  it("does not pretend to convert HEIC files", () => {
-    expect(() => normalizeSocialGalleryFile(new File([data], "foto.heic", { type: "image/heic" }))).toThrow(/HEIC/);
+  it("only passes what the editor can show; HEIC and RAW are converted before reaching here", () => {
+    expect(() => normalizeSocialGalleryFile(new File([data], "foto.heic", { type: "image/heic" }))).toThrow(/foto ou um vídeo/);
   });
   it("rejects empty and oversized files before allocating another File", () => {
     expect(() => normalizeSocialGalleryFile(new File([], "foto.png", { type: "image/png" }))).toThrow(/vazio/);
