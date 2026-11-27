@@ -83,6 +83,33 @@ it("as setas e os pontos trocam a mídia selecionada", () => {
     "true",
   );
 });
+it("com várias mídias, um contador diz em qual delas a pessoa está", () => {
+  const { container } = render(
+    <SocialMediaCarousel
+      media={[img("a"), img("b"), img("c")]}
+      authorName="Ana"
+      autoplay
+    />,
+  );
+  const count = container.querySelector(".social-carousel-count")!;
+  expect(count).toHaveTextContent("1/3");
+  fireEvent.click(screen.getByRole("button", { name: "Próxima mídia" }));
+  expect(count).toHaveTextContent("2/3");
+  // arrastar a fila para o lado também conta
+  const track = container.querySelector(".social-carousel-track")!;
+  Object.defineProperty(track, "clientWidth", { value: 400, configurable: true });
+  Object.defineProperty(track, "scrollLeft", { value: 800, configurable: true });
+  fireEvent.scroll(track);
+  expect(count).toHaveTextContent("3/3");
+});
+it("uma mídia só não tem contador, setas nem pontos", () => {
+  const { container } = render(
+    <SocialMediaCarousel media={[img("a")]} authorName="Ana" autoplay />,
+  );
+  expect(container.querySelector(".social-carousel-count")).toBeNull();
+  expect(screen.queryByRole("button", { name: "Próxima mídia" })).toBeNull();
+  expect(screen.queryByRole("tablist")).toBeNull();
+});
 it("com autoplay desligado o vídeo não recebe o observador", () => {
   render(
     <SocialMediaCarousel
