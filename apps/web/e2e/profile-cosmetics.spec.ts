@@ -71,9 +71,17 @@ test("Cosméticos: usar um pacote liberado, experimentar um bloqueado e ver no p
       left:
         node.querySelector("h2")!.getBoundingClientRect().left -
         node.getBoundingClientRect().left,
+      banner: node
+        .querySelector(".public-profile-banner")!
+        .getBoundingClientRect().width,
+      body: node.querySelector(".public-profile-body")!.getBoundingClientRect()
+        .width,
     }));
   expect(tried.side).toBeGreaterThan(20);
   expect(tried.left).toBeGreaterThan(tried.side);
+  // The banner keeps to the card's own column: as wide as the body under it, never
+  // sticking out past the frame.
+  expect(Math.abs(tried.banner - tried.body)).toBeLessThan(1);
 
   const sakura = dialog.getByRole("group", { name: "Sakura" });
   await sakura.getByRole("button", { name: "Usar o pacote completo" }).click();

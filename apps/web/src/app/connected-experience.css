@@ -634,9 +634,11 @@ html .profile-community .profile-community-tabs button {
   border-radius: 16px;
   overflow: hidden;
 }
+/* The banner is three times as wide as it is tall, so its width decides its height. A minimum
+   height here would become a minimum width and push it out past a framed card. */
 .profile-edit-live-preview .public-profile-banner {
-  height: 130px;
-  min-height: 130px;
+  width: 100%;
+  min-height: 0;
 }
 .profile-edit-live-preview .public-profile-body {
   min-height: 240px;
