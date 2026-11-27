@@ -129,3 +129,66 @@ studentTest("Android mantém os atalhos das configurações abaixo da barra de s
   await page.mouse.wheel(0, -4000);
   await expect.poll(maskHeight).toBe(0);
 });
+
+studentTest("Android mantém as seções do portfólio abaixo da barra de status", async ({
+  page,
+  request,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const tag = randomUUID().slice(0, 8);
+  const registered = await request.post(
+    `${process.env.E2E_API_URL ?? "http://localhost:8080"}/api/v1/auth/register`,
+    {
+      data: {
+        name: "Portfólio no celular",
+        username: `portbar_${tag}`,
+        email: `portbar_${tag}@example.test`,
+        password: "Status-bar-password-123",
+        device: "E2E",
+      },
+    },
+  );
+  expect(registered.ok()).toBe(true);
+  await authenticate(page.context(), await registered.json());
+  await page.goto("/portfolio");
+  await syncNativeInsets(page);
+  const nav = page.getByRole("navigation", { name: "Seções do portfólio" });
+  await expect(nav).toBeVisible();
+  const maskHeight = () =>
+    nav.evaluate((element) => {
+      const mask = getComputedStyle(element, "::before");
+      return mask.content === "none" ? 0 : parseFloat(mask.height) || 0;
+    });
+  expect(await maskHeight()).toBe(0);
+  await expect(nav.getByRole("link", { name: "Apresentação" })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+
+  // Os três números do resumo cabem lado a lado, sem empilhar a tela inteira.
+  const metrics = await page
+    .locator(".portfolio-metrics > div")
+    .evaluateAll((items) => items.map((item) => Math.round(item.getBoundingClientRect().top)));
+  expect(new Set(metrics).size).toBe(1);
+
+  await page.locator("#projetos").scrollIntoViewIfNeeded();
+  await page.mouse.wheel(0, 500);
+  // Presa no topo, a fila fica abaixo da barra de status e nada rola por baixo dela.
+  await expect
+    .poll(async () => Math.round((await nav.boundingBox())?.y ?? -1))
+    .toBe(nativeInsets.top);
+  await expect.poll(maskHeight).toBeGreaterThanOrEqual(nativeInsets.top - 1);
+  const edges = await nav.evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    return { left: Math.round(box.left), right: Math.round(box.right), width: innerWidth };
+  });
+  expect(edges.left).toBe(0);
+  expect(edges.right).toBe(edges.width);
+  await expect(nav.getByRole("link", { name: "Projetos" })).toHaveAttribute(
+    "aria-current",
+    "true",
+  );
+  expect(
+    await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+  ).toBe(true);
+});

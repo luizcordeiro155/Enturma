@@ -32,6 +32,7 @@ import { TeamInvitations } from "./portfolio-team";
 import type { TeamState } from "@/lib/portfolio-team";
 import { PublicPortfolioLink } from "./portfolio-navigation";
 import { PortfolioProjectCard } from "./portfolio-project-card";
+import { PortfolioSections } from "./portfolio-sections";
 import { Shell } from "./shell";
 
 export { PublicPortfolio } from "./portfolio-public";
@@ -382,13 +383,7 @@ export function PortfolioEditor() {
             <strong>{formatDays(data.stats.currentStreak)}</strong>
           </div>
         </section>
-        <nav className="portfolio-sections" aria-label="Seções do portfólio">
-          <a href="#apresentacao">Apresentação</a>
-          <a href="#competencias">Competências</a>
-          <a href="#projetos">Projetos</a>
-          <a href="#jornada">Jornada</a>
-          <Link href="/portfolio/curriculo">Currículo</Link>
-        </nav>
+        <PortfolioSections />
         <form onSubmit={save} noValidate ref={form}>
           <section
             id="apresentacao"

@@ -1190,24 +1190,36 @@ html[data-theme="dark"]
 /* The editor is a long page: a row of anchors stays within reach while it scrolls. */
 .portfolio-sections {
   position: sticky;
-  top: 8px;
+  /* below the Android status bar / notch, never under it */
+  top: calc(8px + var(--enturma-safe-top, 0px));
   z-index: 5;
-  display: flex;
-  gap: 4px;
   margin: 0 0 18px;
   padding: 6px;
-  overflow-x: auto;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: color-mix(in srgb, var(--surface) 92%, transparent);
   backdrop-filter: blur(10px);
+}
+.portfolio-sections > ul {
+  display: flex;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
   scrollbar-width: none;
 }
-.portfolio-sections::-webkit-scrollbar {
+.portfolio-sections > ul::-webkit-scrollbar {
   display: none;
 }
-.portfolio-sections > a {
+.portfolio-sections li {
   flex: none;
+}
+.portfolio-sections li:last-child {
+  margin-left: auto;
+}
+.portfolio-sections a {
+  display: block;
   padding: 8px 14px;
   border-radius: 10px;
   color: var(--muted);
@@ -1216,18 +1228,25 @@ html[data-theme="dark"]
   text-decoration: none;
   white-space: nowrap;
 }
-.portfolio-sections > a:hover,
-.portfolio-sections > a:focus-visible {
+.portfolio-sections a:hover {
   background: var(--soft);
   color: var(--ink);
 }
-.portfolio-sections > a:last-child {
-  margin-left: auto;
+.portfolio-sections a:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
   color: var(--ink);
+}
+.portfolio-sections li:last-child a {
+  color: var(--ink);
+}
+.portfolio-sections a[aria-current="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
 }
 .portfolio-editor-page
   :is(#apresentacao, #competencias, #projetos, #jornada, #equipe) {
-  scroll-margin-top: 76px;
+  scroll-margin-top: calc(76px + var(--enturma-safe-top, 0px));
 }
 @media print {
   .portfolio-sections {
