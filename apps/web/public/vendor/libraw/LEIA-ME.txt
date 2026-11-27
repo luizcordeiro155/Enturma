@@ -1,0 +1,17 @@
+LibRaw em WebAssembly: revela fotos RAW (DNG, CR2, CR3, NEF, ARW, RAF, ORF, RW2...) no navegador.
+
+Origem: pacote npm libraw-wasm 1.6.0 (https://www.npmjs.com/package/libraw-wasm), pasta dist/,
+sem alteração além da remoção da linha de source map.
+  worker.js    o Web Worker que recebe os pedidos
+  libraw.wasm  a LibRaw compilada
+  libraw.js    o carregador que o worker referencia
+
+Licenças: o empacotamento libraw-wasm é ISC; a LibRaw é LGPL 2.1 / CDDL 1.0
+(https://www.libraw.org/). Estes arquivos são servidos como estão, separados do código do
+Enturma, e podem ser trocados por outra compilação da LibRaw com a mesma interface.
+
+Ficam aqui, e não no pacote da aplicação, porque o build de produção do Next trava ao
+empacotar o worker. Quem os usa é src/lib/photo-import.ts.
+
+Para atualizar: copie os três arquivos da pasta dist/ da nova versão e rode
+e2e/social-gallery-mobile.spec.ts.

@@ -49,16 +49,36 @@ beforeEach(() => {
 });
 afterEach(() => { cleanup(); vi.restoreAllMocks(); vi.unstubAllGlobals(); });
 
+const agent = (value: string) =>
+  Object.defineProperty(window.navigator, "userAgent", { value, configurable: true });
+const COMPUTER = window.navigator.userAgent;
+const PHONE = "Mozilla/5.0 (Linux; Android 14; SM-S911B) AppleWebKit/537.36 Chrome/140.0 Mobile Safari/537.36";
+
 it("offers native visual-media selection without forcing camera capture", async () => {
+  // Only image and video types: that is what makes the phone open its gallery.
+  agent(PHONE);
+  try {
+    render(<SocialEditor user="me" mediaEnabled initialKind="POST" published={() => {}} />);
+    const input = await screen.findByLabelText("Escolher mídia");
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(input).toHaveAttribute("accept", "image/*,video/*");
+    expect(input).not.toHaveAttribute("capture");
+    expect(input).toHaveAttribute("multiple");
+  } finally {
+    agent(COMPUTER);
+  }
+});
+it("on a computer the file window also lists HEIC and RAW photos", async () => {
   render(<SocialEditor user="me" mediaEnabled initialKind="POST" published={() => {}} />);
   const input = await screen.findByLabelText("Escolher mídia");
-  expect(input).toHaveAttribute("accept", "image/*,video/*");
-  expect(input).not.toHaveAttribute("capture");
-  expect(input).toHaveAttribute("multiple");
+  await waitFor(() => expect(input.getAttribute("accept")).toContain(".heic"));
+  const accept = input.getAttribute("accept")!.split(",");
+  expect(accept.slice(0, 2)).toEqual(["image/*", "video/*"]);
+  expect(accept).toEqual(expect.arrayContaining([".heif", ".dng", ".cr2", ".nef", ".arw"]));
 });
 it("creating from Clips opens a Post: videos also go to Clips, so there is no Clip format", async () => {
   render(<SocialEditor user="me" mediaEnabled initialKind="CLIP" published={() => {}} />);
-  expect(await screen.findByLabelText("Escolher mídia")).toHaveAttribute("accept", "image/*,video/*");
+  expect((await screen.findByLabelText("Escolher mídia")).getAttribute("accept")).toMatch(/^image\/\*,video\/\*/);
   expect(screen.getByRole("button", { name: "Post" })).toHaveAttribute("aria-pressed", "true");
   expect(screen.queryByRole("button", { name: /^Clip ·/ })).toBeNull();
 });

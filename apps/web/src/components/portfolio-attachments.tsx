@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { FileText, ImageIcon, Upload, X } from "lucide-react";
 import { api } from "@/lib/api";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 export type PortfolioAsset = { id: string; name: string; mime: string };
 export function PortfolioAttachments({
   ids = [],
@@ -20,6 +22,7 @@ export function PortfolioAttachments({
   onChange?: (ids: string[]) => void;
   onUpload?: (asset: PortfolioAsset) => void;
 }) {
+  const photoAccept = usePhotoAccept("application/pdf");
   const [busy, setBusy] = useState(false),
     [error, setError] = useState("");
   if (compact)
@@ -104,20 +107,22 @@ export function PortfolioAttachments({
                 ? "Limite de 6 arquivos atingido"
                 : "Adicionar imagem ou PDF"}
             <small>
-              {ids.length}/6 arquivos · PNG, JPG, WEBP, GIF ou PDF até 3 MB
+              {ids.length}/6 arquivos · fotos (inclusive HEIC e RAW) ou PDF até 3 MB
             </small>
           </span>
           <input
             type="file"
-            accept="image/png,image/jpeg,image/webp,image/gif,application/pdf"
+            accept={photoAccept}
             disabled={busy || ids.length >= 6}
             onChange={async (e) => {
-              const file = e.target.files?.[0];
+              const chosen = e.target.files?.[0];
               e.target.value = "";
-              if (!file) return;
+              if (!chosen) return;
               setBusy(true);
               setError("");
               try {
+                // a phone's HEIC or a camera's RAW goes in as a JPG
+                const file = await importPhoto(chosen, { maxSide: 2048 });
                 if (file.size > 3 * 1024 * 1024)
                   throw Error("Envie arquivos de até 3 MB.");
                 const form = new FormData();

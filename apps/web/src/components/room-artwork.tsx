@@ -11,6 +11,8 @@ import {
 } from "lucide-react";
 import type { Room } from "@enturma/contracts";
 import { api } from "@/lib/api";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 
 export function RoomArtwork({
   room,
@@ -52,6 +54,7 @@ export function RoomArtworkEditor({
   room: Room;
   onSaved: () => Promise<void>;
 }) {
+  const photoAccept = usePhotoAccept();
   const [busy, setBusy] = useState(false);
   const [status, setStatus] = useState("");
   async function change(kind: "avatar" | "banner", file?: File) {
@@ -59,13 +62,14 @@ export function RoomArtworkEditor({
     setStatus("");
     try {
       if (file) {
+        file = await importPhoto(file, { maxSide: 2048 });
         if (
           !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
             file.type,
           ) ||
           file.size > 3 * 1024 * 1024
         )
-          throw Error("Use JPG, PNG, WEBP ou GIF de até 3 MB.");
+          throw Error("Use uma foto ou imagem de até 3 MB.");
         const form = new FormData();
         form.set("file", file);
         const response = await fetch(
@@ -100,7 +104,7 @@ export function RoomArtworkEditor({
             {kind === "avatar" ? "Foto da sala" : "Banner da sala"}
             <input
               type="file"
-              accept="image/png,image/jpeg,image/webp,image/gif"
+              accept={photoAccept}
               disabled={busy}
               onChange={(event) => {
                 const file = event.currentTarget.files?.[0];

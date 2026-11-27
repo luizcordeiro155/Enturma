@@ -3,6 +3,8 @@ import { useState } from "react";
 import { BookOpen, Camera, Image as ImageIcon } from "lucide-react";
 import { api } from "@/lib/api";
 import { prepareChatImage } from "@/lib/chat-image";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 type Identity = {
   id: string;
   title: string;
@@ -38,12 +40,15 @@ export function NotebookArtworkEditor({
   onChanged: () => Promise<void>;
   onError: (error: string) => void;
 }) {
+  const photoAccept = usePhotoAccept();
   const [busy, setBusy] = useState(false);
   async function upload(kind: string, file?: File) {
     if (!file) return;
     setBusy(true);
     try {
-      file = await prepareChatImage(file);
+      file = await prepareChatImage(
+        await importPhoto(file, { maxSide: 2048 }),
+      );
       if (file.size > 3 * 1024 * 1024)
         throw Error("Escolha uma imagem de até 3 MB.");
       const body = new FormData();
@@ -68,7 +73,7 @@ export function NotebookArtworkEditor({
             {kind === "avatar" ? "Foto do caderno" : "Banner do caderno"}
             <input
               type="file"
-              accept="image/png,image/jpeg,image/gif,image/webp"
+              accept={photoAccept}
               disabled={busy}
               onChange={(event) => {
                 void upload(kind, event.target.files?.[0]);

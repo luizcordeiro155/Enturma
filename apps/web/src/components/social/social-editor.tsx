@@ -38,6 +38,8 @@ import {
 import { prepareCover } from "@/lib/social-cover";
 import { bestAspect } from "@/lib/social-editing";
 import { normalizeSocialGalleryFile } from "@/lib/social-gallery";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 import { ImageEditor } from "./image-editor";
 import { VideoEditor } from "./video-editor";
 import { SocialCapture } from "./social-capture";
@@ -245,6 +247,8 @@ export function SocialEditor({
   published: (kind: "POST" | "STORY" | "CLIP") => void;
   onProgress?: (progress: SocialEditorProgress) => void;
 }) {
+  // on a computer the file window also lists HEIC and RAW
+  const mediaAccept = usePhotoAccept("video/*");
   const [draft, setDraft] = useState<SocialDraft | null>(null),
     [savedDrafts, setSavedDrafts] = useState<SavedDraft[]>([]);
   const [portfolio, setPortfolio] = useState<Portfolio>(),
@@ -473,9 +477,11 @@ export function SocialEditor({
         );
       const next: DraftFile[] = [];
       for (const original of files) {
-        const file = normalizeSocialGalleryFile(original);
+        // HEIC from phone cameras and RAW become a JPG here, before anything else looks at them.
+        const prepared = await importPhoto(original);
+        const file = normalizeSocialGalleryFile(prepared);
         if (!/^(image\/(jpeg|png|webp|gif)|video\/)/.test(file.type))
-          throw new Error("Use uma foto (JPG, PNG, WEBP ou GIF) ou um vídeo.");
+          throw new Error("Use uma foto ou um vídeo.");
         const video = file.type.startsWith("video/")
           ? await videoInfo(file)
           : undefined;
@@ -955,7 +961,7 @@ export function SocialEditor({
                 Escolher mídia
                 <input
                   type="file"
-                  accept="image/*,video/*"
+                  accept={mediaAccept}
                   multiple={draft.kind === "POST"}
                   disabled={!mediaEnabled || busy}
                   onChange={(event) => {

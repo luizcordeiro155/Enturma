@@ -46,6 +46,8 @@ import {
 
 import { MessageMenu } from "./message-menu";
 import { AnimatedEmoji } from "./emoji-picker";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 
 const QUICK_EMOJIS = ["👍", "❤️", "😂", "🎉", "🤔", "👏", "✅", "💡"];
 
@@ -107,6 +109,7 @@ type Props = {
 };
 
 export function RoomChat(props: Props) {
+  const photoAccept = usePhotoAccept();
   const {
     roomId,
     ended,
@@ -298,14 +301,21 @@ export function RoomChat(props: Props) {
     if (latestMonitorTurn && nearBottom.current) scrollRoomToLatest("auto");
   }, [latestMonitorTurn, scrollRoomToLatest]);
 
-  function selectImage(file: File | null) {
-    if (!file) return;
+  async function selectImage(chosen: File | null) {
+    if (!chosen) return;
+    let file = chosen;
+    try {
+      file = await importPhoto(chosen, { maxSide: 2048 });
+    } catch (cause) {
+      setError((cause as Error).message);
+      return;
+    }
     if (
       !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
         file.type,
       )
     ) {
-      setError("Use JPG, PNG, WEBP ou GIF.");
+      setError("Escolha uma foto ou imagem.");
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
@@ -950,9 +960,9 @@ export function RoomChat(props: Props) {
               <input
                 type="file"
                 disabled={busy || composerBlocked}
-                accept="image/jpeg,image/png,image/webp,image/gif"
+                accept={photoAccept}
                 onChange={(e) => {
-                  selectImage(e.target.files?.[0] ?? null);
+                  void selectImage(e.target.files?.[0] ?? null);
                   e.target.value = "";
                 }}
               />

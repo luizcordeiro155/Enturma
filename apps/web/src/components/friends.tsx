@@ -73,6 +73,8 @@ import {
   syncNotificationKeys,
 } from "@/lib/native-private-notifications";
 import { useAppShellState } from "./app-shell-state";
+import { importPhoto } from "@/lib/photo-import";
+import { usePhotoAccept } from "@/lib/photo-accept";
 type Friend = Omit<PublicProfile, "id"> & {
   id: string;
   userId: string;
@@ -111,6 +113,7 @@ type PrivateMessage = Envelope & {
   sendStatus?: "sending" | "failed";
 };
 export function Friends() {
+  const photoAccept = usePhotoAccept();
   const params = useSearchParams();
   const router = useRouter();
   const requestedChat = params.get("chat");
@@ -816,14 +819,21 @@ export function Friends() {
   useEffect(() => {
     resizeMessageComposerTextarea(composer.current);
   }, [draft]);
-  function selectImage(file: File | null) {
-    if (!file) return;
+  async function selectImage(chosen: File | null) {
+    if (!chosen) return;
+    let file = chosen;
+    try {
+      file = await importPhoto(chosen, { maxSide: 2048 });
+    } catch (cause) {
+      setError((cause as Error).message);
+      return;
+    }
     if (
       !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(
         file.type,
       )
     ) {
-      setError("Use JPG, PNG, WEBP ou GIF.");
+      setError("Escolha uma foto ou imagem.");
       return;
     }
     if (file.size > 8 * 1024 * 1024) {
@@ -1615,10 +1625,10 @@ export function Friends() {
                         <span className="sr-only">Adicionar imagem</span>
                         <input
                           type="file"
-                          accept="image/jpeg,image/png,image/webp,image/gif"
+                          accept={photoAccept}
                           disabled={busy}
                           onChange={(event) => {
-                            selectImage(event.target.files?.[0] ?? null);
+                            void selectImage(event.target.files?.[0] ?? null);
                             event.target.value = "";
                           }}
                         />
