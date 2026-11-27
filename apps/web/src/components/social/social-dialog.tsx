@@ -20,7 +20,14 @@ export function SocialDialog({
   children: React.ReactNode;
   close: () => void;
   wide?: boolean;
-  variant?: "sheet" | "panel" | "story" | "profile" | "viewer" | "explore";
+  variant?:
+    | "sheet"
+    | "panel"
+    | "story"
+    | "profile"
+    | "viewer"
+    | "explore"
+    | "studio";
 }) {
   const ref = useRef<HTMLDialogElement>(null),
     id = useId();

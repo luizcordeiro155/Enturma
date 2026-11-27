@@ -976,6 +976,141 @@ test("player Clips: um vídeo ativo, navegação por teclado e pausa ao sair", a
   ).toBeAttached();
 });
 
+for (const screen of [
+  { name: "celular", width: 390, height: 844 },
+  { name: "computador", width: 1366, height: 900 },
+] as const)
+  test(`Social: textos do Story são escritos, posicionados e marcados no ${screen.name}`, async ({
+    page,
+    request,
+  }) => {
+    const author = await student(request, "Autora de textos");
+    const friend = await student(request, "Colega Marcada");
+    const tag = `prova${randomUUID().slice(0, 6)}`;
+    await page.setViewportSize({ width: screen.width, height: screen.height });
+    await authenticate(page.context(), author);
+    await page.goto("/social");
+    const opening = page.getByRole("dialog", { name: "Bem-vindo ao Enturma Social" });
+    if (await opening.isVisible()) {
+      await opening.getByRole("button", { name: "Explorar o Social" }).click();
+    }
+    await page
+      .getByRole("navigation", { name: "Ambientes do Social" })
+      .getByRole("button", { name: "Criar", exact: true })
+      .click();
+    await page.getByRole("button", { name: "Story · 24h", exact: true }).click();
+    await page.getByRole("button", { name: "Criar Story só com texto" }).click();
+    await page
+      .getByRole("group", { name: "Textos do Story" })
+      .getByRole("button", { name: "Texto", exact: true })
+      .click();
+
+    // Escrever já no estúdio, com fonte e destaque escolhidos.
+    const studio = page.getByRole("dialog", { name: "Textos do Story" });
+    const field = studio.getByRole("textbox", { name: "Texto do Story" });
+    await expect(field).toBeFocused();
+    await field.pressSequentially("Semana de provas");
+    await studio.getByRole("radio", { name: "Cartaz" }).click();
+    const lookSwitch = studio.getByRole("button", { name: "Destaque", exact: true });
+    if (await lookSwitch.isVisible()) await lookSwitch.click();
+    await studio.getByRole("radio", { name: "Destaque cheio" }).click();
+    await expect(field).toBeFocused();
+    await studio.getByRole("button", { name: "Pronto" }).click();
+    const first = studio.getByRole("button", { name: "Texto 1: Semana de provas" });
+    await expect(first).toHaveAttribute("data-font", "POSTER");
+    await expect(first).toHaveAttribute("data-look", "FILL");
+
+    // Arrastar leva o texto para outro ponto da tela do Story, sem sair dela.
+    const frame = (await studio.getByRole("group", { name: "Tela do Story" }).boundingBox())!;
+    const before = (await first.boundingBox())!;
+    await page.mouse.move(before.x + before.width / 2, before.y + before.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(
+      before.x + before.width / 2,
+      before.y + before.height / 2 + frame.height * 0.3,
+      { steps: 8 },
+    );
+    await page.mouse.up();
+    const after = (await first.boundingBox())!;
+    expect(after.y - before.y).toBeGreaterThan(frame.height * 0.25);
+    expect(after.y + after.height).toBeLessThanOrEqual(frame.y + frame.height + 1);
+    await expect(studio.getByRole("textbox", { name: "Texto do Story" })).toHaveCount(0);
+
+    // Soltar a seleção e marcar uma pessoa pela sugestão.
+    await studio
+      .getByRole("group", { name: "Tela do Story" })
+      .click({ position: { x: 12, y: 12 } });
+    const add = studio.getByRole("toolbar", { name: "Adicionar ao Story" });
+    await add.getByRole("button", { name: "Mencionar" }).click();
+    await studio
+      .getByRole("textbox", { name: "Texto do Story" })
+      .pressSequentially(friend.username.slice(0, 12));
+    await studio.getByRole("option", { name: new RegExp(`@${friend.username}`) }).click();
+    await expect(studio.getByRole("textbox", { name: "Texto do Story" })).toHaveValue(
+      `@${friend.username} `,
+    );
+    await studio.getByRole("button", { name: "Pronto" }).click();
+
+    // E um assunto.
+    await studio
+      .getByRole("group", { name: "Tela do Story" })
+      .click({ position: { x: 12, y: 12 } });
+    await add.getByRole("button", { name: "Hashtag" }).click();
+    await studio.getByRole("textbox", { name: "Texto do Story" }).pressSequentially(tag);
+    await studio.getByRole("button", { name: "Pronto" }).click();
+    await expect(studio.locator(".story-studio-item")).toHaveCount(3);
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+    ).toBe(true);
+    await studio.getByRole("button", { name: "Concluir" }).click();
+    await expect(studio).toHaveCount(0);
+
+    // O editor mostra os mesmos textos, e o Story pode ser publicado só com eles.
+    await expect(page.locator(".social-create-edit .story-text")).toHaveCount(3);
+    await page.getByRole("button", { name: "Avançar" }).click();
+    await page.getByRole("button", { name: "Publicar Story" }).click();
+    const mine = page.getByRole("button", { name: "Ver seus Stories", exact: true });
+    await expect(mine).toBeVisible({ timeout: 20000 });
+    await mine.click();
+
+    const viewer = page.getByRole("dialog", { name: "Stories da turma" });
+    const shown = viewer.locator(".story-text");
+    await expect(shown).toHaveCount(3);
+    await expect(shown.first()).toHaveAttribute("data-font", "POSTER");
+    await expect(shown.first()).toHaveAttribute("data-look", "FILL");
+    // O texto fica dentro da área do Story, na mesma altura relativa em que foi solto.
+    const layer = (await viewer.locator(".social-story-decorations").boundingBox())!;
+    const placed = (await shown.first().boundingBox())!;
+    const relative = (placed.y + placed.height / 2 - layer.y) / layer.height;
+    expect(relative).toBeGreaterThan(0.6);
+    expect(relative).toBeLessThan(0.85);
+    expect(layer.width / layer.height).toBeCloseTo(9 / 16, 1);
+
+    // Um texto novo não nasce em cima do anterior: cada marcação tem o seu lugar.
+    const boxes = await shown.evaluateAll((items) =>
+      items.map((item) => Math.round(item.getBoundingClientRect().top)),
+    );
+    expect(new Set(boxes).size).toBe(3);
+
+    // A hashtag abre a página dela; a menção abre o perfil de quem foi marcado.
+    await viewer.getByRole("button", { name: "Pausar Story" }).click();
+    await viewer.getByRole("link", { name: `#${tag}` }).click();
+    const tagPage = page.getByRole("dialog", { name: `#${tag}` });
+    await expect(tagPage).toBeVisible();
+    await tagPage.getByRole("button", { name: "Fechar" }).click();
+    await viewer.getByRole("link", { name: `@${friend.username}` }).click();
+    await expect(
+      page.getByRole("dialog", { name: "Perfil social" }).getByText("Colega Marcada").first(),
+    ).toBeVisible();
+
+    // Quem foi marcado fica sabendo, como numa menção feita na legenda.
+    const mentioned = await request.get(`${backend}/api/v1/social/mentions`, {
+      headers: asUser(friend.accessToken),
+    });
+    expect(mentioned.ok()).toBe(true);
+    expect(JSON.stringify(await mentioned.json())).toContain(author.username);
+  });
+
 test("Social: autor consegue excluir seu Story com confirmação", async ({
   page,
   request,

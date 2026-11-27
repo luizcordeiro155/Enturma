@@ -573,6 +573,84 @@ class SocialIntegrationTest {
   }
 
   @Test
+  void storyTextsKeepTheirStyleAndTheirMentionsAndHashtagsWork() {
+    String friend =
+        db.one("SELECT username FROM app_user WHERE id=?", b.id()).get("username").toString();
+    String tag = "prova" + UUID.randomUUID().toString().substring(0, 8);
+    UUID id = UUID.randomUUID();
+    var texts =
+        List.of(
+            new SocialPosts.StoryOverlay(
+                "Bora @" + friend + " #" + tag, .5, .96, .12, "POSTER", "#d8ef79", "FILL", "LEFT",
+                -12.0),
+            new SocialPosts.StoryOverlay("🎓", .04, .5));
+    var draft =
+        posts.draft(a, new SocialPosts.Draft(id, "STORY", "", "PUBLIC", null, 0, List.of(), texts));
+    String saved = draft.get("storyOverlays").toString();
+    assertThat(saved)
+        .contains("\"font\":\"POSTER\"")
+        .contains("\"color\":\"#d8ef79\"")
+        .contains("\"style\":\"FILL\"")
+        .contains("\"align\":\"LEFT\"")
+        .contains("\"rotation\":-12.0")
+        .contains("\"size\":0.12");
+    // A plain sticker carries no style at all, as before.
+    assertThat(saved).doesNotContain("null");
+
+    posts.publish(a, id, ((Number) draft.get("version")).intValue());
+    // The person marked in a text is told, and a tap on the mention can open the right profile.
+    assertThat(
+            db.one(
+                    "SELECT count(*) n FROM social_mention WHERE post_id=? AND user_id=?",
+                    id,
+                    b.id())
+                .get("n"))
+        .isEqualTo(1L);
+    assertThat(posts.detail(b, id).get("storyMentions").toString())
+        .contains(b.id().toString())
+        .contains(friend);
+    // The subject marked in a text counts like one written in the caption.
+    assertThat(posts.hashtags(a, "#" + tag).toString()).contains(tag);
+  }
+
+  @Test
+  void storyTextsOutsideTheLimitsAreRefused() {
+    for (var bad :
+        List.of(
+            new SocialPosts.StoryOverlay("x", .5, .5, .9, null, null, null, null, null),
+            new SocialPosts.StoryOverlay("x", .5, .5, null, "COMIC", null, null, null, null),
+            new SocialPosts.StoryOverlay("x", .5, .5, null, null, "red", null, null, null),
+            new SocialPosts.StoryOverlay("x", .5, .5, null, null, null, "GLOW", null, null),
+            new SocialPosts.StoryOverlay("x", .5, .5, null, null, null, null, "TOP", null),
+            new SocialPosts.StoryOverlay("x", .5, .5, null, null, null, null, null, 400.0),
+            new SocialPosts.StoryOverlay("x".repeat(281), .5, .5),
+            new SocialPosts.StoryOverlay("x", .99, .5)))
+      assertThatThrownBy(
+              () ->
+                  posts.draft(
+                      a,
+                      new SocialPosts.Draft(
+                          UUID.randomUUID(), "STORY", "", "PUBLIC", null, 0, List.of(), List.of(bad))))
+          .as(bad.toString())
+          .isInstanceOf(ApiException.class);
+    var thirteen =
+        java.util.stream.IntStream.range(0, 13)
+            .mapToObj(i -> new SocialPosts.StoryOverlay("t" + i, .5, .5))
+            .toList();
+    assertThatThrownBy(
+            () ->
+                posts.draft(
+                    a,
+                    new SocialPosts.Draft(
+                        UUID.randomUUID(), "STORY", "", "PUBLIC", null, 0, List.of(), thirteen)))
+        .isInstanceOf(ApiException.class);
+    posts.draft(
+        a,
+        new SocialPosts.Draft(
+            UUID.randomUUID(), "STORY", "", "PUBLIC", null, 0, List.of(), thirteen.subList(0, 12)));
+  }
+
+  @Test
   void collectionQuotaAllowsRetryAndRenameButRejectsInvalidNames() {
     UUID first = UUID.randomUUID();
     collections.save(a, first, new SocialCollections.Name("Primeira"));

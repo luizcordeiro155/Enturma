@@ -21,6 +21,8 @@ export type SocialMedia = {
 };
 export type SocialPost = SocialPerson & {
   storyOverlays?: StoryOverlay[];
+  /** People mentioned in a Story's texts, so a tap opens the right profile. */
+  storyMentions?: { id: string; username: string }[];
   authorId: string;
   kind: "POST" | "CLIP" | "STORY";
   body: string;
@@ -50,7 +52,19 @@ export type SocialPreferences = {
   navigation: { automatic: boolean; order: SocialView[] };
 };
 export type SocialView = "feed" | "clips" | "create";
-export type StoryOverlay = { text: string; x: number; y: number };
+/** A text or sticker over a Story. Position and size are fractions of the Story frame. */
+export type StoryOverlay = {
+  text: string;
+  x: number;
+  y: number;
+  /** Font size as a fraction of the frame's width. */
+  size?: number;
+  font?: "CLASSIC" | "EDITORIAL" | "HAND" | "POSTER" | "MONO" | "ROUND";
+  color?: string;
+  style?: "PLAIN" | "FILL" | "SOFT" | "OUTLINE";
+  align?: "LEFT" | "CENTER" | "RIGHT";
+  rotation?: number;
+};
 /** Only this application's canonical social URLs are handled as in-app navigation. */
 export function socialPath(raw: string, origin: string): string | null {
   try {

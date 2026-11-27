@@ -7,17 +7,20 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  AtSign,
   Camera,
   Check,
   Clock3,
   Crop,
   Film,
+  Hash,
   ImagePlus,
   LayoutGrid,
   Save,
   Send,
   ShieldCheck,
   Trash2,
+  Type,
 } from "lucide-react";
 import { api } from "@/lib/api";
 import {
@@ -36,7 +39,13 @@ import {
   type DraftFile,
 } from "@/lib/social-draft";
 import { prepareCover } from "@/lib/social-cover";
-import { bestAspect } from "@/lib/social-editing";
+import { bestAspect, outputSize } from "@/lib/social-editing";
+import {
+  STORY_LIMITS,
+  cleanStoryTexts,
+  freeStorySpot,
+  newStoryText,
+} from "@/lib/social-story-text";
 import { normalizeSocialGalleryFile } from "@/lib/social-gallery";
 import { importPhoto } from "@/lib/photo-import";
 import { SocialMediaStrip } from "./social-media-strip";
@@ -45,7 +54,8 @@ import { ImageEditor } from "./image-editor";
 import { VideoEditor } from "./video-editor";
 import { SocialCapture } from "./social-capture";
 import { SocialDialog } from "./social-dialog";
-import { StoryDecorations, StoryDecorationEditor } from "./story-decorations";
+import { StoryDecorations } from "./story-decorations";
+import { StoryTextStudio } from "./story-text-studio";
 import { NavigationLink } from "../navigation-link";
 import { linkedProject } from "@/lib/social-project-link";
 type Portfolio = {
@@ -263,6 +273,9 @@ export function SocialEditor({
     [step, setStep] = useState<Step>("pick");
   // Which media is open: one at a time, in the editor and in the review alike.
   const [reviewIndex, setReviewIndex] = useState(0);
+  // The Story text studio: open, and on which text it starts writing.
+  const [studio, setStudio] = useState<{ write?: number } | null>(null);
+  const storyEntryRef = useRef<HTMLDivElement>(null);
   const picker = useRef<HTMLInputElement>(null);
   const swipe = useRef<{ x: number; y: number } | null>(null);
   // On a phone the end of the form sits behind the sticky actions, so a
@@ -624,6 +637,9 @@ export function SocialEditor({
       }
       const result = await socialWrite<{ version: number }>("/drafts", {
         ...work,
+        // Only valid texts go with the Story: no blanks, nothing past the limits.
+        storyOverlays:
+          work.kind === "STORY" ? cleanStoryTexts(work.storyOverlays ?? []) : [],
         mediaIds: work.files.map((file) => file.id),
         files: undefined,
       });
@@ -809,8 +825,72 @@ export function SocialEditor({
   }
   if (!draft) return <p role="status">Recuperando seu rascunho…</p>;
   const openIndex = Math.max(0, Math.min(reviewIndex, draft.files.length - 1));
+  const storyTexts = draft.storyOverlays ?? [];
+  // Texts are placed on the Story's own frame: the chosen framing, or the saved media's size.
+  const storyFile = draft.kind === "STORY" ? draft.files[0] : undefined;
+  const storyFrame = !storyFile
+    ? { width: 9, height: 16 }
+    : !storyFile.file && storyFile.media?.width && storyFile.media.height
+      ? { width: storyFile.media.width, height: storyFile.media.height }
+      : outputSize((storyFile.recipe ?? { ...defaultRecipe(1), aspect: "4:5" }).aspect);
+  const storyRatio = storyFrame.width / storyFrame.height;
+  const storyLayer =
+    draft.kind === "STORY" ? (
+      <StoryDecorations items={storyTexts} ratio={storyRatio} />
+    ) : undefined;
+  function openStudio(start?: "text" | "@" | "#") {
+    if (!draft) return;
+    if (!start || storyTexts.length >= STORY_LIMITS.items) {
+      setStudio({});
+      return;
+    }
+    // The new text exists before the studio opens, so it opens already writing it.
+    setDraft({
+      ...draft,
+      storyOverlays: [
+        ...storyTexts,
+        newStoryText(start === "text" ? "" : start, { y: freeStorySpot(storyTexts) }),
+      ],
+    });
+    setStudio({ write: storyTexts.length });
+  }
+  const storyEntry = draft.kind === "STORY" && (
+    <div
+      ref={storyEntryRef}
+      className="social-story-text-entry"
+      role="group"
+      aria-label="Textos do Story"
+    >
+      <button type="button" className="secondary" onClick={() => openStudio("text")}>
+        <Type size={18} aria-hidden="true" />
+        Texto
+      </button>
+      <button type="button" className="secondary" onClick={() => openStudio("@")}>
+        <AtSign size={18} aria-hidden="true" />
+        Mencionar
+      </button>
+      <button type="button" className="secondary" onClick={() => openStudio("#")}>
+        <Hash size={18} aria-hidden="true" />
+        Hashtag
+      </button>
+      {storyTexts.length > 0 && (
+        <button type="button" onClick={() => openStudio()}>
+          {`Ajustar ${storyTexts.length} ${storyTexts.length === 1 ? "texto" : "textos"}`}
+        </button>
+      )}
+      <p>
+        {storyTexts.length
+          ? "Mova, gire e mude fonte, cor e destaque de cada texto na tela do Story."
+          : "Escreva sobre o Story, marque pessoas com @ e assuntos com #, e arraste cada texto para o lugar."}
+      </p>
+    </div>
+  );
   const pending = draft.files.some((file) => file.media?.state !== "READY"),
-    hasContent = !!draft.body.trim() || draft.files.length > 0;
+    // A Story can be made of nothing but the texts placed on it.
+    hasContent =
+      !!draft.body.trim() ||
+      draft.files.length > 0 ||
+      (draft.kind === "STORY" && cleanStoryTexts(storyTexts).length > 0);
   const canPublish =
     hasContent &&
     (!draft.files.length || mediaEnabled) &&
@@ -1002,6 +1082,23 @@ export function SocialEditor({
               </button>
             </div>
           </div>
+          {draft.kind === "STORY" && !draft.files.length && (
+            <button
+              type="button"
+              className="secondary social-story-text-only"
+              disabled={busy}
+              onClick={() => {
+                setStep("edit");
+                // The text tools sit at the top of the next step: bring them into view.
+                requestAnimationFrame(() =>
+                  storyEntryRef.current?.scrollIntoView?.({ block: "center" }),
+                );
+              }}
+            >
+              <Type size={18} aria-hidden="true" />
+              Criar Story só com texto
+            </button>
+          )}
           <SocialDraftsShelf
             drafts={savedDrafts}
             busy={busy}
@@ -1095,6 +1192,7 @@ export function SocialEditor({
                   }
                 />
               )}
+              {storyEntry}
               <div className="social-edit-stage">
                 <LocalFile
                   key={item.id}
@@ -1112,11 +1210,7 @@ export function SocialEditor({
                         },
                     )
                   }
-                  overlay={
-                    draft.kind === "STORY" ? (
-                      <StoryDecorations items={draft.storyOverlays ?? []} />
-                    ) : undefined
-                  }
+                  overlay={storyLayer}
                   changed={(recipe) =>
                     setDraft(
                       (previous) =>
@@ -1149,20 +1243,35 @@ export function SocialEditor({
           {draft.kind === "STORY" && (
             <>
               {!draft.files.length && (
-                <div className="social-story-stage">
-                  <p className="social-story-text">
-                    {draft.body || "Seu Story"}
-                  </p>
-                  <StoryDecorations items={draft.storyOverlays ?? []} />
-                </div>
+                <>
+                  {storyEntry}
+                  <div className="social-story-stage social-story-plain">
+                    <p className="social-story-text">
+                      {draft.body || (storyTexts.length ? "" : "Seu Story")}
+                    </p>
+                    {storyLayer}
+                  </div>
+                </>
               )}
-              <StoryDecorationEditor
-                items={draft.storyOverlays ?? []}
-                change={(storyOverlays) =>
-                  setDraft({ ...draft, storyOverlays })
-                }
-              />
             </>
+          )}
+          {studio && draft.kind === "STORY" && (
+            <StoryTextStudio
+              items={storyTexts}
+              change={(storyOverlays) =>
+                setDraft((previous) => previous && { ...previous, storyOverlays })
+              }
+              close={() => setStudio(null)}
+              ratio={storyRatio}
+              write={studio.write}
+              background={
+                storyFile ? (
+                  <SocialDraftPreview key={storyFile.id} item={storyFile} />
+                ) : draft.body ? (
+                  <p className="social-story-text">{draft.body}</p>
+                ) : undefined
+              }
+            />
           )}
         </div>
         {step === "details" && draft.files.length > 0 && (
@@ -1209,11 +1318,7 @@ export function SocialEditor({
                 draft.files[openIndex].id
               }
               item={draft.files[openIndex]}
-              overlay={
-                draft.kind === "STORY" ? (
-                  <StoryDecorations items={draft.storyOverlays ?? []} />
-                ) : undefined
-              }
+              overlay={storyLayer}
             />
             {draft.files.length > 1 && (
               <SocialMediaStrip

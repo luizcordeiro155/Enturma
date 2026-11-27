@@ -119,7 +119,7 @@ export function StoryViewer({ stories, start = 0, me, close, person, onDeleted, 
         <div className="social-story-author"><SocialAuthor user={postPerson(item)} open={person} />
           {item.media[0]?.kind === "VIDEO" && <button type="button" className="icon-control" aria-label={muted ? "Ativar som do Story" : "Silenciar Story"} onClick={() => setMuted(value => !value)}>{muted ? <VolumeX /> : <Volume2 />}</button>}
         </div>
-        <div className="social-story-stage" data-testid="story-stage"
+        <div className={`social-story-stage${item.media.length ? "" : " social-story-plain"}`} data-testid="story-stage"
           onPointerDown={event => {
             if (event.isPrimary === false || (event.pointerType === "mouse" && event.button !== 0) || (event.target as HTMLElement).closest("button,a,input,textarea,select,[data-social-gesture]")) return;
             const bounds = event.currentTarget.getBoundingClientRect();
@@ -142,7 +142,8 @@ export function StoryViewer({ stories, start = 0, me, close, person, onDeleted, 
             onError={() => {setError("Não foi possível carregar o Story. Tente novamente."); setPaused(true);}} /> : item.media[0] ?
               <img key={`${currentId}:${retry}`} src={mediaUrl(item.media[0].id)} alt={`Story de ${item.name}`} draggable={false} onLoad={() => setReadyMedia(currentId)} onError={() => {setError("Não foi possível carregar a imagem.");setPaused(true);}} /> : null}
           {item.body && <p className={item.media.length ? "social-story-caption" : "social-story-text"}><ForumLinks text={item.body} /></p>}
-          <StoryDecorations items={item.storyOverlays ?? []} />
+          <StoryDecorations items={item.storyOverlays ?? []} links people={item.storyMentions} onPerson={person}
+            ratio={item.media[0]?.width && item.media[0].height ? item.media[0].width / item.media[0].height : 9 / 16} />
         </div>
         {item.projectUrl && <ConfirmedLink href={item.projectUrl} label="Abrir link do Story" />}
         <div className="social-row social-story-actions">
