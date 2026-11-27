@@ -48,6 +48,7 @@ import "./room-invitations.css";
 import "./enturma-identity.css";
 import "./portfolio-projects.css";
 import "./portfolio-areas.css";
+import "./portfolio-mobile.css";
 import "./settings.css";
 import "./mission-games.css";
 import "./profile-cosmetics.css";
