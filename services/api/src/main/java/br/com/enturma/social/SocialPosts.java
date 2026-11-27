@@ -54,7 +54,58 @@ public class SocialPosts {
     }
   }
 
-  public record StoryOverlay(String text, double x, double y) {}
+  /**
+   * A text or sticker over a Story. Position and size are fractions of the Story frame; the style
+   * fields are absent on a plain sticker and on texts saved before styles existed.
+   */
+  @com.fasterxml.jackson.annotation.JsonInclude(
+      com.fasterxml.jackson.annotation.JsonInclude.Include.NON_NULL)
+  public record StoryOverlay(
+      String text,
+      double x,
+      double y,
+      Double size,
+      String font,
+      String color,
+      String style,
+      String align,
+      Double rotation) {
+    public StoryOverlay(String text, double x, double y) {
+      this(text, x, y, null, null, null, null, null, null);
+    }
+
+    private static final Set<String> FONTS =
+        Set.of("CLASSIC", "EDITORIAL", "HAND", "POSTER", "MONO", "ROUND");
+    private static final Set<String> STYLES = Set.of("PLAIN", "FILL", "SOFT", "OUTLINE");
+    private static final Set<String> ALIGNS = Set.of("LEFT", "CENTER", "RIGHT");
+    private static final Pattern COLOR = Pattern.compile("#[0-9a-fA-F]{6}");
+
+    boolean valid() {
+      return text != null
+          && !text.isBlank()
+          && text.length() <= 280
+          && Double.isFinite(x)
+          && Double.isFinite(y)
+          && x >= .04
+          && x <= .96
+          && y >= .04
+          && y <= .96
+          && (size == null || (Double.isFinite(size) && size >= .03 && size <= .25))
+          && (font == null || FONTS.contains(font))
+          && (color == null || COLOR.matcher(color).matches())
+          && (style == null || STYLES.contains(style))
+          && (align == null || ALIGNS.contains(align))
+          && (rotation == null
+              || (Double.isFinite(rotation) && rotation >= -180 && rotation <= 180));
+    }
+  }
+
+  /** Mentions and hashtags count wherever the author wrote them: caption or texts on the Story. */
+  private static String written(String body, List<StoryOverlay> overlays) {
+    var all = new StringBuilder(body == null ? "" : body);
+    for (StoryOverlay overlay : overlays) all.append('\n').append(overlay.text());
+    return all.toString();
+  }
 
   public record Draft(
       UUID id,
@@ -96,22 +147,10 @@ public class SocialPosts {
       throw ApiException.invalid("Revise a publicação e suas mídias.");
     String url = project(input.projectUrl());
     var overlays = input.storyOverlays() == null ? List.<StoryOverlay>of() : input.storyOverlays();
-    if (overlays.size() > 8
+    if (overlays.size() > 12
         || (!input.kind().equals("STORY") && !overlays.isEmpty())
-        || overlays.stream()
-            .anyMatch(
-                o ->
-                    o == null
-                        || o.text() == null
-                        || o.text().isBlank()
-                        || o.text().length() > 120
-                        || !Double.isFinite(o.x())
-                        || !Double.isFinite(o.y())
-                        || o.x() < .1
-                        || o.x() > .9
-                        || o.y() < .1
-                        || o.y() > .9))
-      throw ApiException.invalid("Use até oito textos ou adesivos dentro do Story.");
+        || overlays.stream().anyMatch(o -> o == null || !o.valid()))
+      throw ApiException.invalid("Use até doze textos ou adesivos dentro do Story.");
     db.jdbc.update(
         "INSERT INTO social_post(id,author_id,kind) VALUES (?,?,?) ON CONFLICT DO NOTHING",
         input.id(),
@@ -147,7 +186,7 @@ public class SocialPosts {
         input.kind(),
         input.body().strip(),
         input.visibility(),
-        "{" + String.join(",", tags(input.body())) + "}",
+        "{" + String.join(",", tags(written(input.body(), overlays))) + "}",
         url,
         input.id());
     try {
@@ -244,7 +283,11 @@ public class SocialPosts {
     String kind = (String) row.get("kind");
     var media =
         db.list("SELECT * FROM social_media WHERE post_id=? ORDER BY ordinal FOR UPDATE", id);
-    if (media.isEmpty() && row.get("body").toString().isBlank())
+    // A Story can be made of nothing but the texts placed on it.
+    boolean placedTexts =
+        row.get("storyOverlays") instanceof com.fasterxml.jackson.databind.JsonNode placed
+            && !placed.isEmpty();
+    if (media.isEmpty() && row.get("body").toString().isBlank() && !placedTexts)
       throw ApiException.invalid("Adicione texto ou mídia antes de publicar.");
     if (media.stream().anyMatch(m -> !"READY".equals(m.get("state"))))
       throw ApiException.invalid("Aguarde o processamento das mídias.");
@@ -266,7 +309,10 @@ public class SocialPosts {
             + " status='STUDENT_VERIFIED'),updated_at=now() WHERE id=?",
         a.id(),
         id);
-    for (UUID user : notices.mentions(row.get("body").toString()))
+    var written = new StringBuilder(row.get("body").toString());
+    if (row.get("storyOverlays") instanceof com.fasterxml.jackson.databind.JsonNode texts)
+      for (var text : texts) written.append('\n').append(text.path("text").asText(""));
+    for (UUID user : notices.mentions(written.toString()))
       if (!user.equals(a.id()) && access.mayView(new Actor(user, null, "USER"), id)) {
         db.jdbc.update(
             "INSERT INTO social_mention(post_id,user_id) VALUES (?,?) ON CONFLICT DO NOTHING",
@@ -306,19 +352,31 @@ public class SocialPosts {
 
   public Map<String, Object> detail(Actor a, UUID id) {
     access.require();
-    return db.one(
-        projection()
-            + " WHERE p.id=? AND "
-            + SocialAccess.published("p")
-            + " AND "
-            + SocialAccess.visible("p"),
-        a.id(),
-        a.id(),
-        id,
-        a.id(),
-        a.id(),
-        a.id(),
-        a.id());
+    var row =
+        db.one(
+            projection()
+                + " WHERE p.id=? AND "
+                + SocialAccess.published("p")
+                + " AND "
+                + SocialAccess.visible("p"),
+            a.id(),
+            a.id(),
+            id,
+            a.id(),
+            a.id(),
+            a.id(),
+            a.id());
+    // Who a Story's texts mention, so a tap on "@name" opens that person's profile.
+    if ("STORY".equals(row.get("kind"))
+        && row.get("storyOverlays") instanceof com.fasterxml.jackson.databind.JsonNode texts
+        && !texts.isEmpty())
+      row.put(
+          "storyMentions",
+          db.list(
+              "SELECT u.id,u.username FROM social_mention m JOIN app_user u ON u.id=m.user_id"
+                  + " WHERE m.post_id=? AND u.status='ACTIVE' ORDER BY u.username",
+              id));
+    return row;
   }
 
   public Object feed(

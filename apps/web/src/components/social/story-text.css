@@ -1,0 +1,729 @@
+/* Texts over a Story: how they look where they are published and in the editor,
+   and the full-screen studio where they are written and placed. */
+
+/* ---------- The text layer ---------- */
+.social-story-decorations {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  /* sizes below are fractions of this layer's width, so every screen shows the same layout */
+  container-type: inline-size;
+}
+.social-story-decorations[data-fitted="true"] {
+  inset: auto;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+}
+.story-text {
+  --story-face: Arial, Helvetica, sans-serif;
+  --story-weight: 800;
+  --story-scale: 1;
+  position: absolute;
+  box-sizing: border-box;
+  width: max-content;
+  max-width: 88%;
+  margin: 0;
+  padding: 0.14em 0.4em;
+  border-radius: 0.3em;
+  color: var(--story-ink, #fff);
+  font-family: var(--story-face);
+  font-weight: var(--story-weight);
+  font-style: normal;
+  font-size: calc(var(--story-size, 0.075) * var(--story-scale) * 100cqw);
+  line-height: 1.16;
+  letter-spacing: 0;
+  text-align: center;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  text-shadow: 0 0.03em 0.14em
+    color-mix(in srgb, var(--story-on, #111) 55%, transparent);
+}
+.story-text[data-align="LEFT"] {
+  text-align: left;
+}
+.story-text[data-align="RIGHT"] {
+  text-align: right;
+}
+.story-text[data-font="EDITORIAL"] {
+  --story-face: "Playfair Display", Georgia, "Times New Roman", serif;
+  --story-weight: 700;
+}
+.story-text[data-font="HAND"] {
+  --story-face: "Caveat", "Segoe Script", "Bradley Hand", cursive;
+  --story-weight: 700;
+  --story-scale: 1.24;
+  line-height: 1.02;
+}
+.story-text[data-font="POSTER"] {
+  --story-face: "Bebas Neue", Impact, "Arial Narrow", sans-serif;
+  --story-weight: 400;
+  --story-scale: 1.18;
+  letter-spacing: 0.02em;
+  line-height: 1.02;
+  text-transform: uppercase;
+}
+.story-text[data-font="MONO"] {
+  --story-face: "Space Mono", ui-monospace, "Courier New", monospace;
+  --story-weight: 700;
+  --story-scale: 0.84;
+}
+.story-text[data-font="ROUND"] {
+  --story-face: "Fredoka", ui-rounded, "Arial Rounded MT Bold", sans-serif;
+  --story-weight: 600;
+}
+.story-text[data-look="FILL"] {
+  background: var(--story-ink, #fff);
+  color: var(--story-on, #111);
+  text-shadow: none;
+}
+.story-text[data-look="SOFT"] {
+  background: color-mix(in srgb, var(--story-on, #111) 64%, transparent);
+  text-shadow: none;
+}
+.story-text[data-look="OUTLINE"] {
+  -webkit-text-stroke: 0.16em var(--story-on, #111);
+  paint-order: stroke fill;
+  text-shadow: none;
+}
+.story-text .story-text-mark,
+html[data-theme] .social-story-decorations a.story-text-mark {
+  color: inherit;
+  font: inherit;
+  text-decoration: underline;
+  text-decoration-thickness: 0.06em;
+  text-underline-offset: 0.14em;
+}
+html[data-theme] .social-story-decorations a.story-text-mark {
+  pointer-events: auto;
+  cursor: pointer;
+  border-radius: 0.2em;
+}
+html[data-theme] .social-story-decorations a.story-text-mark:focus-visible {
+  outline: 0.08em solid currentColor;
+  outline-offset: 0.08em;
+}
+
+/* A Story with no photo or video: one dark card in every theme, so chosen colours read. */
+html[data-theme] .social-story-stage.social-story-plain {
+  background: linear-gradient(160deg, #1b4539, #0d201b 72%);
+  color: #fff;
+}
+html[data-theme] .social-story-stage.social-story-plain .social-story-text {
+  color: #fff;
+}
+
+/* In the editor the text-only Story is shown in the Story's own proportion. */
+html[data-theme] .social-create-edit .social-story-stage.social-story-plain {
+  width: auto;
+  height: min(58dvh, 560px);
+  aspect-ratio: 9 / 16;
+  margin-inline: auto;
+  overflow: hidden;
+}
+.social-story-text-only {
+  justify-self: start;
+  margin-top: 4px;
+}
+
+/* ---------- Entry in the Story editor ---------- */
+.social-story-text-entry {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin: 10px 0;
+}
+.social-story-text-entry > p {
+  flex: 1 1 100%;
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* ---------- The studio ---------- */
+html[data-theme] dialog.social-dialog-studio {
+  --studio-bg: #0c1412;
+  --studio-raised: #17211e;
+  --studio-line: rgb(255 255 255 / 12%);
+  --studio-ink: #f3f7f5;
+  --studio-muted: #a9b6b1;
+  --studio-accent: #d8ef79;
+  --studio-on-accent: #183f36;
+  box-sizing: border-box;
+  width: min(1060px, calc(100vw - 32px));
+  max-width: 100vw;
+  height: min(880px, calc(100dvh - 32px));
+  max-height: var(--social-viewport, 100dvh);
+  margin: auto;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 18px;
+  color: var(--studio-ink);
+  background: var(--studio-bg);
+  color-scheme: dark;
+
+  &[open] {
+    display: flex;
+    flex-direction: column;
+  }
+  & > header {
+    position: relative;
+    flex: none;
+    padding: 10px 14px;
+    border: 0;
+    color: var(--studio-ink);
+    background: transparent;
+  }
+  & > header h2 {
+    margin: 0;
+    color: var(--studio-ink);
+    font-size: 16px;
+  }
+  & > header .icon-control {
+    border: 0;
+    border-radius: 50%;
+    color: var(--studio-ink);
+    background: var(--studio-raised);
+  }
+  & :focus-visible {
+    outline: 2px solid var(--studio-accent);
+    outline-offset: 2px;
+  }
+
+  & .story-studio {
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+  & .story-studio-done {
+    position: absolute;
+    top: 10px;
+    right: 66px;
+    z-index: 5;
+    min-height: 42px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    color: var(--studio-on-accent);
+    background: var(--studio-accent);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  /* The frame fits the space left for it, whatever its proportion. */
+  & .story-studio-stage {
+    container-type: size;
+    display: grid;
+    place-items: center;
+    min-width: 0;
+    min-height: 96px;
+    padding: 4px 12px 8px;
+    overflow: hidden;
+  }
+  & .story-studio-canvas {
+    position: relative;
+    width: min(100cqw, calc(100cqh * var(--story-ratio, 0.5625)));
+    overflow: hidden;
+    border-radius: 14px;
+    background: linear-gradient(160deg, #1b4539, #0d201b 72%);
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  & .story-studio-backdrop {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+  }
+  & .story-studio-backdrop > .social-story-text {
+    margin: 0;
+    padding: 30px;
+    color: #fff;
+  }
+  & .story-studio-backdrop .social-draft-preview,
+  & .story-studio-backdrop .social-draft-frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  & .story-studio-backdrop .studio-preview {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+    margin: 0;
+    border-radius: 0;
+  }
+  & .story-studio-backdrop figcaption {
+    display: none;
+  }
+  & .story-studio-layer {
+    pointer-events: auto;
+  }
+  & .story-studio-item {
+    cursor: grab;
+    touch-action: none;
+    outline: 0;
+  }
+  & .story-studio-item:active {
+    cursor: grabbing;
+  }
+  & .story-studio-item[aria-pressed="true"] {
+    outline: 2px dashed #fff;
+    outline-offset: 4px;
+    box-shadow: 0 0 0 6px rgb(0 0 0 / 30%);
+  }
+  & .story-studio-item:focus-visible {
+    outline: 2px solid var(--studio-accent);
+    outline-offset: 4px;
+  }
+  & .story-studio-handle {
+    position: absolute;
+    right: -18px;
+    bottom: -18px;
+    display: grid;
+    place-items: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    color: #111;
+    background: #fff;
+    box-shadow: 0 1px 5px rgb(0 0 0 / 45%);
+    cursor: nwse-resize;
+    touch-action: none;
+    -webkit-text-stroke: 0;
+  }
+  & .story-studio-handle::after {
+    content: "";
+    position: absolute;
+    inset: -8px;
+  }
+  & .story-studio-handle svg {
+    width: 14px;
+    height: 14px;
+  }
+  & .story-studio-guide {
+    position: absolute;
+    z-index: 2;
+    background: var(--studio-accent);
+    pointer-events: none;
+  }
+  & .story-studio-guide[data-axis="x"] {
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+  }
+  & .story-studio-guide[data-axis="y"] {
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+  }
+
+  /* Writing: the text comes to the upper part of the frame, clear of the keyboard. */
+  & .story-studio-typing {
+    z-index: 3;
+    display: grid;
+    /* one column as wide as the frame, so the text wraps where it will on the Story */
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-content: start;
+    padding-top: 16%;
+    background: rgb(0 0 0 / 52%);
+    pointer-events: auto;
+  }
+  /* The field is the text itself: same face, size and highlight it will have on the Story.
+     A hidden copy of the words gives it its size; the field lies exactly over that copy. */
+  & .story-studio-field {
+    position: relative;
+    display: block;
+    min-width: 1.4em;
+    color: var(--story-ink, #fff);
+    font-family: var(--story-face);
+    font-weight: var(--story-weight);
+    /* never too small to read while writing, even when the keyboard leaves a short frame */
+    font-size: max(20px, calc(var(--story-size, 0.075) * var(--story-scale) * 100cqw));
+    line-height: 1.16;
+    cursor: text;
+  }
+  & .story-studio-field[data-look="FILL"] {
+    color: var(--story-on, #111);
+  }
+  & .story-studio-field:is([data-font="HAND"], [data-font="POSTER"]) {
+    line-height: 1.02;
+  }
+  & .story-studio-field::after {
+    content: attr(data-value);
+    display: block;
+    visibility: hidden;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  & .story-studio-field textarea {
+    position: absolute;
+    top: 0.14em;
+    /* two pixels of slack each side: a field as wide as its words to the last fraction
+       of a pixel would wrap them */
+    left: calc(0.4em - 2px);
+    width: calc(100% - 0.8em + 4px);
+    height: calc(100% - 0.28em);
+    min-height: 0;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+    resize: none;
+    color: inherit !important;
+    -webkit-text-fill-color: currentColor;
+    background: transparent !important;
+    box-shadow: none;
+    font: inherit;
+    line-height: inherit;
+    letter-spacing: inherit;
+    text-align: inherit;
+    text-transform: inherit;
+    text-shadow: inherit;
+    caret-color: var(--studio-accent);
+  }
+  & .story-studio-field textarea::placeholder {
+    color: currentColor;
+    opacity: 0.55;
+  }
+
+  /* Tools: one row of options above one row of tools, both within reach of the thumb. */
+  & .story-studio-tools {
+    display: grid;
+    gap: 8px;
+    min-width: 0;
+    padding: 6px 0 max(10px, var(--enturma-safe-bottom, 0px));
+  }
+  & .story-studio-options > [data-group] {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 3px 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  & .story-studio-options > [data-group]::-webkit-scrollbar {
+    display: none;
+  }
+  & .story-studio-options > [data-group][data-open="false"] {
+    display: none;
+  }
+  & .story-studio-options button,
+  & .story-studio-bar button,
+  & .story-studio-suggestions button {
+    flex: none;
+    border: 1px solid var(--studio-line);
+    color: var(--studio-ink);
+    background: var(--studio-raised);
+    font-weight: 600;
+  }
+  & .story-studio-font {
+    min-height: 42px;
+    padding: 0 16px;
+    border-radius: 12px;
+    font-size: 17px;
+  }
+  & .story-studio-font[data-font="EDITORIAL"] {
+    font-family: "Playfair Display", Georgia, serif;
+    font-weight: 700;
+  }
+  & .story-studio-font[data-font="HAND"] {
+    font-family: "Caveat", cursive;
+    font-size: 22px;
+    font-weight: 700;
+  }
+  & .story-studio-font[data-font="POSTER"] {
+    font-family: "Bebas Neue", Impact, sans-serif;
+    font-size: 20px;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+  }
+  & .story-studio-font[data-font="MONO"] {
+    font-family: "Space Mono", ui-monospace, monospace;
+    font-size: 15px;
+    font-weight: 700;
+  }
+  & .story-studio-font[data-font="ROUND"] {
+    font-family: "Fredoka", ui-rounded, sans-serif;
+    font-weight: 600;
+  }
+  & .story-studio-options [role="radio"][aria-checked="true"],
+  & .story-studio-bar button[aria-pressed="true"] {
+    border-color: transparent;
+    color: var(--studio-on-accent);
+    background: var(--studio-accent);
+  }
+  & .story-studio-options .story-studio-swatch {
+    position: relative;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: 2px solid rgb(255 255 255 / 85%);
+    border-radius: 50%;
+    background: var(--swatch);
+  }
+  & .story-studio-options .story-studio-swatch[aria-checked="true"] {
+    border-color: rgb(255 255 255 / 85%);
+    background: var(--swatch);
+    outline: 2px solid var(--studio-accent);
+    outline-offset: 2px;
+  }
+  & .story-studio-options .story-studio-custom {
+    flex: none;
+    overflow: hidden;
+    background: conic-gradient(
+      #ff5a5f,
+      #ffd23f,
+      #1f8a70,
+      #3a86ff,
+      #8338ec,
+      #ff66c4,
+      #ff5a5f
+    );
+    cursor: pointer;
+  }
+  & .story-studio-custom span {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  & .story-studio-custom input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+  & .story-studio-look {
+    min-height: 46px;
+    padding: 0 14px 0 8px;
+    border-radius: 12px;
+    font-size: 13px;
+  }
+  & .story-studio-look .story-text {
+    position: static;
+    --story-ink: #fff;
+    --story-on: #111;
+    padding: 0.1em 0.4em;
+    font-size: 16px;
+  }
+  & .story-studio-look[aria-checked="true"] .story-text[data-look="PLAIN"] {
+    --story-ink: #183f36;
+    text-shadow: none;
+  }
+  & .story-studio-align {
+    min-height: 42px;
+    padding: 0 14px;
+    font-size: 13px;
+  }
+  & .story-studio-sliders {
+    flex-wrap: nowrap;
+  }
+  & .story-studio-sliders label {
+    flex: 1 1 0;
+    display: grid;
+    gap: 2px;
+    min-width: 132px;
+    color: var(--studio-muted);
+    font-size: 12px;
+    font-weight: 600;
+  }
+  & .story-studio-sliders input {
+    width: 100%;
+    min-height: 30px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    accent-color: var(--studio-accent);
+  }
+  & .story-studio-sticker {
+    width: 46px;
+    min-width: 46px;
+    height: 46px;
+    padding: 0;
+    border-radius: 12px;
+    font-size: 24px;
+  }
+  & .story-studio-bar {
+    display: flex;
+    gap: 6px;
+    padding: 0 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  & .story-studio-bar::-webkit-scrollbar {
+    display: none;
+  }
+  & .story-studio-bar button {
+    flex-direction: column;
+    gap: 3px;
+    min-width: 66px;
+    min-height: 54px;
+    padding: 6px 10px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    line-height: 1.1;
+  }
+  & .story-studio-bar .story-studio-remove {
+    color: #ffb3b6;
+  }
+  & .story-studio-hint {
+    margin: 0;
+    padding: 0 16px;
+    color: var(--studio-muted);
+    font-size: 13px;
+    line-height: 1.45;
+  }
+  & .story-studio-suggestions {
+    display: flex;
+    gap: 8px;
+    padding: 0 14px;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  & .story-studio-suggestions::-webkit-scrollbar {
+    display: none;
+  }
+  & .story-studio-suggestions button {
+    gap: 8px;
+    min-height: 46px;
+    padding: 4px 14px 4px 6px;
+    border-radius: 999px;
+    text-align: left;
+  }
+  & .story-studio-suggestions button > span {
+    display: grid;
+  }
+  & .story-studio-suggestions button:not(:has(img, .avatar)) {
+    padding-left: 14px;
+  }
+  & .story-studio-suggestions strong {
+    font-size: 13px;
+  }
+  & .story-studio-suggestions small {
+    color: var(--studio-muted);
+    font-size: 11.5px;
+  }
+  & .story-studio-suggestions p {
+    margin: 0;
+    padding: 6px 2px;
+    color: var(--studio-muted);
+    font-size: 13px;
+  }
+}
+
+/* Wide screens: the frame on the left, every option in sight on the right. */
+@media (min-width: 900px) {
+  html[data-theme] dialog.social-dialog-studio {
+    & .story-studio {
+      grid-template-columns: minmax(0, 1fr) 372px;
+      grid-template-rows: minmax(0, 1fr);
+    }
+    & .story-studio-stage {
+      padding: 4px 20px 20px;
+    }
+    & .story-studio-tools {
+      align-content: start;
+      gap: 14px;
+      padding: 4px 18px 18px 0;
+      overflow-y: auto;
+    }
+    & .story-studio-options {
+      display: grid;
+      gap: 14px;
+    }
+    & .story-studio-options > [data-group],
+    & .story-studio-options > [data-group][data-open="false"] {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 0;
+      overflow: visible;
+    }
+    & .story-studio-options > [data-group="sticker"][data-open="false"] {
+      display: none;
+    }
+    & .story-studio-options > [data-group]::before {
+      content: attr(aria-label);
+      flex: 1 1 100%;
+      color: var(--studio-muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+    & .story-studio-options > .story-studio-sliders::before {
+      content: "Tamanho e giro";
+    }
+    & .story-studio-bar {
+      flex-wrap: wrap;
+      padding: 0;
+      overflow: visible;
+    }
+    & .story-studio-bar .story-studio-switch {
+      display: none;
+    }
+    & .story-studio-bar button {
+      flex-direction: row;
+      gap: 8px;
+      min-height: 44px;
+      padding: 0 14px;
+      font-size: 13px;
+    }
+    & .story-studio-hint,
+    & .story-studio-suggestions {
+      padding: 0;
+    }
+    & .story-studio-suggestions {
+      flex-wrap: wrap;
+      overflow: visible;
+    }
+  }
+}
+
+/* Phones: the studio is the whole screen, below the status bar. */
+@media (max-width: 760px) {
+  html[data-theme] dialog.social-dialog-studio {
+    position: fixed;
+    inset: var(--social-viewport-top, 0px) 0 auto;
+    width: 100%;
+    max-width: 100%;
+    height: var(--social-viewport, 100dvh);
+    max-height: var(--social-viewport, 100dvh);
+    margin: 0;
+    border-radius: 0;
+
+    & > header {
+      padding-top: max(10px, var(--enturma-safe-top, 0px));
+    }
+    & .story-studio-done {
+      top: max(10px, var(--enturma-safe-top, 0px));
+    }
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html[data-theme]
+    dialog.social-dialog-studio
+    .story-studio-item[aria-pressed="true"] {
+    transition: box-shadow 0.16s ease;
+  }
+}
